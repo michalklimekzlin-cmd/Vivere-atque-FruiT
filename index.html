@@ -31,28 +31,25 @@
 
   <div id="worldLabel">Svět: Michal Klimek</div>
 
-  <!-- Canvas vrstvy -->
+  <!-- vrstvy -->
   <canvas id="canvasDoor" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
   <canvas id="canvasVaFT" style="position:fixed;inset:0;z-index:1;"></canvas>
   <canvas id="canvasAura" style="position:fixed;inset:0;z-index:2;pointer-events:none;"></canvas>
 
-  <!-- HUD + Rady + Log -->
   <div id="hudLog">🧭 fáze: …<br>🧪 mix → B:0% • G:0% • AI:0% • P:0%</div>
   <div id="advice">…</div>
   <pre id="err"></pre>
 
   <script>
     const $ = s => document.querySelector(s);
-    const logErr = msg => {
-      const el = $('#err');
-      el.style.display = 'block';
-      el.textContent += msg + '\n';
+    const logErr = (msg)=>{
+      const el=$('#err'); el.style.display='block'; el.textContent += (msg+'\n');
     };
-    window.addEventListener('error', e => logErr(`❌ ${e.message} @ ${e.filename?.split('/').pop?.()}:${e.lineno||''}`));
-    window.addEventListener('unhandledrejection', e => logErr('❌ Promise: ' + (e.reason?.message || e.reason || 'unknown')));
+    window.addEventListener('error', e=>logErr(`❌ ${e.message} @ ${e.filename?.split('/').pop?.()}:${e.lineno||''}`));
+    window.addEventListener('unhandledrejection', e=>logErr('❌ Promise: '+(e.reason?.message||e.reason||'unknown')));
   </script>
 
-  <!-- ✅ Hlavní modulový kód -->
+  <!-- ✅ hlavní modul -->
   <script type="module">
     /* CORE */
     import { VaFTXP }            from './VaFT.experience.js?v=2';
@@ -73,81 +70,56 @@
     import { mountMentorBadges } from './badges.js?v=2';
     mountMentorBadges('./data/members.json?v=2');
 
-    /* Inline „Mentorky“ mini UI */
-    (() => {
-      const css = document.createElement('style');
-      css.textContent = `
-        .mentor-badge{position:fixed;z-index:21;background:rgba(20,24,32,.88);color:#cfe;border:1px solid #334;border-radius:.8rem;padding:6px 10px;font:12px/1.25 system-ui,-apple-system,sans-serif;backdrop-filter:blur(6px) saturate(120%);box-shadow:0 8px 28px rgba(0,0,0,.4);pointer-events:none;opacity:.96}
-        .mentor-badge .t{opacity:.75;margin-right:6px}
-        .mentor-badge .chip{display:inline-block;margin:2px 4px 0 0;padding:2px 8px;border-radius:.7rem;border:1px solid #3a4557;background:#0f131b}
-        .mb-tl{top:52px;left:16px}.mb-tr{top:52px;right:16px}.mb-bl{bottom:52px;left:16px}.mb-br{bottom:52px;right:16px}
-      `;
-      document.head.appendChild(css);
-      const mentors = {
-        batolesvet: ["Stanička"],
-        glyph: ["Vaneska"],
-        pedrovci: ["Sofie"],
-        ai: ["Terezka"]
-      };
-      const make = (cls, label, names) => {
-        const el = document.createElement('div');
-        el.className = `mentor-badge ${cls}`;
-        el.innerHTML = `<span class="t">Mentorka:</span>${names.map(n=>`<span class="chip">${n}</span>`).join('')}`;
-        document.body.appendChild(el);
-      };
-      make('mb-tl','Batolesvět',mentors.batolesvet);
-      make('mb-tr','Glyph',mentors.glyph);
-      make('mb-bl','Pedrovci',mentors.pedrovci);
-      make('mb-br','AI',mentors.ai);
-    })();
+    /* === START === */
+    const door = startVaFTDoor(document.getElementById('canvasDoor'));
+    const aura = startVaFTAura(document.getElementById('canvasAura'));
+    const cv   = document.getElementById('canvasVaFT');
 
-    /* ==== START ==== */
-    const door = startVaFTDoor($('#canvasDoor'));
-    const aura = startVaFTAura($('#canvasAura'));
-    const cv   = $('#canvasVaFT');
-
-    const vaft = startVaFTForm(cv);
     const xp   = new VaFTXP();
-    initVaFTLearning(xp);
+    const vaft = startVaFTForm(cv);
+    const learning = initVaFTLearning(xp);
 
     const guardian = initVaFTGuardian(xp);
     const mind     = initVaFTMind(xp);
     const skills   = initVaFTSkills(xp);
 
-    const advice = $('#advice');
+    const hud = document.getElementById('hudLog');
+    const advice = document.getElementById('advice');
+
     const showAdvice = (t)=>{
       advice.textContent = t; advice.style.opacity = 1;
       clearTimeout(showAdvice._t);
       showAdvice._t = setTimeout(()=>advice.style.opacity=0,2000);
     };
 
+    // rohy → EVENTS
     const L = id => document.getElementById(id);
     L('btnTopLeft').onclick     = () => { window.EVENTS.ground(); window.EVENTS.voice({team:'batolesvet',text:'puls paměti',weight:+0.8}); showAdvice('🌱 Klid je síla.'); };
     L('btnTopRight').onclick    = () => { window.EVENTS.voice({team:'glyph',text:'→ ☼',weight:+0.6}); window.EVENTS.vision({kind:'symbol',truth:1}); showAdvice('✨ Slova & symboly.'); };
     L('btnBottomLeft').onclick  = () => { window.EVENTS.voice({team:'pedrovci',text:'cítím změnu',weight:+0.6}); window.EVENTS.mood({calm:+0.05}); showAdvice('❤️ Důvěřuj pocitu.'); };
     L('btnBottomRight').onclick = () => { window.EVENTS.voice({team:'ai',text:'analýza: východ',weight:+0.7}); window.EVENTS.vision({kind:'path',truth:1}); showAdvice('🧩 Logika vpřed.'); };
 
-    const hud = $('#hudLog');
+    // HUD helper
     function paintHUD(s){
-      const pct = k => Math.round(100 * Math.max(0, Math.min(1, s.mix[k] / 3)));
+      const pct = k=>Math.round(100*Math.max(0,Math.min(1,s.mix[k]/3)));
       hud.innerHTML = `🧭 fáze: ${s.label}<br>🧪 mix → B:${pct('B')}% • G:${pct('G')}% • AI:${pct('AI')}% • P:${pct('P')}%<br>• Guardian calm: ${guardian.calm?.toFixed?.(2) ?? '—'}`;
     }
 
+    // hlavní smyčka
     let lastLabel='';
     function loop(){
       xp.tick();
+      learning.tick?.();
       const s = xp.getState();
       guardian.tick();
       mind.reflect();
       skills.decay();
-
       vaft.setMix(s.mix);
       vaft.step();
-      aura.setMix(s.mix);
-      aura.tick();
+      aura?.setMix?.(s.mix);
+      aura?.tick?.();
       door?.tick?.(s);
       paintHUD(s);
-
       if (s.label !== lastLabel) {
         lastLabel = s.label;
         buildInventory(s).then(inv => initMap({ canvas: cv, inventory: inv }));
@@ -156,13 +128,14 @@
     }
     loop();
 
+    // simulace života
     let t=0;
     setInterval(()=>{
       xp.add({team:'batolesvet', value:Math.abs(Math.sin(t*.33))*2});
       xp.add({team:'glyph',      value:Math.abs(Math.sin(t*.51))*2});
       xp.add({team:'ai',         value:Math.abs(Math.sin(t*.77))*2});
       xp.add({team:'pedrovci',   value:Math.abs(Math.cos(t*.41))*2});
-      if (Math.sin(t*.5)>0.9) skills.gain('vnímavost', 0.02);
+      if (Math.sin(t*.5)>0.9) skills.gain?.('vnímavost', 0.02);
       t+=.055;
     },220);
   </script>
