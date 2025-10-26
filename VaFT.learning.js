@@ -1,25 +1,37 @@
-// Napojí globální EVENTS na ViriXP (překládá události na „add“)
-export function initViriLearning(xp){
-  const clamp=(v)=>Math.max(0,Math.min(1,v));
+// VaFT • Learning modul (v2)
+console.log("✅ VaFT.learning.js načten");
 
-  addEventListener('evt:voice', (e)=>{
-    const {team='batolesvet', weight=0.6} = e.detail||{};
-    xp.add({team, value:clamp(weight)});
-  });
+export function initVaFTLearning(xp) {
+  const state = {
+    memory: [],
+    level: 0,
+    growth: 0
+  };
 
-  addEventListener('evt:mood', (e)=>{
-    const {calm=0, anxiety=0} = e.detail||{};
-    if(calm>0)    xp.add({team:'pedrovci', value:clamp(calm*0.8)});
-    if(anxiety>0) xp.add({team:'glyph',    value:clamp(anxiety*0.5)});
-  });
+  function record() {
+    const s = xp.getState();
+    state.memory.push(s.mix);
+    if (state.memory.length > 120) state.memory.shift();
 
-  addEventListener('evt:vision', (e)=>{
-    const {kind='symbol', truth=1} = e.detail||{};
-    const team = kind==='path' ? 'ai' : 'glyph';
-    xp.add({team, value:clamp(truth*0.8)});
-  });
+    // výpočet růstu
+    const energy = s.mix.B + s.mix.G + s.mix.AI + s.mix.P;
+    state.growth = (state.growth * 0.9) + (energy * 0.1);
 
-  addEventListener('evt:ground', ()=>{
-    xp.add({team:'batolesvet', value:0.9});
-  });
+    // přirozený růst úrovně
+    if (state.growth > 6 && state.level < 10) {
+      state.level++;
+      console.log(`🌱 VaFT se učí: level ${state.level}`);
+      state.growth = 0;
+    }
+  }
+
+  function tick() {
+    record();
+  }
+
+  function getMemory() {
+    return [...state.memory];
+  }
+
+  return { tick, getMemory, state };
 }
