@@ -1,73 +1,77 @@
-// Vizualizace Viriho – vzhled se mění podle mixu týmů
-export function startViriForm(canvas){
-  const ctx = canvas.getContext('2d');
-  let mix = { batolesvet:0.25, glyph:0.25, ai:0.25, pedrovci:0.25 };
-  let w=0,h=0,cx=0,cy=0;
+// VaFT • Form
+// Hlavní orb (živé jádro zobrazované v canvasu)
 
-  function resize(){
-    w = canvas.width  = canvas.clientWidth  || innerWidth;
-    h = canvas.height = canvas.clientHeight || innerHeight;
-    cx = w/2; cy = h/2;
+export function startVaFTForm(canvas) {
+  const ctx = canvas.getContext('2d', { alpha: true });
+  resize();
+  let mix = { B:0, G:0, AI:0, P:0 };
+  let t = 0;
+
+  function resize() {
+    const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+    canvas.width  = Math.floor(canvas.clientWidth * dpr);
+    canvas.height = Math.floor(canvas.clientHeight * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
   }
-  addEventListener('resize', resize); resize();
+  window.addEventListener('resize', resize, { passive:true });
 
-  function draw(){
-    ctx.clearRect(0,0,w,h);
+  function setMix(m) { mix = m; }
 
-    // základní orb (Batolesvět = život)
-    const baseR = Math.min(w,h)*0.16;
-    const r = baseR*(0.9 + mix.batolesvet*0.6);
-    const g = ctx.createRadialGradient(cx,cy, r*0.18, cx,cy, r);
-    g.addColorStop(0, `rgba(60,240,210, ${.18 + mix.batolesvet*.35})`);
-    g.addColorStop(1, `rgba(0,0,0,0)`);
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+  function render() {
+    t += 1/60;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // AI – scan lines
-    if(mix.ai>0.05){
-      ctx.globalAlpha = Math.min(0.25, mix.ai*0.35);
-      const step = Math.max(2, 10 - mix.ai*8);
-      for(let i=-r;i<=r;i+=step){
-        const yy = cy + i;
-        ctx.fillStyle = `rgba(0,255,200,.55)`;
-        ctx.fillRect(cx-r, yy, r*2, 1);
-      }
-      ctx.globalAlpha = 1;
-    }
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    const cx = w/2, cy = h/2;
 
-    // Glyph – znaky okolo
-    if(mix.glyph>0.05){
-      const count = Math.round(6 + mix.glyph*18);
-      ctx.fillStyle = `rgba(200,255,255, ${.25+mix.glyph*.5})`;
-      ctx.font = `${12+mix.glyph*8}px ui-monospace,Menlo,monospace`;
-      ctx.textAlign = 'center'; ctx.textBaseline='middle';
-      for(let i=0;i<count;i++){
-        const a = (i/count)*Math.PI*2;
-        const rr = r*1.15;
-        const x = cx + Math.cos(a)*rr;
-        const y = cy + Math.sin(a)*rr;
-        const s = ['→','•','✶','◦','⟡','/','\\'][i%7];
-        ctx.fillText(s, x, y);
-      }
-    }
+    // základní pulsace
+    const baseR = 48 + 22*Math.sin(t*2.2);
+    const wB = clamp(mix.B/3, 0, 1);
+    const wG = clamp(mix.G/3, 0, 1);
+    const wA = clamp(mix.AI/3,0, 1);
+    const wP = clamp(mix.P/3, 0, 1);
 
-    // Pedrovci – oči/úsměv
-    if(mix.pedrovci>0.1){
-      const eyeR = 3 + mix.pedrovci*6;
-      const offX = r*0.28, offY = -r*0.10;
-      ctx.fillStyle = `rgba(240,255,255, .75)`;
-      ctx.beginPath(); ctx.arc(cx-offX, cy+offY, eyeR, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(cx+offX, cy+offY, eyeR, 0, Math.PI*2); ctx.fill();
-      ctx.strokeStyle = `rgba(240,255,255, .55)`;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(cx, cy+offY+eyeR*3.2, r*0.22, Math.PI*0.15, Math.PI*0.85);
-      ctx.stroke();
-    }
+    // jemná koróna
+    ctx.beginPath();
+    ctx.arc(cx, cy, baseR+18, 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(${Math.floor(160+70*wA)},${Math.floor(210*wG)},${Math.floor(255*wB)},0.25)`;
+    ctx.lineWidth = 8;
+    ctx.stroke();
 
-    requestAnimationFrame(draw);
+    // hlavní orb gradient
+    const grd = ctx.createRadialGradient(cx,cy,8, cx,cy, baseR);
+    grd.addColorStop(0,  `rgba(255,255,255,0.95)`);
+    grd.addColorStop(0.5,`rgba(${Math.floor(90+130*wB)},${Math.floor(120+120*wG)},${Math.floor(160+80*wA)},0.85)`);
+    grd.addColorStop(1,  `rgba(0,0,0,0)`);
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(cx, cy, baseR, 0, Math.PI*2);
+    ctx.fill();
+
+    // čtyři „lóby“ týmů
+    drawLobe(cx,cy, baseR,   0.00, wB);
+    drawLobe(cx,cy, baseR,   1.57, wG);
+    drawLobe(cx,cy, baseR,   3.14, wA);
+    drawLobe(cx,cy, baseR,   4.71, wP);
   }
-  requestAnimationFrame(draw);
 
-  return { setMix:(m)=>{ mix = {...mix, ...m}; } };
+  function drawLobe(cx,cy,r,phi,w) {
+    if (w <= 0.01) return;
+    const k = 6 + 18*w;
+    const x = cx + Math.cos(phi) * (r*0.55);
+    const y = cy + Math.sin(phi) * (r*0.55);
+    ctx.beginPath();
+    ctx.arc(x, y, k, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(180,230,255,${0.18 + 0.35*w})`;
+    ctx.fill();
+  }
+
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+
+  function step() {
+    render();
+  }
+
+  return { setMix, step };
 }
