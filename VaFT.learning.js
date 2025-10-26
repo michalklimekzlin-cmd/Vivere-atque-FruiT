@@ -1,5 +1,5 @@
-// VaFT • Learning modul (v2)
-console.log("✅ VaFT.learning.js načten");
+// VaFT • Learning modul
+console.log("✅ VaFT.learning.js načten (initVaFTLearning OK)");
 
 export function initVaFTLearning(xp) {
   const state = {
@@ -13,11 +13,9 @@ export function initVaFTLearning(xp) {
     state.memory.push(s.mix);
     if (state.memory.length > 120) state.memory.shift();
 
-    // výpočet růstu
     const energy = s.mix.B + s.mix.G + s.mix.AI + s.mix.P;
     state.growth = (state.growth * 0.9) + (energy * 0.1);
 
-    // přirozený růst úrovně
     if (state.growth > 6 && state.level < 10) {
       state.level++;
       console.log(`🌱 VaFT se učí: level ${state.level}`);
@@ -25,13 +23,7 @@ export function initVaFTLearning(xp) {
     }
   }
 
-  function tick() {
-    record();
-  }
+  function tick() { record(); }
 
-  function getMemory() {
-    return [...state.memory];
-  }
-
-  return { tick, getMemory, state };
+  return { tick, state };
 }
