@@ -1,4 +1,27 @@
 // sw.js — základní service worker pro PWA + notifikace
+// --- 🟢 CACHE (offline režim pro Batolesvět) ---
+const CACHE_NAME = 'batolesvet-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './badges.js',
+  './data/members.json'
+];
+
+// uloží soubory do cache při instalaci
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+  );
+});
+
+// obsluha načítání (offline fallback)
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(resp => resp || fetch(event.request))
+  );
+});
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 
