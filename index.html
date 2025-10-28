@@ -27,21 +27,6 @@
     #btnBottomLeft{bottom:16px;left:16px}
     #btnBottomRight{bottom:16px;right:16px}
 
-    /* podpis / titul */
-    #vaf-sign{
-      position:fixed;left:50%;bottom:22px;
-      transform:translateX(-50%);
-      font-weight:600;letter-spacing:.04em;
-      color:#bcd;opacity:.75;
-      text-shadow:0 1px 8px rgba(200,230,255,.25);
-      user-select:none;pointer-events:none;z-index:40;
-      animation:vafBreath 6s ease-in-out infinite;
-    }
-    @keyframes vafBreath{
-      0%,100%{opacity:.75;text-shadow:0 1px 8px rgba(200,230,255,.25)}
-      50%{opacity:1;text-shadow:0 0 14px rgba(255,255,255,.6)}
-    }
-
     #hudLog{
       position:fixed;left:50%;transform:translateX(-50%);
       bottom:92px;max-width:92vw;
@@ -75,9 +60,6 @@
   <div id="btnBottomLeft" class="btn">Pedrovci</div>
   <div id="btnBottomRight" class="btn">AI</div>
 
-  <!-- podpis / titul -->
-  <div id="vaf-sign" aria-label="Vivere atque FruiT">Vivere atque FruiT</div>
-
   <!-- vrstvy -->
   <canvas id="canvasDoor" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
   <canvas id="canvasVaFT" style="position:fixed;inset:0;z-index:1;"></canvas>
@@ -87,84 +69,65 @@
   <div id="advice">…</div>
   <pre id="err"></pre>
 
+  <!-- 🌍 Strážce světa: přepisuje "Svět:" na "Vivere atque FruiT" -->
   <script>
-    const $ = s => document.querySelector(s);
-    const logErr = msg => {
-      const el = $('#err');
-      el.style.display = 'block';
-      el.textContent += msg + '\n';
-    };
-    window.addEventListener('error', e =>
-      logErr(`❌ ${e.message} @ ${e.filename?.split('/').pop?.()}:${e.lineno || ''}`)
-    );
-    window.addEventListener('unhandledrejection', e =>
-      logErr('❌ Promise: ' + (e.reason?.message || e.reason || 'unknown'))
-    );
+    (function(){
+      const norm = s => (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      const replaceWorldText = el => {
+        if (!el || !el.textContent) return;
+        const t = norm(el.textContent).toLowerCase();
+        if (t.includes('svet:') || el.id === 'worldLabel') {
+          el.textContent = 'Vivere atque FruiT';
+          el.id = 'vaf-sign';
+          el.setAttribute('aria-label', 'Vivere atque FruiT');
+          el.style = `
+            position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
+            font-weight:600;letter-spacing:.04em;
+            color:#bcd;opacity:.85;
+            text-shadow:0 1px 8px rgba(200,230,255,.25);
+            user-select:none;pointer-events:none;z-index:40;
+            animation:vafBreath 6s ease-in-out infinite;
+          `;
+        }
+      };
+      document.querySelectorAll('body *').forEach(replaceWorldText);
+      new MutationObserver(muts=>{
+        muts.forEach(m=>{
+          m.addedNodes && m.addedNodes.forEach(n=>{
+            if (n.nodeType===1){
+              replaceWorldText(n);
+              n.querySelectorAll && n.querySelectorAll('*').forEach(replaceWorldText);
+            }
+          });
+          if (m.type==='characterData'){
+            const el=m.target.parentElement;
+            replaceWorldText(el);
+          }
+        });
+      }).observe(document.body,{childList:true,subtree:true,characterData:true});
+    })();
   </script>
 
   <!-- ✅ hlavní modul -->
-<script>
-  // 🌍 Strážce světa — přepisuje "Svět:" na "Vivere atque FruiT"
-  (function(){
-    const norm = s => (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); // bez diakritiky
-    const replaceWorldText = el => {
-      if (!el || !el.textContent) return;
-      const t = norm(el.textContent).toLowerCase();
-      if (t.includes('svet:') || el.id === 'worldLabel') {
-        el.textContent = 'Vivere atque FruiT';
-        el.id = 'vaf-sign';
-        el.setAttribute('aria-label', 'Vivere atque FruiT');
-        el.style = `
-          position:fixed;left:50%;bottom:22px;transform:translateX(-50%);
-          font-weight:600;letter-spacing:.04em;
-          color:#bcd;opacity:.85;
-          text-shadow:0 1px 8px rgba(200,230,255,.25);
-          user-select:none;pointer-events:none;z-index:40;
-          animation:vafBreath 6s ease-in-out infinite;
-        `;
-      }
-    };
-
-    // nahradí existující
-    document.querySelectorAll('body *').forEach(replaceWorldText);
-
-    // pozoruje změny
-    new MutationObserver(muts=>{
-      muts.forEach(m=>{
-        m.addedNodes && m.addedNodes.forEach(n=>{
-          if (n.nodeType===1){
-            replaceWorldText(n);
-            n.querySelectorAll && n.querySelectorAll('*').forEach(replaceWorldText);
-          }
-        });
-        if (m.type==='characterData'){
-          const el=m.target.parentElement;
-          replaceWorldText(el);
-        }
-      });
-    }).observe(document.body,{childList:true,subtree:true,characterData:true});
-  })();
-</script>
-</script>
   <script type="module">
     /* CORE */
-    import { VaFTXP }            from './VaFT.experience.js?v=3';
-    import { startVaFTForm }     from './VaFT.form.js?v=3';
-    import { buildInventory }    from './VaFT.inventory.js?v=7';
-    import { initVaFTLearning }  from './VaFT.learning.js?v=3';
-    import { startVaFTDoor }     from './VaFT.door.js?v=3';
-    import { startVaFTAura }     from './VaFT.aura.js?v=3';
+    import { VaFTXP }            from './VaFT.experience.js?v=4';
+    import { startVaFTForm }     from './VaFT.form.js?v=4';
+    import { buildInventory }    from './VaFT.inventory.js?v=8';
+    import { initVaFTLearning }  from './VaFT.learning.js?v=4';
+    import { startVaFTDoor }     from './VaFT.door.js?v=4';
+    import { startVaFTAura }     from './VaFT.aura.js?v=4';
 
     /* EXTRA MODULY */
-    import { initVaFTGuardian }  from './VaFT.guardian.js?v=3';
-    import { initVaFTMind }      from './VaFT.mind.js?v=3';
-    import { initVaFTSkills }    from './VaFT.skills.js?v=3';
+    import { initVaFTGuardian }  from './VaFT.guardian.js?v=4';
+    import { initVaFTMind }      from './VaFT.mind.js?v=4';
+    import { initVaFTSkills }    from './VaFT.skills.js?v=4';
 
     /* OSTATNÍ */
-    import { initMap }           from './map.logic.js?v=3';
-    import './events.core.js?v=3';
-    import { mountMentorBadges } from './badges.js?v=3';
-    mountMentorBadges('./data/members.json?v=3');
+    import { initMap }           from './map.logic.js?v=4';
+    import './events.core.js?v=4';
+    import { mountMentorBadges } from './badges.js?v=4';
+    mountMentorBadges('./data/members.json?v=4');
 
     /* === START === */
     const door = startVaFTDoor(document.getElementById('canvasDoor'));
@@ -200,6 +163,16 @@
     function paintHUD(s){
       const pct = k => Math.round(100 * Math.max(0, Math.min(1, s.mix[k] / 3)));
       hud.innerHTML = `🧭 fáze: ${s.label}<br>🧪 mix → B:${pct('B')}% • G:${pct('G')}% • AI:${pct('AI')}% • P:${pct('P')}%<br>• Guardian calm: ${guardian.calm?.toFixed?.(2) ?? '—'}`;
+
+      // dech textu podle Guardian calm
+      const sign = document.getElementById('vaf-sign');
+      if (sign) {
+        const calm = guardian.calm ?? 1;
+        const scale = 0.95 + calm * 0.1;
+        const opacity = 0.6 + calm * 0.4;
+        sign.style.transform = `translateX(-50%) scale(${scale})`;
+        sign.style.opacity = opacity.toFixed(2);
+      }
     }
 
     // hlavní smyčka
