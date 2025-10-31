@@ -1,5 +1,5 @@
-// Batolesvět • 3D Space-first (v0.33)
-// Prostor nejdřív, postavy potom. Glyf avatary: \{*(•.)(.•)*}//  a  \[*(•.)(.•)*]//
+// Batolesvět • 3D Space-first PWA (v0.34)
+// Prostor -> Postavy, jména nad hlavou + jiskry kolem srdce.
 (() => {
   const TAU = Math.PI * 2;
   const canvas = document.getElementById('c');
@@ -24,12 +24,9 @@
   dir.position.set(3, 5, 4);
   scene.add(dir);
 
-  // kořen pro všechen obsah
+  // kořen pro obsah
   const world = new THREE.Group();
   scene.add(world);
-
-  // podkladová mlha (zapneme v buildSpace)
-  scene.fog = null;
 
   function onResize(){
     const w = window.innerWidth, h = window.innerHeight;
@@ -40,27 +37,27 @@
   window.addEventListener('resize', onResize, { passive:true });
   onResize();
 
-  // --- jednoduché orbit ovládání (drag) ---
-  let dragging = false, lastX = 0, lastY = 0, rotY = 0, rotX = 0;
-  canvas.addEventListener('pointerdown', (e)=>{ dragging=true; lastX=e.clientX; lastY=e.clientY; });
-  window.addEventListener('pointerup', ()=> dragging=false );
-  window.addEventListener('pointermove', (e)=>{
+  // --- orbit ovládání (drag) ---
+  let dragging=false, lastX=0, lastY=0, rotY=0, rotX=0;
+  canvas.addEventListener('pointerdown', e=>{ dragging=true; lastX=e.clientX; lastY=e.clientY; });
+  window.addEventListener('pointerup', ()=> dragging=false);
+  window.addEventListener('pointermove', e=>{
     if(!dragging) return;
-    const dx = (e.clientX - lastX) / window.innerWidth;
-    const dy = (e.clientY - lastY) / window.innerHeight;
-    lastX = e.clientX; lastY = e.clientY;
+    const dx=(e.clientX-lastX)/window.innerWidth;
+    const dy=(e.clientY-lastY)/window.innerHeight;
+    lastX=e.clientX; lastY=e.clientY;
     rotY -= dx * TAU * 0.3;
     rotX = Math.max(-0.8, Math.min(0.8, rotX - dy * TAU * 0.3));
   });
 
   // --- util ---
-  function clearWorld(){ while(world.children.length) world.remove(world.children[0]); }
+  function clearNode(n){ while(n.children.length) n.remove(n.children[0]); }
 
   // --- Space Core ---
   function buildSpace(){
-    clearWorld();
+    clearNode(world);
 
-    // zemní plane
+    // zem
     const plane = new THREE.Mesh(
       new THREE.PlaneGeometry(60, 60, 1, 1),
       new THREE.MeshStandardMaterial({ color:0x0b1018, roughness:0.92, metalness:0.05 })
@@ -69,12 +66,12 @@
     plane.position.y = -0.8;
     world.add(plane);
 
-    // grid pro orientaci
+    // grid
     const grid = new THREE.GridHelper(60, 60, 0x274055, 0x1b2a3a);
     grid.position.y = -0.799;
     world.add(grid);
 
-    // kruhový „střed světa“
+    // střed
     const hub = new THREE.Mesh(
       new THREE.CircleGeometry(2.2, 64),
       new THREE.MeshBasicMaterial({ color:0x102032, transparent:true, opacity:0.6 })
@@ -83,21 +80,19 @@
     hub.position.y = -0.79;
     world.add(hub);
 
-    // sky dome (vnitřní strana koule)
+    // sky a mlha
     const sky = new THREE.Mesh(
       new THREE.SphereGeometry(120, 40, 24),
       new THREE.MeshBasicMaterial({ color:0x02040a, side:THREE.BackSide })
     );
     world.add(sky);
-
-    // mlha pro hloubku
     scene.fog = new THREE.Fog(0x02040a, 25, 120);
   }
 
   // --- stavebnice pro avatary ---
   const palette = {
-    me:   { frame:0x6ac8ff, eye:0xbfe9ff, pulse:0x6ac8ff },
-    misa: { frame:0xff93d0, eye:0xffc9e8, pulse:0xff93d0 },
+    me:   { frame:0x6ac8ff, eye:0xbfe9ff, pulse:0x6ac8ff, tag:"Michal" },
+    misa: { frame:0xff93d0, eye:0xffc9e8, pulse:0xff93d0, tag:"Míša" },
   };
 
   function makeBracketFrame(kind = "square", color = 0xffffff, scale = 1.0) {
@@ -110,19 +105,15 @@
       g.add(m);
     };
     const s = scale;
-
     if (kind === "square") { // [ ]
       const t = 0.05*s, L = 1.4*s, H = 1.8*s, Z = 0;
-      // levá
       bar(t,H, t, -L/2, 0, Z);
       bar(L/3,t, t, -L/2+L/6,  H/2, Z);
       bar(L/3,t, t, -L/2+L/6, -H/2, Z);
-      // pravá
       bar(t,H, t,  L/2, 0, Z);
       bar(L/3,t, t,  L/2-L/6,  H/2, Z);
       bar(L/3,t, t,  L/2-L/6, -H/2, Z);
     }
-
     if (kind === "curly") { // { }
       const t = 0.05*s, L = 1.4*s, H = 1.8*s, Z = 0;
       bar(t, H*0.6, t, -L/2+0.08*s, 0, Z);
@@ -134,7 +125,6 @@
       bar(L*0.18,t, t, -0.28*s,  0, Z);
       bar(L*0.18,t, t,  0.28*s,  0, Z);
     }
-
     return g;
   }
 
@@ -145,16 +135,13 @@
     const ball = new THREE.Mesh(geo, mat);
     ball.position.set(offsetX, offsetY, 0.02);
     grp.add(ball);
-
     const ring = new THREE.RingGeometry(0.09, 0.11, 32);
     const rim = new THREE.Mesh(ring, new THREE.MeshBasicMaterial({ color, transparent:true, opacity:0.35 }));
     rim.position.set(offsetX, offsetY, 0.01);
     grp.add(rim);
-
     grp.userData.tick = (t)=>{
       const s = 1 + Math.sin(t + blinkPhase)*0.03;
-      ball.scale.setScalar(s);
-      rim.scale.setScalar(s);
+      ball.scale.setScalar(s); rim.scale.setScalar(s);
     };
     return grp;
   }
@@ -165,20 +152,67 @@
     const mesh = new THREE.Mesh(ring, mat);
     mesh.rotation.x = -Math.PI/2;
     mesh.position.y = -0.78;
-
     mesh.userData.tick = (t)=>{
       const k = (Math.sin(t*1.8 + phase)+1)/2;
       const s = 0.8 + k*1.2;
-      mesh.scale.set(s,s,1);
-      mat.opacity = 0.25 + k*0.5;
+      mesh.scale.set(s,s,1); mat.opacity = 0.25 + k*0.5;
     };
     return mesh;
   }
 
+  function makeNameTag(text="#") {
+    const can = document.createElement("canvas");
+    const s = 256; can.width = can.height = s;
+    const ctx = can.getContext("2d");
+    ctx.fillStyle = "rgba(0,0,0,0)"; ctx.fillRect(0,0,s,s);
+    ctx.fillStyle = "#cfe";
+    ctx.font = "bold 48px -apple-system, system-ui, Segoe UI, Roboto";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(text, s/2, s/2);
+    const tex = new THREE.CanvasTexture(can); tex.anisotropy = 4;
+    const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent:true }));
+    spr.position.set(0, 0.95, 0); spr.scale.set(1.2, 0.4, 1);
+    return spr;
+  }
+
+  // jednoduché „jiskry“ kolem srdce
+  function makeSparks(color=0x9ddcff){
+    const geom = new THREE.BufferGeometry();
+    const N = 80;
+    const pos = new Float32Array(N*3);
+    const vel = new Float32Array(N*3);
+    for(let i=0;i<N;i++){
+      pos[i*3+0]=0; pos[i*3+1]=0; pos[i*3+2]=0;
+      const a=Math.random()*TAU, u=Math.random()*0.5+0.2;
+      vel[i*3+0]=Math.cos(a)*u; vel[i*3+1]=(Math.random()*0.8); vel[i*3+2]=Math.sin(a)*u;
+    }
+    geom.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    geom.setAttribute('velocity', new THREE.BufferAttribute(vel,3));
+    const mat = new THREE.PointsMaterial({ color, size:0.035, transparent:true, opacity:0.9 });
+    const pts = new THREE.Points(geom, mat);
+    pts.userData.tick=(t)=>{
+      const p=geom.attributes.position.array;
+      const v=geom.attributes.velocity.array;
+      for(let i=0;i<N;i++){
+        v[i*3+1]-=0.005; // gravitace
+        p[i*3+0]+=v[i*3+0]*0.02;
+        p[i*3+1]+=v[i*3+1]*0.02;
+        p[i*3+2]+=v[i*3+2]*0.02;
+        // reset
+        if (p[i*3+1] < -0.2) {
+          p[i*3+0]=0; p[i*3+1]=0; p[i*3+2]=0;
+          const a=Math.random()*TAU, u=Math.random()*0.5+0.2;
+          v[i*3+0]=Math.cos(a)*u; v[i*3+1]=(Math.random()*0.8); v[i*3+2]=Math.sin(a)*u;
+        }
+      }
+      geom.attributes.position.needsUpdate = true;
+    };
+    return pts;
+  }
+
   function buildAvatarFromGlyph(glyph, paletteKey="me", x=0, z=0) {
     const col = palette[paletteKey] || palette.me;
-    const g = new THREE.Group();
-    g.position.set(x, 0, z);
+    const g = new THREE.Group(); g.position.set(x,0,z);
 
     const isSquare = glyph.includes('[') && glyph.includes(']');
     const isCurly  = glyph.includes('{') && glyph.includes('}');
@@ -198,27 +232,28 @@
     heart.userData.tick = (t)=>{ heart.scale.setScalar(1 + Math.sin(t*2.0)*0.12); };
     g.add(heart);
 
+    // jméno + jiskry
+    g.add(makeNameTag(col.tag));
+    const sparks = makeSparks(col.pulse); sparks.position.set(0,-0.05,0);
+    g.add(sparks);
+
     g.userData.tickers = [];
     g.traverse(o=>{ if (o.userData && o.userData.tick) g.userData.tickers.push(o.userData.tick); });
-
     return g;
   }
 
   // --- běh ---
   function run(code){
-    // nepřepisuj prostor – jen přidávej postavy
-    // postavy dáme do vlastní skupiny, aby šly čistit zvlášť
     let avatarsRoot = world.getObjectByName('avatarsRoot');
     if (!avatarsRoot){ avatarsRoot = new THREE.Group(); avatarsRoot.name = 'avatarsRoot'; world.add(avatarsRoot); }
-    while(avatarsRoot.children.length) avatarsRoot.remove(avatarsRoot.children[0]);
+    clearNode(avatarsRoot);
 
     const parts = code.split(/\s+/).filter(Boolean);
     let x = -1.2;
     for (const p of parts){
       if ((/[{\[]/.test(p) && p.includes('//'))){
         const who = (p.includes('[') || p.includes(']')) && !(p.includes('{')||p.includes('}')) ? 'misa' : 'me';
-        const av = buildAvatarFromGlyph(p, who, x, 0);
-        avatarsRoot.add(av);
+        avatarsRoot.add(buildAvatarFromGlyph(p, who, x, 0));
         x += 1.2;
       }
     }
@@ -235,9 +270,7 @@
     const t = performance.now()/1000;
     world.rotation.y = rotY;
     world.rotation.x = rotX*0.5;
-
     world.traverse(o=>{ if (o.userData && o.userData.tick) o.userData.tick(t); });
-
     renderer.render(scene, camera);
     requestAnimationFrame(loop);
   }
@@ -248,11 +281,10 @@
   avatarsBtn.addEventListener('click', addAvatarsFromTextarea);
   runBtn.addEventListener('click', ()=> run(prog.value));
   clearBtn.addEventListener('click', ()=>{
-    // smaž jen postavy, prostor nech
     const avatarsRoot = world.getObjectByName('avatarsRoot');
-    if (avatarsRoot) while(avatarsRoot.children.length) avatarsRoot.remove(avatarsRoot.children[0]);
+    if (avatarsRoot) clearNode(avatarsRoot);
   });
 
-  // start: postav prostor, ale počkej na postavy
+  // start
   buildSpace();
 })();
