@@ -2,9 +2,13 @@
 <html lang="cs">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Batolesvět • 3D Space-first (v0.33)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Batolesvět 3D • v0.34 PWA</title>
   <meta name="color-scheme" content="dark light" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon512.png">
   <style>
     html,body{margin:0;height:100%;background:#000;color:#cfe;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
     #top{position:fixed;left:12px;top:12px;right:12px;display:flex;gap:10px;align-items:center;
@@ -20,13 +24,14 @@
 </head>
 <body>
   <div id="top">
-    <strong>Vivere atque FruiT • 3D Space-first</strong>
+    <strong>Vivere atque FruiT • 3D</strong>
     <span id="hint">1) Prostor → 2) Postavy • otáčej prstem/myší</span>
     <div style="margin-left:auto;display:flex;gap:8px">
       <button class="btn" id="spaceBtn">Prostor</button>
       <button class="btn" id="avatarsBtn">Postavy</button>
       <button class="btn" id="runBtn">Spustit</button>
       <button class="btn" id="clearBtn">Vyčistit</button>
+      <button class="btn" id="installBtn" hidden>Instalovat</button>
     </div>
   </div>
 
@@ -36,9 +41,28 @@
 
   <canvas id="c" aria-label="Batolesvět 3D"></canvas>
 
-  <!-- Three.js z CDN (funguje na GitHub Pages) -->
+  <!-- Three.js z CDN -->
   <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-  <script>window.V=33;</script>
+  <script>window.V=34;</script>
   <script src="main.js?v="+window.V></script>
+
+  <script>
+    // Registrace SW (offline)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    }
+
+    // „Instalovat“ tlačítko (PWA prompt)
+    let deferredPrompt=null;
+    const btn=document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt',(e)=>{
+      e.preventDefault(); deferredPrompt=e; btn.hidden=false;
+    });
+    btn.addEventListener('click', async()=>{
+      if(!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice; deferredPrompt=null; btn.hidden=true;
+    });
+  </script>
 </body>
 </html>
