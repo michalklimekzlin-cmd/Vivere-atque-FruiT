@@ -1,51 +1,40 @@
-// sw.js — service worker pro Batolesvět (offline + notifikace)
-
-// --- 🟢 CACHE (offline režim pro Batolesvět) ---
-const CACHE_NAME = 'batolesvet-v1';
+// Jednoduchý offline cache pro GitHub Pages
+const CACHE = "batole3d-v1";
 const ASSETS = [
-  './',
-  './index.html',
-  './manifest.webmanifest',
-  './badges.js',
-  './data/members.json'
+  "./",
+  "./index.html",
+  "./main.js?v=34",
+  "./manifest.json",
+  "./icon512.png",
+  "https://unpkg.com/three@0.160.0/build/three.min.js"
 ];
 
-// uloží soubory do cache při instalaci
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-  );
+self.addEventListener("install", (e) => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
 });
 
-// obsluha načítání (offline fallback)
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(resp => resp || fetch(event.request))
-  );
-});
-
-// --- 🔔 LOKÁLNÍ NOTIFIKACE (funguje i bez push serveru) ---
-self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : { title: 'Batolesvět', body: 'Živý puls probuzen!' };
+self.addEventListener("activate", (e) => {
   e.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: data.icon || './icons/icon-192.png',
-      vibrate: [60, 30, 60],
-      data: data.data || {}
-    })
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
   );
 });
 
-// --- 🪄 Kliknutí na notifikaci otevře Batolesvět ---
-self.addEventListener('notificationclick', e => {
-  e.notification.close();
-  e.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
-      for (const client of clients) {
-        if ('focus' in client) return client.focus();
-      }
-      return self.clients.openWindow('./');
-    })
-  );
+self.addEventListener("fetch", (e) => {
+  const url = new URL(e.request.url);
+  // Network-first pro main.js, jinak cache-first
+  if (url.pathname.endsWith("main.js")) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, copy));
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
+  } else {
+    e.respondWith(
+      caches.match(e.request).then(cached => cached || fetch(e.request))
+    );
+  }
 });
