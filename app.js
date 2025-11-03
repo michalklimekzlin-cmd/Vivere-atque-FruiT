@@ -180,6 +180,24 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// přepínání panelů (tabs)
+const tabButtons = document.querySelectorAll(".tab-btn");
+const panels = document.querySelectorAll(".panel");
+
+tabButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.getAttribute("data-tab");
+
+    tabButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    panels.forEach(p => {
+      if (p.id === target) p.classList.add("active");
+      else p.classList.remove("active");
+    });
+  });
+});
+
 // PWA – registrace service workeru
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("./service-worker.js")
