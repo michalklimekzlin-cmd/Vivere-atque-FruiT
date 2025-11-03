@@ -18,7 +18,6 @@
   </header>
 
   <main class="layout">
-    <!-- hlavní plátno -->
     <section class="world">
       <canvas id="worldCanvas" aria-label="Svět Vivere atque FruiT"></canvas>
       <div class="world-overlay">
@@ -28,7 +27,6 @@
       </div>
     </section>
 
-    <!-- pravá / spodní část = panely -->
     <aside class="sidebar">
       <div class="tabs">
         <button class="tab-btn active" data-tab="heroPanel">Hrdinové</button>
@@ -67,23 +65,22 @@
         <p class="small" id="ideasStatus">zatím neuloženo</p>
 
         <h3>Virtuální „soubory“ světa</h3>
-        <p class="small">Tady si můžeš přidávat/zapínat/vypínat moduly bez mazání z GitHubu.</p>
         <form id="moduleForm">
-            <input type="text" id="moduleName" placeholder="např. webguardian.mjs" required>
-            <select id="moduleState">
-              <option value="enabled">zapnuto</option>
-              <option value="disabled">vypnuto</option>
-            </select>
-            <button type="submit">Uložit modul</button>
+          <input type="text" id="moduleName" placeholder="např. webguardian.mjs" required>
+          <select id="moduleState">
+            <option value="enabled">zapnuto</option>
+            <option value="disabled">vypnuto</option>
+          </select>
+          <button type="submit">Uložit modul</button>
         </form>
         <ul id="moduleList"></ul>
       </div>
     </aside>
   </main>
 
-  <!-- skripty JEN ze src/ -->
-<script src="src/teams.js?v=0.34"></script>
-<script src="src/engine.js?v=0.34"></script>
-<script src="src/app.js?v=0.34"></script>
+  <!-- skripty – VŽDY dávej verzi, když něco měníš -->
+  <script src="src/teams.js?v=0.35"></script>
+  <script src="src/engine.js?v=0.35"></script>
+  <script src="src/app.js?v=0.35"></script>
 </body>
 </html>
