@@ -168,3 +168,16 @@ button {
   .world { height: 45vh; border-right: none; }
   .sidebar { width: 100%; }
 }
+
+.hero-del {
+  background: rgba(255,112,112,.1);
+  border: 1px solid rgba(255,112,112,.5);
+  color: #fff;
+  border-radius: .4rem;
+  font-size: .7rem;
+  padding: .1rem .35rem;
+  cursor: pointer;
+}
+.hero-del:hover {
+  background: rgba(255,112,112,.3);
+}
