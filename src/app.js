@@ -145,7 +145,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const ctx = canvas.getContext("2d");
 
   // proměnná pro rotaci středu
-  let coreRotation = 0;
+let coreRotation = 0;
+let isDraggingCore = false;
+let lastPointerX = 0;
+const DRAG_SPEED = 0.005; // čím větší, tím citlivější
 
   function resizeCanvas() {
     canvas.width = canvas.clientWidth;
