@@ -50,15 +50,35 @@ window.addEventListener("DOMContentLoaded", () => {
     heroForm.reset();
   });
 
-  function renderHeroes(list) {
-    heroList.innerHTML = "";
-    list.forEach(h => {
-      const li = document.createElement("li");
-      const teamObj = (window.VAF_teams || []).find(t => t.id === h.team);
-      li.innerHTML = `<span>${h.name}</span><span class="badge">${teamObj ? teamObj.name : h.team}</span>`;
-      heroList.appendChild(li);
+function renderHeroes(list) {
+  heroList.innerHTML = "";
+  list.forEach(h => {
+    const li = document.createElement("li");
+    const teamObj = (window.VAF_teams || []).find(t => t.id === h.team);
+
+    li.innerHTML = `
+      <span>${h.name}</span>
+      <span class="badge">${teamObj ? teamObj.name : h.team}</span>
+      <button class="hero-del" data-id="${h.id}">×</button>
+    `;
+    heroList.appendChild(li);
+  });
+
+  // nasadit click na mazání
+  const delBtns = heroList.querySelectorAll(".hero-del");
+  delBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      const idx = heroes.findIndex(h => h.id === id);
+      if (idx !== -1) {
+        heroes.splice(idx, 1);
+        saveHeroes(heroes);
+        renderHeroes(heroes);
+      }
     });
-  }
+  });
+}
+
   function saveHeroes(list) { localStorage.setItem("VAF_heroes", JSON.stringify(list)); }
   function loadHeroes() { return JSON.parse(localStorage.getItem("VAF_heroes") || "[]"); }
 
