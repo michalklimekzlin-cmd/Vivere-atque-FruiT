@@ -143,6 +143,43 @@ window.addEventListener("DOMContentLoaded", () => {
   // CANVAS část
   const canvas = document.getElementById("worldCanvas");
   const ctx = canvas.getContext("2d");
+function isPointerInCore(x, y) {
+  const w = canvas.width, h = canvas.height;
+  const size = Math.min(w, h) * 0.08;
+  const cx = w / 2;
+  const cy = h / 2;
+  const r = size * 1.1;
+  const dx = x - cx;
+  const dy = y - cy;
+  return dx*dx + dy*dy <= r*r;
+}
+
+canvas.addEventListener("pointerdown", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  if (isPointerInCore(x, y)) {
+    isDraggingCore = true;
+    lastPointerX = x;
+  }
+});
+
+canvas.addEventListener("pointermove", (e) => {
+  if (!isDraggingCore) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  // rozdíl v X → přidáme k rotaci
+  const dx = x - lastPointerX;
+  coreRotation += dx * DRAG_SPEED;
+  lastPointerX = x;
+});
+
+canvas.addEventListener("pointerup", () => {
+  isDraggingCore = false;
+});
+canvas.addEventListener("pointerleave", () => {
+  isDraggingCore = false;
+});
 
   // proměnná pro rotaci středu
 let coreRotation = 0;
