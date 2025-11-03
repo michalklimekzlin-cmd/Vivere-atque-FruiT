@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <title>Meziprostor • Michalův útulek písmenek</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root {
+      --bg:#0f1115;
+      --panel:#12151a;
+      --line:#1f242b;
+      --gold:#f6d98f;
+      --text:#eef0f5;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,sans-serif;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      gap:.75rem;
+    }
+    header{
+      padding:14px 16px 0;
+    }
+    header h1{
+      margin:0;
+      font-size:1.05rem;
+      letter-spacing:.06em;
+    }
+    header small{color:rgba(246,217,143,.7)}
+    main{
+      display:flex;
+      gap:.75rem;
+      padding:.75rem;
+      flex:1;
+      min-height:0;
+    }
+    #writeBox, #lostBox, #beingBox{
+      background:var(--panel);
+      border:1px solid rgba(255,255,255,.02);
+      border-radius:.8rem;
+      padding:.6rem .7rem .7rem;
+      display:flex;
+      flex-direction:column;
+      gap:.5rem;
+      min-height:0;
+    }
+    #writeBox{flex:2}
+    #lostBox{flex:1; min-width:150px}
+    #beingBox{flex:1.2; min-width:160px}
+    textarea{
+      flex:1;
+      background:#0b0d10;
+      border:1px solid #1f242b;
+      border-radius:.6rem;
+      color:#fff;
+      padding:.55rem .55rem .7rem;
+      resize:none;
+      font-size:.9rem;
+      min-height:140px;
+    }
+    h2{
+      margin:.1rem 0 .25rem;
+      font-size:.75rem;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      color:var(--gold);
+    }
+    #lostList{
+      overflow-y:auto;
+      flex:1;
+      display:flex;
+      flex-wrap:wrap;
+      gap:.35rem;
+      align-content:flex-start;
+    }
+    .chip{
+      background:rgba(246,217,143,.07);
+      border:1px solid rgba(246,217,143,.3);
+      border-radius:.5rem;
+      padding:.25rem .5rem .3rem;
+      font-size:.7rem;
+      max-width:100%;
+      word-break:break-word;
+    }
+    button{
+      background:rgba(246,217,143,.08);
+      border:1px solid rgba(246,217,143,.24);
+      border-radius:.7rem;
+      color:var(--text);
+      padding:.35rem .7rem;
+      font-size:.7rem;
+    }
+    #beingOutput{
+      background:#0b0d10;
+      border:1px solid rgba(255,255,255,.03);
+      border-radius:.5rem;
+      min-height:70px;
+      padding:.4rem .4rem .5rem;
+      font-size:.8rem;
+      line-height:1.35;
+      white-space:pre-wrap;
+    }
+    #tinyInfo{font-size:.6rem;color:rgba(255,255,255,.35)}
+    @media (max-width:900px){
+      main{flex-direction:column;}
+      #lostBox, #beingBox{min-height:110px;}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Meziprostor • Michalův útulek písmenek</h1>
+    <small>„co napíšu a smažu, nezemře – jen se promění“</small>
+  </header>
+  <main>
+    <!-- 1) psaní -->
+    <section id="writeBox">
+      <h2>psací pole</h2>
+      <textarea id="input" placeholder="Piš sem jako do jakékoliv kolonky… když něco smažeš, vpravo se to oživí."></textarea>
+      <span id="tinyInfo">Všechno zůstává jen v tomhle zařízení (localStorage). Nic se neposílá ven.</span>
+    </section>
+
+    <!-- 2) meziprostor -->
+    <section id="lostBox">
+      <h2>oživené kousky</h2>
+      <div id="lostList"></div>
+      <button id="clear">vyčistit útulek</button>
+    </section>
+
+    <!-- 3) bytost -->
+    <section id="beingBox">
+      <h2>bytost z písmenek</h2>
+      <p style="font-size:.7rem;margin:0;">živí se tím, cos smazal – zkus ji probudit 👇</p>
+      <button id="speak">řekni něco jako Michal</button>
+      <div id="beingOutput">…čekám na tvoje drobky slov… 🙂</div>
+    </section>
+  </main>
+
+  <script>
+    const input = document.getElementById('input');
+    const lostList = document.getElementById('lostList');
+    const clearBtn = document.getElementById('clear');
+    const speakBtn = document.getElementById('speak');
+    const beingOut = document.getElementById('beingOutput');
+    let prev = "";
+
+    // načíst uložené kousky
+    let fragments = JSON.parse(localStorage.getItem('michal_fragments') || '[]');
+    fragments.forEach(addChip);
+
+    input.addEventListener('input', () => {
+      const now = input.value;
+      if (now.length < prev.length) {
+        // něco se smazalo
+        const lost = prev.slice(now.length).trim();
+        if (lost) {
+          addFragment(lost);
+        }
+      }
+      prev = now;
+    });
+
+    clearBtn.addEventListener('click', () => {
+      fragments = [];
+      localStorage.setItem('michal_fragments', JSON.stringify(fragments));
+      lostList.innerHTML = "";
+    });
+
+    speakBtn.addEventListener('click', () => {
+      if (!fragments.length) {
+        beingOut.textContent = "Ještě nemám tvoje slova… něco mi napiš a smaž, ať můžu žít 🙂";
+        return;
+      }
+      // jednoduché „dýchání“ z tvých fragmentů
+      const pick = () => fragments[Math.floor(Math.random() * fragments.length)].text;
+      let sentence = "";
+
+      // tvoříme větu ze 3–5 tvých kousků
+      const parts = Math.floor(Math.random()*3)+3;
+      for (let i=0; i<parts; i++){
+        sentence += (i===0 ? "" : " ") + pick();
+      }
+
+      // trochu „tvého stylu“
+      const endings = [" brácho", " :)", " 🦾", " Vivere atque FruiT", ""];
+      sentence += endings[Math.floor(Math.random()*endings.length)];
+
+      beingOut.textContent = sentence;
+    });
+
+    function addFragment(text){
+      const obj = {text, ts: Date.now()};
+      fragments.unshift(obj);
+      // omezíme na 100 posledních
+      fragments = fragments.slice(0, 100);
+      localStorage.setItem('michal_fragments', JSON.stringify(fragments));
+      addChip(obj);
+    }
+
+    function addChip(obj){
+      const el = document.createElement('div');
+      el.className = 'chip';
+      el.textContent = obj.text;
+      lostList.prepend(el);
+    }
+  </script>
+</body>
+</html>
