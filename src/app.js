@@ -148,17 +148,71 @@ function renderHeroes(list) {
     ];
     teams.forEach((t, i) => {
       const p = positions[i];
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, size, 0, Math.PI*2);
-      ctx.strokeStyle = "rgba(112,255,143,.7)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.fillStyle = "rgba(0,0,0,.35)";
-      ctx.fill();
-      ctx.fillStyle = "#dbe2ff";
-      ctx.font = "10px system-ui";
-      ctx.fillText(t.name, p.x - size*1.1, p.y + size + 10);
-    });
+      // --- Střed: otáčející se koule ---
+let coreRotation = 0; // úhel rotace koule
+
+function drawWorld() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const w = canvas.width, h = canvas.height;
+  const size = Math.min(w, h) * 0.08;
+
+  // čtyři týmy jako dřív
+  const teams = window.VAF_teams || [];
+  const positions = [
+    { x: size*1.4, y: size*1.4 },
+    { x: w - size*1.4, y: size*1.4 },
+    { x: size*1.4, y: h - size*1.4 },
+    { x: w - size*1.4, y: h - size*1.4 },
+  ];
+  teams.forEach((t, i) => {
+    const p = positions[i];
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, size, 0, Math.PI*2);
+    ctx.strokeStyle = "rgba(112,255,143,.7)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = "rgba(0,0,0,.35)";
+    ctx.fill();
+    ctx.fillStyle = "#dbe2ff";
+    ctx.font = "10px system-ui";
+    ctx.fillText(t.name, p.x - size*1.1, p.y + size + 10);
+  });
+
+  // --- NOVÝ STŘED ---
+  const cx = w / 2;
+  const cy = h / 2;
+  const r = size * 1.1;
+
+  // vytvoříme efekt "koule" (gradient + rotace)
+  const grad = ctx.createRadialGradient(cx - r/4, cy - r/4, r/4, cx, cy, r);
+  grad.addColorStop(0, "rgba(13,164,255,0.4)");
+  grad.addColorStop(0.5, "rgba(13,164,255,0.15)");
+  grad.addColorStop(1, "rgba(0,0,0,0.3)");
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(coreRotation);
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = "rgba(13,164,255,.7)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+
+  // nápis - pevně uprostřed (nehýbe se)
+  ctx.fillStyle = "#dbe2ff";
+  ctx.font = "bold 13px system-ui";
+  ctx.textAlign = "center";
+  ctx.fillText("Vivere", cx, cy - 8);
+  ctx.fillText("atque FruiT", cx, cy + 12);
+
+  // rotace jádra
+  coreRotation += 0.01;
+  if (coreRotation > Math.PI * 2) coreRotation = 0;
+  requestAnimationFrame(drawWorld);
+}
 
     ctx.beginPath();
     ctx.arc(w/2, h/2, size*1.1, 0, Math.PI*2);
