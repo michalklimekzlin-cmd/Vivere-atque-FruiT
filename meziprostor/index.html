@@ -141,73 +141,98 @@
     </section>
   </main>
 
-  <script>
-    const input = document.getElementById('input');
-    const lostList = document.getElementById('lostList');
-    const clearBtn = document.getElementById('clear');
-    const speakBtn = document.getElementById('speak');
-    const beingOut = document.getElementById('beingOutput');
-    let prev = "";
+<script>
+  const input = document.getElementById('input');
+  const lostList = document.getElementById('lostList');
+  const clearBtn = document.getElementById('clear');
+  const speakBtn = document.getElementById('speak');
+  const beingOut = document.getElementById('beingOutput');
+  let prev = "";
 
-    // načíst uložené kousky
-    let fragments = JSON.parse(localStorage.getItem('michal_fragments') || '[]');
-    fragments.forEach(addChip);
+  // startovací slova (tvoje + moje)
+  const initialFragments = [
+    {text:"Vivere atque FruiT", ts: Date.now()},
+    {text:"brácho", ts: Date.now()},
+    {text:"KÆŸŠM", ts: Date.now()},
+    {text:"meziprostor žije", ts: Date.now()},
+    {text:"ať se to nezlobí :)", ts: Date.now()},
+    {text:"Batolesvět", ts: Date.now()}
+  ];
 
-    input.addEventListener('input', () => {
-      const now = input.value;
-      if (now.length < prev.length) {
-        // něco se smazalo
-        const lost = prev.slice(now.length).trim();
-        if (lost) {
-          addFragment(lost);
-        }
+  // načíst uložené kousky z localStorage
+  let fragments = JSON.parse(localStorage.getItem('michal_fragments') || '[]');
+
+  // když tam nic není, dáme tam startovací
+  if (!fragments.length) {
+    fragments = initialFragments;
+    localStorage.setItem('michal_fragments', JSON.stringify(fragments));
+  }
+
+  fragments.forEach(addChip);
+
+  if (!fragments.length) {
+    beingOut.textContent = "Ještě nemám tvoje slova… něco mi napiš a smaž, ať můžu žít 🙂";
+  }
+
+  // hlídání psaní
+  input.addEventListener('input', () => {
+    const now = input.value;
+    if (now.length < prev.length) {
+      // něco se smazalo
+      const lost = prev.slice(now.length).trim();
+      if (lost) {
+        addFragment(lost);
+        // hned mluv
+        sayLikeMichal();
       }
-      prev = now;
-    });
-
-    clearBtn.addEventListener('click', () => {
-      fragments = [];
-      localStorage.setItem('michal_fragments', JSON.stringify(fragments));
-      lostList.innerHTML = "";
-    });
-
-    speakBtn.addEventListener('click', () => {
-      if (!fragments.length) {
-        beingOut.textContent = "Ještě nemám tvoje slova… něco mi napiš a smaž, ať můžu žít 🙂";
-        return;
-      }
-      // jednoduché „dýchání“ z tvých fragmentů
-      const pick = () => fragments[Math.floor(Math.random() * fragments.length)].text;
-      let sentence = "";
-
-      // tvoříme větu ze 3–5 tvých kousků
-      const parts = Math.floor(Math.random()*3)+3;
-      for (let i=0; i<parts; i++){
-        sentence += (i===0 ? "" : " ") + pick();
-      }
-
-      // trochu „tvého stylu“
-      const endings = [" brácho", " :)", " 🦾", " Vivere atque FruiT", ""];
-      sentence += endings[Math.floor(Math.random()*endings.length)];
-
-      beingOut.textContent = sentence;
-    });
-
-    function addFragment(text){
-      const obj = {text, ts: Date.now()};
-      fragments.unshift(obj);
-      // omezíme na 100 posledních
-      fragments = fragments.slice(0, 100);
-      localStorage.setItem('michal_fragments', JSON.stringify(fragments));
-      addChip(obj);
     }
+    prev = now;
+  });
 
-    function addChip(obj){
-      const el = document.createElement('div');
-      el.className = 'chip';
-      el.textContent = obj.text;
-      lostList.prepend(el);
+  clearBtn.addEventListener('click', () => {
+    fragments = [];
+    localStorage.setItem('michal_fragments', JSON.stringify(fragments));
+    lostList.innerHTML = "";
+    beingOut.textContent = "Vyčistil jsi útulek… dej mi nové kousky 🙂";
+  });
+
+  speakBtn.addEventListener('click', () => {
+    sayLikeMichal();
+  });
+
+  function addFragment(text){
+    const obj = {text, ts: Date.now()};
+    fragments.unshift(obj);
+    fragments = fragments.slice(0, 120);
+    localStorage.setItem('michal_fragments', JSON.stringify(fragments));
+    addChip(obj);
+  }
+
+  function addChip(obj){
+    const el = document.createElement('div');
+    el.className = 'chip';
+    el.textContent = obj.text;
+    lostList.prepend(el);
+  }
+
+  function sayLikeMichal(){
+    if (!fragments.length) {
+      beingOut.textContent = "Ještě nemám tvoje slova… napiš něco a smaž 💛";
+      return;
     }
-  </script>
+    const pick = () => fragments[Math.floor(Math.random() * fragments.length)].text;
+    const parts = Math.floor(Math.random()*3)+3; // 3–5 kousků
+    let sentence = "";
+    for (let i=0; i<parts; i++){
+      sentence += (i===0 ? "" : " ") + pick();
+    }
+    const endings = [" brácho", " :)", " 🦾", " Vivere atque FruiT", ""];
+    sentence += endings[Math.floor(Math.random()*endings.length)];
+    beingOut.textContent = sentence;
+    // malý puls
+    beingOut.style.transform = "scale(1.01)";
+    setTimeout(() => beingOut.style.transform = "scale(1)", 180);
+  }
+</script>
 </body>
 </html>
