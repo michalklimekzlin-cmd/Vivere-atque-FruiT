@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vivere atque FruiT • v0.31 core</title>
+  <link rel="stylesheet" href="style.css?v=0.31">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Vivere atque FruiT</h1>
+    <span class="version">v0.31 • živý základ</span>
+  </header>
+
+  <main class="layout">
+    <!-- levá část = "svět" -->
+    <section class="world">
+      <canvas id="worldCanvas" aria-label="Svět Vivere atque FruiT"></canvas>
+      <div class="world-overlay">
+        <p class="rule">Pravidlo 1: Přátelství</p>
+        <p class="rule">Pravidlo 2: Vivere atque frui</p>
+        <p class="pulse" id="worldPulse">🫀 svět: čekám…</p>
+      </div>
+    </section>
+
+    <!-- pravá část = naše okénka -->
+    <aside class="sidebar">
+      <!-- hrdinové -->
+      <div class="panel" id="heroPanel">
+        <h2>Hrdinové</h2>
+        <form id="heroForm">
+          <label>Jméno hrdiny</label>
+          <input type="text" id="heroName" placeholder="např. Piko, Orbit, Míza…" required>
+          <label>Tým</label>
+          <select id="heroTeam">
+            <option value="human">Human (Piko)</option>
+            <option value="ai">AI (Orbit)</option>
+            <option value="glyph">Glyph</option>
+            <option value="world">World (Core)</option>
+          </select>
+          <button type="submit">➕ Přidat hrdinu</button>
+        </form>
+        <ul id="heroList"></ul>
+      </div>
+
+      <!-- meziprostor / engine -->
+      <div class="panel" id="enginePanel">
+        <h2>Meziprostor (engine)</h2>
+        <p class="small">Spojuje 4 rohy světa. Tady bude později Shop / Iskry / WebGuardian.</p>
+        <button id="enginePing">Pingnout meziprostor</button>
+        <pre id="engineLog"></pre>
+      </div>
+
+      <!-- systém / nápady / změny -->
+      <div class="panel" id="ideasPanel">
+        <h2>Systém / nápady</h2>
+        <textarea id="ideasBox" rows="4" placeholder="Sem si piš nápady, pravidla, změny…"></textarea>
+        <button id="saveIdeas">Uložit do localStorage</button>
+        <p class="small" id="ideasStatus">zatím neuloženo</p>
+
+        <h3>Virtuální „soubory“ světa</h3>
+        <p class="small">Tady si můžeš přidávat/zapínat/vypínat moduly bez mazání z GitHubu.</p>
+        <form id="moduleForm">
+          <input type="text" id="moduleName" placeholder="např. webguardian.mjs" required>
+          <select id="moduleState">
+            <option value="enabled">zapnuto</option>
+            <option value="disabled">vypnuto</option>
+          </select>
+          <button type="submit">Uložit modul</button>
+        </form>
+        <ul id="moduleList"></ul>
+      </div>
+    </aside>
+  </main>
+
+  <!-- skripty -->
+  <script src="teams.js?v=0.31"></script>
+  <script src="engine.js?v=0.31"></script>
+  <script src="app.js?v=0.31"></script>
+</body>
+</html>
