@@ -86,6 +86,56 @@ body {
   border-radius: var(--radius);
   padding: .7rem .7rem 1rem;
 }
+.sidebar {
+  width: 360px;
+  background: rgba(0,0,0,.25);
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  padding: .8rem;
+  overflow-y: auto;
+}
+
+.tabs {
+  display: flex;
+  gap: .4rem;
+  margin-bottom: .4rem;
+}
+.tab-btn {
+  flex: 1 1 0;
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.02);
+  border-radius: .5rem;
+  color: #dbe2ff;
+  font-size: .65rem;
+  padding: .35rem .4rem;
+}
+.tab-btn.active {
+  background: linear-gradient(140deg, #2ee58a, #0da4ff);
+  color: #020c10;
+  font-weight: 600;
+}
+.panel {
+  display: none;
+}
+.panel.active {
+  display: block;
+}
+
+/* mobilní režim */
+@media (max-width: 960px) {
+  .layout {
+    flex-direction: column;
+  }
+  .world {
+    height: 45vh;
+  }
+  .sidebar {
+    width: 100%;
+    flex-direction: column;
+  }
+}
+
 .panel h2, .panel h3 {
   margin-top: 0;
   font-size: .85rem;
