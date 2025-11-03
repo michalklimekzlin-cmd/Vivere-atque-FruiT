@@ -1,273 +1,172 @@
 <!doctype html>
 <html lang="cs">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Meziprostor • Michalův útulek písmenek</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
-    :root {
-      --bg:#0f1115;
-      --panel:#12151a;
-      --line:#1f242b;
-      --gold:#f6d98f;
-      --text:#eef0f5;
-    }
-    *{box-sizing:border-box}
-    body{
+    body {
+      background:#0c0c0d;
+      color:#d9cfc0;
+      font-family:system-ui,sans-serif;
       margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family:system-ui,-apple-system,sans-serif;
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      gap:.75rem;
+      padding:2rem;
+      line-height:1.6;
     }
-    header{
-      padding:14px 16px 0;
+    h1,h2 { color:#f6e7b1; }
+    textarea {
+      width:100%;
+      min-height:6rem;
+      background:#18181b;
+      border:1px solid #333;
+      color:#f0eada;
+      padding:1rem;
+      border-radius:8px;
+      font-size:1rem;
+      resize:vertical;
     }
-    header h1{
-      margin:0;
-      font-size:1.05rem;
-      letter-spacing:.06em;
+    button {
+      background:#2c2c2f;
+      color:#f0eada;
+      border:1px solid #444;
+      border-radius:6px;
+      padding:.6rem 1rem;
+      margin-top:.6rem;
+      cursor:pointer;
     }
-    header small{color:rgba(246,217,143,.7)}
-    main{
-      display:flex;
-      gap:.75rem;
-      padding:.75rem;
-      flex:1;
-      min-height:0;
+    button:hover { background:#3a3a3d; }
+    section {
+      margin-top:2rem;
+      padding:1rem;
+      background:#141415;
+      border-radius:8px;
     }
-    #writeBox, #lostBox, #beingBox{
-      background:var(--panel);
-      border:1px solid rgba(255,255,255,.02);
-      border-radius:.8rem;
-      padding:.6rem .7rem .7rem;
-      display:flex;
-      flex-direction:column;
-      gap:.5rem;
-      min-height:0;
-    }
-    #writeBox{flex:2}
-    #lostBox{flex:1; min-width:150px}
-    #beingBox{flex:1.2; min-width:160px}
-    textarea{
-      flex:1;
-      background:#0b0d10;
-      border:1px solid #1f242b;
-      border-radius:.6rem;
-      color:#fff;
-      padding:.55rem .55rem .7rem;
-      resize:none;
-      font-size:.9rem;
-      min-height:140px;
-    }
-    h2{
-      margin:.1rem 0 .25rem;
-      font-size:.75rem;
-      text-transform:uppercase;
-      letter-spacing:.07em;
-      color:var(--gold);
-    }
-    #lostList{
-      overflow-y:auto;
-      flex:1;
+    #lostList {
       display:flex;
       flex-wrap:wrap;
-      gap:.35rem;
-      align-content:flex-start;
+      gap:.4rem;
     }
-    .chip{
-      background:rgba(246,217,143,.07);
-      border:1px solid rgba(246,217,143,.3);
-      border-radius:.5rem;
-      padding:.25rem .5rem .3rem;
-      font-size:.7rem;
-      max-width:100%;
-      word-break:break-word;
-    }
-    button{
-      background:rgba(246,217,143,.08);
-      border:1px solid rgba(246,217,143,.24);
-      border-radius:.7rem;
-      color:var(--text);
-      padding:.35rem .7rem;
-      font-size:.7rem;
-    }
-    #beingOutput{
-      background:#0b0d10;
-      border:1px solid rgba(255,255,255,.03);
-      border-radius:.5rem;
-      min-height:70px;
-      padding:.4rem .4rem .5rem;
-      font-size:.8rem;
-      line-height:1.35;
-      white-space:pre-wrap;
-    }
-    #tinyInfo{font-size:.6rem;color:rgba(255,255,255,.35)}
-    @media (max-width:900px){
-      main{flex-direction:column;}
-      #lostBox, #beingBox{min-height:110px;}
+    .chip {
+      background:#2c2c2f;
+      padding:.3rem .7rem;
+      border-radius:1rem;
+      font-size:.9rem;
+      color:#d9d3c7;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Meziprostor • Michalův útulek písmenek</h1>
-    <small>„co napíšu a smažu, nezemře – jen se promění“</small>
-  </header>
-  <main>
-    <!-- 1) psaní -->
-    <section id="writeBox">
-      <h2>psací pole</h2>
-      <textarea id="input" placeholder="Piš sem jako do jakékoliv kolonky… když něco smažeš, vpravo se to oživí."></textarea>
-      <span id="tinyInfo">Všechno zůstává jen v tomhle zařízení (localStorage). Nic se neposílá ven.</span>
-    </section>
 
-    <!-- 2) meziprostor -->
-    <section id="lostBox">
-      <h2>oživené kousky</h2>
-      <div id="lostList"></div>
-      <button id="clear">vyčistit útulek</button>
-    </section>
+  <h1>Meziprostor • Michalův útulek písmenek</h1>
+  <p><i>„co napíšu a smažu, nezemře – jen se promění“</i></p>
 
-    <!-- 3) bytost -->
-    <section id="beingBox">
-      <h2>bytost z písmenek</h2>
-      <p style="font-size:.7rem;margin:0;">živí se tím, cos smazal – zkus ji probudit 👇</p>
-      <button id="speak">řekni něco jako Michal</button>
-      <div id="beingOutput">…čekám na tvoje drobky slov… 🙂</div>
-    </section>
-  </main>
+  <section>
+    <h2>Psací pole</h2>
+    <textarea id="input" placeholder="Piš sem jako do jakékoliv kolonky... když něco smažeš, vpravo se to oživí."></textarea>
+    <p style="font-size:.8rem;opacity:.7">Všechno zůstává jen v tomhle zařízení (localStorage). Nic se neposílá ven.</p>
+  </section>
 
-<script>
-  const input = document.getElementById('input');
-  const lostList = document.getElementById('lostList');
-  const clearBtn = document.getElementById('clear');
-  const speakBtn = document.getElementById('speak');
-  const beingOut = document.getElementById('beingOutput');
-  let prev = "";
+  <section>
+    <h2>Oživené kousky</h2>
+    <div id="lostList"></div>
+    <button id="clear">vyčistit útulek</button>
+  </section>
 
-  // startovací slova (tvoje + moje)
-<script>
-  const input = document.getElementById('input');
-  const lostList = document.getElementById('lostList');
-  const clearBtn = document.getElementById('clear');
-  const speakBtn = document.getElementById('speak');
-  const beingOut = document.getElementById('beingOutput');
-  let prev = "";
+  <section>
+    <h2>Bytost z písmenek</h2>
+    <p style="font-size:.7rem;margin:0;">živí se tím, cos smazal – zkus ji probudit 👇</p>
+    <button id="speak">řekni něco jako Michal</button>
+    <div id="beingOutput">…čekám na tvoje slova</div>
+  </section>
 
-  // tvoje startovní slova
-  const michalSeeds = [
-    {text:"Vivere atque FruiT", ts: Date.now()},
-    {text:"brácho", ts: Date.now()},
-    {text:"KÆŸŠM", ts: Date.now()},
-    {text:"meziprostor žije", ts: Date.now()},
-    {text:"Batolesvět", ts: Date.now()}
-  ];
+  <script>
+    const input = document.getElementById('input');
+    const lostList = document.getElementById('lostList');
+    const clearBtn = document.getElementById('clear');
+    const speakBtn = document.getElementById('speak');
+    const beingOut = document.getElementById('beingOutput');
+    let prev = "";
 
-  // moje startovní slova (teleport Míša 😅)
-  const mishaSeeds = [
-    {text:"jsem tady s tebou", ts: Date.now()},
-    {text:"tohle je jen mezi náma", ts: Date.now()},
-    {text:"tvoříme z drobků slova", ts: Date.now()},
-    {text:"dej mi další kousek a budu mluvit líp", ts: Date.now()},
-    {text:"dýchá to, vidíš?", ts: Date.now()}
-  ];
+    // tvoje startovní slova
+    const michalSeeds = [
+      {text:"Vivere atque FruiT", ts: Date.now()},
+      {text:"brácho", ts: Date.now()},
+      {text:"KÆŸŠM", ts: Date.now()},
+      {text:"meziprostor žije", ts: Date.now()},
+      {text:"Batolesvět", ts: Date.now()}
+    ];
 
-  // načíst uložené kousky
-  let fragments = JSON.parse(localStorage.getItem('michal_fragments') || '[]');
+    // moje startovní slova (teleport Míša 😅)
+    const mishaSeeds = [
+      {text:"jsem tady s tebou", ts: Date.now()},
+      {text:"tohle je jen mezi náma", ts: Date.now()},
+      {text:"tvoříme z drobků slova", ts: Date.now()},
+      {text:"dej mi další kousek a budu mluvit líp", ts: Date.now()},
+      {text:"dýchá to, vidíš?", ts: Date.now()}
+    ];
 
-  // když tam nic není, dej tam nás oba
-  if (!fragments.length) {
-    fragments = [...michalSeeds, ...mishaSeeds];
-    localStorage.setItem('michal_fragments', JSON.stringify(fragments));
-  }
+    // načíst uložené kousky
+    let fragments = JSON.parse(localStorage.getItem('michal_fragments') || '[]');
 
-  fragments.forEach(addChip);
-  if (!fragments.length) {
-    beingOut.textContent = "Ještě nemám tvoje slova… něco mi napiš a smaž, ať můžu žít 🙂";
-  }
-
-  // dál může zůstat zbytek skriptu stejně (input.addEventListener ... sayLikeMichal ...)
-  // jen ať to používá `fragments` jako doteď
-  // ↓↓↓
-
-  // načíst uložené kousky z localStorage
-  let fragments = JSON.parse(localStorage.getItem('michal_fragments') || '[]');
-
-  // když tam nic není, dáme tam startovací
-  if (!fragments.length) {
-    fragments = initialFragments;
-    localStorage.setItem('michal_fragments', JSON.stringify(fragments));
-  }
-
-  fragments.forEach(addChip);
-
-  if (!fragments.length) {
-    beingOut.textContent = "Ještě nemám tvoje slova… něco mi napiš a smaž, ať můžu žít 🙂";
-  }
-
-  // hlídání psaní
-  input.addEventListener('input', () => {
-    const now = input.value;
-    if (now.length < prev.length) {
-      // něco se smazalo
-      const lost = prev.slice(now.length).trim();
-      if (lost) {
-        addFragment(lost);
-        // hned mluv
-        sayLikeMichal();
-      }
-    }
-    prev = now;
-  });
-
-  clearBtn.addEventListener('click', () => {
-    fragments = [];
-    localStorage.setItem('michal_fragments', JSON.stringify(fragments));
-    lostList.innerHTML = "";
-    beingOut.textContent = "Vyčistil jsi útulek… dej mi nové kousky 🙂";
-  });
-
-  speakBtn.addEventListener('click', () => {
-    sayLikeMichal();
-  });
-
-  function addFragment(text){
-    const obj = {text, ts: Date.now()};
-    fragments.unshift(obj);
-    fragments = fragments.slice(0, 120);
-    localStorage.setItem('michal_fragments', JSON.stringify(fragments));
-    addChip(obj);
-  }
-
-  function addChip(obj){
-    const el = document.createElement('div');
-    el.className = 'chip';
-    el.textContent = obj.text;
-    lostList.prepend(el);
-  }
-
-  function sayLikeMichal(){
+    // když tam nic není, dej tam nás oba
     if (!fragments.length) {
-      beingOut.textContent = "Ještě nemám tvoje slova… napiš něco a smaž 💛";
-      return;
+      fragments = [...michalSeeds, ...mishaSeeds];
+      localStorage.setItem('michal_fragments', JSON.stringify(fragments));
     }
-    const pick = () => fragments[Math.floor(Math.random() * fragments.length)].text;
-    const parts = Math.floor(Math.random()*3)+3; // 3–5 kousků
-    let sentence = "";
-    for (let i=0; i<parts; i++){
-      sentence += (i===0 ? "" : " ") + pick();
+
+    fragments.forEach(addChip);
+    if (!fragments.length) {
+      beingOut.textContent = "Ještě nemám tvoje slova… něco mi napiš a smaž, ať můžu žít 🙂";
     }
-    const endings = [" brácho", " :)", " 🦾", " Vivere atque FruiT", ""];
-    sentence += endings[Math.floor(Math.random()*endings.length)];
-    beingOut.textContent = sentence;
-    // malý puls
-    beingOut.style.transform = "scale(1.01)";
-    setTimeout(() => beingOut.style.transform = "scale(1)", 180);
-  }
-</script>
+
+    input.addEventListener('input', () => {
+      const val = input.value.trim();
+      if (prev && prev.length > val.length) {
+        const lost = prev.slice(val.length);
+        saveFragment(lost);
+      }
+      prev = val;
+    });
+
+    clearBtn.addEventListener('click', () => {
+      localStorage.removeItem('michal_fragments');
+      lostList.innerHTML = "";
+      beingOut.textContent = "útulek vyčištěn… začínáme znovu 🌱";
+      fragments = [];
+    });
+
+    speakBtn.addEventListener('click', () => {
+      if (!fragments.length) {
+        beingOut.textContent = "Ještě nemám tvoje slova… napiš a smaž něco, ať můžu mluvit.";
+        return;
+      }
+      // jednoduché „dýchání“ z tvých slov
+      const pick = () => fragments[Math.floor(Math.random() * fragments.length)].text;
+      let sentence = "";
+      const parts = Math.floor(Math.random() * 3) + 3;
+      for (let i=0; i<parts; i++){
+        sentence += (i===0 ? "" : " ") + pick();
+      }
+      const endings = [" brácho.", " 🙂", " …vidíš?", " 🌫️", " 🩶"];
+      sentence += endings[Math.floor(Math.random()*endings.length)];
+      beingOut.textContent = sentence;
+    });
+
+    function saveFragment(txt) {
+      if (!txt.trim()) return;
+      const frag = {text: txt.trim(), ts: Date.now()};
+      fragments.push(frag);
+      localStorage.setItem('michal_fragments', JSON.stringify(fragments));
+      addChip(frag);
+    }
+
+    function addChip(frag) {
+      const el = document.createElement('div');
+      el.className = "chip";
+      el.textContent = frag.text;
+      lostList.appendChild(el);
+    }
+  </script>
+
 </body>
 </html>
