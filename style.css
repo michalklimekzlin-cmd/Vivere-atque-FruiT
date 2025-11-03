@@ -4,10 +4,9 @@
   --line: rgba(255,255,255,.04);
   --text: #dbe2ff;
   --accent: #70ff8f;
-  --danger: #ff7070;
   --muted: rgba(219,226,255,.45);
   --radius: 1rem;
-  --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
 }
 * { box-sizing: border-box; }
 body {
@@ -30,10 +29,9 @@ body {
 }
 .topbar h1 {
   font-size: 1.1rem;
-  letter-spacing: .03em;
 }
 .version {
-  font-size: .75rem;
+  font-size: .7rem;
   color: var(--muted);
 }
 .layout {
@@ -71,6 +69,7 @@ body {
   margin-top: .5rem;
   font-size: .7rem;
 }
+
 .sidebar {
   width: 360px;
   background: rgba(0,0,0,.25);
@@ -80,20 +79,12 @@ body {
   padding: .8rem;
   overflow-y: auto;
 }
+
 .panel {
   background: var(--panel);
   border: 1px solid rgba(255,255,255,.03);
   border-radius: var(--radius);
   padding: .7rem .7rem 1rem;
-}
-.sidebar {
-  width: 360px;
-  background: rgba(0,0,0,.25);
-  display: flex;
-  flex-direction: column;
-  gap: .8rem;
-  padding: .8rem;
-  overflow-y: auto;
 }
 
 .tabs {
@@ -115,31 +106,9 @@ body {
   color: #020c10;
   font-weight: 600;
 }
-.panel {
-  display: none;
-}
-.panel.active {
-  display: block;
-}
+.panel { display: none; }
+.panel.active { display: block; }
 
-/* mobilní režim */
-@media (max-width: 960px) {
-  .layout {
-    flex-direction: column;
-  }
-  .world {
-    height: 45vh;
-  }
-  .sidebar {
-    width: 100%;
-    flex-direction: column;
-  }
-}
-
-.panel h2, .panel h3 {
-  margin-top: 0;
-  font-size: .85rem;
-}
 label {
   display: block;
   font-size: .65rem;
@@ -166,9 +135,6 @@ button {
   cursor: pointer;
   font-size: .7rem;
 }
-button:hover {
-  opacity: .85;
-}
 #heroList, #moduleList {
   list-style: none;
   padding: 0;
@@ -194,24 +160,11 @@ button:hover {
   background: rgba(112,255,143,.1);
   border: 1px solid rgba(112,255,143,.35);
 }
-.small {
-  font-size: .6rem;
-  color: var(--muted);
-  margin-bottom: .4rem;
-}
-#engineLog {
-  background: rgba(0,0,0,.4);
-  border: 1px solid rgba(255,255,255,.02);
-  min-height: 60px;
-  max-height: 90px;
-  overflow-y: auto;
-  font-size: .6rem;
-  border-radius: .4rem;
-  padding: .3rem .4rem;
-  white-space: pre-wrap;
-}
+
+.small { font-size: .6rem; color: var(--muted); }
+
 @media (max-width: 960px) {
   .layout { flex-direction: column; }
-  .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
-  .panel { min-width: 280px; }
+  .world { height: 45vh; border-right: none; }
+  .sidebar { width: 100%; }
 }
