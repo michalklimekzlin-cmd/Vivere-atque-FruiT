@@ -1,13 +1,12 @@
-// service-worker.js
-const CACHE_NAME = "vaf-cache-v0.34"; // ← nové jméno cache = vynutíme nový download
+const CACHE_NAME = "vaf-cache-v0.35";
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=0.31",
   "./manifest.json",
-  "./src/app.js?v=0.34",
-  "./src/engine.js?v=0.34",
-  "./src/teams.js?v=0.34"
+  "./src/app.js?v=0.35",
+  "./src/engine.js?v=0.35",
+  "./src/teams.js?v=0.35"
 ];
 
 self.addEventListener("install", (event) => {
@@ -32,8 +31,6 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then((resp) => {
-      return resp || fetch(event.request);
-    })
+    caches.match(event.request).then((resp) => resp || fetch(event.request))
   );
 });
