@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <title>Bráška Hlava – VAFT</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <style>
+    body{background:#020617;color:#e2e8f0;font-family:system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1rem;padding:1rem;text-align:center;}
+    #log{font-size:.7rem;opacity:.7;max-width:320px;}
+    #sphere{width:140px;height:140px;border-radius:999px;background:radial-gradient(circle at 30% 30%, #fff, #38bdf8 25%, #0f172a 75%);box-shadow:0 0 25px rgba(56,189,248,.4);display:flex;align-items:center;justify-content:center;font-size:.65rem;white-space:pre-line;}
+  </style>
+</head>
+<body>
+  <div id="sphere">Bráška Hlava</div>
+  <div id="log">Načítám jádro…</div>
+
+  <script>
+    // 1) zkus stáhnout jádro z repa
+    (async function(){
+      const log = document.getElementById('log');
+      const sphere = document.getElementById('sphere');
+
+      async function loadKernel(){
+        try {
+          const res = await fetch("../vaft.kernel.js?v=" + Date.now());
+          if (!res.ok) throw new Error("no kernel");
+          const txt = await res.text();
+          const script = document.createElement('script');
+          script.textContent = txt;
+          document.body.appendChild(script);
+          log.textContent = "Jádro načteno.";
+          return true;
+        } catch(e) {
+          log.textContent = "Jádro na serveru není, jedu nouzově.";
+          return false;
+        }
+      }
+
+      const ok = await loadKernel();
+
+      // 2) pokud se povedlo, nabootuj
+      if (ok && window.VAFT) {
+        const state = VAFT.boot("braska-hlava");
+        log.textContent = "Běžíme. Bytostí: "+state.registry.length+" · materiálů: "+state.materials.length;
+      } else {
+        // nouzové mini-jádro přímo tady
+        const matsKey = "vaft_materials_v1";
+        const mats = JSON.parse(localStorage.getItem(matsKey) || "[]");
+        mats.unshift({id:"mini-"+Date.now(),name:"nouzový pulz",ts:Date.now()});
+        localStorage.setItem(matsKey, JSON.stringify(mats.slice(0,200)));
+        log.textContent = "Nouzový pulz uložen (offline).";
+      }
+
+      // 3) každé 4s aktualizuj zapsané bytosti
+      setInterval(()=>{
+        if (window.VAFT) {
+          const reg = VAFT.getRegistry();
+          const mats = VAFT.getMaterials();
+          log.textContent = "Běžíme. Bytostí: "+reg.length+" · materiálů: "+mats.length;
+          sphere.style.transform = "scale(" + (1 + Math.max(0,(3-reg.length))*0.12) + ")";
+        }
+      }, 4000);
+    })();
+  </script>
+</body>
+</html>
