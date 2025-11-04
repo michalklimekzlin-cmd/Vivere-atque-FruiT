@@ -30,6 +30,25 @@
     "vaft_star_feed",
     "vaft_ghost_feed",
     "vaft_bear_feed"
+    // napojení na Meziprostor-Core
+function syncWithCore(){
+  const feed = JSON.parse(localStorage.getItem("meziprostor_feed_v1") || "[]");
+  if(feed.length){
+    const last = feed[0];
+    const msg = `${last.label || "?"}: ${last.desc || ""}`;
+    console.log("🌀 meziprostor →", msg);
+    // ukázka: živý výpis na stránce
+    const coreDisplay = document.getElementById("corePulse") || (()=> {
+      const el = document.createElement("div");
+      el.id = "corePulse";
+      el.style = "position:fixed;bottom:10px;right:10px;font-size:.7rem;background:#0a0;border-radius:.5rem;padding:.4rem .6rem;color:#fff;font-family:monospace;";
+      document.body.appendChild(el);
+      return el;
+    })();
+    coreDisplay.textContent = "Meziprostor: " + msg;
+  }
+}
+setInterval(syncWithCore, 4000);
   ];
   const list = document.getElementById('materials');
 
