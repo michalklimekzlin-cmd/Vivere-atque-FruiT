@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <title>VAFT • Lilie</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{background:#0a1012;color:#f1f5f9;font-family:system-ui,sans-serif;padding:1rem;}
+    #feed{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem;}
+    .item{background:#0f172a;border:1px solid #1e293b;border-radius:.5rem;padding:.4rem .6rem;min-width:130px;}
+  </style>
+</head>
+<body>
+  <h1>3 Lilie</h1>
+  <p style="font-size:.75rem;opacity:.7">Lesní • Vodní • Noční</p>
+  <label><input type="checkbox" id="auto" checked> auto (12s)</label>
+  <div id="feed"></div>
+
+  <script>
+    const KEY="vaft_lilies_feed";
+    const L=[{n:"Lesní lilie",d:"stromy, země"},{n:"Vodní lilie",d:"toky, plynutí"},{n:"Noční lilie",d:"ticho a stín"}];
+    function load(){const r=localStorage.getItem(KEY);if(!r)return[];try{return JSON.parse(r);}catch(e){return[];}}
+    function save(a){localStorage.setItem(KEY,JSON.stringify(a));}
+    function render(){const box=document.getElementById('feed');const a=load();box.innerHTML="";if(!a.length){box.innerHTML="<div class='item'>čekám…</div>";return;}a.forEach(it=>{const el=document.createElement('div');el.className="item";el.innerHTML=`<strong>${it.label}</strong><br><small>${it.desc||""}</small>`;box.appendChild(el);});}
+    function createOne(){const a=load();const lil=L[Math.floor(Math.random()*L.length)];a.unshift({id:"lil-"+Date.now(),type:"lilie",label:lil.n,desc:lil.d,createdAt:Date.now()});save(a.slice(0,30));render();}
+    render();
+    setInterval(()=>{if(document.getElementById('auto').checked)createOne();},12000);
+  </script>
+</body>
+</html>
