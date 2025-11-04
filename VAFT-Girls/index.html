@@ -2,29 +2,58 @@
 <html lang="cs">
 <head>
   <meta charset="utf-8">
-  <title>VAFT • Hodné holky</title>
+  <title>VAFT – Girls</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body{background:#0f0f11;color:#f8fafc;font-family:system-ui,sans-serif;padding:1rem;}
-    #feed{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem;}
-    .item{background:#111827;border:1px solid #1f2937;border-radius:.5rem;padding:.35rem .6rem;min-width:130px;}
+    body { background:#0b0b14; color:#e2e8f0; font-family:system-ui,sans-serif; margin:0; padding:1rem; }
+    h1 { font-size:1rem; margin-bottom:.3rem; }
+    textarea { width:100%; min-height:80px; background:#111827; border:1px solid #1e293b; border-radius:.4rem; color:#e2e8f0; padding:.5rem; }
+    small { opacity:.7; font-size:.7rem; }
   </style>
 </head>
 <body>
-  <h1>Hodné holky</h1>
-  <p style="font-size:.75rem;opacity:.7">Stanka • Tereza • Vanesa • Sofi</p>
-  <label><input type="checkbox" id="auto" checked> auto (10s)</label>
-  <div id="feed"></div>
+  <h1>VAFT – Girls 💫</h1>
+  <small>Píšou, šeptají a nechávají stopy ve světě.</small>
+
+  <textarea id="input" placeholder="Napiš jim něco… a pak to smaž."></textarea>
+
+  <div id="mem" style="margin-top:.6rem;font-size:.7rem;"></div>
 
   <script>
-    const KEY="vaft_girls_feed";
-    const N=["Stanka","Tereza","Vanesa","Sofi"];
-    function load(){const r=localStorage.getItem(KEY);if(!r)return[];try{return JSON.parse(r);}catch(e){return[];}}
-    function save(a){localStorage.setItem(KEY,JSON.stringify(a));}
-    function render(){const box=document.getElementById('feed');const a=load();box.innerHTML="";if(!a.length){box.innerHTML="<div class='item'>čekám…</div>";return;}a.forEach(it=>{const el=document.createElement('div');el.className="item";el.innerHTML=`<strong>${it.label}</strong><br><small>${it.desc||""}</small>`;box.appendChild(el);});}
-    function createOne(){const a=load();const name=N[Math.floor(Math.random()*N.length)];a.unshift({id:"girls-"+Date.now(),type:"girl",label:name,desc:"ochranná energie "+name,createdAt:Date.now()});save(a.slice(0,30));render();}
+    const ENTITY_KEY = "vaft_girls_feed";
+    const WORLD_KEY = "meziprostor_feed_v1";
+    let prev = "";
+
+    function loadArr(k){ try{return JSON.parse(localStorage.getItem(k)||"[]");}catch(e){return[];} }
+    function saveArr(k,a){ localStorage.setItem(k,JSON.stringify(a)); }
+
+    const input = document.getElementById('input');
+    const mem = document.getElementById('mem');
+
+    function render(){
+      const arr = loadArr(ENTITY_KEY);
+      mem.innerHTML = arr.map(x=>`<div>• ${x.txt}</div>`).join("");
+    }
+
+    function pushToWorld(label, desc){
+      const feed = loadArr(WORLD_KEY);
+      feed.unshift({ id:"girls-"+Date.now(), type:"echo", label, desc, createdAt:Date.now() });
+      saveArr(WORLD_KEY, feed.slice(0,80));
+    }
+
+    input.addEventListener('input',()=>{
+      const cur=input.value;
+      if(prev.length>cur.length && prev.trim().length){
+        const arr=loadArr(ENTITY_KEY);
+        arr.unshift({txt:prev.trim(),ts:Date.now()});
+        saveArr(ENTITY_KEY,arr.slice(0,50));
+        pushToWorld("Girls", prev.trim());
+        render();
+      }
+      prev=cur;
+    });
+
     render();
-    setInterval(()=>{if(document.getElementById('auto').checked)createOne();},10000);
   </script>
 </body>
 </html>
