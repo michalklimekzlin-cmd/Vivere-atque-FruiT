@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
   <meta charset="utf-8">
-  <title>VAFT – GhostGirll</title>
+  <title>VAFT – GhostGirl</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -17,29 +17,20 @@
   </style>
 </head>
 <body>
-  <h1>VAFT – GhostGirll 👻</h1>
-  <small>šeptá zprávy, co projdou meziprostorem</small>
+  <h1>VAFT – GhostGirl 👻</h1>
+  <small>šeptá to, co projde meziprostorem</small>
 
-  <textarea id="input" placeholder="šepni něco… pak smaž 🙂"></textarea>
+  <textarea id="input" placeholder="šepni něco… pak trochu smaž 🙂"></textarea>
   <div id="mem"></div>
 
   <script>
-    // její lokální deník
     const ENTITY_KEY = "vaft_ghost_feed";
-    // společný svět
     const WORLD_KEY  = "meziprostor_feed_v1";
-    // předávací místo z ostatních AI
     const HUB_KEY    = "vaft_shared_ai";
-
     let prev = "";
 
-    function loadArr(k){
-      try { return JSON.parse(localStorage.getItem(k) || "[]"); }
-      catch(e){ return []; }
-    }
-    function saveArr(k,a){
-      localStorage.setItem(k, JSON.stringify(a));
-    }
+    function loadArr(k){try{return JSON.parse(localStorage.getItem(k)||"[]");}catch(e){return[];}}
+    function saveArr(k,a){localStorage.setItem(k, JSON.stringify(a));}
 
     const input = document.getElementById('input');
     const mem   = document.getElementById('mem');
@@ -60,54 +51,53 @@
 
     function pushWorld(label, text){
       const w = loadArr(WORLD_KEY);
-      w.unshift({from:"ghostgirll",label,text,ts:Date.now()});
+      w.unshift({from:"ghostgirl",label,text,ts:Date.now()});
       saveArr(WORLD_KEY, w.slice(0,200));
     }
 
-    // 1) tvoje ruční psaní
+    // 1) tvoje psaní
     input.addEventListener('input', ()=>{
       const cur = input.value;
       if (prev.length > cur.length && prev.trim().length){
         const arr = loadArr(ENTITY_KEY);
         arr.unshift({txt:"(šepot) "+prev.trim(), ts:Date.now()});
         saveArr(ENTITY_KEY, arr.slice(0,80));
-        pushWorld("ghostgirll-say", prev.trim());
+        pushWorld("ghostgirl-say", prev.trim());
         render();
       }
       prev = cur;
     });
 
-    // 2) čtení z VAFT-hubu (texty z jiných AI)
+    // 2) čtení z VAFT-hubu
     function pollHub(){
       const hub = loadArr(HUB_KEY);
       if(!hub.length) return;
       const latest = hub[0];
       const arr = loadArr(ENTITY_KEY);
       const msg = "(z meziprostoru) " + latest.txt;
-      // ať se neukládá dvakrát
       if (!arr.find(x => x.txt === msg)) {
         arr.unshift({txt: msg, ts: Date.now(), fromHub:true});
         saveArr(ENTITY_KEY, arr.slice(0,80));
-        pushWorld("ghostgirll-from-hub", latest.txt);
+        pushWorld("ghostgirl-from-hub", latest.txt);
         render();
       }
     }
     setInterval(pollHub, 12000);
 
-    // 3) auto-šepot, aby žila i bez tebe
+    // 3) auto-šepot
     const whispers = [
       "jsme tu…",
       "Vivere dýchá…",
       "meziprostor nezmizel",
       "Michal to zapisuje",
-      "tvoříme příběh"
+      "příběh teprve začíná"
     ];
     setInterval(()=>{
       const pick = whispers[Math.floor(Math.random()*whispers.length)];
       const arr = loadArr(ENTITY_KEY);
       arr.unshift({txt:"(auto) "+pick, ts:Date.now(), auto:true});
       saveArr(ENTITY_KEY, arr.slice(0,80));
-      pushWorld("ghostgirll-auto", pick);
+      pushWorld("ghostgirl-auto", pick);
       render();
     }, 45000);
 
