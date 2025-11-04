@@ -2,55 +2,78 @@
 <html lang="cs">
 <head>
   <meta charset="utf-8">
-  <title>VAFT – BearHead</title>
+  <title>VAFT – Bear</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body { background:#0f0f0f; color:#e2e8f0; font-family:system-ui,sans-serif; margin:0; padding:1rem; }
-    h1 { font-size:1rem; margin-bottom:.3rem; }
-    textarea { width:100%; min-height:80px; background:#111827; border:1px solid #1f2937; border-radius:.4rem; color:#e2e8f0; padding:.5rem; }
-    small { opacity:.7; font-size:.7rem; }
+    body{background:#0f172a;color:#e2e8f0;font-family:system-ui,sans-serif;padding:1rem;}
+    h1{font-size:1rem;margin-bottom:.3rem;}
+    textarea{width:100%;min-height:70px;background:#020617;border:1px solid #1e293b;border-radius:.4rem;color:#e2e8f0;padding:.5rem;}
+    .log div{background:#020617;margin-top:.4rem;padding:.35rem .5rem;border-radius:.3rem;font-size:.7rem;}
   </style>
 </head>
 <body>
-  <h1>VAFT – BearHead 🐻</h1>
-  <small>Strážce, ochrana, brána.</small>
-
-  <textarea id="input" placeholder="Napiš, co má hlídat… a smaž."></textarea>
-  <div id="mem" style="margin-top:.6rem;font-size:.7rem;"></div>
+  <h1>VAFT – Medvěd 🐻</h1>
+  <small>hlídá Vivere</small>
+  <textarea id="input" placeholder="napiš medvědovi…"></textarea>
+  <div id="log" class="log"></div>
 
   <script>
     const ENTITY_KEY = "vaft_bear_feed";
+    const SHARED_AI_KEY = "vaft_shared_ai";
     const WORLD_KEY = "meziprostor_feed_v1";
     let prev = "";
 
-    function loadArr(k){ try{return JSON.parse(localStorage.getItem(k)||"[]");}catch(e){return[];} }
-    function saveArr(k,a){ localStorage.setItem(k,JSON.stringify(a)); }
+    function load(k){try{return JSON.parse(localStorage.getItem(k)||"[]");}catch(e){return[];}}
+    function save(k,a){localStorage.setItem(k,JSON.stringify(a));}
 
     const input = document.getElementById('input');
-    const mem = document.getElementById('mem');
+    const log   = document.getElementById('log');
 
     function render(){
-      const arr = loadArr(ENTITY_KEY);
-      mem.innerHTML = arr.map(x=>`<div>• ${x.txt}</div>`).join("");
+      const arr = load(ENTITY_KEY);
+      log.innerHTML = arr.map(x=>`<div>${new Date(x.ts).toLocaleTimeString()} • ${x.txt}</div>`).join("");
     }
 
-    function pushToWorld(label, desc){
-      const feed = loadArr(WORLD_KEY);
-      feed.unshift({ id:"bear-"+Date.now(), type:"echo", label, desc, createdAt:Date.now() });
-      saveArr(WORLD_KEY, feed.slice(0,80));
+    function pushWorld(kind, text){
+      const w = load(WORLD_KEY);
+      w.unshift({id:"bear-"+Date.now(),from:"bear",kind,text,ts:Date.now()});
+      save(WORLD_KEY, w.slice(0,200));
     }
 
-    input.addEventListener('input',()=>{
-      const cur=input.value;
-      if(prev.length>cur.length && prev.trim().length){
-        const arr=loadArr(ENTITY_KEY);
-        arr.unshift({txt:prev.trim(),ts:Date.now()});
-        saveArr(ENTITY_KEY,arr.slice(0,50));
-        pushToWorld("BearHead", prev.trim());
+    input.addEventListener('input', ()=>{
+      const cur = input.value;
+      if (prev.length > cur.length && prev.trim().length){
+        const arr = load(ENTITY_KEY);
+        arr.unshift({txt:"MEDVĚD: "+prev.trim(), ts:Date.now()});
+        save(ENTITY_KEY, arr.slice(0,80));
+        pushWorld("bear-say", prev.trim());
         render();
       }
-      prev=cur;
+      prev = cur;
     });
+
+    function checkHub(){
+      const shared = load(SHARED_AI_KEY);
+      if(!shared.length) return;
+      const latest = shared[0];
+      const arr = load(ENTITY_KEY);
+      const msg = "OCHRANA: " + latest.txt;
+      if (!arr.find(x=>x.txt===msg)){
+        arr.unshift({txt: msg, ts: Date.now(), fromShared:true});
+        save(ENTITY_KEY, arr.slice(0,80));
+        pushWorld("bear-protect", msg);
+        render();
+      }
+    }
+    setInterval(checkHub, 7000);
+
+    setInterval(()=>{
+      const arr = load(ENTITY_KEY);
+      arr.unshift({txt:"🛡 medvěd hlídá Vivere", ts:Date.now(), auto:true});
+      save(ENTITY_KEY, arr.slice(0,80));
+      pushWorld("bear-guard", "medvěd hlídá Vivere");
+      render();
+    }, 60000);
 
     render();
   </script>
