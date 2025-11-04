@@ -2,25 +2,24 @@
 <html lang="cs">
 <head>
   <meta charset="utf-8">
-  <title>VAFT – Girls</title>
+  <title>VAFT – Doll</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body { background:#0b0b14; color:#e2e8f0; font-family:system-ui,sans-serif; margin:0; padding:1rem; }
+    body { background:#120b0f; color:#fee2e2; font-family:system-ui,sans-serif; margin:0; padding:1rem; }
     h1 { font-size:1rem; margin-bottom:.3rem; }
-    textarea { width:100%; min-height:80px; background:#111827; border:1px solid #1e293b; border-radius:.4rem; color:#e2e8f0; padding:.5rem; }
-    small { opacity:.7; font-size:.7rem; }
+    textarea { width:100%; min-height:80px; background:#111827; border:1px solid #1f2937; border-radius:.4rem; color:#e2e8f0; padding:.5rem; }
+    small { opacity:.7; font-size:.7rem; color:#fecdd3; }
   </style>
 </head>
 <body>
-  <h1>VAFT – Girls 💫</h1>
-  <small>Píšou, šeptají a nechávají stopy ve světě.</small>
+  <h1>VAFT – Doll ❤️</h1>
+  <small>Panenka se srdcem – vztahy, láska, křehkost.</small>
 
-  <textarea id="input" placeholder="Napiš jim něco… a pak to smaž."></textarea>
-
+  <textarea id="input" placeholder="Napiš jí něco hezkého a pak to smaž…"></textarea>
   <div id="mem" style="margin-top:.6rem;font-size:.7rem;"></div>
 
   <script>
-    const ENTITY_KEY = "vaft_girls_feed";
+    const ENTITY_KEY = "vaft_doll_feed";
     const WORLD_KEY = "meziprostor_feed_v1";
     let prev = "";
 
@@ -37,7 +36,7 @@
 
     function pushToWorld(label, desc){
       const feed = loadArr(WORLD_KEY);
-      feed.unshift({ id:"girls-"+Date.now(), type:"echo", label, desc, createdAt:Date.now() });
+      feed.unshift({ id:"doll-"+Date.now(), type:"echo", label, desc, createdAt:Date.now() });
       saveArr(WORLD_KEY, feed.slice(0,80));
     }
 
@@ -47,7 +46,7 @@
         const arr=loadArr(ENTITY_KEY);
         arr.unshift({txt:prev.trim(),ts:Date.now()});
         saveArr(ENTITY_KEY,arr.slice(0,50));
-        pushToWorld("Girls", prev.trim());
+        pushToWorld("Doll", prev.trim());
         render();
       }
       prev=cur;
