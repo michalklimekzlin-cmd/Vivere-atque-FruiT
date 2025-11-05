@@ -1,55 +1,71 @@
 // src/poutnik.js
-// Poutník / Lilie – offline deník přírody + mini-mapa + úkoly + SOS
-// navazuje na VAFT
+// Lilie – soukromý Poutník
+// vše (GPS, fotky, poznámky, úkoly, peněženka) šifrujeme heslem
+// SOS necháváme otevřené
+// máme i pytlík se zlaťáky 💰
 
 window.VAFT = window.VAFT || {};
 
 (function () {
-  // 0) meziprostor – fronta na věci, co pošleme/doladíme později
-  VAFT.meziProstor = VAFT.meziProstor || {
-    queue: JSON.parse(localStorage.getItem('vaft_meziprostor') || '[]'),
-    push(item) {
-      this.queue.push(item);
-      localStorage.setItem('vaft_meziprostor', JSON.stringify(this.queue));
-    }
+  // ====== 0) nastavení ======
+  // deterministický "parťák" klíč – abys to uměl rozšifrovat i ty
+  const PARTNER_SEED = "michalklimekzlin-cmd/Vivere-atque-FruiT";
+
+  // ====== 1) WebCrypto pomocné funkce ======
+  function bufToB64(buf) {
+    return btoa(String.fromCharCode(...new Uint8Array(buf)));
+  }
+  function b64ToBuf(b64) {
+    const bin = atob(b64);
+    const buf = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    return buf;
+  }
+  async function deriveKeyFromPass(pass, saltStr) {
+    const enc = new TextEncoder();
+    const material = await crypto.subtle.importKey("raw", enc.encode(pass), "PBKDF2", false, ["deriveKey"]);
+    const salt = enc.encode(saltStr);
+    return crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt, iterations: 120000, hash: "SHA-256" },
+      material,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["encrypt", "decrypt"]
+    );
+  }
+  async function aesEncryptJson(key, obj) {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const data = new TextEncoder().encode(JSON.stringify(obj));
+    const ct = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
+    return { iv: Array.from(iv), data: bufToB64(ct) };
+  }
+  async function aesDecryptJson(key, payload) {
+    const iv = new Uint8Array(payload.iv);
+    const ct = b64ToBuf(payload.data);
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ct);
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  // ====== 2) globální stav (ale prázdný, naplníme až po hesle) ======
+  let USER_PASS = null;         // heslo, které zadá Lilie
+  let userKey = null;           // z něj odvozený klíč
+  let partnerKey = null;        // z našeho seedu, pro tebe
+  let vaftStore = {             // takhle to budeme ukládat
+    wish: null,
+    gps: [],
+    objects: [],
+    wallet: 0,
+    tasks: null,
+    sos: []                     // SOS necháme plain
   };
 
-  // 1) základní data poutníka
-  VAFT.poutnik = VAFT.poutnik || {
-    config: {},
-    gpsTrack: [],
-    objects: []
-  };
-
-  // načíst uložené GPS a objekty
-  const savedGps = localStorage.getItem('vaft_poutnik_gps');
-  if (savedGps) {
-    try { VAFT.poutnik.gpsTrack = JSON.parse(savedGps); } catch (e) {}
-  }
-  const savedObj = localStorage.getItem('vaft_poutnik_objects');
-  if (savedObj) {
-    try { VAFT.poutnik.objects = JSON.parse(savedObj); } catch (e) {}
-  }
-
-  // 2) pytlík se zlaťáky (wallet)
+  // ====== 3) UI: pytlík hned zobrazíme ======
   const walletDiv = document.createElement('div');
   walletDiv.id = 'poutnik-wallet';
   walletDiv.innerHTML = '💰 <span id="poutnik-wallet-amount">0</span>';
   document.body.appendChild(walletDiv);
-  let walletAmount = parseInt(localStorage.getItem('vaft_poutnik_wallet') || '0', 10);
-  document.getElementById('poutnik-wallet-amount').textContent = walletAmount;
 
-  // 3) základní úkoly
-  const POUTNIK_TASKS = JSON.parse(localStorage.getItem('vaft_poutnik_tasks') || 'null') || [
-    { id: 'river-01', title: 'Vyfoť řeku zblízka', reward: 100, done: false, keyword: 'řeka' },
-    { id: 'tree-01', title: 'Vyfoť strom tak, aby byl vidět kmen', reward: 50, done: false, keyword: 'strom' },
-    { id: 'moss-01', title: 'Vyfoť mech / detail země', reward: 50, done: false, keyword: 'mech' }
-  ];
-  function saveTasks() {
-    localStorage.setItem('vaft_poutnik_tasks', JSON.stringify(POUTNIK_TASKS));
-  }
-
-  // 4) hlavní UI panel
+  // ====== 4) UI: panel + deník ======
   const root = document.createElement('div');
   root.id = 'poutnik-panel';
   root.innerHTML = `
@@ -57,7 +73,7 @@ window.VAFT = window.VAFT || {};
     <div id="poutnik-body">
       <h2>Lilie – deník přírody</h2>
 
-      <label>Co má tahle aplikace umět?</label>
+      <label>Tvoje přání:</label>
       <textarea id="poutnik-wish" rows="3" placeholder="Chci zapisovat rostliny, fotit, mluvit..."></textarea>
       <button id="poutnik-save-wish">Uložit přání</button>
 
@@ -65,7 +81,7 @@ window.VAFT = window.VAFT || {};
       <h3>🧭 GPS stopa</h3>
       <button id="poutnik-gps-start">Začít sledovat</button>
       <button id="poutnik-gps-stop">Zastavit</button>
-      <p id="poutnik-gps-status">GPS: vypnuto</p>
+      <p id="poutnik-gps-status">GPS: čekám...</p>
 
       <hr>
       <h3>📷 Objekt z přírody</h3>
@@ -79,7 +95,7 @@ window.VAFT = window.VAFT || {};
       <p id="poutnik-voice-out"></p>
 
       <hr>
-      <h3>📡 Nouzový přenos</h3>
+      <h3>📡 SOS (veřejné)</h3>
       <textarea id="poutnik-sos" rows="2" placeholder="Popiš situaci..."></textarea>
       <button id="poutnik-sos-send">Uložit SOS</button>
       <p id="poutnik-sos-status"></p>
@@ -89,7 +105,6 @@ window.VAFT = window.VAFT || {};
       <button id="poutnik-export">Exportovat JSON</button>
     </div>
 
-    <!-- DENÍK / KNIHA -->
     <div id="poutnik-book">
       <div class="book-inner">
         <div class="book-left">
@@ -108,7 +123,7 @@ window.VAFT = window.VAFT || {};
   `;
   document.body.appendChild(root);
 
-  // 5) styly
+  // ====== 5) styly ======
   const style = document.createElement('style');
   style.textContent = `
     #poutnik-wallet {
@@ -148,11 +163,6 @@ window.VAFT = window.VAFT || {};
       overflow-y: auto;
       display: none;
     }
-    #poutnik-body h2, #poutnik-body h3 {
-      margin: 6px 0;
-      color: #eff;
-      font-size: 1rem;
-    }
     #poutnik-body textarea, #poutnik-body input[type="text"] {
       width: 100%;
       background: rgba(255,255,255,.02);
@@ -162,15 +172,6 @@ window.VAFT = window.VAFT || {};
       padding: 4px 6px;
       margin-bottom: 6px;
     }
-    #poutnik-body button {
-      background: rgba(255,255,255,.03);
-      border: 1px solid #456;
-      border-radius: .5rem;
-      color: #fff;
-      padding: 4px 8px;
-      margin-top: 4px;
-    }
-    /* deník */
     #poutnik-book {
       position: fixed;
       inset: 0;
@@ -188,224 +189,214 @@ window.VAFT = window.VAFT || {};
       margin: 4vh auto 0;
       display: flex;
       overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0,0,0,.4);
     }
-    .book-left {
-      width: 40%;
-      border-right: 1px solid rgba(255,255,255,.03);
-      padding: 10px;
-      color: #eef;
-      overflow-y: auto;
-    }
-    .book-right {
-      flex: 1;
-      padding: 10px;
-      color: #eef;
-      overflow-y: auto;
-    }
-    #poutnik-days {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    #poutnik-days li {
-      padding: 4px 6px;
-      background: rgba(255,255,255,.02);
-      border: 1px solid transparent;
-      border-radius: .4rem;
-      margin-bottom: 4px;
-      cursor: pointer;
-    }
-    #poutnik-days li.active {
-      border-color: rgba(200,255,255,.5);
-      background: rgba(200,255,255,.04);
-    }
-    #poutnik-map {
-      width: 100%;
-      background: rgba(0,0,0,.4);
-      border: 1px solid rgba(200,255,255,.08);
-      border-radius: .5rem;
-      margin-bottom: 6px;
-    }
-    #poutnik-tasks h4 {
-      margin: 4px 0;
-    }
-    #poutnik-day-entries {
-      font-size: .8rem;
-      line-height: 1.3;
-    }
+    .book-left { width: 40%; padding: 10px; overflow-y: auto; }
+    .book-right { flex: 1; padding: 10px; overflow-y: auto; }
+    #poutnik-days { list-style:none; padding:0; margin:0; }
+    #poutnik-days li { padding:4px 6px; background:rgba(255,255,255,.02); margin-bottom:4px; cursor:pointer; border-radius:.4rem; }
+    #poutnik-days li.active { background:rgba(200,255,255,.04); border:1px solid rgba(200,255,255,.4); }
+    #poutnik-map { width:100%; background:rgba(0,0,0,.4); border:1px solid rgba(200,255,255,.08); border-radius:.5rem; margin-bottom:6px; }
   `;
   document.head.appendChild(style);
 
-  // 6) logika panelu
-  const panelBtn = document.getElementById('poutnik-toggle');
-  const panelBody = document.getElementById('poutnik-body');
-  panelBtn.addEventListener('click', () => {
-    panelBody.style.display = panelBody.style.display === 'none' ? 'block' : 'none';
+  // ====== 6) Úvodní heslo – modální prompt ======
+  async function askForPasswordAndInit() {
+    // jednoduchý prompt – můžeš nahradit vlastním UI
+    USER_PASS = prompt("Zadej heslo Lilie:");
+    if (!USER_PASS) {
+      alert("Bez hesla tohle album nejde otevřít.");
+      return;
+    }
+    // odvoď user klíč
+    userKey = await deriveKeyFromPass(USER_PASS, "vaft-lilie-user");
+    // odvoď partner klíč (aby sis uměl rozšifrovat export)
+    partnerKey = await deriveKeyFromPass(PARTNER_SEED, "vaft-lilie-partner");
+
+    // zkus načíst data z localStorage
+    const raw = localStorage.getItem("vaft_lilie_secure");
+    if (raw) {
+      try {
+        const encObj = JSON.parse(raw);
+        // první pokus – uživatelské heslo
+        try {
+          vaftStore = await aesDecryptJson(userKey, encObj);
+        } catch (e) {
+          // druhý pokus – parťák
+          vaftStore = await aesDecryptJson(partnerKey, encObj);
+        }
+      } catch (e) {
+        console.warn("Nelze dešifrovat stará data", e);
+      }
+    } else {
+      // inicializace základních úkolů
+      vaftStore = {
+        wish: null,
+        gps: [],
+        objects: [],
+        wallet: 0,
+        tasks: [
+          { id: 'river-01', title: 'Vyfoť řeku zblízka', reward: 100, done: false, keyword: 'řeka' },
+          { id: 'tree-01', title: 'Vyfoť strom s kmenem', reward: 50, done: false, keyword: 'strom' },
+          { id: 'moss-01', title: 'Vyfoť mech', reward: 50, done: false, keyword: 'mech' }
+        ],
+        sos: []
+      };
+    }
+    // nastav pytlík
+    document.getElementById('poutnik-wallet-amount').textContent = vaftStore.wallet || 0;
+  }
+
+  // uložit celý stav šifrovaně
+  async function saveAllEncrypted() {
+    if (!userKey) return;
+    const enc = await aesEncryptJson(userKey, vaftStore);
+    localStorage.setItem("vaft_lilie_secure", JSON.stringify(enc));
+  }
+
+  // ====== 7) zbytek logiky (už počítáme s tím, že máme heslo) ======
+  askForPasswordAndInit();
+
+  // toggle panelu
+  document.getElementById('poutnik-toggle').addEventListener('click', () => {
+    const b = document.getElementById('poutnik-body');
+    b.style.display = b.style.display === 'none' ? 'block' : 'none';
   });
 
   // přání
-  const wishEl = document.getElementById('poutnik-wish');
-  const wishSaved = localStorage.getItem('vaft_poutnik_wish');
-  if (wishSaved) wishEl.value = wishSaved;
-  document.getElementById('poutnik-save-wish').addEventListener('click', () => {
-    const v = wishEl.value.trim();
-    localStorage.setItem('vaft_poutnik_wish', v);
-    VAFT.poutnik.config.wish = v;
-    VAFT.meziProstor.push({type:'wish',data:v,t:Date.now()});
+  document.getElementById('poutnik-save-wish').addEventListener('click', async () => {
+    const v = document.getElementById('poutnik-wish').value.trim();
+    vaftStore.wish = v;
+    await saveAllEncrypted();
     alert('Uloženo 🌿');
   });
 
   // GPS
   let gpsWatchId = null;
   const gpsStatus = document.getElementById('poutnik-gps-status');
-  function onGps(pos) {
-    const point = {
-      lat: pos.coords.latitude,
-      lon: pos.coords.longitude,
-      acc: pos.coords.accuracy,
-      t: Date.now()
-    };
-    VAFT.poutnik.gpsTrack.push(point);
-    localStorage.setItem('vaft_poutnik_gps', JSON.stringify(VAFT.poutnik.gpsTrack));
-    VAFT.meziProstor.push({type:'gps',data:point});
-    gpsStatus.textContent = 'GPS: ' + point.lat.toFixed(5) + ', ' + point.lon.toFixed(5);
+  function getLastGps() {
+    return vaftStore.gps.length ? vaftStore.gps[vaftStore.gps.length - 1] : null;
   }
   document.getElementById('poutnik-gps-start').addEventListener('click', () => {
     if (!navigator.geolocation) { alert('Geolokace není dostupná'); return; }
-    gpsWatchId = navigator.geolocation.watchPosition(onGps, err => {
+    gpsWatchId = navigator.geolocation.watchPosition(async pos => {
+      const point = {
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude,
+        acc: pos.coords.accuracy,
+        t: Date.now()
+      };
+      vaftStore.gps.push(point);
+      gpsStatus.textContent = 'GPS: ' + point.lat.toFixed(5) + ', ' + point.lon.toFixed(5);
+      await saveAllEncrypted();
+    }, err => {
       alert('GPS chyba: ' + err.message);
-    }, {
-      enableHighAccuracy: true,
-      maximumAge: 10000,
-      timeout: 20000
-    });
+    }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 });
     gpsStatus.textContent = 'GPS: spuštěno...';
   });
   document.getElementById('poutnik-gps-stop').addEventListener('click', () => {
-    if (gpsWatchId !== null) {
-      navigator.geolocation.clearWatch(gpsWatchId);
-      gpsWatchId = null;
-    }
+    if (gpsWatchId !== null) navigator.geolocation.clearWatch(gpsWatchId);
     gpsStatus.textContent = 'GPS: vypnuto';
   });
 
   // FOTO
-  const photoInput = document.getElementById('poutnik-photo');
-  const photoNote = document.getElementById('poutnik-photo-note');
   document.getElementById('poutnik-photo-save').addEventListener('click', () => {
-    const file = photoInput.files[0];
-    const note = photoNote.value.trim();
+    const file = document.getElementById('poutnik-photo').files[0];
+    const note = document.getElementById('poutnik-photo-note').value.trim();
     if (!file) { alert('Nejdřív vyfoť nebo vyber fotku'); return; }
     const reader = new FileReader();
-    reader.onload = function (e) {
+    reader.onload = async function (e) {
       const obj = {
+        type: 'photo',
         note: note,
         img: e.target.result,
         t: Date.now(),
-        loc: VAFT.poutnik.gpsTrack.length ? VAFT.poutnik.gpsTrack[VAFT.poutnik.gpsTrack.length - 1] : null
+        loc: getLastGps()
       };
-      VAFT.poutnik.objects.push(obj);
-      localStorage.setItem('vaft_poutnik_objects', JSON.stringify(VAFT.poutnik.objects));
-      VAFT.meziProstor.push({type:'photo',data:obj});
+      vaftStore.objects.push(obj);
 
-      // zkusit splnit úkol
+      // zkusí splnit úkoly
       const noteLower = (note || '').toLowerCase();
       let rewarded = false;
-      POUTNIK_TASKS.forEach(task => {
-        if (!task.done && task.keyword && noteLower.includes(task.keyword)) {
-          task.done = true;
-          walletAmount += task.reward;
-          localStorage.setItem('vaft_poutnik_wallet', walletAmount);
-          document.getElementById('poutnik-wallet-amount').textContent = walletAmount;
-          VAFT.meziProstor.push({type:'task-done',taskId:task.id,t:Date.now()});
-          rewarded = true;
-        }
-      });
-      if (rewarded) {
-        saveTasks();
-        alert('Úkol splněn, zlaťáky připsány 💰');
+      if (vaftStore.tasks) {
+        vaftStore.tasks.forEach(task => {
+          if (!task.done && task.keyword && noteLower.includes(task.keyword)) {
+            task.done = true;
+            vaftStore.wallet = (vaftStore.wallet || 0) + task.reward;
+            document.getElementById('poutnik-wallet-amount').textContent = vaftStore.wallet;
+            rewarded = true;
+          }
+        });
       }
+      await saveAllEncrypted();
+      alert(rewarded ? 'Úkol splněn, zlaťáky připsány 💰' : 'Uloženo 🌲');
 
-      alert('Uloženo 🌲');
-      photoInput.value = '';
-      photoNote.value = '';
+      document.getElementById('poutnik-photo').value = '';
+      document.getElementById('poutnik-photo-note').value = '';
     };
     reader.readAsDataURL(file);
   });
 
   // HLAS
-  const voiceBtn = document.getElementById('poutnik-voice');
-  const voiceOut = document.getElementById('poutnik-voice-out');
-  voiceBtn.addEventListener('click', () => {
+  document.getElementById('poutnik-voice').addEventListener('click', () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
       const entry = {
         type: 'voice',
         text: '[hlas offline]',
         t: Date.now(),
-        loc: VAFT.poutnik.gpsTrack.at(-1) || null
+        loc: getLastGps()
       };
-      VAFT.poutnik.objects.push(entry);
-      localStorage.setItem('vaft_poutnik_objects', JSON.stringify(VAFT.poutnik.objects));
-      VAFT.meziProstor.push({type:'voice',data:entry});
+      vaftStore.objects.push(entry);
+      saveAllEncrypted();
       alert('Hlas není dostupný, ale záznam jsem uložil.');
       return;
     }
     const r = new SR();
     r.lang = 'cs-CZ';
     r.start();
-    r.onresult = (ev) => {
+    r.onresult = async (ev) => {
       const text = ev.results[0][0].transcript;
-      voiceOut.textContent = '🗣️ ' + text;
-      const entry = {
+      document.getElementById('poutnik-voice-out').textContent = '🗣️ ' + text;
+      vaftStore.objects.push({
         type: 'voice',
         text,
         t: Date.now(),
-        loc: VAFT.poutnik.gpsTrack.at(-1) || null
-      };
-      VAFT.poutnik.objects.push(entry);
-      localStorage.setItem('vaft_poutnik_objects', JSON.stringify(VAFT.poutnik.objects));
-      VAFT.meziProstor.push({type:'voice',data:entry});
+        loc: getLastGps()
+      });
+      await saveAllEncrypted();
     };
   });
 
-  // SOS
-  const sosText = document.getElementById('poutnik-sos');
-  const sosStatus = document.getElementById('poutnik-sos-status');
+  // SOS – NEŠIFRUJEME
   document.getElementById('poutnik-sos-send').addEventListener('click', () => {
-    const msg = sosText.value.trim() || '[SOS bez textu]';
-    const lastLoc = VAFT.poutnik.gpsTrack.at(-1) || null;
-    const sosPacket = {
+    const msg = document.getElementById('poutnik-sos').value.trim() || '[SOS]';
+    const sosItem = {
       type: 'sos',
       msg,
-      loc: lastLoc,
+      loc: getLastGps(),
       t: Date.now()
     };
-    VAFT.meziProstor.push(sosPacket);
-    sosStatus.textContent = 'SOS uloženo (offline).';
+    // uložíme plain do localStorage zvlášť
+    const old = JSON.parse(localStorage.getItem('vaft_lilie_sos_plain') || '[]');
+    old.push(sosItem);
+    localStorage.setItem('vaft_lilie_sos_plain', JSON.stringify(old));
+    document.getElementById('poutnik-sos-status').textContent = 'SOS uloženo (veřejné).';
   });
 
   // EXPORT
-  document.getElementById('poutnik-export').addEventListener('click', () => {
-    const data = {
-      wish: localStorage.getItem('vaft_poutnik_wish') || '',
-      gps: VAFT.poutnik.gpsTrack,
-      objects: VAFT.poutnik.objects,
-      queue: VAFT.meziProstor.queue,
-      wallet: walletAmount,
-      tasks: POUTNIK_TASKS
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  document.getElementById('poutnik-export').addEventListener('click', async () => {
+    // export chceme šifrovaný i s daty
+    const enc = await aesEncryptJson(userKey, vaftStore);
+    const blob = new Blob([JSON.stringify(enc, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'lilie-poutnik.json';
+    a.download = 'lilie-secure.json';
     a.click();
     URL.revokeObjectURL(url);
   });
 
-  // 7) DENÍK / KNIHA
+  // DENÍK
   const book = document.getElementById('poutnik-book');
   const bookOpen = document.getElementById('poutnik-book-open');
   const bookClose = document.getElementById('poutnik-book-close');
@@ -417,46 +408,42 @@ window.VAFT = window.VAFT || {};
 
   function groupByDay() {
     const days = {};
-    VAFT.poutnik.gpsTrack.forEach(pt => {
+    (vaftStore.gps || []).forEach(pt => {
       const d = new Date(pt.t).toISOString().slice(0,10);
-      days[d] = days[d] || {gps: [], obj: []};
+      days[d] = days[d] || { gps: [], obj: [] };
       days[d].gps.push(pt);
     });
-    VAFT.poutnik.objects.forEach(o => {
+    (vaftStore.objects || []).forEach(o => {
       const d = new Date(o.t).toISOString().slice(0,10);
-      days[d] = days[d] || {gps: [], obj: []};
+      days[d] = days[d] || { gps: [], obj: [] };
       days[d].obj.push(o);
     });
     return days;
   }
-
   function renderTasks() {
     tasksDiv.innerHTML = '<h4>Úkoly</h4>';
-    POUTNIK_TASKS.forEach(t => {
+    (vaftStore.tasks || []).forEach(t => {
       const p = document.createElement('p');
-      p.textContent = (t.done ? '✅ ' : '🟡 ') + t.title + ' · +' + t.reward + ' Kč';
+      p.textContent = (t.done ? '✅ ' : '🟡 ') + t.title + ' +' + t.reward + ' Kč';
       tasksDiv.appendChild(p);
     });
   }
-
   function renderDayDetail(day, data) {
-    // texty
     dayEntries.innerHTML = '';
-    if (data.obj.length === 0 && data.gps.length === 0) {
+    if (!data.obj.length) {
       dayEntries.textContent = 'Žádné záznamy.';
     } else {
       data.obj.forEach(o => {
         const p = document.createElement('p');
         const time = new Date(o.t).toLocaleTimeString();
-        p.textContent = time + ' — ' + (o.note || o.text || 'záznam');
+        p.textContent = time + ' — ' + (o.note || o.text || o.type);
         dayEntries.appendChild(p);
       });
     }
-    // mapa
     ctx.clearRect(0,0,mapCanvas.width,mapCanvas.height);
     if (!data.gps.length) {
       ctx.fillStyle = '#9fd';
-      ctx.fillText('Žádná GPS pro tento den', 10, 20);
+      ctx.fillText('Žádná GPS', 10, 20);
       return;
     }
     let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
@@ -471,7 +458,6 @@ window.VAFT = window.VAFT || {};
     const h = mapCanvas.height - pad*2;
     const latRange = maxLat - minLat || 0.00001;
     const lonRange = maxLon - minLon || 0.00001;
-
     ctx.strokeStyle = '#aff';
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -483,28 +469,14 @@ window.VAFT = window.VAFT || {};
       else ctx.lineTo(x, yy);
     });
     ctx.stroke();
-
-    // body s fotkami
-    ctx.fillStyle = '#f8a';
-    VAFT.poutnik.objects
-      .filter(o => new Date(o.t).toISOString().slice(0,10) === day && o.loc)
-      .forEach(o => {
-        const x = pad + ((o.loc.lon - minLon) / lonRange) * w;
-        const y = pad + ((o.loc.lat - minLat) / latRange) * h;
-        const yy = pad + h - (y - pad);
-        ctx.beginPath();
-        ctx.arc(x, yy, 4, 0, Math.PI*2);
-        ctx.fill();
-      });
   }
-
   function renderDays() {
     const days = groupByDay();
     daysList.innerHTML = '';
     const sorted = Object.keys(days).sort().reverse();
     sorted.forEach((d, idx) => {
       const li = document.createElement('li');
-      li.textContent = d + ' · ' + (days[d].obj.length) + ' záznamů';
+      li.textContent = d + ' · ' + days[d].obj.length + ' záznamů';
       if (idx === 0) li.classList.add('active');
       li.addEventListener('click', () => {
         [...daysList.children].forEach(c => c.classList.remove('active'));
@@ -515,7 +487,6 @@ window.VAFT = window.VAFT || {};
       if (idx === 0) renderDayDetail(d, days[d]);
     });
   }
-
   bookOpen.addEventListener('click', () => {
     renderDays();
     renderTasks();
