@@ -3,307 +3,104 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lilie • příroda</title>
+  <title>VAFT – Lilie 🌸</title>
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#0a0b10" />
+  <link rel="stylesheet" href="../style.css?v=0.32" />
   <style>
-    :root {
-      --bg: #05070b;
-      --panel: rgba(6,10,14,.92);
-      --line: rgba(255,255,255,.04);
-      --accent: #61d6ff;
-    }
     body {
       margin: 0;
-      height: 100vh;
-      background: var(--bg);
+      background: #05070c;
       color: #eef;
       font-family: system-ui,-apple-system,sans-serif;
+      min-height: 100vh;
       overflow: hidden;
       position: relative;
     }
-
-    /* čtyři rohy */
-    .lilie-btn {
-      position: fixed;
-      background: rgba(3,5,7,.2);
-      border: 1px solid rgba(255,255,255,.03);
-      border-radius: .7rem;
-      padding: 6px 10px;
-      min-width: 40px;
-      min-height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      backdrop-filter: blur(2px);
-      z-index: 10;
-    }
-    #btn-book { top: 12px; left: 12px; }
-    #btn-gold { top: 12px; right: 12px; }
-    #btn-car  { bottom: 12px; left: 12px; }
-    #btn-help { bottom: 12px; right: 12px; }
-
-    /* střed – Lilie */
-    #lilie-center {
+    /* základní layout */
+    .corner {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%,-50%);
-      width: 190px;
-      height: 190px;
-      border-radius: 50%;
-      background: radial-gradient(circle,#ffffff0f 0%, #000 75%);
-      border: 1px solid rgba(255,255,255,.03);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 12px;
       text-align: center;
-      pointer-events: none;
     }
-    #lilie-center span {
+    .corner img { width: 28px; height: 28px; opacity: .9; }
+
+    #book { top: 10px; left: 10px; }
+    #gold { top: 10px; right: 10px; }
+    #caravan { bottom: 10px; left: 10px; }
+    #mystery { bottom: 10px; right: 10px; }
+
+    /* lilie uprostřed */
+    #flower {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      animation: bloom 10s ease-in-out infinite alternate;
+      color: #ffe6fa;
       font-size: 20px;
-      letter-spacing: .03em;
+      text-shadow: 0 0 8px #f8a;
+    }
+    @keyframes bloom {
+      from { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: .9; }
+      to   { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 1; }
     }
 
-    /* panely */
-    .lilie-panel {
-      position: fixed;
-      top: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(95vw, 340px);
-      max-height: 80vh;
-      background: var(--panel);
-      border: 1px solid rgba(255,255,255,.02);
-      border-radius: 1rem;
-      padding: 12px 14px;
-      overflow-y: auto;
-      display: none;
-      z-index: 20;
-    }
-    .lilie-panel h2 {
-      margin-top: 0;
-      font-size: 16px;
-    }
-    .line {
-      height: 1px;
-      background: var(--line);
-      margin: 8px 0 10px;
-    }
-    button.primary {
-      background: linear-gradient(135deg,#21c1ff,#0a87b9);
-      border: none;
-      border-radius: .5rem;
-      padding: 4px 10px;
-      color: #011;
+    /* pytlík zlaťáků */
+    #gold-bag {
+      background: rgba(255,215,0,.15);
+      border: 1px solid rgba(255,215,0,.3);
+      padding: 3px 8px;
+      border-radius: .6rem;
+      display: inline-block;
+      margin-top: 4px;
       font-weight: 600;
-      cursor: pointer;
-    }
-    input, textarea {
-      width: 100%;
-      background: rgba(1,1,1,.2);
-      border: 1px solid rgba(255,255,255,.03);
-      border-radius: .5rem;
-      color: #fff;
-      padding: 5px 6px;
-      margin-bottom: 6px;
+      color: #ffe9a6;
     }
   </style>
 </head>
 <body>
 
-  <!-- rohy -->
-  <div id="btn-book" class="lilie-btn" title="Kniha 📖">📖</div>
-  <div id="btn-gold" class="lilie-btn" title="Zlaťáky 💰">💰</div>
-  <div id="btn-car"  class="lilie-btn" title="Karavan / cesta">🚐</div>
-  <div id="btn-help" class="lilie-btn" title="Nápady / pomoc">❓</div>
-
-  <!-- střed -->
-  <div id="lilie-center">
-    <span>Lilie 🌸</span>
+  <div id="book" class="corner">
+    📖<br>Kniha
   </div>
 
-  <!-- panel: Kniha -->
-  <div id="panel-book" class="lilie-panel">
-    <h2>Kniha / Zápisník</h2>
-    <p>Sem patří věci z přírody:</p>
-    <div class="line"></div>
-    <label>📷 Fotka</label>
-    <input id="book-photo" type="file" accept="image/*" capture="environment">
-    <label>📝 Poznámka</label>
-    <input id="book-note" type="text" placeholder="např. dub u potoka">
-    <button id="book-save" class="primary">Uložit záznam</button>
-    <div class="line"></div>
-    <h3>Poslední zápisy</h3>
-    <div id="book-list" style="font-size:12px;opacity:.7;"></div>
+  <div id="gold" class="corner">
+    💰<br>Zlaťáky<br><span id="gold-bag">0</span>
   </div>
 
-  <!-- panel: Zlaťáky -->
-  <div id="panel-gold" class="lilie-panel">
-    <h2>Odměny / úkoly 💰</h2>
-    <p>Stav: <b id="gold-amount">0</b> Kč</p>
-    <div class="line"></div>
-    <ul id="gold-tasks" style="list-style:none; padding-left:0; font-size:13px;"></ul>
+  <div id="caravan" class="corner">
+    🚐<br>Karavan
   </div>
 
-  <!-- panel: Karavan -->
-  <div id="panel-car" class="lilie-panel">
-    <h2>Karavan / Cesta 🚐</h2>
-    <p>GPS + SOS + mini mapa (pozor: offline)</p>
-    <div class="line"></div>
-    <button id="gps-start" class="primary">Začít sledovat</button>
-    <button id="gps-stop" class="primary" style="margin-left:4px;">Zastavit</button>
-    <p id="gps-status" style="font-size:12px;opacity:.7;margin-top:6px;">GPS: čekám…</p>
-    <div class="line"></div>
-    <label>SOS zpráva</label>
-    <textarea id="sos-msg" rows="2" placeholder="Popiš situaci..."></textarea>
-    <button id="sos-save" class="primary">Uložit SOS</button>
+  <div id="mystery" class="corner">
+    ❓<br>Nápad
   </div>
 
-  <!-- panel: Otazník -->
-  <div id="panel-help" class="lilie-panel">
-    <h2>Nápady pro vývojáře ❓</h2>
-    <p>Napiš, co bys chtěl v Lilii doprogramovat.</p>
-    <textarea id="idea" rows="3" placeholder="Např. přidat zvuk ptáků, rychlý SOS, QR odměnu..."></textarea>
-    <button id="idea-save" class="primary">Uložit nápad</button>
-    <div class="line"></div>
-    <small style="opacity:.6;">Nápad se uloží do telefonu, hlavní VAFT si ho pak může načíst.</small>
-  </div>
+  <div id="flower">🌸 Lilie 🌸</div>
 
+  <script src="../src/vaft.bridge.js?v=0.36"></script>
   <script>
-    // společný úložný prostor
-    const LS_GOLD = 'VAFT_GOLD';
-    const LS_BOOK = 'VAFT_LILIE_LOG';
-    const LS_IDEA = 'VAFT_LILIE_NOTES';
+    // Načíst zlaťáky
+    const goldEl = document.getElementById('gold-bag');
+    const goldNow = parseInt(localStorage.getItem('VAFT_GOLD') || '0', 10);
+    goldEl.textContent = goldNow;
 
-    // otevření/zavření panelů
-    const panels = {
-      book: document.getElementById('panel-book'),
-      gold: document.getElementById('panel-gold'),
-      car:  document.getElementById('panel-car'),
-      help: document.getElementById('panel-help')
-    };
-    function showPanel(name) {
-      Object.values(panels).forEach(p => p.style.display = 'none');
-      panels[name].style.display = 'block';
-    }
-    document.getElementById('btn-book').onclick = () => showPanel('book');
-    document.getElementById('btn-gold').onclick = () => {
-      renderTasks();
-      showPanel('gold');
-    };
-    document.getElementById('btn-car').onclick  = () => showPanel('car');
-    document.getElementById('btn-help').onclick = () => {
-      const saved = localStorage.getItem(LS_IDEA);
-      if (saved) document.getElementById('idea').value = saved;
-      showPanel('help');
-    };
+    // Poslat signál že Lilie je online
+    VAFT.bridge.send('core', { from: 'Lilies', online: true });
 
-    // zlaťáky
-    let gold = parseInt(localStorage.getItem(LS_GOLD) || '0', 10);
-    const goldAmountEl = document.getElementById('gold-amount');
-    goldAmountEl.textContent = gold;
-
-    const tasks = [
-      { id: 't1', title: 'Vyfoť strom i s kmenem', reward: 50, keyword: 'strom' },
-      { id: 't2', title: 'Vyfoť vodu / řeku / potok', reward: 100, keyword: 'řeka' },
-      { id: 't3', title: 'Vyfoť mech', reward: 40, keyword: 'mech' },
-    ];
-    function renderTasks() {
-      const ul = document.getElementById('gold-tasks');
-      ul.innerHTML = '';
-      tasks.forEach(t => {
-        const li = document.createElement('li');
-        li.textContent = '• ' + t.title + ' (+' + t.reward + ' Kč)';
-        ul.appendChild(li);
-      });
-    }
-    // uložit záznam z knihy a zkusit splnit úkol
-    document.getElementById('book-save').onclick = () => {
-      const note = document.getElementById('book-note').value.trim().toLowerCase();
-      const file = document.getElementById('book-photo').files[0];
-      const list = JSON.parse(localStorage.getItem(LS_BOOK) || '[]');
-
-      const saveEntry = (imgData) => {
-        const entry = { t: Date.now(), note, img: imgData || null };
-        list.push(entry);
-        localStorage.setItem(LS_BOOK, JSON.stringify(list));
-        renderBookList(list);
-
-        // odměna
-        let rewarded = false;
-        tasks.forEach(t => {
-          if (!rewarded && note.includes(t.keyword)) {
-            gold += t.reward;
-            localStorage.setItem(LS_GOLD, gold);
-            goldAmountEl.textContent = gold;
-            rewarded = true;
-          }
-        });
-        alert(rewarded ? 'Úkol splněn, odměna připsána 💰' : 'Zapsáno 📖');
-        document.getElementById('book-note').value = '';
-        document.getElementById('book-photo').value = '';
-      };
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = e => saveEntry(e.target.result);
-        reader.readAsDataURL(file);
-      } else {
-        saveEntry(null);
+    // Když přibydou zlaťáky z hlavního světa
+    window.addEventListener('storage', e => {
+      if (e.key === 'VAFT_GOLD') {
+        goldEl.textContent = parseInt(e.newValue || '0', 10);
       }
-    };
+    });
 
-    function renderBookList(list) {
-      const box = document.getElementById('book-list');
-      box.innerHTML = '';
-      list.slice(-5).reverse().forEach(e => {
-        const d = new Date(e.t).toLocaleString();
-        const p = document.createElement('p');
-        p.textContent = d + ' – ' + (e.note || '[bez pozn.]');
-        box.appendChild(p);
-      });
-    }
-    // načti při startu
-    const savedBook = JSON.parse(localStorage.getItem(LS_BOOK) || '[]');
-    renderBookList(savedBook);
-
-    // karavan – GPS + SOS
-    let gpsWatch = null;
-    document.getElementById('gps-start').onclick = () => {
-      if (!navigator.geolocation) { alert('GPS není dostupná'); return; }
-      gpsWatch = navigator.geolocation.watchPosition(pos => {
-        document.getElementById('gps-status').textContent =
-          'GPS: ' + pos.coords.latitude.toFixed(5) + ', ' + pos.coords.longitude.toFixed(5);
-        // můžeš uložit do localStorage pro hlavní hru
-        localStorage.setItem('VAFT_LILIE_LAST_GPS', JSON.stringify({
-          lat: pos.coords.latitude,
-          lon: pos.coords.longitude,
-          t: Date.now()
-        }));
-      });
-    };
-    document.getElementById('gps-stop').onclick = () => {
-      if (gpsWatch) navigator.geolocation.clearWatch(gpsWatch);
-      document.getElementById('gps-status').textContent = 'GPS: zastaveno';
-    };
-    document.getElementById('sos-save').onclick = () => {
-      const msg = document.getElementById('sos-msg').value.trim();
-      const old = JSON.parse(localStorage.getItem('VAFT_LILIE_SOS') || '[]');
-      old.push({ msg: msg || '[SOS]', t: Date.now() });
-      localStorage.setItem('VAFT_LILIE_SOS', JSON.stringify(old));
-      document.getElementById('sos-msg').value = '';
-      alert('SOS uloženo (veřejné).');
-    };
-
-    // otazník – nápady
-    document.getElementById('idea-save').onclick = () => {
-      const txt = document.getElementById('idea').value.trim();
-      localStorage.setItem(LS_IDEA, txt);
-      alert('Nápad uložen 🥰');
-    };
-
-    // po načtení dej světu vědět, že Lilie žije
-    localStorage.setItem('VAFT_PULSE', Date.now().toString());
+    // kliky na rohy
+    document.getElementById('book').onclick = () => alert("📖 Deník přírody otevřen");
+    document.getElementById('caravan').onclick = () => alert("🚐 GPS a SOS modul otevřen");
+    document.getElementById('mystery').onclick = () => alert("❓ Inspirace: přidej nový nápad!");
   </script>
+
 </body>
 </html>
