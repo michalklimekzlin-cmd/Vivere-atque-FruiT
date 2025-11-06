@@ -9,7 +9,7 @@ html, body {
 body {
   background: #07111f;
   font-family: -apple-system, system-ui, sans-serif;
-  overflow: hidden; /* ať se to už nikdy nenatáhne do sloupce */
+  overflow: hidden;
 }
 
 /* hlavní kontejner */
@@ -20,24 +20,44 @@ body {
   background: radial-gradient(circle at center, rgba(10,52,82,0.5), #050d16 75%);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   align-items: center;
-  padding-top: 54px;
+  padding-top: 70px; /* místo na horní lištu */
   box-sizing: border-box;
   transition: background-image 1s ease-in-out;
   background-size: cover;
   background-position: center;
 }
 
-/* horní křídlo */
-.revia-wing {
+/* HORNÍ LIŠTA */
+.revia-topbar {
   position: absolute;
-  top: 18px;
-  left: 18px;
-  width: 32px;
-  height: 32px;
-  background: url("./assets/revia-wing.png") center/contain no-repeat;
-  opacity: .7;
+  top: 16px;
+  left: 0;
+  width: 100%;
+  padding: 0 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* křídlo vlevo nahoře */
+.revia-wing {
+  width: 34px;
+  height: 34px;
+  /* provizorní křídlo jako SVG data-uri – můžeš nahradit vlastním PNG */
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 46 C18 20 30 12 44 10 C36 19 32 27 30 34 C28 41 24 48 16 50 C13 51 9 49 10 46 Z' fill='%23f5f7fa' fill-opacity='0.7' /%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: .9;
+}
+
+/* nápis vpravo nahoře */
+.revia-title {
+  color: #e5f5ff;
+  font-size: 1.1rem;
+  letter-spacing: .03rem;
+  font-weight: 500;
 }
 
 /* karta uprostřed */
