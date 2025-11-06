@@ -1,120 +1,62 @@
-// Revia – logika, sync s VAFT
+// Revia client mini
 (function () {
-  const root = document.querySelector('.revia-main');
-  const toggleBtn = document.getElementById('reviaToggle');
-  const slot1 = document.getElementById('reviaSlot1');
-  const glyphSpan = document.getElementById('reviaGlyph');
+  const reviaRoot = document.querySelector('.revia-main');
+  const toggleBtn = document.getElementById('revToggle');
+  const toast = document.getElementById('revToast');
 
-  const GLYPHS = ["「Ī’𞋒", "「Ī’☆"];
-  let glyphIndex = 0;
+  // 1) přepínání anděl / démon
+  toggleBtn?.addEventListener('click', () => {
+    const cur = reviaRoot.getAttribute('data-mode') || 'angel';
+    const next = cur === 'angel' ? 'daemon' : 'angel';
+    reviaRoot.setAttribute('data-mode', next);
+    showToast(next === 'angel' ? 'režim: anděl' : 'režim: démon');
+  });
 
-  // načíst, pokud už si hráč něco zvolil dřív
-  function loadState() {
-    try {
-      const raw = localStorage.getItem('vaft_revia_state');
-      if (!raw) return;
-      const data = JSON.parse(raw);
-      if (typeof data.glyphIndex === 'number') glyphIndex = data.glyphIndex;
-      if (data.mode && root) root.setAttribute('data-mode', data.mode);
-      if (glyphSpan) glyphSpan.textContent = GLYPHS[glyphIndex];
-    } catch (e) {
-      console.warn('Revia: nejde načíst stav', e);
-    }
-  }
+  // 2) slot 1 – přepínací glyph
+  const slot1 = document.getElementById('slot1');
+  const slot1Glyph = document.getElementById('slot1Glyph');
+  const GLYPHS = ['Ī’𞋒', 'Ī’☆'];
+  let gIndex = 0;
 
-  function saveState(mode, glyphIndex) {
-    const payload = {
-      mode,
-      glyphIndex,
-      ts: Date.now()
-    };
-    localStorage.setItem('vaft_revia_state', JSON.stringify(payload));
+  slot1?.addEventListener('click', () => {
+    gIndex = (gIndex + 1) % GLYPHS.length;
+    slot1Glyph.textContent = GLYPHS[gIndex];
+    slot1.classList.add('active');
+    setTimeout(() => slot1.classList.remove('active'), 200);
+    showToast('glyph: ' + GLYPHS[gIndex]);
+  });
 
-    // jednoduchý “heartbeat” do světa – můžeš si to v hlavní appce číst
-    localStorage.setItem('vaft_last_revia', JSON.stringify({
-      who: 'revia',
-      mode,
-      glyph: GLYPHS[glyphIndex],
-      at: new Date().toISOString()
-    }));
-  }
+  // 3) zápisník z křídla
+  const wing = document.getElementById('revWing');
+  const notes = document.getElementById('revNotes');
+  const notesClose = document.getElementById('notesClose');
+  const notesText = document.getElementById('notesText');
+  const NOTES_KEY = 'revia-wing-notes';
 
-  function applyModeFromGlyph(index) {
-    if (!root) return;
-    const mode = index === 0 ? 'angel' : 'daemon';
-    root.setAttribute('data-mode', mode);
-    saveState(mode, index);
-  }
+  // načíst
+  const saved = localStorage.getItem(NOTES_KEY);
+  if (saved) notesText.value = saved;
 
-  // klik na slot 1
-  if (slot1 && glyphSpan) {
-    slot1.addEventListener('click', () => {
-      glyphIndex = (glyphIndex + 1) % GLYPHS.length;
-      glyphSpan.textContent = GLYPHS[glyphIndex];
-      applyModeFromGlyph(glyphIndex);
-    });
-  }
-
-  // dolní tlačítko
-  if (toggleBtn && root && glyphSpan) {
-    toggleBtn.addEventListener('click', () => {
-      const current = root.getAttribute('data-mode') || 'angel';
-      const next = current === 'angel' ? 'daemon' : 'angel';
-      root.setAttribute('data-mode', next);
-
-      // srovnání glyphu
-      glyphIndex = next === 'angel' ? 0 : 1;
-      glyphSpan.textContent = GLYPHS[glyphIndex];
-      saveState(next, glyphIndex);
-    });
-  }
-
-  // inicializace
-  loadState();
-  // kdyby nebyl žádný stav
-  applyModeFromGlyph(glyphIndex);
-})();
-
-// ====== experiment: zápisník křídla ======
-(function() {
-  const wing = document.querySelector('.revia-wing');
-  const notes = document.getElementById('reviaNotes');
-  const notesText = document.getElementById('reviaNotesText');
-  const notesClose = document.getElementById('reviaNotesClose');
-  const notesSave = document.getElementById('reviaNotesSave');
-
-  const KEY = 'vaft_revia_wing_notes';
-
-  // načíst staré zápisky
-  function loadNotes() {
-    try {
-      const saved = localStorage.getItem(KEY);
-      if (saved && notesText) {
-        notesText.value = saved;
-      }
-    } catch (e) {}
-  }
-
-  function showNotes() {
-    if (!notes) return;
-    notes.classList.add('show');
-  }
-
-  function hideNotes() {
-    if (!notes) return;
+  wing?.addEventListener('click', () => {
+    notes.classList.toggle('show');
+  });
+  notesClose?.addEventListener('click', () => {
     notes.classList.remove('show');
-  }
+  });
+  notesText?.addEventListener('input', () => {
+    localStorage.setItem(NOTES_KEY, notesText.value);
+  });
 
-  function saveNotes() {
-    if (!notesText) return;
-    const val = notesText.value || '';
-    localStorage.setItem(KEY, val);
+  // 4) pomocník
+  const help = document.getElementById('revHelp');
+  help?.addEventListener('click', () => {
+    showToast('Revia: první slot střídá glyph, dole střídá pozadí.');
+  });
 
-    // malý “ping” pro hlavní svět – ukládá poslední akci
-    localStorage.setItem('vaft_last_revia', JSON.stringify({
-      who: 'revia',
-      action: 'wing-note-save',
-      len: val.length,
-      at: new Date().toISOString()
-    }));
+  function showToast(text) {
+    if (!toast) return;
+    toast.textContent = text;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
   }
+})();
