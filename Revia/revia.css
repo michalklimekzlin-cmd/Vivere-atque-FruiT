@@ -1,177 +1,226 @@
-/* === REVIa.css === */
-/* Fullscreen layout */
+/* reset a základ */
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
+}
+body {
   font-family: -apple-system, system-ui, sans-serif;
-  background: #05101b;
+  background: #050b14;
   overflow: hidden;
 }
 
-/* Hlavní kontejner */
+/* hlavní plocha revie */
 .revia-main {
   position: relative;
   width: 100%;
   height: 100%;
+  background: radial-gradient(circle at center, rgba(28,62,92,.28), #050b14 60%);
+  background-size: cover;
+  background-position: center;
+  transition: background-image .6s ease-in-out, background .6s;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-size: cover;
-  background-position: center;
-  transition: background-image 1s ease-in-out;
+  padding-top: 56px;  /* místo na horní lištu */
+  box-sizing: border-box;
 }
 
-/* Pozadí – světlé fotky */
+/* světlejší verze */
 .revia-main[data-mode="angel"] {
-  background-image: url("./assets/revia-bg-angel.jpg");
+  background-image: url("./revia-bg-angel.jpg");
+  background-color: #08172a;
 }
 .revia-main[data-mode="daemon"] {
-  background-image: url("./assets/revia-bg-daemon.jpg");
-}
-.revia-main[data-mode="angel"],
-.revia-main[data-mode="daemon"] {
-  filter: brightness(1.35) contrast(1.05) saturate(1.15);
+  background-image: url("./revia-bg-daemon.jpg");
+  background-color: #0a0f15;
 }
 
-/* Horní lišta */
+/* horní lišta */
 .revia-topbar {
   position: absolute;
-  top: 16px;
+  top: 12px;
   left: 0;
-  width: 100%;
+  right: 0;
   padding: 0 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-sizing: border-box;
 }
 
-/* Křídlo vlevo */
+/* křídlo = zápisník */
 .revia-wing {
   width: 34px;
   height: 34px;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 46 C18 20 30 12 44 10 C36 19 32 27 30 34 C28 41 24 48 16 50 C13 51 9 49 10 46 Z' fill='%23eaf4ff' fill-opacity='0.85' /%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  opacity: .9;
+  border: none;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 46 C18 20 30 12 44 10 C36 19 32 27 30 34 C28 41 24 48 16 50 C13 51 9 49 10 46 Z' fill='%23ffffff' fill-opacity='0.9' /%3E%3C/svg%3E") center/contain no-repeat;
+  border-radius: 14px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.35);
+  cursor: pointer;
 }
-
-/* Název vpravo nahoře */
 .revia-title {
-  color: #e5f5ff;
-  font-size: 1.1rem;
-  letter-spacing: .04rem;
-  font-weight: 500;
-  text-shadow: 0 0 6px rgba(180,220,255,0.4);
+  color: #e5f3ff;
+  font-size: 1.35rem;
+  text-shadow: 0 0 8px rgba(159,205,255,.8);
 }
 
-/* === Sloty === */
+/* mřížka 6 slotů */
 .revia-card {
-  position: absolute;
-  top: 58%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 88%;
-  max-width: 480px;
-  height: 220px;
+  width: min(480px, 92%);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
   gap: 14px;
   box-sizing: border-box;
+  transform: translateY(-10px);
 }
-
 .revia-slot {
-  border-radius: 18px;
-  backdrop-filter: blur(16px) brightness(1.1);
-  background: rgba(14, 40, 60, 0.45);
-  border: 1px solid rgba(210, 250, 255, 0.15);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.35);
+  background: rgba(11,30,44,.45);
+  border: 1px solid rgba(126,189,255,.03);
+  border-radius: 26px;
+  backdrop-filter: blur(18px);
+  min-height: 108px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.6s ease;
-  animation: slotBreath 4s ease-in-out infinite;
+  transition: .25s;
+  box-shadow: 0 8px 25px rgba(0,0,0,.12);
+}
+.revia-slot:hover,
+.revia-slot.active {
+  background: rgba(19,61,94,.65);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.18);
 }
 
-.revia-slot:hover {
-  background: rgba(14,40,60,0.6);
-  transform: scale(1.03);
-}
-
-@keyframes slotBreath {
-  0%, 100% { transform: scale(1.00); opacity: 0.95; }
-  50% { transform: scale(1.04); opacity: 1; }
-}
-
-/* Glyph uvnitř slotu */
+/* glyph ve slotu */
 .revia-glyph {
-  font-size: 1.8rem;
-  color: #e5f5ff;
-  text-shadow: 0 0 8px rgba(180,240,255,0.6);
+  font-size: 2.1rem;
+  color: #f5ffff;
+  text-shadow: 0 0 10px rgba(163,232,255,.4);
 }
 
-/* Spodní lišta */
+/* spodní lišta */
 .revia-bottom {
   position: absolute;
   bottom: 16px;
   left: 0;
-  width: 100%;
-  padding: 0 16px;
+  right: 0;
+  padding: 0 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-sizing: border-box;
 }
-
 .revia-mini {
-  font-size: 1.3rem;
-  color: rgba(229,245,255,.5);
+  color: rgba(229,245,255,.85);
+  font-size: 1.2rem;
 }
-
-/* Tlačítko nápovědy */
 .revia-help {
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  border: 1px solid rgba(229,245,255,.15);
-  background: rgba(1,8,12,.3);
+  width: 58px;
+  height: 58px;
+  border-radius: 20px;
+  border: 1px solid rgba(229,245,255,.12);
+  background: rgba(4,9,14,.35);
   color: #fff;
   font-size: 1.6rem;
   backdrop-filter: blur(6px);
 }
 
-/* Přepínač (angel/daemon) */
+/* přepínač */
 .revia-toggle {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(195,223,255,.1);
+  color: #fff;
+  border-radius: 16px;
+  padding: 8px 26px 9px;
+  backdrop-filter: blur(6px);
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: .2s;
+}
+.revia-toggle:hover {
+  background: rgba(255,255,255,.16);
+}
+
+/* toast */
+.revia-toast {
   position: absolute;
-  bottom: 68px;
+  top: 72px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0,0,0,.35);
-  border: 1px solid rgba(200,240,255,.15);
-  color: #d8f1ff;
-  border-radius: 16px;
-  padding: 6px 22px;
+  background: rgba(2,11,15,.55);
+  border: 1px solid rgba(184,225,255,.4);
+  border-radius: 18px;
+  padding: 6px 16px 7px;
+  color: #fff;
+  font-size: .8rem;
   backdrop-filter: blur(6px);
-  cursor: pointer;
-  animation: togglePulse 4s ease-in-out infinite;
-  transition: background 0.3s;
+  opacity: 0;
+  pointer-events: none;
+  transition: .2s;
+}
+.revia-toast.show {
+  opacity: 1;
 }
 
-.revia-toggle:hover {
-  background: rgba(255,255,255,0.12);
+/* notes okno */
+.revia-notes {
+  position: absolute;
+  top: 55px;
+  left: 14px;
+  width: 210px;
+  background: rgba(5,10,16,.75);
+  border: 1px solid rgba(195,228,255,.15);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 36px rgba(0,0,0,.25);
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+}
+.revia-notes.show {
+  display: flex;
+}
+.notes-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px 0;
+  color: #fff;
+  font-size: .65rem;
+}
+.notes-head button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.1rem;
+}
+#notesText {
+  background: transparent;
+  border: none;
+  min-height: 100px;
+  color: #fff;
+  padding: 6px 10px;
+  font-size: .7rem;
+  resize: none;
+  outline: none;
+}
+.notes-foot {
+  padding: 0 10px 6px;
+  color: rgba(227,245,255,.4);
+  font-size: .6rem;
 }
 
-@keyframes togglePulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(140,220,255,0.25); }
-  50% { box-shadow: 0 0 14px rgba(140,220,255,0.45); }
-}
-
-/* Menší displeje */
+/* mobil */
 @media (max-width: 430px) {
-  .revia-card { height: 200px; }
-  .revia-glyph { font-size: 1.5rem; }
+  .revia-card {
+    gap: 10px;
+  }
+  .revia-slot {
+    min-height: 96px;
+  }
+  .revia-glyph {
+    font-size: 1.8rem;
+  }
 }
