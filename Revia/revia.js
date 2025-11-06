@@ -74,3 +74,67 @@
   // kdyby nebyl žádný stav
   applyModeFromGlyph(glyphIndex);
 })();
+
+// ====== experiment: zápisník křídla ======
+(function() {
+  const wing = document.querySelector('.revia-wing');
+  const notes = document.getElementById('reviaNotes');
+  const notesText = document.getElementById('reviaNotesText');
+  const notesClose = document.getElementById('reviaNotesClose');
+  const notesSave = document.getElementById('reviaNotesSave');
+
+  const KEY = 'vaft_revia_wing_notes';
+
+  // načíst staré zápisky
+  function loadNotes() {
+    try {
+      const saved = localStorage.getItem(KEY);
+      if (saved && notesText) {
+        notesText.value = saved;
+      }
+    } catch (e) {}
+  }
+
+  function showNotes() {
+    if (!notes) return;
+    notes.classList.add('show');
+  }
+
+  function hideNotes() {
+    if (!notes) return;
+    notes.classList.remove('show');
+  }
+
+  function saveNotes() {
+    if (!notesText) return;
+    const val = notesText.value || '';
+    localStorage.setItem(KEY, val);
+
+    // malý “ping” pro hlavní svět – ukládá poslední akci
+    localStorage.setItem('vaft_last_revia', JSON.stringify({
+      who: 'revia',
+      action: 'wing-note-save',
+      len: val.length,
+      at: new Date().toISOString()
+    }));
+  }
+
+  // klik na křídlo → otevři zápisník
+  if (wing) {
+    wing.addEventListener('click', () => {
+      loadNotes();
+      showNotes();
+    });
+  }
+
+  if (notesClose) {
+    notesClose.addEventListener('click', hideNotes);
+  }
+
+  if (notesSave) {
+    notesSave.addEventListener('click', () => {
+      saveNotes();
+      hideNotes();
+    });
+  }
+})();
