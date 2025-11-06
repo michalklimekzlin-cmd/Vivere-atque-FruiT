@@ -27,3 +27,29 @@
     }, 3000);
   }
 })();
+
+// 💫 Revia • živý puls srdce
+document.addEventListener("DOMContentLoaded", () => {
+  const heart = document.querySelector(".revia-heart");
+
+  if (!heart) return;
+
+  let glow = 0;
+  let direction = 1;
+
+  function pulse() {
+    glow += 0.02 * direction;
+    if (glow > 1 || glow < 0) direction *= -1;
+
+    const light = 0.5 + 0.5 * glow;
+    heart.style.textShadow = `
+      0 0 ${6 + 8 * light}px rgba(160, 230, 255, ${0.6 + 0.4 * light}),
+      0 0 ${12 + 12 * light}px rgba(180, 255, 255, ${0.4 + 0.4 * light})
+    `;
+    heart.style.opacity = 0.7 + 0.3 * light;
+
+    requestAnimationFrame(pulse);
+  }
+
+  pulse();
+});
