@@ -1,39 +1,33 @@
 <!doctype html>
 <html lang="cs">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Revia • Vivere atque FruiT</title>
-  <link rel="stylesheet" href="revia.css">
-  <!-- až budeš mít PWA manifest, jen ho sem přidáš -->
-</head>
-<body>
-  <div id="revia-app">
-    <!-- horní lišta -->
-    <header class="revia-top">
-      <div class="revia-wings" aria-label="křídla Revii">🪽</div>
-      <div class="revia-title">Revia</div>
-    </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Revia</title>
+    <link rel="stylesheet" href="revia.css?v=0.2">
+  </head>
+  <body>
+    <main class="revia-main" data-mode="angel">
+      <!-- horní křídlo / znak -->
+      <div class="revia-wing"></div>
 
-    <!-- hlavní obsah -->
-    <main class="revia-main">
-      <div class="revia-angel">
-        <!-- pozadí je v CSS, tady může být overlay -->
-        <div class="revia-glyph" aria-label="znak Revii">「Ī’♡</div>
+      <!-- hlavní karta -->
+      <div class="revia-card">
+        <div id="revia-glyph" class="revia-glyph">「Ī’♡</div>
       </div>
+
+      <!-- spodní lišta -->
+      <div class="revia-bottom">
+        <span class="revia-mini" id="reviaMini">「Ī’♡</span>
+        <button id="reviaHelp" class="revia-help">?</button>
+      </div>
+
+      <!-- přepínač režimu -->
+      <button id="reviaToggle" class="revia-toggle">
+        🌀 Přepnout
+      </button>
     </main>
 
-    <!-- spodní panel -->
-    <footer class="revia-bottom">
-      <div class="revia-mark">「Ī’♡</div>
-      <button class="revia-btn" id="reviaAskBtn">?</button>
-    </footer>
-  </div>
-
-  <script src="revia.js"></script>
-</body>
-  <main>
-  <div id="revia-glyph" class="glyph">「Ī’♡</div>
-  <button onclick="toggleRevia()">🌀 Přepnout</button>
-</main>
+    <script src="revia.js?v=0.2"></script>
+  </body>
 </html>
