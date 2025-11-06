@@ -75,3 +75,38 @@ document.addEventListener("DOMContentLoaded", () => {
     showReviaToast(msg);
   });
 });
+
+// 🪽 Revia – 4 podoby: angel / daemon / glyphGood / glyphEvil
+document.addEventListener("DOMContentLoaded", () => {
+  const main = document.querySelector(".revia-main");
+  const btn = document.getElementById("reviaAskBtn");
+  const glyphEl = document.querySelector(".revia-glyph");
+  if (!main || !btn) return;
+
+  // pořadí cyklu
+  const modes = ["angel", "daemon", "glyphGood", "glyphEvil"];
+
+  btn.addEventListener("click", () => {
+    const current = main.getAttribute("data-mode") || "angel";
+    const next = modes[(modes.indexOf(current) + 1) % modes.length];
+    main.setAttribute("data-mode", next);
+
+    // změna glyphu podle módu
+    if (glyphEl) {
+      if (next === "glyphGood") glyphEl.textContent = "「Ī’♡";
+      else if (next === "glyphEvil") glyphEl.textContent = "「Ī’☆";
+      else glyphEl.textContent = "「Ī’♡"; // výchozí pro anděla
+    }
+
+    // hláška
+    const msg =
+      next === "angel"
+        ? "🪽 Revia: světlo dýchá."
+        : next === "daemon"
+        ? "💀 Revia: stín bdí."
+        : next === "glyphGood"
+        ? "✨ Revia: čistý kód srdce."
+        : "⚠️ Revia: kód se zatemnil.";
+    showReviaToast(msg);
+  });
+});
