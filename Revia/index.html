@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Revia • Vivere atque FruiT</title>
-    <link rel="stylesheet" href="./revia.css?v=0.4">
+    <!-- naše CSS -->
+    <link rel="stylesheet" href="./revia.css?v=0.5">
   </head>
   <body>
     <!-- hlavní plátno revie -->
@@ -19,46 +20,38 @@
       <div class="revia-notes" id="revNotes">
         <div class="notes-head">
           <span>✧ Křídlo / zápis</span>
-          <button id="notesClose">×</button>
+          <button id="notesClose" type="button">×</button>
         </div>
         <textarea id="notesText" placeholder="Sem si můžeš psát drobnosti, charakter, co má Revia dávat hráčům…"></textarea>
         <p class="notes-foot">Ukládá se do localStorage v tomto zařízení.</p>
       </div>
 
-      <!-- mřížka slotů -->
+      <!-- mřížka slotů (6) -->
       <div class="revia-card">
-        <!-- SLOT 1 – přepínací glyph -->
-        <button class="revia-slot active" id="slot1">
-          <span class="revia-glyph" id="slot1Glyph">Ī’𞋒</span>
+        <!-- SLOT 1 – náš přepínací glyph -->
+        <button class="revia-slot active" id="slot1" type="button">
+          <span class="revia-glyph" id="slot1Glyph">「Ī’☆</span>
         </button>
-        <!-- SLOT 2 -->
-        <button class="revia-slot">
-        </button>
-        <!-- SLOT 3 -->
-        <button class="revia-slot">
-        </button>
-        <!-- SLOT 4 -->
-        <button class="revia-slot">
-        </button>
-        <!-- SLOT 5 -->
-        <button class="revia-slot">
-        </button>
-        <!-- SLOT 6 -->
-        <button class="revia-slot">
-        </button>
+        <!-- ostatní zatím prázdné -->
+        <button class="revia-slot" type="button"></button>
+        <button class="revia-slot" type="button"></button>
+        <button class="revia-slot" type="button"></button>
+        <button class="revia-slot" type="button"></button>
+        <button class="revia-slot" type="button"></button>
       </div>
 
       <!-- spodní panel -->
       <div class="revia-bottom">
         <div class="revia-mini">Ī’♡</div>
-        <button class="revia-toggle" id="revToggle">🔁 Přepnout</button>
-        <button class="revia-help" id="revHelp">?</button>
+        <button class="revia-toggle" id="revToggle" type="button">🔁 Přepnout</button>
+        <button class="revia-help" id="revHelp" type="button">?</button>
       </div>
 
       <!-- malá bublina pomoc -->
       <div class="revia-toast" id="revToast" aria-live="polite"></div>
     </div>
 
-    <script src="./revia.js?v=0.4"></script>
+    <!-- naše logika -->
+    <script src="./revia.js?v=0.5"></script>
   </body>
 </html>
