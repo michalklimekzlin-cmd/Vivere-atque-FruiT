@@ -4,45 +4,46 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Revia • Vivere atque FruiT</title>
-
-    <!-- naše CSS -->
-    <link rel="stylesheet" href="./revia.css?v=2">
+    <link rel="stylesheet" href="revia.css?v=1.2">
   </head>
   <body>
-    <!-- hlavní plátno Revií -->
     <div class="revia-main" data-mode="angel">
       <!-- horní lišta -->
       <div class="revia-topbar">
-        <div class="revia-wing" aria-label="křídlo"></div>
+        <div class="revia-wing" aria-hidden="true"></div>
         <div class="revia-title">Revia</div>
       </div>
 
-      <!-- mřížka slotů (6 políček) -->
+      <!-- mřížka slotů -->
       <div class="revia-card">
-        <!-- 1) náš přepínací glyph: anděl/ďábel -->
-        <button class="revia-slot" id="rev-slot-1">
-          <span class="revia-glyph" id="rev-glyph-1">「Ī’𞋒</span>
+        <!-- SLOT 1 – přepíná glyphy -->
+        <button class="revia-slot revia-slot--primary" id="reviaSlot1">
+          <span class="revia-glyph" id="reviaGlyph">「Ī’𞋒</span>
         </button>
-
-        <!-- zbytek zatím prázdný -->
-        <button class="revia-slot disabled"></button>
-        <button class="revia-slot disabled"></button>
-        <button class="revia-slot disabled"></button>
-        <button class="revia-slot disabled"></button>
-        <button class="revia-slot disabled"></button>
+        <!-- SLOT 2 -->
+        <button class="revia-slot" disabled></button>
+        <!-- SLOT 3 -->
+        <button class="revia-slot" disabled></button>
+        <!-- SLOT 4 -->
+        <button class="revia-slot" disabled></button>
+        <!-- SLOT 5 -->
+        <button class="revia-slot" disabled></button>
+        <!-- SLOT 6 -->
+        <button class="revia-slot" disabled></button>
       </div>
 
-      <!-- spodní lišta -->
+      <!-- spodní panel -->
       <div class="revia-bottom">
-        <div class="revia-mini">「Ī♡</div>
+        <span class="revia-mini">「Ī’♡</span>
         <button class="revia-help">?</button>
       </div>
 
-      <!-- přepínač anděl / ďábel -->
-      <button class="revia-toggle" id="rev-toggle">🔁 Přepnout</button>
+      <!-- přepínač anděl / démon -->
+      <button class="revia-toggle" id="reviaToggle">
+        🔁 Přepnout
+      </button>
     </div>
 
-    <!-- logika -->
-    <script src="./revia.js?v=2"></script>
+    <script src="revia.js?v=1.2"></script>
   </body>
 </html>
