@@ -149,3 +149,18 @@ html, body {
   transform: translateY(-50%);
   transition: opacity 0.2s;
 }
+
+.revia-main[data-mode="glyph"] .revia-angel {
+  background: radial-gradient(circle at center, rgba(10, 30, 50, 0.9), #000 80%);
+}
+
+.revia-main[data-mode="glyph"] .revia-glyph {
+  opacity: 1;
+  text-shadow: 0 0 8px #cfeaff, 0 0 16px #aef;
+  animation: pulseGlyph 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlyph {
+  0%, 100% { opacity: 0.6; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
