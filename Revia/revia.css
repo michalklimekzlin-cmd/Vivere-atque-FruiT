@@ -164,3 +164,42 @@ html, body {
   0%, 100% { opacity: 0.6; transform: scale(0.98); }
   50% { opacity: 1; transform: scale(1.02); }
 }
+
+/* 1) andělská (už máš) */
+.revia-main[data-mode="angel"] .revia-angel {
+  background: url("./assets/revia-bg-angel.jpg") center/cover no-repeat;
+}
+
+/* 2) démonická */
+.revia-main[data-mode="daemon"] .revia-angel {
+  background: url("./assets/revia-bg-daemon.jpg") center/cover no-repeat;
+  filter: saturate(0.2);
+}
+
+/* 3) hodný glyph – čisté světlo */
+.revia-main[data-mode="glyphGood"] .revia-angel {
+  background: radial-gradient(circle at center, rgba(140, 210, 255, 0.18), #020617 70%);
+}
+
+/* 4) zlý glyph – temné světlo */
+.revia-main[data-mode="glyphEvil"] .revia-angel {
+  background: radial-gradient(circle at center, rgba(255, 83, 83, 0.08), #010109 70%);
+}
+
+/* glyph ať je vždy nahoře */
+.revia-glyph {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #f1f6ff;
+  text-shadow: 0 0 10px rgba(162, 212, 255, .6);
+  transition: .2s;
+}
+
+/* zlý glyph – jen lehká změna barvy */
+.revia-main[data-mode="glyphEvil"] .revia-glyph {
+  color: #ffd0d0;
+  text-shadow: 0 0 10px rgba(255, 80, 80, .6);
+}
