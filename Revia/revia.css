@@ -118,3 +118,23 @@ html, body {
   .revia-bottom { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
   .revia-top { padding-top: calc(14px + env(safe-area-inset-top)); }
 }
+.revia-toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(3,10,18,0.65);
+  border: 1px solid rgba(176,214,255,.4);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 18px;
+  opacity: 0;
+  transition: .2s;
+  backdrop-filter: blur(6px);
+  font-size: .9rem;
+  z-index: 50;
+}
+.revia-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
