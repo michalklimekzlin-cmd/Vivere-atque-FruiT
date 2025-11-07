@@ -1,4 +1,4 @@
-/* základ */
+/* fullscreen základ */
 *,
 *::before,
 *::after {
@@ -14,135 +14,114 @@ html, body {
   background: #020610;
 }
 
-/* hlavní plátno – tady používáme TVOU fotku z kořene repo */
+/* hlavní plátno */
 .hlavoun-main {
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 100vh;
+  /* zesvětlené pozadí + tvoje fotka */
   background:
-    radial-gradient(circle at center, rgba(2,6,16,.2), rgba(2,6,16,1) 85%),
-    url("../DE692167-8603-4E16-B3C7-72A770A63D4A.png") center top / cover no-repeat;
+    linear-gradient(160deg, rgba(4,15,30,.25), rgba(2,6,12,.85)),
+    url("../DE692167-8603-4E16-B3C7-72A770A63D4A.png") center 10% / cover no-repeat;
+  /* lehké dýchání celé scény */
+  animation: scene-breathe 13s ease-in-out infinite;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px 14px 18px;
-  backdrop-filter: blur(0px);
+  gap: 12px;
+  padding: 16px 14px 90px;
 }
 
-/* horní titulek */
+/* dýchání scény */
+@keyframes scene-breathe {
+  0%   { filter: brightness(1) saturate(1); }
+  50%  { filter: brightness(1.25) saturate(1.05); }
+  100% { filter: brightness(1) saturate(1); }
+}
+
+/* horní bar */
 .hlavoun-top {
   z-index: 5;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-
 .hlavoun-top h1 {
   margin: 0;
-  font-size: 1.9rem;
+  font-size: 1.95rem;
   color: #f3f7ff;
-  text-shadow: 0 4px 14px rgba(0,0,0,.7);
+  text-shadow: 0 4px 18px rgba(0,0,0,.55);
 }
-
 .hlavoun-role {
-  font-size: .82rem;
-  color: rgba(227,237,255,.45);
+  font-size: .78rem;
+  color: rgba(224,233,255,.5);
 }
 
-/* velký skleněný panel nahoře */
-.hlavoun-glass {
-  z-index: 4;
-  margin-top: 6px;
-  background: radial-gradient(circle at top, rgba(1,6,12,.35), rgba(1,4,8,.05));
-  background-color: rgba(2,10,17,.4);
-  border: 1px solid rgba(155,191,228,.18);
-  backdrop-filter: blur(14px);
-  border-radius: 28px;
-  padding: 12px 12px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  min-height: 190px;
-}
-
-/* konzole */
+/* panel s initem + inputem (ten velký skleněný nahoře) */
 .hlavoun-console {
-  max-height: 160px;
-  overflow-y: auto;
+  z-index: 6;
+  margin-top: 10px;
+  background: radial-gradient(circle at top, rgba(0,6,12,.65), rgba(0,0,0,.05));
+  border: 1px solid rgba(152,203,255,.07);
+  border-radius: 26px;
+  padding: 16px 16px 18px;
+  backdrop-filter: blur(22px);
+  box-shadow: 0 20px 35px rgba(0,0,0,.28);
 }
-
 .hlavoun-console p {
-  margin: 0 0 4px;
+  margin: 0 0 8px;
   color: #eef5ff;
-  font-size: .9rem;
-  line-height: 1.4;
+  font-size: .90rem;
 }
 
-.hlavoun-console b {
-  color: #9dd1ff;
-}
-
-/* vstup */
+/* input řádek */
 .hlavoun-input {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  align-items: center;
 }
-
 .hlavoun-input input {
   flex: 1;
   background: rgba(0,0,0,.15);
   border: 1px solid rgba(148,199,245,.35);
-  border-radius: 16px;
-  padding: 10px 12px;
+  border-radius: 999px;
+  padding: 10px 14px 10px;
   color: #e6f1ff;
   backdrop-filter: blur(4px);
 }
-
+.hlavoun-input input::placeholder {
+  color: rgba(230,241,255,.4);
+}
 .hlavoun-input input:focus {
   outline: none;
-  border-color: rgba(194,232,255,.9);
+  border-color: rgba(196,232,255,.9);
   background: rgba(1,5,10,.35);
 }
-
 .hlavoun-input button {
-  width: 46px;
+  width: 48px;
+  height: 42px;
   border: none;
-  border-radius: 16px;
+  border-radius: 18px;
   background: rgba(160,205,255,.95);
   color: #000;
   font-weight: 600;
   cursor: pointer;
+  display: grid;
+  place-items: center;
 }
 
-/* tři malé bloky – posunuté dolů */
+/* tři malé bloky POD obrazem, jak jsi kreslil */
 .hlavoun-cells {
-  position: fixed;           /* drží dole nad tlačítky */
-  left: 14px;
-  right: 14px;
-  bottom: 92px;
+  z-index: 4;
   display: flex;
   gap: 12px;
-  z-index: 9;
+  margin-top: 16px;
 }
-
-/* spodní panel */
-.hlavoun-foot {
-  position: fixed;
-  left: 14px;
-  right: 14px;
-  bottom: 20px;
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
-  z-index: 10;
-}
-
 .hlavoun-cells .cell {
   flex: 1;
-  background: rgba(2,12,20,.55);
-  border: 1px solid rgba(157,201,238,.25);
-  backdrop-filter: blur(12px);
+  background: rgba(1,5,10,.25);
+  border: 1px solid rgba(157,201,238,.12);
+  backdrop-filter: blur(10px);
   border-radius: 16px;
   padding: 9px 12px 8px;
   color: #dfeeff;
@@ -154,8 +133,92 @@ html, body {
   gap: 2px;
   text-shadow: 0 2px 8px rgba(0,0,0,.55);
 }
+.hlavoun-cells .cell b {
+  font-size: .68rem;
+  color: #fff;
+}
 
-/* spodní panel */
+/* ─────────────────────────── */
+/* ⚡ jádro – blesk + proud kódů */
+/* ─────────────────────────── */
+
+.hlavoun-core {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* blesk */
+.hlavoun-bolt {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 68px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 2.2rem;
+  text-shadow: 0 0 22px rgba(130,209,255,.9);
+  animation: bolt-pulse 2.4s ease-in-out infinite;
+}
+@keyframes bolt-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 12px rgba(138,215,255,.8));
+    opacity: 1;
+  }
+  50% {
+    filter: drop-shadow(0 0 28px rgba(138,215,255,1));
+    opacity: 1;
+  }
+}
+
+/* stoupačky kódů */
+.hlavoun-stream {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  width: 240px;
+  height: 220px;
+  transform: translate(-50%, -10%);
+  overflow: hidden;
+  pointer-events: none;
+}
+.hlavoun-stream span {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(196,233,255,.4);
+  font-size: .55rem;
+  animation: code-rise 4.8s linear infinite;
+  white-space: nowrap;
+  text-shadow: 0 0 8px rgba(138,215,255,.6);
+}
+.hlavoun-stream span:nth-child(2) {
+  animation-delay: 1.1s;
+  left: 42%;
+}
+.hlavoun-stream span:nth-child(3) {
+  animation-delay: 2.2s;
+  left: 58%;
+}
+@keyframes code-rise {
+  0% {
+    top: 120px;
+    opacity: 0;
+  }
+  10% {
+    opacity: .8;
+  }
+  100% {
+    top: -110px;
+    opacity: 0;
+  }
+}
+
+/* spodní panel (tvoje tlačítka) necháme nahoře, jen fix dolů */
 .hlavoun-foot {
   position: fixed;
   left: 14px;
@@ -166,36 +229,9 @@ html, body {
   justify-content: space-between;
   z-index: 10;
 }
-
-.hlavoun-cells .cell {
-  flex: 1;
-  background: rgba(1,5,10,.4);
-  border: 1px solid rgba(157,201,238,.12);
-  backdrop-filter: blur(10px);
-  border-radius: 18px;
-  padding: 10px 12px 9px;
-  color: #dfeeff;
-  font-size: .72rem;
-  min-height: 54px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-  text-shadow: 0 2px 8px rgba(0,0,0,.5);
-}
-
-/* spodní panel */
-.hlavoun-foot {
-  margin-top: auto;
-  display: flex;
-  gap: 10px;
-  justify-content: space-between;
-  z-index: 5;
-}
-
 .ghost-btn {
-  border: 1px solid rgba(217,235,255,.25);
-  background: rgba(2,6,12,.35);
+  border: 1px solid rgba(217,235,255,.2);
+  background: rgba(2,6,12,.3);
   backdrop-filter: blur(4px);
   border-radius: 14px;
   color: #e6f1ff;
@@ -206,19 +242,15 @@ html, body {
   align-items: center;
 }
 
-.ghost-btn:active {
-  background: rgba(227,247,255,.1);
-}
-
 /* mobil */
 @media (max-width: 540px) {
-  .hlavoun-glass {
-    min-height: 190px;
-  }
   .hlavoun-cells {
-    flex-wrap: wrap;
+    gap: 8px;
   }
   .hlavoun-cells .cell {
-    flex: 0 0 calc(33.333% - 8px);
+    min-height: 50px;
+  }
+  .hlavoun-console {
+    border-radius: 22px;
   }
 }
