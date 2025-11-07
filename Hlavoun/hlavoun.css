@@ -1,12 +1,11 @@
-/* čistý full-screen základ */
+/* základ */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-html,
-body {
+html, body {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -15,36 +14,25 @@ body {
   background: #020610;
 }
 
-/* hlavní plátno – stejná logika jako Revia, jen jiný obrázek */
+/* hlavní plátno – tady používáme TVOU fotku z kořene repo */
 .hlavoun-main {
   position: relative;
   width: 100%;
   height: 100%;
+  min-height: 100vh;
   background:
-  linear-gradient(160deg, rgba(2,6,16,.5), rgba(2,6,16,1)),
-  url("https://michalklimekzlin-cmd.github.io/Vivere-atque-FruiT/DE692167-8603-4E16-B3C7-72A770A63D4A.png") center center / cover no-repeat;
-    url("../DE692167-8603-4E16-B3A0-000000000000.jpeg") center center / cover no-repeat;
+    radial-gradient(circle at center, rgba(2,6,16,.2), rgba(2,6,16,1) 85%),
+    url("../DE692167-8603-4E16-B3C7-72A770A63D4A.png") center top / cover no-repeat;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px 14px 16px;
-  overflow: hidden;
+  gap: 16px;
+  padding: 16px 14px 18px;
+  backdrop-filter: blur(0px);
 }
 
-/* jemné “dýchání” pozadí */
-.hlavoun-main {
-  animation: hlavoun-breathe 16s ease-in-out infinite;
-}
-
-@keyframes hlavoun-breathe {
-  0%   { filter: brightness(0.92) saturate(1); }
-  50%  { filter: brightness(1.06) saturate(1.05); }
-  100% { filter: brightness(0.92) saturate(1); }
-}
-
-/* horní bar */
+/* horní titulek */
 .hlavoun-top {
-  z-index: 3;
+  z-index: 5;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -54,33 +42,34 @@ body {
   margin: 0;
   font-size: 1.9rem;
   color: #f3f7ff;
-  text-shadow: 0 4px 18px rgba(0,0,0,.7);
+  text-shadow: 0 4px 14px rgba(0,0,0,.7);
 }
 
 .hlavoun-role {
   font-size: .82rem;
-  color: rgba(227,237,255,.55);
+  color: rgba(227,237,255,.45);
 }
 
-/* střed – konzole */
-.hlavoun-core {
-  z-index: 3;
-  margin-top: auto;
+/* velký skleněný panel nahoře */
+.hlavoun-glass {
+  z-index: 4;
+  margin-top: 6px;
+  background: radial-gradient(circle at top, rgba(1,6,12,.35), rgba(1,4,8,.05));
+  background-color: rgba(2,10,17,.4);
+  border: 1px solid rgba(155,191,228,.18);
+  backdrop-filter: blur(14px);
+  border-radius: 28px;
+  padding: 12px 12px 10px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-height: 190px;
 }
 
+/* konzole */
 .hlavoun-console {
-  min-height: 210px;
-  max-height: 330px;
+  max-height: 160px;
   overflow-y: auto;
-  background: rgba(1,3,6,.62);
-  border: 1px solid rgba(200,230,255,.05);
-  border-radius: 18px;
-  padding: 12px 12px 12px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 16px 26px rgba(0,0,0,.25);
 }
 
 .hlavoun-console p {
@@ -91,7 +80,7 @@ body {
 }
 
 .hlavoun-console b {
-  color: #92c5ff;
+  color: #9dd1ff;
 }
 
 /* vstup */
@@ -102,42 +91,67 @@ body {
 
 .hlavoun-input input {
   flex: 1;
-  background: rgba(2,6,12,.45);
-  border: 1px solid rgba(142,187,235,.28);
-  border-radius: 14px;
+  background: rgba(0,0,0,.15);
+  border: 1px solid rgba(148,199,245,.35);
+  border-radius: 16px;
   padding: 10px 12px;
   color: #e6f1ff;
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(4px);
 }
 
 .hlavoun-input input:focus {
   outline: none;
-  border-color: rgba(184,226,255,.9);
-  background: rgba(3,9,18,.7);
+  border-color: rgba(194,232,255,.9);
+  background: rgba(1,5,10,.35);
 }
 
 .hlavoun-input button {
   width: 46px;
   border: none;
-  background: rgba(171,211,255,.95);
-  border-radius: 12px;
+  border-radius: 16px;
+  background: rgba(160,205,255,.95);
   color: #000;
   font-weight: 600;
   cursor: pointer;
 }
 
-/* spodní panel – stejná vibes jako u Revie */
+/* tři malé bloky pod panelem */
+.hlavoun-cells {
+  z-index: 4;
+  display: flex;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.hlavoun-cells .cell {
+  flex: 1;
+  background: rgba(1,5,10,.4);
+  border: 1px solid rgba(157,201,238,.12);
+  backdrop-filter: blur(10px);
+  border-radius: 18px;
+  padding: 10px 12px 9px;
+  color: #dfeeff;
+  font-size: .72rem;
+  min-height: 54px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  text-shadow: 0 2px 8px rgba(0,0,0,.5);
+}
+
+/* spodní panel */
 .hlavoun-foot {
-  z-index: 3;
-  margin-top: 10px;
+  margin-top: auto;
   display: flex;
   gap: 10px;
   justify-content: space-between;
+  z-index: 5;
 }
 
 .ghost-btn {
-  border: 1px solid rgba(217,235,255,.2);
-  background: rgba(2,6,12,.25);
+  border: 1px solid rgba(217,235,255,.25);
+  background: rgba(2,6,12,.35);
   backdrop-filter: blur(4px);
   border-radius: 14px;
   color: #e6f1ff;
@@ -149,15 +163,18 @@ body {
 }
 
 .ghost-btn:active {
-  background: rgba(227,247,255,.12);
+  background: rgba(227,247,255,.1);
 }
 
 /* mobil */
 @media (max-width: 540px) {
-  .hlavoun-console {
-    min-height: 200px;
+  .hlavoun-glass {
+    min-height: 190px;
   }
-  .hlavoun-foot {
+  .hlavoun-cells {
     flex-wrap: wrap;
+  }
+  .hlavoun-cells .cell {
+    flex: 0 0 calc(33.333% - 8px);
   }
 }
