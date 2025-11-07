@@ -8,12 +8,29 @@
     <link rel="stylesheet" href="./revia.css?v=0.5">
   <style>
   /* zmenší a lépe usadí revia background, ať jsou vidět ruce */
+  <style>
+  /* Optimalizace pozadí pro iPhone 14 a podobné mobily */
   body {
-    background-size: auto 70vh;   /* místo cover – trochu oddálíme */
-    background-position: center 0;
+    background-size: auto 84vh;   /* výška menší = víc prostoru pro ruce */
+    background-position: center 8vh; /* lehce posunuto dolů */
     background-repeat: no-repeat;
     background-attachment: fixed;
   }
+
+  @media (min-height: 780px) and (max-height: 950px) {
+    body {
+      background-size: auto 80vh;
+      background-position: center 10vh;
+    }
+  }
+
+  @media (orientation: landscape) {
+    body {
+      background-size: 100vw auto;
+      background-position: center;
+    }
+  }
+</style>
 
   /* na menších telefonech malinko víc oddálit */
   @media (max-width: 480px) {
