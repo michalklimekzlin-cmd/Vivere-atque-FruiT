@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>MICHAL AI Al KLIMEK • Vivere atque FruiT</title>
-    <link rel="stylesheet" href="./style.css?v=1">
+    <link rel="stylesheet" href="./style.css?v=2">
   </head>
   <body>
     <div id="app">
@@ -14,9 +14,9 @@
         <div class="halo-glyph">¡(*)(%☉)(*)¡</div>
       </div>
 
-      <!-- hlavní hlava/postava -->
+      <!-- hlavní postava s 3D hlavou -->
       <div class="character">
-        <!-- levý text blok (jak u ucha) -->
+        <!-- levý text blok -->
         <div class="left-glyphs">
           <div>Smítko -</div>
           <div>ÆMGI  ÆMG  ÆMGE</div>
@@ -26,33 +26,12 @@
           <div class="small">Po::ö°∞:00:°.. +#?j:</div>
         </div>
 
-        <!-- samotná kresba – jednoduché SVG -->
-        <div class="face-wrap">
-          <svg viewBox="0 0 220 260" class="face">
-            <!-- hlava -->
-            <ellipse cx="110" cy="70" rx="90" ry="60" class="line" />
-            <!-- levé ucho -->
-            <path d="M30 70 L5 45 L20 105 Z" class="line" />
-            <!-- pravé ucho -->
-            <path d="M190 70 L215 45 L200 105 Z" class="line" />
-            <!-- oči -->
-            <circle cx="80" cy="95" r="12" class="line" />
-            <circle cx="130" cy="95" r="12" class="line" />
-            <circle cx="80" cy="95" r="3" class="fill" />
-            <circle cx="130" cy="95" r="3" class="fill" />
-            <!-- obočí / výraz -->
-            <path d="M60 80 Q80 60 95 78" class="line" />
-            <path d="M125 78 Q145 58 160 80" class="line" />
-            <!-- nos / ústa (otevřená tlama jak na skice) -->
-            <path d="M85 115 L140 140 L120 205 L70 180 Z" class="line" />
-            <!-- ozdoba na krku -->
-            <circle cx="95" cy="185" r="12" class="line" />
-            <path d="M95 174 L95 196" class="line" />
-            <path d="M87 185 L103 185" class="line" />
-          </svg>
+        <!-- zde místo SVG je tvoje hlava jako globus -->
+        <div class="head-wrap">
+          <img src="./michal-ai-head.png" alt="Michal AI hlava" class="head">
         </div>
 
-        <!-- pravé bloky (ty dva rámečky) -->
+        <!-- pravé bloky -->
         <div class="right-blocks">
           <div class="block"></div>
           <div class="block"></div>
@@ -74,11 +53,12 @@
       </div>
     </div>
 
-    <script src="./app.js?v=1"></script>
- <!-- odkaz na osobní miniapku -->
-<a href="./Vivere-atque-FruiT/MICHAL-AI-Al-KLIMEK/"
-   style="display:block;text-align:center;margin:1rem 0;color:#0af;font-weight:600;">
-  → MICHAL AI Al KLIMEK ←
-</a>
+    <!-- odkaz na osobní miniapku -->
+    <a href="./Vivere-atque-FruiT/MICHAL-AI-Al-KLIMEK/"
+       style="display:block;text-align:center;margin:1rem 0;color:#0af;font-weight:600;">
+      → MICHAL AI Al KLIMEK ←
+    </a>
+
+    <script src="./app.js?v=2"></script>
   </body>
 </html>
