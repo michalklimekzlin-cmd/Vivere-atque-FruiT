@@ -1,32 +1,141 @@
-/* === Režimy Jizvy === */
+:root {
+  --bg-dark: radial-gradient(circle at top, #04070d 0%, #020308 45%, #000 100%);
+  --bg-soft: radial-gradient(circle at top, #0b141d 0%, #05080d 50%, #000 100%);
+  --panel: rgba(5, 8, 12, 0.6);
+  --border: rgba(255, 255, 255, 0.03);
+  --accent: #4dd0ff;
+  --accent-soft: #67ffe8;
+  --text: #cfe;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  animation: jizvaBreath 10s infinite;
+  color: var(--text);
+}
 
 body[data-jizva-mode="dark"] {
-  background: radial-gradient(circle at top, #04070d 0%, #020308 45%, #000 100%);
+  background: var(--bg-dark);
   --jizva-eye: #0a4dff;
-  transition: background 1s ease-in-out;
 }
 
 body[data-jizva-mode="soft"] {
-  background: radial-gradient(circle at top, #0b141d 0%, #05080d 50%, #000 100%);
+  background: var(--bg-soft);
   --jizva-eye: #67ffe8;
-  transition: background 1s ease-in-out;
 }
 
-/* Efekt „dýchání“ pozadí */
 @keyframes jizvaBreath {
-  0% { filter: brightness(1.0); }
-  50% { filter: brightness(1.2); }
-  100% { filter: brightness(1.0); }
-}
-body {
-  animation: jizvaBreath 8s infinite;
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.05); }
+  100% { filter: brightness(1); }
 }
 
-/* Textové světlo očí */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px 6px;
+  backdrop-filter: blur(6px);
+}
+
+h1 {
+  font-size: 1.05rem;
+  letter-spacing: .04em;
+}
+
 h1::after {
-  content: "⬤⬤";
+  content: "⬤";
   display: inline-block;
-  margin-left: 8px;
+  margin-left: 6px;
   color: var(--jizva-eye);
   text-shadow: 0 0 8px var(--jizva-eye);
+}
+
+.mode-switch {
+  display: inline-flex;
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.03);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.mode-switch button {
+  background: transparent;
+  border: none;
+  color: #cfe;
+  padding: 4px 12px;
+  font-size: .65rem;
+  cursor: pointer;
+}
+
+.mode-switch button.active {
+  background: rgba(77,208,255,.2);
+  color: #fff;
+}
+
+.wrap {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 10px 16px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 12px 14px;
+  backdrop-filter: blur(8px);
+}
+
+.status {
+  font-size: .7rem;
+  opacity: .7;
+  margin-bottom: 8px;
+}
+
+.lbl {
+  font-size: .7rem;
+  margin-bottom: 5px;
+  display: block;
+}
+
+textarea {
+  width: 100%;
+  background: rgba(2,4,7,.5);
+  border: 1px solid rgba(255,255,255,.02);
+  border-radius: 10px;
+  color: #cfe;
+  padding: 8px 10px;
+  font-size: .7rem;
+  resize: vertical;
+}
+
+button.primary {
+  margin-top: 8px;
+  width: 100%;
+  background: rgba(62, 123, 255, .5);
+}
+
+button.secondary {
+  margin-top: 8px;
+  background: rgba(102, 141, 187, .25);
+  border: 1px solid rgba(255,255,255,.03);
+  font-size: .65rem;
+}
+
+button {
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.02);
+  color: #fff;
+  padding: 7px 12px;
+}
+
+.hint {
+  font-size: .6rem;
+  opacity: .65;
+  margin-top: 4px;
 }
