@@ -1,0 +1,158 @@
+:root {
+  --paper: #f6f1e9;
+  --ink: #122;
+  --accent: #001822;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#app {
+  width: min(480px, 100vw);
+  min-height: 100vh;
+  position: relative;
+  padding: 1.4rem 1rem 4.5rem;
+}
+
+/* horní bublina */
+.halo {
+  text-align: center;
+  margin-bottom: .4rem;
+  line-height: 1.2;
+}
+.halo-title {
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: .04em;
+}
+.halo-glyph {
+  font-family: "SFMono-Regular", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: .8rem;
+}
+
+/* hlavní část */
+.character {
+  position: relative;
+  width: 100%;
+  min-height: 360px;
+}
+
+/* levé texty */
+.left-glyphs {
+  position: absolute;
+  left: .2rem;
+  top: 1.1rem;
+  width: 42%;
+  font-size: .58rem;
+  line-height: 1.05;
+  max-width: 170px;
+  white-space: pre-wrap;
+}
+
+/* pravé texty */
+.right-glyphs {
+  position: absolute;
+  right: .2rem;
+  top: 1.1rem;
+  width: 36%;
+  font-size: .56rem;
+  line-height: 1.06;
+  text-align: right;
+}
+.right-glyphs div {
+  margin-bottom: .25rem;
+}
+
+.small {
+  font-size: .5rem;
+  opacity: .9;
+}
+
+/* svg postava */
+.face-wrap {
+  width: 200px;
+  margin: 0 auto;
+  margin-top: 2.3rem;
+}
+.face {
+  width: 100%;
+  height: auto;
+}
+.line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.fill {
+  fill: var(--ink);
+}
+
+/* pravé rámečky */
+.right-blocks {
+  position: absolute;
+  right: 2.5rem;
+  top: 8.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+.block {
+  width: 52px;
+  height: 34px;
+  border: 1.3px solid var(--ink);
+  border-radius: 6px;
+  background: rgba(246,241,233,0.5);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+}
+
+/* podpis dole */
+.footer {
+  position: absolute;
+  bottom: .8rem;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+.vaft {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-size: 1.2rem;
+  line-height: 1.05;
+  letter-spacing: .03em;
+  transform: translateY(0);
+}
+
+/* mobil – iPhone */
+@media (max-width: 390px) {
+  #app {
+    padding-inline: .5rem;
+  }
+  .left-glyphs {
+    font-size: .56rem;
+  }
+  .right-glyphs {
+    font-size: .52rem;
+  }
+  .right-blocks {
+    right: 1.4rem;
+  }
+}
+
+/* volitelně: kdybys chtěl dát skutečný scan jako pozadí
+body {
+  background-image: url("./michal-ai-al-klimek.png");
+  background-size: cover;
+  background-position: center;
+}
+*/
