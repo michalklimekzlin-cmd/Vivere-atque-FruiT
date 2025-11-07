@@ -12,51 +12,29 @@ html, body {
   height: 100%;
   background: #020610;
   font-family: -apple-system, system-ui, sans-serif;
+  overflow: hidden;
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  background: #020610;
-  font-family: -apple-system, system-ui, sans-serif;
-}
-
-/* ✧ Nový impulsní podklad */
+/* ✧ Impulsní podklad Hlavouna */
 body {
   background: url("../DE692167-8603-4E16-B3A0-000000000000.jpeg") center center / cover no-repeat fixed;
   animation: breathe 14s ease-in-out infinite;
+  backdrop-filter: blur(2px);
 }
 
 /* Efekt dýchání */
 @keyframes breathe {
   0% { filter: brightness(0.9) contrast(1.1); }
-  50% { filter: brightness(1.15) contrast(1.3); }
+  50% { filter: brightness(1.15) contrast(1.25); }
   100% { filter: brightness(0.9) contrast(1.1); }
 }
 
+/* hlavní vrstva */
 .hlavoun-main {
   position: relative;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at center, rgba(10,15,30,0.6), rgba(0,0,0,0.95));
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px 14px 16px;
-}
-
-.hlavoun-main {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at center, rgba(2,12,24,0.2), #020610 75%);
-  /* pozadí – sem si dej ten tvůj obrázek z impulsu */
-  background-image: linear-gradient(160deg, rgba(3,31,49,.6), rgba(2,6,16,.2)), url("./assets/hlavoun-impuls.jpg");
-  background-size: cover;
-  background-position: center;
+  background: radial-gradient(circle at center, rgba(10,15,30,0.65), rgba(0,0,0,0.9));
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -84,34 +62,32 @@ body {
   color: rgba(227,237,255,.4);
 }
 
-/* síť buněk */
+/* síť neuronů (rámečky) */
 .hlavoun-grid {
   position: absolute;
-  inset: 70px 10px 90px;
+  inset: 60px 10px 90px;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
   gap: 10px;
+  z-index: 2;
   pointer-events: none;
-  z-index: 1;
 }
 
 .hlavoun-cell {
   width: 100%;
   aspect-ratio: 1/1;
   border-radius: 14px;
-  background: radial-gradient(circle, rgba(165,207,255,.22), rgba(6,10,15,0));
-  border: 1px solid rgba(206,236,255,.05);
-  box-shadow: 0 14px 25px rgba(0,0,0,.09);
-  opacity: .15;
-  transition: opacity .55s ease, transform .5s ease, border .4s ease;
-  backdrop-filter: blur(2px);
+  background: radial-gradient(circle, rgba(165,207,255,.14), rgba(6,10,15,0));
+  border: 1px solid rgba(206,236,255,.04);
+  opacity: .1;
+  animation: blink 6s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.15s);
 }
 
-/* aktivní blik */
-.hlavoun-cell.on {
-  opacity: .75;
-  transform: translateY(-2px) scale(1.02);
-  border-color: rgba(206,236,255,.45);
+/* animace rozsvěcení */
+@keyframes blink {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
 }
 
 /* konzole */
@@ -129,7 +105,7 @@ body {
   background: radial-gradient(circle at top, rgba(2,6,11,.6), rgba(1,3,5,0.4));
   border: 1px solid rgba(200,230,255,.05);
   border-radius: 18px;
-  padding: 12px 12px 12px;
+  padding: 12px;
   backdrop-filter: blur(4px);
   box-shadow: 0 16px 26px rgba(0,0,0,.25);
 }
@@ -145,6 +121,7 @@ body {
   color: #a5cfff;
 }
 
+/* vstupní řádek */
 .hlavoun-input {
   margin-top: 10px;
   display: flex;
