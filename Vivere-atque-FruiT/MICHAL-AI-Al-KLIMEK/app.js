@@ -1,25 +1,14 @@
-// jednoduché "oživení" – dýchání / mikro-pohyb textu Vivere atque FruiT
-const vaft = document.querySelector('.vaft');
+// Zatím jednoduchý „puls života“ – pro budoucí verzi přidáme světelný efekt
+document.addEventListener("DOMContentLoaded", () => {
+  const head = document.querySelector(".head");
+  if (!head) return;
 
-let t = 0;
-function breathe() {
-  t += 0.035;
-  const y = Math.sin(t) * 3;      // lehké dýchání
-  const s = 1 + Math.sin(t) * 0.015;
-  if (vaft) {
-    vaft.style.transform = `translateY(${y}px) scale(${s})`;
-  }
-  requestAnimationFrame(breathe);
-}
-breathe();
-
-// klepnutí na svg = malý blik
-const face = document.querySelector('.face');
-if (face) {
-  face.addEventListener('click', () => {
-    face.style.filter = 'drop-shadow(0 0 6px rgba(0,0,0,.3))';
-    setTimeout(() => {
-      face.style.filter = 'none';
-    }, 220);
-  });
-}
+  // lehké dýchání – zvětšení/zmenšení
+  let scale = 1;
+  let direction = 1;
+  setInterval(() => {
+    scale += direction * 0.005;
+    if (scale > 1.05 || scale < 0.95) direction *= -1;
+    head.style.transform = `rotateY(${Math.sin(Date.now()/1000)*12}deg) scale(${scale})`;
+  }, 50);
+});
