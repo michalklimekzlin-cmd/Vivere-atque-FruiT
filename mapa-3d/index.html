@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vivere atque FruiT • 3D mapa</title>
+  <style>
+    :root {
+      --bg: #02050a;
+      --panel: rgba(2,5,10,.55);
+      --accent: #4dd0ff;
+      --good: #52ff9c;
+      --danger: #ff5f79;
+      --text: #d9f5ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #scene {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, #06121f 0%, #02050a 60%, #000 100%);
+      z-index: 0;
+    }
+    header {
+      position: fixed;
+      top: env(safe-area-inset-top, 6px);
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 14px 6px;
+      z-index: 10;
+      background: linear-gradient(180deg, rgba(2,5,10,.75) 0%, rgba(2,5,10,0) 100%);
+      backdrop-filter: blur(10px);
+    }
+    .title {
+      font-weight: 650;
+      letter-spacing: .04em;
+    }
+    .pill {
+      border-radius: 999px;
+      background: rgba(0,0,0,.35);
+      padding: 4px 12px;
+      font-size: .7rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .coin {
+      background: rgba(0,0,0,.35);
+      border-radius: 999px;
+      padding: 2px 10px 2px 8px;
+      font-size: .65rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid rgba(255,255,255,.05);
+    }
+    /* středový orb jako v tvojí verzi */
+    #center-orb {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 160px;
+      height: 160px;
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      border: 1.5px solid rgba(91,197,255,.4);
+      box-shadow: 0 0 50px rgba(91,197,255,.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 4;
+    }
+    #center-orb span {
+      font-size: .7rem;
+      text-transform: lowercase;
+      opacity: .85;
+      animation: rotateText 10s linear infinite;
+      display: inline-block;
+    }
+    @keyframes rotateText {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* 4 týmy v rozích */
+    .team-badge {
+      position: fixed;
+      width: 70px;
+      height: 70px;
+      border: 1.5px solid rgba(82,255,156,.4);
+      border-radius: 999px;
+      box-shadow: 0 0 32px rgba(82,255,156,.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .55rem;
+      text-align: center;
+      backdrop-filter: blur(6px);
+      background: radial-gradient(circle, rgba(2,5,10,.4), rgba(2,5,10,0));
+      z-index: 4;
+    }
+    .team-top-left { top: 90px; left: 14px; }
+    .team-top-right { top: 90px; right: 14px; }
+    .team-bottom-left { bottom: 20px; left: 14px; }
+    .team-bottom-right { bottom: 20px; right: 14px; }
+    /* panel s pravidly */
+    #rules-panel {
+      position: fixed;
+      top: 120px;
+      left: 15px;
+      background: rgba(2,5,10,.6);
+      border: 1px solid rgba(255,255,255,.02);
+      border-radius: 18px;
+      padding: 10px 14px 10px;
+      width: 210px;
+      backdrop-filter: blur(10px);
+      z-index: 5;
+    }
+    #rules-panel h3 {
+      margin: 0 0 6px;
+      font-size: .65rem;
+      opacity: .75;
+    }
+    #rules-panel p {
+      margin: 3px 0;
+      font-size: .58rem;
+      opacity: .8;
+    }
+    #rules-panel .pulse {
+      margin-top: 8px;
+      font-size: .55rem;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    #rules-panel .pulse b {
+      font-weight: 500;
+    }
+    #heroes-panel {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(600px, 100%);
+      background: linear-gradient(180deg, rgba(2,5,10,0) 0%, rgba(2,5,10,.8) 55%, rgba(2,5,10,1) 100%);
+      padding: 20px 16px 18px;
+      z-index: 5;
+    }
+    #heroes-panel h2 {
+      font-size: 1rem;
+      margin: 0 0 10px;
+    }
+    .hero-list {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .hero-pill {
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.03);
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: .6rem;
+    }
+    /* canvas pro three */
+    canvas {
+      display: block;
+    }
+
+    @media (max-width: 480px) {
+      #rules-panel {
+        width: 185px;
+      }
+      .team-badge {
+        width: 62px;
+        height: 62px;
+      }
+      #center-orb {
+        width: 140px;
+        height: 140px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- 3D scéna -->
+  <div id="scene"></div>
+
+  <!-- horní panel -->
+  <header>
+    <div class="title">Vivere atque FruiT</div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <div class="pill" id="vaft-status">připojuji k VAFT…</div>
+      <div class="coin">💰 0</div>
+    </div>
+  </header>
+
+  <!-- 4 rohy -->
+  <div class="team-badge team-top-left" id="team-human">Human</div>
+  <div class="team-badge team-top-right" id="team-ai">AI (Bráška)</div>
+  <div class="team-badge team-bottom-left" id="team-glyph">Glyph</div>
+  <div class="team-badge team-bottom-right" id="team-world">World (Core)</div>
+
+  <!-- střed -->
+  <div id="center-orb">
+    <span>Vivere atque FruiT</span>
+  </div>
+
+  <!-- pravidla -->
+  <div id="rules-panel">
+    <h3>Pravidla světa</h3>
+    <p>1. Přátelství</p>
+    <p>2. Vivere atque frui</p>
+    <div class="pulse">
+      <span>❤️ svět: puls</span>
+      <span id="pulse-time"></span>
+    </div>
+  </div>
+
+  <!-- panel hrdinové -->
+  <div id="heroes-panel">
+    <h2>Hrdinové</h2>
+    <div class="hero-list" id="hero-list">
+      <!-- sem doplníme podle VAFTu -->
+    </div>
+  </div>
+
+  <!-- THREE.JS z CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <!-- náš sdílený store (uprav cestu podle repa) -->
+  <script src="../mapa/vaft.world.store.js"></script>
+
+  <script>
+    // ===== 3D SCÉNA =====
+    const container = document.getElementById('scene');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x02050a, 6, 22);
+
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.z = 11;
+    camera.position.y = 1.3;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    // jemné světlo
+    const ambient = new THREE.AmbientLight(0x99b9ff, 1.1);
+    scene.add(ambient);
+
+    // 4 týmová světla
+    const lightHuman = new THREE.PointLight(0x5effb0, 1.1, 40);
+    lightHuman.position.set(-5, 2, -3);
+    scene.add(lightHuman);
+
+    const lightAI = new THREE.PointLight(0x4dd0ff, 1.1, 40);
+    lightAI.position.set(5, 2, -3);
+    scene.add(lightAI);
+
+    const lightGlyph = new THREE.PointLight(0xb98cff, 0.8, 35);
+    lightGlyph.position.set(-4, -2, -3);
+    scene.add(lightGlyph);
+
+    const lightWorld = new THREE.PointLight(0xfff6c9, 0.9, 35);
+    lightWorld.position.set(4, -2, -3);
+    scene.add(lightWorld);
+
+    // centrální pulzující koule
+    const orbGeo = new THREE.SphereGeometry(1.1, 32, 32);
+    const orbMat = new THREE.MeshPhongMaterial({
+      color: 0x15344a,
+      emissive: 0x2b90ff,
+      emissiveIntensity: 0.65,
+      transparent: true,
+      opacity: 0.5
+    });
+    const orb = new THREE.Mesh(orbGeo, orbMat);
+    scene.add(orb);
+
+    // pár plovoucích částic
+    const particlesGeo = new THREE.BufferGeometry();
+    const pCount = 80;
+    const positions = new Float32Array(pCount * 3);
+    for (let i = 0; i < pCount; i++) {
+      positions[i*3 + 0] = (Math.random() - .5) * 14;
+      positions[i*3 + 1] = (Math.random() - .5) * 8;
+      positions[i*3 + 2] = (Math.random() - .5) * 10;
+    }
+    particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particlesMat = new THREE.PointsMaterial({
+      color: 0x6ffff5,
+      size: 0.04,
+      transparent: true,
+      opacity: 0.6
+    });
+    const particles = new THREE.Points(particlesGeo, particlesMat);
+    scene.add(particles);
+
+    // přizpůsobení velikosti
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // ===== VAFT DATA =====
+    const heroListEl = document.getElementById('hero-list');
+    const vaftStatusEl = document.getElementById('vaft-status');
+
+    function loadVAFT() {
+      if (!window.VAFT || !window.VAFT.store) {
+        vaftStatusEl.textContent = 'VAFT store nenalezen';
+        return {
+          teams: { human: [], ai: [], glyph: [], world: [] }
+        };
+      }
+      vaftStatusEl.textContent = 'připojeno k VAFT';
+      return window.VAFT.store.getWorld();
+    }
+
+    function renderHeroes(world) {
+      heroListEl.innerHTML = '';
+      const all = [
+        ...(world.teams.human || []),
+        ...(world.teams.ai || []),
+        ...(world.teams.glyph || []),
+        ...(world.teams.world || [])
+      ];
+      if (all.length === 0) {
+        heroListEl.innerHTML = '<div class="hero-pill">zatím žádní hrdinové</div>';
+        return;
+      }
+      all.forEach(h => {
+        const pill = document.createElement('div');
+        pill.className = 'hero-pill';
+        pill.textContent = h.name + ' (' + (h.home?.type || 'domek') + ')';
+        heroListEl.appendChild(pill);
+      });
+    }
+
+    const worldData = loadVAFT();
+    renderHeroes(worldData);
+
+    // ===== animace =====
+    let t = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      t += 0.01;
+      orb.scale.setScalar(1 + Math.sin(t * 2) * 0.03 + 0.02);
+      orb.material.emissiveIntensity = 0.55 + Math.sin(t * 2) * 0.25;
+      particles.rotation.y += 0.0008;
+      particles.rotation.x += 0.0004;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // ===== puls čas =====
+    function updatePulseTime() {
+      const el = document.getElementById('pulse-time');
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0');
+      const mm = String(now.getMinutes()).padStart(2,'0');
+      const ss = String(now.getSeconds()).padStart(2,'0');
+      el.textContent = hh + ':' + mm + ':' + ss;
+    }
+    updatePulseTime();
+    setInterval(updatePulseTime, 1000);
+  </script>
+</body>
+</html>
