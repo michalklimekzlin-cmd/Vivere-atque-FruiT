@@ -1,0 +1,32 @@
+/* === Režimy Jizvy === */
+
+body[data-jizva-mode="dark"] {
+  background: radial-gradient(circle at top, #04070d 0%, #020308 45%, #000 100%);
+  --jizva-eye: #0a4dff;
+  transition: background 1s ease-in-out;
+}
+
+body[data-jizva-mode="soft"] {
+  background: radial-gradient(circle at top, #0b141d 0%, #05080d 50%, #000 100%);
+  --jizva-eye: #67ffe8;
+  transition: background 1s ease-in-out;
+}
+
+/* Efekt „dýchání“ pozadí */
+@keyframes jizvaBreath {
+  0% { filter: brightness(1.0); }
+  50% { filter: brightness(1.2); }
+  100% { filter: brightness(1.0); }
+}
+body {
+  animation: jizvaBreath 8s infinite;
+}
+
+/* Textové světlo očí */
+h1::after {
+  content: "⬤⬤";
+  display: inline-block;
+  margin-left: 8px;
+  color: var(--jizva-eye);
+  text-shadow: 0 0 8px var(--jizva-eye);
+}
