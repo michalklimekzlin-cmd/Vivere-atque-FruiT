@@ -1,9 +1,9 @@
 :root {
   --bg: #000;
-  --size: min(72vw, 360px);
+  --size: min(70vw, 340px);
   --tilt: 12deg;
   --duration: 4s;
-  --text-color: #0af;
+  --text-color: #00baff;
 }
 
 body {
@@ -23,10 +23,9 @@ body {
   width: 100%;
 }
 
-/* horní část */
 .halo {
-  margin-top: 1rem;
   text-align: center;
+  margin-top: 1rem;
 }
 .halo-title {
   font-weight: 700;
@@ -37,7 +36,6 @@ body {
   opacity: 0.7;
 }
 
-/* hlavní charakter */
 .character {
   display: flex;
   justify-content: center;
@@ -46,7 +44,6 @@ body {
   gap: 1.2rem;
 }
 
-/* levý i pravý text */
 .left-glyphs, .right-glyphs {
   font-size: 0.8rem;
   opacity: 0.7;
@@ -58,7 +55,7 @@ body {
   opacity: 0.5;
 }
 
-/* HLAVA – rotující globus */
+/* 3D otáčení hlavy */
 .head-wrap {
   width: var(--size);
   height: var(--size);
@@ -72,7 +69,6 @@ body {
   max-width: 100%;
   height: auto;
   transform-origin: center;
-  image-rendering: -webkit-optimize-contrast;
   filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.3));
 }
 
@@ -81,7 +77,6 @@ body {
   100% { transform: rotateY(var(--tilt)); }
 }
 
-/* pravé bloky */
 .right-blocks {
   display: flex;
   flex-direction: column;
@@ -95,7 +90,6 @@ body {
   opacity: 0.5;
 }
 
-/* footer */
 .footer {
   position: fixed;
   bottom: 1rem;
