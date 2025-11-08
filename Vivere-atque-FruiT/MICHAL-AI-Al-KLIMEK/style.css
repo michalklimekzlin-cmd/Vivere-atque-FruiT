@@ -75,6 +75,17 @@ body {
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
+.glyph-slot .glyph-text {
+  display: block;
+  width: 100%;
+  text-align: center;
+  color: #e8faff;
+  font-size: 0.7rem;
+  line-height: 74px; /* stejné jako výška slotu */
+  text-shadow: 0 0 6px rgba(0,0,0,0.45);
+  pointer-events: none;
+}
+
 .glyph-slot:active {
   transform: translateY(2px) scale(0.99);
   background: rgba(8, 70, 90, 0.6);
