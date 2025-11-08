@@ -22,44 +22,51 @@
 
       <!-- GLYPH SLOTY podle tvého náčrtu -->
       <!-- levý sloupek 3 ks -->
-      <button class="glyph-slot slot-left-1"></button>
-      <button class="glyph-slot slot-left-2"></button>
-      <button class="glyph-slot slot-left-3"></button>
+      <button class="glyph-slot slot-left-1" data-slot="left-1">
+        <span class="glyph-text"></span>
+      </button>
+      <button class="glyph-slot slot-left-2" data-slot="left-2">
+        <span class="glyph-text"></span>
+      </button>
+      <button class="glyph-slot slot-left-3" data-slot="left-3">
+        <span class="glyph-text"></span>
+      </button>
 
       <!-- horní prostřední -->
-      <button class="glyph-slot slot-top-mid"></button>
+      <button class="glyph-slot slot-top-mid" data-slot="top-mid">
+        <span class="glyph-text"></span>
+      </button>
 
       <!-- horní pravý -->
-      <button class="glyph-slot slot-top-right"></button>
+      <button class="glyph-slot slot-top-right" data-slot="top-right">
+        <span class="glyph-text"></span>
+      </button>
 
-      <!-- spodní pravý / tvoje tři tlačítka jak u Smítka -->
-      <button class="glyph-slot slot-bottom-right-1"></button>
-      <button class="glyph-slot slot-bottom-right-2"></button>
-      <button class="glyph-slot slot-bottom-right-3"></button>
+      <!-- pravá spodní trojice (jako na tvé kresbě) -->
+      <button class="glyph-slot slot-bottom-right-1" data-slot="br-1">
+        <span class="glyph-text"></span>
+      </button>
+      <button class="glyph-slot slot-bottom-right-2" data-slot="br-2">
+        <span class="glyph-text"></span>
+      </button>
+      <button class="glyph-slot slot-bottom-right-3" data-slot="br-3">
+        <span class="glyph-text"></span>
+      </button>
 
-      <!-- tlačítko na PŘEMĚNU (může být to srdíčko) -->
+      <!-- tlačítko na přeměnu -->
       <button class="transform-btn" id="transformBtn">
         I ❤
       </button>
+
     </div>
 
-    <!-- napojení na Vivere atque FruiT (pokud máš v nadřazené složce) -->
+    <!-- (volitelné) napojení na tvůj VAFT core, pokud máš o složku výš
     <script src="../vaft.loader.js"></script>
     <script src="../vaft.core.js"></script>
     <script src="../vaft.heartbeat.js"></script>
-    <script>
-      // kdybys měl knihovny, rozběhne se
-      if (window.VAFT && VAFT.boot) {
-        VAFT.boot({ id: "michal-ai-ai-klimek", role: "character" });
-      }
+    -->
 
-      // jednoduché přepnutí vzhledu
-      const btn = document.getElementById('transformBtn');
-      if (btn) {
-        btn.addEventListener('click', () => {
-          document.body.classList.toggle('alt-mode');
-        });
-      }
-    </script>
+    <!-- náš JS pro dýchání + přepisovací rámečky -->
+    <script src="./app.js?v=0.2"></script>
   </body>
 </html>
