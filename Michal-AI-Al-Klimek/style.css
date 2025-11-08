@@ -15,18 +15,23 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 }
 
+/* výchozí pozadí – SMÍTKO */
 .screen {
   position: relative;
   min-height: 100vh;
   max-width: 100vw;
-  /* obrázek je o složku výš */
   background: url("../7B8F707C-4A0B-4F7A-B3EC-621BCFE498CE.png") no-repeat top center;
-  background-size: cover; /* iPhone fullscreen */
+  background-size: cover;
   background-color: #000;
   overflow: hidden;
 }
 
-/* horní štítek */
+/* přepnuté pozadí – NOVÁ kresba (BCEF...) */
+body.alt-bg .screen {
+  background: url("../BCEF2EFE-14E7-4843-8612-E5FE2EEF58E4.png") no-repeat top center;
+  background-size: cover;
+}
+
 .head-label {
   position: absolute;
   top: 2.2vh;
@@ -43,7 +48,7 @@ body {
   z-index: 10;
 }
 
-/* základ rámečku */
+/* společné pro sloty */
 .glyph-slot {
   position: absolute;
   width: var(--slot-size);
@@ -58,7 +63,7 @@ body {
   justify-content: center;
 }
 
-/* psací plocha uvnitř */
+/* text uvnitř slotu */
 .glyph-text {
   width: 90%;
   height: 90%;
@@ -73,30 +78,20 @@ body {
   align-items: center;
   justify-content: center;
   word-break: break-word;
-  /* aby se iPhone klávesnice nechovala divně */
-  -webkit-user-select: text;
 }
 
-/* aby kurzor byl uprostřed */
-.glyph-text:focus {
-  /* maličko zvýrazníme */
-  text-shadow: 0 0 6px rgba(0,0,0,0.45);
-}
+/* rozložení tak jak máš na screenu */
+.slot-left-1 { top: 11vh; left: 8vw; }
+.slot-left-2 { top: 28vh; left: 8vw; }
+.slot-left-3 { top: 46vh; left: 8vw; }
+.slot-left-4 { top: 64vh; left: 8vw; }
 
-/* ROZMÍSTĚNÍ NA IPHONE 14 (390x844) */
-/* 4 vlevo */
-.slot-left-1 { top: 10vh; left: 8vw; }
-.slot-left-2 { top: 27vh; left: 8vw; }
-.slot-left-3 { top: 45vh; left: 8vw; }
-.slot-left-4 { top: 63vh; left: 8vw; }
-
-/* 1 vpravo dole */
 .slot-bottom-right-1 {
   bottom: 10vh;
   right: 8vw;
 }
 
-/* tlačítko */
+/* tlačítko dole */
 .transform-btn {
   position: absolute;
   bottom: 5vh;
@@ -112,25 +107,13 @@ body {
   box-shadow: 0 6px 16px rgba(0,0,0,0.35);
   font-weight: 500;
 }
+
 .transform-btn:active {
   transform: translateY(2px);
 }
 
-body.alt-mode .screen {
-  filter: hue-rotate(14deg) saturate(1.05);
-}
-body.alt-mode .glyph-slot {
-  background: rgba(198, 210, 255, 0.12);
-  border-color: rgba(217, 243, 255, 0.28);
-}
-.transform-btn.pressed {
-  box-shadow: 0 0 18px rgba(159, 255, 240, 0.55);
-}
-
-/* drobné zmenšení pro menší výšky (SE, starší) */
-@media (max-height: 780px) {
-  :root {
-    --slot-size: 68px;
-  }
-  .slot-left-4 { top: 60vh; }
+/* když přepneš mód, ať se lehce změní i sloty */
+body.alt-bg .glyph-slot {
+  background: rgba(20, 20, 20, 0.45);
+  border-color: rgba(255, 255, 255, 0.15);
 }
