@@ -4,24 +4,21 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Michal AI AI Klimek • Vivere atque FruiT</title>
-    <link rel="stylesheet" href="./style.css?v=0.1">
+    <link rel="stylesheet" href="./style.css?v=0.2">
   </head>
   <body>
     <div class="screen">
-
-      <!-- hlavní nápis nahoře v hlavě -->
+      <!-- horní nápis v hlavě -->
       <div class="head-label">
         Michal | AI | AI | Klimek
       </div>
 
-      <!-- střed – tu máš u té první fotky Smítko / hlava -->
+      <!-- střed (Smítko / Vivere atque Fruit) -->
       <div class="center-character">
-        <!-- tady může být později canvas nebo svg -->
         <div class="vaft-name">Vivere<br>atque<br>Fruit</div>
       </div>
 
-      <!-- GLYPH SLOTY podle tvého náčrtu -->
-      <!-- levý sloupek 3 ks -->
+      <!-- LEVÝ SLOUPEK – 4 červené rámečky z tvého náčrtu -->
       <button class="glyph-slot slot-left-1" data-slot="left-1">
         <span class="glyph-text"></span>
       </button>
@@ -31,42 +28,27 @@
       <button class="glyph-slot slot-left-3" data-slot="left-3">
         <span class="glyph-text"></span>
       </button>
-
-      <!-- horní prostřední -->
-      <button class="glyph-slot slot-top-mid" data-slot="top-mid">
+      <button class="glyph-slot slot-left-4" data-slot="left-4">
         <span class="glyph-text"></span>
       </button>
 
-      <!-- horní pravý -->
-      <button class="glyph-slot slot-top-right" data-slot="top-right">
-        <span class="glyph-text"></span>
-      </button>
-
-      <!-- pravá spodní trojice (jako na tvé kresbě) -->
+      <!-- PRAVÝ DOLNÍ – 1 červený rámeček z tvého náčrtu -->
       <button class="glyph-slot slot-bottom-right-1" data-slot="br-1">
         <span class="glyph-text"></span>
       </button>
-      <button class="glyph-slot slot-bottom-right-2" data-slot="br-2">
-        <span class="glyph-text"></span>
-      </button>
-      <button class="glyph-slot slot-bottom-right-3" data-slot="br-3">
-        <span class="glyph-text"></span>
-      </button>
 
-      <!-- tlačítko na přeměnu -->
+      <!-- tlačítko přeměny -->
       <button class="transform-btn" id="transformBtn">
         I ❤
       </button>
-
     </div>
 
-    <!-- (volitelné) napojení na tvůj VAFT core, pokud máš o složku výš
+    <!-- kdybys chtěl později napojit VAFT core
     <script src="../vaft.loader.js"></script>
     <script src="../vaft.core.js"></script>
     <script src="../vaft.heartbeat.js"></script>
     -->
 
-    <!-- náš JS pro dýchání + přepisovací rámečky -->
     <script src="./app.js?v=0.2"></script>
   </body>
 </html>
