@@ -1,101 +1,154 @@
 :root {
-  --bg: #000;
-  --size: min(70vw, 340px);
-  --tilt: 12deg;
-  --duration: 4s;
-  --text-color: #00baff;
+  --slot-size: 74px;
+  --slot-radius: 14px;
+  --slot-bg: rgba(6, 19, 20, 0.45);
+  --slot-border: rgba(173, 229, 255, 0.25);
+  --accent: #bde4ff;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text-color);
-  font-family: system-ui, -apple-system, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  background: #000;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.screen {
+  position: relative;
+  min-height: 100vh;
+  background: #001920 url("./bear-michal-ai-ai-klimek.jpg") center top / cover no-repeat;
   overflow: hidden;
 }
 
-#app {
-  text-align: center;
-  width: 100%;
+/* horní “hlava” nápis */
+.head-label {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  color: #dff5ff;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(6px);
 }
 
-.halo {
-  text-align: center;
-  margin-top: 1rem;
-}
-.halo-title {
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-.halo-glyph {
-  font-size: 0.9rem;
-  opacity: 0.7;
-}
-
-.character {
+/* střed – text Vivere atque Fruit, kde máš v náčrtu hlavu */
+.center-character {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 140px;
+  height: 140px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-top: 1rem;
-  gap: 1.2rem;
-}
-
-.left-glyphs, .right-glyphs {
-  font-size: 0.8rem;
-  opacity: 0.7;
-  line-height: 1.3;
-}
-.left-glyphs .small,
-.right-glyphs .small {
-  font-size: 0.65rem;
-  opacity: 0.5;
-}
-
-/* 3D otáčení hlavy */
-.head-wrap {
-  width: var(--size);
-  height: var(--size);
-  perspective: 1000px;
-  display: flex;
   justify-content: center;
-  align-items: center;
-  animation: swing var(--duration) ease-in-out infinite alternate;
-}
-.head {
-  max-width: 100%;
-  height: auto;
-  transform-origin: center;
-  filter: drop-shadow(0 0 25px rgba(0, 255, 255, 0.3));
+  pointer-events: none;
 }
 
-@keyframes swing {
-  0% { transform: rotateY(-var(--tilt)); }
-  100% { transform: rotateY(var(--tilt)); }
-}
-
-.right-blocks {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.block {
-  width: 30px;
-  height: 30px;
-  border: 1px solid #0af;
-  border-radius: 4px;
-  opacity: 0.5;
-}
-
-.footer {
-  position: fixed;
-  bottom: 1rem;
-  width: 100%;
+.vaft-name {
   text-align: center;
-  color: #0af;
-  font-size: 0.9rem;
-  letter-spacing: 1px;
+  color: rgba(222, 243, 255, 0.88);
+  text-shadow: 0 0 8px rgba(0,0,0,0.9);
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* obecný vzhled glyph slotu */
+.glyph-slot {
+  position: absolute;
+  width: var(--slot-size);
+  height: var(--slot-size);
+  border-radius: var(--slot-radius);
+  background: var(--slot-bg);
+  border: 1px solid rgba(214, 245, 255, 0.1);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 5px 18px rgba(0,0,0,0.3);
+  outline: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.glyph-slot:active {
+  transform: translateY(2px) scale(0.99);
+  background: rgba(8, 70, 90, 0.6);
+}
+
+/* rozložení podle tvého náčrtu */
+
+/* levý sloupek (3 ks) */
+.slot-left-1 {
+  top: 16%;
+  left: 4%;
+}
+.slot-left-2 {
+  top: 33%;
+  left: 4%;
+}
+.slot-left-3 {
+  top: 50%;
+  left: 4%;
+}
+
+/* horní střed */
+.slot-top-mid {
+  top: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* horní pravý */
+.slot-top-right {
+  top: 11%;
+  right: 6%;
+}
+
+/* pravá spodnější trojice (inspirace z tvé první fotky) */
+.slot-bottom-right-1 {
+  top: 55%;
+  right: 7%;
+}
+.slot-bottom-right-2 {
+  top: 66%;
+  right: 7%;
+}
+.slot-bottom-right-3 {
+  top: 77%;
+  right: 7%;
+}
+
+/* tlačítko přeměny */
+.transform-btn {
+  position: absolute;
+  bottom: 6%;
+  left: 5%;
+  padding: 10px 16px;
+  background: rgba(0, 253, 208, 0.16);
+  border: 1px solid rgba(138, 255, 232, 0.3);
+  border-radius: 14px;
+  color: #dff;
+  font-size: .9rem;
+  letter-spacing: .05em;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  font-weight: 500;
+}
+
+.transform-btn:active {
+  transform: translateY(2px);
+}
+
+/* alternativní mód po kliknutí */
+body.alt-mode .screen {
+  filter: hue-rotate(14deg) saturate(1.2);
+}
+body.alt-mode .glyph-slot {
+  background: rgba(198, 210, 255, 0.12);
+  border-color: rgba(217, 243, 255, 0.28);
 }
