@@ -19,30 +19,31 @@ body {
 .screen {
   position: relative;
   min-height: 100vh;
-  background: #001920 url("./bear-michal-ai-ai-klimek.jpg") center top / cover no-repeat;
+  background: #001920; /* tady můžeš dát url(...) na ten tvůj obrázek */
   overflow: hidden;
 }
 
-/* horní “hlava” nápis */
+/* horní label */
 .head-label {
   position: absolute;
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
   padding: 6px 14px;
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 999px;
   color: #dff5ff;
   font-size: 0.7rem;
   letter-spacing: 0.05em;
   backdrop-filter: blur(6px);
+  z-index: 10;
 }
 
-/* střed – text Vivere atque Fruit, kde máš v náčrtu hlavu */
+/* střed – text Vivere atque Fruit */
 .center-character {
   position: absolute;
-  top: 46%;
+  top: 52%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 140px;
@@ -55,35 +56,24 @@ body {
 
 .vaft-name {
   text-align: center;
-  color: rgba(222, 243, 255, 0.88);
-  text-shadow: 0 0 8px rgba(0,0,0,0.9);
+  color: rgba(222, 243, 255, 0.9);
+  text-shadow: 0 0 8px rgba(0,0,0,0.85);
   font-weight: 600;
   line-height: 1;
 }
 
-/* obecný vzhled glyph slotu */
+/* obecný vzhled slotu */
 .glyph-slot {
   position: absolute;
   width: var(--slot-size);
   height: var(--slot-size);
   border-radius: var(--slot-radius);
   background: var(--slot-bg);
-  border: 1px solid rgba(214, 245, 255, 0.1);
+  border: 1px solid rgba(214, 245, 255, 0.09);
   backdrop-filter: blur(10px);
-  box-shadow: 0 5px 18px rgba(0,0,0,0.3);
+  box-shadow: 0 5px 18px rgba(0,0,0,0.25);
   outline: none;
   transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.glyph-slot .glyph-text {
-  display: block;
-  width: 100%;
-  text-align: center;
-  color: #e8faff;
-  font-size: 0.7rem;
-  line-height: 74px; /* stejné jako výška slotu */
-  text-shadow: 0 0 6px rgba(0,0,0,0.45);
-  pointer-events: none;
 }
 
 .glyph-slot:active {
@@ -91,47 +81,40 @@ body {
   background: rgba(8, 70, 90, 0.6);
 }
 
-/* rozložení podle tvého náčrtu */
+/* text uvnitř slotu (glyph) */
+.glyph-slot .glyph-text {
+  display: block;
+  width: 100%;
+  text-align: center;
+  color: #e8faff;
+  font-size: 0.7rem;
+  line-height: 74px;
+  text-shadow: 0 0 6px rgba(0,0,0,0.45);
+  pointer-events: none;
+}
 
-/* levý sloupek (3 ks) */
+/* LEVÝ SLOUPEK – 4 rámečky */
 .slot-left-1 {
-  top: 16%;
-  left: 4%;
+  top: 14%;
+  left: 6%;
 }
 .slot-left-2 {
-  top: 33%;
-  left: 4%;
+  top: 30%;
+  left: 6%;
 }
 .slot-left-3 {
-  top: 50%;
-  left: 4%;
+  top: 46%;
+  left: 6%;
+}
+.slot-left-4 {
+  top: 62%;
+  left: 6%;
 }
 
-/* horní střed */
-.slot-top-mid {
-  top: 8%;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-/* horní pravý */
-.slot-top-right {
-  top: 11%;
-  right: 6%;
-}
-
-/* pravá spodnější trojice (inspirace z tvé první fotky) */
+/* PRAVÝ DOLNÍ – 1 rámeček */
 .slot-bottom-right-1 {
-  top: 55%;
-  right: 7%;
-}
-.slot-bottom-right-2 {
-  top: 66%;
-  right: 7%;
-}
-.slot-bottom-right-3 {
-  top: 77%;
-  right: 7%;
+  bottom: 10%;
+  right: 8%;
 }
 
 /* tlačítko přeměny */
@@ -155,11 +138,16 @@ body {
   transform: translateY(2px);
 }
 
-/* alternativní mód po kliknutí */
+/* mód po přeměně */
 body.alt-mode .screen {
-  filter: hue-rotate(14deg) saturate(1.2);
+  filter: hue-rotate(14deg) saturate(1.05);
 }
 body.alt-mode .glyph-slot {
   background: rgba(198, 210, 255, 0.12);
   border-color: rgba(217, 243, 255, 0.28);
+}
+
+/* highlight tlačítka při kliknutí z JS */
+.transform-btn.pressed {
+  box-shadow: 0 0 18px rgba(159, 255, 240, 0.55);
 }
