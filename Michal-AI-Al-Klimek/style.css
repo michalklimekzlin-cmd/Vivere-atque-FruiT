@@ -17,13 +17,15 @@ body {
 .screen {
   position: relative;
   min-height: 100vh;
+
+  /* TADY je důležité ../ protože obrázek je o složku výš */
   background: url("../7B8F707C-4A0B-4F7A-B3EC-621BCFE498CE.png") no-repeat center center;
-  background-size: contain; /* aby kresba nebyla oříznutá */
-  background-color: #000; /* pro jistotu kolem */
+  background-size: contain;
+  background-color: #000;
   overflow: hidden;
 }
 
-/* horní label */
+/* horní štítek */
 .head-label {
   position: absolute;
   top: 2vh;
@@ -40,7 +42,6 @@ body {
   z-index: 10;
 }
 
-/* název Vivere atque Fruit */
 .vaft-name {
   position: absolute;
   bottom: 12%;
@@ -53,7 +54,7 @@ body {
   line-height: 1.1;
 }
 
-/* glyph sloty */
+/* slot obecně */
 .glyph-slot {
   position: absolute;
   width: var(--slot-size);
@@ -82,20 +83,19 @@ body {
   pointer-events: none;
 }
 
-/* ROZMÍSTĚNÍ SLOTŮ podle skici */
-/* levý sloupek (4) */
+/* LEVÝ SLOUPEK – podle tvé skici */
 .slot-left-1 { top: 10%; left: 8%; }
 .slot-left-2 { top: 28%; left: 8%; }
 .slot-left-3 { top: 46%; left: 8%; }
 .slot-left-4 { top: 64%; left: 8%; }
 
-/* pravý dolní slot */
+/* jediný vpravo dole */
 .slot-bottom-right-1 {
   bottom: 12%;
   right: 10%;
 }
 
-/* tlačítko přeměny vlevo dole */
+/* tlačítko dole vlevo */
 .transform-btn {
   position: absolute;
   bottom: 6%;
@@ -111,6 +111,7 @@ body {
   box-shadow: 0 6px 16px rgba(0,0,0,0.35);
   font-weight: 500;
 }
+
 .transform-btn:active {
   transform: translateY(2px);
 }
