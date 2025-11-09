@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VAFT – Kometa</title>
+  <link rel="stylesheet" href="./comet.css?v=0.1">
+</head>
+<body>
+  <div class="top">
+    <div class="badge">🛰 Atlas komet</div>
+    <div class="title">C/2025 A6 (Lemmon)</div>
+    <div class="sub">zjasňuje – severní obloha • data z pozorování 2025  [oai_citation:3‡Astronomické fotografie dne](https://apod.nasa.gov/apod/ap250930.html?utm_source=chatgpt.com)</div>
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <div>
+        <div class="label">Typ</div>
+        <div class="val">Neperiodická kometa</div>
+      </div>
+      <div>
+        <div class="label">Pozice dnes</div>
+        <div class="val" id="comet-pos">načítám…</div>
+      </div>
+      <div>
+        <div class="label">Jasnost (mag.)</div>
+        <div class="val" id="comet-mag">~4–5 (odhad)</div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-title">Popis</div>
+      <p>
+        Lemmon se právě blíží ke Slunci a podle astronomů je viditelná triedrem v ranní severní obloze.
+        V našem světě Vivere atque FruiT ji bereme jako „živý objekt“ – můžeš ji zobrazit, nechat po ní posílat zprávy
+        nebo ji připnout do mapy světa.  [oai_citation:4‡Astronomické fotografie dne](https://apod.nasa.gov/apod/ap250930.html?utm_source=chatgpt.com)
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Další komety 2025</div>
+      <ul class="list">
+        <li data-comet="lemmon" class="active">C/2025 A6 (Lemmon)</li>
+        <li data-comet="atlas">C/2025 K1 (ATLAS)</li>
+        <li data-comet="swan">C/2025 R2 (SWAN)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <button onclick="window.history.back()" class="btn-ghost">← zpět do světa</button>
+    <button id="send-to-vaft" class="btn-primary">📡 poslat do Vivere</button>
+  </div>
+
+  <script src="./comet.js?v=0.1"></script>
+  <script src="../vaft-core.js"></script>
+</body>
+</html>
