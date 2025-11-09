@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Vivere atque FruiT</title>
     <meta name="theme-color" content="#000814" />
+    <!-- když budeš chtít, můžeš mít i externí style.css -->
     <link rel="stylesheet" href="./style.css?v=0.31">
     <style>
       body {
@@ -12,6 +13,7 @@
         background: radial-gradient(circle at top, #000814 0%, #000 48%, #000 100%);
         color: #fff;
         font-family: system-ui, -apple-system, sans-serif;
+        padding-bottom: 70px; /* místo pro spodní VAFT hub */
       }
       .topbar {
         padding: 12px 14px 4px;
@@ -77,51 +79,47 @@
         gap: 6px;
         font-size: 13px;
         margin-top: 4px;
+        cursor: pointer;
       }
-      /* jen aby se to netlouklo */
-      .planet-wrap {
-        height: 240px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+      /* obal pro 3D svět */
+      .world3d-wrap {
+        height: 320px;
+        margin: 4px 14px 0;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,.02);
+        background: rgba(0,0,0,.25);
       }
-      .planet {
-        width: 180px;
-        height: 180px;
-        border: 1px solid rgba(124,214,255,.3);
-        border-radius: 999px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: rgba(255,255,255,.7);
-        transform: rotate(-36deg);
-        font-size: 14px;
+      .world3d-wrap iframe {
+        width: 100%;
+        height: 100%;
+        border: 0;
       }
     </style>
   </head>
   <body>
+    <!-- HLAVA -->
     <div class="topbar">
       <div class="badge">🌿 Poutník</div>
       <div class="title">Vivere atque FruiT</div>
       <div style="font-size:11px;opacity:.55;">v0.31 · živý základ</div>
     </div>
 
-    <!-- střední “planeta” jak máš -->
-    <div class="planet-wrap">
-      <div class="planet">Vivere atque FruiT</div>
+    <!-- 3D STŘED SVĚTA (to co jsme řešili) -->
+    <div class="world3d-wrap">
+      <iframe src="./VAFT-Center3D/index.html"></iframe>
     </div>
 
     <!-- PRAVIDLA / PULS -->
     <div class="section">
       <div class="section-title">Pravidlo 1: Přátelství</div>
       <div class="section-title">Pravidlo 2: Vivere atque frui</div>
-      <div style="margin-top:4px;font-size:12px;">❤️ svět: puls 12:32:11</div>
+      <div style="margin-top:4px;font-size:12px;">❤️ svět: puls <span id="vaft-pulse">12:32:11</span></div>
     </div>
 
     <!-- REVIA – jen jedna akce nahoře -->
     <div class="section" style="margin-top:12px;">
       <div class="section-title">Revia</div>
-      <!-- pokud chceš, necháme jen tohle -->
       <button class="btn" onclick="openApp('./Revia/')">🔷 Otevřít Revii</button>
     </div>
 
@@ -130,25 +128,19 @@
       <div class="section-title">Tým</div>
       <div class="team-card">
         <div style="font-size:12px;opacity:.65;margin-bottom:4px;">Human (Piko)</div>
-        <button class="hero-button" onclick="alert('sem přijde přidání hrdiny')">＋ Přidat hrdinu</button>
+        <button class="hero-button" onclick="alert('Sem přijde výběr/postava')">＋ Přidat hrdinu</button>
 
         <!-- TVOJE PŘESUNUTÁ KARTA ↓↓↓ -->
         <div class="hero-app" onclick="openApp('./Michal-AI-Al-Klimek/')">
           🤖 <span>MICHAL AI AI KLIMEK</span>
         </div>
-        <!-- ^ tohle je to, cos chtěl dát dolů -->
       </div>
-
-      <!-- můžeš tu mít i další sekce jako “AI (Orbit)”, “Glyph”, “World (Core)” -->
     </div>
 
-    <!-- sem dáš svoje původní scripty VAFT -->
+    <!-- rámec pro načítání podaplikací -->
     <iframe id="app-frame" style="display:none;"></iframe>
 
-    <!-- TVŮJ VAFT HUB, CO JSI POSLAL -->
-    <script>
-      /* sem vlož tvůj vaft.hub.js přesně jak jsi ho poslal */
-    </script>
+    <!-- VAFT HUB -->
     <script src="./vaft.hub.js?v=1"></script>
     <script>
       function openApp(url){
@@ -159,6 +151,17 @@
           window.location.href = url;
         }
       }
+
+      // jednoduchý živý puls
+      setInterval(() => {
+        const el = document.getElementById('vaft-pulse');
+        if (!el) return;
+        const d = new Date();
+        const h = String(d.getHours()).padStart(2,'0');
+        const m = String(d.getMinutes()).padStart(2,'0');
+        const s = String(d.getSeconds()).padStart(2,'0');
+        el.textContent = `${h}:${m}:${s}`;
+      }, 1000);
     </script>
   </body>
 </html>
