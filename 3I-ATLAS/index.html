@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>3I / ATLAS — mezihvězdný návštěvník</title>
+    <link rel="stylesheet" href="./atlas.css?v=0.1">
+  </head>
+  <body>
+    <div class="atlas-wrap">
+      <!-- horní lišta -->
+      <header class="atlas-top">
+        <div>
+          <div class="atlas-tag">🛰 interstellar object</div>
+          <h1 class="atlas-title">3I / ATLAS</h1>
+          <p class="atlas-sub">detekováno teleskopem ATLAS • směr od vnějších oblastí</p>
+        </div>
+        <button class="atlas-close" onclick="goBack()">×</button>
+      </header>
+
+      <!-- střed – “dráha” -->
+      <main class="atlas-main">
+        <div class="orbit-field">
+          <div class="orbit-circle orbit-1"></div>
+          <div class="orbit-circle orbit-2"></div>
+          <div class="orbit-comet" id="atlasComet"></div>
+        </div>
+
+        <!-- info panel -->
+        <div class="atlas-panel">
+          <h2>Parametry průletu</h2>
+          <ul>
+            <li><strong>typ:</strong> mezihvězdná kometa (3I)</li>
+            <li><strong>původ:</strong> mimo Sluneční soustavu</li>
+            <li><strong>dráha:</strong> hyperbolická</li>
+            <li><strong>status:</strong> možný rozpad / fragmentace</li>
+          </ul>
+          <p class="atlas-note">
+            Pozn.: v reálném světě se řeší, jestli je to jen roztažená kometa
+            nebo umělý objekt. Tady ji můžeme brát jako posla zvenčí.
+          </p>
+        </div>
+      </main>
+
+      <!-- spodní akce -->
+      <footer class="atlas-bottom">
+        <button class="atlas-btn" id="signalBtn">📡 Zachytit signál</button>
+        <div class="atlas-toast" id="atlasToast">kanál není otevřený — vrať se později</div>
+      </footer>
+    </div>
+
+    <script src="./atlas.js?v=0.1"></script>
+  </body>
+</html>
