@@ -30,25 +30,35 @@
     </div>
 
     <!-- 🔗 napojení na KOŘEN repa -->
-    <script src="../vaft.loader.js"></script>
-    <script src="../vaft.kernel.js"></script>
-    <script src="../vaft-core.js"></script>
-    <script src="../vaft.heartbeat.js"></script>
-    <script src="../teams.js"></script>
-    <script src="../engine.js"></script>
+<script src="../vaft.loader.js"></script>
+<script src="../vaft.kernel.js"></script>
+<script src="../vaft-core.js"></script>
+<script src="../vaft.heartbeat.js"></script>
 
-    <!-- náš modul s písmeny -->
-    <script src="./vaft.letters.js?v=1"></script>
+<!-- 💡 nový palivový modul -->
+<script src="../vaft.fuel.js"></script>
 
-    <script>
-      // pokud má tvůj engine boot, spustíme ho
-      if (window.VAFT && typeof VAFT.boot === "function") {
-        VAFT.boot();
-      }
-      // a pak náš LetterLab
-      if (window.VAFT && VAFT.letters && typeof VAFT.letters.init === "function") {
-        VAFT.letters.init();
-      }
-    </script>
+<script src="../teams.js"></script>
+<script src="../engine.js"></script>
+
+<!-- náš modul s písmeny -->
+<script src="./vaft.letters.js?v=1"></script>
+
+<script>
+  // 🩵 Spuštění jádra světa
+  if (window.VAFT && typeof VAFT.boot === "function") {
+    VAFT.boot();
+  }
+
+  // 🔥 Aktivace paliva (písmena jako energie)
+  if (window.VAFT && VAFT.fuel && typeof VAFT.fuel.init === "function") {
+    VAFT.fuel.init();
+  }
+
+  // 💬 Aktivace LetterLabu (napojeného na palivo)
+  if (window.VAFT && VAFT.letters && typeof VAFT.letters.init === "function") {
+    VAFT.letters.init();
+  }
+</script>
   </body>
 </html>
