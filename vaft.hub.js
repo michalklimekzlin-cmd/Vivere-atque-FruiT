@@ -1,206 +1,231 @@
-// vaft.hub.js (skupinová verze)
+// vaft.hub.js – mobilní spodní panel
 (function() {
-  if (document.getElementById("vaft-hub")) return;
+  if (document.getElementById("vaft-hub-trigger")) return;
 
-  // 1) definice skupin podle toho, co máš v repu
+  // tvoje skupiny podle repa
   const GROUPS = [
     {
       name: "🧠 Core / AI / Hlava",
       items: [
-        { name: "Braska-Hlava", url: "./Braska-Hlava/", desc: "AI hlava" },
-        { name: "Hlavoun", url: "./Hlavoun/", desc: "tvoje hlava" },
-        { name: "Michal-AI-Al-Klimek", url: "./Michal-AI-Al-Klimek/", desc: "osobní AI appka" },
-        { name: "Meziprostor-Core", url: "./Meziprostor-Core/", desc: "meziprostor" }
+        { name: "Braska-Hlava", url: "./Braska-Hlava/" },
+        { name: "Hlavoun", url: "./Hlavoun/" },
+        { name: "Michal-AI-Al-Klimek", url: "./Michal-AI-Al-Klimek/" },
+        { name: "Meziprostor-Core", url: "./Meziprostor-Core/" }
       ]
     },
     {
       name: "🛠 VAFT moduly",
       items: [
-        { name: "VAFT-LetterLab", url: "./VAFT-LetterLab/", desc: "písmena → obchod" },
-        { name: "VAFT-Game", url: "./VAFT-Game/", desc: "herní část" },
-        { name: "VAFT-Doll", url: "./VAFT-Doll/", desc: "doll modul" },
-        { name: "VAFT-BearHead", url: "./VAFT-BearHead/", desc: "medvědí hlava" },
-        { name: "VAFT-Lady", url: "./VAFT-Lady/", desc: "lady" },
-        { name: "VAFT-Jizva", url: "./VAFT-Jizva/", desc: "jizva" }
+        { name: "VAFT-LetterLab", url: "./VAFT-LetterLab/" },
+        { name: "VAFT-Game", url: "./VAFT-Game/" },
+        { name: "VAFT-Doll", url: "./VAFT-Doll/" },
+        { name: "VAFT-BearHead", url: "./VAFT-BearHead/" },
+        { name: "VAFT-Lady", url: "./VAFT-Lady/" },
+        { name: "VAFT-Jizva", url: "./VAFT-Jizva/" }
       ]
     },
     {
       name: "🌍 Mapy / světy",
       items: [
-        { name: "Vivere", url: "./Vivere/", desc: "hlavní svět" },
-        { name: "mapa", url: "./mapa/", desc: "2D mapa" },
-        { name: "mapa-3d", url: "./mapa-3d/", desc: "3D mapa" },
-        { name: "VAFT-MapWorld", url: "./VAFT-MapWorld/", desc: "dům + stromy" }
+        { name: "Vivere", url: "./Vivere/" },
+        { name: "mapa", url: "./mapa/" },
+        { name: "mapa-3d", url: "./mapa-3d/" },
+        { name: "VAFT-MapWorld", url: "./VAFT-MapWorld/" }
       ]
     },
     {
       name: "🎭 Postavy / vizuál",
       items: [
-        { name: "VAFT-GhostGirl", url: "./VAFT-GhostGirl/", desc: "ghost girl" },
-        { name: "VAFT-Girls", url: "./VAFT-Girls/", desc: "girls" },
-        { name: "VAFT-Lilies", url: "./VAFT-Lilies/", desc: "lilies" },
-        { name: "VAFT-StarSkull", url: "./VAFT-StarSkull/", desc: "star skull" }
+        { name: "VAFT-GhostGirl", url: "./VAFT-GhostGirl/" },
+        { name: "VAFT-Girls", url: "./VAFT-Girls/" },
+        { name: "VAFT-Lilies", url: "./VAFT-Lilies/" },
+        { name: "VAFT-StarSkull", url: "./VAFT-StarSkull/" }
       ]
     },
     {
       name: "⚗️ Build / test",
       items: [
-        { name: "build", url: "./build/", desc: "build náhled" }
+        { name: "build", url: "./build/" }
       ]
     }
   ];
 
-  // 2) vytvoření panelu
-  const hub = document.createElement("div");
-  hub.id = "vaft-hub";
-  hub.innerHTML = `
-    <style>
-      #vaft-hub {
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        width: 260px;
-        max-height: 70vh;
-        background: rgba(0,0,0,.78);
-        border: 1px solid rgba(156,200,255,.15);
-        border-radius: 14px;
-        backdrop-filter: blur(12px);
-        font-family: system-ui, -apple-system, sans-serif;
-        color: #e8f4ff;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        z-index: 9999;
-      }
-      #vaft-hub-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 10px 3px;
-      }
-      #vaft-hub-title { font-size: 12px; font-weight: 600; }
-      #vaft-hub-body {
-        overflow-y: auto;
-        padding: 4px 6px 6px;
-      }
-      .vaft-group {
-        margin-bottom: 6px;
-        border: 1px solid rgba(255,255,255,.01);
-        border-radius: 10px;
-        background: rgba(255,255,255,.01);
-      }
-      .vaft-group-header {
-        padding: 5px 6px 4px;
-        font-size: 11px;
-        font-weight: 500;
-        display: flex;
-        justify-content: space-between;
-        cursor: pointer;
-      }
-      .vaft-group-body {
-        display: none;
-        padding: 4px 4px 6px;
-        display: none;
-        flex-direction: column;
-        gap: 4px;
-      }
-      .vaft-app {
-        background: rgba(255,255,255,.01);
-        border: 1px solid rgba(255,255,255,.01);
-        border-radius: 7px;
-        padding: 3px 5px 2px;
-        cursor: pointer;
-      }
-      .vaft-app-name { font-size: 11px; }
-      .vaft-app-desc { font-size: 9px; opacity: .5; }
-      #vaft-hub-footer {
-        border-top: 1px solid rgba(255,255,255,.02);
-        padding: 5px 6px 7px;
-        display: flex;
-        gap: 5px;
-        flex-wrap: wrap;
-      }
-      .vaft-hub-btn {
-        background: rgba(156,200,255,.05);
-        border: 1px solid rgba(156,200,255,.25);
-        border-radius: 8px;
-        font-size: 10px;
-        padding: 3px 6px 2px;
-        cursor: pointer;
-      }
-      #vaft-hub-collapse {
-        background: none;
-        border: none;
-        color: #fff;
-        opacity: .5;
-        cursor: pointer;
-      }
-      @media (max-width: 600px) {
-        #vaft-hub { width: 92vw; right: 4vw; }
-      }
-    </style>
-    <div id="vaft-hub-header">
-      <div id="vaft-hub-title">Vivere atque FruiT • přehled</div>
-      <button id="vaft-hub-collapse">–</button>
+  // 1) malý trigger dole (pásek)
+  const trigger = document.createElement("div");
+  trigger.id = "vaft-hub-trigger";
+  trigger.innerHTML = `VAFT – tvoje appky`;
+  document.body.appendChild(trigger);
+
+  // 2) samotný panel (skrytý)
+  const panel = document.createElement("div");
+  panel.id = "vaft-hub-panel";
+  panel.innerHTML = `
+    <div id="vaft-hub-top">
+      <div>Vivere atque FruiT • vše v jednom</div>
+      <button id="vaft-hub-close">✕</button>
     </div>
-    <div id="vaft-hub-body"></div>
-    <div id="vaft-hub-footer">
-      <button class="vaft-hub-btn" data-action="fuel">palivo</button>
-      <button class="vaft-hub-btn" data-action="spell">kouzlo</button>
-      <button class="vaft-hub-btn" data-action="tree">strom</button>
+    <div id="vaft-hub-groups"></div>
+    <div id="vaft-hub-actions">
+      <button data-act="fuel">palivo</button>
+      <button data-act="spell">kouzlo</button>
+      <button data-act="tree">strom</button>
     </div>
   `;
-  document.body.appendChild(hub);
+  document.body.appendChild(panel);
 
-  const body = hub.querySelector("#vaft-hub-body");
+  // 3) styly
+  const style = document.createElement("style");
+  style.textContent = `
+    #vaft-hub-trigger {
+      position: fixed;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.65);
+      border: 1px solid rgba(255,255,255,.04);
+      border-radius: 999px;
+      padding: 6px 14px 5px;
+      font-family: system-ui,-apple-system,sans-serif;
+      font-size: 12px;
+      color: #fff;
+      z-index: 9998;
+      backdrop-filter: blur(10px);
+    }
+    #vaft-hub-panel {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: -100%;
+      height: 62vh;
+      background: rgba(1,2,6,.92);
+      border-top: 1px solid rgba(255,255,255,.03);
+      backdrop-filter: blur(18px);
+      z-index: 9999;
+      transition: bottom .25s ease;
+      display: flex;
+      flex-direction: column;
+      font-family: system-ui,-apple-system,sans-serif;
+    }
+    #vaft-hub-panel.open {
+      bottom: 0;
+    }
+    #vaft-hub-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    #vaft-hub-top button {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #vaft-hub-groups {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .vaft-group {
+      background: rgba(255,255,255,.01);
+      border: 1px solid rgba(255,255,255,.01);
+      border-radius: 10px;
+    }
+    .vaft-group-head {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 8px 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .vaft-group-body {
+      display: none;
+      padding: 2px 6px 6px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .vaft-app {
+      background: rgba(255,255,255,.01);
+      border-radius: 7px;
+      padding: 4px 6px 3px;
+      font-size: 11px;
+    }
+    .vaft-app small { opacity: .5; font-size: 9px; display:block; }
+    #vaft-hub-actions {
+      border-top: 1px solid rgba(255,255,255,.02);
+      padding: 6px 10px 10px;
+      display: flex;
+      gap: 6px;
+    }
+    #vaft-hub-actions button {
+      background: rgba(156,200,255,.06);
+      border: 1px solid rgba(156,200,255,.3);
+      border-radius: 9px;
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 8px 3px;
+    }
+    @media (min-width: 900px) {
+      #vaft-hub-panel {
+        left: auto;
+        right: 10px;
+        width: 320px;
+        height: 72vh;
+        border-radius: 14px 14px 0 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
 
-  // 3) naplnění skupin
+  // naplnit skupiny
+  const groupsContainer = panel.querySelector("#vaft-hub-groups");
   GROUPS.forEach(group => {
     const g = document.createElement("div");
     g.className = "vaft-group";
+    const head = document.createElement("div");
+    head.className = "vaft-group-head";
+    head.innerHTML = `<span>${group.name}</span><span>＋</span>`;
+    const body = document.createElement("div");
+    body.className = "vaft-group-body";
 
-    const gh = document.createElement("div");
-    gh.className = "vaft-group-header";
-    gh.innerHTML = `<span>${group.name}</span><span>＋</span>`;
-    g.appendChild(gh);
-
-    const gb = document.createElement("div");
-    gb.className = "vaft-group-body";
     group.items.forEach(app => {
       const a = document.createElement("div");
       a.className = "vaft-app";
-      a.dataset.url = app.url;
-      a.innerHTML = `
-        <div class="vaft-app-name">${app.name}</div>
-        <div class="vaft-app-desc">${app.desc || ""}</div>
-      `;
+      a.innerHTML = `${app.name}${app.desc ? `<small>${app.desc}</small>` : ""}`;
       a.addEventListener("click", () => openApp(app.url));
-      gb.appendChild(a);
-    });
-    g.appendChild(gb);
-
-    gh.addEventListener("click", () => {
-      const isOpen = gb.style.display === "flex";
-      gb.style.display = isOpen ? "none" : "flex";
-      gh.querySelector("span:last-child").textContent = isOpen ? "＋" : "－";
+      body.appendChild(a);
     });
 
-    body.appendChild(g);
+    head.addEventListener("click", () => {
+      const opened = body.style.display === "flex";
+      body.style.display = opened ? "none" : "flex";
+      head.querySelector("span:last-child").textContent = opened ? "＋" : "－";
+    });
+
+    g.appendChild(head);
+    g.appendChild(body);
+    groupsContainer.appendChild(g);
   });
 
-  // collapse celé hub okno
-  hub.querySelector("#vaft-hub-collapse").addEventListener("click", () => {
-    const b = hub.querySelector("#vaft-hub-body");
-    const f = hub.querySelector("#vaft-hub-footer");
-    const hidden = b.style.display === "none";
-    b.style.display = hidden ? "block" : "none";
-    f.style.display = hidden ? "flex" : "none";
+  // otevření panelu
+  trigger.addEventListener("click", () => {
+    panel.classList.add("open");
+  });
+  panel.querySelector("#vaft-hub-close").addEventListener("click", () => {
+    panel.classList.remove("open");
   });
 
-  // tlačítka dole
-  hub.querySelectorAll(".vaft-hub-btn").forEach(btn => {
+  // akce
+  panel.querySelectorAll("#vaft-hub-actions button").forEach(btn => {
     btn.addEventListener("click", () => {
-      const act = btn.dataset.action;
+      const act = btn.dataset.act;
       if (act === "fuel") showFuel();
       if (act === "spell") doSpell();
       if (act === "tree") addTree();
@@ -211,6 +236,7 @@
     const frame = document.getElementById("app-frame");
     if (frame) {
       frame.src = url;
+      panel.classList.remove("open");
     } else {
       window.location.href = url;
     }
@@ -242,5 +268,5 @@
     }
   }
 
-  console.log("VAFT HUB (skupiny): aktivní");
+  console.log("VAFT HUB (mobilní spodní) aktivní");
 })();
