@@ -4,6 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>VafiT výběr • Vivere atque FruiT</title>
+
+    <!-- manifest pro PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <!-- barva nahoře na iPhonu/Androidu -->
+    <meta name="theme-color" content="#050507">
+
     <link rel="stylesheet" href="./style.css?v=1">
   </head>
   <body>
@@ -14,9 +20,7 @@
       </header>
 
       <main class="content">
-        <section class="grid" id="vafitGrid">
-          <!-- naplní JS -->
-        </section>
+        <section class="grid" id="vafitGrid"></section>
 
         <section class="info-panel" id="infoPanel">
           <div class="triple-stack" id="tripleStack"></div>
@@ -30,6 +34,12 @@
       </main>
     </div>
 
-    <script src="./app.js?v=1"></script>
+    <script src="./app.js?v=2"></script>
+    <script>
+      // registrace service workeru
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js').catch(console.warn);
+      }
+    </script>
   </body>
 </html>
