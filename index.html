@@ -39,20 +39,14 @@
         flex-direction: column;
         gap: 2px;
       }
-      .brand-mini {
-        font-size: .58rem;
-        opacity: .5;
-      }
-      .brand-title {
-        font-size: 1.15rem;
-        font-weight: 600;
-      }
+      .brand-mini { font-size: .58rem; opacity: .5; }
+      .brand-title { font-size: 1.15rem; font-weight: 600; }
       .role-badge {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: rgba(34,197,94,.1);
-        border: 1px solid rgba(34,197,94,.4);
+        background: rgba(59,130,246,.05);
+        border: 1px solid rgba(59,130,246,.4);
         border-radius: 999px;
         padding: 3px 10px 4px;
         font-size: .62rem;
@@ -67,25 +61,16 @@
         align-items: center;
       }
       .coin-icon {
-        width: 22px;
-        height: 22px;
+        width: 22px; height: 22px;
         border-radius: 999px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         background: radial-gradient(circle, #eab308 0%, #92400e 90%);
         font-size: .6rem;
       }
-      .coin-txt {
-        line-height: 1.1;
-        font-size: .6rem;
-        text-align: right;
-      }
-      .coin-ver {
-        opacity: .4;
-      }
+      .coin-txt { line-height: 1.1; font-size: .6rem; text-align: right; }
+      .coin-ver { opacity: .4; }
 
-      /* revia / prostředek */
+      /* revia panel */
       .revia-panel {
         margin: 14px 16px 0;
         background: radial-gradient(circle at center, rgba(2,6,23,.65) 0%, rgba(2,6,23,0) 70%);
@@ -94,18 +79,9 @@
         padding: 10px 10px 16px;
         position: relative;
       }
-      .revia-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .revia-title {
-        font-weight: 500;
-      }
-      .revia-link {
-        color: var(--accent);
-        font-size: .68rem;
-      }
+      .revia-head { display:flex; justify-content:space-between; align-items:center; }
+      .revia-title { font-weight:500; }
+      .revia-link { color:var(--accent); font-size:.68rem; }
       .rules {
         margin-top: 6px;
         background: rgba(15,23,42,.35);
@@ -128,9 +104,7 @@
         font-size: .62rem;
       }
       .pulse-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 999px;
+        width: 7px; height: 7px; border-radius: 999px;
         background: #f43f5e;
         animation: blip 2s infinite;
       }
@@ -143,41 +117,33 @@
       }
       .vaft-core {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 130px;
-        height: 130px;
-        margin-left: -65px;
-        margin-top: -65px;
+        top: 50%; left: 50%;
+        width: 130px; height: 130px;
+        margin-left: -65px; margin-top: -65px;
         border: 1px solid rgba(56,189,248,.4);
         border-radius: 999px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: flex; align-items: center; justify-content: center;
         text-align: center;
         font-size: .62rem;
         color: rgba(226,232,240,.9);
         animation: spin 12s linear infinite;
       }
-      @keyframes spin { 0%{transform: rotate(0deg);} 100%{transform: rotate(360deg);} }
+      @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
       .orbit-node {
-        position: absolute;
-        width: 70px;
-        height: 70px;
-        border-radius: 999px;
-        border: 1px solid rgba(126,248,156,.48);
-        background: rgba(15,23,42,.15);
-        backdrop-filter: blur(4px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: .58rem;
+        position:absolute;
+        width:70px;height:70px;
+        border-radius:999px;
+        border:1px solid rgba(126,248,156,.48);
+        background:rgba(15,23,42,.15);
+        backdrop-filter:blur(4px);
+        display:flex;align-items:center;justify-content:center;
+        font-size:.58rem;
       }
-      .node-glyph { left: 10px; bottom: 6px; }
-      .node-ai { right: 14px; top: 12px; }
-      .node-world { right: 16px; bottom: 12px; }
+      .node-glyph { left:10px; bottom:6px; }
+      .node-ai { right:14px; top:12px; }
+      .node-world { right:16px; bottom:12px; }
 
-      /* TABS */
+      /* tabs */
       .tabs {
         margin: 10px 16px 0;
         display: flex;
@@ -186,12 +152,12 @@
       .tab-btn {
         flex: 1;
         background: rgba(15,23,42,.08);
-        border: 1px solid rgba(15,23,42,0);
         border-radius: 14px;
         padding: 6px 7px 7px;
         text-align: center;
         font-size: .7rem;
         color: #e2e8f0;
+        border: 1px solid transparent;
       }
       .tab-btn.active {
         background: linear-gradient(140deg, #22c55e, #06b6d4);
@@ -199,7 +165,6 @@
         color: #fff;
       }
 
-      /* PANELY */
       .panel {
         margin: 10px 16px 0;
         background: rgba(2,6,23,.55);
@@ -208,15 +173,10 @@
         padding: 10px 10px 14px;
         display: none;
       }
-      .panel.active {
-        display: block;
-      }
+      .panel.active { display:block; }
+      .panel-title { font-weight:600; margin-bottom:8px; }
 
-      /* hrdinové panel */
-      .panel-title {
-        font-weight: 600;
-        margin-bottom: 8px;
-      }
+      /* HRDINOVÉ */
       .hero-input,
       .hero-select {
         width: 100%;
@@ -237,19 +197,25 @@
         font-size: .7rem;
         font-weight: 500;
       }
-      #selectedVafit {
-        font-size: .6rem;
-        opacity: .65;
-        margin-top: 7px;
-      }
+      #selectedVafit { font-size:.6rem; opacity:.65; margin-top:7px; }
 
-      /* meziprostor panel */
-      .muted {
-        font-size: .65rem;
-        opacity: .5;
+      /* MEZIPROSTOR CHAT */
+      #hlavoun-chat {
+        background: rgba(1,4,10,.3);
+        border: 1px solid rgba(148,163,184,.03);
+        border-radius: 12px;
+        padding: 8px;
+        max-height: 195px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: .64rem;
       }
+      .msg-user { }
+      .msg-ai { }
 
-      /* systém / apps */
+      /* SYSTÉM / APPKY */
       .apps-wrap {
         margin-top: 6px;
         border: 1px solid rgba(148,163,184,.03);
@@ -260,9 +226,9 @@
         padding: 8px 9px;
         border-bottom: 1px solid rgba(148,163,184,.03);
       }
-      .app-row:last-child { border-bottom: none; }
-      .app-name { font-size: .75rem; }
-      .app-desc { font-size: .58rem; opacity: .45; }
+      .app-row:last-child { border-bottom:none; }
+      .app-name { font-size:.75rem; }
+      .app-desc { font-size:.58rem; opacity:.45; }
       .app-btn {
         background: rgba(56,189,248,.12);
         border: 1px solid rgba(56,189,248,.04);
@@ -273,53 +239,6 @@
         margin-top: 4px;
       }
     </style>
-
-    <script>
-      function openApp(url){
-        window.location.href = url;
-      }
-
-      function tick(){
-        const el = document.getElementById('pulseTime');
-        if(!el) return;
-        const d = new Date();
-        el.textContent = d.toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-      }
-
-      function showTab(which){
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        const btn = document.querySelector('[data-tab="'+which+'"]');
-        const pan = document.getElementById('panel-'+which);
-        if (btn) btn.classList.add('active');
-        if (pan) pan.classList.add('active');
-      }
-
-      document.addEventListener('DOMContentLoaded', () => {
-        tick();
-        setInterval(tick, 1000);
-
-        // první tab
-        showTab('heroes');
-
-        // přepínání tabů
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-          btn.addEventListener('click', () => showTab(btn.dataset.tab));
-        });
-
-        // přečíst vybraného VafiTa z galerie
-        const chosen = localStorage.getItem('VAFT_SELECTED_VAFIT');
-        if (chosen) {
-          try {
-            const obj = JSON.parse(chosen);
-            const place = document.getElementById('selectedVafit');
-            if (place && obj && obj.name) {
-              place.textContent = "Vybraný VafiT: " + obj.name + " " + (obj.glyph || "");
-            }
-          } catch(e){}
-        }
-      });
-    </script>
   </head>
   <body>
     <!-- TOP -->
@@ -327,7 +246,7 @@
       <div class="brand-block">
         <div class="brand-mini">Ĭ’♡ ↓</div>
         <div class="brand-title">Vivere atque FruiT</div>
-        <div class="role-badge">🌿 Poutník</div>
+        <div class="role-badge">🧠 Hlavoun</div>
       </div>
       <div class="coins">
         <div class="coin-icon">💰</div>
@@ -371,25 +290,27 @@
     <div class="panel active" id="panel-heroes">
       <div class="panel-title">Hrdinové</div>
       <label style="font-size:.6rem;opacity:.55;">Jméno hrdiny</label>
-      <input class="hero-input" placeholder="např. Piko, Orbit, Míza…" />
+      <input id="hero-name" class="hero-input" placeholder="např. Piko, Orbit, Míza…" />
       <label style="font-size:.6rem;opacity:.55;">Tým</label>
-      <select class="hero-select">
+      <select id="hero-team" class="hero-select">
         <option>Human (Piko)</option>
         <option>AI (Orbit)</option>
         <option>Glyph</option>
         <option>World (Core)</option>
       </select>
-      <button class="btn-primary" onclick="alert('Později to uložíme do VAFT Core 🙂')">+ Přidat hrdinu</button>
+      <button class="btn-primary" onclick="saveHero()">+ Přidat hrdinu</button>
       <div id="selectedVafit"></div>
+      <div id="heroesList" style="margin-top:8px;font-size:.6rem;opacity:.6;"></div>
     </div>
 
-    <!-- PANEL: MEZIPROSTOR -->
+    <!-- PANEL: MEZIPROSTOR (HLAVOUN) -->
     <div class="panel" id="panel-space">
-      <div class="panel-title">Meziprostor</div>
-      <p class="muted">
-        Tady bude propojení mezi jednotlivými podaplikacemi (VafiT galerie → hrdina → svět).  
-        Můžeme sem později dát i log „co se stalo“ nebo zprávy od AI brášků.
-      </p>
+      <div class="panel-title">Meziprostor (Hlavoun)</div>
+      <div id="hlavoun-chat"></div>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <input id="hlavoun-input" placeholder="napiš Hlavounovi..." style="flex:1;background:rgba(15,23,42,.4);border:1px solid rgba(148,163,184,.12);border-radius:9px;padding:5px 7px;color:#fff;font-size:.65rem;">
+        <button onclick="sendToHlavoun()" style="background:#0ea5e9;border:none;border-radius:9px;padding:5px 10px;color:#fff;font-size:.65rem;">Poslat</button>
+      </div>
     </div>
 
     <!-- PANEL: SYSTÉM -->
@@ -418,5 +339,163 @@
         </div>
       </div>
     </div>
+
+    <script>
+      function openApp(url){ window.location.href = url; }
+
+      function tick(){
+        const el = document.getElementById('pulseTime');
+        if(!el) return;
+        const d = new Date();
+        el.textContent = d.toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      }
+
+      function showTab(which){
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        const btn = document.querySelector('[data-tab="'+which+'"]');
+        const pan = document.getElementById('panel-'+which);
+        if (btn) btn.classList.add('active');
+        if (pan) pan.classList.add('active');
+      }
+
+      // uložit hrdinu do localStorage
+      function saveHero(){
+        const name = document.getElementById('hero-name').value.trim();
+        const team = document.getElementById('hero-team').value;
+        if (!name) return;
+        const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
+        heroes.push({ name, team, ts: Date.now() });
+        localStorage.setItem('VAFT_HEROES', JSON.stringify(heroes));
+        document.getElementById('hero-name').value = '';
+        renderHeroes();
+        appendHlavounMsg('ai', 'Uložil jsem hrdinu „'+name+'“. Můžeš mu přidat úkol v Meziprostoru.');
+      }
+
+      function renderHeroes(){
+        const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
+        const box = document.getElementById('heroesList');
+        if (!box) return;
+        if (!heroes.length) { box.textContent = 'Zatím nemáš uložené hrdiny.'; return; }
+        box.innerHTML = heroes.map(h => '• '+h.name+' ('+h.team+')').join('<br>');
+      }
+
+      /* ==== HLAVOUN ENGINE ==== */
+
+      function appendHlavounMsg(role, text) {
+        const box = document.getElementById('hlavoun-chat');
+        if (!box) return;
+        const row = document.createElement('div');
+        const name = role === 'user' ? 'Ty' : 'Hlavoun';
+        row.innerHTML = `<strong style="font-size:.6rem;opacity:.6;">${name}:</strong> <span>${text}</span>`;
+        box.appendChild(row);
+        box.scrollTop = box.scrollHeight;
+
+        const log = JSON.parse(localStorage.getItem('VAFT_HLAVOUN_LOG') || '[]');
+        log.push({ role, text, ts: Date.now() });
+        localStorage.setItem('VAFT_HLAVOUN_LOG', JSON.stringify(log));
+      }
+
+      function loadHlavounLog() {
+        const log = JSON.parse(localStorage.getItem('VAFT_HLAVOUN_LOG') || '[]');
+        log.forEach(m => appendHlavounMsg(m.role, m.text));
+      }
+
+      // Hlavoun se podívá, co máme v localStorage, a vymyslí další krok
+      function hlavounAnalyze(userText) {
+        const selectedVafit = getJSON('VAFT_SELECTED_VAFIT');
+        const heroes = getJSON('VAFT_HEROES', []);
+        const gps = getJSON('VAFT_GPS_LOG', []);           // kdyby sis to někdy ukládal
+        const nature = getJSON('VAFT_NATURE_OBJECTS', []); // fotky/objekty z přírody
+        const sos = getJSON('VAFT_SOS', []);
+
+        // 1) uživatelský explicitní dotaz
+        if (userText) {
+          const lower = userText.toLowerCase();
+          if (lower.includes('příběh') || lower.includes('story')) {
+            if (selectedVafit) {
+              appendHlavounMsg('ai', 'Tak jo. VafiT „'+selectedVafit.name+'“ ('+(selectedVafit.glyph||'⚙')+ ') může být nosič deníku. Uděláme mu misi: „Najdi 3 objekty z přírody a ulož je.“ To pak napojíme na tvůj panel s přírodou.');
+            } else {
+              appendHlavounMsg('ai', 'Nejdřív si ale vyber VafiTa v galerii, ať mám na koho ten příběh napsat.');
+            }
+            return;
+          }
+          if (lower.includes('gps')) {
+            appendHlavounMsg('ai', 'GPS stopu ukládej jako pole bodů [{lat,lng,time}], klidně pod klíč VAFT_GPS_LOG. Pak ti z toho vygeneruju cestu nebo úkol „projdi trasu znovu”.');
+            return;
+          }
+        }
+
+        // 2) žádný VafiT vybraný
+        if (!selectedVafit) {
+          appendHlavounMsg('ai', 'Ještě nemáš vybraného VafiTa. Otevři „VafiT galerie“ v Systému, klikni na jednoho a vrať se – hned mu něco vymyslím.');
+          return;
+        }
+
+        // 3) máme VafiTa ale žádného hrdinu
+        if (selectedVafit && !heroes.length) {
+          appendHlavounMsg('ai', 'Máš vybraného VafiTa („'+selectedVafit.name+'“), ale nemáš ještě hrdinu. V záložce Hrdinové z něj udělej hrdinu nebo vytvoř člověka, co ho bude nosit.');
+          return;
+        }
+
+        // 4) máme hrdiny i VafiTa – teď navrhnu propojení
+        if (selectedVafit && heroes.length) {
+          const lastHero = heroes[heroes.length - 1];
+          let msg = 'Vidím hrdinu „'+lastHero.name+'“ ('+lastHero.team+'). Můžeme mu dát VafiTa „'+selectedVafit.name+'“ jako vnitřní jiskru.';
+          if (!nature.length) {
+            msg += ' Zkus hned přidat „objekt z přírody“ v tom panelu, co sis kreslil – a já pak budu vědět, že tenhle hrdina chodí ven.';
+          } else {
+            msg += ' Už máš '+nature.length+' přírodních objektů – můžu z toho udělat úkol „zmapuj místo“ nebo „vyfoť další 2 fotky“.';
+          }
+          appendHlavounMsg('ai', msg);
+          return;
+        }
+
+        // 5) kdyby fakt nebylo co
+        appendHlavounMsg('ai', 'Zatím moc dat nemám, ale můžeme začít tak, že do Hrdinů uložíš jedno jméno a v galerii vybereš VafiTa.');
+      }
+
+      function getJSON(key, fallback=null) {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        try { return JSON.parse(raw); } catch(e) { return fallback; }
+      }
+
+      function sendToHlavoun() {
+        const inp = document.getElementById('hlavoun-input');
+        if (!inp || !inp.value.trim()) return;
+        const text = inp.value.trim();
+        appendHlavounMsg('user', text);
+        inp.value = '';
+        setTimeout(() => hlavounAnalyze(text), 200);
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        tick();
+        setInterval(tick, 1000);
+
+        // tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => showTab(btn.dataset.tab));
+        });
+        showTab('heroes');
+
+        // vybraný VafiT z galerie → ukázat v Hrdinech
+        const selectedVafit = getJSON('VAFT_SELECTED_VAFIT');
+        if (selectedVafit) {
+          const place = document.getElementById('selectedVafit');
+          if (place) place.textContent = "Vybraný VafiT: " + selectedVafit.name + " " + (selectedVafit.glyph || "");
+        }
+
+        renderHeroes();
+        loadHlavounLog();
+
+        // když chat byl úplně prázdný, Hlavoun se představí
+        const log = JSON.parse(localStorage.getItem('VAFT_HLAVOUN_LOG') || '[]');
+        if (!log.length) {
+          appendHlavounMsg('ai', 'Čau, jsem Hlavoun v appce. Dívám se do localStorage a pomůžu ti to tu skládat. Vyber VafiTa v “Systém → VafiT galerie”, pak mi napiš “navrhni příběh”.');
+        }
+      });
+    </script>
   </body>
 </html>
