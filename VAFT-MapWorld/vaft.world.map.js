@@ -1,66 +1,52 @@
 // vaft.world.map.js
+// vykreslí dům + umí přidávat stromy
 window.VAFT = window.VAFT || {};
 
 (function() {
-  // vytvoříme svět, pokud ještě není
-  VAFT.world = VAFT.world || {};
-
-  // základ mapy
+  const MW = {};
   const state = {
     house: { x: 210, y: 320, w: 80, h: 60 },
     trees: []
   };
 
-  // hlavní modul mapy
-  VAFT.mapWorld = {
-    init() {
-      const canvas = document.getElementById("map");
-      if (!canvas) return;
-      const ctx = canvas.getContext("2d");
-      this.canvas = canvas;
-      this.ctx = ctx;
-
-      // jeden dům už máme ve state
-      this.loop();
-    },
-
-    loop() {
-      requestAnimationFrame(() => this.loop());
-      this.render();
-    },
-
-    render() {
-      const ctx = this.ctx;
-      const c = this.canvas;
-      if (!ctx || !c) return;
-
-      // vyčistit
-      ctx.clearRect(0, 0, c.width, c.height);
-
-      // background
-      ctx.fillStyle = "rgba(0,0,0,0)";
-      ctx.fillRect(0, 0, c.width, c.height);
-
-      // dům
-      drawHouse(ctx, state.house);
-
-      // stromy
-      state.trees.forEach(t => drawTree(ctx, t));
+  MW.init = function() {
+    const canvas = document.getElementById("map");
+    if (!canvas) {
+      console.warn("MapWorld: nenašel jsem canvas #map");
+      return;
     }
+    MW.canvas = canvas;
+    MW.ctx = canvas.getContext("2d");
+
+    // pro jistotu jeden strom na start
+    addTreeNearHouse();
+    loop();
   };
 
-  // přidáme do VAFT.world spawn funkci, aby na ni mohl sáhnout spell
-  VAFT.world.spawn = function(opts) {
-    const { type, count = 1, near = null } = opts || {};
-    if (type === "tree") {
-      for (let i = 0; i < count; i++) {
-        addTreeNear(near || "house");
-      }
-    }
-  };
+  function loop() {
+    requestAnimationFrame(loop);
+    render();
+  }
 
-  function addTreeNear(place) {
-    // aktuálně známe jen "house"
+  function render() {
+    if (!MW.ctx || !MW.canvas) return;
+    const ctx = MW.ctx;
+    const c = MW.canvas;
+
+    ctx.clearRect(0, 0, c.width, c.height);
+
+    // pozadí
+    ctx.fillStyle = "#0b0f15";
+    ctx.fillRect(0, 0, c.width, c.height);
+
+    // dům
+    drawHouse(ctx, state.house);
+
+    // stromy
+    state.trees.forEach(t => drawTree(ctx, t));
+  }
+
+  function addTreeNearHouse() {
     const base = state.house;
     const angle = Math.random() * Math.PI * 2;
     const radius = 90 + Math.random() * 40;
@@ -99,4 +85,25 @@ window.VAFT = window.VAFT || {};
     ctx.fill();
   }
 
+  // vystavíme pro tlačítko
+  MW.addTreeNearHouse = addTreeNearHouse;
+
+  // napojíme na VAFT.world, pokud ho máš
+  VAFT.world = VAFT.world || {};
+  VAFT.world.spawn = function(opts) {
+    const { type, count = 1 } = opts || {};
+    if (type === "tree") {
+      for (let i = 0; i < count; i++) addTreeNearHouse();
+    }
+  };
+
+  // dej to ven
+  VAFT.mapWorld = MW;
+
+  // auto-init po načtení
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => MW.init());
+  } else {
+    MW.init();
+  }
 })();
