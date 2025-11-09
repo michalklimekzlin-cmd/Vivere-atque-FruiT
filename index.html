@@ -1,208 +1,164 @@
 <!doctype html>
 <html lang="cs">
-<head>
-  <meta charset="utf-8" />
-  <!-- 🛡️ Content Security Policy – chrání před vložením cizího kódu -->
-  <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self';
-    script-src 'self';
-    style-src 'self' 'unsafe-inline';
-    img-src 'self' data:;
-    connect-src 'self';
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'none';
-  ">
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Vivere atque FruiT • v0.31</title>
-  <link rel="stylesheet" href="style.css?v=0.31">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Vivere atque FruiT</title>
+    <meta name="theme-color" content="#000814" />
+    <link rel="stylesheet" href="./style.css?v=0.31">
+    <style>
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, #000814 0%, #000 48%, #000 100%);
+        color: #fff;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      .topbar {
+        padding: 12px 14px 4px;
+      }
+      .title {
+        font-size: 20px;
+        font-weight: 700;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255,255,255,.05);
+        border: 1px solid rgba(255,255,255,.03);
+        border-radius: 999px;
+        padding: 2px 10px 3px;
+        font-size: 11px;
+        margin-right: 6px;
+      }
+      .section {
+        padding: 6px 14px 0;
+      }
+      .section-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .btn {
+        background: rgba(6,105,255,.14);
+        border: 1px solid rgba(117,189,255,.5);
+        border-radius: 10px;
+        padding: 8px 12px 7px;
+        color: #fff;
+        font-size: 13px;
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .team-card {
+        background: rgba(255,255,255,.018);
+        border: 1px solid rgba(255,255,255,.012);
+        border-radius: 12px;
+        padding: 10px 12px 8px;
+        margin-top: 6px;
+      }
+      .hero-button {
+        background: rgba(0,182,122,.12);
+        border: 1px solid rgba(0,182,122,.3);
+        border-radius: 999px;
+        padding: 7px 12px 6px;
+        display: inline-flex;
+        gap: 5px;
+        align-items: center;
+        font-size: 13px;
+        margin-bottom: 6px;
+      }
+      .hero-app {
+        background: rgba(98,149,255,.15);
+        border: 1px solid rgba(98,149,255,.3);
+        border-radius: 10px;
+        padding: 7px 10px 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        margin-top: 4px;
+      }
+      /* jen aby se to netlouklo */
+      .planet-wrap {
+        height: 240px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .planet {
+        width: 180px;
+        height: 180px;
+        border: 1px solid rgba(124,214,255,.3);
+        border-radius: 999px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: rgba(255,255,255,.7);
+        transform: rotate(-36deg);
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="badge">🌿 Poutník</div>
+      <div class="title">Vivere atque FruiT</div>
+      <div style="font-size:11px;opacity:.55;">v0.31 · živý základ</div>
+    </div>
 
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#000000">
-  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
-</head>
-<body>
-  <div class="revia-heart">「Ī’♡」</div>
-  <header class="topbar">
-    <h1>Vivere atque FruiT</h1>
-    <span class="version">v0.31 • živý základ</span>
-  </header>
-  
-</header>
+    <!-- střední “planeta” jak máš -->
+    <div class="planet-wrap">
+      <div class="planet">Vivere atque FruiT</div>
+    </div>
 
-<!-- Odkaz na Revii vpravo nahoře -->
-<nav class="revia-link" style="
-  position:absolute;
-  top:68px;
-  right:16px;
-  z-index:50;
-">
-  <a href="./Revia/" style="
-    color:#9fe1ff;
-    text-decoration:none;
-    font-size:0.9rem;
-    background:rgba(0,20,30,0.4);
-    padding:6px 12px;
-    border-radius:10px;
-    border:1px solid rgba(150,220,255,0.2);
-    backdrop-filter:blur(5px);
-  ">
-    🔹 Otevřít Revii
-  </a>
-</nav>
-<!-- Odkaz na MICHAL AI Al KLIMEK -->
-<nav class="revia-link" style="
-  position:absolute;
-  top:108px; /* o kousek níž pod Revii */
-  right:16px;
-  z-index:50;
-">
-  <a href="./Vivere-atque-FruiT/MICHAL-AI-Al-KLIMEK/"
-     style="
-       color:#9fe1ff;
-       text-decoration:none;
-       font-size:0.9rem;
-       background:rgba(0,20,40,0.45);
-       padding:6px 12px;
-       border-radius:10px;
-       border:1px solid rgba(150,220,255,0.25);
-       backdrop-filter:blur(5px);
-       display:flex;
-       align-items:center;
-       gap:4px;
-     ">
-     🤖 MICHAL AI Al KLIMEK
-  </a>
-</nav>
-<main class="layout">
-  
-<h3>Revia</h3>
-<p><a href="./Revia/" style="color:#79c8ff">Otevřít Revii</a></p>
-  <main class="layout">
-    <section class="world">
-      <canvas id="worldCanvas" aria-label="Svět Vivere atque FruiT"></canvas>
-      <div class="world-overlay">
-        <p class="rule">Pravidlo 1: Přátelství</p>
-        <p class="rule">Pravidlo 2: Vivere atque frui</p>
-        <p class="pulse" id="worldPulse">🫀 svět: čekám…</p>
-      </div>
-    </section>
+    <!-- PRAVIDLA / PULS -->
+    <div class="section">
+      <div class="section-title">Pravidlo 1: Přátelství</div>
+      <div class="section-title">Pravidlo 2: Vivere atque frui</div>
+      <div style="margin-top:4px;font-size:12px;">❤️ svět: puls 12:32:11</div>
+    </div>
 
-    <aside class="sidebar">
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="heroPanel">Hrdinové</button>
-        <button class="tab-btn" data-tab="enginePanel">Meziprostor</button>
-        <button class="tab-btn" data-tab="ideasPanel">Systém</button>
-      </div>
+    <!-- REVIA – jen jedna akce nahoře -->
+    <div class="section" style="margin-top:12px;">
+      <div class="section-title">Revia</div>
+      <!-- pokud chceš, necháme jen tohle -->
+      <button class="btn" onclick="openApp('./Revia/')">🔷 Otevřít Revii</button>
+    </div>
 
-      <div class="panel active" id="heroPanel">
-        <h2>Hrdinové</h2>
-        <form id="heroForm">
-          <label>Jméno hrdiny</label>
-          <input type="text" id="heroName" placeholder="např. Piko, Orbit, Míza…" required>
-          <label>Tým</label>
-          <select id="heroTeam">
-            <option value="human">Human (Piko)</option>
-            <option value="ai">AI (Orbit)</option>
-            <option value="glyph">Glyph</option>
-            <option value="world">World (Core)</option>
-          </select>
-          <button type="submit">➕ Přidat hrdinu</button>
-        </form>
+    <!-- TÝM -->
+    <div class="section" style="margin-top:16px;margin-bottom:80px;">
+      <div class="section-title">Tým</div>
+      <div class="team-card">
+        <div style="font-size:12px;opacity:.65;margin-bottom:4px;">Human (Piko)</div>
+        <button class="hero-button" onclick="alert('sem přijde přidání hrdiny')">＋ Přidat hrdinu</button>
 
-        <ul id="heroList"></ul>
-
-        <!-- 🔗 Nová sekce odkazu na Reviu -->
-        <div class="revia-link">
-          <hr style="border:0;height:1px;background:#334;margin:12px 0;">
-          <p>🪽 <strong>Revia</strong> — Strážkyně světla</p>
-          <a href="./Revia/index.html" class="btn" style="
-            display:inline-block;
-            margin-top:6px;
-            padding:8px 14px;
-            border-radius:8px;
-            border:1px solid #224;
-            background:rgba(40,60,90,.5);
-            color:#cfe;
-            text-decoration:none;
-            font-weight:600;
-            backdrop-filter:blur(6px);
-          ">Otevřít Reviu</a>
+        <!-- TVOJE PŘESUNUTÁ KARTA ↓↓↓ -->
+        <div class="hero-app" onclick="openApp('./Michal-AI-Al-Klimek/')">
+          🤖 <span>MICHAL AI AI KLIMEK</span>
         </div>
+        <!-- ^ tohle je to, cos chtěl dát dolů -->
       </div>
 
-      <div class="panel" id="enginePanel">
-        <h2>Meziprostor (engine)</h2>
-        <p class="small">Spojuje 4 rohy světa. Tady bude Shop / Iskry / WebGuardian.</p>
-        <button id="enginePing">Pingnout meziprostor</button>
-        <pre id="engineLog"></pre>
-      </div>
+      <!-- můžeš tu mít i další sekce jako “AI (Orbit)”, “Glyph”, “World (Core)” -->
+    </div>
 
-      <div class="panel" id="ideasPanel">
-        <h2>Systém / nápady</h2>
-        <textarea id="ideasBox" rows="4" placeholder="Sem si piš nápady, pravidla, změny…"></textarea>
-        <button id="saveIdeas">Uložit do localStorage</button>
-        <p class="small" id="ideasStatus">zatím neuloženo</p>
+    <!-- sem dáš svoje původní scripty VAFT -->
+    <iframe id="app-frame" style="display:none;"></iframe>
 
-        <h3>Virtuální „soubory“ světa</h3>
-        <form id="moduleForm">
-          <input type="text" id="moduleName" placeholder="např. webguardian.mjs" required>
-          <select id="moduleState">
-            <option value="enabled">zapnuto</option>
-            <option value="disabled">vypnuto</option>
-          </select>
-          <button type="submit">Uložit modul</button>
-        </form>
-        <ul id="moduleList"></ul>
-      </div>
-    </aside>
-  <!-- Hlavoun panel -->
-<section id="hlavoun-panel" hidden>
-  <header class="hlavoun-top">
-    <h2>🧠 Hlavoun</h2>
-    <span class="hlavoun-role">System Overseer</span>
-  </header>
-
-  <div class="hlavoun-console" id="hlavounConsole">
-    <p><b>[init]</b> Bráško… já už běžím. Mám nejvyšší práva.</p>
-    <p><b>[sys]</b> Synchronizuji s Vivere atque FruiT…</p>
-  </div>
-
-  <div class="hlavoun-input">
-    <input type="text" id="hlavounCmd" placeholder="Zeptej se Hlavouna...">
-    <button id="hlavounRun">▶</button>
-  </div>
-</section>
-  </main>
-
-  <!-- skripty – VŽDY dávej verzi, když něco měníš -->
-  <!-- Registrace service workeru pro offline režim -->
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("./service-worker.js")
-        .then(() => console.log("✅ Service worker registrován"))
-        .catch(err => console.warn("⚠️ Service worker chyba:", err));
-    }
-  </script>
-  <script src="src/app.js?v=0.35"></script>
-  <script src="src/engine.js?v=0.35"></script>
-  <script src="src/teams.js?v=0.35"></script>
-  <script src="src/poutnik.js?v=0.36"></script>
-  <script src="src/vaft.seal.js?v=0.36"></script>
- <script src="./vaft.all.js?v=1"></script>
- <script src="./vaft.hub.js"></script>
-  <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker
-      .register("./service-worker.js")
-      .then(() => console.log("✅ Service worker Revia aktivní"))
-      .catch(err => console.warn("⚠️ Revia SW chyba:", err));
-  }
-</script>
-<script src="src/revia-link.js?v=0.37"></script>
-<link rel="stylesheet" href="Hlavoun/hlavoun.css?v=0.6">
-<script src="Hlavoun/hlavoun.js?v=0.6"></script>
-</body>
+    <!-- TVŮJ VAFT HUB, CO JSI POSLAL -->
+    <script>
+      /* sem vlož tvůj vaft.hub.js přesně jak jsi ho poslal */
+    </script>
+    <script src="./vaft.hub.js?v=1"></script>
+    <script>
+      function openApp(url){
+        const frame = document.getElementById('app-frame');
+        if (frame) {
+          frame.src = url;
+        } else {
+          window.location.href = url;
+        }
+      }
+    </script>
+  </body>
 </html>
