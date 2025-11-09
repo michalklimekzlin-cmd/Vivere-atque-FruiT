@@ -5,72 +5,53 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Revia • Vivere atque FruiT</title>
 
-    <!-- Styl -->
-    <link rel="stylesheet" href="./revia.css?v=0.5">
-
+    <link rel="stylesheet" href="./revia.css?v=0.6">
     <style>
-      /* 🌌 Optimalizace pozadí – aby byly vidět ruce (iPhone 14 / mobile) */
       body {
-        background-size: auto 70vh;         /* menší výška pro celé tělo */
-        background-position: center 18vh;   /* posun nahoru */
+        background-size: auto 70vh;
+        background-position: center 18vh;
         background-repeat: no-repeat;
         background-attachment: fixed;
         background-color: #000;
       }
-
-      /* iPhone Pro / SE drobné doladění */
       @media (max-height: 820px) {
-        body {
-          background-size: auto 68vh;
-          background-position: center 20vh;
-        }
+        body { background-size: auto 68vh; background-position: center 20vh; }
       }
-
-      /* Na větších displejích (iPad, PC) */
       @media (min-height: 900px) {
-        body {
-          background-size: auto 78vh;
-          background-position: center 15vh;
-        }
+        body { background-size: auto 78vh; background-position: center 15vh; }
       }
-
-      /* Na menších telefonech (např. iPhone SE) */
       @media (max-width: 480px) {
-        body {
-          background-size: auto 88vh;
-          background-position: center 0;
-        }
+        body { background-size: auto 88vh; background-position: center 0; }
       }
     </style>
   </head>
 
   <body>
-    <!-- 🩶 hlavní plátno Revie -->
-    <div class="revia-main" data-mode="angel">
+    <div class="revia-main" data-mode="angel" data-control="ai">
       
       <!-- horní lišta -->
       <div class="revia-topbar">
         <button class="revia-wing" id="revWing" aria-label="otevřít zápisník"></button>
         <div class="revia-title">Revia</div>
+        <!-- stav kdo ji drží -->
+        <div class="revia-state" id="revState">AI: hlídám svět</div>
       </div>
 
-      <!-- zápisník z křídla -->
+      <!-- zápisník -->
       <div class="revia-notes" id="revNotes">
         <div class="notes-head">
           <span>✧ Křídlo / zápis</span>
           <button id="notesClose" type="button">×</button>
         </div>
-        <textarea id="notesText" placeholder="Sem si můžeš psát drobnosti, charakter, co má Revia dávat hráčům…"></textarea>
-        <p class="notes-foot">Ukládá se do localStorage v tomto zařízení.</p>
+        <textarea id="notesText" placeholder="Charakter, úkoly, komu se ukáže…"></textarea>
+        <p class="notes-foot">Ukládá se jen do tohoto zařízení.</p>
       </div>
 
-      <!-- mřížka slotů (6) -->
+      <!-- mřížka slotů -->
       <div class="revia-card">
-        <!-- SLOT 1 – náš přepínací glyph -->
         <button class="revia-slot active" id="slot1" type="button">
           <span class="revia-glyph" id="slot1Glyph">「Ī’☆</span>
         </button>
-        <!-- ostatní zatím prázdné -->
         <button class="revia-slot" type="button"></button>
         <button class="revia-slot" type="button"></button>
         <button class="revia-slot" type="button"></button>
@@ -81,16 +62,18 @@
       <!-- spodní panel -->
       <div class="revia-bottom">
         <div class="revia-mini">Ī’♡</div>
+
+        <!-- TADY JE TO TVÉ „VLÉZT“ -->
+        <button class="revia-enter" id="revEnter" type="button" disabled>🔒 Vstoupit</button>
+
         <button class="revia-toggle" id="revToggle" type="button">🔁 Přepnout</button>
         <button class="revia-help" id="revHelp" type="button">?</button>
       </div>
 
-      <!-- malá bublina pomoc -->
       <div class="revia-toast" id="revToast" aria-live="polite"></div>
     </div>
 
-    <!-- 🧠 skripty -->
-    <script src="./revia.js?v=0.5"></script>
+    <script src="./revia.js?v=0.6"></script>
     <script src="../vaft-core.js"></script>
   </body>
 </html>
