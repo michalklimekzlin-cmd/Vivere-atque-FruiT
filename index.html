@@ -3,32 +3,261 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Vivere atque FruiT • Center 3D</title>
-    <link rel="stylesheet" href="./style.css">
-  </head>
+    <title>Vivere atque FruiT</title>
+    <style>
+      :root {
+        --bg: radial-gradient(circle at top, #0b1222 0%, #05070f 45%, #000 100%);
+        --card: rgba(5,8,12,0.35);
+        --stroke: rgba(255,255,255,0.02);
+        --text: #fff;
+        --accent: #38bdf8;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        font-family: -apple-system, system-ui, sans-serif;
+        color: var(--text);
+        padding-bottom: 90px;
+      }
+      header {
+        padding: 16px 16px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+      }
+      .role {
+        background: rgba(34,197,94,.1);
+        border: 1px solid rgba(34,197,94,.35);
+        color: #d1fae5;
+        padding: 3px 10px 4px;
+        border-radius: 999px;
+        font-size: .65rem;
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .title-wrap {
+        padding: 4px 16px 0;
+      }
+      .title-big {
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: .01rem;
+      }
+      .subline {
+        opacity: .4;
+        font-size: .65rem;
+      }
+      .top-btn {
+        background: rgba(7,89,133,.15);
+        border: 1px solid rgba(59,130,246,.4);
+        border-radius: 14px;
+        color: #fff;
+        padding: 7px 14px;
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .world-card {
+        margin: 16px;
+        background: rgba(4,6,10,.4);
+        border: 1px solid rgba(255,255,255,.01);
+        border-radius: 20px;
+        padding: 12px 14px 14px;
+      }
+      .world-name {
+        font-weight: 500;
+        margin-bottom: 8px;
+      }
+      .pulse {
+        background: rgba(248,113,113,.04);
+        border: 1px solid rgba(248,113,113,.15);
+        border-radius: 15px;
+        padding: 6px 10px;
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        font-size: .7rem;
+      }
+      .pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: #f43f5e;
+        border-radius: 50%;
+        animation: blip 2s infinite;
+      }
+      @keyframes blip {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .2; }
+      }
+      /* orbit kolečka – jen vizuál */
+      .orbit-row {
+        margin-top: 14px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .orbit {
+        width: 68px;
+        height: 68px;
+        border-radius: 999px;
+        border: 2px solid rgba(34,197,94,.35);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .55rem;
+        opacity: .55;
+      }
 
-  <body>
-    <!-- 🌍 Hlavní 3D plátno -->
-    <canvas id="vaft3d"></canvas>
+      /* TÝM */
+      .section {
+        margin: 6px 16px 0;
+      }
+      .section-title {
+        font-weight: 500;
+        margin-bottom: 6px;
+      }
+      .team-card {
+        background: rgba(4,6,10,.4);
+        border: 1px solid rgba(255,255,255,.01);
+        border-radius: 16px;
+        padding: 10px;
+      }
+      .select {
+        width: 100%;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.03);
+        border-radius: 12px;
+        padding: 7px 10px;
+        color: #fff;
+      }
+      .btn-add {
+        margin-top: 10px;
+        background: linear-gradient(120deg, #10b981, #059669);
+        border: none;
+        border-radius: 14px;
+        padding: 7px 0;
+        color: #fff;
+        font-weight: 500;
+      }
 
-    <!-- 🛰 Tlačítko pro otevření komety -->
-    <button class="btn" onclick="openApp('./VAFT-Comet/')">🛰 Kometa 2025</button>
-
-    <!-- 📦 3D knihovny -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
-
-    <!-- ⚙️ Hlavní 3D logika -->
-    <script src="./center.js"></script>
-
-    <!-- 🧭 Seznam podaplikací -->
-    <script src="./vaft.apps.js"></script>
-
-    <!-- 🧠 Jednoduché přepínání mezi aplikacemi -->
+      /* VAFT – tvoje appky */
+      .apps-wrap {
+        margin: 16px;
+        background: rgba(3,5,9,.3);
+        border: 1px solid rgba(255,255,255,.01);
+        border-radius: 18px;
+        overflow: hidden;
+      }
+      .apps-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 11px 14px;
+      }
+      .apps-title { font-weight: 500; }
+      .apps-body {
+        border-top: 1px solid rgba(255,255,255,.01);
+      }
+      .app-row {
+        padding: 9px 14px;
+        border-bottom: 1px solid rgba(255,255,255,.01);
+      }
+      .app-row:last-child { border-bottom: none; }
+      .app-btn {
+        background: rgba(15,118,178,.18);
+        border: 1px solid rgba(59,130,246,.12);
+        border-radius: 10px;
+        padding: 5px 11px;
+        color: #fff;
+        font-size: .7rem;
+        margin-top: 5px;
+      }
+    </style>
     <script>
-      function openApp(url) {
+      function openApp(url){
         window.location.href = url;
       }
+      // malý puls času
+      function tick(){
+        const el = document.getElementById('pulseTime');
+        if(!el) return;
+        const d = new Date();
+        const h = String(d.getHours()).padStart(2,'0');
+        const m = String(d.getMinutes()).padStart(2,'0');
+        const s = String(d.getSeconds()).padStart(2,'0');
+        el.textContent = h + ":" + m + ":" + s;
+      }
+      document.addEventListener('DOMContentLoaded', () => {
+        tick();
+        setInterval(tick, 1000);
+      });
     </script>
+  </head>
+  <body>
+    <header>
+      <span class="role">🌿 Poutník</span>
+      <button class="top-btn" onclick="openApp('./Revia/')">🔷 Otevřít Revii</button>
+    </header>
+
+    <div class="title-wrap">
+      <div class="title-big">Vivere atque FruiT</div>
+      <div class="subline">v0.31 • živý základ</div>
+    </div>
+
+    <div class="world-card">
+      <div class="world-name">Revia</div>
+      <div class="pulse">
+        <span class="pulse-dot"></span>
+        <span>❤️ svět: puls <span id="pulseTime">00:00:00</span></span>
+      </div>
+      <div class="orbit-row">
+        <div class="orbit">Glyph</div>
+        <div class="orbit">AI (Orbit)</div>
+        <div class="orbit">World (Core)</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Tým</div>
+      <div class="team-card">
+        <label style="font-size:.7rem;opacity:.55;">Tým</label>
+        <select class="select">
+          <option>Human (Piko)</option>
+        </select>
+        <button class="btn-add">+ Přidat hrdinu</button>
+      </div>
+    </div>
+
+    <div class="section" style="margin-top:14px;">
+      <div class="section-title">🪽 Revia — Strážkyně světla</div>
+      <button class="app-btn" style="width:100%;" onclick="openApp('./Revia/')">Otevřít Revii</button>
+    </div>
+
+    <div class="apps-wrap">
+      <div class="apps-head">
+        <div class="apps-title">VAFT – tvoje appky</div>
+        <div style="opacity:.35;font-size:.7rem;">—</div>
+      </div>
+      <div class="apps-body">
+        <div class="app-row">
+          <div style="font-size:.8rem;">VAFT Center 3D</div>
+          <div style="opacity:.3;font-size:.6rem;">původní 3D scéna</div>
+          <button class="app-btn" onclick="openApp('./VAFT-Center3D/')">Otevřít</button>
+        </div>
+        <div class="app-row">
+          <div style="font-size:.8rem;">Kometa 3I / ATLAS</div>
+          <div style="opacity:.3;font-size:.6rem;">atlas dráhy (work in progress)</div>
+          <button class="app-btn" onclick="openApp('./VAFT-Comet/')">Otevřít</button>
+        </div>
+        <div class="app-row">
+          <div style="font-size:.8rem;">Další modul</div>
+          <div style="opacity:.3;font-size:.6rem;">sem přidáš další složku</div>
+          <button class="app-btn" onclick="alert('Tady pak přidáme další složku 🙂')">Přidat</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
