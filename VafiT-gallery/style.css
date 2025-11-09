@@ -1,8 +1,12 @@
-body { background:#000; color:#fff; font-family:system-ui; text-align:center; }
-.gallery { padding:20px; }
+body { background:#000; color:#fff; font-family:system-ui; margin:0; }
+.gallery { padding:16px; text-align:center; }
+.grid { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:16px; }
 .vafit {
-  display:inline-block; margin:8px; padding:10px 16px;
-  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);
-  border-radius:10px; cursor:pointer; transition:0.2s;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  padding:12px 16px;
+  cursor:pointer;
+  min-width:70px;
 }
-.vafit:hover { background:rgba(255,255,255,0.15); }
+.vafit:hover { background:rgba(255,255,255,.15); }
