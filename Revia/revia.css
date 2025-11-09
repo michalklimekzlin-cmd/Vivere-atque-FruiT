@@ -1,4 +1,4 @@
-/* 🌌 Revia v0.71 – plná výška na iPhone + světelné přechody */
+/* 🌌 Revia v0.73 – optimalizace pro iPhone, full-screen background + světelný přechod */
 
 /* základ */
 html, body {
@@ -11,38 +11,42 @@ html, body {
   overflow: hidden;
 }
 
-/* 🔮 hlavní plátno – už BEZ contain, vždy přes celou plochu */
+/* 🔮 hlavní plátno – full-screen background */
 .revia-main {
   position: relative;
   width: 100%;
   height: 100%;
   background-image: url("./revia-bg-angel.jpg");
-  background-size: cover;           /* ⬅ důležité */
-  background-position: center top;  /* ať je hlava nahoře */
+  background-size: cover !important;
+  background-position: center top !important;
   background-repeat: no-repeat;
-  background-attachment: scroll;    /* iPhone nemá rád fixed */
-  transition: background-image 1s ease-in-out,
-              filter 1s ease-in-out,
-              background-size 1s;
+  background-attachment: scroll;
+  transition: background-image 1s ease-in-out, filter 1s ease-in-out;
   filter: brightness(1.08) saturate(1.1);
 }
 
-/* 🩶 režimy */
+/* režim démon */
 .revia-main[data-mode="daemon"] {
   background-image: url("./revia-bg-daemon.jpg");
   filter: brightness(0.88) saturate(1.2);
 }
-.revia-main[data-mode="angel"] {
-  filter: brightness(1.08) saturate(1.1);
-}
 
-/* 📱 mobile force – kdyby si iPhone dělal chytrého */
-@media (max-width: 900px) {
-  .revia-main {
-    background-size: cover !important;
-    background-position: center top !important;
-    background-attachment: scroll !important;
-  }
+/* přechod dole, aby to nebylo utnuté */
+.revia-main::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 38vh;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,.65) 55%,
+    #000 100%
+  );
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* horní lišta */
@@ -56,12 +60,13 @@ html, body {
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
+  z-index: 2;
   opacity: 0;
   animation: fadeInTop 1.6s ease forwards 0.5s;
 }
 @keyframes fadeInTop {
+  to { opacity: 1; transform: translateY(0); }
   from { opacity: 0; transform: translateY(-10px); }
-  to   { opacity: 1; transform: translateY(0); }
 }
 .revia-title {
   color: #e9f4ff;
@@ -84,6 +89,7 @@ html, body {
   background-size: 74%;
   cursor: pointer;
   transition: .3s;
+  z-index: 2;
 }
 .revia-wing:hover {
   transform: scale(1.05);
@@ -105,6 +111,7 @@ html, body {
   padding: 10px 12px;
   box-sizing: border-box;
   transition: left .4s ease;
+  z-index: 2;
 }
 .revia-notes.open { left: 10px; }
 .notes-head {
@@ -141,102 +148,4 @@ html, body {
 /* mřížka slotů */
 .revia-card {
   position: absolute;
-  bottom: 23%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(480px, 92vw);
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  justify-items: center;
-}
-
-/* sloty */
-.revia-slot {
-  width: 108px;
-  height: 108px;
-  border-radius: 22px;
-  border: 1px solid rgba(121,193,255,0.08);
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), rgba(1,7,12,0.07));
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.25),
-              inset 0 0 15px rgba(255,255,255,0.03);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: .25s;
-}
-.revia-slot:hover {
-  transform: scale(1.03);
-  border-color: rgba(134,208,255,.4);
-}
-.revia-slot.active {
-  box-shadow: 0 0 25px rgba(160,233,255,.55);
-}
-
-/* glyph */
-.revia-glyph {
-  font-size: 2.2rem;
-  color: #f2fbff;
-  text-shadow: 0 0 12px rgba(196,238,255,.5);
-}
-
-/* spodní panel */
-.revia-bottom {
-  position: absolute;
-  bottom: 12px;
-  left: 0;
-  width: 100%;
-  padding: 0 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-sizing: border-box;
-}
-.revia-mini {
-  color: rgba(230,245,255,.7);
-  font-size: 1.4rem;
-}
-.revia-help {
-  width: 56px;
-  height: 56px;
-  border-radius: 19px;
-  border: 1px solid rgba(234,245,255,.12);
-  background: rgba(1,8,12,.25);
-  color: #fff;
-  font-size: 1.7rem;
-  backdrop-filter: blur(6px);
-}
-.revia-toggle {
-  background: rgba(5,13,26,.65);
-  border: 1px solid rgba(218,237,255,.1);
-  color: #f4fcff;
-  border-radius: 16px;
-  padding: 7px 26px;
-  backdrop-filter: blur(6px);
-}
-
-/* toast */
-.revia-toast {
-  position: absolute;
-  top: 60px;
-  right: 16px;
-  background: rgba(3,10,15,.85);
-  border: 1px solid rgba(232,244,255,.06);
-  color: #fff;
-  border-radius: 12px;
-  padding: 8px 12px;
-  font-size: .8rem;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .25s;
-}
-.revia-toast.show { opacity: 1; }
-
-/* menší displej */
-@media (max-width: 430px) {
-  .revia-card { bottom: 21%; gap: 10px; }
-  .revia-slot { width: 100px; height: 100px; }
-  .revia-glyph { font-size: 1.9rem; }
-}
+ 
