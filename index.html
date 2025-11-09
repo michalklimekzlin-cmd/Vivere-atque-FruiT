@@ -170,13 +170,23 @@
       }
 
       function sendToHlavoun() {
-        const inp = document.getElementById('hlavoun-input');
-        if (!inp || !inp.value.trim()) return;
-        const text = inp.value.trim();
-        appendHlavounMsg('user', text);
-        inp.value = '';
-        if (window.HlavounSystem) window.HlavounSystem.think(text);
-      }
+  const inp = document.getElementById('hlavoun-input');
+  if (!inp || !inp.value.trim()) return;
+
+  const text = inp.value.trim();
+  appendHlavounMsg('user', text);
+  inp.value = '';
+
+  // 🔹 starý systém (kompatibilita)
+  if (window.HlavounSystem) {
+    window.HlavounSystem.think(text);
+  }
+
+  // 🔹 nový duo systém (rovnocenný Hlavoun + Viri)
+  if (window.AgentBus) {
+    window.AgentBus.handleUserMessage(text);
+  }
+}
 
       function sendQuickToHlavoun(text){
         const inp = document.getElementById('hlavoun-input');
