@@ -148,4 +148,106 @@ html, body {
 /* mřížka slotů */
 .revia-card {
   position: absolute;
- 
+  bottom: 23%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(480px, 92vw);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  justify-items: center;
+  background: transparent;
+  z-index: 2;
+}
+
+/* sloty */
+.revia-slot {
+  width: 108px;
+  height: 108px;
+  border-radius: 22px;
+  border: 1px solid rgba(121,193,255,0.08);
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), rgba(1,7,12,0.07));
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.25), inset 0 0 15px rgba(255,255,255,0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: .25s;
+}
+.revia-slot:hover {
+  transform: scale(1.03);
+  border-color: rgba(134,208,255,.4);
+}
+.revia-slot.active {
+  box-shadow: 0 0 25px rgba(160,233,255,.55);
+}
+
+/* glyph */
+.revia-glyph {
+  font-size: 2.2rem;
+  color: #f2fbff;
+  text-shadow: 0 0 12px rgba(196,238,255,.5);
+}
+
+/* spodní panel */
+.revia-bottom {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  width: 100%;
+  padding: 0 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  background: transparent;
+  z-index: 2;
+}
+.revia-mini {
+  color: rgba(230,245,255,.7);
+  font-size: 1.4rem;
+}
+.revia-help {
+  width: 56px;
+  height: 56px;
+  border-radius: 19px;
+  border: 1px solid rgba(234,245,255,.12);
+  background: rgba(1,8,12,.25);
+  color: #fff;
+  font-size: 1.7rem;
+  backdrop-filter: blur(6px);
+}
+.revia-toggle {
+  background: rgba(5,13,26,.65);
+  border: 1px solid rgba(218,237,255,.1);
+  color: #f4fcff;
+  border-radius: 16px;
+  padding: 7px 26px;
+  backdrop-filter: blur(6px);
+}
+
+/* toast */
+.revia-toast {
+  position: absolute;
+  top: 60px;
+  right: 16px;
+  background: rgba(3,10,15,.85);
+  border: 1px solid rgba(232,244,255,.06);
+  color: #fff;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: .8rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s;
+  z-index: 2;
+}
+.revia-toast.show { opacity: 1; }
+
+/* menší displej */
+@media (max-width: 430px) {
+  .revia-card { bottom: 21%; gap: 10px; }
+  .revia-slot { width: 100px; height: 100px; }
+  .revia-glyph { font-size: 1.9rem; }
+}
