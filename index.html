@@ -2,177 +2,273 @@
 <html lang="cs">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>Vivere atque FruiT</title>
+    <meta name="theme-color" content="#020617">
     <style>
       :root {
-        --bg: radial-gradient(circle at top, #0b1222 0%, #05070f 45%, #000 100%);
-        --card: rgba(5,8,12,0.35);
-        --stroke: rgba(255,255,255,0.02);
-        --text: #fff;
+        --page-bg: radial-gradient(circle at top, #020617 0%, #010814 40%, #000 100%);
+        --card: rgba(2,6,23,0.55);
+        --stroke: rgba(255,255,255,.03);
+        --txt: #e2e8f0;
+        --muted: rgba(226,232,240,.45);
         --accent: #38bdf8;
       }
       * { box-sizing: border-box; }
+
       body {
         margin: 0;
         min-height: 100vh;
-        background: var(--bg);
-        font-family: -apple-system, system-ui, sans-serif;
-        color: var(--text);
+        background: var(--page-bg);
+        color: var(--txt);
+        font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", sans-serif;
         padding-bottom: 90px;
       }
-      header {
+
+      /* top bar */
+      .topbar {
         padding: 16px 16px 0;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        gap: 16px;
+        justify-content: space-between;
+        gap: 12px;
       }
-      .role {
-        background: rgba(34,197,94,.1);
-        border: 1px solid rgba(34,197,94,.35);
-        color: #d1fae5;
+      .brand-block {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .brand-mini {
+        font-size: .58rem;
+        opacity: .5;
+      }
+      .brand-title {
+        font-size: 1.15rem;
+        font-weight: 600;
+        letter-spacing: .01em;
+      }
+      .role-badge {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        background: rgba(74,222,128,.08);
+        border: 1px solid rgba(74,222,128,.28);
         padding: 3px 10px 4px;
         border-radius: 999px;
-        font-size: .65rem;
-        display: inline-flex;
-        gap: 6px;
-        align-items: center;
+        font-size: .62rem;
+        margin-top: 3px;
       }
-      .title-wrap {
-        padding: 4px 16px 0;
-      }
-      .title-big {
-        font-size: 1.25rem;
-        font-weight: 600;
-        letter-spacing: .01rem;
-      }
-      .subline {
-        opacity: .4;
-        font-size: .65rem;
-      }
-      .top-btn {
-        background: rgba(7,89,133,.15);
-        border: 1px solid rgba(59,130,246,.4);
+      .coins {
+        background: rgba(15,23,42,.65);
+        border: 1px solid rgba(148,163,184,.2);
+        padding: 6px 10px 5px;
         border-radius: 14px;
-        color: #fff;
-        padding: 7px 14px;
-        display: inline-flex;
-        gap: 6px;
+        display: flex;
+        gap: 4px;
         align-items: center;
       }
-      .world-card {
-        margin: 16px;
-        background: rgba(4,6,10,.4);
-        border: 1px solid rgba(255,255,255,.01);
+      .coin-icon {
+        width: 22px;
+        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle, #eab308 0%, #92400e 95%);
+        border-radius: 999px;
+        font-size: .6rem;
+      }
+      .coin-text {
+        font-size: .6rem;
+        text-align: right;
+        line-height: 1.05;
+      }
+      .ver {
+        font-size: .6rem;
+        opacity: .35;
+      }
+
+      /* REVIA PANEL – střed s kolečky */
+      .revia-panel {
+        margin: 14px 16px 0;
+        background: radial-gradient(circle at center, rgba(2,6,23,.6) 0%, rgba(2,6,23,0) 65%);
+        border: 1px solid rgba(148,163,184,0.05);
         border-radius: 20px;
-        padding: 12px 14px 14px;
+        padding: 10px 10px 14px;
+        position: relative;
+        overflow: hidden;
       }
-      .world-name {
-        font-weight: 500;
-        margin-bottom: 8px;
-      }
-      .pulse {
-        background: rgba(248,113,113,.04);
-        border: 1px solid rgba(248,113,113,.15);
-        border-radius: 15px;
-        padding: 6px 10px;
-        display: inline-flex;
-        gap: 6px;
-        align-items: center;
-        font-size: .7rem;
-      }
-      .pulse-dot {
-        width: 8px;
-        height: 8px;
-        background: #f43f5e;
-        border-radius: 50%;
-        animation: blip 2s infinite;
-      }
-      @keyframes blip {
-        0%, 100% { opacity: 1; }
-        50% { opacity: .2; }
-      }
-      /* orbit kolečka – jen vizuál */
-      .orbit-row {
-        margin-top: 14px;
+      .revia-head {
         display: flex;
         justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
       }
-      .orbit {
-        width: 68px;
-        height: 68px;
+      .revia-title {
+        font-weight: 500;
+      }
+      .revia-link {
+        color: #38bdf8;
+        font-size: .68rem;
+      }
+      .rules {
+        font-size: .58rem;
+        background: rgba(15,23,42,.4);
+        border: 1px solid rgba(148,163,184,.1);
+        border-radius: 12px;
+        padding: 6px 8px 6px;
+        display: inline-flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .pulse-line {
+        margin-top: 6px;
+        font-size: .6rem;
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        background: rgba(248,113,113,.03);
+        border: 1px solid rgba(248,113,113,.12);
         border-radius: 999px;
-        border: 2px solid rgba(34,197,94,.35);
+        padding: 4px 8px;
+      }
+      .pulse-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: #f43f5e;
+        animation: blip 2s infinite;
+      }
+      @keyframes blip { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+      /* kruhy */
+      .center-orbit {
+        position: relative;
+        margin-top: 16px;
+        height: 220px;
+      }
+      .vaft-core {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 130px;
+        height: 130px;
+        margin-left: -65px;
+        margin-top: -65px;
+        border: 1px solid rgba(56,189,248,.4);
+        border-radius: 999px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: .55rem;
-        opacity: .55;
+        color: rgba(226,232,240,.8);
+        font-size: .62rem;
+        text-align: center;
+        animation: spin 12s linear infinite;
       }
+      @keyframes spin { 0%{transform:translate(-0%,-0%) rotate(0deg);} 100%{transform:translate(-0%,-0%) rotate(360deg);} }
+
+      .orbit-node {
+        position: absolute;
+        width: 70px;
+        height: 70px;
+        border: 1.2px solid rgba(126,248,156,.45);
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .58rem;
+        background: rgba(15,23,42,.1);
+        backdrop-filter: blur(4px);
+      }
+      .node-glyph { left: 10px; bottom: 8px; }
+      .node-ai { right: 12px; top: 12px; }
+      .node-world { right: 14px; bottom: 14px; }
 
       /* TÝM */
-      .section {
-        margin: 6px 16px 0;
+      .team-card {
+        margin: 10px 16px 0;
+        background: rgba(2,6,23,.55);
+        border: 1px solid rgba(148,163,184,.04);
+        border-radius: 16px;
+        padding: 10px 10px 12px;
       }
-      .section-title {
+      .team-label {
+        font-size: .62rem;
+        opacity: .45;
+        margin-bottom: 3px;
+      }
+      .team-select {
+        width: 100%;
+        background: rgba(15,23,42,.55);
+        border: 1px solid rgba(148,163,184,.12);
+        border-radius: 10px;
+        color: #fff;
+        padding: 6px 8px;
+        font-size: .7rem;
+      }
+      .btn-add {
+        margin-top: 9px;
+        background: #0ea5e9;
+        border: none;
+        border-radius: 999px;
+        padding: 6px 12px;
+        color: #fff;
+        font-weight: 500;
+        font-size: .7rem;
+      }
+
+      /* Revia blok */
+      .rev-block {
+        margin: 14px 16px 0;
+        background: rgba(2,6,23,.4);
+        border: 1px solid rgba(148,163,184,.04);
+        border-radius: 16px;
+        padding: 10px 10px 12px;
+      }
+      .rev-title {
         font-weight: 500;
         margin-bottom: 6px;
       }
-      .team-card {
-        background: rgba(4,6,10,.4);
-        border: 1px solid rgba(255,255,255,.01);
-        border-radius: 16px;
-        padding: 10px;
-      }
-      .select {
-        width: 100%;
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.03);
-        border-radius: 12px;
-        padding: 7px 10px;
-        color: #fff;
-      }
-      .btn-add {
-        margin-top: 10px;
-        background: linear-gradient(120deg, #10b981, #059669);
-        border: none;
+      .btn-open {
+        background: rgba(15,118,178,.35);
+        border: 1px solid rgba(125,211,252,.2);
         border-radius: 14px;
-        padding: 7px 0;
+        padding: 6px 11px;
         color: #fff;
         font-weight: 500;
+        font-size: .7rem;
       }
 
-      /* VAFT – tvoje appky */
+      /* apps */
       .apps-wrap {
         margin: 16px;
-        background: rgba(3,5,9,.3);
-        border: 1px solid rgba(255,255,255,.01);
-        border-radius: 18px;
+        background: rgba(2,6,23,.35);
+        border: 1px solid rgba(148,163,184,.04);
+        border-radius: 16px;
         overflow: hidden;
       }
       .apps-head {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 11px 14px;
+        padding: 10px 12px;
       }
       .apps-title { font-weight: 500; }
-      .apps-body {
-        border-top: 1px solid rgba(255,255,255,.01);
-      }
+      .apps-body { border-top: 1px solid rgba(148,163,184,.03); }
+
       .app-row {
-        padding: 9px 14px;
-        border-bottom: 1px solid rgba(255,255,255,.01);
+        padding: 9px 12px;
+        border-bottom: 1px solid rgba(148,163,184,.03);
       }
       .app-row:last-child { border-bottom: none; }
+      .app-name { font-size: .78rem; }
+      .app-desc { font-size: .6rem; opacity: .4; }
       .app-btn {
-        background: rgba(15,118,178,.18);
-        border: 1px solid rgba(59,130,246,.12);
+        background: rgba(56,189,248,.12);
+        border: 1px solid rgba(56,189,248,.12);
         border-radius: 10px;
-        padding: 5px 11px;
+        padding: 4px 11px 5px;
         color: #fff;
-        font-size: .7rem;
+        font-size: .67rem;
         margin-top: 5px;
       }
     </style>
@@ -182,93 +278,113 @@
         window.location.href = url;
       }
 
-      // malý puls času
       function tick(){
         const el = document.getElementById('pulseTime');
         if(!el) return;
         const d = new Date();
-        const h = String(d.getHours()).padStart(2,'0');
-        const m = String(d.getMinutes()).padStart(2,'0');
-        const s = String(d.getSeconds()).padStart(2,'0');
-        el.textContent = h + ":" + m + ":" + s;
+        el.textContent = d.toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
       }
+
       document.addEventListener('DOMContentLoaded', () => {
         tick();
         setInterval(tick, 1000);
+
+        // když jsi ve VafiT galerii něco vybral, ukážeme to nahoře
+        const chosen = localStorage.getItem('VAFT_SELECTED_VAFIT');
+        if (chosen) {
+          try {
+            const obj = JSON.parse(chosen);
+            const place = document.getElementById('selectedVafit');
+            if (place && obj && obj.name) {
+              place.textContent = "Vybraný VafiT: " + obj.name + " " + (obj.glyph || "");
+              place.style.opacity = "0.65";
+            }
+          } catch(e){}
+        }
       });
     </script>
   </head>
-
   <body>
-    <header>
-      <span class="role">🌿 Poutník</span>
-      <button class="top-btn" onclick="openApp('./Revia/')">🔷 Otevřít Revii</button>
-    </header>
-
-    <div class="title-wrap">
-      <div class="title-big">Vivere atque FruiT</div>
-      <div class="subline">v0.31 • živý základ</div>
+    <!-- horní pás -->
+    <div class="topbar">
+      <div class="brand-block">
+        <div class="brand-mini">Ĭ’♡ ↓</div>
+        <div class="brand-title">Vivere atque FruiT</div>
+        <div class="role-badge">🌿 Poutník</div>
+      </div>
+      <div class="coins">
+        <div class="coin-icon">💰</div>
+        <div class="coin-text">
+          <div>0</div>
+          <div class="ver">v0.31 • živý základ</div>
+        </div>
+      </div>
     </div>
 
-    <div class="world-card">
-      <div class="world-name">Revia</div>
-      <div class="pulse">
+    <!-- REVIA / svět -->
+    <div class="revia-panel">
+      <div class="revia-head">
+        <div class="revia-title">Revia</div>
+        <a class="revia-link" href="javascript:void(0)" onclick="openApp('./Revia/')">Otevřít Revii →</a>
+      </div>
+      <div class="rules">
+        <span>Pravidlo 1 : Přátelství</span>
+        <span>Pravidlo 2 : Vivere atque frui</span>
+      </div>
+      <div class="pulse-line">
         <span class="pulse-dot"></span>
         <span>❤️ svět: puls <span id="pulseTime">00:00:00</span></span>
       </div>
-      <div class="orbit-row">
-        <div class="orbit">Glyph</div>
-        <div class="orbit">AI (Orbit)</div>
-        <div class="orbit">World (Core)</div>
+
+      <div class="center-orbit">
+        <div class="vaft-core">Vivere <br>atque FruiT</div>
+        <div class="orbit-node node-glyph">Glyph</div>
+        <div class="orbit-node node-ai">AI (Orbit)</div>
+        <div class="orbit-node node-world">World (Core)</div>
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-title">Tým</div>
-      <div class="team-card">
-        <label style="font-size:.7rem;opacity:.55;">Tým</label>
-        <select class="select">
-          <option>Human (Piko)</option>
-        </select>
-        <button class="btn-add">+ Přidat hrdinu</button>
-      </div>
+    <!-- tým -->
+    <div class="team-card">
+      <div class="team-label">Tým</div>
+      <select class="team-select">
+        <option>Human (Piko)</option>
+      </select>
+      <button class="btn-add" onclick="alert('Tady pak otevřeme výběr hrdiny / VafiTa 🙂')">+ Přidat hrdinu</button>
+      <div id="selectedVafit" style="font-size:.58rem;opacity:0;margin-top:6px;transition:.3s;"></div>
     </div>
 
-    <div class="section" style="margin-top:14px;">
-      <div class="section-title">🪽 Revia — Strážkyně světla</div>
-      <button class="app-btn" style="width:100%;" onclick="openApp('./Revia/')">Otevřít Revii</button>
+    <!-- Revia detail -->
+    <div class="rev-block">
+      <div class="rev-title">🪽 Revia — Strážkyně světla</div>
+      <button class="btn-open" onclick="openApp('./Revia/')">Otevřít Revii</button>
     </div>
 
-    <!-- 🔹 TVOJE APLIKACE -->
+    <!-- appky -->
     <div class="apps-wrap">
       <div class="apps-head">
         <div class="apps-title">VAFT – tvoje appky</div>
         <div style="opacity:.35;font-size:.7rem;">—</div>
       </div>
-
       <div class="apps-body">
         <div class="app-row">
-          <div style="font-size:.8rem;">VAFT Center 3D</div>
-          <div style="opacity:.3;font-size:.6rem;">původní 3D scéna</div>
+          <div class="app-name">VAFT Center 3D</div>
+          <div class="app-desc">původní 3D scéna</div>
           <button class="app-btn" onclick="openApp('./VAFT-Center3D/')">Otevřít</button>
         </div>
-
         <div class="app-row">
-          <div style="font-size:.8rem;">Kometa 3I / ATLAS</div>
-          <div style="opacity:.3;font-size:.6rem;">atlas dráhy (work in progress)</div>
+          <div class="app-name">Kometa 3I / ATLAS</div>
+          <div class="app-desc">atlas dráhy (work in progress)</div>
           <button class="app-btn" onclick="openApp('./VAFT-Comet/')">Otevřít</button>
         </div>
-
-        <!-- 🔸 Nové tlačítko: VafiT galerie -->
         <div class="app-row">
-          <div style="font-size:.8rem;">VafiT galerie</div>
-          <div style="opacity:.3;font-size:.6rem;">výběr a příběhy VafiTů</div>
+          <div class="app-name">VafiT galerie</div>
+          <div class="app-desc">výběr a příběhy VafiTů</div>
           <button class="app-btn" onclick="openApp('./VafiT-gallery/index.html')">Otevřít</button>
         </div>
-
         <div class="app-row">
-          <div style="font-size:.8rem;">Další modul</div>
-          <div style="opacity:.3;font-size:.6rem;">sem přidáš další složku</div>
+          <div class="app-name">Další modul</div>
+          <div class="app-desc">sem přidáš další složku</div>
           <button class="app-btn" onclick="alert('Tady pak přidáme další složku 🙂')">Přidat</button>
         </div>
       </div>
