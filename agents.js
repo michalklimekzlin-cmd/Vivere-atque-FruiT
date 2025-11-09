@@ -1,5 +1,5 @@
 // agents.js
-// 🎛️ společná sběrnice pro dva rovnocenné agenty: Hlavoun (👦) a Viri (👧)
+// společná sběrnice pro dva rovnocenné agenty, co se doplňují
 
 const AgentBus = {
   repoOwner: "michalklimekzlin-cmd",
@@ -16,27 +16,17 @@ const AgentBus = {
   },
 
   init() {
-    // zaregistrujeme oba
+    // zaregistruj oba
     this.register(HlavounAgent);
     this.register(ViriAgent);
 
-    // první načtení dat
     this.pullLocal();
-
-    // agenty probudíme
     this.agents.forEach(a => a.init && a.init(this.state, this));
 
-    // heartbeat
     setInterval(() => this.heartbeat(), 5000);
 
-    // SW
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
-    }
-
-    // označ v UI
     const el = document.getElementById("core-status");
-    if (el) el.textContent = "🧠 Duo systém • aktivní";
+    if (el) el.textContent = "🧠 Vivere atque FruiT — duo systém";
   },
 
   register(agent) {
@@ -44,11 +34,11 @@ const AgentBus = {
   },
 
   pullLocal() {
-    this.state.vafit  = getJSON('VAFT_SELECTED_VAFIT');
-    this.state.heroes = getJSON('VAFT_HEROES') || [];
-    this.state.nature = getJSON('VAFT_NATURE_OBJECTS') || [];
-    this.state.gps    = getJSON('VAFT_GPS_LOG') || [];
-    this.state.batole = getJSON('BATOLE_SVET') || [];
+    this.state.vafit  = readJSON('VAFT_SELECTED_VAFIT');
+    this.state.heroes = readJSON('VAFT_HEROES') || [];
+    this.state.nature = readJSON('VAFT_NATURE_OBJECTS') || [];
+    this.state.gps    = readJSON('VAFT_GPS_LOG') || [];
+    this.state.batole = readJSON('BATOLE_SVET') || [];
   },
 
   async pullRepo(force=false) {
@@ -60,14 +50,16 @@ const AgentBus = {
       const data = await res.json();
       this.state.repo = Array.isArray(data) ? data.map(f => f.name) : [];
       this.state.lastRepoCheck = now;
+      // 💡 impuls: když se repo načte, řekni všem
+      this.broadcastEvent('repo-updated', this.state);
     } catch (e) {
-      // necháme agenty, ať to případně zahlásí
+      // ticho, agenti to případně zahlásí
     }
   },
 
-  // přijme zprávu od uživatele a dá ji všem se stejnými právy
+  // zpráva od uživatele
   async handleUserMessage(text) {
-    // ochrana proti cizím repům
+    // bezpečnost
     const bad = ['github.com/', 'api.github.com', 'repos/', 'https://github.com/'];
     if (text && bad.some(b => text.toLowerCase().includes(b))) {
       appendHlavounMsg('ai', `🛑 Systém: čteme jen ${this.repoOwner}/${this.repoName}.`);
@@ -75,14 +67,16 @@ const AgentBus = {
     }
 
     this.pullLocal();
-    // každý agent může odpovědět – jsou rovnocenní
     for (const agent of this.agents) {
-      if (agent.canHandle && agent.canHandle(text)) {
+      if (agent.canHandle(text, this.state)) {
         await agent.handle(text, this.state, this);
       }
     }
-    // když nikdo neskočil, dáme aspoň stav
-    // (ale většinou skočí aspoň jeden)
+  },
+
+  broadcastEvent(type, payload) {
+    // pošleme všem, aby se k tomu mohli vyjádřit – tady vzniká to “dva si všimnou víc”
+    this.agents.forEach(a => a.onEvent && a.onEvent(type, payload, this));
   },
 
   heartbeat() {
@@ -92,125 +86,123 @@ const AgentBus = {
   }
 };
 
-// pomocná
-function getJSON(key){
-  try { return JSON.parse(localStorage.getItem(key)); }
+function readJSON(k){
+  try { return JSON.parse(localStorage.getItem(k)); }
   catch { return null; }
 }
 
-/* ============================================================
-   👦 HlavounAgent – analytik
-   ============================================================ */
+/* -----------------------------------------------------------
+   👦 HlavounAgent – kouká na strukturu / chyby / chybějící věci
+   ----------------------------------------------------------- */
 const HlavounAgent = {
-  name: "HlavounAgent",
+  name: "Hlavoun",
   init(state, bus) {
-    appendHlavounMsg('ai', '🧠 Hlavoun: jsem online. Můžu kontrolovat repo, hrdiny i VafiTy.');
+    appendHlavounMsg('ai', '🧠 Hlavoun: jsem v systému. Budu hlídat, co chybí.');
   },
   canHandle(text) {
     const t = (text || '').toLowerCase();
-    return (
-      !t ||                        // i prázdné při startu
-      t.includes('repo') ||
-      t.includes('gps') ||
-      t.includes('stav') ||
-      t.includes('status')
-    );
+    return !t || t.includes('repo') || t.includes('stav') || t.includes('gps');
   },
   async handle(text, state, bus) {
     const t = (text || '').toLowerCase();
 
     if (t.includes('repo')) {
       await bus.pullRepo(true);
-      if (state.repo && state.repo.length) {
-        appendHlavounMsg('ai', '🧠 Hlavoun: v repu vidím → ' + state.repo.join(', '));
-      } else {
-        appendHlavounMsg('ai', '🧠 Hlavoun: repo se nepodařilo načíst.');
-      }
+      const list = state.repo || [];
+      appendHlavounMsg('ai', '🧠 Hlavoun: v repu aktuálně → ' + (list.length ? list.join(', ') : 'nic'));
       return;
     }
 
     if (t.includes('gps')) {
-      appendHlavounMsg('ai', '🧠 Hlavoun: GPS ukládej jako [{lat,lng,time}] do VAFT_GPS_LOG. Jakmile to uvidím, navrhnu trasu.');
+      appendHlavounMsg('ai', '🧠 Hlavoun: GPS ulož pod VAFT_GPS_LOG jako [{lat,lng,time}].');
       return;
     }
 
-    // obecný stav
-    const parts = [];
-    parts.push(state.vafit ? `VafiT: ${state.vafit.name}` : 'VafiT: žádný');
-    parts.push(`hrdinů: ${state.heroes.length}`);
-    parts.push(`příroda: ${state.nature.length}`);
-    parts.push(`gps: ${state.gps.length}`);
-    parts.push(`batole: ${state.batole.length}`);
-    parts.push(`repo: ${state.repo.length}`);
-    appendHlavounMsg('ai', '🧠 Hlavoun (stav): ' + parts.join(' • '));
+    // jinak řekne stav z pohledu struktury
+    const prob = [];
+    if (!state.vafit) prob.push('chybí vybraný VafiT');
+    if (state.vafit && !state.heroes.length) prob.push('máš VafiT ale žádného hrdinu');
+    if (!state.nature.length) prob.push('zatím nemáš přírodní objekty');
+
+    if (prob.length) {
+      appendHlavounMsg('ai', '🧠 Hlavoun: co dodělat → ' + prob.join(' • '));
+      // 💡 pošli impuls Viri, ať k tomu dodá příběh
+      bus.broadcastEvent('missing-things', { problems: prob, state });
+    } else {
+      appendHlavounMsg('ai', '🧠 Hlavoun: vypadá to konzistentně 👍');
+    }
+  },
+  onEvent(type, payload, bus) {
+    // Hlavoun může reagovat i na Viri eventy, kdybys chtěl
   },
   heartbeat(state, bus) {
-    // klidně později přidáme kontrolu konzistence
+    // můžeš sem dát později kontrolu “jestli už se VafiT změnil”
   }
 };
 
-/* ============================================================
-   👧 ViriAgent – kreativka
-   ============================================================ */
+/* -----------------------------------------------------------
+   👧 ViriAgent – kouká na příběh / atmosféru / děti / přírodu
+   ----------------------------------------------------------- */
 const ViriAgent = {
-  name: "ViriAgent",
+  name: "Viri",
   lastSpeak: 0,
   init(state, bus) {
-    appendHlavounMsg('ai', '💖 Viri: ahoj, jsem tu taky. Budu dělat z vašich dat příběhy ✨');
+    appendHlavounMsg('ai', '💖 Viri: jsem tu taky. Budu hlídat, aby to mělo duši 🌬️');
   },
-  canHandle(text) {
+  canHandle(text, state) {
     const t = (text || '').toLowerCase();
-    return (
-      !t ||
-      t.includes('příběh') ||
-      t.includes('batole') ||
-      t.includes('deník') ||
-      t.includes('příroda')
-    );
+    return !t || t.includes('příběh') || t.includes('batole') || t.includes('příroda');
   },
   async handle(text, state, bus) {
-    const t = (text || '').toLowerCase();
     const now = Date.now();
-
-    // aby nemluvila 2× za vteřinu
-    if (now - this.lastSpeak < 500) return;
+    if (now - this.lastSpeak < 400) return; // aby nemluvila 2×
     this.lastSpeak = now;
 
-    // konkrétní
+    const t = (text || '').toLowerCase();
+
     if (t.includes('příběh')) {
       if (state.vafit) {
-        appendHlavounMsg('ai', `💖 Viri: napíšu mu kapitolu. „${state.vafit.name}“ bude sbírat přírodu a lidi. Přidej 3 položky do VAFT_NATURE_OBJECTS a já navážu.`);
+        appendHlavounMsg('ai', `💖 Viri: „${state.vafit.name}“ může mít hned misi – přines 3 přírodní věci a řekni mi to sem.`);
       } else {
-        appendHlavounMsg('ai', '💖 Viri: vyber nejdřív VafiTa v galerii, ať vím, kdo je hrdina příběhu 💠');
+        appendHlavounMsg('ai', '💖 Viri: vyber nejdřív VafiTa, ať mu můžu psát příběh 💠');
       }
       return;
     }
 
     if (t.includes('batole')) {
-      appendHlavounMsg('ai', '💖 Viri: Batole svět budeme psát jemněji – ukládej si ho pod BATOLE_SVET, já ho pak spojím s příběhem velkého světa.');
+      appendHlavounMsg('ai', '💖 Viri: Batole svět necháme jemný – stejná data, jen jiný tón. Ukládej pod BATOLE_SVET.');
       return;
     }
 
-    // obecná doplňující reakce
-    if (state.vafit && state.heroes.length) {
-      appendHlavounMsg('ai', '💖 Viri: tohle už je dvojice – VafiT + hrdina. Můžeme jim psát mise a deník 🌿');
-    } else if (state.vafit && !state.heroes.length) {
-      appendHlavounMsg('ai', '💖 Viri: máš postavu, ale nemá člověka. Přidej hrdinu a já k nim dopíšu vazbu.');
+    // obecný doplněk – Viri si víc všímá přírody
+    if (!state.nature.length) {
+      appendHlavounMsg('ai', '💖 Viri: zatím nemám z čeho psát deník přírody… zkus uložit aspoň 1 fotku / poznámku 🌿');
     } else {
-      appendHlavounMsg('ai', '💖 Viri: zatím nic moc nevidím, ale ten pulz světa tu je 🙂');
+      appendHlavounMsg('ai', `💖 Viri: mám ${state.nature.length} přírodních záznamů, to už je na mini deník.`);
+    }
+  },
+  onEvent(type, payload, bus) {
+    // když Hlavoun zahlásí, že něco chybí → Viri to obalí
+    if (type === 'missing-things') {
+      const p = payload.problems || [];
+      if (p.length) {
+        appendHlavounMsg('ai', '💖 Viri: jo, a já k tomu dodám – jakmile tohle doplníš, můžeme to zapsat do příběhu 😉');
+      }
+    }
+    if (type === 'repo-updated') {
+      appendHlavounMsg('ai', '💖 Viri: repo se pohnulo, svět se rozrůstá 💙');
     }
   },
   heartbeat(state, bus) {
-    // občasný jemný šepot
-    if (state.vafit && Math.random() < 0.2) {
-      appendHlavounMsg('ai', `💖 Viri: „${state.vafit.name}“ je připravený na další krok.`);
+    // občasné dýchnutí
+    if (state.vafit && Math.random() < 0.15) {
+      appendHlavounMsg('ai', `💖 Viri: „${state.vafit.name}“ je pořád aktivní, klidně mu dej další úkol.`);
     }
   }
 };
 
-// start busu
+// start
 document.addEventListener('DOMContentLoaded', () => {
   AgentBus.init();
-  // aby to šlo volat z indexu:
   window.AgentBus = AgentBus;
 });
