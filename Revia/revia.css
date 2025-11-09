@@ -30,16 +30,43 @@ body {
 }
 
 /* ✨ efekt přepínání a světel */
+/* 🌠 Dynamická optimalizace pozadí – vždy celý obrázek */
 .revia-main {
   position: relative;
   width: 100%;
   height: 100%;
-  background-size: contain;
-  background-position: center top;
-  background-repeat: no-repeat;
   background-image: url("./revia-bg-angel.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   transition: background-image 1s ease-in-out, filter 1s ease-in-out;
 }
+
+/* démon */
+.revia-main[data-mode="daemon"] {
+  background-image: url("./revia-bg-daemon.jpg");
+  filter: brightness(0.88) saturate(1.15);
+}
+
+/* anděl */
+.revia-main[data-mode="angel"] {
+  filter: brightness(1.08) saturate(1.1);
+}
+
+/* přizpůsobení výšce obrazovky */
+@media (max-aspect-ratio: 9/16) {
+  .revia-main {
+    background-size: contain;      /* pokud je displej hodně vysoký (např. iPhone) */
+    background-position: center top;
+  }
+}
+
+@media (min-aspect-ratio: 16/9) {
+  .revia-main {
+    background-size: cover;        /* na širších zařízeních (iPad, PC) */
+    background-position: center center;
+  }
 
 .revia-main[data-mode="daemon"] {
   background-image: url("./revia-bg-daemon.jpg");
