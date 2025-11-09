@@ -36,6 +36,14 @@ function sendHeartbeat() {
   window.__VAFT_HEARTBEAT_LAST__ = map;
 }
 
+// 💡 generátor paliva z pulsu (napojení na VAFT.fuel)
+if (window.VAFT && VAFT.fuel && typeof VAFT.fuel.generateRandom === "function") {
+  VAFT.__fuelCounter = (VAFT.__fuelCounter || 0) + 1;
+  if (VAFT.__fuelCounter % 5 === 0) {
+    VAFT.fuel.generateRandom();
+    console.log("💧 Palivo vytvořeno ze života světa (písmeno)");
+  }
+
 function getOnlineNodes() {
   const now = Date.now();
   const raw = localStorage.getItem(VAFT_HEARTBEAT_KEY);
