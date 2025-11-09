@@ -3,21 +3,32 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Vivere atque FruiT</title>
+    <title>Vivere atque FruiT • Center 3D</title>
     <link rel="stylesheet" href="./style.css">
   </head>
+
   <body>
-    <!-- 3D plátno -->
+    <!-- 🌍 Hlavní 3D plátno -->
     <canvas id="vaft3d"></canvas>
 
-    <!-- three.js z CDN -->
+    <!-- 🛰 Tlačítko pro otevření komety -->
+    <button class="btn" onclick="openApp('./VAFT-Comet/')">🛰 Kometa 2025</button>
+
+    <!-- 📦 3D knihovny -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
 
-    <!-- tvoje 3D scéna -->
+    <!-- ⚙️ Hlavní 3D logika -->
     <script src="./center.js"></script>
 
-    <!-- nový seznam modulů / appek -->
+    <!-- 🧭 Seznam podaplikací -->
     <script src="./vaft.apps.js"></script>
+
+    <!-- 🧠 Jednoduché přepínání mezi aplikacemi -->
+    <script>
+      function openApp(url) {
+        window.location.href = url;
+      }
+    </script>
   </body>
 </html>
