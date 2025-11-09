@@ -1,4 +1,4 @@
-/* 🌌 Revia v0.7 – plně dynamická verze pro iPhone + světelné přechody */
+/* 🌌 Revia v0.71 – plná výška na iPhone + světelné přechody */
 
 /* základ */
 html, body {
@@ -11,17 +11,19 @@ html, body {
   overflow: hidden;
 }
 
-/* 🔮 hlavní plátno – automatický optimalizer */
+/* 🔮 hlavní plátno – už BEZ contain, vždy přes celou plochu */
 .revia-main {
   position: relative;
   width: 100%;
   height: 100%;
   background-image: url("./revia-bg-angel.jpg");
-  background-size: cover;
-  background-position: center center;
+  background-size: cover;           /* ⬅ důležité */
+  background-position: center top;  /* ať je hlava nahoře */
   background-repeat: no-repeat;
-  background-attachment: fixed;
-  transition: background-image 1s ease-in-out, filter 1s ease-in-out, background-size 1s;
+  background-attachment: scroll;    /* iPhone nemá rád fixed */
+  transition: background-image 1s ease-in-out,
+              filter 1s ease-in-out,
+              background-size 1s;
   filter: brightness(1.08) saturate(1.1);
 }
 
@@ -34,18 +36,12 @@ html, body {
   filter: brightness(1.08) saturate(1.1);
 }
 
-/* 📱 dynamické přizpůsobení poměru stran */
-@media (max-aspect-ratio: 9/16) {
+/* 📱 mobile force – kdyby si iPhone dělal chytrého */
+@media (max-width: 900px) {
   .revia-main {
-    background-size: contain;      
-    background-position: center top;
-    background-attachment: scroll;
-  }
-}
-@media (min-aspect-ratio: 16/9) {
-  .revia-main {
-    background-size: cover;
-    background-position: center center;
+    background-size: cover !important;
+    background-position: center top !important;
+    background-attachment: scroll !important;
   }
 }
 
@@ -64,8 +60,8 @@ html, body {
   animation: fadeInTop 1.6s ease forwards 0.5s;
 }
 @keyframes fadeInTop {
-  to { opacity: 1; transform: translateY(0); }
   from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .revia-title {
   color: #e9f4ff;
@@ -163,7 +159,8 @@ html, body {
   border: 1px solid rgba(121,193,255,0.08);
   background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18), rgba(1,7,12,0.07));
   backdrop-filter: blur(10px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.25), inset 0 0 15px rgba(255,255,255,0.03);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.25),
+              inset 0 0 15px rgba(255,255,255,0.03);
   display: flex;
   align-items: center;
   justify-content: center;
