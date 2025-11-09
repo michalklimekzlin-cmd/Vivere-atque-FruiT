@@ -169,13 +169,17 @@
         localStorage.setItem('VAFT_HLAVOUN_LOG', JSON.stringify(log));
       }
 
-      function sendToHlavoun() {
+     function sendToHlavoun() {
   const inp = document.getElementById('hlavoun-input');
   if (!inp || !inp.value.trim()) return;
-
   const text = inp.value.trim();
   appendHlavounMsg('user', text);
   inp.value = '';
+
+  // náš nový rodinný bus
+  if (window.VAFTBus) {
+    window.VAFTBus.handleUserMessage(text);
+  }
 
   // 🔹 starý systém (kompatibilita)
   if (window.HlavounSystem) {
