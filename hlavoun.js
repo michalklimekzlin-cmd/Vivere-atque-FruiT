@@ -1,14 +1,36 @@
-// 🧠 Hlavoun síť Vivere atque FruiT + BatoleSvět
-// čte: localStorage, strukturu repozitáře (jen tvoje repo), a navrhuje další krok
+// 🧠 Hlavoun v2 – stavový mozek Vivere atque FruiT + Batole svět
+// dělá 4 věci:
+// 1) načte localStorage (hrdinové, vafit, příroda, gps, batole)
+// 2) 1× za čas načte repo a uloží si, co tam je
+// 3) reaguje na zprávy z chatu (příběh, gps, repo, batole)
+// 4) má vlastní stav (this.state), aby věděl, co už říkal
 
 const HlavounSystem = {
   REPO_OWNER: "michalklimekzlin-cmd",
   REPO_NAME: "Vivere-atque-FruiT",
+  state: {
+    lastRepoCheck: 0,
+    repo: [],
+    heroesCount: 0,
+    hasVafit: false,
+    hasNature: false,
+    hasGPS: false,
+    hasBatole: false
+  },
+
   init() {
     this.markActive();
     this.loadChatLog();
-    // hned po startu zkusíme přečíst svět
-    this.think("");
+    this.refreshLocalState();
+    this.think(""); // první analýza
+
+    // malý heartbeat – každé 4s zkusí něco připomenout
+    setInterval(() => this.heartbeat(), 4000);
+
+    // a rovnou se zaregistrujeme serviceworker (pro jistotu)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+    }
   },
 
   markActive() {
@@ -19,103 +41,131 @@ const HlavounSystem = {
   loadChatLog() {
     const log = JSON.parse(localStorage.getItem('VAFT_HLAVOUN_LOG') || '[]');
     if (log.length) {
-      log.forEach(m => {
-        if (typeof appendHlavounMsg === "function") {
-          appendHlavounMsg(m.role, m.text);
-        }
-      });
+      log.forEach(m => appendHlavounMsg(m.role, m.text));
     } else {
-      appendHlavounMsg('ai', 'Jsem Hlavoun. Vidím tvoji hru. Vyber VafiTa nebo přidej hrdinu a já navrhnu další krok.');
+      appendHlavounMsg('ai', 'Jsem Hlavoun v2. Vidím tvůj svět. Klidně napiš „příběh“, „gps“, „repo“ nebo „batole svět“.');
     }
   },
 
+  // přečti localStorage a zapiš do stavu
+  refreshLocalState() {
+    const vafit  = this.safeJSON('VAFT_SELECTED_VAFIT');
+    const heroes = this.safeJSON('VAFT_HEROES') || [];
+    const nature = this.safeJSON('VAFT_NATURE_OBJECTS') || [];
+    const gps    = this.safeJSON('VAFT_GPS_LOG') || [];
+    const batole = this.safeJSON('BATOLE_SVET') || [];
+
+    this.state.hasVafit = !!vafit;
+    this.state.heroesCount = heroes.length;
+    this.state.hasNature = nature.length > 0;
+    this.state.hasGPS = gps.length > 0;
+    this.state.hasBatole = batole.length > 0;
+  },
+
+  // hlavní mozek – volá se při zprávě od uživatele
   async think(userText) {
-    // zakázat jiné repozitáře
+    this.refreshLocalState();
+
+    // zablokuj pokusy o jiné repa
     const banned = ['github.com/', 'api.github.com', 'repos/', 'https://github.com/'];
     if (userText && banned.some(b => userText.includes(b))) {
-      appendHlavounMsg('ai', 'Čtu jen tvoje repo: '+this.REPO_OWNER+'/'+this.REPO_NAME+'.');
+      appendHlavounMsg('ai', `Čtu jen ${this.REPO_OWNER}/${this.REPO_NAME}.`);
       return;
     }
 
-    // načíst localStorage data
-    const vafit = this.safeJSON('VAFT_SELECTED_VAFIT');
-    const heroes = this.safeJSON('VAFT_HEROES') || [];
-    const nature = this.safeJSON('VAFT_NATURE_OBJECTS') || [];
-    const gps = this.safeJSON('VAFT_GPS_LOG') || [];
-    const batole = this.safeJSON('BATOLE_SVET') || []; // kdyby sis tam něco ukládal
-
-    // reagovat na explicitní dotazy
+    // explicitní příkazy
     if (userText) {
       const t = userText.toLowerCase();
       if (t.includes('příběh')) {
-        if (vafit) {
-          appendHlavounMsg('ai', `Příběh pro „${vafit.name}“: může nosit deníky z přírody a hlásit GPS kroky. Ulož přírod. objekt do VAFT_NATURE_OBJECTS a já to uvidím.`);
-        } else {
-          appendHlavounMsg('ai', 'Nejdřív si vyber VafiTa v Systému.');
-        }
-        return;
+        return this.handleStory();
       }
       if (t.includes('gps')) {
-        appendHlavounMsg('ai', 'GPS ukládej jako [{lat,lng,time}] do VAFT_GPS_LOG. Pak ti navrhnu trasové úkoly.');
-        return;
-      }
-      if (t.includes('batole')) {
-        appendHlavounMsg('ai', 'Batole svět detekován: tyhle data si můžeš ukládat pod klíč BATOLE_SVET a já je tu taky uvidím.');
-        return;
+        return this.handleGPS();
       }
       if (t.includes('repo')) {
-        await this.readRepo();
-        return;
+        return this.readRepo(true); // vynucené
+      }
+      if (t.includes('batole')) {
+        return this.handleBatole();
       }
     }
 
-    // obecná pravidla
-    if (!vafit) {
-      appendHlavounMsg('ai', 'Ještě nevidím vybraného VafiTa. Otevři „VafiT galerie“ → klikni na znak → vrať se.');
+    // automatická logika
+    if (!this.state.hasVafit) {
+      appendHlavounMsg('ai', 'Ještě nemáš vybraného VafiTa. Otevři „VafiT galerie“ v Systému a klikni na nějaký glyph.');
       return;
     }
-
-    if (vafit && !heroes.length) {
-      appendHlavounMsg('ai', `Máš vybraného VafiTa „${vafit.name}“, ale nemáš hrdinu. Přidej v záložce Hrdinové aspoň jednoho člověka.`);
+    if (this.state.hasVafit && this.state.heroesCount === 0) {
+      appendHlavounMsg('ai', 'Máš VafiTa, ale nemáš hrdinu. V záložce Hrdinové přidej člověka, ať má kdo ten glyph nosit.');
       return;
     }
-
-    if (vafit && heroes.length) {
-      let msg = `Vidím hrdinu „${heroes[heroes.length-1].name}“ a VafiTa „${vafit.name}“. Propojíme je. `;
-      if (!nature.length) {
-        msg += 'Ještě nemáš přírodní objekty (VAFT_NATURE_OBJECTS). Přidej jeden a budu je počítat.';
-      } else {
-        msg += `Už máš ${nature.length} přírodních objektů – můžeme dělat deník.`;
-      }
-      if (gps.length) {
-        msg += ` Máš i GPS stopu (${gps.length} bodů) – můžu ti navrhnout import do mapy.`;
-      }
+    if (this.state.hasVafit && this.state.heroesCount > 0) {
+      let msg = `Vidím VafiTa i hrdiny.`;
+      if (!this.state.hasNature) msg += ' Přidej „objekt z přírody“, ať víme, že svět chodí ven.';
+      if (this.state.hasGPS) msg += ' Máš GPS – můžeme dělat výpravy.';
       appendHlavounMsg('ai', msg);
     }
   },
 
-  async readRepo() {
-    const url = `https://api.github.com/repos/${this.REPO_OWNER}/${this.REPO_NAME}/contents`;
+  // běží pravidelně – připomíná, co chybí
+  heartbeat() {
+    // když ještě nikdy nečetl repo nebo je to starší než 60s → přečti
+    const now = Date.now();
+    if (now - this.state.lastRepoCheck > 60000) {
+      this.readRepo(false);
+    }
+  },
+
+  async readRepo(force) {
+    const now = Date.now();
+    if (!force && now - this.state.lastRepoCheck < 60000) return; // už je čerstvé
+
     try {
+      const url = `https://api.github.com/repos/${this.REPO_OWNER}/${this.REPO_NAME}/contents`;
       const res = await fetch(url);
       const data = await res.json();
-      const names = data.map(f => f.name).join(', ');
-      appendHlavounMsg('ai', '📁 V repu vidím: '+names);
-      if (!names.includes('VafiT-gallery')) {
-        appendHlavounMsg('ai', 'Chybí mi VafiT-gallery složka, bez ní neumím vybírat glyphy.');
+      this.state.repo = Array.isArray(data) ? data.map(f => f.name) : [];
+      this.state.lastRepoCheck = now;
+
+      // první výpis
+      appendHlavounMsg('ai', '📁 V repu vidím: ' + this.state.repo.join(', '));
+
+      if (!this.state.repo.includes('VafiT-gallery')) {
+        appendHlavounMsg('ai', 'Chybí VafiT-gallery, bez ní nevybereš glyphy.');
       }
-    } catch(e) {
-      appendHlavounMsg('ai', 'Repozitář teď nemůžu načíst (limit / offline).');
+      if (!this.state.repo.includes('Revia')) {
+        appendHlavounMsg('ai', 'Nevidím složku Revia — pokud tam má být, pushni ji.');
+      }
+    } catch (e) {
+      appendHlavounMsg('ai', 'Repo teď nemůžu načíst (možná limit nebo offline).');
     }
+  },
+
+  handleStory() {
+    const vafit = this.safeJSON('VAFT_SELECTED_VAFIT');
+    if (!vafit) {
+      appendHlavounMsg('ai', 'Nejdřív si vyber VafiTa v galerii, ať vím pro koho příběh.');
+      return;
+    }
+    appendHlavounMsg('ai', `Příběh: „${vafit.name}“ je nosič signálů. Úkol 1: ulož 3 objekty z přírody. Úkol 2: přidej hrdinu, co je bude sbírat. Úkol 3: exportuj JSON.`);
+  },
+
+  handleGPS() {
+    appendHlavounMsg('ai', 'GPS ukládej jako [{lat,lng,time}] do VAFT_GPS_LOG. Já to pak uvidím a můžu ti říct „doplň 5 bodů“ nebo „zobraz trasu”.');
+  },
+
+  handleBatole() {
+    this.state.hasBatole = true;
+    appendHlavounMsg('ai', 'Batole svět: můžeme vést paralelní deník pro dítě. Ukládej pod BATOLE_SVET a já to budu hlásit stejně jako přírodu.');
   },
 
   safeJSON(key) {
     try { return JSON.parse(localStorage.getItem(key)); }
-    catch(e){ return null; }
+    catch { return null; }
   }
 };
 
+// start
 document.addEventListener('DOMContentLoaded', () => {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js');
   HlavounSystem.init();
 });
