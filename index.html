@@ -267,12 +267,12 @@
 
     <!-- TABS -->
     <div class="tabs">
-      <button class="tab-btn active" data-tab="heroes">Hrdinové</button>
-      <button class="tab-btn" data-tab="space">Meziprostor</button>
-      <button class="tab-btn" data-tab="system">Systém</button>
-      <button class="tab-btn" data-tab="nodes">Síť</button>
-      <button class="tab-btn" data-tab="worlds">Světy</button>
-    </div>
+  <button class="tab-btn active" data-tab="heroes">Hrdinové</button>
+  <button class="tab-btn" data-tab="space">Meziprostor</button>
+  <button class="tab-btn" data-tab="system">Systém</button>
+  <button class="tab-btn" data-tab="nodes">Síť</button>
+  <button class="tab-btn" data-tab="worlds">Světy</button>
+</div>
 
     <!-- PANEL: HRDINOVÉ -->
     <div class="panel active" id="panel-heroes">
@@ -308,29 +308,34 @@
     </div>
 
     <!-- PANEL: SYSTÉM -->
-    <div class="panel" id="panel-system">
-      <div class="panel-title">Systém / appky</div>
-      <p style="opacity:.65;font-size:.7rem;">
-        Všechno jsme schovali do jednoho okna, ať je pořádek. 👇
-      </p>
-      <button class="btn-primary system-open-btn" onclick="toggleSystemMenu()">Otevřít systémové appky</button>
-    </div>
+<div class="panel" id="panel-system">
+  <div class="panel-title">Systém / appky</div>
+  <p style="opacity:.65;font-size:.7rem;">
+    Všechno jsme schovali do jednoho okna, ať je pořádek. 👇
+  </p>
+  <button class="btn-primary system-open-btn" onclick="toggleSystemMenu()">Otevřít systémové appky</button>
+</div>
 
-    <!-- PANEL: SÍŤ -->
-    <div class="panel" id="panel-nodes">
-      <div class="panel-title">Síť uzlů</div>
-      <p style="opacity:.6;font-size:.7rem;">Tady se zobrazují všechny živé čtverečky napojené na Vivere atque FruiT.</p>
-      <div id="vaft-nodes"></div>
-      <div id="vaft-nodes-outer"></div>
-      <div id="vaft-nodes-mirror"></div>
-      <div id="vaft-nodes-origin"></div>
-      <p style="opacity:.4;font-size:.65rem;margin-top:4px;">(síť se načte až když ji otevřeš – kvůli výkonu iPhonu)</p>
-   
-      <!-- PANEL: SVĚTY VIVERE ATQUE FRUIT -->
+   <!-- PANEL: SÍŤ -->
+<div class="panel" id="panel-nodes">
+  <div class="panel-title">Síť uzlů</div>
+  <p style="opacity:.6;font-size:.7rem;">
+    Tady se zobrazují všechny živé čtverečky napojené na Vivere atque FruiT.
+  </p>
+  <div id="vaft-nodes"></div>
+  <div id="vaft-nodes-outer"></div>
+  <div id="vaft-nodes-mirror"></div>
+  <div id="vaft-nodes-origin"></div>
+  <p style="opacity:.4;font-size:.65rem;margin-top:4px;">
+    (síť se načte až když ji otevřeš – kvůli výkonu iPhonu)
+  </p>
+</div>
+
+<!-- PANEL: SVĚTY VIVERE ATQUE FRUIT -->
 <div class="panel" id="panel-worlds">
   <div class="panel-title">Světy Vivere atque FruiT</div>
   <p style="opacity:.6;font-size:.72rem;margin-bottom:10px;">
-    Každé písmeno tvoří svět. Klikni na svět a já to pošlu Hlavounovi / Viri / Pikošovi.
+    Každé písmeno tvoří svět. Klikni na svět a pošlu to Hlavounovi / Viri / Pikošovi.
   </p>
 
   <div id="vaft-worlds-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;">
