@@ -54,7 +54,7 @@
     try {
       // stáhni si challenge
       const challenge = await getChallenge(); 
-      // udělej lokální práci
+      // udělej lokální práci (Proof of Work)
       const work = await doLocalWork(text, challenge.difficulty || 13);
 
       // pošli zpět, všimni si že to přibalí i tu zprávu
@@ -68,15 +68,18 @@
 
       // Netlify funkce ti může říct „ok“ nebo „sus“
       if (result && result.status === 'ok') {
-        console.log('[guardian] ok');
+        console.log('[guardian] ok ✅');
+        // přidáme palivo – vyvolá událost do hlavního světa
+        window.dispatchEvent(new CustomEvent('guardian:reward'));
       } else {
-        console.warn('[guardian] suspicious input', result);
+        console.warn('[guardian] suspicious input ⚠️', result);
       }
     } catch (err) {
-      console.warn('[guardian] error', err);
+      console.warn('[guardian] error ❌', err);
     }
   };
 
   // export
-  win.Guardian = GUARDIAN;
+  win.VAFT = win.VAFT || {};
+  win.VAFT.guardian = GUARDIAN;
 })(window);
