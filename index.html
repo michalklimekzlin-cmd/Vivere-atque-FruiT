@@ -207,6 +207,24 @@
     <script src="./agents_v3.js"></script>
     <script src="./vaft.bus.js"></script>
     <script src="./vaft.agents.js"></script>
+    <script>
+  // načti síť bezpečně jen když otevře user Meziprostor nebo Síť
+  function loadNetworkCore() {
+    if (window.VAFT && window.VAFT.network && window.VAFT.network.status && window.VAFT.network.status().started) return;
+    const s = document.createElement('script');
+    s.src = './vaft.network.core.js';
+    s.onload = () => console.log('VAFT network core loaded');
+    s.onerror = () => console.warn('VAFT network core failed to load');
+    document.body.appendChild(s);
+  }
+
+  // přepni showTab (máš ho v indexu) aby volal loadNetworkCore
+  const _origShowTab = window.showTab || function(){};
+  window.showTab = function(t) {
+    _origShowTab(t);
+    if (t === 'nodes' || t === 'space') loadNetworkCore();
+  };
+</script>
     <script src="./vaft.engine.js"></script>
     <script src="./vaft.ascend.js"></script>
 <script src="./vaft.diagnostics.js"></script>
