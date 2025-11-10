@@ -225,16 +225,32 @@
       }
 
       function saveHero(){
-        const name = document.getElementById('hero-name').value.trim();
-        const team = document.getElementById('hero-team').value;
-        if (!name) return;
-        const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
-        heroes.push({ name, team, ts: Date.now() });
-        localStorage.setItem('VAFT_HEROES', JSON.stringify(heroes));
-        document.getElementById('hero-name').value = '';
-        renderHeroes();
-        appendHlavounMsg('ai', 'Uložil jsem hrdinu „'+name+'“. Můžeš ho propojit s vybraným VafiTem.');
-      }
+  const name = document.getElementById('hero-name').value.trim();
+  const team = document.getElementById('hero-team').value;
+  if (!name) return;
+
+  // 1) původní uložení = ať funguje to, cos měl
+  const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
+  const heroObj = { name, team, ts: Date.now() };
+  heroes.push(heroObj);
+  localStorage.setItem('VAFT_HEROES', JSON.stringify(heroes));
+
+  // 2) nové uložení do našeho organismu (Viri)
+  if (window.VAFT && VAFT.agents && VAFT.agents.Viri) {
+    const viriList = VAFT.agents.Viri.load('heroes') || [];
+    viriList.push(heroObj);
+    VAFT.agents.Viri.save('heroes', viriList);
+  }
+
+  // 3) ať to Pikoš může hned pustit ven (třeba do hry)
+  if (window.VAFT && VAFT.agents && VAFT.agents.Pikos) {
+    VAFT.agents.Pikos.output({ type: 'hero.added', hero: heroObj });
+  }
+
+  document.getElementById('hero-name').value = '';
+  renderHeroes();
+  appendHlavounMsg('ai', 'Uložil jsem hrdinu „'+name+'“.');
+}
 
       function renderHeroes(){
         const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
