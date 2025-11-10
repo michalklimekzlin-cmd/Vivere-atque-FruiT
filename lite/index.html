@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Vivere atque FruiT – lite</title>
+    <meta name="theme-color" content="#000000" />
+    <link rel="stylesheet" href="../style.css" />
+    <style>
+      body { background:#05070b; color:#e9f2ff; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+      .topbar { display:flex; justify-content:space-between; align-items:center; padding:14px 16px 8px; }
+      .badge { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:999px; padding:4px 10px; font-size:.65rem; }
+      .panel { padding:14px 16px 0; }
+      #log { background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.03); border-radius:12px; padding:8px 10px; max-height:55vh; overflow-y:auto; }
+      .row { font-size:.7rem; margin-bottom:3px; }
+      .ts { opacity:.35; margin-right:4px; }
+      .src { opacity:.65; margin-right:4px; }
+      .pulse { font-size:.75rem; opacity:.8; }
+      .btn { background:#1494ff; border:none; color:white; border-radius:9px; padding:4px 10px; font-size:.65rem; }
+      .quick { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div>
+        <div style="font-size:.78rem;opacity:.6;">Vivere atque FruiT</div>
+        <div style="font-size:1.02rem;">Lite jádro</div>
+      </div>
+      <div class="badge" id="pulse">⏱ čekám na puls…</div>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin:0 0 6px;font-size:.8rem;">Tok světa</h3>
+      <div id="log"></div>
+      <div class="quick">
+        <button class="btn" onclick="sendTest('ahoj od uživatele')">➤ poslat zprávu</button>
+        <button class="btn" onclick="clearLog()">🧹 vyčistit</button>
+        <button class="btn" onclick="window.location.href='../'">↩︎ zpět do plné</button>
+      </div>
+    </div>
+
+    <!-- bus + mozky ze složky výš -->
+    <script src="../vaft.bus.js"></script>
+    <script src="../vaft.agents.js"></script>
+    <script src="../vaft.brains.js"></script>
+    <script>
+      const logBox = document.getElementById('log');
+      const pulseBox = document.getElementById('pulse');
+
+      function addRow(text, from) {
+        const row = document.createElement('div');
+        row.className = 'row';
+        const t = new Date();
+        row.innerHTML =
+          '<span class="ts">'+t.toLocaleTimeString('cs-CZ')+'</span>' +
+          (from ? '<span class="src">['+from+']</span>' : '') +
+          '<span>'+text+'</span>';
+        logBox.prepend(row);
+        // udržet to krátké
+        while (logBox.children.length > 120) {
+          logBox.removeChild(logBox.lastChild);
+        }
+      }
+
+      function clearLog() {
+        logBox.innerHTML = '';
+      }
+
+      function sendTest(txt) {
+        if (window.VAFT && VAFT.bus) {
+          VAFT.bus.emit('vaft.signal', { from: 'lite-ui', msg: { text: txt } });
+        }
+      }
+
+      // napojíme se na signály z mozků
+      if (window.VAFT && VAFT.bus) {
+        VAFT.bus.on('vaft.heartbeat', d => {
+          pulseBox.textContent = '❤️ puls ' + (d.beat || '?');
+          addRow('puls '+d.beat, d.from);
+        });
+        VAFT.bus.on('vaft.diagnostic', d => addRow(d.msg, d.from));
+        VAFT.bus.on('vaft.output', d => addRow(d.text || 'výstup', d.from));
+        VAFT.bus.on('vaft.signal', d => {
+          // tohodle bude víc, tak jen zkráceně
+          if (d.from === 'Viri') return; // aby to nespamovalo
+          addRow('signál', d.from);
+        });
+      } else {
+        addRow('VAFT bus není k dispozici','⚠');
+      }
+    </script>
+  </body>
+</html>
