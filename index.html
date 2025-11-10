@@ -209,6 +209,14 @@
     <script src="./vaft.agents.js"></script>
     <script src="./vaft.engine.js"></script>
     <script src="./vaft.ascend.js"></script>
-    <script src="./vaft.network.js"></script>
+    <script>
+  (function(){
+    var s = document.createElement('script');
+    s.src = './vaft.network.js';
+    s.onload = function(){ console.log('VAFT network OK'); };
+    s.onerror = function(){ console.warn('VAFT network nenalezen – jedu dál bez sítě'); };
+    document.body.appendChild(s);
+  })();
+</script>
   </body>
 </html>
