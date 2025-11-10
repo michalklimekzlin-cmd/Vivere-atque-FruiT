@@ -1,21 +1,67 @@
 <!doctype html>
 <html lang="cs">
   <head>
-  <meta charset="utf-8" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vivere atque FruiT</title>
-  <meta name="theme-color" content="#000000" />
-  <link rel="manifest" href="./manifest.json" />
-  <link rel="stylesheet" href="./style.css" />
-</head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vivere atque FruiT</title>
+    <meta name="theme-color" content="#000000" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./style.css" />
+    <style>
+      /* malé systémové okno */
+      #systemMenu {
+        position: fixed;
+        bottom: 85px;
+        right: 14px;
+        background: rgba(5, 8, 12, 0.9);
+        border: 1px solid rgba(130,155,180,0.25);
+        border-radius: 16px;
+        padding: 14px 12px 10px;
+        color: #e8f5ff;
+        backdrop-filter: blur(14px);
+        min-width: 240px;
+        max-height: 60vh;
+        overflow-y: auto;
+        box-shadow: 0 8px 25px rgba(0,0,0,.35);
+        z-index: 200;
+      }
+      #systemMenu.hidden { display: none; }
+      #systemMenu h3 {
+        margin: 0 0 8px;
+        font-size: .78rem;
+        opacity: .8;
+        letter-spacing: .04em;
+      }
+      .sys-app {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+      .sys-app-name {
+        font-size: .72rem;
+      }
+      .sys-app-btn {
+        background: rgba(112,194,227,.12);
+        border: 1px solid rgba(112,194,227,.35);
+        color: #e8f5ff;
+        border-radius: 9px;
+        font-size: .6rem;
+        padding: 3px 8px 4px;
+      }
+      .system-open-btn {
+        margin-top: 12px;
+      }
+    </style>
+  </head>
   <body>
     <!-- TOP -->
     <div class="topbar">
       <div class="brand-block">
         <div class="brand-mini">Ĭ’♡ ↓</div>
         <div class="brand-title">Vivere atque FruiT</div>
-        <!-- tady už NENÍ Poutník, ale Hlavoun -->
         <div class="role-badge" id="core-status">🧠 Hlavoun systém</div>
       </div>
       <div class="coins">
@@ -92,27 +138,58 @@
     <!-- PANEL: SYSTÉM -->
     <div class="panel" id="panel-system">
       <div class="panel-title">Systém / appky</div>
-      <div class="apps-wrap">
-        <div class="app-row">
-          <div class="app-name">VAFT Center 3D</div>
-          <div class="app-desc">původní 3D scéna</div>
-          <button class="app-btn" onclick="openApp('./VAFT-Center3D/')">Otevřít</button>
-        </div>
-        <div class="app-row">
-          <div class="app-name">Kometa 3I / ATLAS</div>
-          <div class="app-desc">atlas dráhy (work in progress)</div>
-          <button class="app-btn" onclick="openApp('./VAFT-Comet/')">Otevřít</button>
-        </div>
-        <div class="app-row">
-          <div class="app-name">VafiT galerie</div>
-          <div class="app-desc">výběr a příběhy VafiTů</div>
-          <button class="app-btn" onclick="openApp('./VafiT-gallery/index.html')">Otevřít</button>
-        </div>
-        <div class="app-row">
-          <div class="app-name">Další modul</div>
-          <div class="app-desc">sem přidáš další složku</div>
-          <button class="app-btn" onclick="alert('Tady pak přidáme další složku 🙂')">Přidat</button>
-        </div>
+      <p style="opacity:.65;font-size:.7rem;">
+        Všechno jsme schovali do jednoho okna, ať je pořádek. 👇
+      </p>
+      <button class="btn-primary system-open-btn" onclick="toggleSystemMenu()">Otevřít systémové appky</button>
+    </div>
+
+    <!-- SKRYTÉ SYSTÉMOVÉ MENU -->
+    <div id="systemMenu" class="hidden">
+      <h3>VAFT – tvoje appky</h3>
+      <div class="sys-app">
+        <div class="sys-app-name">Vivere (hlavní)</div>
+        <button class="sys-app-btn" onclick="openApp('./')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">Braska-Hlava</div>
+        <button class="sys-app-btn" onclick="openApp('./Braska-Hlava/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">Hlavoun</div>
+        <button class="sys-app-btn" onclick="openApp('./Hlavoun/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">Meziprostor-Core</div>
+        <button class="sys-app-btn" onclick="openApp('./Meziprostor-Core/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">Michal-AI-Al-Klimek</div>
+        <button class="sys-app-btn" onclick="openApp('./Michal-AI-Al-Klimek/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">VAFT-LetterLab</div>
+        <button class="sys-app-btn" onclick="openApp('./VAFT-LetterLab/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">VAFT-MapWorld</div>
+        <button class="sys-app-btn" onclick="openApp('./VAFT-MapWorld/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">VAFT-BearHead</div>
+        <button class="sys-app-btn" onclick="openApp('./VAFT-BearHead/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">VAFT-Doll</div>
+        <button class="sys-app-btn" onclick="openApp('./VAFT-Doll/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">VAFT-Game</div>
+        <button class="sys-app-btn" onclick="openApp('./VAFT-Game/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">VAFT-GhostGirl</div>
+        <button class="sys-app-btn" onclick="openApp('./VAFT-GhostGirl/')">Otevřít</button>
       </div>
     </div>
 
@@ -133,6 +210,18 @@
         const pan = document.getElementById('panel-'+which);
         if (btn) btn.classList.add('active');
         if (pan) pan.classList.add('active');
+
+        // když se přepne jinam než na systém, systémové okno schováme
+        if (which !== 'system') {
+          const m = document.getElementById('systemMenu');
+          if (m) m.classList.add('hidden');
+        }
+      }
+
+      function toggleSystemMenu() {
+        const m = document.getElementById('systemMenu');
+        if (!m) return;
+        m.classList.toggle('hidden');
       }
 
       function saveHero(){
@@ -144,7 +233,6 @@
         localStorage.setItem('VAFT_HEROES', JSON.stringify(heroes));
         document.getElementById('hero-name').value = '';
         renderHeroes();
-        // po uložení hrdiny informujeme Hlavouna
         appendHlavounMsg('ai', 'Uložil jsem hrdinu „'+name+'“. Můžeš ho propojit s vybraným VafiTem.');
       }
 
@@ -155,7 +243,7 @@
         box.innerHTML = heroes.map(h => '• '+h.name+' ('+h.team+')').join('<br>');
       }
 
-      // chat obálka (konzumuje to hlavoun.js)
+      // chat obálka
       function appendHlavounMsg(role, text) {
         const box = document.getElementById('hlavoun-chat');
         if (!box) return;
@@ -164,34 +252,28 @@
         row.innerHTML = `<strong style="font-size:.6rem;opacity:.6;">${name}:</strong> <span>${text}</span>`;
         box.appendChild(row);
         box.scrollTop = box.scrollHeight;
-        // log do localStorage
         const log = JSON.parse(localStorage.getItem('VAFT_HLAVOUN_LOG') || '[]');
         log.push({ role, text, ts: Date.now() });
         localStorage.setItem('VAFT_HLAVOUN_LOG', JSON.stringify(log));
       }
 
-     function sendToHlavoun() {
-  const inp = document.getElementById('hlavoun-input');
-  if (!inp || !inp.value.trim()) return;
-  const text = inp.value.trim();
-  appendHlavounMsg('user', text);
-  inp.value = '';
+      function sendToHlavoun() {
+        const inp = document.getElementById('hlavoun-input');
+        if (!inp || !inp.value.trim()) return;
+        const text = inp.value.trim();
+        appendHlavounMsg('user', text);
+        inp.value = '';
 
-  // náš nový rodinný bus
-  if (window.VAFTBus) {
-    window.VAFTBus.handleUserMessage(text);
-  }
-
-  // 🔹 starý systém (kompatibilita)
-  if (window.HlavounSystem) {
-    window.HlavounSystem.think(text);
-  }
-
-  // 🔹 nový duo systém (rovnocenný Hlavoun + Viri)
-  if (window.AgentBus) {
-    window.AgentBus.handleUserMessage(text);
-  }
-}
+        if (window.VAFTBus) {
+          window.VAFTBus.handleUserMessage(text);
+        }
+        if (window.HlavounSystem) {
+          window.HlavounSystem.think(text);
+        }
+        if (window.AgentBus) {
+          window.AgentBus.handleUserMessage(text);
+        }
+      }
 
       function sendQuickToHlavoun(text){
         const inp = document.getElementById('hlavoun-input');
@@ -210,7 +292,6 @@
 
         renderHeroes();
 
-        // ukázat vybraného VafiTa
         const selectedVafit = JSON.parse(localStorage.getItem('VAFT_SELECTED_VAFIT') || 'null');
         if (selectedVafit) {
           const place = document.getElementById('selectedVafit');
@@ -218,13 +299,13 @@
         }
       });
     </script>
+
     <!-- tady je mozek -->
-<!-- tady je mozek -->
-<script src="./app.js"></script>
-<script src="./hlavoun.js"></script>
-<script src="./viri.js"></script>
-<script src="./pikos.js"></script>
-<script src="./agents.js"></script>
-<script src="./agents_v3.js"></script>
+    <script src="./app.js"></script>
+    <script src="./hlavoun.js"></script>
+    <script src="./viri.js"></script>
+    <script src="./pikos.js"></script>
+    <script src="./agents.js"></script>
+    <script src="./agents_v3.js"></script>
   </body>
 </html>
