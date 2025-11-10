@@ -1,22 +1,16 @@
-// /.netlify/functions/guardian-challenge
+// netlify/functions/guardian-challenge.js
 exports.handler = async function (event, context) {
-  const crypto = require('crypto');
-
-  const seed = crypto.randomBytes(16).toString('hex');
-  const challengeId = crypto.randomBytes(8).toString('hex');
-  const difficulty = 18; // můžeš zvednout až budeš chtít
+  // vygeneruj jednoduchý challenge
+  const challengeId = Math.random().toString(36).slice(2);
+  const seed = Math.random().toString(36).slice(2);
+  const difficulty = 13; // můžeš zvedat
 
   return {
     statusCode: 200,
     headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      challengeId,
-      seed,
-      difficulty,
-      ttlSeconds: 60
-    })
+    body: JSON.stringify({ challengeId, seed, difficulty })
   };
 };
