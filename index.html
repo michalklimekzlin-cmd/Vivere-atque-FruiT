@@ -9,12 +9,172 @@
     <link rel="manifest" href="./manifest.json" />
     <link rel="stylesheet" href="./style.css" />
     <style>
-      /* systémové okno */
+      :root {
+        --bg: #05070a;
+        --panel: rgba(5, 8, 12, 0.35);
+        --stroke: rgba(255, 255, 255, 0.04);
+        --accent: #19d6ff;
+      }
+      body {
+        background: var(--bg);
+        color: #eef6ff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        margin: 0;
+        min-height: 100vh;
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: rgba(5, 7, 10, 0.9);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255,255,255,.04);
+      }
+      .brand-block { display: flex; flex-direction: column; gap: 2px; }
+      .brand-mini { font-size: .7rem; opacity: .65; }
+      .brand-title { font-weight: 600; font-size: 1.12rem; }
+      .role-badge {
+        font-size: .68rem;
+        color: #ffb6e1;
+      }
+      .coins { text-align: right; font-size: .72rem; }
+      .coin-ver { opacity: .5; }
+      .revia-panel {
+        padding: 18px 16px 10px;
+      }
+      .revia-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .revia-title { font-weight: 600; }
+      .revia-link { color: #7dd7ff; font-size: .7rem; text-decoration: none; }
+      .rules { font-size: .7rem; opacity: .7; display: flex; gap: 12px; margin-bottom: 6px; }
+      .pulse-line { font-size: .72rem; display: flex; gap: 6px; align-items: center; }
+      .pulse-dot {
+        width: 9px; height: 9px; border-radius: 999px;
+        background: #e93454;
+        box-shadow: 0 0 12px rgba(233, 52, 84, 0.7);
+      }
+      .center-orbit {
+        position: relative;
+        width: min(340px, 90vw);
+        height: min(340px, 90vw);
+        margin: 14px auto 6px;
+      }
+      .vaft-core {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%) rotate(-12deg);
+        width: 180px; height: 180px;
+        border: 1px solid rgba(170,206,255,.08);
+        border-radius: 999px;
+        display: flex; align-items: center; justify-content: center;
+        text-align: center;
+        font-weight: 500;
+        background: radial-gradient(circle at 50% 35%, rgba(51, 72, 103, 0.18), rgba(5,7,10,0.1));
+      }
+      .orbit-node {
+        position: absolute;
+        width: 86px; height: 86px;
+        border-radius: 999px;
+        border: 1px solid rgba(196,253,205,.28);
+        display: flex; align-items: center; justify-content: center;
+        font-size: .7rem;
+        background: rgba(5,8,12,.3);
+      }
+      .node-glyph { bottom: 12%; left: 5%; }
+      .node-ai { top: 9%; right: 4%; }
+      .node-world { bottom: 9%; right: 8%; }
+      .tabs {
+        display: flex;
+        gap: 6px;
+        padding: 10px 10px 0;
+      }
+      .tab-btn {
+        flex: 1;
+        background: rgba(8,11,13,.5);
+        border: none;
+        border-radius: 999px 999px 0 0;
+        padding: 8px 0 9px;
+        color: rgba(231,244,255,.55);
+        font-size: .78rem;
+      }
+      .tab-btn.active {
+        background: linear-gradient(120deg, #17d0ff, #17ffb9);
+        color: #02070a;
+        font-weight: 600;
+      }
+      .panel {
+        display: none;
+        padding: 14px 14px 88px;
+      }
+      .panel.active { display: block; }
+      .panel-title { font-weight: 600; margin-bottom: 10px; }
+      .label-sm { font-size: .68rem; opacity: .7; display:block; margin-bottom:3px; }
+      .hero-input, .hero-select {
+        width: 100%;
+        background: rgba(1,1,1,.06);
+        border: 1px solid rgba(255,255,255,.015);
+        border-radius: 11px;
+        padding: 9px 10px;
+        color: #fff;
+        font-size: .82rem;
+        margin-bottom: 8px;
+      }
+      .btn-primary {
+        background: #0fb2ff;
+        color: #02070a;
+        font-weight: 600;
+        border: none;
+        border-radius: 999px;
+        padding: 9px 14px;
+        font-size: .8rem;
+      }
+      #heroesList {
+        margin-top: 10px;
+        font-size: .78rem;
+        opacity: .8;
+      }
+      /* meziprostor */
+      #hlavoun-chat {
+        background: rgba(5,8,12,.35);
+        border: 1px solid rgba(255,255,255,.015);
+        border-radius: 16px;
+        padding: 6px 8px;
+        max-height: 240px;
+        overflow-y: auto;
+        margin-bottom: 8px;
+      }
+      #hlavoun-input {
+        width: calc(100% - 80px);
+        background: rgba(1,1,1,.12);
+        border: 1px solid rgba(255,255,255,.01);
+        border-radius: 999px;
+        padding: 8px 9px;
+        color: #fff;
+      }
+      .chat-row {
+        display: flex; gap: 6px; align-items: center;
+        margin-bottom: 6px;
+      }
+      .quick-row { display: flex; gap: 6px; flex-wrap: wrap; }
+      .quick-row button {
+        background: rgba(5,11,13,.25);
+        border: 1px solid rgba(255,255,255,.02);
+        border-radius: 999px;
+        padding: 6px 11px;
+        font-size: .72rem;
+        color: #fff;
+      }
+      /* system menu */
       #systemMenu {
         position: fixed;
-        bottom: 85px;
-        right: 14px;
-        background: rgba(5, 8, 12, 0.9);
+        bottom: 88px;
+        right: 12px;
+        background: rgba(5,8,12,.9);
         border: 1px solid rgba(130,155,180,0.25);
         border-radius: 16px;
         padding: 14px 12px 10px;
@@ -49,7 +209,24 @@
         font-size: .6rem;
         padding: 3px 8px 4px;
       }
-      .system-open-btn { margin-top: 12px; }
+      .system-open-btn {
+        margin-top: 12px;
+      }
+      /* síť */
+      #vaft-nodes, #vaft-nodes-outer, #vaft-nodes-mirror, #vaft-nodes-origin {
+        display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;
+      }
+      .node-pill {
+        background: rgba(4,9,11,.35);
+        border:1px solid rgba(255,255,255,.01);
+        border-radius: 9px;
+        padding: 4px 7px;
+        font-size:.6rem;
+      }
+      /* spodní mezera pro iPhone */
+      @media (max-width: 820px) {
+        .panel { margin-bottom: 95px; }
+      }
     </style>
   </head>
   <body>
@@ -58,18 +235,15 @@
       <div class="brand-block">
         <div class="brand-mini">Ĭ’♡ ↓</div>
         <div class="brand-title">Vivere atque FruiT</div>
-        <div class="role-badge" id="core-status">🧠 Hlavoun systém</div>
+        <div class="role-badge" id="core-status">🧠 Hlavoun systém • aktivní</div>
       </div>
       <div class="coins">
-        <div class="coin-icon">💰</div>
-        <div class="coin-txt">
-          <div>0</div>
-          <div class="coin-ver">v0.31 • živý základ</div>
-        </div>
+        <div>0</div>
+        <div class="coin-ver">v0.31 • živý základ</div>
       </div>
     </div>
 
-    <!-- STŘED / REVIA -->
+    <!-- REVIA / STŘED -->
     <div class="revia-panel">
       <div class="revia-head">
         <div class="revia-title">Revia</div>
@@ -91,7 +265,7 @@
       </div>
     </div>
 
-    <!-- ZÁLOŽKY -->
+    <!-- TABS -->
     <div class="tabs">
       <button class="tab-btn active" data-tab="heroes">Hrdinové</button>
       <button class="tab-btn" data-tab="space">Meziprostor</button>
@@ -99,7 +273,7 @@
       <button class="tab-btn" data-tab="nodes">Síť</button>
     </div>
 
-    <!-- PANEL HRDINOVÉ -->
+    <!-- PANEL: HRDINOVÉ -->
     <div class="panel active" id="panel-heroes">
       <div class="panel-title">Hrdinové</div>
       <label class="label-sm">Jméno hrdiny</label>
@@ -113,16 +287,16 @@
       </select>
       <button class="btn-primary" onclick="saveHero()">+ Přidat hrdinu</button>
       <div id="selectedVafit"></div>
-      <div id="heroesList" class="list-sm"></div>
+      <div id="heroesList" class="list-sm">Zatím nemáš uložené hrdiny.</div>
     </div>
 
-    <!-- PANEL MEZIPROSTOR -->
+    <!-- PANEL: MEZIPROSTOR -->
     <div class="panel" id="panel-space">
       <div class="panel-title">Meziprostor (Hlavoun)</div>
       <div id="hlavoun-chat"></div>
       <div class="chat-row">
         <input id="hlavoun-input" placeholder="napiš Hlavounovi...">
-        <button onclick="sendToHlavoun()">Poslat</button>
+        <button class="btn-primary" onclick="sendToHlavoun()">Poslat</button>
       </div>
       <div class="quick-row">
         <button onclick="sendQuickToHlavoun('příběh pro vybraného vafita')">💡 Příběh</button>
@@ -132,102 +306,189 @@
       </div>
     </div>
 
-    <!-- PANEL SYSTÉM -->
+    <!-- PANEL: SYSTÉM -->
     <div class="panel" id="panel-system">
       <div class="panel-title">Systém / appky</div>
-      <p style="opacity:.65;font-size:.7rem;">Všechno jsme schovali do jednoho okna, ať je pořádek 👇</p>
+      <p style="opacity:.65;font-size:.7rem;">
+        Všechno jsme schovali do jednoho okna, ať je pořádek. 👇
+      </p>
       <button class="btn-primary system-open-btn" onclick="toggleSystemMenu()">Otevřít systémové appky</button>
     </div>
 
-    <!-- PANEL SÍŤ -->
+    <!-- PANEL: SÍŤ -->
     <div class="panel" id="panel-nodes">
       <div class="panel-title">Síť uzlů</div>
       <p style="opacity:.6;font-size:.7rem;">Tady se zobrazují všechny živé čtverečky napojené na Vivere atque FruiT.</p>
-      <div id="vaft-nodes" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
+      <div id="vaft-nodes"></div>
       <div id="vaft-nodes-outer"></div>
       <div id="vaft-nodes-mirror"></div>
       <div id="vaft-nodes-origin"></div>
+      <p style="opacity:.4;font-size:.65rem;margin-top:4px;">(síť se načte až když ji otevřeš – kvůli výkonu iPhonu)</p>
     </div>
 
-    <!-- MENU APP -->
+    <!-- SKRYTÉ SYSTÉMOVÉ MENU -->
     <div id="systemMenu" class="hidden">
       <h3>VAFT – tvoje appky</h3>
-      <div class="sys-app"><div class="sys-app-name">Vivere (hlavní)</div><button class="sys-app-btn" onclick="openApp('./')">Otevřít</button></div>
-      <div class="sys-app"><div class="sys-app-name">Braska-Hlava</div><button class="sys-app-btn" onclick="openApp('./Braska-Hlava/')">Otevřít</button></div>
-      <div class="sys-app"><div class="sys-app-name">Hlavoun</div><button class="sys-app-btn" onclick="openApp('./Hlavoun/')">Otevřít</button></div>
-      <div class="sys-app"><div class="sys-app-name">Meziprostor-Core</div><button class="sys-app-btn" onclick="openApp('./Meziprostor-Core/')">Otevřít</button></div>
-      <div class="sys-app"><div class="sys-app-name">VAFT-Network</div><button class="sys-app-btn" onclick="openApp('./VAFT-Network/')">Otevřít</button></div>
-    <div class="sys-app">
-  <div class="sys-app-name">Vivere (lite)</div>
-  <button class="sys-app-btn" onclick="openApp('./lite/')">Otevřít</button>
+      <div class="sys-app">
+        <div class="sys-app-name">Vivere (hlavní)</div>
+        <button class="sys-app-btn" onclick="openApp('./')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">Braska-Hlava</div>
+        <button class="sys-app-btn" onclick="openApp('./Braska-Hlava/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">Hlavoun</div>
+        <button class="sys-app-btn" onclick="openApp('./Hlavoun/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">Meziprostor-Core</div>
+        <button class="sys-app-btn" onclick="openApp('./Meziprostor-Core/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">VAFT-Network</div>
+        <button class="sys-app-btn" onclick="openApp('./VAFT-Network/')">Otevřít</button>
+      </div>
     </div>
 
-    <div class="panel" id="panel-vent" style="display:none;">
-  <div class="panel-title">Ventil / výstup sítě</div>
-  <div class="vent-controls" style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-    <select id="vent-filter-agent" style="min-width:120px;">
-      <option value="">— Všechny agenty —</option>
-      <option value="Hlavoun">Hlavoun</option>
-      <option value="Viri">Viri</option>
-      <option value="Pikos">Pikos</option>
-      <option value="Vivere">Vivere</option>
-      <option value="?">?</option>
-    </select>
-    <select id="vent-filter-type" style="min-width:120px;">
-      <option value="">— Všechny typy —</option>
-      <option value="signal">signal</option>
-      <option value="heartbeat">heartbeat</option>
-      <option value="diagnostic">diagnostic</option>
-      <option value="output">output</option>
-      <option value="custom">custom</option>
-    </select>
-    <button id="vent-clear" class="btn-small">Vyčistit</button>
-    <button id="vent-export" class="btn-small">Export JSON</button>
-  </div>
-  <div id="vent-summary" style="opacity:.8;font-size:.8rem;margin-bottom:8px;"></div>
-  <div id="vent-feed" style="max-height:48vh;overflow:auto;padding:6px;border-radius:10px;background:rgba(10,12,15,.45);border:1px solid rgba(255,255,255,.03)"></div>
-</div>
-    
-    <!-- ZÁKLADNÍ SCRIPTY -->
+    <!-- SCRIPTS -->
     <script>
+      // otevření app
       function openApp(url){ window.location.href = url; }
+
+      // puls
       function tick(){
         const el = document.getElementById('pulseTime');
-        if(el) el.textContent = new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        if(!el) return;
+        el.textContent = new Date().toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
       }
+
+      // přepínání tabů
+      const _origShowTab = function(which){
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        const btn = document.querySelector('[data-tab="'+which+'"]');
+        const pan = document.getElementById('panel-'+which);
+        if (btn) btn.classList.add('active');
+        if (pan) pan.classList.add('active');
+
+        if (which !== 'system') {
+          const m = document.getElementById('systemMenu');
+          if (m) m.classList.add('hidden');
+        }
+      };
+
       function showTab(which){
-        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-        document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-        const btn=document.querySelector('[data-tab="'+which+'"]');
-        const pan=document.getElementById('panel-'+which);
-        if(btn) btn.classList.add('active');
-        if(pan) pan.classList.add('active');
-        if(which!=='system'){const m=document.getElementById('systemMenu');if(m)m.classList.add('hidden');}
+        _origShowTab(which);
+        // síť načítáme jen když je potřeba
+        if (which === 'nodes' || which === 'space') {
+          lazyLoadNetwork();
+        }
       }
-      function toggleSystemMenu(){document.getElementById('systemMenu').classList.toggle('hidden');}
+
+      function toggleSystemMenu() {
+        const m = document.getElementById('systemMenu');
+        if (!m) return;
+        m.classList.toggle('hidden');
+      }
+
+      // hrdinové
       function saveHero(){
-        const name=document.getElementById('hero-name').value.trim();
-        const team=document.getElementById('hero-team').value;
-        if(!name)return;
-        const heroes=JSON.parse(localStorage.getItem('VAFT_HEROES')||'[]');
-        heroes.push({name,team,ts:Date.now()});
-        localStorage.setItem('VAFT_HEROES',JSON.stringify(heroes));
-        document.getElementById('hero-name').value='';
+        const name = document.getElementById('hero-name').value.trim();
+        const team = document.getElementById('hero-team').value;
+        if (!name) return;
+        const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
+        const heroObj = { name, team, ts: Date.now() };
+        heroes.push(heroObj);
+        localStorage.setItem('VAFT_HEROES', JSON.stringify(heroes));
+        document.getElementById('hero-name').value = '';
         renderHeroes();
+        appendHlavounMsg('ai', 'Uložil jsem hrdinu „'+name+'“. Můžeš ho propojit s VafiTem.');
       }
+
       function renderHeroes(){
-        const heroes=JSON.parse(localStorage.getItem('VAFT_HEROES')||'[]');
-        const box=document.getElementById('heroesList');
-        box.innerHTML=heroes.length?heroes.map(h=>'• '+h.name+' ('+h.team+')').join('<br>'):'Zatím nemáš uložené hrdiny.';
+        const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
+        const box = document.getElementById('heroesList');
+        if (!heroes.length) { box.textContent = 'Zatím nemáš uložené hrdiny.'; return; }
+        box.innerHTML = heroes.map(h => '• '+h.name+' ('+h.team+')').join('<br>');
       }
-      document.addEventListener('DOMContentLoaded',()=>{
-        tick();setInterval(tick,1000);
-        document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>showTab(btn.dataset.tab)));
-        showTab('heroes');renderHeroes();
+
+      // chat obálka
+      function appendHlavounMsg(role, text) {
+        const box = document.getElementById('hlavoun-chat');
+        if (!box) return;
+        const row = document.createElement('div');
+        const name = role === 'user' ? 'Ty' : 'Hlavoun';
+        row.innerHTML = `<strong style="font-size:.6rem;opacity:.6;">${name}:</strong> <span>${text}</span>`;
+        box.appendChild(row);
+        box.scrollTop = box.scrollHeight;
+        const log = JSON.parse(localStorage.getItem('VAFT_HLAVOUN_LOG') || '[]');
+        log.push({ role, text, ts: Date.now() });
+        localStorage.setItem('VAFT_HLAVOUN_LOG', JSON.stringify(log));
+      }
+
+      function sendToHlavoun() {
+        const inp = document.getElementById('hlavoun-input');
+        if (!inp || !inp.value.trim()) return;
+        const text = inp.value.trim();
+        appendHlavounMsg('user', text);
+        inp.value = '';
+
+        // tady můžeš napojit tvoje skripty
+        if (window.VAFTBus) {
+          window.VAFTBus.handleUserMessage(text);
+        }
+        if (window.HlavounSystem) {
+          window.HlavounSystem.think(text);
+        }
+        if (window.AgentBus) {
+          window.AgentBus.handleUserMessage(text);
+        }
+      }
+
+      function sendQuickToHlavoun(text){
+        const inp = document.getElementById('hlavoun-input');
+        inp.value = text;
+        sendToHlavoun();
+      }
+
+      // lazy načtení sítě = kvůli iPhone
+      let networkLoaded = false;
+      function lazyLoadNetwork() {
+        if (networkLoaded) return;
+        const s = document.createElement('script');
+        s.src = './vaft.network.js';
+        s.onload = () => {
+          console.log('VAFT network připojena');
+          networkLoaded = true;
+          if (window.VAFT && window.VAFT.network && window.VAFT.network.render) {
+            window.VAFT.network.render('#vaft-nodes', '#vaft-nodes-outer', '#vaft-nodes-mirror', '#vaft-nodes-origin');
+          }
+        };
+        s.onerror = () => console.warn('VAFT network.js se nenačetl – jedu bez sítě');
+        document.body.appendChild(s);
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        tick();
+        setInterval(tick, 1000);
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => showTab(btn.dataset.tab));
+        });
+        showTab('heroes');
+
+        renderHeroes();
+
+        const selectedVafit = JSON.parse(localStorage.getItem('VAFT_SELECTED_VAFIT') || 'null');
+        if (selectedVafit) {
+          const place = document.getElementById('selectedVafit');
+          if (place) place.textContent = "Vybraný VafiT: " + selectedVafit.name + " " + (selectedVafit.glyph || "");
+        }
       });
     </script>
 
-       <!-- tady je mozek -->
+    <!-- tady je mozek – tvé stávající soubory -->
     <script src="./app.js"></script>
     <script src="./hlavoun.js"></script>
     <script src="./viri.js"></script>
@@ -235,46 +496,9 @@
     <script src="./agents.js"></script>
     <script src="./agents_v3.js"></script>
     <script src="./vaft.bus.js"></script>
-<script src="./vaft.agents.js"></script>
-<script src="./vaft.brains.js"></script>  <!-- ← TADY NOVÉ -->
-<script>
-  // načti síť bezpečně ...
-</script>
-    <script>
-  // načti síť bezpečně jen když otevře user Meziprostor nebo Síť
-  function loadNetworkCore() {
-    if (window.VAFT && window.VAFT.network && window.VAFT.network.status && window.VAFT.network.status().started) return;
-    const s = document.createElement('script');
-    s.src = './vaft.network.core.js';
-    s.onload = () => console.log('VAFT network core loaded');
-    s.onerror = () => console.warn('VAFT network core failed to load');
-    document.body.appendChild(s);
-  }
-
-  // přepni showTab (máš ho v indexu) aby volal loadNetworkCore
-  const _origShowTab = window.showTab || function(){};
-  window.showTab = function(t) {
-    _origShowTab(t);
-    if (t === 'nodes' || t === 'space') loadNetworkCore();
-  };
-</script>
+    <script src="./vaft.agents.js"></script>
     <script src="./vaft.engine.js"></script>
     <script src="./vaft.ascend.js"></script>
-<script src="./vaft.diagnostics.js"></script>
-    
-    <!-- síť načti jen pokud soubor existuje -->
-    <script>
-      (function () {
-        var s = document.createElement('script');
-        s.src = './vaft.network.js';
-        s.onload = function () {
-          console.log('VAFT network připojena');
-        };
-        s.onerror = function () {
-          console.warn('VAFT network.js se nenačetl – jedu bez sítě');
-        };
-        document.body.appendChild(s);
-      })();
-    </script>
+    <script src="./vaft.diagnostics.js"></script>
   </body>
 </html>
