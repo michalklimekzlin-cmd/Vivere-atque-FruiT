@@ -1,98 +1,82 @@
 // vaft.guardian.client.js
-// Lehce integrovateľný klient pro volání guardian endpoints.
+// klientská stráž pro Vivere atque FruiT
+// mluví s Netlify Functions na vivereatquefruit.netlify.app
 
-(function (global) {
-  const VAFTG = global.VAFTGuardian = global.VAFTGuardian || {};
+;(function (win) {
+  const GUARDIAN = {};
+  const BASE = 'https://vivereatquefruit.netlify.app/.netlify/functions';
 
-  const API = {
-    challenge: '/guardian/challenge',
-    submit: '/guardian/submit',
-    honeypot: '/guardian/honeypot'
-  };
-
-  async function sha256Hex(message) {
+  // jednoduché PoW – jen aby to něco sežralo 💪
+  async function doLocalWork(text, difficulty = 13) {
+    // difficulty = kolik nul na začátku hashe chceme
     const enc = new TextEncoder();
-    const data = enc.encode(message);
-    const hash = await crypto.subtle.digest('SHA-256', data);
-    return Array.from(new Uint8Array(hash)).map(b=>('0'+b.toString(16)).slice(-2)).join('');
-  }
-
-  async function solvePow(seed, difficulty, maxMs = 3000) {
-    const start = Date.now();
     let nonce = 0;
-    const zeros = Math.floor(difficulty / 4);
-    while (true) {
-      const candidate = seed + ':' + nonce;
-      const h = await sha256Hex(candidate);
-      if (h.startsWith('0'.repeat(zeros))) {
-        return { nonce: String(nonce), proof: h };
+    const targetPrefix = '0'.repeat(Math.floor(difficulty / 4)); // hodně hrubé
+
+    while (nonce < 50_000) {           // limit, ať se ti iPhone neuvaří
+      const payload = text + '::' + nonce;
+      const data = enc.encode(payload);
+      const hashBuf = await crypto.subtle.digest('SHA-256', data);
+      const hashArr = Array.from(new Uint8Array(hashBuf));
+      const hashHex = hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
+      if (hashHex.startsWith(targetPrefix)) {
+        return { nonce, hash: hashHex };
       }
       nonce++;
-      if ((Date.now() - start) > maxMs) return null;
-      if (nonce % 256 === 0) await new Promise(r => setTimeout(r, 0));
     }
+    // když se to nepovede, vracíme alespoň nějaký nonce
+    return { nonce: 0, hash: '' };
   }
 
-  async function ensureChallenge(meta = {}) {
+  // 1) vyžádá si challenge od Netlify
+  async function getChallenge() {
+    const res = await fetch(`${BASE}/guardian-challenge`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) throw new Error('guardian: challenge fail');
+    return res.json();
+  }
+
+  // 2) pošle výsledek
+  async function submitSolution(payload) {
+    const res = await fetch(`${BASE}/guardian-submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('guardian: submit fail');
+    return res.json();
+  }
+
+  // veřejná funkce – tohle volá tvůj sendToHlavoun()
+  GUARDIAN.checkMessage = async function (text) {
     try {
-      const resp = await fetch(API.challenge, { method: 'GET', cache: 'no-store' });
-      if (!resp.ok) throw new Error('challenge failed');
-      const chal = await resp.json();
+      // stáhni si challenge
+      const challenge = await getChallenge(); 
+      // udělej lokální práci
+      const work = await doLocalWork(text, challenge.difficulty || 13);
 
-      const solved = await solvePow(chal.seed, chal.difficulty, 2500);
-      if (!solved) {
-        try {
-          await fetch(API.honeypot, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reason: 'pow_timeout', chal, meta })
-          });
-        } catch (e) { /* ignore */ }
-        return { ok:false, reason:'pow_timeout' };
-      }
-
-      const submitResp = await fetch(API.submit, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          challengeId: chal.challengeId,
-          nonce: solved.nonce,
-          proof: solved.proof,
-          meta
-        })
+      // pošli zpět, všimni si že to přibalí i tu zprávu
+      const result = await submitSolution({
+        challengeId: challenge.challengeId,
+        seed: challenge.seed,
+        message: text,
+        nonce: work.nonce,
+        pow: work.hash
       });
-      if (!submitResp.ok) {
-        try {
-          await fetch(API.honeypot, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reason: 'submit_rejected', chal, meta })
-          });
-        } catch (e) {}
-        return { ok:false, reason:'submit_rejected' };
+
+      // Netlify funkce ti může říct „ok“ nebo „sus“
+      if (result && result.status === 'ok') {
+        console.log('[guardian] ok');
+      } else {
+        console.warn('[guardian] suspicious input', result);
       }
-      const token = await submitResp.json();
-      return { ok:true, token };
     } catch (err) {
-      console.warn('VAFTGuardian.ensureChallenge error', err);
-      return { ok:false, reason:'error' };
+      console.warn('[guardian] error', err);
     }
-  }
+  };
 
-  async function sendWithGuard(handlerFn, meta = {}) {
-    const pre = await ensureChallenge(meta);
-    if (!pre.ok) return { ok:false, reason: pre.reason || 'guard_failed' };
-    const ctx = Object.assign({}, meta, { guardToken: pre.token?.authToken });
-    try {
-      const res = await handlerFn(ctx);
-      return { ok:true, res };
-    } catch (e) {
-      return { ok:false, reason:'handler_error', error:e };
-    }
-  }
-
-  VAFTG.ensureChallenge = ensureChallenge;
-  VAFTG.sendWithGuard = sendWithGuard;
-  VAFTG._internal = { sha256Hex, solvePow };
-
+  // export
+  win.Guardian = GUARDIAN;
 })(window);
