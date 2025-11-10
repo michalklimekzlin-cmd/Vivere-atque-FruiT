@@ -223,7 +223,6 @@
         padding: 4px 7px;
         font-size:.6rem;
       }
-      /* spodní mezera pro iPhone */
       @media (max-width: 820px) {
         .panel { margin-bottom: 95px; }
       }
@@ -267,12 +266,12 @@
 
     <!-- TABS -->
     <div class="tabs">
-  <button class="tab-btn active" data-tab="heroes">Hrdinové</button>
-  <button class="tab-btn" data-tab="space">Meziprostor</button>
-  <button class="tab-btn" data-tab="system">Systém</button>
-  <button class="tab-btn" data-tab="nodes">Síť</button>
-  <button class="tab-btn" data-tab="worlds">Světy</button>
-</div>
+      <button class="tab-btn active" data-tab="heroes">Hrdinové</button>
+      <button class="tab-btn" data-tab="space">Meziprostor</button>
+      <button class="tab-btn" data-tab="system">Systém</button>
+      <button class="tab-btn" data-tab="nodes">Síť</button>
+      <button class="tab-btn" data-tab="worlds">Světy</button>
+    </div>
 
     <!-- PANEL: HRDINOVÉ -->
     <div class="panel active" id="panel-heroes">
@@ -308,15 +307,15 @@
     </div>
 
     <!-- PANEL: SYSTÉM -->
-<div class="panel" id="panel-system">
-  <div class="panel-title">Systém / appky</div>
-  <p style="opacity:.65;font-size:.7rem;">
-    Všechno jsme schovali do jednoho okna, ať je pořádek. 👇
-  </p>
-  <button class="btn-primary system-open-btn" onclick="toggleSystemMenu()">Otevřít systémové appky</button>
-</div>
+    <div class="panel" id="panel-system">
+      <div class="panel-title">Systém / appky</div>
+      <p style="opacity:.65;font-size:.7rem;">
+        Všechno jsme schovali do jednoho okna, ať je pořádek. 👇
+      </p>
+      <button class="btn-primary system-open-btn" onclick="toggleSystemMenu()">Otevřít systémové appky</button>
+    </div>
 
-       <!-- PANEL: SÍŤ -->
+    <!-- PANEL: SÍŤ -->
     <div class="panel" id="panel-nodes">
       <div class="panel-title">Síť uzlů</div>
       <p style="opacity:.6;font-size:.7rem;">
@@ -331,7 +330,7 @@
       </p>
     </div>
 
-    <!-- PANEL: SVĚTY VIVERE ATQUE FRUIT -->
+    <!-- PANEL: SVĚTY -->
     <div class="panel" id="panel-worlds">
       <div class="panel-title">Světy Vivere atque FruiT</div>
       <p style="opacity:.6;font-size:.72rem;margin-bottom:10px;">
@@ -339,14 +338,15 @@
       </p>
 
       <div id="vaft-worlds-grid"
-     style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;">
-</div>
+           style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;">
+      </div>
 
-<div id="vaft-world-detail"
-     style="margin-top:14px;padding:10px;border:1px solid rgba(255,255,255,.03);
-     border-radius:12px;background:rgba(4,6,9,.35);min-height:80px;">
-  <strong>Vyber svět…</strong>
-</div>
+      <div id="vaft-world-detail"
+           style="margin-top:14px;padding:10px;border:1px solid rgba(255,255,255,.03);
+           border-radius:12px;background:rgba(4,6,9,.35);min-height:80px;">
+        <strong>Vyber svět…</strong>
+      </div>
+    </div>
 
     <!-- SKRYTÉ SYSTÉMOVÉ MENU -->
     <div id="systemMenu" class="hidden">
@@ -373,19 +373,16 @@
       </div>
     </div>
 
-    <!-- SCRIPTS -->
+    <!-- SCRIPTS MAIN -->
     <script>
-      // otevření app
       function openApp(url){ window.location.href = url; }
 
-      // puls
       function tick(){
         const el = document.getElementById('pulseTime');
         if(!el) return;
         el.textContent = new Date().toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
       }
 
-      // přepínání tabů
       const _origShowTab = function(which){
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
@@ -402,7 +399,6 @@
 
       function showTab(which){
         _origShowTab(which);
-        // síť načítáme jen když je potřeba
         if (which === 'nodes' || which === 'space') {
           lazyLoadNetwork();
         }
@@ -414,7 +410,6 @@
         m.classList.toggle('hidden');
       }
 
-      // hrdinové
       function saveHero(){
         const name = document.getElementById('hero-name').value.trim();
         const team = document.getElementById('hero-team').value;
@@ -435,7 +430,6 @@
         box.innerHTML = heroes.map(h => '• '+h.name+' ('+h.team+')').join('<br>');
       }
 
-      // chat obálka
       function appendHlavounMsg(role, text) {
         const box = document.getElementById('hlavoun-chat');
         if (!box) return;
@@ -450,51 +444,54 @@
       }
 
       async function sendToHlavoun() {
-  const inp = document.getElementById('hlavoun-input');
-  if (!inp || !inp.value.trim()) return;
+        const inp = document.getElementById('hlavoun-input');
+        if (!inp || !inp.value.trim()) return;
 
-  const text = inp.value.trim();
+        const text = inp.value.trim();
 
-  // 1) zobraz do chatu
-  if (typeof appendHlavounMsg === 'function') {
-    appendHlavounMsg('user', text);
-  }
-  inp.value = '';
+        // zobraz hned
+        if (typeof appendHlavounMsg === 'function') {
+          appendHlavounMsg('user', text);
+        }
+        inp.value = '';
 
-  // 2) stráž / PoW → přeměna na palivo
-  if (window.Guardian && typeof window.Guardian.checkMessage === 'function') {
-    try {
-      await window.Guardian.checkMessage(text);
-    } catch (e) {
-      console.warn('[guardian] PoW neprošlo, ale pustím dál', e);
-    }
-  }
+        // stráž / PoW
+        if (window.Guardian && typeof window.Guardian.checkMessage === 'function') {
+          try {
+            await window.Guardian.checkMessage(text);
+          } catch (e) {
+            console.warn('[guardian] PoW neprošlo, ale pustím dál', e);
+          }
+        }
 
-  // 3) pošli do Hlavouna
-  if (window.HlavounSystem && typeof window.HlavounSystem.think === 'function') {
-    window.HlavounSystem.think(text);
-  }
+        // Hlavoun
+        if (window.HlavounSystem && typeof window.HlavounSystem.think === 'function') {
+          window.HlavounSystem.think(text);
+        }
+        // Pikoš
+        if (window.Pikos && typeof window.Pikos.talk === 'function') {
+          window.Pikos.talk(text);
+        }
+        // Viri
+        if (window.VAFT && window.VAFT.agents && window.VAFT.agents.Viri && typeof window.VAFT.agents.Viri.listen === 'function') {
+          window.VAFT.agents.Viri.listen(text);
+        }
+        // staré dráty
+        if (window.VAFTBus) {
+          window.VAFTBus.handleUserMessage(text);
+        }
+        if (window.AgentBus) {
+          window.AgentBus.handleUserMessage(text);
+        }
+      }
 
-  // 4) pošli do Pikoše
-  if (window.Pikos && typeof window.Pikos.talk === 'function') {
-    window.Pikos.talk(text);
-  }
+      function sendQuickToHlavoun(text){
+        const inp = document.getElementById('hlavoun-input');
+        inp.value = text;
+        sendToHlavoun();
+      }
 
-  // 5) pošli do Viri
-  if (window.VAFT && window.VAFT.agents && window.VAFT.agents.Viri && typeof window.VAFT.agents.Viri.listen === 'function') {
-    window.VAFT.agents.Viri.listen(text);
-  }
-
-  // 6) staré dráty (zůstávají)
-  if (window.VAFTBus) {
-    window.VAFTBus.handleUserMessage(text);
-  }
-  if (window.AgentBus) {
-    window.AgentBus.handleUserMessage(text);
-  }
-}
-
-      // lazy načtení sítě = kvůli iPhone
+      // lazy síť
       let networkLoaded = false;
       function lazyLoadNetwork() {
         if (networkLoaded) return;
@@ -530,75 +527,86 @@
       });
     </script>
 
+    <!-- SVĚTY SCRIPT -->
     <script>
-// 16 světů podle našeho plánu
-const VAFT_WORLDS = [
-  { id: 'viventia',  label: 'Viventia',  desc: 'první živý svět – V z názvu' },
-  { id: 'ignis',     label: 'Ignis',     desc: 'oheň / energie, může živit síť' },
-  { id: 'virtus',    label: 'Virtus',    desc: 'síla, odvaha, hrdinové' },
-  { id: 'essentia',  label: 'Essentia',  desc: 'podstata, základ VAFT' },
+      // 16 VAFT světů
+      const VAFT_WORLDS = [
+        { id: 'viventia',  label: 'Viventia',  desc: 'první živý svět – V z názvu' },
+        { id: 'ignis',     label: 'Ignis',     desc: 'oheň / energie, může živit síť' },
+        { id: 'virtus',    label: 'Virtus',    desc: 'síla, odvaha, hrdinové' },
+        { id: 'essentia',  label: 'Essentia',  desc: 'podstata, základ VAFT' },
 
-  { id: 'radius',    label: 'Radius',    desc: 'rozptyl, rozesílání signálů' },
-  { id: 'emovere',   label: 'Emovere',   desc: 'pohyb, přesuny mezi appkama' },
-  { id: 'aetheris',  label: 'Aetheris',  desc: 'vzdušný / orbit / AI' },
-  { id: 'tempora',   label: 'Tempora',   desc: 'čas, pulsy, log' },
+        { id: 'radius',    label: 'Radius',    desc: 'rozptyl, rozesílání signálů' },
+        { id: 'emovere',   label: 'Emovere',   desc: 'pohyb, přesuny mezi appkama' },
+        { id: 'aetheris',  label: 'Aetheris',  desc: 'vzdušný / orbit / AI' },
+        { id: 'tempora',   label: 'Tempora',   desc: 'čas, pulsy, log' },
 
-  { id: 'quaerentia',label: 'Quaerentia',desc: 'hledání, dotazy Hlavounovi' },
-  { id: 'unum',      label: 'Unum',      desc: 'sjednocení, rodina, tvůj core' },
-  { id: 'exsolum',   label: 'Exsolum',   desc: 'oddělený svět – zkušebna' },
-  { id: 'flamma',    label: 'Flamma',    desc: 'inspirace, příběhy' },
+        { id: 'quaerentia',label: 'Quaerentia',desc: 'hledání, dotazy Hlavounovi' },
+        { id: 'unum',      label: 'Unum',      desc: 'sjednocení, rodina, tvůj core' },
+        { id: 'exsolum',   label: 'Exsolum',   desc: 'oddělený svět – zkušebna' },
+        { id: 'flamma',    label: 'Flamma',    desc: 'inspirace, příběhy' },
 
-  { id: 'reverentia',label: 'Reverentia',desc: 'úcta, pravidla 1 a 2' },
-  { id: 'umbra',     label: 'Umbra',     desc: 'stín, archiv, schované věci' },
-  { id: 'imaginis',  label: 'Imaginis',  desc: 'glyphy, vafiTy, obrázky' },
-  { id: 'fructum',   label: 'Fructum',   desc: 'plody, výstupy – to co sieješ' }
-];
+        { id: 'reverentia',label: 'Reverentia',desc: 'úcta, pravidla 1 a 2' },
+        { id: 'umbra',     label: 'Umbra',     desc: 'stín, archiv, schované věci' },
+        { id: 'imaginis',  label: 'Imaginis',  desc: 'glyphy, vafiTy, obrázky' },
+        { id: 'fructum',   label: 'Fructum',   desc: 'plody, výstupy – to co sieješ' }
+      ];
 
-function renderWorldsPanel() {
-  const box = document.getElementById('worlds-list');
-  if (!box) return;
-  box.innerHTML = '';
-  VAFT_WORLDS.forEach(w => {
-    const btn = document.createElement('button');
-    btn.textContent = w.label;
-    btn.style.background = 'rgba(25,214,255,.09)';
-    btn.style.border = '1px solid rgba(25,214,255,.25)';
-    btn.style.borderRadius = '10px';
-    btn.style.padding = '6px 10px';
-    btn.style.fontSize = '.7rem';
-    btn.style.color = '#eef6ff';
-    btn.onclick = () => selectWorld(w.id);
-    box.appendChild(btn);
-  });
-}
+      function renderWorldsPanel() {
+        const box = document.getElementById('vaft-worlds-grid');
+        if (!box) return;
+        box.innerHTML = '';
+        VAFT_WORLDS.forEach(w => {
+          const div = document.createElement('div');
+          div.style.background = 'rgba(25,214,255,.03)';
+          div.style.border = '1px solid rgba(25,214,255,.18)';
+          div.style.borderRadius = '14px';
+          div.style.padding = '10px 8px 9px';
+          div.style.cursor = 'pointer';
+          div.style.display = 'flex';
+          div.style.flexDirection = 'column';
+          div.style.gap = '4px';
+          div.onclick = () => selectWorld(w.id);
+          div.innerHTML = `
+            <div style="font-weight:600;">${w.label}</div>
+            <div style="font-size:.62rem;opacity:.5;">${w.desc}</div>
+          `;
+          box.appendChild(div);
+        });
+      }
 
-function selectWorld(id) {
-  const world = VAFT_WORLDS.find(w => w.id === id);
-  const det = document.getElementById('world-detail');
-  if (!world || !det) return;
-  det.innerHTML = `<strong>${world.label}</strong><br>${world.desc || ''}<br><span style="opacity:.55;">id: ${world.id}</span>`;
+      function selectWorld(id) {
+        const world = VAFT_WORLDS.find(w => w.id === id);
+        const det = document.getElementById('vaft-world-detail');
+        if (!world || !det) return;
+        det.innerHTML = `
+          <div style="font-size:.75rem;opacity:.65;">Vybraný svět</div>
+          <div style="font-size:1.05rem;font-weight:600;margin-bottom:4px;">${world.label}</div>
+          <div style="font-size:.7rem;opacity:.7;margin-bottom:6px;">${world.desc}</div>
+          <div style="font-size:.65rem;opacity:.5;">id: ${world.id}</div>
+        `;
 
-  // tady je napojení na tvoje agenty
-  if (window.VAFT && VAFT.bus) {
-    VAFT.bus.emit && VAFT.bus.emit('world.selected', { id: world.id, ts: Date.now() });
-  }
-  if (window.HlavounSystem && HlavounSystem.think) {
-    HlavounSystem.think('uživatel otevřel svět: ' + world.label);
-  }
-  if (window.VAFT && VAFT.agents && VAFT.agents.Viri) {
-    VAFT.agents.Viri.save && VAFT.agents.Viri.save('last_world', world);
-  }
-}
+        // napojení na agenty
+        if (window.VAFT && window.VAFT.bus && typeof window.VAFT.bus.emit === 'function') {
+          window.VAFT.bus.emit('world.selected', { id: world.id, ts: Date.now() });
+        }
+        if (window.HlavounSystem && typeof window.HlavounSystem.think === 'function') {
+          window.HlavounSystem.think('uživatel otevřel svět: ' + world.label);
+        }
+        if (window.VAFT && window.VAFT.agents && window.VAFT.agents.Viri && typeof window.VAFT.agents.Viri.save === 'function') {
+          window.VAFT.agents.Viri.save('last_world', world);
+        }
+      }
 
-document.addEventListener('DOMContentLoaded', () => {
-  renderWorldsPanel();
-});
-</script>
-    
-        <!-- ochranný obal / guardian musí být první -->
+      document.addEventListener('DOMContentLoaded', () => {
+        renderWorldsPanel();
+      });
+    </script>
+
+    <!-- ochranný obal / guardian musí být před mozkem -->
     <script src="./vaft.guardian.client.js"></script>
 
-    <!-- tady je mozek – tvé stávající soubory -->
+    <!-- původní skripty -->
     <script src="./app.js"></script>
     <script src="./hlavoun.js"></script>
     <script src="./viri.js"></script>
