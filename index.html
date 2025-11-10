@@ -618,5 +618,42 @@
     <script src="./vaft.engine.js"></script>
     <script src="./vaft.ascend.js"></script>
     <script src="./vaft.diagnostics.js"></script>
+ <script>
+(function () {
+  // při načtení doplníme stav
+  const box = document.querySelector('.coins div:first-child');
+  const saved = localStorage.getItem('VAFT_LETTERS') || '';
+  if (box) {
+    if (saved.length) {
+      box.textContent = saved.length + ' ' + saved.slice(-1);
+    } else {
+      box.textContent = '0';
+    }
+  }
+
+  // rotace písmen
+  function nextLetter() {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let idx = parseInt(localStorage.getItem('VAFT_LETTER_INDEX') || '0', 10);
+    const letter = alphabet[idx % alphabet.length];
+    idx++;
+    localStorage.setItem('VAFT_LETTER_INDEX', idx);
+    return letter;
+  }
+
+  // když guardian řekne "odvedeno", přidáme písmeno
+  window.addEventListener('guardian:reward', function () {
+    const letter = nextLetter();
+    const current = localStorage.getItem('VAFT_LETTERS') || '';
+    const updated = current + letter;
+    localStorage.setItem('VAFT_LETTERS', updated);
+
+    const box2 = document.querySelector('.coins div:first-child');
+    if (box2) {
+      box2.textContent = updated.length + ' ' + letter;
+    }
+  });
+})();
+</script>
   </body>
 </html>
