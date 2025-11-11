@@ -776,7 +776,16 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     
     <!-- původní skripty -->
     <script src="./app.js"></script>
-   <script src="./vaft.glyphs.js"></script>
+   <!-- CHYBOŽROUT-OPRAVÁŘ -->
+<script src="./vaft.chybozrout.js?v=1"></script>
+<script>
+  // spustí Chybožrouta a jeho tým
+  window.VAFT_CHYBOZROUT && window.VAFT_CHYBOZROUT.init({
+    appName: 'Vivere atque FruiT',
+    version: window.V || 'dev'
+  });
+</script>
+<script src="./vaft.glyphs.js"></script>
     <script src="./hlavoun.js"></script>
     <script src="./viri.js"></script>
     <script src="./pikos.js"></script>
