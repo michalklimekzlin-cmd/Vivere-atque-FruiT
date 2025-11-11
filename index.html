@@ -761,5 +761,46 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
-</body>
+<script>
+// ─── VAFT nezničitelný kořen ───────────────────────────
+(function (win) {
+  if (win.VAFT_CORE) return;
+
+  const dna = {
+    name: 'Vivere atque FruiT',
+    short: 'VaFT',
+    mark: 'T',              // tvoje jizva / znak
+    meaning: 'žít a užívat • zapsáno do světa',
+    permanence: 'scar-ink', // hojení -> tetování -> zůstává
+    creator: 'michalklimekzlin-cmd',
+    createdAt: '2025-11-11'
+  };
+
+  const core = {
+    id: 'vaft://core',
+    version: '1.0',
+    dna,
+    role: 'sovereign',     // vládnoucí jádro
+    signature: 'VaFT-T',
+    register: function (what) {
+      try {
+        this.modules = this.modules || [];
+        this.modules.push({ name: what, ts: Date.now() });
+      } catch (e) {}
+    }
+  };
+
+  // 🔸 tady přidáš vrstvy DNA
+  core.dna.layers = ['scar', 'ink', 'memory', 'world'];
+  Object.freeze(core.dna.layers);
+
+  // 🔹 a teď teprve zamrazíš DNA a celé jádro
+  Object.freeze(core.dna);
+  Object.freeze(core);
+
+  // 🔹 uložíš ho do systému
+  win.VAFT_CORE = core;
+})(window);
+</script>
+  </body>
 </html>
