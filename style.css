@@ -190,3 +190,54 @@ body {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* můžeš dát do style.css */
+.pill-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.pill {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 14px;
+  padding: 6px 10px;
+  display: flex;
+  gap: .4rem;
+  align-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+}
+
+.pill:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.pill-code {
+  background: rgba(0,0,0,0.3);
+  border-radius: 999px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.vafit-row {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: 10px;
+  padding: 6px 8px;
+  min-width: 190px;
+}
+
+.vafit-glyph {
+  font-family: "SF Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 14px;
+}
+
+.vafit-role {
+  opacity: .5;
+  font-size: 11px;
+}
