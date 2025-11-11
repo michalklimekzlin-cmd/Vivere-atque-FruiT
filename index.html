@@ -606,6 +606,54 @@
     <!-- ochranný obal / guardian musí být před mozkem -->
     <script src="./vaft.guardian.client.js"></script>
 
+    <script>
+// ─── VAFT nezničitelný kořen ───────────────────────────
+(function (win) {
+  // když už náhodou existuje, tak ho jen použij
+  if (win.VAFT_CORE) return;
+
+  const dna = {
+    name: 'Vivere atque FruiT',
+    short: 'VaFT',
+    mark: 'T',              // tvoje jizva / znak
+    meaning: 'žít a užívat • zapsáno do světa',
+    permanence: 'scar-ink', // hojení -> tetování -> zůstává
+    creator: 'michalklimekzlin-cmd', // klidně si přepiš
+    createdAt: '2025-11-11',        // můžeš dát aktuální
+  };
+
+  const core = {
+    id: 'vaft://core',
+    version: '1.0',
+    dna,
+    // tohle říká: jsem nad AI i nad “app”
+    role: 'sovereign',
+    // světová identita – dají se z toho generovat glyphy
+    signature: 'VaFT-T',
+    // helper: každý modul se může zaregistrovat
+    register: function (what) {
+      // jen zapisujeme, nepřepisujeme DNA
+      try {
+        this.modules = this.modules || [];
+        this.modules.push({
+          name: what,
+          ts: Date.now()
+        });
+      } catch (e) {
+        // když je to zamrzlý, tak nic
+      }
+    }
+  };
+
+  // zmrzneme to, ať to nikdo nepřepíše
+  Object.freeze(core.dna);
+  Object.freeze(core);
+
+  // dáme to do window
+  win.VAFT_CORE = core;
+})(window);
+</script>
+    
     <!-- původní skripty -->
     <script src="./app.js"></script>
    <script src="./vaft.glyphs.js"></script>
