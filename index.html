@@ -802,5 +802,49 @@ if ('serviceWorker' in navigator) {
   win.VAFT_CORE = core;
 })(window);
 </script>
+  
+    <script>
+// ─── Živé jádro postav Vivere atque FruiT ──────────────────────────────
+(function () {
+  const beings = [
+    { name: 'Hlavoun', color: '#00bfff', icon: '🧠' },
+    { name: 'Viri', color: '#8cff66', icon: '💚' },
+    { name: 'Pikoš', color: '#ffaa33', icon: '🧡' },
+    { name: 'VaFT', color: '#cc66ff', icon: '🧬' }
+  ];
+
+  const hud = document.createElement('div');
+  hud.id = 'vaft-hud';
+  hud.style.cssText = `
+    position:fixed;bottom:10px;left:50%;transform:translateX(-50%);
+    display:flex;gap:8px;z-index:9999;
+    font-family:system-ui,-apple-system,sans-serif;font-size:12px;
+  `;
+
+  beings.forEach(b => {
+    const box = document.createElement('div');
+    box.style.cssText = `
+      padding:6px 10px;border-radius:10px;
+      background:${b.color};color:#000;font-weight:600;
+      animation: vaftPulse 3s infinite ease-in-out;
+      box-shadow:0 0 10px ${b.color}80;
+    `;
+    box.textContent = `${b.icon} ${b.name}: běží`;
+    hud.appendChild(box);
+  });
+
+  document.body.appendChild(hud);
+
+  // 💓 jemné dýchání barev
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes vaftPulse {
+      0%,100% { transform:scale(1); opacity:.8; }
+      50% { transform:scale(1.15); opacity:1; }
+    }
+  `;
+  document.head.appendChild(style);
+})();
+</script>
   </body>
 </html>
