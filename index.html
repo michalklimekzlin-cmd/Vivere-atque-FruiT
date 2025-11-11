@@ -690,19 +690,34 @@
     return letter;
   }
 
-  // když guardian řekne "odvedeno", přidáme písmeno
-  window.addEventListener('guardian:reward', function () {
-    const letter = nextLetter();
-    const current = localStorage.getItem('VAFT_LETTERS') || '';
-    const updated = current + letter;
-    localStorage.setItem('VAFT_LETTERS', updated);
+ <script>
+// registrace / aktualizace service workeru
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('./service-worker.js?v=4')
+      .then(reg => {
+        console.log('[SW] registrován', reg);
 
-    const box2 = document.querySelector('.coins div:first-child');
-    if (box2) {
-      box2.textContent = updated.length + ' ' + letter;
-    }
+        // když už čeká nový SW → řekni mu "aktivuj se"
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+
+        // když přijde nová verze během běhu
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed') {
+              console.log('[SW] je dostupná nová verze');
+              // tady můžeš udělat refresh nebo ukázat hlášku
+              // location.reload();
+            }
+          });
+        });
+      });
   });
-})();
+}
 </script>
   <script>
   // registrace / aktualizace service workeru
