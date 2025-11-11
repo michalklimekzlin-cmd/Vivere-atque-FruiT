@@ -1,23 +1,29 @@
-const CACHE_NAME = 'vaft-cache-v1';
-const urlsToCache = [
-  './',
-  './index.html',
-  './style.css',
-  './hlavoun.js',
-  './manifest.json',
-  './VafiT-gallery/index.html',
-  './VafiT-gallery/style.css',
-  './VafiT-gallery/app.js'
-];
+// 🧠 Nový čistý service-worker.js
+const CACHE_NAME = 'vaft-cache-v2'; // zvýš verzi, ať se starý zneplatní
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-  );
+self.addEventListener('install', (event) => {
+  console.log('[SW] Instalace nové verze...');
+  self.skipWaiting(); // hned aktivuj novou verzi
 });
 
-self.addEventListener('fetch', event => {
+self.addEventListener('activate', (event) => {
+  console.log('[SW] Aktivace a čištění starých cache...');
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.map(key => {
+        if (key !== CACHE_NAME) {
+          console.log('[SW] Mazání cache:', key);
+          return caches.delete(key);
+        }
+      }))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', (event) => {
+  // Vždy ber novou verzi z internetu, pokud jde
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
