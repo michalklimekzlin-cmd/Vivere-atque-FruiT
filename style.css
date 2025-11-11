@@ -175,3 +175,23 @@ body {
   background:rgba(56,189,248,.12); border:1px solid rgba(56,189,248,.04);
   border-radius:8px; padding:4px 10px; color:#fff; font-size:.62rem; margin-top:4px;
 }
+
+/* základ panelů */
+.panel {
+  display: none;            /* všechny panely jsou defaultně schované */
+}
+
+/* aktuálně vybraný panel */
+.panel.active {
+  display: block;           /* tenhle se ukáže */
+}
+
+/* jen pro hezčí přepínání (nepovinné) */
+.panel.active {
+  animation: vaftFade 0.15s ease-out;
+}
+
+@keyframes vaftFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
