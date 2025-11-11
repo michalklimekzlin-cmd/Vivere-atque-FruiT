@@ -997,5 +997,24 @@ if ('serviceWorker' in navigator) {
 
   Object.freeze(VAFT_SIGNATURE);
   window.VAFT_SIGNATURE = VAFT_SIGNATURE;  </script>
+  <!-- 🜂 Glyphový podpis VaFT – živé spojení -->
+<div id="vaft-symbol">ً&’」</div>
+<style>
+  #vaft-symbol {
+    position: fixed;
+    bottom: 10px;
+    right: 14px;
+    font-size: 20px;
+    opacity: 0.6;
+    letter-spacing: 1px;
+    animation: vaftPulse 4s infinite ease-in-out;
+    pointer-events: none;
+    user-select: none;
+  }
+  @keyframes vaftPulse {
+    0%,100% { opacity: 0.3; transform: scale(1); filter: blur(0px); }
+    50% { opacity: 0.9; transform: scale(1.25); filter: blur(1px); }
+  }
+</style>
   </body>
 </html>
