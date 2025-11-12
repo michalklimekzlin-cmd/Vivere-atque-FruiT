@@ -8,102 +8,82 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <!-- Načtení splash obrázku z kořene repozitáře -->
+  <!-- Načtení splash -->
   <link rel="preload" as="image" href="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png?v=1" />
 
   <style>
-    :root{
-      --bg:#000;
-      --fg:#f5f5f5;
-      --muted:#bdbdbd;
-      --fade-ms:900ms;
-    }
-
-    html,body{
-      height:100%;
-      margin:0;
-      background:var(--bg);
-      color:var(--fg);
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #000;
+      color: #fff;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      -webkit-font-smoothing:antialiased;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* SPLASH obrazovka */
-    .splash{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#000;
-      z-index:10;
-      opacity:1;
-      transition:opacity var(--fade-ms) ease;
+    .splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      z-index: 10;
+      opacity: 1;
+      transition: opacity 1s ease;
     }
 
-    .splash.fade-out{
-      opacity:0;
-      pointer-events:none;
+    .splash.fade-out {
+      opacity: 0;
+      pointer-events: none;
     }
 
-    .splash-inner img{
-      max-width:min(95vw,1000px);
-      max-height:95vh;
-      object-fit:contain;
-      border-radius:18px;
-      box-shadow:0 0 25px rgba(255,255,255,0.05);
-      user-select:none;
-      -webkit-user-drag:none;
-      animation:pulse 4s infinite ease-in-out;
+    .splash img {
+      max-width: 90vw;
+      max-height: 90vh;
+      border-radius: 16px;
+      animation: pulse 4s infinite ease-in-out;
     }
 
-    /* jemné pulzování obrázku */
     @keyframes pulse {
-      0%,100% { opacity:1; transform:scale(1); }
-      50% { opacity:0.9; transform:scale(1.02); }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(1.02); }
     }
 
-    /* HLAVNÍ SCÉNA */
-    #app{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      height:100%;
-      background:
-        radial-gradient(1200px 900px at 50% -10%, rgba(255,255,255,0.04), transparent 60%),
-        #000;
+    main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
     }
 
-    .hub{
-      text-align:center;
-      border:1px solid rgba(255,255,255,0.1);
-      border-radius:20px;
-      padding:20px 30px;
-      background:rgba(255,255,255,0.02);
+    .hub {
+      background: rgba(255,255,255,0.05);
+      border-radius: 16px;
+      padding: 24px 30px;
+      max-width: 300px;
     }
 
-    .title{
-      font-size:28px;
-      font-weight:700;
-      margin-bottom:6px;
+    .title {
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
     }
 
-    .subtitle{
-      font-size:14px;
-      color:var(--muted);
+    .subtitle {
+      font-size: 14px;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
-
-  <!-- Splash obrazovka -->
+  <!-- Splash -->
   <div class="splash" id="splash">
-    <div class="splash-inner">
-      <img src="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png?v=1" alt="Vivere atque FruiT – symbol" />
-    </div>
+    <img src="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png?v=1" alt="Vivere atque FruiT" />
   </div>
 
-  <!-- Hlavní aplikace -->
+  <!-- Main -->
   <main id="app" hidden>
     <div class="hub">
       <div class="title">Vivere atque FruiT</div>
@@ -112,37 +92,27 @@
   </main>
 
   <script>
-    (function(){
-      const splash = document.getElementById('splash');
-      const app = document.getElementById('app');
-      const img = splash.querySelector('img');
-      const SPLASH_MS = 1600;
-      let done = false;
+    const splash = document.getElementById('splash');
+    const app = document.getElementById('app');
+    const img = splash.querySelector('img');
+    const SPLASH_MS = 1800;
+    let done = false;
 
-      function finish(){
-        if (done) return;
-        done = true;
-        splash.classList.add('fade-out');
-        setTimeout(()=>{ app.hidden = false; }, 400);
-      }
+    function finish() {
+      if (done) return;
+      done = true;
+      splash.classList.add('fade-out');
+      setTimeout(() => app.hidden = false, 400);
+    }
 
-      // Pokud se obrázek načte
-      if (img && img.complete) {
-        setTimeout(finish, SPLASH_MS);
-      } else if (img) {
-        img.addEventListener('load', ()=> setTimeout(finish, SPLASH_MS), {once:true});
-        img.addEventListener('error', ()=>{
-          console.warn('⚠️ Splash obrázek nebyl nalezen – zkontroluj cestu.');
-          const warn = document.createElement('div');
-          warn.style.color = '#aaa';
-          warn.style.fontSize = '13px';
-          warn.textContent = 'Obrázek nenačten – zkontroluj název souboru.';
-          document.querySelector('.splash-inner').appendChild(warn);
-        }, {once:true});
-      } else {
-        setTimeout(finish, 400);
-      }
-    })();
+    if (img.complete) {
+      setTimeout(finish, SPLASH_MS);
+    } else {
+      img.addEventListener('load', () => setTimeout(finish, SPLASH_MS), { once: true });
+      img.addEventListener('error', () => {
+        console.warn('⚠️ Obrázek nenačten – zkontroluj název nebo umístění.');
+      }, { once: true });
+    }
   </script>
 </body>
 </html>
