@@ -8,141 +8,140 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-  <!-- Preload splash obrázku (uprav cestu/ název dle souboru) -->
-  <link rel="preload" as="image" href="./assets/vaft-splash.png" />
+  <!-- Načtení splash obrázku z kořene repozitáře -->
+  <link rel="preload" as="image" href="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png?v=1" />
 
   <style>
     :root{
-      --bg:#000; --fg:#f5f5f5; --muted:#bdbdbd; --fade-ms:700ms;
-      --safe-pad: env(safe-area-inset-bottom, 0px);
+      --bg:#000;
+      --fg:#f5f5f5;
+      --muted:#bdbdbd;
+      --fade-ms:900ms;
     }
-    /* Reset a základ */
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; background:var(--bg); color:var(--fg);
+
+    html,body{
+      height:100%;
+      margin:0;
+      background:var(--bg);
+      color:var(--fg);
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-      overscroll-behavior: none;
+      -webkit-font-smoothing:antialiased;
     }
 
-    /* --- SPLASH --- */
+    /* SPLASH obrazovka */
     .splash{
-      position:fixed; inset:0; display:grid; place-items:center;
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       background:#000;
-      transition: opacity var(--fade-ms) ease;
-      will-change: opacity;
       z-index:10;
+      opacity:1;
+      transition:opacity var(--fade-ms) ease;
     }
-    .splash-inner{
-      width:100%; height:100%;
-      display:flex; align-items:center; justify-content:center;
-      padding:24px;
-    }
-    .splash-inner img{
-      max-width:min(92vw, 1100px);
-      max-height:92vh;
-      width:auto; height:auto;
-      object-fit:contain; object-position:center;
-      user-select:none; -webkit-user-drag:none;
-      border-radius:18px;
-      /* jemný „papír“ efekt přes tmavé pozadí */
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.06),
-                  0 14px 60px rgba(0,0,0,0.65);
-    }
-    .splash.fade-out{ opacity:0; pointer-events:none; }
 
-    /* --- HLAVNÍ SCÉNA (zatím prázdný rám) --- */
+    .splash.fade-out{
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .splash-inner img{
+      max-width:min(95vw,1000px);
+      max-height:95vh;
+      object-fit:contain;
+      border-radius:18px;
+      box-shadow:0 0 25px rgba(255,255,255,0.05);
+      user-select:none;
+      -webkit-user-drag:none;
+      animation:pulse 4s infinite ease-in-out;
+    }
+
+    /* jemné pulzování obrázku */
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.9; transform:scale(1.02); }
+    }
+
+    /* HLAVNÍ SCÉNA */
     #app{
-      position:relative; min-height:100%; display:flex; align-items:center; justify-content:center;
-      padding:24px; padding-bottom: calc(24px + var(--safe-pad));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:100%;
       background:
         radial-gradient(1200px 900px at 50% -10%, rgba(255,255,255,0.04), transparent 60%),
         #000;
     }
+
     .hub{
-      width:min(960px, 92vw);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:20px; padding:18px 20px 22px;
-      background: rgba(255,255,255,0.02);
-      backdrop-filter: blur(0.5px);
+      text-align:center;
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:20px;
+      padding:20px 30px;
+      background:rgba(255,255,255,0.02);
     }
+
     .title{
-      font-size:28px; font-weight:700; letter-spacing:.4px; text-align:center;
-      margin:8px 0 2px;
+      font-size:28px;
+      font-weight:700;
+      margin-bottom:6px;
     }
+
     .subtitle{
-      text-align:center; color:var(--muted); font-size:13px; margin-bottom:6px;
-    }
-
-    /* Tlačítko „Pokračovat“ – dočasně pro ruční odskok ze splash */
-    .skip{
-      position:fixed; right:14px; bottom:14px;
-      border:1px solid rgba(255,255,255,0.14);
-      background:#0b0b0b; color:#fff; font-size:12px;
-      padding:8px 10px; border-radius:10px; opacity:.75;
-    }
-
-    @media (prefers-reduced-motion: reduce){
-      .splash{ transition:none }
+      font-size:14px;
+      color:var(--muted);
     }
   </style>
 </head>
 <body>
 
-  <!-- SPLASH s naším symbolem -->
-<div class="splash" id="splash">
-  <div class="splash-inner">
-    <img src="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png" alt="Vivere atque FruiT – symbol" />
+  <!-- Splash obrazovka -->
+  <div class="splash" id="splash">
+    <div class="splash-inner">
+      <img src="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png?v=1" alt="Vivere atque FruiT – symbol" />
+    </div>
   </div>
-</div>
 
-  <!-- Dočasné tlačítko pro případ, že chceš přeskočit ručně (můžeš klidně smazat) -->
-  <button class="skip" id="skipBtn" aria-label="Přeskočit úvod">Přeskočit</button>
-
-  <!-- HLAVNÍ APLIKACE – prázdný hub, připravený na další moduly -->
+  <!-- Hlavní aplikace -->
   <main id="app" hidden>
-    <section class="hub">
+    <div class="hub">
       <div class="title">Vivere atque FruiT</div>
       <div class="subtitle">Základ běží. Krok po kroku budeme přidávat světy a moduly.</div>
-      <!-- Sem budeme postupně vkládat: Deníky, Revia, Čtverečky/Chybožrout, Tlapka, Lilie atd. -->
-    </section>
+    </div>
   </main>
 
   <script>
-    // Minimal safe splash: fade out po načtení obrázku nebo po čase
     (function(){
       const splash = document.getElementById('splash');
       const app = document.getElementById('app');
-      const skip = document.getElementById('skipBtn');
-
-      // Délka zobrazení splash (ms)
-      const SPLASH_MS = 1600; // jemné a rychlé
-
+      const img = splash.querySelector('img');
+      const SPLASH_MS = 1600;
       let done = false;
+
       function finish(){
         if (done) return;
         done = true;
         splash.classList.add('fade-out');
-        // Po fade-out zobrazíme app
-        setTimeout(()=>{ app.hidden = false; }, 50);
+        setTimeout(()=>{ app.hidden = false; }, 400);
       }
 
-      // Přeskočení ručně
-      skip.addEventListener('click', finish);
-
-      // Jakmile je obrázek hotový, odstartuj časovač
-      const img = splash.querySelector('img');
+      // Pokud se obrázek načte
       if (img && img.complete) {
         setTimeout(finish, SPLASH_MS);
       } else if (img) {
         img.addEventListener('load', ()=> setTimeout(finish, SPLASH_MS), {once:true});
-        img.addEventListener('error', ()=> setTimeout(finish, 400), {once:true}); // fallback
+        img.addEventListener('error', ()=>{
+          console.warn('⚠️ Splash obrázek nebyl nalezen – zkontroluj cestu.');
+          const warn = document.createElement('div');
+          warn.style.color = '#aaa';
+          warn.style.fontSize = '13px';
+          warn.textContent = 'Obrázek nenačten – zkontroluj název souboru.';
+          document.querySelector('.splash-inner').appendChild(warn);
+        }, {once:true});
       } else {
         setTimeout(finish, 400);
       }
-
-      // Obejít starou cache jednoduše přidáním verze do URL při nasazení (např. ?v=0.35)
     })();
   </script>
 </body>
