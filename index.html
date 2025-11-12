@@ -2,27 +2,123 @@
 <html lang="cs">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Vivere atque FruiT</title>
+
   <meta name="theme-color" content="#000000" />
+
   <style>
-    html, body {
+    * {
       margin: 0;
-      height: 100%;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    img {
-      max-width: 90vw;
-      max-height: 90vh;
-      display: block;
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      font-family: -apple-system, system-ui, sans-serif;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .page {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      aspect-ratio: 9/16;
+      overflow: hidden;
+    }
+
+    .hero-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    /* LEVÝ SYSTÉMOVÝ PANEL */
+    .left-panel {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 999;
+    }
+
+    .tile-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 14px;
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #fff;
+      font-size: 12px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .tile-btn:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.4);
     }
   </style>
 </head>
+
 <body>
-  <img src="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png" alt="Vivere atque FruiT" />
+  <div class="page">
+
+    <!-- HLAVNÍ OBRÁZEK (děcko + telefon + Vivere atque FruíT) -->
+    <img src="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png" class="hero-img" />
+
+    <!-- LEVÝ PANEL -->
+    <nav class="left-panel">
+
+      <button class="tile-btn" onclick="go('revia')">Revia</button>
+      <button class="tile-btn" onclick="go('glyph')">Glyph</button>
+      <button class="tile-btn" onclick="go('vafit')">VafiT</button>
+      <button class="tile-btn" onclick="go('hlavoun')">Hlavoun</button>
+      <button class="tile-btn" onclick="go('worlds')">Světy</button>
+
+      <!-- 🔥 NÁŠ NOVÝ CHYBOŽROUT / OPRAVÁŘ -->
+      <button class="tile-btn" onclick="go('chybo')">
+        🔧 Chybožrout
+      </button>
+
+    </nav>
+
+  </div>
+
+  <script>
+    /* ROUTING NA MODULY */
+    function go(id) {
+      const L = {
+        revia: "./Revia/",
+        glyph: "./Glyph/",
+        vafit: "./VafiT/",
+        hlavoun: "./Hlavoun/",
+        worlds: "./Worlds/",
+        chybo: "./chybozrout-opravar/",   // náš OPRAVÁŘ
+      };
+
+      window.location.href = L[id] || "#";
+    }
+  </script>
+
 </body>
 </html>
