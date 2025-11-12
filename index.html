@@ -5,469 +5,349 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Vivere atque FruiT</title>
   <meta name="theme-color" content="#000000" />
+
   <style>
     :root {
-      color-scheme: dark;
-      --bg: #000;
-      --fg: #f5f5f5;
-      --accent: #ff3b30;
-      --accent-soft: rgba(255,59,48,.16);
-      --card-bg: rgba(255,255,255,.04);
-      --border: rgba(255,255,255,.14);
+      --bg: #000000;
+      --card: #080808;
+      --card2: #101010;
+      --border: #262626;
+      --text-main: #f5f5f5;
+      --text-soft: #a0a0a0;
+      --accent: #ff3b30;   /* červená */
+      --accent2: #ffd60a;  /* zlatá */
       --ok: #30d158;
-      --err: #ff453a;
-      --warn: #ffd60a;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      background: radial-gradient(circle at top, #050505 0, #000 45%, #000 100%);
-      color: var(--fg);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-                   "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at top, #111 0, #000 55%, #000 100%);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                   system-ui, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     body {
       display: flex;
-      justify-content: center;
       align-items: stretch;
+      justify-content: center;
     }
 
-    .app {
+    .page {
       width: 100%;
-      max-width: 520px;
-      padding: 16px 14px 26px;
+      max-width: 1200px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
 
-    header {
+    /* layout – na větších šířkách vedle sebe */
+    @media (min-width: 768px) {
+      .page {
+        flex-direction: row;
+        align-items: stretch;
+      }
+    }
+
+    .splash {
+      flex: 1;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 10px 14px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
-      border: 1px solid var(--border);
-      backdrop-filter: blur(14px);
-    }
-
-    header .title {
-      font-weight: 650;
-      letter-spacing: .03em;
-      font-size: 16px;
-    }
-
-    header .subtitle {
-      font-size: 11px;
-      opacity: .78;
-      text-align: right;
-    }
-
-    .hero {
-      display: flex;
       justify-content: center;
-      align-items: center;
-      padding: 12px 10px 6px;
+      padding: 8px;
     }
 
-    .hero img {
-      max-width: 78vw;
-      max-height: 54vh;
+    .splash img {
+      max-width: 100%;
+      max-height: 80vh;
       height: auto;
-      display: block;
-      border-radius: 26px;
+      border-radius: 24px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.8);
     }
 
-    main {
+    .panel {
+      flex: 1.2;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
 
-    section.card {
+    .panel-header {
+      padding: 12px 16px;
       border-radius: 20px;
+      background: linear-gradient(135deg, #141414, #050505);
       border: 1px solid var(--border);
-      background: var(--card-bg);
-      padding: 12px 12px 10px;
-      backdrop-filter: blur(10px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.65);
     }
 
-    .card h2 {
-      margin: 0 0 8px;
-      font-size: 14px;
+    .panel-title {
+      font-size: 18px;
       font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .panel-sub {
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--text-soft);
+    }
+
+    .panel-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      margin-top: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(255,214,10,0.08);
+      border: 1px solid rgba(255,214,10,0.25);
+      color: var(--accent2);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+    }
+
+    .hero-card {
+      padding: 10px 12px;
+      border-radius: 18px;
+      background: radial-gradient(circle at top, #181818, #050505);
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.7);
+      min-height: 90px;
+    }
+
+    .hero-name {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .hero-name span {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-soft);
+      margin-left: 4px;
+    }
+
+    .hero-name.hl { color: var(--accent2); }
+    .hero-name.vi { color: #32d74b; }
+    .hero-name.pi { color: #0a84ff; }
+    .hero-name.vv { color: #bf5af2; }
+    .hero-name.qm { color: var(--accent); }
+
+    .hero-stats {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-soft);
+    }
+
+    .hero-stats strong {
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .systems {
+      margin-top: 4px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #050505, #101010);
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 14px 30px rgba(0,0,0,0.7);
+    }
+
+    .systems-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-soft);
       letter-spacing: .06em;
       text-transform: uppercase;
-      opacity: .9;
     }
 
-    .module-list {
+    .systems-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 6px;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
     }
 
-    .module-pill {
-      padding: 6px 8px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.3);
-      font-size: 11px;
+    .sys-pill {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 4px;
-      min-height: 30px;
-    }
-
-    .module-pill span.name {
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .badge {
-      font-size: 10px;
-      padding: 2px 6px;
+      padding: 6px 10px;
       border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.22);
-      background: rgba(255,255,255,.05);
-    }
-
-    .badge.ok    { border-color: var(--ok);   color: var(--ok); }
-    .badge.err   { border-color: var(--err);  color: var(--err); }
-    .badge.load  { border-color: var(--warn); color: var(--warn); }
-
-    .world-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
-      gap: 6px;
-    }
-
-    .world-tile {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 9px 10px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(0,0,0,.5);
-      font-size: 12px;
-      text-decoration: none;
-      color: var(--fg);
-    }
-
-    .world-tile span {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .world-tile:active {
-      transform: scale(.97);
-      background: rgba(255,255,255,.06);
-    }
-
-    #console-log {
-      max-height: 120px;
-      overflow: auto;
-      font-family: "SF Mono", Menlo, Consolas, monospace;
-      font-size: 11px;
-      line-height: 1.35;
-      padding: 6px 6px 4px;
-      border-radius: 10px;
       background: #050505;
-      border: 1px solid rgba(255,255,255,.18);
-    }
-
-    #console-log div {
-      margin-bottom: 2px;
-      white-space: nowrap;
-    }
-
-    #reload-modules {
-      margin-top: 8px;
-      width: 100%;
-      border-radius: 12px;
-      border: 1px solid var(--accent);
-      background: var(--accent-soft);
-      color: #fff;
-      padding: 7px 0;
+      border: 1px solid var(--border);
       font-size: 12px;
+      color: var(--text-soft);
     }
 
-    #reload-modules:active {
-      transform: scale(.98);
-      filter: brightness(1.1);
-    }
-
-    footer {
-      margin-top: 6px;
-      font-size: 10px;
-      opacity: .7;
-      text-align: center;
-    }
-
-    .fab {
-      position: fixed;
-      right: 16px;
-      bottom: 18px;
+    .sys-pill span.label {
       display: inline-flex;
       align-items: center;
-      gap: .45rem;
-      padding: 9px 12px;
-      border-radius: 16px;
-      background: rgba(255,255,255,.07);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,.22);
-      text-decoration: none;
-      font-size: 12px;
-      backdrop-filter: blur(10px);
+      gap: .35rem;
     }
 
-    .fab:active { transform: scale(.97); }
+    .sys-pill span.state {
+      font-weight: 600;
+      color: var(--ok);
+    }
 
-    @media (max-width: 400px) {
-      header { padding-inline: 10px; }
-      .hero img { max-width: 86vw; }
+    /* plovoucí tlačítko na Chybožrouta */
+    .fab{
+      position:fixed;
+      right:16px;
+      bottom:18px;
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      padding:10px 14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.16);
+      text-decoration:none;
+      font:14px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      backdrop-filter: blur(6px);
+      z-index: 20;
+    }
+
+    .fab span {
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div class="title">Vivere atque FruiT</div>
-      <div class="subtitle">
-        Michal &amp; Hlavoun<br/>
-        živý systém světů
-      </div>
-    </header>
-
-    <div class="hero">
-      <!-- náš společný obrázek -->
+  <div class="page">
+    <!-- LEVÁ STRANA – náš společný obrázek -->
+    <div class="splash">
       <img src="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png"
-           alt="Vivere atque FruiT – kluk s mobilem" loading="lazy" />
+           alt="Vivere atque FruiT – Michal & Hlavoun">
     </div>
 
-    <main>
-      <!-- SYSTÉMOVÉ MODULY -->
-      <section class="card">
-        <h2>Status systému</h2>
-        <div class="module-list" id="system-modules"></div>
-      </section>
-
-      <!-- SVĚTY A MINIAPKY -->
-      <section class="card">
-        <h2>Svět Vivere atque FruiT</h2>
-        <div class="world-grid">
-          <!-- hlavní světy/postavy -->
-          <a class="world-tile" href="./Revia/"><span>Revia</span></a>
-          <a class="world-tile" href="./VAFT-BearHead/"><span>BearHead</span></a>
-          <a class="world-tile" href="./Michal-AI-Al-Klimek/"><span>Michal AI Al Klimek</span></a>
-          <a class="world-tile" href="./VafiT-gallery/"><span>VafiT gallery</span></a>
-          <a class="world-tile" href="./VAFT-LetterLab/"><span>LetterLab</span></a>
-          <a class="world-tile" href="./VAFT-Lilies/"><span>Lilie</span></a>
-          <a class="world-tile" href="./VAFT-MapWorld/"><span>MapWorld</span></a>
-          <a class="world-tile" href="./VAFT-Network/"><span>VAFT Network</span></a>
-          <a class="world-tile" href="./Braska-Hlava/"><span>Bráška Hlava</span></a>
-          <a class="world-tile" href="./Hlavoun/"><span>Hlavoun</span></a>
-          <a class="world-tile" href="./Meziprostor-Core/"><span>Meziprostor Core</span></a>
-          <a class="world-tile" href="./VAFT-GhostGirl/"><span>GhostGirl</span></a>
-          <a class="world-tile" href="./VAFT-Doll/"><span>Doll</span></a>
-          <a class="world-tile" href="./VAFT-Girls/"><span>Girls</span></a>
-          <a class="world-tile" href="./VAFT-Jizva/"><span>Jizva</span></a>
-          <a class="world-tile" href="./VAFT-Lady/"><span>Lady</span></a>
-          <a class="world-tile" href="./VAFT-Game/"><span>Game (experiment)</span></a>
-          <a class="world-tile" href="./3I-ATLAS/"><span>3I Atlas</span></a>
-          <a class="world-tile" href="./guardian/"><span>Guardian</span></a>
-          <a class="world-tile" href="./mapa/"><span>Mapa</span></a>
-          <a class="world-tile" href="./mapa-3d/"><span>Mapa 3D</span></a>
-          <a class="world-tile" href="./lite/"><span>Lite režim</span></a>
+    <!-- PRAVÁ STRANA – nový VAFT 2.0 panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Vivere atque FruiT • core shell</div>
+        <div class="panel-sub">
+          Michal &amp; Hlavoun – živý systém hrdinů, světů a modulů.
         </div>
-      </section>
+        <div class="panel-badge">
+          <span>🧪 jádro 1.1.0 • návrh</span>
+        </div>
+      </div>
 
-      <!-- DIAGNOSTIKA -->
-      <section class="card">
-        <h2>Diagnostika modulů</h2>
-        <div id="console-log"></div>
-        <button id="reload-modules">Znovu načíst moduly</button>
-      </section>
-    </main>
+      <!-- hrdinové -->
+      <div class="grid">
+        <div class="hero-card">
+          <div class="hero-name hl">Hlavoun <span>🧠 systém</span></div>
+          <div class="hero-stats">
+            🧠 <strong>mozek</strong>: čeká<br>
+            💾 paměť: 0<br>
+            ⚙️ motor: ---<br>
+            ❤️ srdce: 0<br>
+            💨 ventil: ---
+          </div>
+        </div>
 
-    <footer>
-      Vivere atque FruiT • živý index všech světů • v0.3 (testovací jádro)
-    </footer>
+        <div class="hero-card">
+          <div class="hero-name vi">Viri <span>🌀 energie</span></div>
+          <div class="hero-stats">
+            🧠 mozek: spí<br>
+            💾 paměť: 0<br>
+            ⚙️ motor: ---<br>
+            ❤️ srdce: 0<br>
+            💨 ventil: ---
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-name pi">Pikoš <span>🦴 tělo</span></div>
+          <div class="hero-stats">
+            🧠 mozek: ...<br>
+            💾 paměť: 0<br>
+            ⚙️ motor: ---<br>
+            ❤️ srdce: 0<br>
+            💨 ventil: ---
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-name vv">Vivere <span>🌍 svět</span></div>
+          <div class="hero-stats">
+            🧠 mozek: ...<br>
+            💾 paměť: 0<br>
+            ⚙️ motor: ---<br>
+            ❤️ srdce: 0<br>
+            💨 ventil: ---
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <div class="hero-name qm">? <span>místo pro dalšího</span></div>
+          <div class="hero-stats">
+            🧠 mozek: ☐<br>
+            💾 paměť: ☐<br>
+            ⚙️ motor: ☐<br>
+            ❤️ srdce: ☐<br>
+            💨 ventil: ☐
+          </div>
+        </div>
+      </div>
+
+      <!-- systémy -->
+      <div class="systems">
+        <div class="systems-title">Systémy jádra (připraveno)</div>
+        <div class="systems-grid">
+          <div class="sys-pill">
+            <span class="label">🧬 Kernel</span>
+            <span class="state">OK</span>
+          </div>
+          <div class="sys-pill">
+            <span class="label">🌐 Network</span>
+            <span class="state">OK</span>
+          </div>
+          <div class="sys-pill">
+            <span class="label">🕸 Hub</span>
+            <span class="state">OK</span>
+          </div>
+          <div class="sys-pill">
+            <span class="label">🧩 Nodes</span>
+            <span class="state">OK</span>
+          </div>
+          <div class="sys-pill">
+            <span class="label">🛰 Autonodes</span>
+            <span class="state">čeká</span>
+          </div>
+          <div class="sys-pill">
+            <span class="label">🛡 Guardian</span>
+            <span class="state">čeká</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- zkratka na samostatnou appku Chybožrout-Opravář -->
+  <!-- plovoucí tlačítko na Chybožrout-Opravář -->
   <a class="fab" href="./chybozrout-opravar/">
-    🧩 Chybožrout
+    🧩 <span>Chybožrout-Opravář</span>
   </a>
 
   <script>
-    // ---------- Pomocné logování ----------
-    const consoleBox = document.getElementById('console-log');
-
-    function logLine(msg, type = 'info') {
-      if (!consoleBox) return;
-      const line = document.createElement('div');
-      let prefix = '·';
-      let color = '#ccc';
-      if (type === 'ok')   { prefix = '✓'; color = '#30d158'; }
-      if (type === 'err')  { prefix = '✗'; color = '#ff453a'; }
-      if (type === 'warn') { prefix = '!'; color = '#ffd60a'; }
-      line.textContent = prefix + ' ' + msg;
-      line.style.color = color;
-      consoleBox.appendChild(line);
-      consoleBox.scrollTop = consoleBox.scrollHeight;
-    }
-
-    // ---------- Definice systémových modulů ----------
-    const MODULES = [
-      { id: 'vaft-core',         file: './vaft-core.js',             label: 'VAFT Core' },
-      { id: 'vaft-kernel',       file: './vaft.kernel.js',           label: 'Kernel' },
-      { id: 'vaft-loader',       file: './vaft.loader.js',           label: 'Loader' },
-      { id: 'vaft-network',      file: './vaft.network.js',          label: 'Network' },
-      { id: 'vaft-core-net',     file: './vaft.core.network.js',     label: 'Core Network' },
-      { id: 'vaft-hub',          file: './vaft.hub.js',              label: 'Hub' },
-      { id: 'vaft-bus',          file: './vaft.bus.js',              label: 'Bus' },
-      { id: 'vaft-nodes',        file: './vaft.nodes.js',            label: 'Nodes' },
-      { id: 'vaft-autonodes',    file: './vaft.autonodes.js',        label: 'Autonodes' },
-      { id: 'vaft-autonodes-l2', file: './vaft.autonodes.layer2.js', label: 'Autonodes L2' },
-      { id: 'vaft-autonodes-l3', file: './vaft.autonodes.layer3.js', label: 'Autonodes L3' },
-      { id: 'vaft-autonodes-or', file: './vaft.autonodes.origin.js', label: 'Autonodes Origin' },
-      { id: 'vaft-brains',       file: './vaft.brains.js',           label: 'Brains' },
-      { id: 'vaft-fuel',         file: './vaft.fuel.js',             label: 'Fuel' },
-      { id: 'vaft-engine',       file: './vaft.engine.js',           label: 'Engine' },
-      { id: 'vaft-heartbeat',    file: './vaft.heartbeat.js',        label: 'Heartbeat' },
-      { id: 'vaft-glyphs',       file: './vaft.glyphs.js',           label: 'Glyphs' },
-      { id: 'vaft-spell',        file: './vaft.spell.js',            label: 'Spell' },
-      { id: 'vaft-vent',         file: './vaft.vent.js',             label: 'Vent' },
-      { id: 'vaft-agents',       file: './vaft.agents.js',           label: 'Agents' },
-      { id: 'vaft-apps',         file: './vaft.apps.js',             label: 'Apps' },
-      { id: 'vaft-all',          file: './vaft.all.js',              label: 'All (bundle)' },
-      { id: 'vaft-ascend',       file: './vaft.ascend.js',           label: 'Ascend' },
-      { id: 'vaft-msg-shell',    file: './vaft.message.shell.js',    label: 'Message shell' },
-      { id: 'vaft-diagnostics',  file: './vaft.diagnostics.js',      label: 'Diagnostics' },
-      { id: 'vaft-guardian',     file: './vaft.guardian.client.js',  label: 'Guardian client' },
-      { id: 'vaft-chyboz',       file: './vaft.chybozrout.js',       label: 'Chybožrout modul' },
-      { id: 'agents-root',       file: './agents.js',                label: 'Agents (root)' },
-      { id: 'app-root',          file: './app.js',                   label: 'App (root)' },
-      { id: 'center-root',       file: './center.js',                label: 'Center' },
-      { id: 'engine-root',       file: './engine.js',                label: 'Engine (root)' },
-      { id: 'hlavoun-root',      file: './hlavoun.js',               label: 'Hlavoun' },
-      { id: 'pikos-root',        file: './pikos.js',                 label: 'Pikoš' },
-      { id: 'viri-root',         file: './viri.js',                  label: 'Viri' }
-    ];
-
-    // ---------- UI pro moduly ----------
-    const moduleListEl = document.getElementById('system-modules');
-    const moduleState = {};
-
-    function buildModuleList() {
-      moduleListEl.innerHTML = '';
-      MODULES.forEach(m => {
-        const pill = document.createElement('div');
-        pill.className = 'module-pill';
-        pill.dataset.id = m.id;
-
-        const name = document.createElement('span');
-        name.className = 'name';
-        name.textContent = m.label;
-
-        const badge = document.createElement('span');
-        badge.className = 'badge load';
-        badge.textContent = 'čeká';
-
-        pill.appendChild(name);
-        pill.appendChild(badge);
-        moduleListEl.appendChild(pill);
-
-        moduleState[m.id] = { pill, badge };
-      });
-    }
-
-    function setModuleStatus(id, status) {
-      const entry = moduleState[id];
-      if (!entry) return;
-      entry.badge.classList.remove('ok', 'err', 'load');
-      if (status === 'ok') {
-        entry.badge.classList.add('ok');
-        entry.badge.textContent = 'OK';
-      } else if (status === 'err') {
-        entry.badge.classList.add('err');
-        entry.badge.textContent = 'chyba';
-      } else if (status === 'load') {
-        entry.badge.classList.add('load');
-        entry.badge.textContent = '…';
-      }
-    }
-
-    // ---------- Loader modulů ----------
-    function loadScriptSequential(mod) {
-      return new Promise((resolve) => {
-        const s = document.createElement('script');
-        const cacheBust = 'v=' + Date.now();
-        s.src = mod.file + (mod.file.includes('?') ? '&' : '?') + cacheBust;
-        s.onload = () => {
-          setModuleStatus(mod.id, 'ok');
-          logLine(mod.label + ' načten', 'ok');
-          resolve(true);
-        };
-        s.onerror = () => {
-          setModuleStatus(mod.id, 'err');
-          logLine('Nepodařilo se načíst ' + mod.file, 'err');
-          resolve(false);
-        };
-        setModuleStatus(mod.id, 'load');
-        logLine('Načítám ' + mod.file + ' …', 'warn');
-        document.body.appendChild(s);
-      });
-    }
-
-    async function loadAllModules() {
-      consoleBox.innerHTML = '';
-      logLine('Start sekvenčního načítání modulů…', 'warn');
-      for (const mod of MODULES) {
-        // eslint-disable-next-line no-await-in-loop
-        await loadScriptSequential(mod);
-      }
-      if (window.VAFT && typeof window.VAFT.boot === 'function') {
-        try {
-          window.VAFT.boot();
-          logLine('VAFT.boot() proběhl', 'ok');
-        } catch (e) {
-          logLine('VAFT.boot() chyba: ' + e.message, 'err');
-        }
-      } else {
-        logLine('VAFT.boot() není k dispozici (zatím?)', 'warn');
-      }
-    }
-
-    // ---------- Init ----------
-    document.addEventListener('DOMContentLoaded', () => {
-      buildModuleList();
-      loadAllModules();
-
-      const btnReload = document.getElementById('reload-modules');
-      btnReload.addEventListener('click', () => {
-        loadAllModules();
-      });
-
-      // Service Worker (pokud existuje)
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./service-worker.js')
-          .then(() => logLine('Service worker registrován', 'ok'))
-          .catch(err => logLine('SW chyba: ' + err.message, 'err'));
-      }
-    });
+    // Minimální VAFT shell – budeme dál rozšiřovat
+    window.VAFT = window.VAFT || {};
+    VAFT.version = '1.1.0-shell';
+    console.log('Vivere atque FruiT shell ready •', VAFT.version);
   </script>
 </body>
 </html>
