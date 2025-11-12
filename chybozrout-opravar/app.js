@@ -10,9 +10,10 @@ function log(msg) {
   logBox.scrollTop = logBox.scrollHeight;
 }
 
+// nahraď tímto:
 btn.addEventListener('click', async () => {
-  log('Spouštím skenování souborů Vivere atque FruiT…');
-  const results = await window.RepairNet.scan();
+  log('Spouštím rekurzivní sken podsložek (v2.2-pre)…');
+  const results = await window.RepairNet.scanDeep();
   results.forEach(r => log(r));
-  log('Skenování dokončeno ✅');
+  log('Hotovo ✅');
 });
