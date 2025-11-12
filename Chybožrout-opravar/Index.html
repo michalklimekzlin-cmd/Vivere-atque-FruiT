@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chybožrout-Opravář • VAFT</title>
+  <meta name="theme-color" content="#000000" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-title">Chybožrout-Opravář</div>
+      <div class="brand-sub">Diagnostika Vivere atque FruiT</div>
+    </div>
+    <button id="installBtn" class="btn">➕ Instalovat</button>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="row">
+        <label class="label">Cílová adresa (stejný původ/doména):</label>
+        <input id="targetUrl" placeholder="../" value="../" />
+        <button id="scanBtn" class="btn btn-primary">🔍 Spustit sken</button>
+      </div>
+      <p class="hint">Tip: Pokud je Chybožrout nasazen ve STEJNÉM projektu jako hlavní appka,
+        stačí nechat <code>../</code>. Jinak vlož přesnou cestu (musí být stejný původ).</p>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h3>Výsledky skenu</h3>
+        <div id="results" class="results">Ještě neskenuji…</div>
+        <div class="row">
+          <button id="exportBtn" class="btn">⬇️ Export JSON</button>
+          <button id="clearBtn" class="btn">🧹 Vyčistit</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Živý log (cílová stránka)</h3>
+        <pre id="log" class="log"></pre>
+        <div class="row">
+          <button id="toggleLog" class="btn">👁️/🙈 Zobrazit/Skrýt</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Quick-fix tipy</h3>
+      <ul class="tips">
+        <li>❗ <b>Service Worker</b>: v indexu ponech JEN <b>jednu</b> registraci.</li>
+        <li>❗ <b>Duplicitní funkce</b>: <code>vaftSwitchPanel</code> nech jen jednou.</li>
+        <li>❗ <b>Uzavírání &lt;script&gt;</b>: žádné vnořené <code>&lt;script&gt;</code> a chybějící <code>&lt;/script&gt;</code>.</li>
+        <li>💤 <b>Pulzy</b>: místo dlouhodobých <code>setInterval</code> preferuj rAF + setTimeout (CalmPulse).</li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- skrytý iframe pro sken -->
+  <iframe id="probe" sandbox="allow-same-origin allow-scripts" class="hidden"></iframe>
+
+  <script src="./app.js"></script>
+</body>
+</html>
