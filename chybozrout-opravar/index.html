@@ -20,7 +20,28 @@
     <p>Součást systému Vivere atque FruiT • verze 2.1</p>
   </footer>
 
-  <script src="./repairnet.js"></script>
-  <script src="./app.js"></script>
+  <!-- JISTÉ načtení skriptů (nejdřív repairnet, pak app) -->
+<script>
+(function () {
+  function load(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src + (src.includes('?') ? '&' : '?') + 'v=' + Date.now(); // obejde cache
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('Nepodařilo se načíst: ' + src));
+      document.body.appendChild(s);
+    });
+  }
+  window.addEventListener('DOMContentLoaded', async () => {
+    try {
+      await load('./repairnet.js');       // musí být první
+      await load('./app.js');             // UI až po RepairNet
+    } catch (e) {
+      const box = document.getElementById('scanLog');
+      if (box) box.textContent = '❌ ' + e.message;
+    }
+  });
+})();
+</script>
 </body>
 </html>
