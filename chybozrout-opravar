@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Chybožrout-Opravář v2.1</title>
+  <link rel="stylesheet" href="./style.css" />
+  <meta name="theme-color" content="#0a0a0a" />
+</head>
+<body>
+  <div class="header">
+    <div class="title">🛠️ Chybožrout-Opravář v2.1</div>
+    <div class="subtitle">„Více hlav = méně pádů“</div>
+  </div>
+
+  <div id="scanLog" class="panel">Inicializace systému…</div>
+  <button id="scanBtn">Spustit skenování</button>
+
+  <footer>
+    <p>Součást systému Vivere atque FruiT • verze 2.1</p>
+  </footer>
+
+  <script src="./repairnet.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
