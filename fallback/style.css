@@ -1,0 +1,15 @@
+/* 🧩 Fallback style pro moduly Vivere atque FruiT */
+body {
+  background: radial-gradient(circle at center, #111 0%, #000 100%);
+  color: #eee;
+  font-family: system-ui, -apple-system, sans-serif;
+  text-align: center;
+  padding-top: 25vh;
+}
+h1 {
+  font-size: 2rem;
+  color: #ff4747;
+}
+p {
+  color: #aaa;
+}
