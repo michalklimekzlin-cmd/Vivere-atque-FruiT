@@ -1367,10 +1367,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
   <script>
-<!-- Chybožrout – Opravář -->
-<script src="./chybozrout-opravar/repairnet.js?v=2"></script>
+<!-- ——— Chybožrout – Opravář ——— -->
+<script src="./chybozrout-opravar/repairnet.js?v=2.3"></script>
+<script src="./chybozrout-opravar/repairapp.js?v=2.3"></script>
+
+<!-- 🧩 2) Globální zachytávání chyb (log do panelu místo pádu) -->
 <script>
-/* Safe SW – single registration, no reload loops */
+(function () {
+  const ui = () => document.querySelector('#scanLog, #vaft-hud, .panel') || document.body;
+  const logLine = (txt) => {
+    const el = document.createElement('div');
+    el.textContent = txt;
+    el.style.whiteSpace = 'pre-wrap';
+    ui().appendChild(el);
+
+    const max = 80;
+    const parent = ui();
+    while (parent.children.length > max) parent.firstChild.remove();
+  };
+
+  window.addEventListener('error', (e) => {
+    logLine('❌ ' + (e?.message || 'Unknown error'));
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    logLine('❌ (promise) ' + (e?.reason?.message || e?.reason || 'Unknown rejection'));
+  });
+})();
+</script>
+
+<!-- 🛡️ 1) Safe Service Worker – jediný a bez smyček -->
+<script>
 (function () {
   if (!('serviceWorker' in navigator)) return;
   let registered = false;
@@ -1381,7 +1407,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const reg = await navigator.serviceWorker.register('./service-worker.js?v=17');
       registered = true;
 
-      // slušné převzetí bez nuceného reloadu
       if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
 
       reg.addEventListener('updatefound', () => {
@@ -1389,7 +1414,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!nw) return;
         nw.addEventListener('statechange', () => {
           if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-            // pouze info; už žádné location.reload()
             console.log('[SW] nová verze připravena');
           }
         });
