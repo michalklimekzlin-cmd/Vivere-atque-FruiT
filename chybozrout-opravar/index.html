@@ -3,47 +3,87 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Chybožrout-Opravář v2.5</title>
+  <title>Chybožrout-Opravář v2.6 • Tiles + Drawer</title>
   <meta name="theme-color" content="#000000" />
   <style>
     :root{
       --bg:#000; --fg:#f5f5f5; --muted:#bdbdbd;
-      --pane:#0c0c0c; --line:#1a1a1a; --ok:#86efac; --bad:#fca5a5; --warn:#facc15;
+      --pane:#0c0c0c; --line:#1a1a1a; --ok:#86efac; --bad:#fca5a5; --warn:#facc15; --acc:#e84a4a;
     }
     *{box-sizing:border-box}
     html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-    .wrap{max-width:1100px;margin:18px auto;padding:0 14px}
+    .wrap{max-width:1120px;margin:18px auto;padding:0 14px}
+
     .header{display:flex;gap:12px;align-items:baseline;margin-bottom:10px}
     .title{font-size:22px;font-weight:800}
     .sub{color:var(--muted);font-size:13px}
+
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .card{background:var(--pane);border:1px solid var(--line);border-radius:14px;padding:14px}
-    .row{display:flex;gap:8px;flex-wrap:wrap}
-    button{background:#111;color:#fff;border:1px solid var(--line);padding:10px 12px;border-radius:12px;cursor:pointer}
-    button:disabled{opacity:.6;cursor:not-allowed}
     .kpi{font-size:30px;font-weight:800}
     .muted{color:var(--muted);font-size:12px}
     #scanLog{min-height:140px;white-space:pre-wrap;line-height:1.35;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
-    .list{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+
+    .list{max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:12px}
     .err{padding:10px 12px;border-bottom:1px solid var(--line)}
     .err:last-child{border-bottom:none}
     .msg{font-size:13px}
     .meta{color:var(--muted);font-size:11px;margin-top:4px}
     .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
-    @media (max-width:900px){ .grid{grid-template-columns:1fr} }
+    @media (max-width:960px){ .grid{grid-template-columns:1fr} }
+
+    /* ======= Tiles (čtverečky) ======= */
+    .tiles{display:grid;grid-template-columns:repeat(4,minmax(72px,1fr));gap:10px;margin-top:10px}
+    @media (max-width:720px){ .tiles{grid-template-columns:repeat(2,minmax(120px,1fr))} }
+    .tile{
+      aspect-ratio:1 / 1;
+      border:1px solid var(--line);
+      border-radius:14px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+      background:#0b0b0b; cursor:pointer; user-select:none;
+      transition:transform .1s ease, background .2s ease, border-color .2s ease;
+      text-align:center; padding:8px;
+    }
+    .tile:hover{ background:#111; border-color:#2a2a2a; }
+    .tile:active{ transform:scale(0.98); }
+    .tile b{font-size:20px}
+    .tile span{font-size:12px;color:#ddd}
+
+    /* ======= Drawer (výsuvný panel) ======= */
+    .drawer{
+      position:fixed; left:0; right:0; bottom:-420px;
+      background:rgba(20,20,20,.98);
+      border-top:1px solid var(--line);
+      box-shadow:0 -30px 80px rgba(0,0,0,.5);
+      transition:bottom .28s ease;
+      z-index:50;
+    }
+    .drawer.open{ bottom:0; }
+    .drawer .inner{max-width:1120px;margin:0 auto;padding:14px}
+    .drawer .row{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .drawer .desc{font-size:14px;color:#ddd;line-height:1.45; padding:8px 0}
+    .drawer button{
+      background:#111;color:#fff;border:1px solid var(--line);
+      padding:10px 14px;border-radius:12px;cursor:pointer;min-width:160px;
+    }
+    .drawer .primary{border-color:#2a2a2a;background:#151515}
+    .drawer .close{opacity:.7}
+
+    footer{margin:14px 0;color:var(--muted);font-size:12px;text-align:center}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="header">
-      <div class="title">🛠️ Chybožrout-Opravář <span id="ver">v2.5</span></div>
+      <div class="title">🛠️ Chybožrout-Opravář <span id="ver">v2.6</span></div>
       <div class="sub">„Více hlav = méně pádů“</div>
     </div>
 
     <div class="grid">
+      <!-- KPI + Tiles -->
       <div class="card">
-        <div class="row" style="justify-content:space-between;align-items:center">
+        <div class="row" style="display:flex;justify-content:space-between;gap:12px">
           <div>
             <div class="muted">Úroveň</div>
             <div class="kpi" id="lvl">1</div>
@@ -53,40 +93,61 @@
             <div class="kpi" id="qcnt">0</div>
           </div>
         </div>
-        <div class="row" style="margin-top:8px">
-          <button id="btn-scan">🔎 Sken indexů</button>
-          <button id="btn-deps">📦 Sken závislostí</button>
-          <button id="btn-fix" >🔧 Opravit nejbližší</button>
-          <button id="btn-fixall">✨ Opravit vše</button>
-          <button id="btn-sim">💥 Nasimulovat chybu</button>
-          <button id="btn-clear">🧹 Čistit log</button>
-        </div>
-        <div class="muted" style="margin-top:6px">
-          Fallback cesta pro opravy: <code id="fb-base">/fallback/</code>
+
+        <!-- ČTVERCE / Tiles -->
+        <div class="tiles" id="tiles">
+          <div class="tile" data-action="attach"><b>🧠</b><span>Zachytávat chyby</span></div>
+          <div class="tile" data-action="scan"><b>🔎</b><span>Sken indexů</span></div>
+          <div class="tile" data-action="deps"><b>📦</b><span>Sken závislostí</span></div>
+          <div class="tile" data-action="fallback"><b>🧯</b><span>Opravit (fallback)</span></div>
+
+          <div class="tile" data-action="fix1"><b>🔧</b><span>Opravit nejbližší</span></div>
+          <div class="tile" data-action="fixall"><b>✨</b><span>Opravit vše</span></div>
+          <div class="tile" data-action="sim"><b>💥</b><span>Simulovat chybu</span></div>
+          <div class="tile" data-action="export"><b>📤</b><span>Export report</span></div>
         </div>
       </div>
 
+      <!-- Log -->
       <div class="card">
         <div class="muted">Systémový log</div>
         <div id="scanLog">Inicializace systému…</div>
       </div>
     </div>
 
+    <!-- Fronta chyb -->
     <div class="card" style="margin-top:12px">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <div class="muted">Fronta chyb a chybějících souborů</div>
-        <div class="muted">klikni na řádek pro detail</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="muted">Fronta chyb / chybějících souborů</div>
+        <button id="btn-clear" style="background:#111;color:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:10px;cursor:pointer">🧹 Vyčistit log</button>
       </div>
       <div id="errList" class="list"></div>
+    </div>
+
+    <footer>Součást světa Vivere atque FruiT • build v2.6 (tiles + drawer)</footer>
+  </div>
+
+  <!-- Výsuvný panel -->
+  <div class="drawer" id="drawer">
+    <div class="inner">
+      <div class="row">
+        <div id="drawer-title" style="font-weight:700">Akce</div>
+        <div>
+          <button class="close" id="drawer-close">Zavřít</button>
+          <button class="primary" id="drawer-run">Spustit</button>
+        </div>
+      </div>
+      <div id="drawer-desc" class="desc">Popis akce…</div>
     </div>
   </div>
 
   <script>
-  // ============================
-  // 🧠 RepairNet v2.5 (rozšířený)
-  // ============================
+  /* ===========================
+     🧠 RepairNet v2.6 (core)
+     – vychází z v2.5
+  ============================ */
   (function(){
-    const VERSION = 'v2.5';
+    const VERSION = 'v2.6';
     const MAX_QUEUE = 400;
     const ROOTS = [
       '../Revia/',
@@ -95,17 +156,15 @@
       '../Meziprostor-Core/',
       '../VAFT-Network/'
     ];
-    // Kam sáhnout pro fallback soubory (vytvoř v repu složku /fallback/)
     const FALLBACK_BASE = location.origin + location.pathname.replace(/\/[^/]*$/,'/') + '../fallback/';
 
     const state = {
       queue: [],
       fixed: parseInt(localStorage.getItem('vaft.chzr.fixed')||'0',10),
       lvl:   parseInt(localStorage.getItem('vaft.chzr.lvl')||'1',10),
-      scanning:false
+      scanning:false,
+      handlers:false
     };
-    document.getElementById('fb-base').textContent = new URL(FALLBACK_BASE).pathname;
-
     const save = ()=>{ localStorage.setItem('vaft.chzr.fixed', state.fixed); localStorage.setItem('vaft.chzr.lvl', state.lvl); };
 
     function enqueue(obj){
@@ -122,122 +181,80 @@
       if (state.queue.length > MAX_QUEUE) state.queue.shift();
       return item;
     }
-
     function fixNext(){
       if (!state.queue.length) return null;
       const it = state.queue.shift();
-      state.fixed++; if (state.fixed % 3 === 0) state.lvl++;
-      save();
+      state.fixed++; if (state.fixed % 3 === 0) state.lvl++; save();
       return it;
     }
     function fixAll(){ let n=state.queue.length; while(state.queue.length) fixNext(); return n; }
 
     async function check(url){
-      try{
-        const r = await fetch(url, {cache:'no-store'});
-        return {ok:r.ok, status:r.status};
-      }catch(e){ return {ok:false, status:e.message}; }
+      try{ const r = await fetch(url, {cache:'no-store'}); return {ok:r.ok, status:r.status}; }
+      catch(e){ return {ok:false, status:e.message}; }
     }
-
-    // ——— DEPS SCAN: vytáhne z indexu všechny src/href a zkontroluje je
-    const RES_RE = /<(script|img|link|audio|video)\b[^>]+?(?:src|href)\s*=\s*["']([^"']+)["'][^>]*>/gi;
-    function toAbs(base, rel){
-      try{
-        // zachovej absolute http(s) jak jsou
-        if (/^https?:\/\//i.test(rel)) return rel;
-        return new URL(rel, base).href;
-      }catch{ return rel; }
-    }
-
     async function fetchText(url){
-      const res = await fetch(url, {cache:'no-store'});
-      if (!res.ok) throw new Error('HTTP '+res.status);
-      return await res.text();
+      const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); return await r.text();
     }
+    const RES_RE = /<(script|img|link|audio|video)\b[^>]+?(?:src|href)\s*=\s*["']([^"']+)["'][^>]*>/gi;
+    const toAbs = (base, rel)=> /^https?:\/\//i.test(rel) ? rel : new URL(rel, base).href;
 
     async function scanIndexAndDeps(root, logFn){
-      const indexUrl = new URL(root + 'index.html', 'https://michalklimekzlin-cmd.github.io/Vivere-atque-FruiT/').href;
-      logFn && logFn('🔎 Index: ' + indexUrl);
-      let html = '';
-      try{
-        html = await fetchText(indexUrl);
-        logFn && logFn('✅ ' + indexUrl + ' (OK)');
-      }catch(e){
-        enqueue({ type:'missing-index', msg:'Index nedostupný', src:indexUrl, stack:e.message });
-        logFn && logFn('❌ ' + indexUrl + ' ('+e.message+')');
-        return;
-      }
+      const indexUrl = new URL(root+'index.html','https://michalklimekzlin-cmd.github.io/Vivere-atque-FruiT/').href;
+      logFn && logFn('🔎 Index: '+indexUrl);
+      let html='';
+      try{ html = await fetchText(indexUrl); logFn && logFn('✅ '+indexUrl+' (OK)'); }
+      catch(e){ enqueue({type:'missing-index', msg:'Index nedostupný', src:indexUrl, stack:e.message}); logFn && logFn('❌ '+indexUrl+' ('+e.message+')'); return; }
 
-      // Vytáhni zdroje
-      const base = indexUrl;
-      const found = new Set();
-      let m;
-      while ((m = RES_RE.exec(html)) !== null){
-        const rel = m[2];
-        // ignoruj manifesty a externí analytics, pokud nechceš
-        if (/manifest\.json$/i.test(rel)) continue;
-        found.add(toAbs(base, rel));
-      }
-      // Zkontroluj všechny nalezené soubory
+      const base = indexUrl; const found = new Set(); let m;
+      while((m = RES_RE.exec(html)) !== null){ const rel = m[2]; if(/manifest\.json$/i.test(rel)) continue; found.add(toAbs(base, rel)); }
       for (const u of found){
         const r = await check(u);
-        if (!r.ok){
-          enqueue({ type:'missing-asset', msg:'Chybí asset', src:u, stack:'status: '+r.status });
-          logFn && logFn('❌ ' + u + ' ('+r.status+')');
-        } else {
-          logFn && logFn('✅ ' + u + ' ('+r.status+')');
-        }
+        if (!r.ok){ enqueue({type:'missing-asset', msg:'Chybí asset', src:u, stack:'status: '+r.status}); logFn && logFn('❌ '+u+' ('+r.status+')'); }
+        else { logFn && logFn('✅ '+u+' ('+r.status+')'); }
       }
     }
-
     async function scanDeep(logFn){
       state.scanning = true;
-      for (const root of ROOTS){
-        await scanIndexAndDeps(root, logFn);
-      }
+      for (const r of ROOTS){ await scanIndexAndDeps(r, logFn); }
       state.scanning = false;
     }
 
-    // fallback „oprava“: zkusí dynamicky nahrát chybějící skripty/styly/obrázky z FALLBACK_BASE
     async function tryRepairMissing(logFn){
-      const missing = state.queue.filter(x => x.type === 'missing-asset');
-      if (!missing.length){ logFn && logFn('✨ Není co opravovat (missing-asset).'); return 0; }
+      const missing = state.queue.filter(x=>x.type==='missing-asset');
+      if(!missing.length){ logFn && logFn('✨ Není co opravovat (missing-asset).'); return 0; }
       let repaired = 0;
-
       for (const m of missing){
         try{
           const url = new URL(m.src);
-          const relPath = url.pathname.replace(/^\/+/, '').replace(/^Vivere-atque-FruiT\//,''); // relativně v repu
+          const relPath = url.pathname.replace(/^\/+/, '').replace(/^Vivere-atque-FruiT\//,'');
           const fbUrl = new URL(relPath, FALLBACK_BASE).href;
-
-          // ověř existenci fallbacku
           const chk = await check(fbUrl);
-          if (!chk.ok){ logFn && logFn('⚠️ Fallback nenalezen: ' + fbUrl); continue; }
+          if (!chk.ok){ logFn && logFn('⚠️ Fallback nenalezen: '+fbUrl); continue; }
 
-          // dynamicky připoj (pro .js jako <script>, pro .css jako <link>, ostatní jen validujeme)
           if (/\.(js)(\?|$)/i.test(fbUrl)){
-            await new Promise((res,rej)=>{
-              const s=document.createElement('script'); s.src=fbUrl; s.onload=res; s.onerror=rej; document.body.appendChild(s);
-            });
-            repaired++;
-            logFn && logFn('🔧 Nahrán fallback skript: ' + fbUrl);
+            await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=fbUrl; s.onload=res; s.onerror=rej; document.body.appendChild(s); });
+            repaired++; logFn && logFn('🔧 Nahrán fallback skript: '+fbUrl);
           } else if (/\.(css)(\?|$)/i.test(fbUrl)){
             const l=document.createElement('link'); l.rel='stylesheet'; l.href=fbUrl; document.head.appendChild(l);
-            repaired++;
-            logFn && logFn('🔧 Nahrán fallback styl: ' + fbUrl);
-          } else {
-            // obrázek/audio – „opravíme“ jako validované, UI si ho načte při dalším renderu
-            repaired++;
-            logFn && logFn('🔧 Fallback dostupný: ' + fbUrl);
-          }
-          // odstraníme ze fronty (považuj jako opravené)
+            repaired++; logFn && logFn('🔧 Nahrán fallback styl: '+fbUrl);
+          } else { repaired++; logFn && logFn('🔧 Fallback dostupný: '+fbUrl); }
+
           const idx = state.queue.indexOf(m);
-          if (idx>=0){ state.queue.splice(idx,1); state.fixed++; if (state.fixed%3===0) state.lvl++; save(); }
-        }catch(e){
-          logFn && logFn('❌ Oprava selhala: ' + (e.message||e));
-        }
+          if (idx>=0){ state.queue.splice(idx,1); state.fixed++; if(state.fixed%3===0) state.lvl++; save(); }
+        }catch(e){ logFn && logFn('❌ Oprava selhala: '+(e.message||e)); }
       }
       return repaired;
+    }
+
+    function attachHandlers(){
+      if (state.handlers) return false;
+      state.handlers = true;
+      const origError = console.error;
+      console.error = function(...args){ try{ enqueue({ msg: args.join(' ') }); }catch(e){} return origError.apply(console,args); };
+      window.onerror = (msg, src, line, col, error)=>{ enqueue({ msg, src, line, col, stack:error && error.stack }); return false; };
+      window.addEventListener('unhandledrejection', (e)=>{ const r=e.reason||{}; enqueue({ msg:'PromiseRejection: '+(r.message||r), stack:r.stack }); });
+      return true;
     }
 
     window.RepairNet = {
@@ -248,99 +265,136 @@
       isScanning: ()=> state.scanning,
       feedError: enqueue,
       fixNext, fixAll,
-      scanDeep,
-      scanIndexAndDeps,
-      tryRepairMissing
+      scanDeep, scanIndexAndDeps,
+      tryRepairMissing,
+      attachHandlers
     };
   })();
 
-  // ============================
-  // 🖥️ UI – řízení a výpis
-  // ============================
+  /* ===========================
+     🖥️ UI – Tiles + Drawer
+  ============================ */
   (function(){
     const $ = (q)=>document.querySelector(q);
     const elVer=$('#ver'), elLvl=$('#lvl'), elQ=$('#qcnt'), elLog=$('#scanLog'), elList=$('#errList');
-    const bScan=$('#btn-scan'), bDeps=$('#btn-deps'), bFix=$('#btn-fix'), bFixAll=$('#btn-fixall'), bSim=$('#btn-sim'), bClear=$('#btn-clear');
+    const tiles=$('#tiles');
+    const drawer=$('#drawer'), dTitle=$('#drawer-title'), dDesc=$('#drawer-desc'), dRun=$('#drawer-run'), dClose=$('#drawer-close');
+    const bClear=$('#btn-clear');
 
-    function logLine(txt){
-      const line=document.createElement('div'); line.textContent=`[${new Date().toLocaleTimeString()}] ${txt}`;
-      elLog.appendChild(line); elLog.scrollTop=elLog.scrollHeight;
-    }
     const safe = (s)=> (''+s).replace(/[<&>]/g, c=>({ '<':'&lt;','>':'&gt;','&':'&amp;' }[c]));
-
-    function renderKPI(){
-      elVer.textContent = 'v' + (window.RepairNet?.version || '?');
-      elLvl.textContent = window.RepairNet.getLevel();
-      elQ.textContent   = window.RepairNet.getQueue().length;
-    }
-
+    function logLine(txt){ const line=document.createElement('div'); line.textContent=`[${new Date().toLocaleTimeString()}] ${txt}`; elLog.appendChild(line); elLog.scrollTop=elLog.scrollHeight; }
+    function renderKPI(){ elVer.textContent='v'+(window.RepairNet?.version||'?'); elLvl.textContent=window.RepairNet.getLevel(); elQ.textContent=window.RepairNet.getQueue().length; }
     function renderList(){
       const q = window.RepairNet.getQueue().slice().reverse();
       elList.innerHTML = q.map(x=>{
         const t=new Date(x.t).toLocaleString();
-        const meta=[x.type, x.src, x.line && ('ř:'+x.line), x.col && ('sl:'+x.col)].filter(Boolean).join(' • ');
-        const stack=x.stack ? `<div class="meta">${safe(x.stack)}</div>`:'';
-        return `<div class="err">
-          <div class="msg ${x.type==='missing-asset'?'warn':'bad'}">${safe(x.msg||'Chyba')}</div>
-          <div class="meta">${safe(t)} • ${safe(meta)}</div>${stack}
-        </div>`;
+        const meta=[x.type, x.src, x.line&&('ř:'+x.line), x.col&&('sl:'+x.col)].filter(Boolean).join(' • ');
+        const stack=x.stack?`<div class="meta">${safe(x.stack)}</div>`:'';
+        return `<div class="err"><div class="msg ${x.type==='missing-asset'?'warn':'bad'}">${safe(x.msg||'Chyba')}</div><div class="meta">${safe(t)} • ${safe(meta)}</div>${stack}</div>`;
       }).join('') || `<div class="err"><div class="msg ok">Žádné položky ve frontě.</div></div>`;
     }
 
-    // Akce
-    bScan?.addEventListener('click', async ()=>{
-      bScan.disabled=true;
-      try{
-        logLine('🔎 Spouštím sken indexů…');
-        await window.RepairNet.scanDeep(m=>logLine(m));
-        logLine('✅ Sken indexů hotov.');
-      }catch(e){
-        logLine('❌ Chyba při skenu indexů: '+(e.message||e));
-      }finally{ renderKPI(); renderList(); bScan.disabled=false; }
+    // Drawer ovládání
+    let pendingAction = null;
+    function openDrawer(title, desc, run){
+      dTitle.textContent = title;
+      dDesc.textContent = desc;
+      pendingAction = run;
+      drawer.classList.add('open');
+    }
+    dClose.addEventListener('click', ()=> drawer.classList.remove('open'));
+    dRun.addEventListener('click', async ()=>{
+      if (!pendingAction) return;
+      dRun.disabled = true;
+      try{ await pendingAction(); }
+      finally{ dRun.disabled=false; drawer.classList.remove('open'); renderKPI(); renderList(); }
     });
 
-    bDeps?.addEventListener('click', async ()=>{
-      bDeps.disabled=true;
-      try{
-        logLine('📦 Sken závislostí (všechny moduly)…');
-        const roots = ['../Revia/','../Braska-Hlava/','../Hlavoun/','../Meziprostor-Core/','../VAFT-Network/'];
-        for (const r of roots){ await window.RepairNet.scanIndexAndDeps(r, m=>logLine(m)); }
-        // pokus o opravu chybějících z fallbacku
-        const repaired = await window.RepairNet.tryRepairMissing(m=>logLine(m));
-        if (repaired) logLine(`✨ Opraveno přes fallback: ${repaired}`);
-        else logLine('ℹ️ Fallback opravy nebyly potřeba / nedostupné.');
-        logLine('✅ Sken závislostí dokončen.');
-      }catch(e){
-        logLine('❌ Chyba při skenu závislostí: '+(e.message||e));
-      }finally{ renderKPI(); renderList(); bDeps.disabled=false; }
+    // Akce map
+    const actions = {
+      attach(){
+        openDrawer('Zachytávat chyby',
+          'Zapne handlery (window.onerror, unhandledrejection, console.error), aby Chybožrout sbíral události této aplikace.',
+          async ()=>{ const ok = window.RepairNet.attachHandlers(); logLine(ok?'🧠 Zachytávání zapnuto.':'ℹ️ Už běží.'); }
+        );
+      },
+      scan(){
+        openDrawer('Sken indexů',
+          'Zkontroluje index.html ve všech základních modulech (Revia, Hlavoun, Meziprostor…)',
+          async ()=>{ logLine('🔎 Spouštím sken indexů…'); await window.RepairNet.scanDeep(m=>logLine(m)); logLine('✅ Sken indexů hotov.'); }
+        );
+      },
+      deps(){
+        openDrawer('Sken závislostí',
+          'Načte indexy, vyparsuje JS/CSS/IMG/AUDIO/VIDEO a otestuje jejich dostupnost.',
+          async ()=>{
+            logLine('📦 Sken závislostí (všechny moduly)…');
+            const roots=['../Revia/','../Braska-Hlava/','../Hlavoun/','../Meziprostor-Core/','../VAFT-Network/'];
+            for (const r of roots){ await window.RepairNet.scanIndexAndDeps(r, m=>logLine(m)); }
+            logLine('✅ Sken závislostí dokončen.');
+          }
+        );
+      },
+      fallback(){
+        openDrawer('Oprava přes fallback',
+          'Pokusí se automaticky nahrát chybějící soubory ze složky /fallback/ (pokud existují).',
+          async ()=>{ const n = await window.RepairNet.tryRepairMissing(m=>logLine(m)); logLine(n?`✨ Opraveno přes fallback: ${n}`:'ℹ️ Nic k opravě / fallback nedostupný.'); }
+        );
+      },
+      fix1(){
+        openDrawer('Opravit nejbližší',
+          'Odstraní první položku z fronty a zvýší postup/úroveň opraváře.',
+          async ()=>{ const it=window.RepairNet.fixNext(); logLine(it?('🔧 Opraveno: '+(it.msg||'neznámá')):'✨ Není co opravovat.'); }
+        );
+      },
+      fixall(){
+        openDrawer('Opravit vše',
+          'Vyčistí frontu všech chyb a chybějících assetů (jako „hmotná oprava“).',
+          async ()=>{ const n=window.RepairNet.fixAll(); logLine(n?`✨ Opraveno vše: ${n} položek.`:'✨ Fronta prázdná.'); }
+        );
+      },
+      sim(){
+        openDrawer('Nasimulovat chybu',
+          'Vloží do konzole a Promisu testovací chyby, aby bylo co opravovat.',
+          async ()=>{ console.error('SimulatedError: test z UI'); Promise.reject(new Error('AsyncFail: Promise test')); logLine('💥 Chyby nasimulovány.'); }
+        );
+      },
+      export(){
+        openDrawer('Export reportu',
+          'Vygeneruje JSON s frontou chyb a počitadly (úroveň, opravy).',
+          async ()=>{
+            const report = {
+              generatedAt: new Date().toISOString(),
+              version: window.RepairNet.version,
+              level: window.RepairNet.getLevel(),
+              fixed: window.RepairNet.getFixedCount(),
+              queue: window.RepairNet.getQueue()
+            };
+            const blob = new Blob([JSON.stringify(report,null,2)], {type:'application/json'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'vaft-repair-report.json';
+            document.body.appendChild(a); a.click(); a.remove();
+            logLine('📤 Export hotov: vaft-repair-report.json');
+          }
+        );
+      }
+    };
+
+    // Kliky na tiles
+    tiles.addEventListener('click', (e)=>{
+      const t = e.target.closest('.tile');
+      if (!t) return;
+      const act = t.dataset.action;
+      if (actions[act]) actions[act]();
     });
 
-    bFix?.addEventListener('click', ()=>{
-      const it = window.RepairNet.fixNext();
-      logLine(it ? ('🔧 Opraveno: '+(it.msg||'neznámá')) : '✨ Není co opravovat.');
-      renderKPI(); renderList();
-    });
-
-    bFixAll?.addEventListener('click', ()=>{
-      const n = window.RepairNet.fixAll();
-      logLine(n ? `✨ Opraveno vše: ${n} položek.` : '✨ Fronta prázdná.');
-      renderKPI(); renderList();
-    });
-
-    bSim?.addEventListener('click', ()=>{
-      // simulace chyb
-      console.error('SimulatedError: test z UI tlačítka');
-      Promise.reject(new Error('AsyncFail: Promise test'));
-      renderKPI(); renderList();
-    });
-
-    bClear?.addEventListener('click', ()=>{
-      elLog.textContent=''; logLine('🧹 Log vyčištěn.');
-    });
+    // Vyčistit log panel (ne frontu)
+    bClear.addEventListener('click', ()=>{ elLog.textContent=''; logLine('🧹 Log vyčištěn.'); });
 
     // Boot
     logLine('✅ UI připraveno • kompatibilní s RepairNet v'+(window.RepairNet?.version||'?'));
-    renderKPI(); renderList();
+    (function renderLoop(){ renderKPI(); renderList(); setTimeout(renderLoop, 1000); })();
   })();
   </script>
 </body>
