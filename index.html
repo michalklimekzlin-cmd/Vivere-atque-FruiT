@@ -3,211 +3,471 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-
   <title>Vivere atque FruiT</title>
   <meta name="theme-color" content="#000000" />
-
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      color-scheme: dark;
+      --bg: #000;
+      --fg: #f5f5f5;
+      --accent: #ff3b30;
+      --accent-soft: rgba(255,59,48,.16);
+      --card-bg: rgba(255,255,255,.04);
+      --border: rgba(255,255,255,.14);
+      --ok: #30d158;
+      --err: #ff453a;
+      --warn: #ffd60a;
+    }
+
+    * { box-sizing: border-box; }
+
     html, body {
-      width:100%; height:100%;
-      background:#000;
-      color:#fff;
-      font-family:-apple-system, system-ui, sans-serif;
-      overflow:hidden;
-      display:flex;
-      justify-content:center;
-      align-items:center;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: radial-gradient(circle at top, #050505 0, #000 45%, #000 100%);
+      color: var(--fg);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+                   "Segoe UI", Roboto, sans-serif;
     }
 
-    .page {
-      position:relative;
-      width:100%;
-      max-width:480px;
-      aspect-ratio:9/16;
-      overflow:hidden;
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
     }
 
-    .hero-img {
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      background:#000;
+    .app {
+      width: 100%;
+      max-width: 520px;
+      padding: 16px 14px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
 
-    /* LEVÝ PANEL */
-    .left-panel {
-      position:absolute;
-      left:10px;
-      top:50%;
-      transform:translateY(-50%);
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      z-index:50;
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
     }
 
-    .tile-btn {
-      width:70px;
-      height:70px;
-      border-radius:14px;
-      background:rgba(0,0,0,0.55);
-      border:1px solid rgba(255,255,255,0.16);
-      backdrop-filter:blur(10px);
-      color:#fff;
-      font-size:12px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      text-align:center;
-      cursor:pointer;
-      transition:.2s;
-    }
-    .tile-btn:hover {
-      background:rgba(255,255,255,0.08);
-      border-color:rgba(255,255,255,0.35);
+    header .title {
+      font-weight: 650;
+      letter-spacing: .03em;
+      font-size: 16px;
     }
 
-    /* MODUL: CHYBOŽROUT PANEL */
-    .module {
-      position:absolute;
-      inset:0;
-      background:rgba(0,0,0,0.92);
-      padding:18px;
-      overflow-y:auto;
-      z-index:100;
-    }
-    .hidden { display:none; }
-
-    .system-title {
-      font-size:20px;
-      margin-bottom:4px;
-      font-weight:700;
-    }
-    .system-sub {
-      font-size:13px;
-      color:#ccc;
-      margin-bottom:12px;
+    header .subtitle {
+      font-size: 11px;
+      opacity: .78;
+      text-align: right;
     }
 
-    .tiles {
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:10px;
-      margin-bottom:14px;
+    .hero {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px 10px 6px;
     }
 
-    .tiles button {
-      padding:12px;
-      background:#111;
-      border:1px solid #333;
-      color:#fff;
-      border-radius:12px;
-      cursor:pointer;
-      font-size:14px;
-      transition:.15s;
-    }
-    .tiles button:hover {
-      background:#181818;
-      border-color:#555;
+    .hero img {
+      max-width: 78vw;
+      max-height: 54vh;
+      height: auto;
+      display: block;
+      border-radius: 26px;
     }
 
-    .log, .queue {
-      background:#0a0a0a;
-      padding:10px;
-      border-radius:12px;
-      border:1px solid #222;
-      font-family:ui-monospace, Menlo, Consolas;
-      font-size:12px;
-      max-height:200px;
-      overflow:auto;
-      margin-top:10px;
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    .close-btn {
-      margin-top:14px;
-      background:#222;
-      padding:8px 14px;
-      border-radius:10px;
-      border:1px solid #333;
-      color:#fff;
-      cursor:pointer;
+    section.card {
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      padding: 12px 12px 10px;
+      backdrop-filter: blur(10px);
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      opacity: .9;
+    }
+
+    .module-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 6px;
+    }
+
+    .module-pill {
+      padding: 6px 8px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.3);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      min-height: 30px;
+    }
+
+    .module-pill span.name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.05);
+    }
+
+    .badge.ok    { border-color: var(--ok);   color: var(--ok); }
+    .badge.err   { border-color: var(--err);  color: var(--err); }
+    .badge.load  { border-color: var(--warn); color: var(--warn); }
+
+    .world-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px,1fr));
+      gap: 6px;
+    }
+
+    .world-tile {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 10px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.5);
+      font-size: 12px;
+      text-decoration: none;
+      color: var(--fg);
+    }
+
+    .world-tile span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .world-tile:active {
+      transform: scale(.97);
+      background: rgba(255,255,255,.06);
+    }
+
+    #console-log {
+      max-height: 120px;
+      overflow: auto;
+      font-family: "SF Mono", Menlo, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.35;
+      padding: 6px 6px 4px;
+      border-radius: 10px;
+      background: #050505;
+      border: 1px solid rgba(255,255,255,.18);
+    }
+
+    #console-log div {
+      margin-bottom: 2px;
+      white-space: nowrap;
+    }
+
+    #reload-modules {
+      margin-top: 8px;
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--accent);
+      background: var(--accent-soft);
+      color: #fff;
+      padding: 7px 0;
+      font-size: 12px;
+    }
+
+    #reload-modules:active {
+      transform: scale(.98);
+      filter: brightness(1.1);
+    }
+
+    footer {
+      margin-top: 6px;
+      font-size: 10px;
+      opacity: .7;
+      text-align: center;
+    }
+
+    .fab {
+      position: fixed;
+      right: 16px;
+      bottom: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: .45rem;
+      padding: 9px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.07);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.22);
+      text-decoration: none;
+      font-size: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .fab:active { transform: scale(.97); }
+
+    @media (max-width: 400px) {
+      header { padding-inline: 10px; }
+      .hero img { max-width: 86vw; }
     }
   </style>
 </head>
-
 <body>
-
-  <div class="page">
-
-    <!-- HLAVNÍ OBRÁZEK -->
-    <img src="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png" class="hero-img">
-
-    <!-- LEVÝ PANEL ČTVERCŮ -->
-    <nav class="left-panel">
-      <button class="tile-btn" onclick="go('revia')">Revia</button>
-      <button class="tile-btn" onclick="go('glyph')">Glyph</button>
-      <button class="tile-btn" onclick="go('vafit')">VafiT</button>
-      <button class="tile-btn" onclick="go('hlavoun')">Hlavoun</button>
-      <button class="tile-btn" onclick="go('worlds')">Světy</button>
-
-      <!-- CHYBOŽROUT uvnitř aplikace -->
-      <button class="tile-btn" onclick="go('chybo')">🔧 Chybožrout</button>
-    </nav>
-
-    <!-- 🛠️ PANEL: CHYBOŽROUT -->
-    <section id="mod-chybozrout" class="module hidden">
-      <div class="system-title">🛠️ Chybožrout-Opravář v2.6</div>
-      <div class="system-sub">„Více hlav = méně pádů“</div>
-
-      <div class="tiles">
-        <button data-act="attach">🧠 Zachytávat</button>
-        <button data-act="scan">🔎 Sken indexů</button>
-        <button data-act="deps">📦 Sken závislostí</button>
-        <button data-act="fallback">🧯 Opravit (fallback)</button>
-        <button data-act="fix1">🔧 Opravit 1</button>
-        <button data-act="fixall">✨ Opravit vše</button>
-        <button data-act="sim">💥 Simulovat</button>
-        <button data-act="export">📤 Export</button>
+  <div class="app">
+    <header>
+      <div class="title">Vivere atque FruiT</div>
+      <div class="subtitle">
+        Michal &amp; Hlavoun<br/>
+        živý systém světů
       </div>
+    </header>
 
-      <div id="chzr-log" class="log">Inicializace systému…</div>
-      <div id="chzr-queue" class="queue"></div>
+    <div class="hero">
+      <!-- náš společný obrázek -->
+      <img src="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png"
+           alt="Vivere atque FruiT – kluk s mobilem" loading="lazy" />
+    </div>
 
-      <button class="close-btn" onclick="closeChybo()">Zavřít Chybožrouta</button>
-    </section>
+    <main>
+      <!-- SYSTÉMOVÉ MODULY -->
+      <section class="card">
+        <h2>Status systému</h2>
+        <div class="module-list" id="system-modules"></div>
+      </section>
 
+      <!-- SVĚTY A MINIAPKY -->
+      <section class="card">
+        <h2>Svět Vivere atque FruiT</h2>
+        <div class="world-grid">
+          <!-- hlavní světy/postavy -->
+          <a class="world-tile" href="./Revia/"><span>Revia</span></a>
+          <a class="world-tile" href="./VAFT-BearHead/"><span>BearHead</span></a>
+          <a class="world-tile" href="./Michal-AI-Al-Klimek/"><span>Michal AI Al Klimek</span></a>
+          <a class="world-tile" href="./VafiT-gallery/"><span>VafiT gallery</span></a>
+          <a class="world-tile" href="./VAFT-LetterLab/"><span>LetterLab</span></a>
+          <a class="world-tile" href="./VAFT-Lilies/"><span>Lilie</span></a>
+          <a class="world-tile" href="./VAFT-MapWorld/"><span>MapWorld</span></a>
+          <a class="world-tile" href="./VAFT-Network/"><span>VAFT Network</span></a>
+          <a class="world-tile" href="./Braska-Hlava/"><span>Bráška Hlava</span></a>
+          <a class="world-tile" href="./Hlavoun/"><span>Hlavoun</span></a>
+          <a class="world-tile" href="./Meziprostor-Core/"><span>Meziprostor Core</span></a>
+          <a class="world-tile" href="./VAFT-GhostGirl/"><span>GhostGirl</span></a>
+          <a class="world-tile" href="./VAFT-Doll/"><span>Doll</span></a>
+          <a class="world-tile" href="./VAFT-Girls/"><span>Girls</span></a>
+          <a class="world-tile" href="./VAFT-Jizva/"><span>Jizva</span></a>
+          <a class="world-tile" href="./VAFT-Lady/"><span>Lady</span></a>
+          <a class="world-tile" href="./VAFT-Game/"><span>Game (experiment)</span></a>
+          <a class="world-tile" href="./3I-ATLAS/"><span>3I Atlas</span></a>
+          <a class="world-tile" href="./guardian/"><span>Guardian</span></a>
+          <a class="world-tile" href="./mapa/"><span>Mapa</span></a>
+          <a class="world-tile" href="./mapa-3d/"><span>Mapa 3D</span></a>
+          <a class="world-tile" href="./lite/"><span>Lite režim</span></a>
+        </div>
+      </section>
+
+      <!-- DIAGNOSTIKA -->
+      <section class="card">
+        <h2>Diagnostika modulů</h2>
+        <div id="console-log"></div>
+        <button id="reload-modules">Znovu načíst moduly</button>
+      </section>
+    </main>
+
+    <footer>
+      Vivere atque FruiT • živý index všech světů • v0.3 (testovací jádro)
+    </footer>
   </div>
 
+  <!-- zkratka na samostatnou appku Chybožrout-Opravář -->
+  <a class="fab" href="./chybozrout-opravar/">
+    🧩 Chybožrout
+  </a>
+
   <script>
-    function go(id) {
-      if (id === 'chybo') {
-        document.getElementById('mod-chybozrout').classList.remove('hidden');
-        return;
+    // ---------- Pomocné logování ----------
+    const consoleBox = document.getElementById('console-log');
+
+    function logLine(msg, type = 'info') {
+      if (!consoleBox) return;
+      const line = document.createElement('div');
+      let prefix = '·';
+      let color = '#ccc';
+      if (type === 'ok')   { prefix = '✓'; color = '#30d158'; }
+      if (type === 'err')  { prefix = '✗'; color = '#ff453a'; }
+      if (type === 'warn') { prefix = '!'; color = '#ffd60a'; }
+      line.textContent = prefix + ' ' + msg;
+      line.style.color = color;
+      consoleBox.appendChild(line);
+      consoleBox.scrollTop = consoleBox.scrollHeight;
+    }
+
+    // ---------- Definice systémových modulů ----------
+    const MODULES = [
+      { id: 'vaft-core',         file: './vaft-core.js',             label: 'VAFT Core' },
+      { id: 'vaft-kernel',       file: './vaft.kernel.js',           label: 'Kernel' },
+      { id: 'vaft-loader',       file: './vaft.loader.js',           label: 'Loader' },
+      { id: 'vaft-network',      file: './vaft.network.js',          label: 'Network' },
+      { id: 'vaft-core-net',     file: './vaft.core.network.js',     label: 'Core Network' },
+      { id: 'vaft-hub',          file: './vaft.hub.js',              label: 'Hub' },
+      { id: 'vaft-bus',          file: './vaft.bus.js',              label: 'Bus' },
+      { id: 'vaft-nodes',        file: './vaft.nodes.js',            label: 'Nodes' },
+      { id: 'vaft-autonodes',    file: './vaft.autonodes.js',        label: 'Autonodes' },
+      { id: 'vaft-autonodes-l2', file: './vaft.autonodes.layer2.js', label: 'Autonodes L2' },
+      { id: 'vaft-autonodes-l3', file: './vaft.autonodes.layer3.js', label: 'Autonodes L3' },
+      { id: 'vaft-autonodes-or', file: './vaft.autonodes.origin.js', label: 'Autonodes Origin' },
+      { id: 'vaft-brains',       file: './vaft.brains.js',           label: 'Brains' },
+      { id: 'vaft-fuel',         file: './vaft.fuel.js',             label: 'Fuel' },
+      { id: 'vaft-engine',       file: './vaft.engine.js',           label: 'Engine' },
+      { id: 'vaft-heartbeat',    file: './vaft.heartbeat.js',        label: 'Heartbeat' },
+      { id: 'vaft-glyphs',       file: './vaft.glyphs.js',           label: 'Glyphs' },
+      { id: 'vaft-spell',        file: './vaft.spell.js',            label: 'Spell' },
+      { id: 'vaft-vent',         file: './vaft.vent.js',             label: 'Vent' },
+      { id: 'vaft-agents',       file: './vaft.agents.js',           label: 'Agents' },
+      { id: 'vaft-apps',         file: './vaft.apps.js',             label: 'Apps' },
+      { id: 'vaft-all',          file: './vaft.all.js',              label: 'All (bundle)' },
+      { id: 'vaft-ascend',       file: './vaft.ascend.js',           label: 'Ascend' },
+      { id: 'vaft-msg-shell',    file: './vaft.message.shell.js',    label: 'Message shell' },
+      { id: 'vaft-diagnostics',  file: './vaft.diagnostics.js',      label: 'Diagnostics' },
+      { id: 'vaft-guardian',     file: './vaft.guardian.client.js',  label: 'Guardian client' },
+      { id: 'vaft-chyboz',       file: './vaft.chybozrout.js',       label: 'Chybožrout modul' },
+      { id: 'agents-root',       file: './agents.js',                label: 'Agents (root)' },
+      { id: 'app-root',          file: './app.js',                   label: 'App (root)' },
+      { id: 'center-root',       file: './center.js',                label: 'Center' },
+      { id: 'engine-root',       file: './engine.js',                label: 'Engine (root)' },
+      { id: 'hlavoun-root',      file: './hlavoun.js',               label: 'Hlavoun' },
+      { id: 'pikos-root',        file: './pikos.js',                 label: 'Pikoš' },
+      { id: 'viri-root',         file: './viri.js',                  label: 'Viri' }
+    ];
+
+    // ---------- UI pro moduly ----------
+    const moduleListEl = document.getElementById('system-modules');
+    const moduleState = {};
+
+    function buildModuleList() {
+      moduleListEl.innerHTML = '';
+      MODULES.forEach(m => {
+        const pill = document.createElement('div');
+        pill.className = 'module-pill';
+        pill.dataset.id = m.id;
+
+        const name = document.createElement('span');
+        name.className = 'name';
+        name.textContent = m.label;
+
+        const badge = document.createElement('span');
+        badge.className = 'badge load';
+        badge.textContent = 'čeká';
+
+        pill.appendChild(name);
+        pill.appendChild(badge);
+        moduleListEl.appendChild(pill);
+
+        moduleState[m.id] = { pill, badge };
+      });
+    }
+
+    function setModuleStatus(id, status) {
+      const entry = moduleState[id];
+      if (!entry) return;
+      entry.badge.classList.remove('ok', 'err', 'load');
+      if (status === 'ok') {
+        entry.badge.classList.add('ok');
+        entry.badge.textContent = 'OK';
+      } else if (status === 'err') {
+        entry.badge.classList.add('err');
+        entry.badge.textContent = 'chyba';
+      } else if (status === 'load') {
+        entry.badge.classList.add('load');
+        entry.badge.textContent = '…';
       }
-
-      const L = {
-        revia:"./Revia/",
-        glyph:"./Glyph/",
-        vafit:"./VafiT/",
-        hlavoun:"./Hlavoun/",
-        worlds:"./Worlds/"
-      };
-
-      if (L[id]) window.location.href = L[id];
-      else alert("Modul ještě není vytvořen 🍼");
     }
 
-    function closeChybo() {
-      document.getElementById('mod-chybozrout').classList.add('hidden');
+    // ---------- Loader modulů ----------
+    function loadScriptSequential(mod) {
+      return new Promise((resolve) => {
+        const s = document.createElement('script');
+        const cacheBust = 'v=' + Date.now();
+        s.src = mod.file + (mod.file.includes('?') ? '&' : '?') + cacheBust;
+        s.onload = () => {
+          setModuleStatus(mod.id, 'ok');
+          logLine(mod.label + ' načten', 'ok');
+          resolve(true);
+        };
+        s.onerror = () => {
+          setModuleStatus(mod.id, 'err');
+          logLine('Nepodařilo se načíst ' + mod.file, 'err');
+          resolve(false);
+        };
+        setModuleStatus(mod.id, 'load');
+        logLine('Načítám ' + mod.file + ' …', 'warn');
+        document.body.appendChild(s);
+      });
     }
+
+    async function loadAllModules() {
+      consoleBox.innerHTML = '';
+      logLine('Start sekvenčního načítání modulů…', 'warn');
+      for (const mod of MODULES) {
+        // eslint-disable-next-line no-await-in-loop
+        await loadScriptSequential(mod);
+      }
+      if (window.VAFT && typeof window.VAFT.boot === 'function') {
+        try {
+          window.VAFT.boot();
+          logLine('VAFT.boot() proběhl', 'ok');
+        } catch (e) {
+          logLine('VAFT.boot() chyba: ' + e.message, 'err');
+        }
+      } else {
+        logLine('VAFT.boot() není k dispozici (zatím?)', 'warn');
+      }
+    }
+
+    // ---------- Init ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      buildModuleList();
+      loadAllModules();
+
+      const btnReload = document.getElementById('reload-modules');
+      btnReload.addEventListener('click', () => {
+        loadAllModules();
+      });
+
+      // Service Worker (pokud existuje)
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(() => logLine('Service worker registrován', 'ok'))
+          .catch(err => logLine('SW chyba: ' + err.message, 'err'));
+      }
+    });
   </script>
-
-  <!-- REPAIRNET SCRIPTS -->
-  <script src="./modules/chybozrout/repairnet.js?v=2.6"></script>
-  <script src="./modules/chybozrout/repairnet.ui.js?v=2.6"></script>
-
 </body>
 </html>
