@@ -858,28 +858,28 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 <!-- 💡 TADY vlož ten RepairNet -->
 <script src="./chybozrout-opravar/repairnet.js?v=10"></script>
 
-<!-- původní skripty -->
-<script src="./app.js"></script>
-<!-- CHYBOŽROUT – OPRAVÁŘ -->
-<script src="./vaft.chybozrout.js?v=1"></script>
-<script>
-  window.VAFT_CHYBOZROUT && window.VAFT_CHYBOZROUT({
-    appName: 'Vivere atque FruiT',
-    version: window.V || 'dev'
-  });
-</script>
-<script src="./vaft.glyphs.js"></script>
-    <script src="./hlavoun.js"></script>
-    <script src="./viri.js"></script>
-    <script src="./pikos.js"></script>
-    <script src="./agents.js"></script>
-    <script src="./agents_v3.js"></script>
-    <script src="./vaft.bus.js"></script>
-    <script src="./vaft.agents.js"></script>
-    <script src="./vaft.engine.js"></script>
-    <script src="./vaft.ascend.js"></script>
-    <script src="./vaft.diagnostics.js"></script>
-    <script>
+<!-- REPAIR ORDER START -->
+<!-- 1) opravářský mozek -->
+<script src="./chybozrout-opravar/repairnet.js?v=11"></script>
+
+<!-- 2) jádro dřív než agenti -->
+<script src="./vaft.engine.js?v=11"></script>
+<script src="./vaft.bus.js?v=11"></script>
+<script src="./vaft.agents.js?v=11"></script>
+
+<!-- 3) agenti a moduly -->
+<script src="./hlavoun.js?v=11"></script>
+<script src="./viri.js?v=11"></script>
+<script src="./pikos.js?v=11"></script>
+<script src="./agents.js?v=11"></script>
+<script src="./agents_v3.js?v=11"></script>
+<script src="./vaft.ascend.js?v=11"></script>
+<script src="./vaft.diagnostics.js?v=11"></script>
+
+<!-- 4) chybožrout UI + nakonec app UI -->
+<script src="./vaft.chybozrout.js?v=11"></script>
+<script src="./app.js?v=11"></script>
+<!-- REPAIR ORDER END -->
 (function () {
   // při načtení doplníme stav
   const box = document.querySelector('.coins div:first-child');
