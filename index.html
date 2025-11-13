@@ -3,351 +3,368 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Vivere atque FruiT</title>
-  <meta name="theme-color" content="#000000" />
-
+  <title>Vivere atque FruiT • VAFT Home</title>
   <style>
     :root {
-      --bg: #000000;
-      --card: #080808;
-      --card2: #101010;
-      --border: #262626;
-      --text-main: #f5f5f5;
-      --text-soft: #a0a0a0;
-      --accent: #ff3b30;   /* červená */
-      --accent2: #ffd60a;  /* zlatá */
-      --ok: #30d158;
+      font-family: system-ui, -apple-system, sans-serif;
+      color-scheme: dark;
     }
-
-    * {
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #151525, #050509 60%, #000);
+      color: #f8f8ff;
+    }
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 14px 14px 40px;
       box-sizing: border-box;
     }
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: radial-gradient(circle at top, #111 0, #000 55%, #000 100%);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text",
-                   system-ui, "Segoe UI", Roboto, Arial, sans-serif;
-    }
-
-    body {
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-    }
-
-    .page {
-      width: 100%;
-      max-width: 1200px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    /* layout – na větších šířkách vedle sebe */
-    @media (min-width: 768px) {
-      .page {
-        flex-direction: row;
-        align-items: stretch;
-      }
-    }
-
-    .splash {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px;
-    }
-
-    .splash img {
-      max-width: 100%;
-      max-height: 80vh;
-      height: auto;
-      border-radius: 24px;
-      box-shadow: 0 0 40px rgba(0,0,0,0.8);
-    }
-
-    .panel {
-      flex: 1.2;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .panel-header {
-      padding: 12px 16px;
-      border-radius: 20px;
-      background: linear-gradient(135deg, #141414, #050505);
-      border: 1px solid var(--border);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.65);
-    }
-
-    .panel-title {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-    }
-
-    .panel-sub {
-      margin-top: 4px;
-      font-size: 13px;
-      color: var(--text-soft);
-    }
-
-    .panel-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: .35rem;
-      margin-top: 8px;
-      padding: 4px 10px;
-      border-radius: 999px;
+    .section-title {
       font-size: 12px;
-      background: rgba(255,214,10,0.08);
-      border: 1px solid rgba(255,214,10,0.25);
-      color: var(--accent2);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-    }
-
-    .hero-card {
-      padding: 10px 12px;
-      border-radius: 18px;
-      background: radial-gradient(circle at top, #181818, #050505);
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 10px 26px rgba(0,0,0,0.7);
-      min-height: 90px;
-    }
-
-    .hero-name {
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .hero-name span {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-soft);
-      margin-left: 4px;
-    }
-
-    .hero-name.hl { color: var(--accent2); }
-    .hero-name.vi { color: #32d74b; }
-    .hero-name.pi { color: #0a84ff; }
-    .hero-name.vv { color: #bf5af2; }
-    .hero-name.qm { color: var(--accent); }
-
-    .hero-stats {
-      font-size: 12px;
-      line-height: 1.5;
-      color: var(--text-soft);
-    }
-
-    .hero-stats strong {
-      color: var(--text-main);
-      font-weight: 500;
-    }
-
-    .systems {
-      margin-top: 4px;
-      padding: 10px 12px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, #050505, #101010);
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 14px 30px rgba(0,0,0,0.7);
-    }
-
-    .systems-title {
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text-soft);
-      letter-spacing: .06em;
       text-transform: uppercase;
+      letter-spacing: .08em;
+      opacity: .7;
+      margin: 10px 2px 6px;
     }
 
-    .systems-grid {
+    .grid-top {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: minmax(54px, auto);
+      gap: 6px;
+      margin-bottom: 10px;
     }
 
-    .sys-pill {
+    .card {
+      position: relative;
+      border-radius: 16px;
+      padding: 8px 10px;
+      background: rgba(8,8,16,0.92);
+      border: 1px solid #26263a;
+      box-shadow: 0 0 18px rgba(0,0,0,0.6);
+      font-size: 11px;
+      line-height: 1.3;
+      box-sizing: border-box;
+    }
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .card-tag {
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      font-size: 10px;
+      opacity: .6;
+    }
+
+    /* konkrétní rozmístění podle tvého návrhu */
+    .card-world-name { grid-column: 1 / span 3; grid-row: 1; } /* #2 */
+    .card-hlavoun    { grid-column: 3; grid-row: 2; }          /* #3 */
+    .card-pikos      { grid-column: 4; grid-row: 1 / span 2; } /* #4 */
+    .card-viri       { grid-column: 3; grid-row: 3; }          /* #5 */
+    .card-vaft       { grid-column: 4; grid-row: 3; }          /* #6 */
+
+    .col-left {
+      grid-column: 1 / span 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      grid-row: 2 / span 4;
+    }
+    .card-vafiti { height: 54px; }   /* #7 */
+    .card-glyph  { height: 90px; }   /* #8 */
+    .card-map    { height: 90px; }   /* #9 */
+    .card-bug    { height: 54px; }   /* #10 */
+
+    .card-chatgpt {
+      grid-column: 2;
+      grid-row: 3;
+      align-self: center;
+      justify-self: center;
+      min-height: 54px;
+    }
+
+    .card-world-select {
+      margin-top: 10px;
+    }
+    .world-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-auto-rows: 34px;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .world-cell {
+      border-radius: 10px;
+      background: rgba(4,4,10,0.9);
+      border: 1px solid #33344a;
+      font-size: 10px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+    }
+
+    .card-editor {
+      margin-top: 8px;
+      min-height: 70px;
+    }
+    .editor-textarea {
+      width: 100%;
+      min-height: 60px;
+      border-radius: 10px;
+      border: 1px solid #33344a;
+      background: rgba(0,0,0,0.6);
+      color: #f8f8ff;
+      padding: 6px 8px;
+      font-size: 11px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+
+    /* SCROLL – VAFT STREAM */
+    .stream {
+      margin-top: 16px;
+      border-radius: 18px;
+      border: 1px solid #26263a;
+      background: rgba(5,5,12,0.95);
+      padding: 10px 10px 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.7);
+    }
+    .stream-inner {
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .stream-entry {
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      padding: 6px 8px;
+      font-size: 11px;
+      margin-bottom: 6px;
+    }
+    .stream-entry-tag {
+      font-size: 10px;
+      opacity: .65;
+      margin-bottom: 2px;
+    }
+    .stream-entry-text {
+      font-size: 11px;
+    }
+
+    .stream-input {
+      margin-top: 8px;
+      border-top: 1px solid #26263a;
+      padding-top: 8px;
+    }
+    .stream-textarea {
+      width: 100%;
+      min-height: 44px;
+      border-radius: 10px;
+      border: 1px solid #33344a;
+      background: rgba(0,0,0,0.6);
+      color: #f8f8ff;
+      padding: 6px 8px;
+      font-size: 11px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    .btn {
+      margin-top: 6px;
       padding: 6px 10px;
       border-radius: 999px;
-      background: #050505;
-      border: 1px solid var(--border);
-      font-size: 12px;
-      color: var(--text-soft);
-    }
-
-    .sys-pill span.label {
+      border: 1px solid #4b4b73;
+      background: linear-gradient(135deg, #4b3cff, #9b5cff);
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: .35rem;
+      gap: 4px;
+    }
+    .btn:active {
+      transform: scale(0.97);
     }
 
-    .sys-pill span.state {
-      font-weight: 600;
-      color: var(--ok);
-    }
-
-    /* plovoucí tlačítko na Chybožrouta */
-    .fab{
-      position:fixed;
-      right:16px;
-      bottom:18px;
-      display:inline-flex;
-      align-items:center;
-      gap:.5rem;
-      padding:10px 14px;
-      border-radius:14px;
-      background:rgba(255,255,255,.08);
-      color:#fff;
-      border:1px solid rgba(255,255,255,.16);
-      text-decoration:none;
-      font:14px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      backdrop-filter: blur(6px);
-      z-index: 20;
-    }
-
-    .fab span {
-      font-size: 13px;
+    .footer-note {
+      margin-top: 10px;
+      font-size: 10px;
+      opacity: .6;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="page">
-    <!-- LEVÁ STRANA – náš společný obrázek -->
-    <div class="splash">
-      <img src="./AFA0870E-F586-4406-8BAA-0A7944120AA3.png"
-           alt="Vivere atque FruiT – Michal & Hlavoun">
+  <div id="app">
+    <!-- TOP – statická architektura -->
+    <div class="section-title">VAFT Home • rozhraní světa</div>
+    <div class="grid-top">
+      <!-- levý sloupec #7–#10 -->
+      <div class="col-left">
+        <div class="card card-vafiti">
+          <div class="card-title">VaFiT’i</div>
+          <div>💗 Srdíčka hráčů, buffy, dary na mapě.</div>
+        </div>
+        <div class="card card-glyph">
+          <div class="card-title">Glyph</div>
+          <div>🛰 AI agenti na mapě, tipy, rady a vedení.</div>
+        </div>
+        <div class="card card-map">
+          <div class="card-title">Mapa / Spectate</div>
+          <div>🗺 Volný pohyb po mapě, náhled světa.</div>
+        </div>
+        <div class="card card-bug">
+          <div class="card-title">Chybožrout</div>
+          <div>🧹 Opravuje chyby a nesmysly ve světě.</div>
+        </div>
+      </div>
+
+      <!-- #2 Název světa -->
+      <div class="card card-world-name">
+        <div class="card-title" id="worldName">Vivere atque FruiT</div>
+        <div>Aktuální svět (mění se podle výběru níže).</div>
+        <div class="card-tag">#2</div>
+      </div>
+
+      <!-- #3–#6 pohledy -->
+      <div class="card card-hlavoun">
+        <div class="card-title">Hlavoun</div>
+        <div>Chlapský úhel pohledu, logika a nadhled.</div>
+        <div class="card-tag">#3</div>
+      </div>
+
+      <div class="card card-pikos">
+        <div class="card-title">Pikoš</div>
+        <div>Dětský pohled, hravost a jednoduché vysvětlení.</div>
+        <div class="card-tag">#4</div>
+      </div>
+
+      <div class="card card-viri">
+        <div class="card-title">Viri</div>
+        <div>Ženský pohled, empatie a harmonie.</div>
+        <div class="card-tag">#5</div>
+      </div>
+
+      <div class="card card-vaft">
+        <div class="card-title">VaFT Core</div>
+        <div>Strategický pohled, systém a plánování.</div>
+        <div class="card-tag">#6</div>
+      </div>
+
+      <!-- #1 ChatGPT / Kovošrot -->
+      <div class="card card-chatgpt">
+        <div class="card-title">Kovošrot / ChatGPT</div>
+        <div>⚡ Rychlý port na AI parťáka.</div>
+        <div class="card-tag">#1</div>
+      </div>
     </div>
 
-    <!-- PRAVÁ STRANA – nový VAFT 2.0 panel -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">Vivere atque FruiT • core shell</div>
-        <div class="panel-sub">
-          Michal &amp; Hlavoun – živý systém hrdinů, světů a modulů.
-        </div>
-        <div class="panel-badge">
-          <span>🧪 jádro 1.1.0 • návrh</span>
+    <!-- #11 Výběr 16 světů -->
+    <div class="card card-world-select">
+      <div class="card-title">Výběr světa (16 latinských)</div>
+      <div class="world-grid" id="worldGrid">
+        <!-- jen placeholder názvy, později nahradíme tvými latinskými -->
+        <div class="world-cell" data-world="Vivere">Vivere</div>
+        <div class="world-cell" data-world="Amare">Amare</div>
+        <div class="world-cell" data-world="Fortis">Fortis</div>
+        <div class="world-cell" data-world="Tempus">Tempus</div>
+        <div class="world-cell" data-world="Lumen">Lumen</div>
+        <div class="world-cell" data-world="Aqua">Aqua</div>
+        <div class="world-cell" data-world="Terra">Terra</div>
+        <div class="world-cell" data-world="Spiritus">Spiritus</div>
+        <div class="world-cell" data-world="Via">Via</div>
+        <div class="world-cell" data-world="Fructus">Fructus</div>
+        <div class="world-cell" data-world="Ignis">Ignis</div>
+        <div class="world-cell" data-world="Ventus">Ventus</div>
+        <div class="world-cell" data-world="Pax">Pax</div>
+        <div class="world-cell" data-world="Somnium">Somnium</div>
+        <div class="world-cell" data-world="Vires">Vires</div>
+        <div class="world-cell" data-world="Arcana">Arcana</div>
+      </div>
+      <div style="margin-top:6px;font-size:10px;opacity:.7;">
+        Kliknutím změníš aktivní svět (#2 nahoře).
+      </div>
+      <div class="card-tag">#11</div>
+    </div>
+
+    <!-- #12 Editor / poznámky -->
+    <div class="card card-editor">
+      <div class="card-title">Programovací okno / poznámky</div>
+      <textarea class="editor-textarea" placeholder="Poznámky, kód, nápady, TODO pro světy VAFT..."></textarea>
+      <div class="card-tag">#12</div>
+    </div>
+
+    <!-- VAFT STREAM – SCROLL DOLE -->
+    <div class="section-title">VAFT Stream (scroll)</div>
+    <div class="stream">
+      <div class="stream-inner" id="streamInner">
+        <!-- Sem se budou přidávat záznamy -->
+        <div class="stream-entry">
+          <div class="stream-entry-tag">Chybožrout</div>
+          <div class="stream-entry-text">Systém inicializován. Vše běží čistě. 🧹</div>
         </div>
       </div>
 
-      <!-- hrdinové -->
-      <div class="grid">
-        <div class="hero-card">
-          <div class="hero-name hl">Hlavoun <span>🧠 systém</span></div>
-          <div class="hero-stats">
-            🧠 <strong>mozek</strong>: čeká<br>
-            💾 paměť: 0<br>
-            ⚙️ motor: ---<br>
-            ❤️ srdce: 0<br>
-            💨 ventil: ---
-          </div>
+      <div class="stream-input">
+        <div style="font-size:11px;opacity:.8;margin-bottom:4px;">
+          Zpráva světu (písmenka se férově rozdělí mezi hráče a uloží se jim do inventáře, pokud budou chtít):
         </div>
-
-        <div class="hero-card">
-          <div class="hero-name vi">Viri <span>🌀 energie</span></div>
-          <div class="hero-stats">
-            🧠 mozek: spí<br>
-            💾 paměť: 0<br>
-            ⚙️ motor: ---<br>
-            ❤️ srdce: 0<br>
-            💨 ventil: ---
-          </div>
-        </div>
-
-        <div class="hero-card">
-          <div class="hero-name pi">Pikoš <span>🦴 tělo</span></div>
-          <div class="hero-stats">
-            🧠 mozek: ...<br>
-            💾 paměť: 0<br>
-            ⚙️ motor: ---<br>
-            ❤️ srdce: 0<br>
-            💨 ventil: ---
-          </div>
-        </div>
-
-        <div class="hero-card">
-          <div class="hero-name vv">Vivere <span>🌍 svět</span></div>
-          <div class="hero-stats">
-            🧠 mozek: ...<br>
-            💾 paměť: 0<br>
-            ⚙️ motor: ---<br>
-            ❤️ srdce: 0<br>
-            💨 ventil: ---
-          </div>
-        </div>
-
-        <div class="hero-card">
-          <div class="hero-name qm">? <span>místo pro dalšího</span></div>
-          <div class="hero-stats">
-            🧠 mozek: ☐<br>
-            💾 paměť: ☐<br>
-            ⚙️ motor: ☐<br>
-            ❤️ srdce: ☐<br>
-            💨 ventil: ☐
-          </div>
-        </div>
+        <textarea id="messageInput" class="stream-textarea" placeholder="Napiš globální zprávu..."></textarea>
+        <button class="btn" id="sendMessageBtn">
+          ✉️ Rozdělit zprávu světu
+        </button>
       </div>
+    </div>
 
-      <!-- systémy -->
-      <div class="systems">
-        <div class="systems-title">Systémy jádra (připraveno)</div>
-        <div class="systems-grid">
-          <div class="sys-pill">
-            <span class="label">🧬 Kernel</span>
-            <span class="state">OK</span>
-          </div>
-          <div class="sys-pill">
-            <span class="label">🌐 Network</span>
-            <span class="state">OK</span>
-          </div>
-          <div class="sys-pill">
-            <span class="label">🕸 Hub</span>
-            <span class="state">OK</span>
-          </div>
-          <div class="sys-pill">
-            <span class="label">🧩 Nodes</span>
-            <span class="state">OK</span>
-          </div>
-          <div class="sys-pill">
-            <span class="label">🛰 Autonodes</span>
-            <span class="state">čeká</span>
-          </div>
-          <div class="sys-pill">
-            <span class="label">🛡 Guardian</span>
-            <span class="state">čeká</span>
-          </div>
-        </div>
-      </div>
+    <div class="footer-note">
+      Vivere atque FruiT • hlavní rozhraní (concept build)
     </div>
   </div>
 
-  <!-- plovoucí tlačítko na Chybožrout-Opravář -->
-  <a class="fab" href="./chybozrout-opravar/">
-    🧩 <span>Chybožrout-Opravář</span>
-  </a>
-
   <script>
-    // Minimální VAFT shell – budeme dál rozšiřovat
-    window.VAFT = window.VAFT || {};
-    VAFT.version = '1.1.0-shell';
-    console.log('Vivere atque FruiT shell ready •', VAFT.version);
+    // Přepínání světů (#11 → #2)
+    const worldNameEl = document.getElementById('worldName');
+    const worldCells = document.querySelectorAll('.world-cell');
+    worldCells.forEach(cell => {
+      cell.addEventListener('click', () => {
+        const w = cell.dataset.world || cell.textContent.trim();
+        worldNameEl.textContent = w;
+      });
+    });
+
+    // VAFT Stream – zpráva světu (zatím jen lokální log)
+    const streamInner = document.getElementById('streamInner');
+    const msgInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendMessageBtn');
+
+    sendBtn.addEventListener('click', () => {
+      const text = msgInput.value.trim();
+      if (!text) return;
+
+      const chars = text.split('');
+      // concept: fair distribuce – tady jen simulace pro log
+      const fakePlayers = 4; // placeholder, později napojíme na skutečné hráče
+      const avg = Math.floor(chars.length / fakePlayers);
+      const extra = chars.length % fakePlayers;
+
+      const info = `Zpráva má ${chars.length} písmen. Férově rozdělena mezi ${fakePlayers} hráče (≈ ${avg}–${avg+1} písmen každému, uloží se do inventáře, pokud budou chtít).`;
+
+      const entry = document.createElement('div');
+      entry.className = 'stream-entry';
+      entry.innerHTML = `
+        <div class="stream-entry-tag">Zpráva světu</div>
+        <div class="stream-entry-text">${text}</div>
+        <div class="stream-entry-text" style="opacity:.7;margin-top:2px;font-size:10px;">${info}</div>
+      `;
+      streamInner.appendChild(entry);
+      streamInner.scrollTop = streamInner.scrollHeight;
+
+      msgInput.value = '';
+    });
   </script>
 </body>
 </html>
