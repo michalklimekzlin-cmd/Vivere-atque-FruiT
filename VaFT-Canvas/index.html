@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VaFT • Návrhové plátno tlačítek</title>
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color-scheme: dark;
+    }
+    body {
+      margin: 0;
+      padding: 16px;
+      background: radial-gradient(circle at top, #151523, #050509 60%, #000);
+      color: #f7f7ff;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      max-width: 480px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 4px 0;
+    }
+    .hint {
+      font-size: 12px;
+      opacity: 0.75;
+      margin-bottom: 14px;
+    }
+
+    .layout {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .phone-frame {
+      margin: 0 auto;
+      width: 260px;
+      height: 520px;
+      border-radius: 38px;
+      border: 2px solid #33344a;
+      background: radial-gradient(circle at top, #181826, #050509);
+      padding: 16px 14px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    .notch {
+      width: 120px;
+      height: 16px;
+      border-radius: 0 0 12px 12px;
+      background: #050509;
+      margin: 0 auto 12px;
+    }
+
+    .slot-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 64px;
+      gap: 8px;
+    }
+
+    .slot {
+      border-radius: 16px;
+      border: 1px dashed #3e3f60;
+      background: rgba(9,9,18,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6px;
+      font-size: 11px;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.15s, box-shadow 0.15s, transform 0.06s;
+    }
+    .slot:hover {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 10px rgba(139,92,246,0.4);
+    }
+    .slot:active {
+      transform: scale(0.97);
+    }
+    .slot-label {
+      pointer-events: none;
+    }
+    .slot-index {
+      position: absolute;
+      top: 5px;
+      left: 7px;
+      font-size: 9px;
+      opacity: 0.6;
+    }
+
+    .side-card {
+      border-radius: 14px;
+      border: 1px solid #26263a;
+      background: rgba(8,8,16,0.95);
+      padding: 10px 12px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .side-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      opacity: 0.7;
+      margin-bottom: 6px;
+    }
+    .info-row {
+      margin-bottom: 4px;
+    }
+    .info-label {
+      opacity: 0.7;
+    }
+    .info-value {
+      font-weight: 500;
+    }
+    .tip {
+      font-size: 11px;
+      opacity: 0.7;
+      margin-top: 6px;
+    }
+    .code-note {
+      font-size: 10px;
+      opacity: 0.55;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>VaFT – návrhové plátno tlačítek</h1>
+    <div class="hint">
+      Klikni na libovolný slot v „iPhone“ plátně a napiš, co tam má být
+      (např. <strong>Revia</strong>, <strong>Mapa</strong>, <strong>Bicák Supreme</strong>…).
+      Později sem místo textu vložíme ikony a funkce.
+    </div>
+
+    <div class="layout">
+      <!-- Telefon / plátno -->
+      <div class="phone-frame">
+        <div class="notch"></div>
+        <div class="slot-grid" id="slotGrid">
+          <!-- Sloty se doplní skriptem -->
+        </div>
+      </div>
+
+      <!-- Panel s informací o vybraném slotu -->
+      <div class="side-card">
+        <div class="side-title">Vybraný slot</div>
+        <div class="info-row">
+          <span class="info-label">Číslo slotu: </span>
+          <span class="info-value" id="infoIndex">—</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Název / účel: </span>
+          <span class="info-value" id="infoLabel">Klikni na tlačítko v plátně.</span>
+        </div>
+        <div class="tip">
+          Návrhový mód: tady jen vymýšlíme rozložení a názvy.
+          Až budeš spokojený, můžeme převést tento layout do hlavní VaFT aplikace
+          a každému slotu přiřadit ikonku a funkci.
+        </div>
+        <div class="code-note">
+          Pozn.: Kdykoliv mi můžeš poslat screen nebo seznam:
+          „Slot 1 = ..., Slot 2 = ...“ a já to převedu do finálního kódu.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Kolik slotů chceme v mřížce (3x4 = 12)
+    const SLOT_COUNT = 12;
+    const slotGrid = document.getElementById('slotGrid');
+    const infoIndex = document.getElementById('infoIndex');
+    const infoLabel = document.getElementById('infoLabel');
+
+    const state = [];
+    for (let i = 1; i <= SLOT_COUNT; i++) {
+      state.push({ index: i, label: '' });
+    }
+
+    function renderSlots() {
+      slotGrid.innerHTML = '';
+      state.forEach(slot => {
+        const el = document.createElement('div');
+        el.className = 'slot';
+        el.dataset.index = slot.index;
+
+        const indexEl = document.createElement('div');
+        indexEl.className = 'slot-index';
+        indexEl.textContent = `#${slot.index}`;
+
+        const labelEl = document.createElement('div');
+        labelEl.className = 'slot-label';
+        labelEl.textContent = slot.label || 'prázdné';
+
+        el.appendChild(indexEl);
+        el.appendChild(labelEl);
+
+        el.addEventListener('click', () => {
+          const current = slot.label || '';
+          const next = window.prompt(
+            `Název / účel pro slot #${slot.index}:`,
+            current
+          );
+          if (next !== null) {
+            slot.label = next.trim();
+            labelEl.textContent = slot.label || 'prázdné';
+            updateInfo(slot);
+          } else {
+            updateInfo(slot);
+          }
+        });
+
+        el.addEventListener('mouseenter', () => {
+          updateInfo(slot);
+        });
+
+        slotGrid.appendChild(el);
+      });
+    }
+
+    function updateInfo(slot) {
+      infoIndex.textContent = `#${slot.index}`;
+      infoLabel.textContent = slot.label || 'zatím prázdné';
+    }
+
+    renderSlots();
+  </script>
+</body>
+</html>
