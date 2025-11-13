@@ -49,6 +49,7 @@
       font-size: 11px;
       line-height: 1.3;
       box-sizing: border-box;
+      cursor: pointer;
     }
     .card-title {
       font-size: 12px;
@@ -63,7 +64,7 @@
       opacity: .6;
     }
 
-    /* Layout podle tvého návrhu (#1–#12) */
+    /* Layout podle tvého Canvasu (#1–#12) */
     .card-world-name { grid-column: 1 / span 3; grid-row: 1; }
     .card-hlavoun    { grid-column: 3; grid-row: 2; }
     .card-pikos      { grid-column: 4; grid-row: 1 / span 2; }
@@ -126,6 +127,7 @@
       font-size: 11px;
       box-sizing: border-box;
       resize: vertical;
+      cursor: text;
     }
 
     /* VAFT Stream scroll */
@@ -186,32 +188,71 @@
     <div class="section-title">VAFT Home • rozhraní světa</div>
 
     <div class="grid-top">
+      <!-- levý sloupec #7–#10 -->
       <div class="col-left">
-        <div class="card card-vafiti"><div class="card-title">VaFiT’i</div><div>💗 Srdíčka hráčů</div><div class="card-tag">#7</div></div>
-        <div class="card card-glyph"><div class="card-title">Glyph</div><div>🛰 AI pomoc</div><div class="card-tag">#8</div></div>
-        <div class="card card-map"><div class="card-title">Mapa</div><div>🗺 Náhled</div><div class="card-tag">#9</div></div>
-        <div class="card card-bug"><div class="card-title">Chybožrout</div><div>🧹 Opravy</div><div class="card-tag">#10</div></div>
+        <div class="card card-vafiti" data-app="vafiti">
+          <div class="card-title">VaFiT’i</div>
+          <div>💗 Srdíčka hráčů</div>
+          <div class="card-tag">#7</div>
+        </div>
+        <div class="card card-glyph" data-app="glyph">
+          <div class="card-title">Glyph</div>
+          <div>🛰 AI pomoc na mapě</div>
+          <div class="card-tag">#8</div>
+        </div>
+        <div class="card card-map" data-app="mapview">
+          <div class="card-title">Mapa / Spectate</div>
+          <div>🗺 Volný náhled světa</div>
+          <div class="card-tag">#9</div>
+        </div>
+        <div class="card card-bug" data-app="chybozrout">
+          <div class="card-title">Chybožrout</div>
+          <div>🧹 Opravuje chyby</div>
+          <div class="card-tag">#10</div>
+        </div>
       </div>
 
-      <div class="card card-world-name">
+      <!-- #2 Název světa -->
+      <div class="card card-world-name" data-app="world-name">
         <div class="card-title" id="worldName">Vivere atque FruiT</div>
-        <div>Aktivní svět</div>
+        <div>Aktivní svět (mění se podle výběru níže).</div>
         <div class="card-tag">#2</div>
       </div>
 
-      <div class="card card-hlavoun"><div class="card-title">Hlavoun</div><div>Chlapský pohled</div><div class="card-tag">#3</div></div>
-      <div class="card card-pikos"><div class="card-title">Pikoš</div><div>Dětský pohled</div><div class="card-tag">#4</div></div>
-      <div class="card card-viri"><div class="card-title">Viri</div><div>Ženský pohled</div><div class="card-tag">#5</div></div>
-      <div class="card card-vaft"><div class="card-title">VaFT</div><div>Strategie</div><div class="card-tag">#6</div></div>
+      <div class="card card-hlavoun" data-app="hlavoun">
+        <div class="card-title">Hlavoun</div>
+        <div>Chlapský úhel pohledu</div>
+        <div class="card-tag">#3</div>
+      </div>
 
-      <div class="card card-chatgpt">
-        <div class="card-title">Kovošrot</div>
-        <div>⚡ ChatGPT port</div>
+      <div class="card card-pikos" data-app="pikos">
+        <div class="card-title">Pikoš</div>
+        <div>Dětský úhel pohledu</div>
+        <div class="card-tag">#4</div>
+      </div>
+
+      <div class="card card-viri" data-app="viri">
+        <div class="card-title">Viri</div>
+        <div>Ženský úhel pohledu</div>
+        <div class="card-tag">#5</div>
+      </div>
+
+      <div class="card card-vaft" data-app="vaft-core">
+        <div class="card-title">VaFT Core</div>
+        <div>Strategie a plánování</div>
+        <div class="card-tag">#6</div>
+      </div>
+
+      <!-- #1 AI port -->
+      <div class="card card-chatgpt" data-app="ai-port">
+        <div class="card-title">Kovošrot / ChatGPT</div>
+        <div>⚡ Rychlý port na AI parťáka</div>
         <div class="card-tag">#1</div>
       </div>
     </div>
 
-    <div class="card card-world-select">
+    <!-- #11 Výběr světů -->
+    <div class="card card-world-select" data-app="worlds-select">
       <div class="card-title">Výběr světů (16)</div>
       <div class="world-grid" id="worldGrid">
         <div class="world-cell" data-world="Vivere">Vivere</div>
@@ -234,9 +275,10 @@
       <div class="card-tag">#11</div>
     </div>
 
-    <div class="card card-editor">
-      <div class="card-title">Editor</div>
-      <textarea class="editor-textarea"></textarea>
+    <!-- #12 Editor -->
+    <div class="card card-editor" data-app="editor">
+      <div class="card-title">Editor / poznámky</div>
+      <textarea class="editor-textarea" placeholder="Poznámky, kód, nápady pro světy VAFT..."></textarea>
       <div class="card-tag">#12</div>
     </div>
 
@@ -251,52 +293,66 @@
 
       <div class="stream-input">
         <textarea id="messageInput" class="editor-textarea" placeholder="Zpráva světu..."></textarea>
-        <button class="btn" id="sendMessageBtn">✉️ Rozdělit zprávu</button>
+        <button class="btn" id="sendMessageBtn">✉️ Rozdělit zprávu světu</button>
       </div>
     </div>
 
     <div class="footer-note">
-      Vivere atque FruiT • concept UI build
+      Vivere atque FruiT • VAFT Home (Canvas build)
     </div>
   </div>
 
-<script>
-  // Výběr světů
-  const worldNameEl = document.getElementById('worldName');
-  document.querySelectorAll('.world-cell').forEach(cell => {
-    cell.addEventListener('click', () => {
-      worldNameEl.textContent = cell.dataset.world;
+  <!-- logika výběru světů + stream -->
+  <script>
+    const worldNameEl = document.getElementById('worldName');
+    document.querySelectorAll('.world-cell').forEach(cell => {
+      cell.addEventListener('click', () => {
+        worldNameEl.textContent = cell.dataset.world;
+      });
     });
-  });
 
-  // VAFT stream zprávy (demo verze)
-  const streamInner = document.getElementById('streamInner');
-  const msgInput = document.getElementById('messageInput');
-  const sendBtn = document.getElementById('sendMessageBtn');
+    const streamInner = document.getElementById('streamInner');
+    const msgInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendMessageBtn');
 
-  sendBtn.addEventListener('click', () => {
-    const text = msgInput.value.trim();
-    if (!text) return;
+    sendBtn.addEventListener('click', () => {
+      const text = msgInput.value.trim();
+      if (!text) return;
 
-    const chars = text.split('');
-    const players = 4;
-    const avg = Math.floor(chars.length / players);
-    const extra = chars.length % players;
+      const chars = text.split('');
+      const players = 4;
+      const avg = Math.floor(chars.length / players);
 
-    const entry = document.createElement('div');
-    entry.className = 'stream-entry';
-    entry.innerHTML = `
-      <div class="stream-entry-tag">Zpráva světu</div>
-      <div class="stream-entry-text">${text}</div>
-      <div class="stream-entry-text" style="opacity:.7;font-size:10px;margin-top:2px;">
-        Férové rozdělení: ${players} hráčů → ${avg}–${avg+1} písmen, uloží se do inventářů.
-      </div>
-    `;
-    streamInner.appendChild(entry);
-    streamInner.scrollTop = streamInner.scrollHeight;
+      const entry = document.createElement('div');
+      entry.className = 'stream-entry';
+      entry.innerHTML = `
+        <div class="stream-entry-tag">Zpráva světu</div>
+        <div class="stream-entry-text">${text}</div>
+        <div class="stream-entry-text" style="opacity:.7;font-size:10px;margin-top:2px;">
+          Férové rozdělení: ${players} hráčů → ${avg}–${avg+1} písmen, uloží se do inventářů.
+        </div>
+      `;
+      streamInner.appendChild(entry);
+      streamInner.scrollTop = streamInner.scrollHeight;
+      msgInput.value = '';
+    });
+  </script>
 
-    msgInput.value = '';
-  });
-</script>
+  <!-- VAFT Home router -->
+  <script src="./app.js"></script>
+
+  <!-- zatím jen placeholder moduly -->
+  <script src="./apps/ai-port.js"></script>
+  <script src="./apps/world-name.js"></script>
+  <script src="./apps/hlavoun.js"></script>
+  <script src="./apps/pikos.js"></script>
+  <script src="./apps/viri.js"></script>
+  <script src="./apps/vaft-core.js"></script>
+  <script src="./apps/vafiti.js"></script>
+  <script src="./apps/glyph.js"></script>
+  <script src="./apps/mapview.js"></script>
+  <script src="./apps/chybozrout.js"></script>
+  <script src="./apps/worlds-select.js"></script>
+  <script src="./apps/editor.js"></script>
 </body>
 </html>
