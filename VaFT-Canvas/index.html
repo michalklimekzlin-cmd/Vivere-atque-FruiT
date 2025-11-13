@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>VAFT Canvas • Drag, Resize & Text</title>
+<title>VAFT Canvas • Drag, Resize, Write</title>
 <style>
   :root {
     font-family: system-ui, -apple-system, sans-serif;
@@ -29,45 +29,40 @@
     box-shadow: 0 0 40px rgba(0,0,0,0.8);
   }
   .slot {
-    width: 70px;
-    height: 70px;
-    background: rgba(255,255,255,0.05);
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.07);
     border: 1px dashed #555;
     border-radius: 16px;
     position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    text-align: center;
-    user-select: none;
-    touch-action: none;
-    transition: background 0.15s;
+    padding: 8px;
     box-sizing: border-box;
+    font-size: 12px;
+    text-align: left;
+    color: #fff;
+    resize: none;
+    overflow: hidden;
+    touch-action: none;
   }
-  .slot:hover {
-    background: rgba(255,255,255,0.08);
-  }
-  .slot:active {
-    transform: scale(0.98);
+  .slot:focus {
+    outline: none;
+    border-color: #7c4dff;
+    background: rgba(255,255,255,0.12);
   }
   .slot-index {
     position: absolute;
     top: 4px;
     left: 6px;
-    font-size: 9px;
+    font-size: 10px;
     opacity: 0.6;
-  }
-  .slot-label {
-    padding: 4px;
     pointer-events: none;
   }
   .resize-handle {
     position: absolute;
-    width: 14px;
-    height: 14px;
-    right: 3px;
-    bottom: 3px;
+    width: 16px;
+    height: 16px;
+    right: 4px;
+    bottom: 4px;
     border-radius: 4px;
     border: 1px solid #888;
     background: rgba(0,0,0,0.6);
@@ -89,187 +84,160 @@
 <div class="canvas" id="canvas"></div>
 
 <script>
-// Nastavení
+// nastavení
 const SLOT_COUNT = 12;
-const MIN_SIZE = 40;
-const MAX_SIZE = 200;
+const MIN_SIZE = 50;
+const MAX_SIZE = 250;
 
 const canvas = document.getElementById("canvas");
 
-// výchozí pozice (mřížka 3×4)
+// výchozí pozice
 const startPositions = [
   { x: 20,  y: 20 },
-  { x: 115, y: 20 },
-  { x: 210, y: 20 },
+  { x: 120, y: 20 },
+  { x: 220, y: 20 },
   { x: 20,  y: 120 },
-  { x: 115, y: 120 },
-  { x: 210, y: 120 },
+  { x: 120, y: 120 },
+  { x: 220, y: 120 },
   { x: 20,  y: 220 },
-  { x: 115, y: 220 },
-  { x: 210, y: 220 },
+  { x: 120, y: 220 },
+  { x: 220, y: 220 },
   { x: 20,  y: 320 },
-  { x: 115, y: 320 },
-  { x: 210, y: 320 },
+  { x: 120, y: 320 },
+  { x: 220, y: 320 },
 ];
 
-const slots = [];
-
 for (let i = 1; i <= SLOT_COUNT; i++) {
+  const wrap = document.createElement("div");
+  wrap.style.position = "absolute";
+
   const slot = document.createElement("div");
   slot.className = "slot";
-  slot.dataset.index = i;
+  slot.contentEditable = true;  // ←← TADY JE MAGIC! PÍŠEŠ DOVNITŘ
+  slot.innerText = "";
 
   const pos = startPositions[i-1];
-  slot.style.left = pos.x + "px";
-  slot.style.top  = pos.y + "px";
+  wrap.style.left = pos.x + "px";
+  wrap.style.top = pos.y + "px";
 
   const indexEl = document.createElement("div");
   indexEl.className = "slot-index";
   indexEl.textContent = `#${i}`;
 
-  const labelEl = document.createElement("div");
-  labelEl.className = "slot-label";
-  labelEl.textContent = "prázdné";
+  const resize = document.createElement("div");
+  resize.className = "resize-handle";
 
-  const resizeHandle = document.createElement("div");
-  resizeHandle.className = "resize-handle";
+  wrap.appendChild(slot);
+  wrap.appendChild(indexEl);
+  wrap.appendChild(resize);
+  canvas.appendChild(wrap);
 
-  slot.appendChild(indexEl);
-  slot.appendChild(labelEl);
-  slot.appendChild(resizeHandle);
-
-  makeDraggable(slot, resizeHandle);
-  makeResizable(slot, resizeHandle);
-
-  // Kliknutí na slot = změna textu
-  slot.addEventListener("click", (e) => {
-    // ignoruj klikání na resize handle
-    if (e.target === resizeHandle) return;
-    const current = labelEl.textContent === "prázdné" ? "" : labelEl.textContent;
-    const next = window.prompt(`Text pro slot #${i}:`, current);
-    if (next !== null) {
-      labelEl.textContent = next.trim() || "prázdné";
-    }
-  });
-
-  canvas.appendChild(slot);
-  slots.push(slot);
+  makeDraggable(wrap, resize);
+  makeResizable(wrap, slot, resize);
 }
 
-// DRAG (pohyb)
-function makeDraggable(el, resizeHandle) {
+// DRAG (přesouvání)
+function makeDraggable(wrapper, resizeHandle) {
+  let dragging = false;
   let offsetX = 0;
   let offsetY = 0;
-  let dragging = false;
 
-  function onDown(e) {
-    // když chytnu resize handle, tak nedragujeme
-    if (e.target === resizeHandle) return;
+  wrapper.addEventListener("mousedown", startDrag);
+  wrapper.addEventListener("touchstart", startDrag, { passive: false });
 
+  function startDrag(e) {
+    if (e.target === resizeHandle) return; // ne při resize
     dragging = true;
-    const rect = el.getBoundingClientRect();
-    const canvasRect = canvas.getBoundingClientRect();
+
+    const rect = wrapper.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     offsetX = clientX - rect.left;
     offsetY = clientY - rect.top;
 
-    e.preventDefault && e.preventDefault();
+    e.preventDefault();
   }
 
   function onMove(e) {
     if (!dragging) return;
     const canvasRect = canvas.getBoundingClientRect();
+
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
     let x = clientX - offsetX - canvasRect.left;
     let y = clientY - offsetY - canvasRect.top;
 
-    // omez na plátno
-    const rect = el.getBoundingClientRect();
+    // hranice plátna
+    const rect = wrapper.getBoundingClientRect();
     const w = rect.width;
     const h = rect.height;
-
     if (x < 0) x = 0;
     if (y < 0) y = 0;
-    if (x + w > canvasRect.width)  x = canvasRect.width - w;
+    if (x + w > canvasRect.width) x = canvasRect.width - w;
     if (y + h > canvasRect.height) y = canvasRect.height - h;
 
-    el.style.left = x + "px";
-    el.style.top  = y + "px";
+    wrapper.style.left = x + "px";
+    wrapper.style.top = y + "px";
 
-    e.preventDefault && e.preventDefault();
+    e.preventDefault();
   }
-
-  function onUp() {
-    dragging = false;
-  }
-
-  el.addEventListener("mousedown", onDown);
-  el.addEventListener("touchstart", onDown, { passive: false });
 
   window.addEventListener("mousemove", onMove, { passive: false });
   window.addEventListener("touchmove", onMove, { passive: false });
-
-  window.addEventListener("mouseup", onUp);
-  window.addEventListener("touchend", onUp);
+  window.addEventListener("mouseup", () => dragging = false);
+  window.addEventListener("touchend", () => dragging = false);
 }
 
 // RESIZE (roztahování)
-function makeResizable(el, handle) {
+function makeResizable(wrapper, slot, handle) {
   let resizing = false;
   let startX = 0;
   let startY = 0;
   let startW = 0;
   let startH = 0;
 
-  function onDown(e) {
+  handle.addEventListener("mousedown", startResize);
+  handle.addEventListener("touchstart", startResize, { passive: false });
+
+  function startResize(e) {
     resizing = true;
-    const rect = el.getBoundingClientRect();
+
+    const rect = wrapper.getBoundingClientRect();
     startW = rect.width;
     startH = rect.height;
 
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    startX = clientX;
-    startY = clientY;
+    startX = e.touches ? e.touches[0].clientX : e.clientX;
+    startY = e.touches ? e.touches[0].clientY : e.clientY;
 
+    e.preventDefault();
     e.stopPropagation();
-    e.preventDefault && e.preventDefault();
   }
 
   function onMove(e) {
     if (!resizing) return;
+
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
     let newW = startW + (clientX - startX);
     let newH = startH + (clientY - startY);
 
-    if (newW < MIN_SIZE) newW = MIN_SIZE;
-    if (newH < MIN_SIZE) newH = MIN_SIZE;
-    if (newW > MAX_SIZE) newW = MAX_SIZE;
-    if (newH > MAX_SIZE) newH = MAX_SIZE;
+    if (newW < 50) newW = 50;
+    if (newH < 50) newH = 50;
+    if (newW > 250) newW = 250;
+    if (newH > 250) newH = 250;
 
-    el.style.width  = newW + "px";
-    el.style.height = newH + "px";
+    wrapper.style.width = newW + "px";
+    wrapper.style.height = newH + "px";
 
-    e.preventDefault && e.preventDefault();
+    e.preventDefault();
   }
-
-  function onUp() {
-    resizing = false;
-  }
-
-  handle.addEventListener("mousedown", onDown);
-  handle.addEventListener("touchstart", onDown, { passive: false });
 
   window.addEventListener("mousemove", onMove, { passive: false });
   window.addEventListener("touchmove", onMove, { passive: false });
-
-  window.addEventListener("mouseup", onUp);
-  window.addEventListener("touchend", onUp);
+  window.addEventListener("mouseup", () => resizing = false);
+  window.addEventListener("touchend", () => resizing = false);
 }
 </script>
 
