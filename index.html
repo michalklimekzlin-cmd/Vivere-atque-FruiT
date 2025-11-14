@@ -23,12 +23,10 @@
         min-height: 100vh;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         color: #eef6ff;
-        /* obrázek přes CELÉ pozadí */
         background: url('./AFA0870E-F586-4406-8BAA-0A7944120AA3.png') center center no-repeat fixed;
         background-size: cover;
       }
 
-      /* poloprůhledné ztmavení obsahu, aby byl text čitelný */
       .page-layer {
         min-height: 100vh;
         background: radial-gradient(circle at 20% 0%, rgba(10,20,30,0.6), rgba(2,4,8,0.9));
@@ -173,7 +171,6 @@
         opacity: .8;
       }
 
-      /* Hlavoun chat */
       #hlavoun-chat {
         background: rgba(5,8,12,.35);
         border: 1px solid rgba(255,255,255,.015);
@@ -206,7 +203,6 @@
         color: #fff;
       }
 
-      /* system menu */
       #systemMenu {
         position: fixed;
         bottom: 88px;
@@ -217,7 +213,7 @@
         padding: 14px 12px 10px;
         color: #e8f5ff;
         backdrop-filter: blur(14px);
-        min-width: 240px;
+        min-width: 260px;
         max-height: 60vh;
         overflow-y: auto;
         box-shadow: 0 8px 25px rgba(0,0,0,.35);
@@ -225,10 +221,11 @@
       }
       #systemMenu.hidden { display: none; }
       #systemMenu h3 {
-        margin: 0 0 8px;
-        font-size: .78rem;
+        margin: 4px 0 6px;
+        font-size: .72rem;
         opacity: .8;
-        letter-spacing: .04em;
+        letter-spacing: .06em;
+        text-transform: uppercase;
       }
       .sys-app {
         display: flex;
@@ -247,7 +244,6 @@
         padding: 3px 8px 4px;
       }
 
-      /* Síť */
       #vaft-nodes, #vaft-nodes-outer, #vaft-nodes-mirror, #vaft-nodes-origin {
         display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;
         font-size: .62rem;
@@ -260,14 +256,12 @@
         font-size:.6rem;
       }
 
-      /* Světy – grid */
       #vaft-worlds-grid {
         display:grid;
         grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
         gap:10px;
       }
 
-      /* VafiT board */
       .vafit-grid {
         display:grid;
         grid-template-columns: repeat(3, 1fr);
@@ -304,7 +298,6 @@
         margin-bottom:4px;
       }
 
-      /* Světové karty */
       .world-grid {
         display:grid;
         grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
@@ -335,7 +328,6 @@
         background:rgba(3,5,10,0.85);
       }
 
-      /* HUB – telefonní rámeček */
       #wrap {
         position: relative;
         box-sizing: border-box;
@@ -372,7 +364,6 @@
         line-height: 1.25;
       }
 
-      /* Rozmístění slotů pro iPhone 14 (v procentech) */
       #s2  { top: 4%;  left: 4%;  width: 60%; height: 10%; }
       #s3  { top: 4%;  right: 23%; width: 18%; height: 10%; }
       #s4  { top: 4%;  right: 4%;  width: 22%; height: 20%; }
@@ -390,7 +381,6 @@
       #s11 { top: 62%; right: 4%; width: 58%; height: 18%; }
       #s12 { top: 84%; right: 4%; width: 58%; height: 12%; }
 
-      /* Glyph podpis v rohu */
       #vaft-symbol {
         position: fixed;
         bottom: 10px;
@@ -605,13 +595,23 @@
 
       <!-- SKRYTÉ SYSTÉMOVÉ MENU -->
       <div id="systemMenu" class="hidden">
-        <h3>VAFT – tvoje appky</h3>
+        <h3>VAFT – hlavní appky</h3>
         <div class="sys-app">
           <div class="sys-app-name">Vivere (hlavní)</div>
           <button class="sys-app-btn" onclick="openApp('./')">Otevřít</button>
         </div>
         <div class="sys-app">
-          <div class="sys-app-name">Braska-Hlava</div>
+          <div class="sys-app-name">Vivere – světová verze</div>
+          <button class="sys-app-btn" onclick="openApp('./Vivere/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Revia</div>
+          <button class="sys-app-btn" onclick="openApp('./Revia/')">Otevřít</button>
+        </div>
+
+        <h3>Hlava / rodina</h3>
+        <div class="sys-app">
+          <div class="sys-app-name">Braska-Hlava (Pikoš)</div>
           <button class="sys-app-btn" onclick="openApp('./Braska-Hlava/')">Otevřít</button>
         </div>
         <div class="sys-app">
@@ -622,9 +622,107 @@
           <div class="sys-app-name">Meziprostor-Core</div>
           <button class="sys-app-btn" onclick="openApp('./Meziprostor-Core/')">Otevřít</button>
         </div>
+
+        <h3>Postavy / hrdinové</h3>
+        <div class="sys-app">
+          <div class="sys-app-name">BearHead</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-BearHead/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Doll</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-Doll/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">GhostGirl</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-GhostGirl/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Girls</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-Girls/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Jizva</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-Jizva/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Lady</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-Lady/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Lilies</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-Lilies/')">Otevřít</button>
+        </div>
+
+        <h3>Mapy / svět / Canvas</h3>
+        <div class="sys-app">
+          <div class="sys-app-name">MapWorld</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-MapWorld/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">VAFT-Canvas</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-Canvas/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">VAFT-Game / VafiTi</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-Game/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">StarSkull</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-StarSkull/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Comet</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-Comet/')">Otevřít</button>
+        </div>
+
+        <h3>Glyphy / písmena / galerie</h3>
+        <div class="sys-app">
+          <div class="sys-app-name">LetterLab</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-LetterLab/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">VAFT-gallery</div>
+          <button class="sys-app-btn" onclick="openApp('./VAFT-gallery/')">Otevřít</button>
+        </div>
+
+        <h3>Ochrana / systém</h3>
         <div class="sys-app">
           <div class="sys-app-name">VAFT-Network</div>
           <button class="sys-app-btn" onclick="openApp('./VAFT-Network/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Chybožrout-Opravář</div>
+          <button class="sys-app-btn" onclick="openApp('./chybozrout-opravar/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Guardian</div>
+          <button class="sys-app-btn" onclick="openApp('./guardian/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Lite verze</div>
+          <button class="sys-app-btn" onclick="openApp('./lite/')">Otevřít</button>
+        </div>
+
+        <h3>Tvoje studio</h3>
+        <div class="sys-app">
+          <div class="sys-app-name">Michal AI Al Klimek</div>
+          <button class="sys-app-btn" onclick="openApp('./Michal-AI-Al-Klimek/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Editor / apps</div>
+          <button class="sys-app-btn" onclick="openApp('./apps/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">App-Style-System</div>
+          <button class="sys-app-btn" onclick="openApp('./App-Style-System/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">Bicak Supreme Edition</div>
+          <button class="sys-app-btn" onclick="openApp('./Bicak-Supreme-Edition/')">Otevřít</button>
+        </div>
+        <div class="sys-app">
+          <div class="sys-app-name">3I-ATLAS</div>
+          <button class="sys-app-btn" onclick="openApp('./3I-ATLAS/')">Otevřít</button>
         </div>
       </div>
 
@@ -646,7 +744,6 @@
         });
       }
 
-      // přepínání tabů + lazy síť
       let vaftTabLock = false;
       const VAFT_TAB_DELAY = 350;
       let networkLoaded = false;
@@ -743,7 +840,6 @@
         appendHlavounMsg('user', text);
         inp.value = '';
 
-        // Guardian
         if (window.Guardian && typeof window.Guardian.checkMessage === 'function') {
           try {
             await window.Guardian.checkMessage(text);
@@ -752,261 +848,7 @@
           }
         }
 
-        // Hlavoun
         if (window.HlavounSystem && typeof window.HlavounSystem.think === 'function') {
           window.HlavounSystem.think(text);
         }
-        // Pikoš
-        if (window.Pikos && typeof window.Pikos.talk === 'function') {
-          window.Pikos.talk(text);
-        }
-        // Viri
-        if (window.VAFT && window.VAFT.agents && window.VAFT.agents.Viri && typeof window.VAFT.agents.Viri.listen === 'function') {
-          window.VAFT.agents.Viri.listen(text);
-        }
-        if (window.VAFTBus && typeof window.VAFTBus.handleUserMessage === 'function') {
-          window.VAFTBus.handleUserMessage(text);
-        }
-        if (window.AgentBus && typeof window.AgentBus.handleUserMessage === 'function') {
-          window.AgentBus.handleUserMessage(text);
-        }
-      }
-
-      function sendQuickToHlavoun(text){
-        const inp = document.getElementById('hlavoun-input');
-        if (!inp) return;
-        inp.value = text;
-        sendToHlavoun();
-      }
-    </script>
-
-    <!-- SVĚTY SCRIPT -->
-    <script>
-      const VAFT_WORLDS = [
-        { id: 'viventia',  label: 'Viventia',  desc: 'první živý svět – V z názvu' },
-        { id: 'ignis',     label: 'Ignis',     desc: 'oheň / energie, může živit síť' },
-        { id: 'virtus',    label: 'Virtus',    desc: 'síla, odvaha, hrdinové' },
-        { id: 'essentia',  label: 'Essentia',  desc: 'podstata, základ VAFT' },
-        { id: 'radius',    label: 'Radius',    desc: 'rozptyl, rozesílání signálů' },
-        { id: 'emovere',   label: 'Emovere',   desc: 'pohyb, přesuny mezi appkama' },
-        { id: 'aetheris',  label: 'Aetheris',  desc: 'vzdušný / orbit / AI' },
-        { id: 'tempora',   label: 'Tempora',   desc: 'čas, pulsy, log' },
-        { id: 'quaerentia',label: 'Quaerentia',desc: 'hledání, dotazy Hlavounovi' },
-        { id: 'unum',      label: 'Unum',      desc: 'sjednocení, rodina, tvůj core' },
-        { id: 'exsolum',   label: 'Exsolum',   desc: 'oddělený svět – zkušebna' },
-        { id: 'flamma',    label: 'Flamma',    desc: 'inspirace, příběhy' },
-        { id: 'reverentia',label: 'Reverentia',desc: 'úcta, pravidla 1 a 2' },
-        { id: 'umbra',     label: 'Umbra',     desc: 'stín, archiv, schované věci' },
-        { id: 'imaginis',  label: 'Imaginis',  desc: 'glyphy, vafiTy, obrázky' },
-        { id: 'fructum',   label: 'Fructum',   desc: 'plody, výstupy – to co sieješ' }
-      ];
-
-      function renderWorldsPanel() {
-        const box = document.getElementById('vaft-worlds-grid');
-        if (!box) return;
-        box.innerHTML = '';
-        VAFT_WORLDS.forEach(w => {
-          const div = document.createElement('div');
-          div.style.background = 'rgba(25,214,255,.03)';
-          div.style.border = '1px solid rgba(25,214,255,.18)';
-          div.style.borderRadius = '14px';
-          div.style.padding = '10px 8px 9px';
-          div.style.cursor = 'pointer';
-          div.style.display = 'flex';
-          div.style.flexDirection = 'column';
-          div.style.gap = '4px';
-          div.onclick = () => selectWorld(w.id);
-          div.innerHTML = `
-            <div style="font-weight:600;">${w.label}</div>
-            <div style="font-size:.62rem;opacity:.5;">${w.desc}</div>
-          `;
-          box.appendChild(div);
-        });
-      }
-
-      function selectWorld(id) {
-        const world = VAFT_WORLDS.find(w => w.id === id);
-        const det = document.getElementById('vaft-world-detail');
-        if (!world || !det) return;
-        det.innerHTML = `
-          <div style="font-size:.75rem;opacity:.65;">Vybraný svět</div>
-          <div style="font-size:1.05rem;font-weight:600;margin-bottom:4px;">${world.label}</div>
-          <div style="font-size:.7rem;opacity:.7;margin-bottom:6px;">${world.desc}</div>
-          <div style="font-size:.65rem;opacity:.5;">id: ${world.id}</div>
-        `;
-
-        if (window.VAFT && window.VAFT.bus && typeof window.VAFT.bus.emit === 'function') {
-          window.VAFT.bus.emit('world.selected', { id: world.id, ts: Date.now() });
-        }
-        if (window.HlavounSystem && typeof window.HlavounSystem.think === 'function') {
-          window.HlavounSystem.think('uživatel otevřel svět: ' + world.label);
-        }
-        if (window.VAFT && window.VAFT.agents && window.VAFT.agents.Viri && typeof window.VAFT.agents.Viri.save === 'function') {
-          window.VAFT.agents.Viri.save('last_world', world);
-        }
-      }
-    </script>
-
-    <!-- Guardian musí být před mozkem -->
-    <script src="./vaft.guardian.client.js"></script>
-
-    <!-- VAFT nezničitelný kořen (verze s dna.layers) -->
-    <script>
-      (function (win) {
-        if (win.VAFT_CORE) return;
-
-        const dna = {
-          name: 'Vivere atque FruiT',
-          short: 'VaFT',
-          mark: 'T',
-          meaning: 'žít a užívat • zapsáno do světa',
-          permanence: 'scar-ink',
-          creator: 'michalklimekzlin-cmd',
-          createdAt: '2025-11-11'
-        };
-
-        const core = {
-          id: 'vaft://core',
-          version: '1.0',
-          dna,
-          role: 'sovereign',
-          signature: 'VaFT-T',
-          register: function (what) {
-            try {
-              this.modules = this.modules || [];
-              this.modules.push({ name: what, ts: Date.now() });
-            } catch (e) {}
-          }
-        };
-
-        core.dna.layers = ['scar', 'ink', 'memory', 'world'];
-        Object.freeze(core.dna.layers);
-        Object.freeze(core.dna);
-        Object.freeze(core);
-        win.VAFT_CORE = core;
-      })(window);
-    </script>
-
-    <!-- původní skripty -->
-    <script src="./app.js"></script>
-    <script src="./vaft.chybozrout.js?v=1"></script>
-    <script>
-      window.VAFT_CHYBOZROUT && window.VAFT_CHYBOZROUT.init({
-        appName: 'Vivere atque FruiT',
-        version: window.V || 'dev'
-      });
-    </script>
-    <script src="./vaft.glyphs.js"></script>
-    <script src="./hlavoun.js"></script>
-    <script src="./viri.js"></script>
-    <script src="./pikos.js"></script>
-    <script src="./agents.js"></script>
-    <script src="./agents_v3.js"></script>
-    <script src="./vaft.bus.js"></script>
-    <script src="./vaft.agents.js"></script>
-    <script src="./vaft.engine.js"></script>
-    <script src="./vaft.ascend.js"></script>
-    <script src="./vaft.diagnostics.js"></script>
-
-    <!-- loader service workeru -->
-    <script src="../vaft-swloader.js"></script>
-
-    <!-- Světové karty – kliky -->
-    <script>
-      const worldCards = document.querySelectorAll('.world-card');
-      const worldTarget = document.getElementById('world-target');
-
-      worldCards.forEach(card => {
-        card.addEventListener('click', () => {
-          const name = card.textContent.trim();
-          if (worldTarget) {
-            worldTarget.textContent = '📡 Posílám: ' + name + ' → Hlavoun / Viri / Pikoš';
-          }
-        });
-      });
-    </script>
-
-    <!-- VafiT klikací logika -->
-    <script>
-      function initVafitBoard() {
-        const grid = document.getElementById('vafit-grid');
-        const detail = document.getElementById('vafit-detail');
-        if (!grid || !detail) return;
-
-        const titleEl = detail.querySelector('.vafit-detail-title');
-        const bodyEl  = detail.querySelector('.vafit-detail-body');
-
-        const VAFIT_DATA = {
-          chybozrout: {
-            title: 'Chybožrout-Opravář',
-            body: 'Strážce rovnováhy ve světě Vivere atque FruiT. Pohlcuje chyby, opravuje kód a hlídá, aby se svět nezhroutil. Mluví hlasem Pikoše, Viri, Hlavouna i VaFT.'
-          }
-        };
-
-        grid.addEventListener('click', e => {
-          const tile = e.target.closest('.vafit-tile');
-          if (!tile || tile.classList.contains('vafit-empty')) return;
-          const id = tile.dataset.vafit;
-          const data = VAFIT_DATA[id];
-          if (!data) return;
-
-          if (titleEl) titleEl.textContent = data.title;
-          if (bodyEl) bodyEl.textContent  = data.body;
-
-          if (window.VAFT_CHYBOZROUT && typeof window.VAFT_CHYBOZROUT.say === 'function') {
-            window.VAFT_CHYBOZROUT.say('Chybožrout', 'Byl jsem otevřen z panelu VafiT.');
-          }
-        });
-      }
-    </script>
-
-    <!-- HUB slot funkce – napojení na tvoje panely / appky -->
-    <script>
-      function openPort()          { console.log('AI port'); }
-      function openWorldName()     { vaftSwitchPanel('worlds'); }
-      function openHlavoun()       { vaftSwitchPanel('space'); }
-      function openPikos()         { vaftSwitchPanel('heroes'); }
-      function openViri()          { vaftSwitchPanel('worlds'); }
-      function openVaFT()          { vaftSwitchPanel('system'); }
-      function openVaFiTi()        { vaftSwitchPanel('worlds'); }
-      function openGlyph()         { vaftSwitchPanel('nodes'); }
-      function openMap()           { vaftSwitchPanel('nodes'); }
-      function openChybozrout()    { vaftSwitchPanel('worlds'); }
-      function openWorldSelector() { vaftSwitchPanel('worlds'); }
-      function openEditor()        { console.log('Editor světa / rychlé programování'); }
-    </script>
-
-    <!-- DOMContentLoaded – start všeho -->
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        tick();
-        setInterval(tick, 1000);
-
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-          btn.addEventListener('click', () => vaftSwitchPanel(btn.dataset.tab));
-        });
-        vaftSwitchPanel('heroes');
-
-        renderHeroes();
-        renderWorldsPanel();
-        initVafitBoard();
-
-        const saved = localStorage.getItem('VAFT_LETTERS') || '';
-        const boxCoins = document.getElementById('coins-main');
-        if (boxCoins) {
-          if (saved.length) {
-            boxCoins.textContent = saved.length + ' ' + saved.slice(-1);
-          } else {
-            boxCoins.textContent = '0';
-          }
-        }
-
-        const selectedVafit = JSON.parse(localStorage.getItem('VAFT_SELECTED_VAFIT') || 'null');
-        if (selectedVafit) {
-          const place = document.getElementById('selectedVafit');
-          if (place) place.textContent = "Vybraný VafiT: " + selectedVafit.name + " " + (selectedVafit.glyph || "");
-        }
-      });
-    </script>
-  </body>
-</html>
+        if (window.Pikos && typeof window.Pikos.talk
