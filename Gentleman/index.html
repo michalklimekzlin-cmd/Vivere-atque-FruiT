@@ -3,14 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>VaF'i'T • Centrum světa</title>
+    <title>VaF'i'T • Motor světa</title>
 
     <style>
       :root {
-        --bg: #000;
-        --card: #0a0a0f;
+        --bg: #000000;
+        --card: #090910;
         --frame: #f5e9d6;
-        --text: #e9e4d0;
+        --text: #f5f1e2;
         --soft: #c0b7a3;
         --accent: #ff7b42;
       }
@@ -24,33 +24,35 @@
 
       body {
         background: #000;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text";
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          sans-serif;
         color: var(--text);
         display: flex;
         justify-content: center;
-        align-items: start;
-        padding: 20px 0;
+        align-items: flex-start;
+        min-height: 100vh;
+        padding: 18px 0;
       }
 
       .wrap {
         width: 100%;
-        max-width: 420px;
-        padding: 12px;
+        max-width: 420px; /* iPhone 14 + kousek */
+        padding: 0 12px;
       }
 
       .card {
         background: var(--card);
         border-radius: 22px;
-        padding: 14px;
-        border: 1px solid #222;
-        box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        padding: 14px 14px 16px;
+        border: 1px solid #20202b;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
       }
 
       .title {
-        font-size: 20px;
+        font-size: 19px;
         font-weight: 700;
         text-align: center;
-        margin-bottom: 12px;
+        margin-bottom: 10px;
         color: var(--frame);
       }
 
@@ -58,55 +60,169 @@
         background: var(--frame);
         border-radius: 14px;
         padding: 10px 14px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
         color: #000;
         font-weight: 600;
         font-size: 13px;
+        line-height: 1.3;
       }
 
-      .grid {
-        display: grid;
-        grid-template-columns: 25% 1fr 30%;
-        gap: 10px;
-      }
-
-      .leftcol, .rightcol {
+      /* STŘED – DIGITÁLNÍ TVOR / VÍR */
+      .core-wrap {
+        margin: 6px 0 10px;
         display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-
-      .slot {
-        background: var(--frame);
-        padding: 7px;
-        border-radius: 10px;
-        color: #000;
-        font-size: 12px;
-      }
-
-      .center {
-        position: relative;
-        border-radius: 16px;
-        border: 1px solid #333;
-        background: radial-gradient(circle at top, #f5e9d6 0%, #7c6b55 40%, #0a0a0f 80%);
-        min-height: 160px;
-        display: flex;
-        align-items: center;
         justify-content: center;
       }
 
-      .center-text {
-        font-size: 16px;
-        font-weight: 700;
-        color: #2b1b0f;
-        text-align: center;
-        line-height: 1.1;
+      .core-shell {
+        position: relative;
+        width: 220px;
+        max-width: 70vw;
+        aspect-ratio: 3 / 4; /* lehce na výšku */
       }
 
-      .button {
-        padding: 8px 12px;
+      .core {
+        position: absolute;
+        inset: 0;
+        border-radius: 18px;
+        overflow: hidden;
+        background: radial-gradient(
+          circle at 50% 20%,
+          #f5e9d6 0%,
+          #b79f7f 35%,
+          #403124 65%,
+          #05060c 100%
+        );
+        box-shadow:
+          0 0 35px rgba(0, 0, 0, 0.9),
+          0 0 22px rgba(245, 233, 214, 0.4);
+      }
+
+      .core::before {
+        content: "";
+        position: absolute;
+        inset: 6%;
+        border-radius: 14px;
+        background: radial-gradient(
+          circle at 50% 30%,
+          rgba(255, 255, 255, 0.75) 0%,
+          rgba(255, 255, 255, 0) 55%
+        );
+        opacity: 0.85;
+        mix-blend-mode: screen;
+        animation: breathe 3.2s ease-in-out infinite;
+      }
+
+      .core-inner {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #1f1209;
+      }
+
+      .core-name {
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .core-sub {
+        margin-top: 4px;
+        font-size: 11px;
+        opacity: 0.9;
+      }
+
+      .core-hint {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 8px;
+        text-align: center;
+        font-size: 10px;
+        color: rgba(0, 0, 0, 0.7);
+        z-index: 1;
+      }
+
+      @keyframes breathe {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.75;
+        }
+        50% {
+          transform: scale(1.04);
+          opacity: 1;
+        }
+      }
+
+      /* MENU UVNITŘ STŘEDU – ZOBRAZÍ SE PO KLEPNUTÍ */
+      .core-menu {
+        position: absolute;
+        inset: 0;
+        border-radius: 18px;
+        backdrop-filter: blur(8px);
+        background: radial-gradient(
+          circle at center,
+          rgba(0, 0, 0, 0.72),
+          rgba(0, 0, 0, 0.95)
+        );
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+        gap: 6px;
+        padding: 14px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+
+      .core-menu.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .core-menu-title {
+        text-align: center;
+        font-size: 11px;
+        color: var(--soft);
+        margin-bottom: 2px;
+      }
+
+      .core-menu-btn {
+        border-radius: 999px;
+        padding: 6px 10px;
+        border: 1px solid rgba(245, 233, 214, 0.24);
+        background: rgba(245, 233, 214, 0.06);
+        color: var(--frame);
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .core-menu-btn span {
+        display: block;
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      .core-tap-hint {
+        font-size: 11px;
+        text-align: center;
+        color: var(--soft);
+        margin-top: 4px;
+      }
+
+      .button-main {
+        padding: 9px 12px;
         background: var(--accent);
-        border-radius: 10px;
+        border-radius: 12px;
         border: none;
         color: #000;
         margin-top: 10px;
@@ -116,9 +232,10 @@
       }
 
       .summary {
-        margin-top: 12px;
-        font-size: 12px;
+        margin-top: 10px;
+        font-size: 11px;
         color: var(--soft);
+        line-height: 1.4;
       }
     </style>
   </head>
@@ -126,44 +243,56 @@
   <body>
     <div class="wrap">
       <div class="card">
-
         <div class="title">VaF'i'T • Motor světa</div>
 
         <div id="engine-bubble" class="bubble">
-          Načítám informace…
+          Načítám motor…
         </div>
 
-        <div class="grid">
-          <div class="leftcol">
-            <div class="slot">Poznámky</div>
-            <div class="slot">Hrdinové</div>
-            <div class="slot">Síť</div>
-          </div>
+        <!-- STŘEDNÍ TVOR / VÍR -->
+        <div class="core-wrap">
+          <div class="core-shell">
+            <div id="vafit-core" class="core">
+              <div class="core-inner">
+                <div class="core-name">Vivere atque FruiT</div>
+                <div class="core-sub">VaF'i'T • pohon</div>
+                <div class="core-hint">Klepni na střed</div>
+              </div>
 
-          <div class="center">
-            <div class="center-text">
-              Vivere<br>atque<br>FruiT
+              <!-- menu uvnitř středu -->
+              <div id="core-menu" class="core-menu">
+                <div class="core-menu-title">Kam chceš poslat energii?</div>
+                <div class="core-menu-btn" onclick="VaFiT.goTo('revia')">
+                  Revia
+                  <span>srdce světa</span>
+                </div>
+                <div class="core-menu-btn" onclick="VaFiT.goTo('michalFace')">
+                  Tvář
+                  <span>Michal AI Al Klimek</span>
+                </div>
+                <div class="core-menu-btn" onclick="VaFiT.goTo('braska')">
+                  Bráška hlava
+                  <span>logika / mozek</span>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div class="rightcol">
-            <div class="slot" onclick="VaFiT.goTo('revia')">Revia</div>
-            <div class="slot" onclick="VaFiT.goTo('michalFace')">Tvář</div>
-            <div class="slot" onclick="VaFiT.goTo('braska')">Bráška hlava</div>
-          </div>
         </div>
 
-        <button class="button" onclick="alert(VaFiT.suggestNextStep())">
+        <div class="core-tap-hint">
+          Střed v sobě nese všechny funkce. Klepni pro otevření bran.
+        </div>
+
+        <button class="button-main" onclick="alert(VaFiT.suggestNextStep())">
           Co navrhuje motor dnes?
         </button>
 
         <div id="summary" class="summary"></div>
-
       </div>
     </div>
 
     <!-- ──────────────────────────────────────────────── -->
-    <!--               ZABUDOVANÝ VaF'i'T ENGINE          -->
+    <!--                 VaF'i'T ENGINE                  -->
     <!-- ──────────────────────────────────────────────── -->
     <script>
       (function (global) {
@@ -200,19 +329,25 @@
           },
 
           modules: {
-            revia:      { name: "Revia",          path: "../Revia/" },
-            michalFace: { name: "Tvář",           path: "../Michal-AI-Al-Klimek/" },
-            braska:     { name: "Bráška Hlava",   path: "../Braska-Hlava/" }
+            revia: {
+              name: "Revia",
+              path: "../Revia/"
+            },
+            michalFace: {
+              name: "Tvář",
+              path: "../Michal-AI-Al-Klimek/"
+            },
+            braska: {
+              name: "Bráška Hlava",
+              path: "../Braska-Hlava/"
+            }
           },
 
           init() {
             const m = load();
             if (m) this.memory = m;
-
             this.memory.lastVisit = now();
             this.save();
-
-            console.log("VaF'i'T ENGINE READY", this.memory);
           },
 
           save() {
@@ -222,33 +357,44 @@
 
           goTo(modKey) {
             const mod = this.modules[modKey];
-            if (!mod) return alert("Modul neexistuje: " + modKey);
-
+            if (!mod) {
+              alert("Modul neexistuje: " + modKey);
+              return;
+            }
             this.memory.lastModule = modKey;
             this.save();
-
             location.href = mod.path;
           },
 
           suggestNextStep() {
-            if (!this.memory.heroes.length)
-              return "Brácho, zatím nemáme hrdinu – dneska bych jednoho vytvořil.";
-
-            if (!this.memory.lastModule)
-              return "Můžeme začít v Revii nebo u Brášky.";
-
-            return "Pokračoval bych tam, kde jsme skončili: modul " + this.memory.lastModule + ".";
+            if (!this.memory.heroes.length) {
+              return "Brácho, zatím nemáme hrdiny – dneska můžeme jednoho vymyslet.";
+            }
+            if (!this.memory.lastModule) {
+              return "Můžeme začít v Revii nebo u Brášky, jak chceš.";
+            }
+            return (
+              "Pokračoval bych tam, kde jsme skončili – modul " +
+              this.memory.lastModule +
+              "."
+            );
           },
 
           summary() {
-            return `
-              Verze: ${this.version}<br>
-              Mód: ${this.mode}<br>
-              Poslední návštěva: ${this.memory.lastVisit}<br>
-              Poslední modul: ${this.memory.lastModule || "žádný"}<br>
-              Hrdinové: ${this.memory.heroes.length}<br>
-              Poznámky: ${this.memory.notes.length}
-            `;
+            return (
+              "Verze: " +
+              this.version +
+              "<br>Mód: " +
+              this.mode +
+              "<br>Poslední návštěva: " +
+              this.memory.lastVisit +
+              "<br>Poslední modul: " +
+              (this.memory.lastModule || "žádný") +
+              "<br>Hrdinové: " +
+              this.memory.heroes.length +
+              "<br>Poznámky: " +
+              this.memory.notes.length
+            );
           }
         };
 
@@ -256,13 +402,24 @@
         VaFiT.init();
       })(window);
 
-      // UI AKTUALIZACE
+      // UI po načtení
       document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("engine-bubble").innerHTML =
-          "Motor aktivní • verze " + VaFiT.version;
+        const bubble = document.getElementById("engine-bubble");
+        const summaryEl = document.getElementById("summary");
+        const core = document.getElementById("vafit-core");
+        const menu = document.getElementById("core-menu");
 
-        document.getElementById("summary").innerHTML =
-          VaFiT.summary();
+        bubble.innerHTML =
+          "Motor aktivní • verze " +
+          VaFiT.version +
+          "<br>" +
+          VaFiT.suggestNextStep();
+
+        summaryEl.innerHTML = VaFiT.summary();
+
+        core.addEventListener("click", () => {
+          menu.classList.toggle("open");
+        });
       });
     </script>
   </body>
