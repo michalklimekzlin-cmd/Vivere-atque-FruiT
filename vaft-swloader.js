@@ -1,38 +1,39 @@
-// ===== Vivere atque FruiT • SW Loader (automatická registrace) =====
-// Detekuje, v jaké složce se nacházíme, a zaregistruje centrálního workera.
-// Michal & Kovošrot 2025 🦾
-
+// vaft-swloader.js
 (function () {
-  if (!('serviceWorker' in navigator)) return;
+  if (!('serviceWorker' in navigator)) {
+    console.log('[VAFT SW] Service worker nepodporován');
+    return;
+  }
 
   window.addEventListener('load', () => {
-    // zkusíme zaregistrovat centrálního workera z kořene
-    const swURL = new URL('./vaft-sw.js?v=1', window.location.href).toString();
+    try {
+      // zjistíme cestu k tomuhle souboru
+      const script = document.currentScript;
+      let basePath = '';
 
-    navigator.serviceWorker
-      .register(swURL)
-      .then((reg) => {
-        console.log('[VAFT-Loader] registrován →', reg.scope);
+      if (script && script.src) {
+        const url = new URL(script.src, window.location.origin);
+        // adresář, kde leží vaft-swloader.js
+        basePath = url.pathname.replace(/\/[^\/]*$/, '/');
+      } else {
+        basePath = '/';
+      }
 
-        // pokud už čeká nová verze, aktivuj ji
-        if (reg.waiting) {
-          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-        }
+      const ver = window.V || Date.now();
+      const swUrl = basePath + 'service-worker.js?v=' + ver;
 
-        // detekce nových verzí během běhu
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed') {
-              console.log('[VAFT-Loader] dostupná nová verze workera');
-              // volitelně:
-              // location.reload();
-            }
-          });
+      console.log('[VAFT SW] Registruji', swUrl);
+
+      navigator.serviceWorker
+        .register(swUrl)
+        .then(reg => {
+          console.log('[VAFT SW] OK', reg.scope);
+        })
+        .catch(err => {
+          console.warn('[VAFT SW] Chyba registrace', err);
         });
-      })
-      .catch((err) =>
-        console.warn('[VAFT-Loader] registrace selhala:', err)
-      );
+    } catch (e) {
+      console.warn('[VAFT SW] Výjimka při registraci', e);
+    }
   });
 })();
