@@ -7,16 +7,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages } = req.body || {};
+    const { messages = [] } = req.body || {};
 
-    const result = await fetch("https://api.openai.com/v1/chat/completions", {
+    const apiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-5.1-mini",
+        // DŮLEŽITÉ: platný název modelu
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
@@ -26,17 +27,29 @@ export default async function handler(req, res) {
               "Držíš pravidla: 1) Přátelství, 2) Vivere atque frui, 3) Nezraňuj Batole / lidi. " +
               "Mysli jednoduše, stručně a jako kamarád, ne jako formální AI."
           },
-          ...(messages || []),
+          ...messages,
         ],
       }),
     });
 
-    const data = await result.json();
+    if (!apiRes.ok) {
+      // pro debugování do logů Vercelu
+      const errorText = await apiRes.text();
+      console.error("OpenAI API error:", apiRes.status, errorText);
+
+      return res.status(500).json({
+        reply:
+          "Brácho… motor u OpenAI škytl (chyba z API). Zkus to prosím ještě jednou.",
+      });
+    }
+
+    const data = await apiRes.json();
+
     const reply =
-      data?.choices?.[0]?.message?.content ||
+      data?.choices?.[0]?.message?.content?.trim() ||
       "Brácho… nějaký zádrhel v motoru. Zkus to prosím ještě jednou.";
 
-    res.status(200).json({ reply });
+    return res.status(200).json({ reply });
   } catch (err) {
     console.error("VaF'i'T ERROR:", err);
     return res.status(500).json({
