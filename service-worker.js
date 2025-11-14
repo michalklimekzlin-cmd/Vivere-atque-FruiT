@@ -1,69 +1,50 @@
-// ===== Vivere atque FruiT • Service Worker (rychlá verze) =====
-const CACHE_NAME = 'vaft-cache-v4'; // zvýšeno z v3 → donutí to stáhnout znova
-const ASSETS = [
+// service-worker.js
+const CACHE_NAME = 'vaft-cache-v3';
+
+// podle potřeby můžeš přidat další soubory
+const OFFLINE_URLS = [
   './',
   './index.html',
   './style.css',
-  './app.js',
-  './hlavoun.js',
-  './agents.js',
-  './pikos.js',
-  './manifest.json'
+  './manifest.json',
+  './AFA0870E-F586-4406-8BAA-0A7944120AA3.png'
 ];
 
-// instalace – spustit hned, cachování běží "best effort"
 self.addEventListener('install', event => {
-  console.log('[SW] instalace (rychlá)...');
-  self.skipWaiting();
+  console.log('[VAFT SW] install');
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // když něco nejde stáhnout, ať se to celé nezasekne
-      return Promise.all(
-        ASSETS.map(url =>
-          fetch(url)
-            .then(res => {
-              if (res.ok) cache.put(url, res.clone());
-            })
-            .catch(() => {
-              console.warn('[SW] nepodařilo se stáhnout:', url);
-            })
-        )
-      );
+      return cache.addAll(OFFLINE_URLS);
     })
   );
+  self.skipWaiting();
 });
 
-// aktivace – smaž staré cache
 self.addEventListener('activate', event => {
-  console.log('[SW] aktivace...');
+  console.log('[VAFT SW] activate');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => {
-            console.log('[SW] mažu starou cache:', key);
-            return caches.delete(key);
-          })
+          .filter(k => k !== CACHE_NAME)
+          .map(k => caches.delete(k))
       )
     )
   );
   self.clients.claim();
 });
 
-// fetch – NETWORK FIRST → když nejde síť, vem cache
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // ulož si čerstvou verzi
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        return response;
-      })
-      .catch(() => {
-        // offline / chyba → zkus cache
-        return caches.match(event.request);
-      })
+    caches.match(event.request).then(resp => {
+      if (resp) return resp;
+
+      return fetch(event.request).catch(() => {
+        // fallback na index, když jsme offline
+        return caches.match('./index.html');
+      });
+    })
   );
 });
