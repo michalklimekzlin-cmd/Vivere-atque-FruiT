@@ -3,175 +3,377 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>VaF'i'T – Vivere atque FruiT</title>
+    <title>VaF'i'T • Motor světa</title>
     <style>
       body {
-        background: #000;
-        color: #eee;
-        font-family: system-ui;
-        padding: 18px;
+        margin: 0;
+        padding: 16px;
+        background: radial-gradient(circle at top, #10131c, #050509);
+        color: #f5f5f5;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
       }
-      #vafit-chat {
-        margin-top: 20px;
+
+      .card {
+        max-width: 430px;
+        margin: 0 auto;
+        background: rgba(10, 10, 15, 0.96);
+        border-radius: 18px;
+        padding: 16px 16px 20px;
+        box-shadow: 0 0 24px rgba(0, 0, 0, 0.7);
+        border: 1px solid #202335;
+      }
+
+      .top {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .avatar-wrap {
+        width: 42px;
+        height: 42px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 20%, #ffe7c4, #f08b3b);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .avatar-wrap.pulsing {
+        transform: scale(1.07);
+        box-shadow: 0 0 16px rgba(255, 164, 64, 0.6);
+      }
+
+      .avatar-emoji {
+        font-size: 22px;
+      }
+
+      .top-text {
+        flex: 1;
+      }
+      .top-title {
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .top-sub {
+        font-size: 11px;
+        opacity: 0.7;
+      }
+
+      .mood {
+        font-size: 11px;
+        margin-bottom: 10px;
+        opacity: 0.9;
+      }
+
+      .bubble {
+        background: radial-gradient(circle at top, #1e2030, #0d0f17);
+        border-radius: 14px;
+        padding: 10px 12px;
+        font-size: 13px;
+        margin-bottom: 12px;
+        border: 1px solid #252843;
+      }
+
+      .summary {
+        font-size: 11px;
+        opacity: 0.8;
+        margin-bottom: 12px;
+      }
+
+      .chat-box {
+        background: #05060b;
+        border-radius: 14px;
         padding: 10px;
-        background: #111;
-        border-radius: 8px;
+        border: 1px solid #1b1e2f;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
       }
-      #vafit-output {
-        margin-top: 10px;
-        padding: 8px;
-        background: #151515;
-        border-radius: 6px;
+
+      .chat-history {
+        max-height: 260px;
+        overflow-y: auto;
+        padding-right: 4px;
+        font-size: 12px;
       }
+
+      .msg {
+        margin-bottom: 6px;
+        line-height: 1.35;
+      }
+      .msg-user {
+        color: #e1d0b5;
+      }
+      .msg-vafit {
+        color: #a6c8ff;
+      }
+      .msg small {
+        opacity: 0.6;
+        font-size: 10px;
+      }
+
       textarea {
         width: 100%;
-        height: 60px;
-        background: #0d0d0d;
-        border: 1px solid #222;
-        color: #ddd;
-        padding: 8px;
-        border-radius: 6px;
+        min-height: 52px;
+        resize: vertical;
+        background: #050509;
+        border-radius: 10px;
+        border: 1px solid #25273a;
+        color: #f0f0f0;
+        padding: 6px 8px;
+        font-size: 12px;
+        outline: none;
       }
+      textarea:focus {
+        border-color: #4fa6ff;
+      }
+
       button {
-        background: #0894ff;
-        color: black;
-        border: none;
-        padding: 10px;
         width: 100%;
-        border-radius: 8px;
-        font-weight: bold;
-        margin-top: 6px;
+        border: none;
+        border-radius: 10px;
+        padding: 9px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        background: linear-gradient(90deg, #ffb156, #ff7a3c);
+        color: #120707;
+      }
+
+      .small {
+        margin-top: 8px;
+        font-size: 10px;
+        opacity: 0.6;
+        text-align: center;
       }
     </style>
   </head>
 
   <body>
+    <div class="card">
+      <div class="top">
+        <div id="avatar" class="avatar-wrap">
+          <div class="avatar-emoji">🧠</div>
+        </div>
+        <div class="top-text">
+          <div class="top-title">VaF'i'T • Motor světa</div>
+          <div id="top-sub" class="top-sub"></div>
+        </div>
+      </div>
 
-    <h2>VaF'i'T</h2>
-    <div id="bubble" style="opacity:0.8;margin-bottom:10px;"></div>
-    <div id="summary"></div>
+      <div id="mood" class="mood"></div>
 
-    <div id="vafit-chat">
-      <label>Napiš VaF'i'Tovi:</label>
-      <textarea id="vafit-input"></textarea>
-      <button id="vafit-send">Poslat</button>
-      <div id="vafit-output"></div>
+      <div id="bubble" class="bubble"></div>
+      <div id="summary" class="summary"></div>
+
+      <div class="chat-box">
+        <div id="chat-history" class="chat-history"></div>
+
+        <div>
+          <textarea id="vafit-input" placeholder="Napiš VaF'i'Tovi cokoliv, brácho…"></textarea>
+        </div>
+        <button id="vafit-send">Poslat VaF'i'Tovi</button>
+      </div>
+
+      <div class="small">
+        🔴 VaF'i'T si pamatuje historii jen v tomto zařízení (localStorage).
+      </div>
     </div>
 
     <script>
-      // ==== MEMORY STORAGE ====
-      const STORAGE_KEY = "VaFiT.character.v1";
+      // ======== LOKÁLNÍ PAMĚŤ ========
+      const STORAGE_KEY_CHARACTER = "VaFiT.character.v2";
+      const STORAGE_KEY_CHAT = "VaFiT.chatHistory.v1";
 
-      function loadMemory() {
+      function loadJson(key) {
         try {
-          const raw = localStorage.getItem(STORAGE_KEY);
+          const raw = localStorage.getItem(key);
           return raw ? JSON.parse(raw) : null;
         } catch {
           return null;
         }
       }
 
-      function saveMemory(data) {
+      function saveJson(key, value) {
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          localStorage.setItem(key, JSON.stringify(value));
         } catch {}
       }
 
-      const now = () => new Date().toISOString();
+      const nowISO = () => new Date().toISOString();
+      const nowTime = () => new Date().toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });
 
-      // ==== CHARACTER ENGINE ====
+      // ======== VAFT OBJEKT ========
       const VaFiT = {
         name: "Vivere atque FruiT",
         short: "VaF'i'T",
-        version: "0.2-character",
+        version: "0.3-motor",
         mood: "calm",
-
+        moodLabel: "Nálada: klidný ✨",
         memory: {
           createdAt: null,
           updatedAt: null,
           visits: 0,
           lastVisit: null,
-          lastModule: null,
-        },
-
-        modules: {
-          glavna: { name: "Hlavoun" },
-          viri: { name: "Viri" },
-          piko: { name: "Pikoš" },
         },
 
         init() {
-          let mem = loadMemory();
+          let mem = loadJson(STORAGE_KEY_CHARACTER);
           if (!mem) {
             mem = {
-              createdAt: now(),
-              updatedAt: now(),
+              createdAt: nowISO(),
+              updatedAt: nowISO(),
               visits: 1,
-              lastVisit: now(),
-              lastModule: null,
+              lastVisit: nowISO(),
             };
           } else {
             mem.visits += 1;
-            mem.updatedAt = now();
-            mem.lastVisit = now();
+            mem.updatedAt = nowISO();
+            mem.lastVisit = nowISO();
           }
-
           this.memory = mem;
-          saveMemory(mem);
+          saveJson(STORAGE_KEY_CHARACTER, mem);
         },
 
-        suggestGreeting() {
-          return "Ahoj brácho 🧠✨ tady VaF'i'T — svět běží.";
+        updateMoodFromText(text) {
+          const lower = (text || "").toLowerCase();
+          if (lower.includes("unav") || lower.includes("spát")) {
+            this.mood = "soft";
+            this.moodLabel = "Nálada: jemný / opatrný 😴";
+          } else if (lower.includes("strach") || lower.includes("bojim")) {
+            this.mood = "protect";
+            this.moodLabel = "Nálada: ochranný 🛡️";
+          } else if (lower.includes("radost") || lower.includes("super") || lower.includes("bomba")) {
+            this.mood = "playful";
+            this.moodLabel = "Nálada: nadšený 🔥";
+          } else {
+            this.mood = "calm";
+            this.moodLabel = "Nálada: klidný ✨";
+          }
+        },
+
+        greeting() {
+          return (
+            "Ahoj brácho, tady VaF'i'T. Motor běží, verze " +
+            this.version +
+            ". Jsem složený z Hlavouna, Viriho a Pikoše."
+          );
         },
 
         summaryHtml() {
           return (
             "Verze: " + this.version +
-            "<br>Nálada: " + this.mood +
-            "<br>Návštěvy: " + this.memory.visits +
-            "<br>Poslední návštěva: " + this.memory.lastVisit
+            "<br>Počet návštěv: " + this.memory.visits +
+            "<br>Poslední otevření: " + this.memory.lastVisit
           );
         },
       };
 
       VaFiT.init();
 
-      document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("bubble").innerHTML =
-          "Motor aktivní ⚙️<br>" + VaFiT.suggestGreeting();
+      // ======== CHAT HISTORIE ========
+      let chatHistory = loadJson(STORAGE_KEY_CHAT) || [];
 
-        document.getElementById("summary").innerHTML =
-          VaFiT.summaryHtml();
-      });
+      function addMessage(role, content) {
+        const msg = {
+          role,
+          content,
+          time: nowTime(),
+        };
+        chatHistory.push(msg);
+        // držíme třeba posledních 20 zpráv
+        if (chatHistory.length > 20) {
+          chatHistory = chatHistory.slice(chatHistory.length - 20);
+        }
+        saveJson(STORAGE_KEY_CHAT, chatHistory);
+        renderChat();
+      }
 
-      // ==== SEND MESSAGE TO SERVER / GPT ====
-      async function sendToVaFiT(message) {
+      function renderChat() {
+        const box = document.getElementById("chat-history");
+        box.innerHTML = "";
+        chatHistory.forEach((m) => {
+          const div = document.createElement("div");
+          div.className = "msg " + (m.role === "user" ? "msg-user" : "msg-vafit");
+          const who = m.role === "user" ? "Ty" : "VaF'i'T";
+          div.innerHTML =
+            "<small>" +
+            who +
+            " • " +
+            (m.time || "") +
+            "</small><br>" +
+            m.content;
+          box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
+      }
+
+      // ======== BACKEND CALL ========
+      async function sendToVaFiT(messages) {
         const response = await fetch("/api/vafit-chat", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            messages: [{ role: "user", content: message }],
-          }),
+          body: JSON.stringify({ messages }),
         });
 
         const data = await response.json();
         return data.reply;
       }
 
-      // ==== BUTTON LOGIC ====
-      document.getElementById("vafit-send").onclick = async () => {
-        const input = document.getElementById("vafit-input").value;
-        const output = document.getElementById("vafit-output");
+      // ======== UI INIT ========
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("bubble").innerHTML = VaFiT.greeting();
+        document.getElementById("summary").innerHTML = VaFiT.summaryHtml();
+        document.getElementById("top-sub").textContent = "Motor aktivní – lokální paměť + AI mozek";
+        document.getElementById("mood").textContent = VaFiT.moodLabel;
 
-        output.innerHTML = "⏳ VaF'i'T přemýšlí…";
+        if (chatHistory.length === 0) {
+          addMessage(
+            "assistant",
+            "Jsem nový VaF'i'T. Napiš mi třeba, jaký svět chceš dneska posunout."
+          );
+        } else {
+          renderChat();
+        }
 
-        const reply = await sendToVaFiT(input);
+        const input = document.getElementById("vafit-input");
+        const sendBtn = document.getElementById("vafit-send");
+        const avatar = document.getElementById("avatar");
+        const moodEl = document.getElementById("mood");
 
-        output.innerHTML = "🧠 VaF'i'T: " + reply;
-      };
+        async function handleSend() {
+          const text = (input.value || "").trim();
+          if (!text) return;
+
+          addMessage("user", text);
+          input.value = "";
+          avatar.classList.add("pulsing");
+          VaFiT.updateMoodFromText(text);
+          moodEl.textContent = VaFiT.moodLabel;
+
+          try {
+            // připravíme messages pro backend (jen role + content)
+            const backendMessages = chatHistory.map((m) => ({
+              role: m.role === "user" ? "user" : "assistant",
+              content: m.content,
+            }));
+
+            const reply = await sendToVaFiT(backendMessages);
+            addMessage("assistant", reply);
+          } catch (e) {
+            addMessage("assistant", "Brácho… spadlo spojení s motorem. Zkus to ještě jednou.");
+          } finally {
+            avatar.classList.remove("pulsing");
+          }
+        }
+
+        sendBtn.addEventListener("click", handleSend);
+      });
     </script>
-
   </body>
 </html>
