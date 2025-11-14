@@ -3,11 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Vivere atque FruiT • Panel</title>
+    <title>Gentleman • Vivere atque FruiT</title>
     <style>
       :root {
         --bg: #000000;
-        --card-bg: #050505;
         --frame: #f5e9d6;
         --frame-soft: #f5e9d6;
         --text: #111;
@@ -33,7 +32,7 @@
 
       .vaft-wrapper {
         width: 100vw;
-        max-width: 430px; /* iPhone 14 + trošku */
+        max-width: 430px; /* iPhone 14 + něco málo navíc */
         padding: 12px;
       }
 
@@ -50,16 +49,17 @@
         flex-direction: column;
       }
 
-      /* TOP OBLÁČEK */
+      /* horní oválný rámeček */
       .top-bubble {
         height: 48px;
         border-radius: 22px;
         background: var(--frame-soft);
         margin-bottom: 10px;
         padding: 10px 16px;
+        font-size: 14px;
       }
 
-      /* LAYOUT STŘEDU */
+      /* hlavní layout – tři sloupce */
       .layout {
         flex: 1;
         display: grid;
@@ -90,14 +90,13 @@
         padding: 6px;
       }
 
-      /* Sem si později můžeš dát svou kresbu jako background */
       .center-figure-inner {
         position: relative;
         width: 100%;
         height: 100%;
         border-radius: 18px;
-        /* Pokud budeš mít PNG s postavičkou, odkomentuj a změň URL:
-        background-image: url('./vivere-kid.png');
+        /* sem můžeš časem dát PNG s postavičkou:
+        background-image: url('./kid-phone.png');
         background-size: contain;
         background-position: center bottom;
         background-repeat: no-repeat;
@@ -133,7 +132,6 @@
       }
 
       .right-grid {
-        background: transparent;
         border-radius: 14px;
         padding: 4px;
         display: grid;
@@ -143,16 +141,17 @@
         align-items: stretch;
       }
 
-      /* SPODNÍ LIŠTA */
+      /* spodní lišta */
       .bottom-bar {
         margin-top: 10px;
         height: 46px;
         border-radius: 12px;
         background: var(--frame-soft);
         padding: 10px 14px;
+        font-size: 13px;
       }
 
-      /* SLOT = každý čtvereček / rámeček */
+      /* univerzální rámeček / čtvereček */
       .slot {
         background: var(--frame);
         border-radius: 10px;
@@ -178,7 +177,7 @@
         color: transparent;
       }
 
-      /* Placeholder text – když je prázdno */
+      /* placeholder text když je prázdno */
       .slot[data-placeholder]:empty::before,
       .editable[data-placeholder]:empty::before {
         content: attr(data-placeholder);
@@ -195,7 +194,6 @@
         outline-offset: 0;
       }
 
-      /* Info proužek nahoře */
       .hint {
         position: absolute;
         left: 12px;
@@ -226,7 +224,7 @@
         <div
           class="top-bubble editable"
           contenteditable="true"
-          data-placeholder="Nadpis / myšlenka dne…"
+          data-placeholder="Gentleman – název / téma dne…"
         ></div>
 
         <div class="layout">
@@ -254,22 +252,20 @@
             ></div>
           </div>
 
-          <!-- STŘED – postava + Vivere atque FruiT -->
+          <!-- STŘED – postavička + bublina -->
           <div class="center-figure">
             <div class="center-figure-inner">
-              <!-- placeholder postavičky -->
+              <!-- prozatím emoji, místo kresby -->
               <div class="center-placeholder">👶📱</div>
 
-              <!-- bublina Vivere atque FruiT -->
               <div class="speech-banner slot" contenteditable="true">
                 <span>Vivere<br />atque<br />FruiT</span>
               </div>
             </div>
           </div>
 
-          <!-- PRAVÁ MŘÍŽKA -->
+          <!-- PRAVÁ MŘÍŽKA 3 × 4 -->
           <div class="right-grid">
-            <!-- 3 × 4 buňky -->
             <div
               class="slot"
               contenteditable="true"
@@ -337,7 +333,7 @@
         <div
           class="bottom-bar editable"
           contenteditable="true"
-          data-placeholder="Spodní poznámka, podpis, úkol dne…"
+          data-placeholder="Spodní poznámka, podpis, úkol…"
         ></div>
 
         <div class="hint">
@@ -355,20 +351,18 @@
     />
 
     <script>
-      // Umožní psaní – už nastaveno přes contenteditable v HTML
-
-      // Obrázky do slotů (dvojklikem)
       const imageInput = document.getElementById("image-picker");
       let activeSlotForImage = null;
 
+      // aktivace psaní + obrázky
       document.querySelectorAll(".slot").forEach((slot) => {
-        // jistota že se dá psát
+        // klik = psaní
         slot.addEventListener("click", () => {
           slot.setAttribute("contenteditable", "true");
           slot.focus();
         });
 
-        // dvojklik = vyber obrázek
+        // dvojklik = výběr obrázku
         slot.addEventListener("dblclick", () => {
           activeSlotForImage = slot;
           imageInput.click();
@@ -383,15 +377,11 @@
         reader.onload = (ev) => {
           activeSlotForImage.style.backgroundImage = `url('${ev.target.result}')`;
           activeSlotForImage.dataset.mode = "image";
-          activeSlotForImage.textContent = ""; // schová text
+          activeSlotForImage.textContent = "";
         };
         reader.readAsDataURL(file);
-
-        // vyčistit input (aby šel vybrat stejný soubor znovu)
         imageInput.value = "";
       });
-
-      // Když klikneš mimo slot, ukončí se editace, ale to je default chování browseru.
     </script>
   </body>
 </html>
