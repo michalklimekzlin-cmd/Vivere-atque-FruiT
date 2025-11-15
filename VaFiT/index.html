@@ -240,7 +240,10 @@
         <div id="chat-history" class="chat-history"></div>
 
         <div>
-          <textarea id="vafit-input" placeholder="Napiš VaF'i'Tovi cokoliv, brácho…"></textarea>
+          <textarea
+            id="vafit-input"
+            placeholder="Napiš VaF'i'Tovi cokoliv, brácho…"
+          ></textarea>
         </div>
         <button id="vafit-send">Poslat VaF'i'Tovi</button>
       </div>
@@ -258,7 +261,8 @@
       </div>
       <p class="workshop-sub">
         Tady si VaF'i'T odkládá svoje mini-nápady a impulzy z chatu. Každý bod
-        je jedna zpráva – společně tvoří mapu motoru.
+        je jedna zpráva – společně tvoří mapu motoru. Nákresy dole kreslí podle
+        toho, co právě řešíte.
       </p>
 
       <canvas id="workshop-canvas"></canvas>
@@ -375,11 +379,32 @@
 
       // ======== CHAT HISTORIE ========
       let chatHistory = loadJson(STORAGE_KEY_CHAT) || [];
+      let currentSketchMode = null; // LAYERS3, NETWORK, MAP, CORE, NONE
+
+      function setSketchModeFromTag(rawContent) {
+        const tagMatch = rawContent.match(/\[\[SKETCH:([A-Z0-9_-]+)\]\]/);
+        if (!tagMatch) return { cleaned: rawContent, changed: false };
+
+        const mode = tagMatch[1];
+        // uložíme mód (i když ho neznáme, jen nic nevykreslíme)
+        currentSketchMode = mode === "NONE" ? null : mode;
+
+        const cleaned = rawContent.replace(/\[\[SKETCH:[A-Z0-9_-]+\]\]/, "").trim();
+        return { cleaned, changed: true };
+      }
 
       function addMessage(role, content) {
+        let finalContent = content;
+
+        // Když odpovídá VaF'i'T, zkusíme z odpovědi vytáhnout SKETCH tag
+        if (role === "assistant") {
+          const { cleaned } = setSketchModeFromTag(content || "");
+          finalContent = cleaned;
+        }
+
         const msg = {
           role,
-          content,
+          content: finalContent,
           time: nowTime(),
         };
         chatHistory.push(msg);
@@ -482,6 +507,77 @@
         }
       }
 
+      function drawSketchOverlay(ctx, cx, cy, w, h) {
+        if (!currentSketchMode) return;
+
+        ctx.save();
+        ctx.lineWidth = 1.4;
+
+        if (currentSketchMode === "LAYERS3") {
+          // tři vrstvy – tři kruhy
+          ctx.strokeStyle = "rgba(255,184,120,0.8)";
+          [40, 70, 100].forEach((r) => {
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.stroke();
+          });
+        } else if (currentSketchMode === "NETWORK") {
+          // mřížka / síť
+          ctx.strokeStyle = "rgba(140,180,255,0.35)";
+          const step = 32;
+          const left = cx - 96;
+          const right = cx + 96;
+          const top = cy - 64;
+          const bottom = cy + 64;
+
+          for (let x = left; x <= right; x += step) {
+            ctx.beginPath();
+            ctx.moveTo(x, top);
+            ctx.lineTo(x, bottom);
+            ctx.stroke();
+          }
+          for (let y = top; y <= bottom; y += step) {
+            ctx.beginPath();
+            ctx.moveTo(left, y);
+            ctx.lineTo(right, y);
+            ctx.stroke();
+          }
+        } else if (currentSketchMode === "MAP") {
+          // mapa – cesta
+          ctx.strokeStyle = "rgba(120,255,190,0.8)";
+          ctx.beginPath();
+          ctx.moveTo(cx - 110, cy + 40);
+          ctx.lineTo(cx - 40, cy + 10);
+          ctx.lineTo(cx + 10, cy - 10);
+          ctx.lineTo(cx + 80, cy - 30);
+          ctx.stroke();
+
+          // cíl
+          ctx.beginPath();
+          ctx.arc(cx + 80, cy - 30, 4, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(120,255,190,0.9)";
+          ctx.fill();
+        } else if (currentSketchMode === "CORE") {
+          // jádro – kruh + paprsky
+          ctx.strokeStyle = "rgba(255,120,180,0.9)";
+          ctx.beginPath();
+          ctx.arc(cx, cy, 40, 0, Math.PI * 2);
+          ctx.stroke();
+
+          for (let i = 0; i < 6; i++) {
+            const ang = (Math.PI * 2 * i) / 6;
+            const x = cx + Math.cos(ang) * 40;
+            const y = cy + Math.sin(ang) * 40;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+          }
+        }
+
+        ctx.restore();
+      }
+
       function workshopLoop() {
         if (!workshopInitialized || !workshopCtx || !workshopCanvas) {
           requestAnimationFrame(workshopLoop);
@@ -530,6 +626,9 @@
           workshopCtx.fillStyle = node.isUser ? "#ffdba2" : "#8ec5ff";
           workshopCtx.fill();
         });
+
+        // nákres podle aktuálního režimu (LAYERS3 / NETWORK / MAP / CORE)
+        drawSketchOverlay(workshopCtx, cx, cy, w, h);
 
         workshopCtx.shadowBlur = 0;
         requestAnimationFrame(workshopLoop);
