@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kovošrot • Vivere atque FruiT</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        sans-serif;
+      background: #05070b;
+      color: #f5efe6;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .wrap {
+      margin: 20px;
+      padding: 16px;
+      max-width: 480px;
+      width: 100%;
+      background: radial-gradient(circle at top, #141827, #05070b);
+      border-radius: 18px;
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.7);
+    }
+    h1 {
+      font-size: 18px;
+      margin: 0 0 4px;
+    }
+    .subtitle {
+      font-size: 12px;
+      opacity: 0.75;
+      margin-bottom: 12px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 8px;
+      background: rgba(5, 7, 11, 0.8);
+      color: #f5efe6;
+      resize: vertical;
+      font-size: 13px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      margin-top: 8px;
+      background: #ff7a3c;
+      color: #121214;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .col {
+      font-size: 11px;
+    }
+    .label {
+      opacity: 0.7;
+      margin-bottom: 2px;
+    }
+    .scrap-box {
+      min-height: 44px;
+      border-radius: 10px;
+      padding: 6px;
+      background: rgba(8, 10, 17, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-size: 11px;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .section-title {
+      margin-top: 16px;
+      margin-bottom: 4px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .note {
+      font-size: 10px;
+      opacity: 0.6;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Kovošrot • Recycle</h1>
+    <div class="subtitle">
+      Vlož digitální šrot (text, logy, nesmysly) a my ho rozložíme na písmenka,
+      čísla a znaky. Pak se zeptáš VaF'i'Ta, jak z toho postavit svět. ♻️
+    </div>
+
+    <!-- VSTUP ŠROTU -->
+    <textarea id="scrap-input" placeholder="Vlož sem cokoliv, co chceš rozebrat..."></textarea>
+    <button id="btn-generate">Roztřídit šrot</button>
+
+    <!-- ROZDĚLENÝ ŠROT -->
+    <div class="grid">
+      <div class="col">
+        <div class="label">🔡 Písmenka</div>
+        <div id="letters-box" class="scrap-box"></div>
+      </div>
+      <div class="col">
+        <div class="label">🔢 Čísla</div>
+        <div id="digits-box" class="scrap-box"></div>
+      </div>
+      <div class="col">
+        <div class="label">🔣 Znaky</div>
+        <div id="symbols-box" class="scrap-box"></div>
+      </div>
+    </div>
+
+    <!-- VaF'i'T MOZEK -->
+    <div class="section-title">VaF'i'T – mozek kovošrotu</div>
+    <button id="btn-ask-vafit">Zeptat se VaF'i'Ta na tenhle šrot</button>
+    <div id="vafit-answer" class="scrap-box" style="margin-top:6px;">
+      (VaF'i'T zatím nic neřekl.)
+    </div>
+    <div class="note">
+      VaF'i'T vidí jen souhrn (kolik je písmenek, čísel a znaků) a navrhuje, jak
+      z toho postavit něco ve světě Vivere atque FruiT.
+    </div>
+  </main>
+
+  <script>
+    // --- KOVOŠROT: ROZEBRÁNÍ ŠROTU ---------------------------------
+    const scrapInput = document.getElementById("scrap-input");
+    const btnGenerate = document.getElementById("btn-generate");
+    const lettersBox = document.getElementById("letters-box");
+    const digitsBox = document.getElementById("digits-box");
+    const symbolsBox = document.getElementById("symbols-box");
+
+    let currentScrap = "";
+
+    function splitScrap() {
+      const text = scrapInput.value || "";
+      currentScrap = text;
+
+      let letters = "";
+      let digits = "";
+      let symbols = "";
+
+      for (const ch of text) {
+        if (/[A-Za-zÁ-ž]/.test(ch)) {
+          letters += ch;
+        } else if (/[0-9]/.test(ch)) {
+          digits += ch;
+        } else if (ch.trim() !== "") {
+          symbols += ch;
+        }
+      }
+
+      lettersBox.textContent = letters;
+      digitsBox.textContent = digits;
+      symbolsBox.textContent = symbols;
+    }
+
+    if (btnGenerate) {
+      btnGenerate.addEventListener("click", splitScrap);
+    }
+
+    // --- VaF'i'T: DOTAZ NA ŠROT ------------------------------------
+    const btnAskVaFit = document.getElementById("btn-ask-vafit");
+    const vafitAnswerBox = document.getElementById("vafit-answer");
+
+    async function askVaFitAboutScrap() {
+      if (!currentScrap) {
+        vafitAnswerBox.textContent =
+          "Brácho… nejdřív mi nasypej nějaký šrot do textového pole.";
+        return;
+      }
+
+      const letters = lettersBox.textContent || "";
+      const digits = digitsBox.textContent || "";
+      const symbols = symbolsBox.textContent || "";
+
+      const summaryText =
+        "Mám digitální šrot pro Vivere atque FruiT. " +
+        "Písmenka: " + letters.length +
+        ", čísla: " + digits.length +
+        ", speciální znaky: " + symbols.length +
+        ". Jak bys tenhle materiál použil ve světě?";
+
+      vafitAnswerBox.textContent = "VaF'i'T přemýšlí…";
+
+      try {
+        const res = await fetch("/api/vafit-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [{ role: "user", content: summaryText }],
+          }),
+        });
+
+        const data = await res.json();
+        vafitAnswerBox.textContent =
+          data?.reply || "Brácho… VaF'i'T nic neřekl, zkus to znovu.";
+      } catch (err) {
+        console.error("VaF'i'T fetch error:", err);
+        vafitAnswerBox.textContent =
+          "Brácho… spadlo spojení s motorem. Zkus to ještě jednou.";
+      }
+    }
+
+    if (btnAskVaFit) {
+      btnAskVaFit.addEventListener("click", askVaFitAboutScrap);
+    }
+  </script>
+</body>
+</html>
