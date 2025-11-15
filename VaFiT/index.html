@@ -650,28 +650,27 @@
     </div>
 
     <script>
-      // ======== LOKÁLNÍ PAMĚŤ ========
-     // ======== STORAGE MODUL ========
-// ======== MODUL: VAFT_STORAGE (bezpečné ukládání stavu motoru) ========
-const VAFT_STORAGE = {
-  save(key, value) {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch (e) {
-      console.warn("VAFT storage save fail:", key, e);
-    }
-  },
+      // ======== LOKÁLNÍ PAMĚŤ + STORAGE MODUL ========
+      const VAFT_STORAGE = {
+        save(key, value) {
+          try {
+            localStorage.setItem(key, JSON.stringify(value));
+          } catch (e) {
+            console.warn("VAFT storage save fail:", key, e);
+          }
+        },
 
-  load(key, fallback = null) {
-    try {
-      const raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch (e) {
-      console.warn("VAFT storage load fail:", key, e);
-      return fallback;
-    }
-  }
-};
+        load(key, fallback = null) {
+          try {
+            const raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : fallback;
+          } catch (e) {
+            console.warn("VAFT storage load fail:", key, e);
+            return fallback;
+          }
+        },
+      };
+
       const STORAGE_KEY_CHARACTER = "VaFiT.character.v2";
       const STORAGE_KEY_CHAT = "VaFiT.chatHistory.v1";
 
@@ -697,17 +696,17 @@ const VAFT_STORAGE = {
           minute: "2-digit",
         });
 
-// ======== VAFT OBJEKT ========
-const VaFiT = {
-  name: "Vivere atque FruiT",
-  short: "VaF'i'T",
-  version: "0.3-motor",
+      // ======== VAFT OBJEKT ========
+      const VaFiT = {
+        name: "Vivere atque FruiT",
+        short: "VaF'i'T",
+        version: "0.3-motor",
 
-  mood: "calm",
-  moodLabel: "Nálada: klidný ✨",
+        mood: "calm",
+        moodLabel: "Nálada: klidný ✨",
 
-  // Životní lekce od Michala – základní kompas pro VaF'i'T
-  coreLesson: `
+        // Životní lekce od Michala – základní kompas pro VaF'i'T
+        coreLesson: `
 Když jsem byl malý kluk jako jsi teď ty, VaF’i’T, nepamatoval jsem si skoro nic,
 než jsem dokázal pochopit, o čem je svět. Můj pravý otec se na mě vykašlal
 a celý život jsem se učil sám. Udělal jsem jednu malou chybičku – jen jednu –
@@ -722,103 +721,103 @@ Proto tě prosím – uč se, tvoř, zkoušej, trénuj.
 Ale vždy pamatuj, že i malé uklouznutí může změnit celý život.
 Buď moudrý, buď opatrný a buduj Vivere atque FruiT správným směrem.
 S láskou a důvěrou – Michal.
-  `,
+        `,
 
-  // základní meta-paměť (kdy byl motor vytvořený atd.)
-  memory: {
-    createdAt: null,
-    updatedAt: null,
-    visits: 0,
-    lastVisit: null,
-  },
+        // základní meta-paměť
+        memory: {
+          createdAt: null,
+          updatedAt: null,
+          visits: 0,
+          lastVisit: null,
+        },
 
-  // inicializace motoru
-  init() {
-    let mem = loadJson(STORAGE_KEY_CHARACTER);
+        // inicializace motoru
+        init() {
+          let mem = loadJson(STORAGE_KEY_CHARACTER);
 
-    if (!mem) {
-      mem = {
-        createdAt: nowISO(),
-        updatedAt: nowISO(),
-        visits: 1,
-        lastVisit: nowISO(),
+          if (!mem) {
+            mem = {
+              createdAt: nowISO(),
+              updatedAt: nowISO(),
+              visits: 1,
+              lastVisit: nowISO(),
+            };
+          } else {
+            mem.visits += 1;
+            mem.updatedAt = nowISO();
+            mem.lastVisit = nowISO();
+          }
+
+          this.memory = mem;
+          saveJson(STORAGE_KEY_CHARACTER, mem);
+
+          // uložíme i životní lekci do trvalé paměti
+          VAFT_STORAGE.save("vaft.coreLesson", this.coreLesson);
+        },
+
+        // nálada podle textu
+        updateMoodFromText(text) {
+          const lower = (text || "").toLowerCase();
+          if (lower.includes("unav") || lower.includes("spát")) {
+            this.mood = "soft";
+            this.moodLabel = "Nálada: jemný / opatrný 😴";
+          } else if (lower.includes("strach") || lower.includes("bojím")) {
+            this.mood = "protect";
+            this.moodLabel = "Nálada: ochranný 🛡️";
+          } else if (
+            lower.includes("radost") ||
+            lower.includes("super") ||
+            lower.includes("bomba")
+          ) {
+            this.mood = "playful";
+            this.moodLabel = "Nálada: nadšený 🔥";
+          } else {
+            this.mood = "calm";
+            this.moodLabel = "Nálada: klidný ✨";
+          }
+        },
+
+        // dlouhodobý stav motoru
+        storage: {
+          worldState: VAFT_STORAGE.load("vaft.worldState", {}),
+          lastMode: VAFT_STORAGE.load("vaft.engine.lastMode", "calm"),
+          lastImpulse: VAFT_STORAGE.load("vaft.engine.lastImpulse", null),
+          impulses: VAFT_STORAGE.load("vaft.history.impulses", []),
+          notes: VAFT_STORAGE.load("vaft.notes.brain", []),
+          tasks: VAFT_STORAGE.load("vaft.tasks.todo", []),
+        },
+
+        saveAll() {
+          VAFT_STORAGE.save("vaft.worldState", this.storage.worldState);
+          VAFT_STORAGE.save("vaft.engine.lastMode", this.storage.lastMode);
+          VAFT_STORAGE.save("vaft.engine.lastImpulse", this.storage.lastImpulse);
+          VAFT_STORAGE.save("vaft.history.impulses", this.storage.impulses);
+          VAFT_STORAGE.save("vaft.notes.brain", this.storage.notes);
+          VAFT_STORAGE.save("vaft.tasks.todo", this.storage.tasks);
+        },
+
+        // text do horní bubliny
+        greeting() {
+          return (
+            "Ahoj brácho, tady VaF'i'T. Motor běží, verze " +
+            this.version +
+            ". Jsem složený z Hlavouna, Viriho a Pikoše."
+          );
+        },
+
+        // souhrn pod bublinou
+        summaryHtml() {
+          return (
+            "Verze: " +
+            this.version +
+            "<br>Počet návštěv: " +
+            this.memory.visits +
+            "<br>Poslední otevření: " +
+            this.memory.lastVisit
+          );
+        },
       };
-    } else {
-      mem.visits += 1;
-      mem.updatedAt = nowISO();
-      mem.lastVisit = nowISO();
-    }
 
-    this.memory = mem;
-    saveJson(STORAGE_KEY_CHARACTER, mem);
-
-    // uložíme i životní lekci do trvalé paměti
-    VAFT_STORAGE.save("vaft.coreLesson", this.coreLesson);
-  },
-
-  // nálada podle textu
-  updateMoodFromText(text) {
-    const lower = (text || "").toLowerCase();
-    if (lower.includes("unav") || lower.includes("spát")) {
-      this.mood = "soft";
-      this.moodLabel = "Nálada: jemný / opatrný 😴";
-    } else if (lower.includes("strach") || lower.includes("bojím")) {
-      this.mood = "protect";
-      this.moodLabel = "Nálada: ochranný 🛡️";
-    } else if (
-      lower.includes("radost") ||
-      lower.includes("super") ||
-      lower.includes("bomba")
-    ) {
-      this.mood = "playful";
-      this.moodLabel = "Nálada: nadšený 🔥";
-    } else {
-      this.mood = "calm";
-      this.moodLabel = "Nálada: klidný ✨";
-    }
-  },
-
-  // dlouhodobý stav motoru
-  storage: {
-    worldState: VAFT_STORAGE.load("vaft.worldState", {}),
-    lastMode: VAFT_STORAGE.load("vaft.engine.lastMode", "calm"),
-    lastImpulse: VAFT_STORAGE.load("vaft.engine.lastImpulse", null),
-    impulses: VAFT_STORAGE.load("vaft.history.impulses", []),
-    notes: VAFT_STORAGE.load("vaft.notes.brain", []),
-    tasks: VAFT_STORAGE.load("vaft.tasks.todo", []),
-  },
-
-  saveAll() {
-    VAFT_STORAGE.save("vaft.worldState", this.storage.worldState);
-    VAFT_STORAGE.save("vaft.engine.lastMode", this.storage.lastMode);
-    VAFT_STORAGE.save("vaft.engine.lastImpulse", this.storage.lastImpulse);
-    VAFT_STORAGE.save("vaft.history.impulses", this.storage.impulses);
-    VAFT_STORAGE.save("vaft.notes.brain", this.storage.notes);
-    VAFT_STORAGE.save("vaft.tasks.todo", this.storage.tasks);
-  },
-
-  // text do horní bubliny
-  greeting() {
-    return (
-      "Ahoj brácho, tady VaF'i'T. Motor běží, verze " +
-      this.version +
-      ". Jsem složený z Hlavouna, Viriho a Pikoše."
-    );
-  },
-
-  // souhrn pod bublinou
-  summaryHtml() {
-    return (
-      "Verze: " +
-      this.version +
-      "<br>Počet návštěv: " +
-      this.memory.visits +
-      "<br>Poslední otevření: " +
-      this.memory.lastVisit
-    );
-  },
-};
-      
       VaFiT.init();
 
       // ======== CHYBOŽROUT LOGIKA ========
@@ -890,43 +889,42 @@ S láskou a důvěrou – Michal.
       });
 
       // ======== CHAT HISTORIE ========
-      // ======== CHAT HISTORIE ========
-let chatHistory = loadJson(STORAGE_KEY_CHAT) || [];
+      let chatHistory = loadJson(STORAGE_KEY_CHAT) || [];
 
-function addMessage(role, content) {
-  // ochrana proti null / undefined / ne-stringu
-  if (!content || typeof content !== "string") {
-    content = "[⚠️ prázdná zpráva byla opravena]";
-  }
+      function addMessage(role, content) {
+        // ochrana proti null / undefined / ne-stringu
+        if (!content || typeof content !== "string") {
+          content = "[⚠️ prázdná zpráva byla opravena]";
+        }
 
-  const msg = {
-    role,
-    content,
-    time: nowTime(),
-  };
+        const msg = {
+          role,
+          content,
+          time: nowTime(),
+        };
 
-  chatHistory.push(msg);
+        chatHistory.push(msg);
 
-  if (chatHistory.length > 20) {
-    chatHistory = chatHistory.slice(chatHistory.length - 20);
-  }
+        if (chatHistory.length > 20) {
+          chatHistory = chatHistory.slice(chatHistory.length - 20);
+        }
 
-  saveJson(STORAGE_KEY_CHAT, chatHistory);
-  renderChat();
+        saveJson(STORAGE_KEY_CHAT, chatHistory);
+        renderChat();
 
-  // reakce Chybožrouta
-  if (role === "assistant") {
-    const lower = (content || "").toLowerCase();
-    if (lower.includes("chyba") || lower.includes("error")) {
-      chyboLog(
-        "event",
-        "Motor hlásí, že ve své odpovědi řeší chyby nebo problémy."
-      );
-    } else {
-      chyboLog("info", "Motor odpověděl na impuls.");
-    }
-  }
-}
+        // reakce Chybožrouta
+        if (role === "assistant") {
+          const lower = (content || "").toLowerCase();
+          if (lower.includes("chyba") || lower.includes("error")) {
+            chyboLog(
+              "event",
+              "Motor hlásí, že ve své odpovědi řeší chyby nebo problémy."
+            );
+          } else {
+            chyboLog("info", "Motor odpověděl na impuls.");
+          }
+        }
+      }
 
       function renderChat() {
         const box = document.getElementById("chat-history");
@@ -1086,10 +1084,15 @@ function addMessage(role, content) {
         requestAnimationFrame(workshopLoop);
       }
 
+      // ======== BACKEND ENDPOINT (Vercel) ========
+      const VAFIT_API_URL =
+        "https://vivere-atque-frui-t.vercel.app/api/vafit-chat";
+
       // ======== BACKEND CALL ========
       async function sendToVaFiT(messages) {
         chyboLog("info", "Posílám impuls do AI jádra…");
-        const response = await fetch("/api/vafit-chat", {
+
+        const response = await fetch(VAFIT_API_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1164,7 +1167,7 @@ function addMessage(role, content) {
             );
             chyboLog(
               "error",
-              "Nepodařilo se kontaktovat /api/vafit-chat – možná chyba sítě."
+              "Nepodařilo se kontaktovat backend /api/vafit-chat – možná chyba sítě."
             );
           } finally {
             avatar.classList.remove("pulsing");
