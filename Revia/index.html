@@ -66,10 +66,28 @@
   <button class="revia-help" id="revHelp" type="button">?</button>
 </div>
 
-      <div class="revia-toast" id="revToast" aria-live="polite"></div>
-    </div>
+    <div class="revia-toast" id="revToast" aria-live="polite"></div>
+  </div>
 
-    <script src="./revia.js?v=0.6"></script>
-    <script src="../vaft-core.js"></script>
-  </body>
+  <!-- SEM VLOŽIT REVIA ROTATION MODULE -->
+  <script>
+    const WORLD = ["vafiti", "glyph", "engine"];
+    let current = 0;
+
+    function reviaRotate() {
+      current = (current + 1) % WORLD.length;
+      console.log("Revia otočila svět na:", WORLD[current]);
+      document.body.setAttribute("data-world", WORLD[current]);
+    }
+  </script>
+
+  <!-- tlačítko (zatím test) -->
+  <button onclick="reviaRotate()" 
+    style="position:fixed;bottom:20px;right:20px;padding:12px;background:#444;color:white;border:none;border-radius:6px;">
+    🔄 Otočit svět
+  </button>
+
+  <script src="./revia.js?v=0.6"></script>
+  <script src="../vaft-core.js"></script>
+</body>
 </html>
