@@ -893,6 +893,9 @@ S láskou a důvěrou – Michal.
       let chatHistory = loadJson(STORAGE_KEY_CHAT) || [];
 
       function addMessage(role, content) {
+  if (!content || typeof content !== "string") {
+    content = "[⚠️ prázdná zpráva byla opravena]";
+  }
         const msg = {
           role,
           content,
