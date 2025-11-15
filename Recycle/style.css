@@ -1,0 +1,112 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    sans-serif;
+  background: #05070b;
+  color: #f5efe6;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.wrap {
+  margin: 20px;
+  padding: 16px;
+  max-width: 480px;
+  width: 100%;
+  background: radial-gradient(circle at top, #141827, #05070b);
+  border-radius: 18px;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.7);
+}
+
+h1 {
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-bottom: 12px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 80px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  background: rgba(5, 7, 11, 0.8);
+  color: #f5efe6;
+  resize: vertical;
+  font-size: 13px;
+}
+
+button {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  margin-top: 8px;
+  background: #ff7a3c;
+  color: #121214;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.col {
+  font-size: 11px;
+}
+
+.label {
+  opacity: 0.7;
+  margin-bottom: 2px;
+}
+
+.scrap-box {
+  min-height: 44px;
+  border-radius: 10px;
+  padding: 6px;
+  background: rgba(8, 10, 17, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.scrap-answer {
+  margin-top: 6px;
+}
+
+.section-title {
+  margin-top: 16px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.note {
+  font-size: 10px;
+  opacity: 0.6;
+  margin-top: 4px;
+}
