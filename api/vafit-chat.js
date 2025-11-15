@@ -231,10 +231,18 @@ export default async function handler(req, res) {
     const clientMessages = Array.isArray(body.messages) ? body.messages : [];
 
     // posledních 30 zpráv stačí
-    const trimmedMessages =
-      clientMessages.length > 30
-        ? clientMessages.slice(clientMessages.length - 30)
-        : clientMessages;
+    const clientMessages = Array.isArray(body.messages) ? body.messages : [];
+
+// oprava – odfiltrujeme špatné zprávy
+const safeMessages = clientMessages.filter(
+  (m) => m && typeof m.content === "string" && m.content.trim() !== ""
+);
+
+// posledních 30 zpráv
+const trimmedMessages =
+  safeMessages.length > 30
+    ? safeMessages.slice(safeMessages.length - 30)
+    : safeMessages;
 
     // Načteme přehled repa – VaF'i'T ví, co ve světě existuje
     const repoOverview = await fetchRepoOverview();
