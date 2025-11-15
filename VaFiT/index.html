@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>VaF'i'T • Motor světa</title>
     <style>
+      :root {
+        --color-motor: #ffb156;
+        --color-vafit: #ff5ad4;
+        --color-chybo: #d68cff;
+      }
+
       body {
         margin: 0;
         padding: 16px;
@@ -213,8 +219,200 @@
         width: 8px;
         height: 8px;
         border-radius: 999px;
-        background: #ffb156;
+        background: var(--color-motor);
         box-shadow: 0 0 10px rgba(255, 177, 86, 0.8);
+      }
+
+      /* === PORTÁL PANEL – podle skici (zůstává jeden centrální portál) === */
+      .portal-panel {
+        max-width: 900px;
+        margin: 14px auto 0;
+        padding: 10px 14px 14px;
+        border-radius: 18px;
+        background: radial-gradient(circle at top left, #160814, #050509);
+        border: 1px solid #4a284f;
+        box-shadow: 0 0 24px rgba(0, 0, 0, 0.8);
+        font-size: 11px;
+      }
+
+      .portal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .portal-title {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .portal-sub {
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      .portal-cube-btn {
+        border: none;
+        padding: 6px;
+        border-radius: 14px;
+        background: radial-gradient(circle at top, #1c101f, #08040a);
+        cursor: pointer;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+        transition: box-shadow 0.15s ease, transform 0.12s ease,
+          border-color 0.15s ease;
+        border: 1px solid rgba(255, 177, 86, 0.05);
+      }
+
+      .portal-cube-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0 16px rgba(255, 177, 86, 0.5);
+        border-color: rgba(255, 177, 86, 0.5);
+      }
+
+      .portal-cube-btn.active {
+        transform: translateY(0) scale(0.97);
+        box-shadow: 0 0 18px rgba(214, 140, 255, 0.9);
+        border-color: rgba(214, 140, 255, 0.9);
+      }
+
+      .portal-cube {
+        width: 64px;
+        height: 64px;
+        position: relative;
+        transform: skewY(-6deg) rotate(0deg);
+        transform-origin: center;
+      }
+
+      .portal-face {
+        position: absolute;
+        border-radius: 6px;
+      }
+
+      .portal-left {
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 26px;
+        background: linear-gradient(180deg, #ff5ad4, #b3004f);
+        box-shadow: 0 0 10px rgba(255, 90, 212, 0.8);
+      }
+
+      .portal-right {
+        right: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 24px;
+        background: linear-gradient(180deg, #ffcc66, #ff8a1c);
+        box-shadow: 0 0 10px rgba(255, 170, 70, 0.8);
+      }
+
+      .portal-bottom {
+        left: 12px;
+        right: 10px;
+        bottom: 0;
+        height: 18px;
+        background: linear-gradient(180deg, #4a0101, #050105);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+      }
+
+      .portal-inner {
+        left: 18px;
+        right: 16px;
+        top: 16px;
+        bottom: 22px;
+        border-radius: 4px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(0, 0, 0, 0.85);
+        box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
+      }
+
+      .portal-status {
+        margin-top: 4px;
+        font-size: 10px;
+        opacity: 0.8;
+      }
+
+      /* === BOČNÍ KOSTKY – 6 kusů, rotující === */
+      .side-cubes {
+        position: fixed;
+        top: 70px;
+        bottom: 80px;
+        width: 72px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .side-cubes-left {
+        left: 4px;
+      }
+
+      .side-cubes-right {
+        right: 4px;
+      }
+
+      .side-cubes-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .side-cube {
+        width: 52px;
+        height: 52px;
+        opacity: 0.85;
+      }
+
+      .side-cube .portal-left {
+        box-shadow: 0 0 12px rgba(255, 90, 212, 0.9);
+      }
+      .side-cube .portal-right {
+        box-shadow: 0 0 12px rgba(255, 170, 70, 0.9);
+      }
+
+      @keyframes cubeSpinSlow {
+        from {
+          transform: skewY(-6deg) rotate(0deg);
+        }
+        to {
+          transform: skewY(-6deg) rotate(360deg);
+        }
+      }
+      @keyframes cubeSpinMedium {
+        from {
+          transform: skewY(-6deg) rotate(0deg);
+        }
+        to {
+          transform: skewY(-6deg) rotate(-360deg);
+        }
+      }
+      @keyframes cubeSpinFast {
+        from {
+          transform: skewY(-4deg) rotate(0deg);
+        }
+        to {
+          transform: skewY(-4deg) rotate(360deg);
+        }
+      }
+
+      .spin-slow {
+        animation: cubeSpinSlow 26s linear infinite;
+      }
+      .spin-medium {
+        animation: cubeSpinMedium 18s linear infinite;
+      }
+      .spin-fast {
+        animation: cubeSpinFast 12s linear infinite;
+      }
+
+      @media (max-width: 640px) {
+        .side-cubes {
+          display: none;
+        }
       }
 
       /* === CHYBOŽROUT PANEL === */
@@ -307,6 +505,54 @@
   </head>
 
   <body>
+    <!-- BOČNÍ ROTUJÍCÍ KOSTKY -->
+    <div class="side-cubes side-cubes-left">
+      <div class="side-cubes-inner">
+        <div class="portal-cube side-cube spin-slow">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-medium">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-fast">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-cubes side-cubes-right">
+      <div class="side-cubes-inner">
+        <div class="portal-cube side-cube spin-medium">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-fast">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-slow">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HLAVNÍ KARTA -->
     <div class="card">
       <div class="top">
         <div id="avatar" class="avatar-wrap">
@@ -340,7 +586,7 @@
       </div>
     </div>
 
-    <!-- VaF'i'T WORKSHOP / MOTOROVNA -->
+    <!-- MOTOROVNA -->
     <div id="vafit-workshop">
       <div class="workshop-header">
         <div class="workshop-title">Motorovna • VaF'i'T Workshop</div>
@@ -362,7 +608,31 @@
       </div>
     </div>
 
-    <!-- CHYBOŽROUT • MOTOROVÝ MECHANIK -->
+    <!-- PORTÁL – zatím jen impuls -->
+    <div id="portal-panel" class="portal-panel">
+      <div class="portal-header">
+        <div>
+          <div class="portal-title">Portál • VaF'i'T Builder (náčrt)</div>
+          <div class="portal-sub">
+            Experimentální brána podle tvé kostky. Zatím jen posílá portálový
+            impuls do motoru – auto-builder schováme dovnitř později.
+          </div>
+        </div>
+        <button id="portal-btn" class="portal-cube-btn" type="button">
+          <div class="portal-cube">
+            <div class="portal-face portal-left"></div>
+            <div class="portal-face portal-right"></div>
+            <div class="portal-face portal-bottom"></div>
+            <div class="portal-face portal-inner"></div>
+          </div>
+        </button>
+      </div>
+      <div id="portal-status" class="portal-status">
+        Portál spí. Klepni na kostku, ať motor dostane první portálový impuls.
+      </div>
+    </div>
+
+    <!-- CHYBOŽROUT -->
     <div id="chybo-panel" class="chybo-panel">
       <div class="chybo-header">
         <div class="chybo-left">
@@ -538,7 +808,6 @@
         }
       }
 
-      // globální chyby v UI
       window.addEventListener("error", (e) => {
         chyboLog("error", "Neočekávaná chyba v UI: " + (e.message || "???"));
       });
@@ -560,14 +829,12 @@
           time: nowTime(),
         };
         chatHistory.push(msg);
-        // držíme třeba posledních 20 zpráv
         if (chatHistory.length > 20) {
           chatHistory = chatHistory.slice(chatHistory.length - 20);
         }
         saveJson(STORAGE_KEY_CHAT, chatHistory);
         renderChat();
 
-        // Chybožrout sleduje, co se děje
         if (role === "assistant") {
           const lower = (content || "").toLowerCase();
           if (lower.includes("chyba") || lower.includes("error")) {
@@ -600,11 +867,10 @@
         });
         box.scrollTop = box.scrollHeight;
 
-        // aktualizuj motorovnu podle nové historie
         rebuildWorkshopFromChat();
       }
 
-      // ======== WORKSHOP / MOTOROVNA (canvas) ========
+      // ======== WORKSHOP / MOTOROVNA ========
       let workshopCanvas = null;
       let workshopCtx = null;
       let workshopNodes = [];
@@ -633,9 +899,6 @@
 
         const max = Math.min(chatHistory.length, 24);
         const startIndex = chatHistory.length - max;
-        const rect = workshopCanvas.getBoundingClientRect();
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
 
         for (let i = 0; i < max; i++) {
           const msg = chatHistory[startIndex + i];
@@ -684,7 +947,6 @@
 
         workshopCtx.clearRect(0, 0, w, h);
 
-        // jemné pozadí
         workshopCtx.globalAlpha = 0.25;
         workshopCtx.fillStyle = "#05060b";
         workshopCtx.fillRect(0, 0, w, h);
@@ -693,7 +955,6 @@
         const cx = w / 2;
         const cy = h / 2;
 
-        // středový "motor"
         workshopCtx.beginPath();
         workshopCtx.arc(cx, cy, 8, 0, Math.PI * 2);
         workshopCtx.fillStyle = "#ffb156";
@@ -701,27 +962,23 @@
         workshopCtx.shadowColor = "rgba(255,177,86,0.8)";
         workshopCtx.shadowBlur = 12;
 
-        // orbitující uzly
         workshopNodes.forEach((node) => {
           node.angle += node.speed;
           const x = cx + Math.cos(node.angle) * node.radius;
           const y = cy + Math.sin(node.angle) * node.radius;
 
-          // orbitová linka (slabá)
           workshopCtx.beginPath();
           workshopCtx.arc(cx, cy, node.radius, 0, Math.PI * 2);
           workshopCtx.strokeStyle = "rgba(80, 110, 180, 0.18)";
           workshopCtx.lineWidth = 1;
           workshopCtx.stroke();
 
-          // uzel
           workshopCtx.beginPath();
           workshopCtx.arc(x, y, node.isUser ? 3.5 : 4.5, 0, Math.PI * 2);
           workshopCtx.fillStyle = node.isUser ? "#ffdba2" : "#8ec5ff";
           workshopCtx.fill();
         });
 
-        // NÁKRES: tři vrstvy světa (3 kruhy kolem motoru)
         workshopCtx.save();
         workshopCtx.lineWidth = 1.4;
         workshopCtx.strokeStyle = "rgba(255,184,120,0.65)";
@@ -732,7 +989,6 @@
         });
         workshopCtx.restore();
 
-        // CHYBOŽROUTOVY PURPUROVÉ PULZY (zásahy / chyby / události)
         chyboPulses = chyboPulses.filter((p) => p.life > 0.04);
         chyboPulses.forEach((p) => {
           p.life *= 0.97;
@@ -784,7 +1040,10 @@
           "Motor aktivní – lokální paměť + AI mozek";
         document.getElementById("mood").textContent = VaFiT.moodLabel;
 
-        chyboLog("info", "Chybožrout zapnutý. Sleduju motor a čekám na první chybu.");
+        chyboLog(
+          "info",
+          "Chybožrout zapnutý. Sleduju motor a čekám na první chybu."
+        );
 
         if (chatHistory.length === 0) {
           addMessage(
@@ -811,7 +1070,6 @@
           moodEl.textContent = VaFiT.moodLabel;
 
           try {
-            // připravíme messages pro backend (jen role + content)
             const backendMessages = chatHistory.map((m) => ({
               role: m.role === "user" ? "user" : "assistant",
               content: m.content,
@@ -834,6 +1092,25 @@
         }
 
         sendBtn.addEventListener("click", handleSend);
+
+        // PORTÁL – klik na kostku
+        const portalBtn = document.getElementById("portal-btn");
+        const portalStatus = document.getElementById("portal-status");
+        if (portalBtn && portalStatus) {
+          portalBtn.addEventListener("click", () => {
+            portalBtn.classList.add("active");
+            portalStatus.textContent =
+              "Portál poslal do motoru zkušební impuls. Chybožrout sleduje, co z něj vyleze.";
+            chyboLog(
+              "event",
+              "Spuštěn portálový impuls – připravuju v hlavě auto-builder (zatím jen náčrt)."
+            );
+            chyboAddPulse();
+            setTimeout(() => {
+              portalBtn.classList.remove("active");
+            }, 260);
+          });
+        }
       });
     </script>
   </body>
