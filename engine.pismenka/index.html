@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VaFT • Engine Core</title>
+
+  <style>
+    body {
+      background:#000;
+      color:#0f0;
+      font-family: monospace;
+      padding:20px;
+    }
+    .line-box {
+      padding:10px;
+      border:1px solid #0f0;
+      margin-top:20px;
+      background:#010;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div style="font-size:22px;">⚙️ VaFT • Engine Core (Line Builder)</div>
+
+  <label>Zadej text / písmena / čísla:</label><br>
+  <input id="inputText" style="width:80%;padding:10px;margin-top:10px;" placeholder="např. VAFIT2025" />
+
+  <button onclick="makeLine()" style="padding:10px;margin-top:10px;">
+    ➕ Vytvořit 3D-linii (zatím 2D)
+  </button>
+
+  <div id="line-output" class="line-box">
+    <b>3D Linie:</b><br>
+    <span id="line-text">Čekám na vstup...</span>
+  </div>
+
+  <script>
+    function makeLine() {
+      let t = document.getElementById("inputText").value;
+      if(!t) t = "EMPTY";
+
+      // zatím jednoduchý kompresní efekt → později 3D mesh
+      const compressed = "[" + t.split("").join("-") + "]";
+      document.getElementById("line-text").innerText = compressed;
+    }
+  </script>
+
+</body>
+</html>
