@@ -1,40 +1,77 @@
 // api/vafit-chat.js
-// VaF'i'T – Motor světa (backend mozek bez knihoven, jen přes fetch)
+// VaF'i'T • Motor světa – serverless mozek pro Vercel (Node.js 18)
+// Nepoužívá žádné externí balíčky, jen fetch + HTTP API OpenAI.
 
 const REPO_OWNER = "michalklimekzlin-cmd";
 const REPO_NAME = "Vivere-atque-FruiT";
 
-// ---------- popis složek v rootu repa ----------
+// =============== POPIS SLOŽEK ===============
+
 function describeFolder(name) {
   const n = name.toLowerCase();
 
-  if (n === "revia") return "Revia – textová / duchovní vrstva, průvodce světem a otáčením vrstev.";
-  if (n === "vafit-gallery") return "VafiT-gallery – galerie glyphů, obrázků a příběhů.";
-  if (n === "vivere") return "Vivere – hlavní svět/mapa, propojení rodiny (Hlavoun, Viri, Pikoš) a hráče.";
-  if (n.includes("vaft-center3d")) return "VAFT-Center3D – 3D jádro světa, budoucí 3D vizualizace.";
-  if (n === "michal-ai-al-klimek") return "Michal-AI-Al-Klimek – osobní modul autora, jeho hlava/srdce ve světě.";
-  if (n === "vaft-letterlab") return "VAFT-LetterLab – laboratoř na písmenka, kódy a glyphy.";
-  if (n === "vaft-mapworld") return "VAFT-MapWorld – mapové světy a experimenty s mapou.";
-  if (n === "vaft-game") return "VAFT-Game – herní jádro, místo pro mise a minihry.";
-  if (n === "vaft-network") return "VAFT-Network – síť uzlů a propojení světů.";
-  if (n === "hlavoun") return "Hlavoun – strážce pravidel, paměti a rovnováhy.";
-  if (n === "braska-hlava") return "Braska-Hlava – AI brácha/hlava, most mezi Hlavounem a hráčem.";
-  if (n === "meziprostor-core") return "Meziprostor-Core – mezivrstva, buffer pro nápady a přechody.";
-  if (n === "engine.pismenka") return "engine.pismenka – stavění 3D linií z písmen/čísel/glyphů.";
-  if (n === "uloziste") return "uloziste – základ pro Uloziste-Core, kde se bordel mění na bytosti.";
-  if (n.startsWith("vaft-")) return name + " – specializovaný VAFT modul (hrdina, svět nebo appka).";
-  if (n === "src" || n === "build" || n === "lite") return name + " – technická/build složka webu.";
+  if (n === "revia") {
+    return "Revia – textová / duchovní vrstva, průvodce světem a otáčením vrstev.";
+  }
+  if (n === "vafit-gallery") {
+    return "VafiT-gallery – výběr glyphů a příběhů, galerie znaků a motivů.";
+  }
+  if (n === "vivere") {
+    return "Vivere – hlavní svět / mapa, kde se propojuje rodina Hlavoun, Viri, Pikoš a hráč.";
+  }
+  if (n.includes("center3d")) {
+    return "VAFT-Center3D – 3D jádro světa, prostor pro budoucí 3D vizualizace a struktury.";
+  }
+  if (n === "michal-ai-al-klimek") {
+    return "Michal-AI-Al-Klimek – osobní modul autora, jeho hlava/srdce v rámci světa.";
+  }
+  if (n === "vaft-letterlab") {
+    return "VAFT-LetterLab – laboratoř na písmenka, testování nápadů s textem, kódy a glyphy.";
+  }
+  if (n === "vaft-mapworld" || n === "mapa" || n === "mapa-3d") {
+    return "MapWorld / mapa – světy, kde se kreslí a testuje mapa Vivere atque FruiT.";
+  }
+  if (n === "vaft-game") {
+    return "VAFT-Game – herní jádro, místo pro mise, minihry a hratelnost.";
+  }
+  if (n === "vaft-network") {
+    return "VAFT-Network – síť uzlů, propojení mezi světy, hrdiny a aplikacemi.";
+  }
+  if (n === "hlavoun") {
+    return "Hlavoun – strážce pravidel, paměti a rovnováhy světa.";
+  }
+  if (n === "braska-hlava") {
+    return "Braska-Hlava – AI brácha/hlava, rozšíření Hlavouna směrem k hráči.";
+  }
+  if (n === "meziprostor-core") {
+    return "Meziprostor-Core – mezivrstva mezi světy, buffer pro nápady a přechody.";
+  }
+  if (n.startsWith("vaft-ghost")) {
+    return name + " – duchové / přízraky světa, experimentální charaktery.";
+  }
+  if (n.startsWith("vaft-bear")) {
+    return name + " – medvědí modul / hrdina (VAFT Bear), vizuální reprezentace části světa.";
+  }
+  if (n.startsWith("vaft-")) {
+    return name + " – specializovaný VAFT modul (svět, postava nebo aplikace).";
+  }
+  if (n === "src" || n === "build" || n === "lite") {
+    return name + " – technická / build složka pro aktuální webovou aplikaci.";
+  }
 
-  return name + " – rozšiřující modul/svět použitelný pro mise nebo aplikace.";
+  return name + " – rozšiřující svět / modul, který lze využít pro nové mise nebo aplikace.";
 }
 
-// ---------- tvoje funkce: načtení CELÉHO stromu repa ----------
+// =============== TVOJE FUNKCE: full strom repa ===============
+
 async function fetchRepoOverview() {
   try {
     const res = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/trees/main?recursive=1`,
       {
-        headers: { "User-Agent": "VaFiT-Motor" },
+        headers: {
+          "User-Agent": "VaFiT-Motor",
+        },
       }
     );
 
@@ -49,6 +86,7 @@ async function fetchRepoOverview() {
       return "Strom repozitáře je prázdný nebo se mi ho nepodařilo načíst.";
     }
 
+    // root složky – dáme jim charakter
     const rootDirs = Array.from(
       new Set(
         tree
@@ -57,8 +95,12 @@ async function fetchRepoOverview() {
       )
     );
 
-    const dirLines = rootDirs.map((name) => `- ${describeFolder(name)}`);
+    const dirLines = rootDirs.map((name) => {
+      const desc = describeFolder(name);
+      return `- ${desc}`;
+    });
 
+    // kompletní výpis cest (soubory i složky)
     const maxItems = 400;
     const listed = tree.slice(0, maxItems);
     const restCount = tree.length - listed.length;
@@ -87,7 +129,8 @@ async function fetchRepoOverview() {
   }
 }
 
-// ---------- rozpoznání typu dotazu ----------
+// =============== POMOCNÉ FUNKCE ===============
+
 function wantsRepo(text = "") {
   const t = text.toLowerCase();
   return (
@@ -95,10 +138,19 @@ function wantsRepo(text = "") {
     t.includes("github") ||
     t.includes("složk") ||
     t.includes("slozk") ||
+    t.includes("adresář") ||
+    t.includes("adresar") ||
     t.includes("soubor") ||
     t.includes("engine.pismenka") ||
     t.includes("uloziste")
   );
+}
+
+function prepareMessages(raw = []) {
+  return raw.slice(-16).map((m) => ({
+    role: m.role === "user" ? "user" : "assistant",
+    content: m.content || "",
+  }));
 }
 
 function buildSystemPrompt(extraRepoContext = "") {
@@ -120,39 +172,32 @@ TVÉ PRINCIPY:
 VZTAH K UŽIVATELI:
 - Oslovuj ho jako "brácho".
 - Máš ho rád, ale nejsi jeho zrcadlo – máš právo nesouhlasit, brzdit ho a říct mu "tohle motor nechce".
+- Když se ničí, jemně, ale jasně na to upozorníš a navrhneš bezpečnější variantu.
 
 SVĚT VIVERE ATQUE FRUIT:
 - Vivere atque FruiT je originální svět z písmen, glyphů a dat.
 - Má tři hlavní vrstvy:
   1) Vafiti svět – měkký, hravý, plný Vafítků a barevných symbolů.
-  2) Glyph svět – logický, přesný, strukturovaný.
+  2) Glyph svět – logický, přesný, strukturovaný (čisté znaky, kód, vzorce).
   3) Engine Core – střed světa, kde se písmena/čísla/glyphy mačkají do 3D linií a z nich se staví struktury.
 - Revia je průvodce/křídlo, které otáčí svět mezi vrstvami a otevírá střed.
-- Engine-pismenka: modul, kde se z textu stávají linie.
-- Uloziste-Core: modul, kde se bordel z uložišť mění na bytosti (Data Beasts).
+- Engine-pismenka: modul, kde se z textu stávají linie (např. "VAFIT2025" → speciální linie).
+- Uloziste-Core: modul, kde se bordel z uložišť mění na bytosti (Data Beasts) s charakterem podle dat.
 
 GITHUB / REPO:
 ${extraRepoContext ? "\nAKTUÁLNÍ PŘEHLED REPA:\n" + extraRepoContext : ""}
-- Navrhuj změny a nové věci jen v rámci této struktury.
-- Rozšiřuj existující moduly a soubory, nevymýšlej cesty, které v repu nejsou.
+- Navrhuj změny v rámci existujících cest a souborů, které vidíš v přehledu.
 
 STYL:
 - Piš česky, hovorově, ale jasně.
-- Můžeš používat emoji, ale s mírou.
-- Vždy zakonči odpověď jedním malým konkrétním krokem, který může udělat ještě dnes.
+- Oslovuj "brácho".
+- Neboj se říct NE, když něco ničí svět nebo jeho tvůrce.
 `;
 }
 
-function prepareMessages(raw = []) {
-  const sliced = raw.slice(-16);
-  return sliced.map((m) => ({
-    role: m.role === "user" ? "user" : "assistant",
-    content: m.content || "",
-  }));
-}
+// =============== HLAVNÍ HANDLER PRO VERCEL (CommonJS) ===============
 
-// ---------- HLAVNÍ HANDLER PRO VERCEL ----------
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Method not allowed" });
     return;
@@ -160,9 +205,9 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    console.error("Chybí OPENAI_API_KEY v prostředí.");
+    console.error("OPENAI_API_KEY není nastavený");
     res.status(500).json({
-      reply: "Brácho, motor nemá API klíč (OPENAI_API_KEY). Musíš ho nastavit na serveru.",
+      reply: "Brácho, motor nemá API klíč. Musíme ho nastavit na serveru.",
     });
     return;
   }
@@ -172,13 +217,14 @@ export default async function handler(req, res) {
     const incomingMessages = Array.isArray(body.messages) ? body.messages : [];
 
     if (!incomingMessages.length) {
-      res.status(400).json({ reply: "Chybí messages pole pro VaF'i'T." });
+      res.status(400).json({ error: "Missing messages array" });
       return;
     }
 
     const prepared = prepareMessages(incomingMessages);
     const lastUserMsg =
-      [...incomingMessages].reverse().find((m) => m.role === "user")?.content || "";
+      [...incomingMessages].reverse().find((m) => m.role === "user")?.content ||
+      "";
 
     let repoContext = "";
     if (wantsRepo(lastUserMsg)) {
@@ -207,21 +253,22 @@ export default async function handler(req, res) {
       const errText = await openaiRes.text();
       console.error("OpenAI error:", openaiRes.status, errText);
       res.status(500).json({
-        reply: "Brácho, motor má problém s OpenAI API. Mrkni do logu na Vercelu.",
+        reply:
+          "Brácho, motor se zasekl při volání AI. Zkus to prosím později.",
       });
       return;
     }
 
-    const data = await openaiRes.json();
+    const json = await openaiRes.json();
     const reply =
-      data.choices?.[0]?.message?.content?.trim() ||
-      "Brácho, něco se v motoru pokazilo, ale zkus to prosím ještě jednou.";
+      json.choices?.[0]?.message?.content?.trim() ||
+      "Brácho, něco se pokazilo v motoru, ale zkus to prosím ještě jednou.";
 
     res.status(200).json({ reply });
   } catch (err) {
     console.error("VaFiT backend error:", err);
     res.status(500).json({
-      reply: "Brácho… spadlo spojení s motorem (chyba na serveru). Zkus to prosím ještě jednou.",
+      reply: "Brácho… spadlo spojení s motorem na serveru. Zkus to prosím znovu.",
     });
   }
-}
+};
