@@ -149,6 +149,73 @@
         opacity: 0.6;
         text-align: center;
       }
+
+      /* === VaF'i'T WORKSHOP / MOTOROVNA === */
+      #vafit-workshop {
+        max-width: 900px;
+        margin: 24px auto 0;
+        padding: 14px 16px 18px;
+        border-radius: 18px;
+        background: radial-gradient(circle at top, #080910, #020208);
+        border: 1px solid #202335;
+        box-shadow: 0 0 26px rgba(0, 0, 0, 0.7);
+      }
+
+      .workshop-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 8px;
+      }
+
+      .workshop-title {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .workshop-badge {
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid #383b5a;
+        opacity: 0.85;
+      }
+
+      .workshop-sub {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-bottom: 8px;
+      }
+
+      #workshop-canvas {
+        width: 100%;
+        height: 210px;
+        display: block;
+        border-radius: 14px;
+        background: radial-gradient(circle at 20% 0%, #1b2035, #050509);
+        border: 1px solid #262a42;
+      }
+
+      .workshop-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+        font-size: 10px;
+        opacity: 0.8;
+      }
+
+      .workshop-status {
+        max-width: 80%;
+      }
+
+      .workshop-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #ffb156;
+        box-shadow: 0 0 10px rgba(255, 177, 86, 0.8);
+      }
     </style>
   </head>
 
@@ -183,6 +250,27 @@
       </div>
     </div>
 
+    <!-- VaF'i'T WORKSHOP / MOTOROVNA -->
+    <div id="vafit-workshop">
+      <div class="workshop-header">
+        <div class="workshop-title">Motorovna • VaF'i'T Workshop</div>
+        <div class="workshop-badge">živé experimenty</div>
+      </div>
+      <p class="workshop-sub">
+        Tady si VaF'i'T odkládá svoje mini-nápady a impulzy z chatu. Každý bod
+        je jedna zpráva – společně tvoří mapu motoru.
+      </p>
+
+      <canvas id="workshop-canvas"></canvas>
+
+      <div class="workshop-bottom">
+        <div id="workshop-status" class="workshop-status">
+          Čekám na první impulzy z chatu…
+        </div>
+        <div class="workshop-dot"></div>
+      </div>
+    </div>
+
     <script>
       // ======== LOKÁLNÍ PAMĚŤ ========
       const STORAGE_KEY_CHARACTER = "VaFiT.character.v2";
@@ -204,7 +292,11 @@
       }
 
       const nowISO = () => new Date().toISOString();
-      const nowTime = () => new Date().toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" });
+      const nowTime = () =>
+        new Date().toLocaleTimeString("cs-CZ", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
       // ======== VAFT OBJEKT ========
       const VaFiT = {
@@ -246,7 +338,11 @@
           } else if (lower.includes("strach") || lower.includes("bojim")) {
             this.mood = "protect";
             this.moodLabel = "Nálada: ochranný 🛡️";
-          } else if (lower.includes("radost") || lower.includes("super") || lower.includes("bomba")) {
+          } else if (
+            lower.includes("radost") ||
+            lower.includes("super") ||
+            lower.includes("bomba")
+          ) {
             this.mood = "playful";
             this.moodLabel = "Nálada: nadšený 🔥";
           } else {
@@ -265,9 +361,12 @@
 
         summaryHtml() {
           return (
-            "Verze: " + this.version +
-            "<br>Počet návštěv: " + this.memory.visits +
-            "<br>Poslední otevření: " + this.memory.lastVisit
+            "Verze: " +
+            this.version +
+            "<br>Počet návštěv: " +
+            this.memory.visits +
+            "<br>Poslední otevření: " +
+            this.memory.lastVisit
           );
         },
       };
@@ -297,7 +396,8 @@
         box.innerHTML = "";
         chatHistory.forEach((m) => {
           const div = document.createElement("div");
-          div.className = "msg " + (m.role === "user" ? "msg-user" : "msg-vafit");
+          div.className =
+            "msg " + (m.role === "user" ? "msg-user" : "msg-vafit");
           const who = m.role === "user" ? "Ty" : "VaF'i'T";
           div.innerHTML =
             "<small>" +
@@ -309,6 +409,130 @@
           box.appendChild(div);
         });
         box.scrollTop = box.scrollHeight;
+
+        // aktualizuj motorovnu podle nové historie
+        rebuildWorkshopFromChat();
+      }
+
+      // ======== WORKSHOP / MOTOROVNA (canvas) ========
+      let workshopCanvas = null;
+      let workshopCtx = null;
+      let workshopNodes = [];
+      let workshopInitialized = false;
+
+      function initWorkshop() {
+        workshopCanvas = document.getElementById("workshop-canvas");
+        if (!workshopCanvas) return;
+        workshopCtx = workshopCanvas.getContext("2d");
+
+        function resize() {
+          const rect = workshopCanvas.getBoundingClientRect();
+          workshopCanvas.width = rect.width;
+          workshopCanvas.height = rect.height;
+        }
+        resize();
+        window.addEventListener("resize", resize);
+        workshopInitialized = true;
+        rebuildWorkshopFromChat();
+        workshopLoop();
+      }
+
+      function rebuildWorkshopFromChat() {
+        if (!workshopInitialized || !workshopCanvas) return;
+        workshopNodes = [];
+
+        const max = Math.min(chatHistory.length, 24);
+        const startIndex = chatHistory.length - max;
+        const rect = workshopCanvas.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        for (let i = 0; i < max; i++) {
+          const msg = chatHistory[startIndex + i];
+          const radius = 28 + i * 4;
+          const speed = 0.003 + i * 0.0006;
+          const angle = i * (Math.PI / 6);
+          const isUser = msg.role === "user";
+
+          workshopNodes.push({
+            radius,
+            speed,
+            angle,
+            isUser,
+          });
+        }
+
+        const statusEl = document.getElementById("workshop-status");
+        if (statusEl) {
+          const last = chatHistory[chatHistory.length - 1];
+          if (last) {
+            const who = last.role === "user" ? "ty" : "motor";
+            const text = (last.content || "")
+              .slice(0, 80)
+              .replace(/\s+/g, " ");
+            statusEl.textContent =
+              "Poslední impuls (" +
+              who +
+              "): " +
+              text +
+              (last.content.length > 80 ? "…" : "");
+          } else {
+            statusEl.textContent = "Čekám na první impulzy z chatu…";
+          }
+        }
+      }
+
+      function workshopLoop() {
+        if (!workshopInitialized || !workshopCtx || !workshopCanvas) {
+          requestAnimationFrame(workshopLoop);
+          return;
+        }
+
+        const rect = workshopCanvas.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+
+        workshopCtx.clearRect(0, 0, w, h);
+
+        // jemné pozadí
+        workshopCtx.globalAlpha = 0.25;
+        workshopCtx.fillStyle = "#05060b";
+        workshopCtx.fillRect(0, 0, w, h);
+        workshopCtx.globalAlpha = 1;
+
+        const cx = w / 2;
+        const cy = h / 2;
+
+        // středový "motor"
+        workshopCtx.beginPath();
+        workshopCtx.arc(cx, cy, 8, 0, Math.PI * 2);
+        workshopCtx.fillStyle = "#ffb156";
+        workshopCtx.fill();
+        workshopCtx.shadowColor = "rgba(255,177,86,0.8)";
+        workshopCtx.shadowBlur = 12;
+
+        // orbitující uzly
+        workshopNodes.forEach((node) => {
+          node.angle += node.speed;
+          const x = cx + Math.cos(node.angle) * node.radius;
+          const y = cy + Math.sin(node.angle) * node.radius;
+
+          // orbitová linka (slabá)
+          workshopCtx.beginPath();
+          workshopCtx.arc(cx, cy, node.radius, 0, Math.PI * 2);
+          workshopCtx.strokeStyle = "rgba(80, 110, 180, 0.18)";
+          workshopCtx.lineWidth = 1;
+          workshopCtx.stroke();
+
+          // uzel
+          workshopCtx.beginPath();
+          workshopCtx.arc(x, y, node.isUser ? 3.5 : 4.5, 0, Math.PI * 2);
+          workshopCtx.fillStyle = node.isUser ? "#ffdba2" : "#8ec5ff";
+          workshopCtx.fill();
+        });
+
+        workshopCtx.shadowBlur = 0;
+        requestAnimationFrame(workshopLoop);
       }
 
       // ======== BACKEND CALL ========
@@ -327,9 +551,12 @@
 
       // ======== UI INIT ========
       document.addEventListener("DOMContentLoaded", () => {
+        initWorkshop();
+
         document.getElementById("bubble").innerHTML = VaFiT.greeting();
         document.getElementById("summary").innerHTML = VaFiT.summaryHtml();
-        document.getElementById("top-sub").textContent = "Motor aktivní – lokální paměť + AI mozek";
+        document.getElementById("top-sub").textContent =
+          "Motor aktivní – lokální paměť + AI mozek";
         document.getElementById("mood").textContent = VaFiT.moodLabel;
 
         if (chatHistory.length === 0) {
@@ -366,7 +593,10 @@
             const reply = await sendToVaFiT(backendMessages);
             addMessage("assistant", reply);
           } catch (e) {
-            addMessage("assistant", "Brácho… spadlo spojení s motorem. Zkus to ještě jednou.");
+            addMessage(
+              "assistant",
+              "Brácho… spadlo spojení s motorem. Zkus to ještě jednou."
+            );
           } finally {
             avatar.classList.remove("pulsing");
           }
