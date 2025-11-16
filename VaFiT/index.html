@@ -211,13 +211,16 @@
 
       /* plátno – obdélník č. 1 (mapa + impulzy) */
       #workshop-canvas {
-        width: 100%;
-        height: 210px;
-        display: block;
-        border-radius: 14px;
-        background: radial-gradient(circle at 20% 0%, #1b2035, #050509);
-        border: 1px solid #262a42;
-      }
+  width: 100%;
+  height: 210px;
+  display: block;
+  border-radius: 14px;
+
+  /* OPRAVENO – střed přesně doprostřed */
+  background: radial-gradient(circle at center, #1b2035, #050509);
+
+  border: 1px solid #262a42;
+}
 
       .workshop-status {
         margin-top: 6px;
