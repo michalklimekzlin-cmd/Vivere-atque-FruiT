@@ -1114,15 +1114,42 @@ S láskou a důvěrou – Michal.
       }
 
       // ======== UI INIT ========
-      document.addEventListener("DOMContentLoaded", () => {
-        initWorkshop();
+document.addEventListener("DOMContentLoaded", () => {
+    initWorkshop();
 
-        document.getElementById("bubble").innerHTML = VaFiT.greeting();
-        document.getElementById("summary").innerHTML = VaFiT.summaryHtml();
-        document.getElementById("top-sub").textContent =
-          "Motor aktivní – lokální paměť + AI mozek";
-        document.getElementById("mood").textContent = VaFiT.moodLabel;
+// ======== UI INIT ========
+document.addEventListener("DOMContentLoaded", () => {
+  initWorkshop();
 
+  const bubble = document.getElementById("bubble");
+
+  // --- TRADING212: načtení hodnot portfolia ---
+  fetch('/api/t212-portfolio')
+    .then(res => res.json())
+    .then(data => {
+      console.log("T212 PORTFOLIO:", data);
+
+      if (data.error) {
+        bubble.innerHTML =
+          VaFiT.greeting() +
+          "<br><br>⚠️ Nepodařilo se načíst hodnotu portfolia.";
+      } else {
+        bubble.innerHTML =
+          VaFiT.greeting() +
+          `<br><br><strong>Hodnota portfolia:</strong><br>💶 ${data.total.toLocaleString("cs-CZ")} €`;
+      }
+    })
+    .catch(err => {
+      console.log("FETCH ERROR:", err);
+      bubble.innerHTML =
+        VaFiT.greeting() +
+        "<br><br>⚠️ Chyba komunikace s API.";
+    });
+
+  document.getElementById("summary").innerHTML = VaFiT.summaryHtml();
+  document.getElementById("top-sub").textContent =
+    "Motor aktivní – lokální paměť + AI mozek";
+  document.getElementById("mood").textContent = VaFiT.moodLabel;
         chyboLog(
           "info",
           "Chybožrout zapnutý. Sleduju motor a čekám na první chybu."
