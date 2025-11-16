@@ -1,117 +1,109 @@
 <!doctype html>
 <html lang="cs">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>VaF'i'T • Motor světa</title>
-    <style>
-      :root {
-        --color-motor: #ffb156;
-        --color-vafit: #ff5ad4;
-        --color-chybo: #d68cff;
-      }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VaF'i'T • Motor světa</title>
 
-      body {
-        margin: 0;
-        padding: 16px;
-        background: radial-gradient(circle at top, #10131c, #050509);
-        color: #f5f5f5;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      }
+  <style>
+    :root {
+      --color-motor: #ffb156;
+      --color-vafit: #ff5ad4;
+      --color-chybo: #d68cff;
+    }
 
-      .card {
-        max-width: 430px;
-        margin: 0 auto;
-        background: rgba(10, 10, 15, 0.96);
-        border-radius: 18px;
-        padding: 16px 16px 20px;
-        box-shadow: 0 0 24px rgba(0, 0, 0, 0.7);
-        border: 1px solid #202335;
-      }
+    /* případně starý .card-right-panel můžeš úplně smazat */
+    .card-right-panel {
+      position: absolute;
+      top: 20px;
+      right: -200px;
+      width: 180px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      font-size: .8rem;
+    }
 
-      .top {
-        display: flex;
-        align-items: center;
-        margin-bottom: 12px;
-      }
+    /* layout pro Motor + banku */
+    .motor-layout {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+    }
 
-      .avatar-wrap {
-        width: 42px;
-        height: 42px;
-        border-radius: 999px;
-        background: radial-gradient(circle at 30% 20%, #ffe7c4, #f08b3b);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 10px;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-      }
+    .motor-main {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
 
-      .avatar-wrap.pulsing {
-        transform: scale(1.07);
-        box-shadow: 0 0 16px rgba(255, 164, 64, 0.6);
-      }
+    .fuel-panel {
+      flex: 0 0 260px;
+      background: rgba(7, 9, 18, 0.92);
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 12px 14px 10px;
+      font-size: 0.75rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    }
 
-      .avatar-emoji {
-        font-size: 22px;
-      }
+    .fuel-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
 
-      .top-text {
-        flex: 1;
-      }
+    .fuel-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
 
-      .top-title {
-        font-size: 15px;
-        font-weight: 600;
-      }
+    .fuel-row span { opacity: 0.7; }
+    .fuel-row strong { font-variant-numeric: tabular-nums; }
 
-      .top-sub {
-        font-size: 11px;
-        opacity: 0.7;
-      }
+    .fuel-note {
+      margin-top: 8px;
+      opacity: 0.55;
+      font-size: 0.68rem;
+      line-height: 1.3;
+    }
 
-      .mood {
-        font-size: 11px;
-        margin-bottom: 10px;
-        opacity: 0.9;
-      }
-
-      .bubble {
-        background: radial-gradient(circle at top, #1e2030, #0d0f17);
-        border-radius: 14px;
-        padding: 10px 12px;
-        font-size: 13px;
-        margin-bottom: 12px;
-        border: 1px solid #252843;
-      }
-
-      .summary {
-        font-size: 11px;
-        opacity: 0.8;
-        margin-bottom: 12px;
-      }
-
-      .chat-box {
-        background: #05060b;
-        border-radius: 14px;
-        padding: 10px;
-        border: 1px solid #1b1e2f;
-        display: flex;
+    @media (max-width: 900px) {
+      .motor-layout {
         flex-direction: column;
-        gap: 8px;
       }
+      .fuel-panel {
+        width: 100%;
+        flex: 0 0 auto;
+      }
+    }
 
-      .chat-history {
-        max-height: 260px;
-        overflow-y: auto;
-        padding-right: 4px;
-        font-size: 12px;
-      }
+    body {
+      margin: 0;
+      padding: 16px;
+      background: radial-gradient(circle at top, #10131c, #050509);
+      color: #f5f5f5;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-      .msg {
-        margin-bottom: 6px;
-        line-height: 1.35;
-      }
+    .card {
+      max-width: 430px;
+      margin: 0 auto;
+      background: rgba(10, 10, 15, 0.96);
+      border-radius: 18px;
+      padding: 16px 16px 20px;
+      box-shadow: 0 0 24px rgba(0, 0, 0, 0.7);
+      border: 1px solid #202335;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
 
       .msg-user {
         color: #e1d0b5;
