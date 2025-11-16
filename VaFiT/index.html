@@ -31,7 +31,7 @@
   gap: 18px;
   align-items: flex-start;
   max-width: 1100px;     /* střed stránky */
-  margin: 0 auto 0;      /* zarovná vše doprostřed */
+    margin: 40px auto 0;   /* trošku dolů + vystředění celého motoru */
 }
 
 .motor-main {
@@ -93,7 +93,7 @@
 
     .card {
   max-width: 430px;
-  margin: 60px auto 0;      /* ⬅⬅⬅ POSUN DOLŮ */
+  margin: 0;      /* ⬅⬅⬅ POSUN DOLŮ */
   background: rgba(10, 10, 15, 0.96);
   border-radius: 18px;
   padding: 16px 16px 20px;
@@ -723,40 +723,40 @@
       </div>
     </div>
 
-            <!-- HLAVNÍ KARTA + PÍSMENKOVÁ BANKA -->
+                <!-- HLAVNÍ KARTA + PÍSMENKOVÁ BANKA -->
     <div class="motor-layout">
+
       <!-- LEVÁ STRANA: MOTOR / CHAT -->
-      <div class="motor-main">
-        <div class="card">
-          <div class="top">
-            <div id="avatar" class="avatar-wrap">
-              <div class="avatar-emoji">🧠</div>
-            </div>
-            <div class="top-text">
-              <div class="top-title">VaF'i'T • Motor světa</div>
-              <div id="top-sub" class="top-sub"></div>
-            </div>
+      <div class="card">
+        <div class="top">
+          <div id="avatar" class="avatar-wrap">
+            <div class="avatar-emoji">🧠</div>
           </div>
-
-          <div id="mood" class="mood"></div>
-          <div id="bubble" class="bubble"></div>
-          <div id="summary" class="summary"></div>
-
-          <div class="chat-box">
-            <div id="chat-history" class="chat-history"></div>
-
-            <div>
-              <textarea
-                id="vafit-input"
-                placeholder="Napiš VaF'i'Tovi cokoliv, brácho…"
-              ></textarea>
-            </div>
-            <button id="vafit-send">Poslat VaF'i'Tovi</button>
+          <div class="top-text">
+            <div class="top-title">VaF'i'T • Motor světa</div>
+            <div id="top-sub" class="top-sub"></div>
           </div>
+        </div>
 
-          <div class="small">
-            🔴 VaF'i'T si pamatuje historii jen v tomto zařízení (localStorage).
+        <!-- samotný motor -->
+        <div id="mood" class="mood"></div>
+        <div id="bubble" class="bubble"></div>
+        <div id="summary" class="summary"></div>
+
+        <div class="chat-box">
+          <div id="chat-history" class="chat-history"></div>
+
+          <div>
+            <textarea
+              id="vafit-input"
+              placeholder="Napiš VaF'i'Tovi cokoliv, brácho…"
+            ></textarea>
           </div>
+          <button id="vafit-send">Poslat VaF'i'Tovi</button>
+        </div>
+
+        <div class="small">
+          🔴 VaF'i'T si pamatuje historii jen v tomto zařízení (localStorage).
         </div>
       </div>
 
@@ -795,6 +795,7 @@
         </div>
       </aside>
     </div>
+    <!-- KONEC HLAVNÍ KARTA + PÍSMENKOVÁ BANKA -->
 
     <!-- MOTOROVNA / DÍLNA -->
     <div id="vafit-workshop">
