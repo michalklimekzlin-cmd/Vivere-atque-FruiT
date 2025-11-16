@@ -320,20 +320,34 @@
       /* obdélník 3 – náhled toho, co VaF'i'T vykreslil */
       .lab-preview-output {
   position: relative;
-  min-height: 140px;
-  max-height: 220px;
+  overflow: hidden;              /* nic neuteče ven */
+  min-height: 120px;
   border-radius: 10px;
   border: 1px dashed #363b5d;
   background: rgba(5, 6, 11, 0.9);
   padding: 8px 9px;
   font-size: 11px;
   color: #f4f4f6;
+  display: flex;                 /* centrování obsahu */
+  align-items: center;
+  justify-content: center;
+}
 
-  /* NOVÉ – centrum a mantinely */
+/* vnitřní „sandbox“ – do něj se vloží kód z dílny */
+.lab-preview-inner {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;        /* nic nepoleze ven */
+}
+
+/* všechny prvky uvnitř se drží v tom boxu */
+.lab-preview-inner * {
+  max-width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
 }
 
 .lab-preview-output .placeholder {
