@@ -586,28 +586,75 @@
       </div>
     </div>
 
-    <!-- MOTOROVNA -->
-    <div id="vafit-workshop">
-      <div class="workshop-header">
-        <div class="workshop-title">Motorovna • VaF'i'T Workshop</div>
-        <div class="workshop-badge">živé experimenty</div>
-      </div>
-      <p class="workshop-sub">
-        Tady si VaF'i'T odkládá svoje mini-nápady a impulzy z chatu. Každý bod
-        je jedna zpráva – společně tvoří mapu motoru. Tři kruhy představují
-        tři vrstvy světa.
-      </p>
+    <!-- MOTOROVNA / DÍLNA -->
+<div id="vafit-workshop">
+  <div class="workshop-header">
+    <div class="workshop-title">Motorovna • VaF'i'T Workshop</div>
+    <div class="workshop-badge">živé experimenty</div>
+  </div>
+  <p class="workshop-sub">
+    Tady si VaF'i'T odkládá svoje mini-nápady a impulzy z chatu. Každý bod
+    je jedna zpráva – společně tvoří mapu motoru. Tři kruhy představují tři
+    vrstvy světa. Vpravo je dílna – živý náčrt programovacího a příběhového okna.
+  </p>
 
+  <div class="workshop-layout">
+    <!-- LEVÁ STRANA: orbit / mapování impulsů -->
+    <div class="workshop-left">
       <canvas id="workshop-canvas"></canvas>
-
-      <div class="workshop-bottom">
-        <div id="workshop-status" class="workshop-status">
-          Čekám na první impulzy z chatu…
-        </div>
-        <div class="workshop-dot"></div>
+      <div id="workshop-status" class="workshop-status">
+        Čekám na první impulzy z chatu…
       </div>
     </div>
 
+    <!-- PRAVÁ STRANA: programovací + příběhové okno -->
+    <div class="workshop-right">
+      <div class="lab-tabs">
+        <button class="lab-tab active" data-tab="code">Kód</button>
+        <button class="lab-tab" data-tab="story">Příběh</button>
+      </div>
+
+      <div class="lab-panels">
+        <!-- PANEL: KÓD -->
+        <div id="lab-panel-code" class="lab-panel active">
+          <label class="lab-label">Kód postavy / prvku (HTML + kousky CSS)</label>
+          <textarea
+            id="lab-code-input"
+            class="lab-textarea"
+            placeholder="Sem napiš kód, který má VaF'i'T nakreslit v dílně…"
+          ></textarea>
+        </div>
+
+        <!-- PANEL: PŘÍBĚH -->
+        <div id="lab-panel-story" class="lab-panel">
+          <label class="lab-label">Příběh / zadání pro VaF'i'T</label>
+          <textarea
+            id="lab-story-input"
+            class="lab-textarea"
+            placeholder="Sem napiš příběh, charakter nebo zadání, podle kterého má VaF'i'T programovat…"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="lab-actions">
+        <button id="lab-run" type="button">Spustit v dílně</button>
+        <button id="lab-send-to-vafit" type="button">
+          Poslat VaF'i'Tovi jako impuls
+        </button>
+      </div>
+
+      <div class="lab-preview-wrap">
+        <div class="lab-preview-title">Náhled dílny</div>
+        <div id="lab-preview" class="lab-preview">
+          <div class="lab-preview-placeholder">
+            Tady se objeví postava / prvek, který nakóduješ výše.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
     <!-- PORTÁL – zatím jen impuls -->
     <div id="portal-panel" class="portal-panel">
       <div class="portal-header">
