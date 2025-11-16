@@ -374,6 +374,44 @@
         box-shadow: 0 0 12px rgba(255, 170, 70, 0.9);
       }
 
+/* === VAFIT LAYOUT UPGRADE: posun hlavního panelu + místo na kód === */
+
+.vafit-main {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.vafit-chat-panel {
+  flex: 2; /* hlavní panel bude vlevo */
+}
+
+.vafit-code-panel {
+  flex: 1; /* nové místo vpravo */
+  background: rgba(0,0,0,0.35);
+  border-radius: 16px;
+  padding: 16px;
+  backdrop-filter: blur(6px);
+  color: #fff;
+  min-height: 300px;
+  display: none; /* zatím skryté */
+}
+
+.vafit-story-panel {
+  flex: 1;
+  background: rgba(0,0,0,0.20);
+  border-radius: 16px;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+  color: #fff;
+  margin-top: 12px;
+  display: none; /* zatím skryté */
+}
+
+.vafit-panel-visible {
+  display: block !important;
+}
+      
       @keyframes cubeSpinSlow {
         from {
           transform: skewY(-6deg) rotate(0deg);
