@@ -228,19 +228,21 @@
         opacity: 0.75;
       }
 
-      /* při širším display rozdělit 1 / 2 / 3 vedle sebe */
-      @media (min-width: 720px) {
-        .workshop-layout {
-          flex-direction: row;
-          align-items: flex-start;
-        }
+  /* při širším display rozdělit 1 / 2 / 3 vedle sebe */
+@media (max-width: 900px) {
+  .motor-layout {
+    flex-direction: column;
+  }
 
-        .workshop-left,
-        .workshop-right {
-          min-width: 0;
-        }
-      }
+  .fuel-panel {
+    width: 100%;
+  }
+}
 
+.workshop-left,
+.workshop-right {
+  min-width: 0;
+}
       /* === DÍLNA – obdélník 2 (text + příběh) a 3 (náhled) === */
 
       .lab-tabs {
@@ -737,10 +739,52 @@
             </div>
           </div>
 
-          <div id="mood" class="mood"></div>
+          <!-- MOTOR + BANKA LAYOUT -->
+<div class="motor-layout">
+  
+  <!-- LEVÁ STRANA: MOTOR -->
+  <div class="motor-main">
+    <div id="mood" class="mood"></div>
+    <div id="bubble" class="bubble"></div>
+    <div id="summary" class="summary"></div>
+  </div>
 
-          <div id="bubble" class="bubble"></div>
-          <div id="summary" class="summary"></div>
+  <!-- PRAVÁ STRANA: BANKA -->
+  <div class="fuel-panel">
+    <div class="fuel-title">Písmenková banka • Michal Klimek</div>
+
+    <div class="fuel-row">
+      <span>Bankovní zásoba (celkem)</span>
+      <strong id="bank-total">0</strong>
+    </div>
+
+    <div class="fuel-row">
+      <span>Aktuální stav v motoru</span>
+      <strong id="bank-motor">0</strong>
+    </div>
+
+    <div class="fuel-row">
+      <span>Spotřeba dílna (celkem)</span>
+      <strong id="bank-workshop">0</strong>
+    </div>
+
+    <div class="fuel-row">
+      <span>Spotřeba za 60 s</span>
+      <strong id="bank-60s">0</strong>
+    </div>
+
+    <div class="fuel-row">
+      <span>Písmenka utracená hráči</span>
+      <strong id="bank-players">0</strong>
+    </div>
+
+    <div class="fuel-note">
+      Banka běží jen na tomto zařízení.<br />
+      Hodnoty se počítají z portfolia 212 + impulzů (chat + dílna).
+    </div>
+  </div>
+</div>
+<!-- KONEC MOTOR + BANKA -->
 
           <div class="chat-box">
             <div id="chat-history" class="chat-history"></div>
@@ -1455,6 +1499,24 @@ async function loadT212Portfolio() {
 }
 
       // ======== UI INIT ========
+      function updateBankUi() {
+  const ws = VaFiT.storage.worldState || {};
+
+  document.getElementById("bank-total").textContent =
+    (ws.letterFuel || 0).toLocaleString("cs-CZ");
+
+  document.getElementById("bank-motor").textContent =
+    (ws.letterFuel || 0).toLocaleString("cs-CZ");
+
+  document.getElementById("bank-workshop").textContent =
+    (ws.workshopUse || 0).toLocaleString("cs-CZ");
+
+  document.getElementById("bank-60s").textContent =
+    (ws.use60s || 0).toLocaleString("cs-CZ");
+
+  document.getElementById("bank-players").textContent =
+    (ws.playersUse || 0).toLocaleString("cs-CZ");
+}
       document.addEventListener("DOMContentLoaded", () => {
         initWorkshop();
 
@@ -1467,6 +1529,8 @@ async function loadT212Portfolio() {
 
         // portfolio 212 -> přidá se pod pozdrav
         loadT212Portfolio();
+       
+        updateBankUi();
 
         chyboLog(
           "info",
