@@ -1352,9 +1352,7 @@ S láskou a důvěrou – Michal.
         return data.reply;
       }
 
-      // ======== TRADING212 – načtení hodnoty portfolia ========
-      // ======== TRADING212 – načtení hodnoty portfolia + písmenkové tokeny ========
-// ======= TRADING212 – načtení hodnoty portfolia + přepočet na písmenka =======
+      // ======= TRADING212 – načtení hodnoty portfolia =======
 async function loadT212Portfolio() {
   try {
     const res = await fetch("/api/t212-portfolio");
@@ -1364,9 +1362,9 @@ async function loadT212Portfolio() {
     const bubble = document.getElementById("bubble");
     if (!bubble) return;
 
+    // když API vrátí chybu
     if (!data || data.error) {
-      bubble.innerHTML +=
-        "<br><br>⚠️ Nepodařilo se načíst hodnotu portfolia.";
+      bubble.innerHTML += "<br><br>⚠️ Nepodařilo se načíst hodnotu portfolia.";
       if (data && data.note) {
         bubble.innerHTML += "<br><small>" + data.note + "</small>";
       }
@@ -1379,26 +1377,30 @@ async function loadT212Portfolio() {
         : Number(data.total || 0);
 
     const practiceLabel = data.practice ? " (tréninkový účet)" : "";
-    const currency = data.currency || "€";
 
-    // přepočet na písmenkové tokeny – 1 € = 10 „písmen“
-    const letterFuel = Math.floor(total * 10);
+    // 🔡 Převod € → písmenka: 1 € = 10 tokenů
+    const lettersFromPortfolio = Math.max(0, Math.floor(total * 10));
 
-    // uložíme do worldState, ať si to VaFiT pamatuje
+    // Uložit písmenkové palivo do worldState
     const ws = VaFiT.storage.worldState || {};
-    ws.letterFuel = letterFuel;
+    ws.letterFuel = lettersFromPortfolio;
     VaFiT.storage.worldState = ws;
     VaFiT.saveAll();
 
+    // Formátované stringy
+    const totalStr = total.toLocaleString("cs-CZ");
+    const lettersStr = lettersFromPortfolio.toLocaleString("cs-CZ");
+
+    // Text v bublině nahoře (to co máš na screenshotu)
     bubble.innerHTML +=
-      "<br><br><strong>Hodnota portfolia 212:</strong> " +
+      "<br><br><strong>Hodnota portfolia 212:</strong>" +
       practiceLabel +
-      "<br>≈ " +
-      total.toLocaleString("cs-CZ") +
-      " " +
-      currency +
-      "<br><br><strong>Písmenkové palivo VaFiT'a:</strong><br>" +
-      letterFuel.toLocaleString("cs-CZ") +
+      "<br>💶 " +
+      totalStr +
+      " €" +
+      "<br><br><strong>Písmenkové palivo VaF'i'Ta:</strong>" +
+      "<br>🔡 " +
+      lettersStr +
       " tokenů (písmenek).";
 
   } catch (err) {
