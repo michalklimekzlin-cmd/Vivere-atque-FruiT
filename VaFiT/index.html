@@ -1005,6 +1005,22 @@ S láskou a důvěrou – Michal.
           notes: VAFT_STORAGE.load("vaft.notes.brain", []),
           tasks: VAFT_STORAGE.load("vaft.tasks.todo", []),
         },
+          
+        tokens: {
+    getLetters() {
+      const ws = VaFiT.storage.worldState || {};
+      return ws.letterFuel || 0;
+    },
+    spendLetters(amount) {
+      const ws = VaFiT.storage.worldState || {};
+      const current = ws.letterFuel || 0;
+      const used = Math.min(current, Math.max(0, amount || 0));
+      ws.letterFuel = current - used;
+      VaFiT.storage.worldState = ws;
+      VaFiT.saveAll();
+      return ws.letterFuel;
+    },
+  },
 
         saveAll() {
           VAFT_STORAGE.save("vaft.worldState", this.storage.worldState);
