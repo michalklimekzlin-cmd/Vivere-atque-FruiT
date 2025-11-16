@@ -334,6 +334,122 @@
         opacity: 0.8;
       }
 
+/* === DÍLNA: editor kódu + příběhu === */
+
+.workshop-editor {
+  margin-top: 10px;
+  padding: 10px 12px 12px;
+  border-radius: 14px;
+  background: radial-gradient(circle at top, #080910, #020208);
+  border: 1px solid #262a42;
+  font-size: 11px;
+}
+
+.workshop-editor-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.workshop-editor-title {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.workshop-editor-sub {
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+.workshop-tabs {
+  display: inline-flex;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid #353956;
+  font-size: 10px;
+}
+
+.workshop-tab {
+  padding: 4px 10px;
+  border: none;
+  background: transparent;
+  color: #d9d9e0;
+  cursor: pointer;
+}
+
+.workshop-tab.active {
+  background: linear-gradient(90deg, #ffb156, #ff7a3c);
+  color: #120707;
+}
+
+.workshop-editor-body {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.workshop-label {
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+.workshop-textarea {
+  width: 100%;
+  min-height: 70px;
+  resize: vertical;
+  border-radius: 10px;
+  border: 1px solid #262a42;
+  background: #050509;
+  color: #f4f4f6;
+  padding: 6px 8px;
+  font-size: 11px;
+  outline: none;
+}
+
+.workshop-textarea:focus {
+  border-color: #4fa6ff;
+}
+
+.workshop-run-btn {
+  margin-top: 4px;
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 10px;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  background: linear-gradient(90deg, #ffb156, #ff7a3c);
+  color: #120707;
+}
+
+.workshop-preview-box {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px dashed #363b5d;
+  background: radial-gradient(circle at top, #070814, #020208);
+  min-height: 80px;
+  font-size: 11px;
+  color: #f4f4f6;
+}
+
+.workshop-preview-placeholder {
+  opacity: 0.55;
+  font-size: 10px;
+}
+
+/* náhledový obsah, který si VaF'i'T vykresluje */
+.workshop-preview-content {
+  display: inline-block;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(13, 18, 32, 0.9);
+  border: 1px solid rgba(255, 177, 86, 0.45);
+}
+      
       /* === BOČNÍ KOSTKY – 6 kusů, rotující === */
       .side-cubes {
         position: fixed;
@@ -624,74 +740,78 @@
       </div>
     </div>
 
-    <!-- MOTOROVNA / DÍLNA -->
-<div id="vafit-workshop">
-  <div class="workshop-header">
-    <div class="workshop-title">Motorovna • VaF'i'T Workshop</div>
-    <div class="workshop-badge">živé experimenty</div>
-  </div>
-  <p class="workshop-sub">
-    Tady si VaF'i'T odkládá svoje mini-nápady a impulzy z chatu. Každý bod
-    je jedna zpráva – společně tvoří mapu motoru. Tři kruhy představují tři
-    vrstvy světa. Vpravo je dílna – živý náčrt programovacího a příběhového okna.
-  </p>
-
-  <div class="workshop-layout">
-    <!-- LEVÁ STRANA: orbit / mapování impulsů -->
-    <div class="workshop-left">
-      <canvas id="workshop-canvas"></canvas>
-      <div id="workshop-status" class="workshop-status">
-        Čekám na první impulzy z chatu…
-      </div>
-    </div>
-
-    <!-- PRAVÁ STRANA: programovací + příběhové okno -->
-    <div class="workshop-right">
-      <div class="lab-tabs">
-        <button class="lab-tab active" data-tab="code">Kód</button>
-        <button class="lab-tab" data-tab="story">Příběh</button>
+        <!-- MOTOROVNA / DÍLNA -->
+    <div id="vafit-workshop">
+      <div class="workshop-header">
+        <div class="workshop-title">Motorovna • VaF'i'T Workshop</div>
+        <div class="workshop-badge">živé experimenty</div>
       </div>
 
-      <div class="lab-panels">
-        <!-- PANEL: KÓD -->
-        <div id="lab-panel-code" class="lab-panel active">
-          <label class="lab-label">Kód postavy / prvku (HTML + kousky CSS)</label>
-          <textarea
-            id="lab-code-input"
-            class="lab-textarea"
-            placeholder="Sem napiš kód, který má VaF'i'T nakreslit v dílně…"
-          ></textarea>
+      <p class="workshop-sub">
+        Tady si VaF'i'T odkládá svoje mini-nápady a impulzy z chatu.
+        Každý bod je jedna zpráva – společně tvoří mapu motoru.
+        Vlevo je mapa impulsů, vpravo živá dílna pro kód a příběhy.
+      </p>
+
+      <div class="workshop-layout">
+        <!-- 1) LEVÁ STRANA – mapa impulsů / orbit -->
+        <div class="workshop-left">
+          <canvas id="workshop-canvas"></canvas>
+          <div id="workshop-status" class="workshop-status">
+            Čekám na první impulzy z chatu…
+          </div>
         </div>
 
-        <!-- PANEL: PŘÍBĚH -->
-        <div id="lab-panel-story" class="lab-panel">
-          <label class="lab-label">Příběh / zadání pro VaF'i'T</label>
-          <textarea
-            id="lab-story-input"
-            class="lab-textarea"
-            placeholder="Sem napiš příběh, charakter nebo zadání, podle kterého má VaF'i'T programovat…"
-          ></textarea>
-        </div>
-      </div>
+        <!-- 2) PRAVÁ STRANA – programovací + příběhové okno -->
+        <div class="workshop-right">
+          <!-- přepínač Kód / Příběh -->
+          <div class="lab-tabs">
+            <button class="lab-tab active" data-tab="code">Kód</button>
+            <button class="lab-tab" data-tab="story">Příběh</button>
+          </div>
 
-      <div class="lab-actions">
-        <button id="lab-run" type="button">Spustit v dílně</button>
-        <button id="lab-send-to-vafit" type="button">
-          Poslat VaF'i'Tovi jako impuls
-        </button>
-      </div>
+          <!-- panely pro vstup -->
+          <div class="lab-panels">
+            <!-- panel: KÓD -->
+            <div class="lab-panel active" id="lab-panel-code">
+              <label class="lab-label">
+                Kód postavy / prvku (HTML + kousky CSS)
+              </label>
+              <textarea
+                id="lab-code"
+                class="lab-input"
+                placeholder="Sem napiš kód, který má VaF'i'T nakreslit v dílně…"
+              ></textarea>
+            </div>
 
-      <div class="lab-preview-wrap">
-        <div class="lab-preview-title">Náhled dílny</div>
-        <div id="lab-preview" class="lab-preview">
-          <div class="lab-preview-placeholder">
-            Tady se objeví postava / prvek, který nakóduješ výše.
+            <!-- panel: PŘÍBĚH -->
+            <div class="lab-panel" id="lab-panel-story">
+              <label class="lab-label">
+                Příběh / zadání pro VaF'i'T
+              </label>
+              <textarea
+                id="lab-story"
+                class="lab-input"
+                placeholder="Sem napiš příběh, charakter nebo zadání, podle kterého má VaF'i'T programovat…"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- tlačítko – impuls do motoru + vykreslení -->
+          <button id="lab-run" class="lab-run-btn">
+            Spustit v dílně • Poslat VaF'i'Tovi jako impuls
+          </button>
+
+          <!-- 3) NÁHLED – co VaF'i'T vytvořil (vykreslený objekt) -->
+          <div class="lab-preview">
+            <div class="lab-preview-title">Náhled dílny</div>
+            <div id="lab-preview-output" class="lab-preview-output">
+              Tady se objeví postava / prvek, který nakóduješ nebo popíšeš výše.
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
     
     <!-- PORTÁL – zatím jen impuls -->
     <div id="portal-panel" class="portal-panel">
