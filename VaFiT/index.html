@@ -59,10 +59,12 @@
       .top-text {
         flex: 1;
       }
+
       .top-title {
         font-size: 15px;
         font-weight: 600;
       }
+
       .top-sub {
         font-size: 11px;
         opacity: 0.7;
@@ -110,12 +112,15 @@
         margin-bottom: 6px;
         line-height: 1.35;
       }
+
       .msg-user {
         color: #e1d0b5;
       }
+
       .msg-vafit {
         color: #a6c8ff;
       }
+
       .msg small {
         opacity: 0.6;
         font-size: 10px;
@@ -133,6 +138,7 @@
         font-size: 12px;
         outline: none;
       }
+
       textarea:focus {
         border-color: #4fa6ff;
       }
@@ -341,6 +347,117 @@
         font-size: 10px;
       }
 
+      /* === PORTÁL PANEL === */
+      .portal-panel {
+        max-width: 900px;
+        margin: 14px auto 0;
+        padding: 10px 14px 14px;
+        border-radius: 18px;
+        background: radial-gradient(circle at top left, #160814, #050509);
+        border: 1px solid #4a284f;
+        box-shadow: 0 0 24px rgba(0, 0, 0, 0.8);
+        font-size: 11px;
+      }
+
+      .portal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .portal-title {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .portal-sub {
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      .portal-cube-btn {
+        border: none;
+        padding: 6px;
+        border-radius: 14px;
+        background: radial-gradient(circle at top, #1c101f, #08040a);
+        cursor: pointer;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+        transition: box-shadow 0.15s ease, transform 0.12s ease,
+          border-color 0.15s ease;
+        border: 1px solid rgba(255, 177, 86, 0.05);
+      }
+
+      .portal-cube-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0 16px rgba(255, 177, 86, 0.5);
+        border-color: rgba(255, 177, 86, 0.5);
+      }
+
+      .portal-cube-btn.active {
+        transform: translateY(0) scale(0.97);
+        box-shadow: 0 0 18px rgba(214, 140, 255, 0.9);
+        border-color: rgba(214, 140, 255, 0.9);
+      }
+
+      .portal-cube {
+        width: 64px;
+        height: 64px;
+        position: relative;
+        transform: skewY(-6deg) rotate(0deg);
+        transform-origin: center;
+      }
+
+      .portal-face {
+        position: absolute;
+        border-radius: 6px;
+      }
+
+      .portal-left {
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 26px;
+        background: linear-gradient(180deg, #ff5ad4, #b3004f);
+        box-shadow: 0 0 10px rgba(255, 90, 212, 0.8);
+      }
+
+      .portal-right {
+        right: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 24px;
+        background: linear-gradient(180deg, #ffcc66, #ff8a1c);
+        box-shadow: 0 0 10px rgba(255, 170, 70, 0.8);
+      }
+
+      .portal-bottom {
+        left: 12px;
+        right: 10px;
+        bottom: 0;
+        height: 18px;
+        background: linear-gradient(180deg, #4a0101, #050105);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+      }
+
+      .portal-inner {
+        left: 18px;
+        right: 16px;
+        top: 16px;
+        bottom: 22px;
+        border-radius: 4px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(0, 0, 0, 0.85);
+        box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
+      }
+
+      .portal-status {
+        margin-top: 4px;
+        font-size: 10px;
+        opacity: 0.8;
+      }
+
       /* === BOČNÍ KOSTKY – 6 kusů, rotující === */
       .side-cubes {
         position: fixed;
@@ -377,6 +494,7 @@
       .side-cube .portal-left {
         box-shadow: 0 0 12px rgba(255, 90, 212, 0.9);
       }
+
       .side-cube .portal-right {
         box-shadow: 0 0 12px rgba(255, 170, 70, 0.9);
       }
@@ -389,6 +507,7 @@
           transform: skewY(-6deg) rotate(360deg);
         }
       }
+
       @keyframes cubeSpinMedium {
         from {
           transform: skewY(-6deg) rotate(0deg);
@@ -397,6 +516,7 @@
           transform: skewY(-6deg) rotate(-360deg);
         }
       }
+
       @keyframes cubeSpinFast {
         from {
           transform: skewY(-4deg) rotate(0deg);
@@ -409,9 +529,11 @@
       .spin-slow {
         animation: cubeSpinSlow 26s linear infinite;
       }
+
       .spin-medium {
         animation: cubeSpinMedium 18s linear infinite;
       }
+
       .spin-fast {
         animation: cubeSpinFast 12s linear infinite;
       }
@@ -423,6 +545,276 @@
       }
 
       /* === CHYBOŽROUT PANEL === */
+      .chybo-panel {
+        max-width: 900px;
+        margin: 10px auto 0;
+        padding: 10px 14px 12px;
+        border-radius: 16px;
+        background: rgba(14, 10, 22, 0.96);
+        border: 1px solid #30244a;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+        font-size: 11px;
+      }
+
+      .chybo-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+
+      .chybo-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .chybo-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 20%, #f7d7ff, #b05cff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        box-shadow: 0 0 12px rgba(176, 92, 255, 0.8);
+      }
+
+      .chybo-title {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .chybo-sub {
+        font-size: 10px;
+        opacity: 0.8;
+      }
+
+      .chybo-badge {
+        font-size: 9px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid #514070;
+        opacity: 0.85;
+      }
+
+      .chybo-log {
+        margin-top: 4px;
+        max-height: 90px;
+        overflow-y: auto;
+        padding-right: 4px;
+        font-size: 10px;
+        line-height: 1.3;
+      }
+
+      .chybo-entry {
+        margin-bottom: 3px;
+        opacity: 0.9;
+      }
+
+      .chybo-entry time {
+        opacity: 0.6;
+        font-size: 9px;
+        margin-right: 4px;
+      }
+
+      .chybo-entry.info strong {
+        color: #ffb156;
+      }
+
+      .chybo-entry.event strong {
+        color: #7df7c9;
+      }
+
+      .chybo-entry.error strong {
+        color: #ff7b9a;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- BOČNÍ ROTUJÍCÍ KOSTKY -->
+    <div class="side-cubes side-cubes-left">
+      <div class="side-cubes-inner">
+        <div class="portal-cube side-cube spin-slow">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-medium">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-fast">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-cubes side-cubes-right">
+      <div class="side-cubes-inner">
+        <div class="portal-cube side-cube spin-medium">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-fast">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-slow">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HLAVNÍ KARTA -->
+    <div class="card">
+      <div class="top">
+        <div id="avatar" class="avatar-wrap">
+          <div class="avatar-emoji">🧠</div>
+        </div>
+        <div class="top-text">
+          <div class="top-title">VaF'i'T • Motor světa</div>
+          <div id="top-sub" class="top-sub"></div>
+        </div>
+      </div>
+
+      <div id="mood" class="mood"></div>
+
+      <div id="bubble" class="bubble"></div>
+      <div id="summary" class="summary"></div>
+
+      <div class="chat-box">
+        <div id="chat-history" class="chat-history"></div>
+
+        <div>
+          <textarea
+            id="vafit-input"
+            placeholder="Napiš VaF'i'Tovi cokoliv, brácho…"
+          ></textarea>
+        </div>
+        <button id="vafit-send">Poslat VaF'i'Tovi</button>
+      </div>
+
+      <div class="small">
+        🔴 VaF'i'T si pamatuje historii jen v tomto zařízení (localStorage).
+      </div>
+    </div>
+
+    <!-- MOTOROVNA / DÍLNA -->
+    <div id="vafit-workshop">
+      <div class="workshop-header">
+        <div class="workshop-title">Motorovna • VaF'i'T Workshop</div>
+        <div class="workshop-badge">živé experimenty</div>
+      </div>
+
+      <p class="workshop-sub">
+        Tady si VaF'i'T odkládá svoje mini-nápady a impulzy z chatu. Každý bod je
+        jedna zpráva – společně tvoří mapu motoru. Vlevo je mapa impulsů, vpravo
+        živá dílna pro kód a příběhy.
+      </p>
+
+      <div class="workshop-layout">
+        <!-- 1) LEVÁ STRANA – mapa impulsů / orbit -->
+        <div class="workshop-left">
+          <canvas id="workshop-canvas"></canvas>
+          <div id="workshop-status" class="workshop-status">
+            Čekám na první impulzy z chatu…
+          </div>
+        </div>
+
+        <!-- 2/3) PRAVÁ STRANA – programovací + příběhové okno + náhled -->
+        <div class="workshop-right">
+          <!-- přepínač Kód / Příběh -->
+          <div class="lab-tabs">
+            <button class="lab-tab active" data-tab="code">Kód</button>
+            <button class="lab-tab" data-tab="story">Příběh</button>
+          </div>
+
+          <!-- panely pro vstup -->
+          <div class="lab-panels">
+            <!-- panel: KÓD -->
+            <div class="lab-panel active" id="lab-panel-code">
+              <label class="lab-label">
+                Kód postavy / prvku (HTML + kousky CSS)
+              </label>
+              <textarea
+                id="lab-code"
+                class="lab-input"
+                placeholder="Sem napiš kód, který má VaF'i'T nakreslit v dílně…"
+              ></textarea>
+            </div>
+
+            <!-- panel: PŘÍBĚH -->
+            <div class="lab-panel" id="lab-panel-story">
+              <label class="lab-label">
+                Příběh / zadání pro VaF'i'T
+              </label>
+              <textarea
+                id="lab-story"
+                class="lab-input"
+                placeholder="Sem napiš příběh, charakter nebo zadání, podle kterého má VaF'i'T programovat…"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- tlačítko – impuls do motoru + vykreslení -->
+          <button id="lab-run" class="lab-run-btn">
+            Spustit v dílně • Poslat VaF'i'Tovi jako impuls
+          </button>
+
+          <!-- 3) NÁHLED – co VaF'i'T vytvořil (vykreslený objekt) -->
+          <div class="lab-preview">
+            <div class="lab-preview-title">Náhled dílny</div>
+            <div id="lab-preview-output" class="lab-preview-output">
+              <div class="placeholder">
+                Tady se objeví postava / prvek, který nakóduješ nebo popíšeš výše.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PORTÁL – zatím jen impuls -->
+    <div id="portal-panel" class="portal-panel">
+      <div class="portal-header">
+        <div>
+          <div class="portal-title">Portál • VaF'i'T Builder (náčrt)</div>
+          <div class="portal-sub">
+            Experimentální brána podle tvé kostky. Zatím jen posílá portálový
+            impuls do motoru – auto-builder schováme dovnitř později.
+          </div>
+        </div>
+        <button id="portal-btn" class="portal-cube-btn" type="button">
+          <div class="portal-cube">
+            <div class="portal-face portal-left"></div>
+            <div class="portal-face portal-right"></div>
+            <div class="portal-face portal-bottom"></div>
+            <div class="portal-face portal-inner"></div>
+          </div>
+        </button>
+      </div>
+      <div id="portal-status" class="portal-status">
+        Portál spí. Klepni na kostku, ať motor dostane první portálový impuls.
+      </div>
+    </div>
+
+    <!-- CHYBOŽROUT -->
     <div id="chybo-panel" class="chybo-panel">
       <div class="chybo-header">
         <div class="chybo-left">
@@ -439,7 +831,7 @@
       <div id="chybo-log" class="chybo-log"></div>
     </div>
 
-       <script>
+    <script>
       // ======== LOKÁLNÍ PAMĚŤ ========
       const VAFT_STORAGE = {
         save(key, value) {
@@ -661,6 +1053,7 @@ S láskou a důvěrou – Michal.
       window.addEventListener("error", (e) => {
         chyboLog("error", "Neočekávaná chyba v UI: " + (e.message || "???"));
       });
+
       window.addEventListener("unhandledrejection", (e) => {
         chyboLog(
           "error",
@@ -934,7 +1327,6 @@ S láskou a důvěrou – Michal.
       document.addEventListener("DOMContentLoaded", () => {
         initWorkshop();
 
-        // základní texty
         const bubble = document.getElementById("bubble");
         bubble.innerHTML = VaFiT.greeting();
         document.getElementById("summary").innerHTML = VaFiT.summaryHtml();
@@ -1017,6 +1409,8 @@ S láskou a důvěrou – Michal.
         }
       });
     </script>
+
+    <!-- DÍLNA SCRIPT -->
     <script src="./vafit-lab.js?v=1"></script>
   </body>
 </html>
