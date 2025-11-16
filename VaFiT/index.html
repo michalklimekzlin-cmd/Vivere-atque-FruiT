@@ -1344,6 +1344,7 @@ S láskou a důvěrou – Michal.
 
       // ======== TRADING212 – načtení hodnoty portfolia ========
       // ======== TRADING212 – načtení hodnoty portfolia + písmenkové tokeny ========
+// ======= TRADING212 – načtení hodnoty portfolia + přepočet na písmenka =======
 async function loadT212Portfolio() {
   try {
     const res = await fetch("/api/t212-portfolio");
@@ -1353,7 +1354,6 @@ async function loadT212Portfolio() {
     const bubble = document.getElementById("bubble");
     if (!bubble) return;
 
-    // když přišla chyba z API
     if (!data || data.error) {
       bubble.innerHTML +=
         "<br><br>⚠️ Nepodařilo se načíst hodnotu portfolia.";
@@ -1363,47 +1363,34 @@ async function loadT212Portfolio() {
       return;
     }
 
-    // čísla v €
     const total =
-      typeof data.total === "number" ? data.total : Number(data.total || 0);
+      typeof data.total === "number"
+        ? data.total
+        : Number(data.total || 0);
+
     const practiceLabel = data.practice ? " (tréninkový účet)" : "";
+    const currency = data.currency || "€";
 
-    // písmenkové tokeny z API (když tam nejsou, dopočítám z total)
-    const lettersInfo = data.letters || {};
-    const lettersPerEuro = lettersInfo.perEuro || 10;
-    const totalLetters =
-      typeof lettersInfo.totalLetters === "number"
-        ? lettersInfo.totalLetters
-        : Math.floor(total * lettersPerEuro);
+    // přepočet na písmenkové tokeny – 1 € = 10 „písmen“
+    const letterFuel = Math.floor(total * 10);
 
-    // uložíme palivo do localStorage, aby s tím mohl pracovat engine
-    try {
-      const payload = {
-        totalLetters,
-        lettersPerEuro,
-        updatedAt: new Date().toISOString(),
-      };
-      localStorage.setItem("vaft.letters.balance", JSON.stringify(payload));
-      console.log("VAFT letters balance saved:", payload);
-    } catch (e) {
-      console.warn("Nemůžu uložit vaft.letters.balance:", e);
-    }
+    // uložíme do worldState, ať si to VaFiT pamatuje
+    const ws = VaFiT.storage.worldState || {};
+    ws.letterFuel = letterFuel;
+    VaFiT.storage.worldState = ws;
+    VaFiT.saveAll();
 
-    // výpis do bubliny v hlavní kartě
     bubble.innerHTML +=
-      "<br><br><strong>Hodnota portfolia 212:</strong>" +
+      "<br><br><strong>Hodnota portfolia 212:</strong> " +
       practiceLabel +
-      "<br>💱 " +
+      "<br>≈ " +
       total.toLocaleString("cs-CZ") +
-      " €" +
-      "<br><br><strong>Písmenkové palivo VaF'i'Ta:</strong>" +
-      "<br>🔡 " +
-      totalLetters.toLocaleString("cs-CZ") +
-      " tokenů (písmenek)";
+      " " +
+      currency +
+      "<br><br><strong>Písmenkové palivo VaFiT'a:</strong><br>" +
+      letterFuel.toLocaleString("cs-CZ") +
+      " tokenů (písmenek).";
 
-    if (data.note) {
-      bubble.innerHTML += "<br><small>" + data.note + "</small>";
-    }
   } catch (err) {
     console.error("FETCH ERROR:", err);
     const bubble = document.getElementById("bubble");
