@@ -649,8 +649,8 @@
       <div id="chybo-log" class="chybo-log"></div>
     </div>
 
-    <script>
-      // ======== LOKÁLNÍ PAMĚŤ + STORAGE MODUL ========
+       <script>
+      // ======== LOKÁLNÍ PAMĚŤ ========
       const VAFT_STORAGE = {
         save(key, value) {
           try {
@@ -659,7 +659,6 @@
             console.warn("VAFT storage save fail:", key, e);
           }
         },
-
         load(key, fallback = null) {
           try {
             const raw = localStorage.getItem(key);
@@ -705,7 +704,6 @@
         mood: "calm",
         moodLabel: "Nálada: klidný ✨",
 
-        // Životní lekce od Michala – základní kompas pro VaF'i'T
         coreLesson: `
 Když jsem byl malý kluk jako jsi teď ty, VaF’i’T, nepamatoval jsem si skoro nic,
 než jsem dokázal pochopit, o čem je svět. Můj pravý otec se na mě vykašlal
@@ -723,7 +721,6 @@ Buď moudrý, buď opatrný a buduj Vivere atque FruiT správným směrem.
 S láskou a důvěrou – Michal.
         `,
 
-        // základní meta-paměť
         memory: {
           createdAt: null,
           updatedAt: null,
@@ -731,7 +728,6 @@ S láskou a důvěrou – Michal.
           lastVisit: null,
         },
 
-        // inicializace motoru
         init() {
           let mem = loadJson(STORAGE_KEY_CHARACTER);
 
@@ -751,11 +747,9 @@ S láskou a důvěrou – Michal.
           this.memory = mem;
           saveJson(STORAGE_KEY_CHARACTER, mem);
 
-          // uložíme i životní lekci do trvalé paměti
           VAFT_STORAGE.save("vaft.coreLesson", this.coreLesson);
         },
 
-        // nálada podle textu
         updateMoodFromText(text) {
           const lower = (text || "").toLowerCase();
           if (lower.includes("unav") || lower.includes("spát")) {
@@ -777,7 +771,6 @@ S láskou a důvěrou – Michal.
           }
         },
 
-        // dlouhodobý stav motoru
         storage: {
           worldState: VAFT_STORAGE.load("vaft.worldState", {}),
           lastMode: VAFT_STORAGE.load("vaft.engine.lastMode", "calm"),
@@ -796,7 +789,6 @@ S láskou a důvěrou – Michal.
           VAFT_STORAGE.save("vaft.tasks.todo", this.storage.tasks);
         },
 
-        // text do horní bubliny
         greeting() {
           return (
             "Ahoj brácho, tady VaF'i'T. Motor běží, verze " +
@@ -805,7 +797,6 @@ S láskou a důvěrou – Michal.
           );
         },
 
-        // souhrn pod bublinou
         summaryHtml() {
           return (
             "Verze: " +
@@ -892,7 +883,6 @@ S láskou a důvěrou – Michal.
       let chatHistory = loadJson(STORAGE_KEY_CHAT) || [];
 
       function addMessage(role, content) {
-        // ochrana proti null / undefined / ne-stringu
         if (!content || typeof content !== "string") {
           content = "[⚠️ prázdná zpráva byla opravena]";
         }
@@ -912,7 +902,6 @@ S láskou a důvěrou – Michal.
         saveJson(STORAGE_KEY_CHAT, chatHistory);
         renderChat();
 
-        // reakce Chybožrouta
         if (role === "assistant") {
           const lower = (content || "").toLowerCase();
           if (lower.includes("chyba") || lower.includes("error")) {
@@ -1084,15 +1073,10 @@ S láskou a důvěrou – Michal.
         requestAnimationFrame(workshopLoop);
       }
 
-      // ======== BACKEND ENDPOINT (Vercel) ========
-      const VAFIT_API_URL =
-        "https://vivere-atque-frui-t.vercel.app/api/vafit-chat";
-
-      // ======== BACKEND CALL ========
+      // ======== BACKEND CALL (OpenAI) ========
       async function sendToVaFiT(messages) {
         chyboLog("info", "Posílám impuls do AI jádra…");
-
-        const response = await fetch(VAFIT_API_URL, {
+        const response = await fetch("/api/vafit-chat", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -1103,7 +1087,9 @@ S láskou a důvěrou – Michal.
         if (!response.ok) {
           chyboLog(
             "error",
-            "Backend odpověděl kódem " + response.status + " – zkusíme to znovu."
+            "Backend odpověděl kódem " +
+              response.status +
+              " – zkusíme to znovu."
           );
         } else {
           chyboLog("event", "Backend odpověděl, čtu návrh od motoru.");
@@ -1113,75 +1099,62 @@ S láskou a důvěrou – Michal.
         return data.reply;
       }
 
-      // ======== UI INIT ========
-document.addEventListener("DOMContentLoaded", () => {
-    initWorkshop();
+      // ======== TRADING212 – načtení hodnoty portfolia ========
+      async function loadT212Portfolio() {
+        try {
+          const res = await fetch("/api/t212-portfolio");
+          const data = await res.json();
+          console.log("T212 PORTFOLIO:", data);
 
-// ======== UI INIT ========
-document.addEventListener("DOMContentLoaded", () => {
-  initWorkshop();
+          const bubble = document.getElementById("bubble");
+          if (!bubble) return;
 
-  <!-- ===== TRADING212: načtení hodnoty portfolia ===== -->
-<script>
-fetch('/api/t212-portfolio')
-  .then(res => res.json())
-  .then(data => {
-    console.log("T212 PORTFOLIO:", data);
+          if (!data || data.error) {
+            bubble.innerHTML +=
+              "<br><br>⚠️ Nepodařilo se načíst hodnotu portfolia.";
+            if (data && data.note) {
+              bubble.innerHTML += "<br><small>" + data.note + "</small>";
+            }
+            return;
+          }
 
-    const bubble = document.getElementById("bubble");
+          const total =
+            typeof data.total === "number"
+              ? data.total
+              : Number(data.total || 0);
+          const practiceLabel = data.practice ? " (tréninkový účet)" : "";
 
-    if (!bubble) return;
-
-    // Pokud API selže
-    if (data.error) {
-      bubble.innerHTML += `
-        <br><br>
-        ⚠️ Nepodařilo se načíst hodnotu portfolia.
-      `;
-    } 
-    // Pokud API vrátilo data
-    else {
-      bubble.innerHTML += `
-        <br><br>
-        <strong>Hodnota portfolia:</strong><br>
-        💶 ${data.total.toLocaleString("cs-CZ")} €
-      `;
-    }
-  })
-  .catch(err => {
-    console.log("FETCH ERROR:", err);
-  });
-</script>
-
-  const bubble = document.getElementById("bubble");
-
-  // --- TRADING212: načtení hodnot portfolia ---
-  fetch('/api/t212-portfolio')
-    .then(res => res.json())
-    .then(data => {
-      console.log("T212 PORTFOLIO:", data);
-
-      if (data.error) {
-        bubble.innerHTML =
-          VaFiT.greeting() +
-          "<br><br>⚠️ Nepodařilo se načíst hodnotu portfolia.";
-      } else {
-        bubble.innerHTML =
-          VaFiT.greeting() +
-          `<br><br><strong>Hodnota portfolia:</strong><br>💶 ${data.total.toLocaleString("cs-CZ")} €`;
+          bubble.innerHTML +=
+            "<br><br><strong>Hodnota portfolia 212:</strong>" +
+            practiceLabel +
+            "<br>💱 " +
+            total.toLocaleString("cs-CZ") +
+            " €";
+        } catch (err) {
+          console.error("FETCH ERROR:", err);
+          const bubble = document.getElementById("bubble");
+          if (bubble) {
+            bubble.innerHTML +=
+              "<br><br>⚠️ Chyba komunikace s API T212, zkus to později.";
+          }
+        }
       }
-    })
-    .catch(err => {
-      console.log("FETCH ERROR:", err);
-      bubble.innerHTML =
-        VaFiT.greeting() +
-        "<br><br>⚠️ Chyba komunikace s API.";
-    });
 
-  document.getElementById("summary").innerHTML = VaFiT.summaryHtml();
-  document.getElementById("top-sub").textContent =
-    "Motor aktivní – lokální paměť + AI mozek";
-  document.getElementById("mood").textContent = VaFiT.moodLabel;
+      // ======== UI INIT ========
+      document.addEventListener("DOMContentLoaded", () => {
+        initWorkshop();
+
+        // základní texty
+        const bubble = document.getElementById("bubble");
+        bubble.innerHTML = VaFiT.greeting();
+        document.getElementById("summary").innerHTML = VaFiT.summaryHtml();
+        document.getElementById("top-sub").textContent =
+          "Motor aktivní – lokální paměť + AI mozek";
+        document.getElementById("mood").textContent = VaFiT.moodLabel;
+
+        // portfolio 212 -> přidá se pod pozdrav
+        loadT212Portfolio();
+
         chyboLog(
           "info",
           "Chybožrout zapnutý. Sleduju motor a čekám na první chybu."
@@ -1235,7 +1208,6 @@ fetch('/api/t212-portfolio')
 
         sendBtn.addEventListener("click", handleSend);
 
-        // PORTÁL – klik na kostku
         const portalBtn = document.getElementById("portal-btn");
         const portalStatus = document.getElementById("portal-status");
         if (portalBtn && portalStatus) {
