@@ -43,6 +43,7 @@
 
     if (!preview) return;
 
+    // === REŽIM KÓD – jen vykreslit, nevoláme AI ===
     if (mode === "code") {
       const raw = (codeInput.value || "").trim();
       if (!raw) {
@@ -59,7 +60,7 @@
       // vykreslení do náhledu (obdélník 3)
       preview.innerHTML = raw;
 
-      // téměř kosmetické – impuls pro mapu (obdélník 1)
+      // kosmetický impuls pro mapu (obdélník 1)
       if (typeof chyboLog === "function") {
         chyboLog(
           "event",
@@ -72,7 +73,7 @@
       return;
     }
 
-    // ===== PŘÍBĚH -> kód přes VaF'i'T (mode === "story") =====
+    // === REŽIM PŘÍBĚH – pošleme do VaF'i'T motoru ===
     const story = (storyInput.value || "").trim();
     if (!story) {
       preview.innerHTML =
@@ -88,7 +89,6 @@
         );
       }
 
-      // jednoduchá jednorázová zpráva do backendu
       const messages = [
         {
           role: "user",
@@ -99,10 +99,11 @@
         },
       ];
 
+      // sendToVaFiT už máš definovaný v indexu
       const reply = await sendToVaFiT(messages);
       const snippet = extractHtmlSnippet(reply) || "<p>[žádný kód]</p>";
 
-      // doplníme kód i do „Kód“ panelu, ať je vidět, co VaF'i'T vytvořil
+      // uložit
       if (codeInput) {
         codeInput.value = snippet;
         try {
@@ -113,6 +114,7 @@
         localStorage.setItem("VaFiT.lab.story", story);
       } catch {}
 
+      // vykreslit do náhledu
       preview.innerHTML = snippet;
 
       if (typeof chyboLog === "function") {
