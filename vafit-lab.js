@@ -1,5 +1,5 @@
 // vafit-lab.js
-// Dílna VaF'i'T – propojení obdélníků 1, 2, 3
+// Dílna VaF'i'T – propojení obdélníků 1, 2, 3 (chat ↔ dílna ↔ mapa)
 
 (function () {
   function $(id) {
@@ -21,7 +21,7 @@
     });
   }
 
-  // jednoduchý extractor kódu z odpovědi VaF'i'Ta
+  // vytáhne HTML snippet z odpovědi VaF'i'Ta (z ```html ... ```)
   function extractHtmlSnippet(text) {
     if (!text) return "";
     const codeBlock = text.match(/```html([\s\S]*?)```/i);
@@ -35,6 +35,7 @@
     return text.trim();
   }
 
+  // hlavní akce dílny
   async function runWorkshop() {
     const mode = getActiveTab();
     const codeInput = $("lab-code");
@@ -43,7 +44,7 @@
 
     if (!preview) return;
 
-    // === REŽIM KÓD – jen vykreslit, nevoláme AI ===
+    // ===== REŽIM KÓD =====
     if (mode === "code") {
       const raw = (codeInput.value || "").trim();
       if (!raw) {
@@ -52,15 +53,15 @@
         return;
       }
 
-      // uložíme kód do localStorage
+      // uložit kód
       try {
         localStorage.setItem("VaFiT.lab.code", raw);
       } catch {}
 
-      // vykreslení do náhledu (obdélník 3)
+      // vykreslit do náhledu
       preview.innerHTML = raw;
 
-      // kosmetický impuls pro mapu (obdélník 1)
+      // impuls do logu / mapy
       if (typeof chyboLog === "function") {
         chyboLog(
           "event",
@@ -70,10 +71,20 @@
       if (typeof chyboAddPulse === "function") {
         chyboAddPulse();
       }
+
+      // zapsat shrnutí do chatu, ať se to promítne do orbitu
+      if (typeof addMessage === "function") {
+        const shortCode = raw.slice(0, 400);
+        addMessage(
+          "user",
+          "[DÍLNA • KÓD]\n" + shortCode + (raw.length > 400 ? "…" : "")
+        );
+      }
+
       return;
     }
 
-    // === REŽIM PŘÍBĚH – pošleme do VaF'i'T motoru ===
+    // ===== REŽIM PŘÍBĚH -> kód přes VaF'i'T =====
     const story = (storyInput.value || "").trim();
     if (!story) {
       preview.innerHTML =
@@ -99,11 +110,11 @@
         },
       ];
 
-      // sendToVaFiT už máš definovaný v indexu
+      // používáme globální sendToVaFiT z index.html
       const reply = await sendToVaFiT(messages);
       const snippet = extractHtmlSnippet(reply) || "<p>[žádný kód]</p>";
 
-      // uložit
+      // uložit do panelu „Kód“ + localStorage
       if (codeInput) {
         codeInput.value = snippet;
         try {
@@ -114,9 +125,10 @@
         localStorage.setItem("VaFiT.lab.story", story);
       } catch {}
 
-      // vykreslit do náhledu
+      // vykreslit náhled
       preview.innerHTML = snippet;
 
+      // log + pulz
       if (typeof chyboLog === "function") {
         chyboLog(
           "event",
@@ -125,6 +137,23 @@
       }
       if (typeof chyboAddPulse === "function") {
         chyboAddPulse();
+      }
+
+      // propsat do chatu, ať orbit reaguje
+      if (typeof addMessage === "function") {
+        const shortStory = story.slice(0, 400);
+        const shortSnippet = snippet.slice(0, 400);
+        addMessage(
+          "user",
+          "[DÍLNA • PŘÍBĚH]\n" + shortStory + (story.length > 400 ? "…" : "")
+        );
+        addMessage(
+          "assistant",
+          "[VaF'i'T • KÓD Z PŘÍBĚHU]\n```html\n" +
+            shortSnippet +
+            (snippet.length > 400 ? "…" : "") +
+            "\n```"
+        );
       }
     } catch (err) {
       console.error("VaFiT-lab run error:", err);
