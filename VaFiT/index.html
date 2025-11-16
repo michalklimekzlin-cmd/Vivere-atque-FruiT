@@ -318,64 +318,61 @@
       }
 
       /* obdélník 3 – náhled toho, co VaF'i'T vykreslil */
-      .lab-preview-output {
+.lab-preview {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid #262a42;
+  background: radial-gradient(circle at top, #070814, #020208);
+}
+
+.lab-preview-title {
+  font-size: 10px;
+  opacity: 0.75;
+  margin-bottom: 4px;
+}
+
+/* Rámeček pro náhled – pevná plocha, nic nesmí utéct ven */
+.lab-preview-output {
+  position: relative;
   min-height: 120px;
+  max-height: 200px;
   border-radius: 10px;
   border: 1px dashed #363b5d;
   background: rgba(5, 6, 11, 0.9);
+  padding: 8px 9px;
   font-size: 11px;
   color: #f4f4f6;
 
-  /* NOVÉ – držet obsah v rámečku */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
   overflow: hidden;
 }
 
-/* vnitřní obal pro kód z dílny */
-.lab-preview-inner {
-  max-width: 100%;
-  max-height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* kdyby tam byly texty / bloky, ať se nezvětšují mimo */
-.lab-preview-inner > * {
-  max-width: 100%;
-  max-height: 100%;
-}
-
-/* vnitřní „sandbox“ – do něj se vloží kód z dílny */
-.lab-preview-inner {
+/* vnitřní wrapper pro postavu / prvek */
+.lab-preview-frame {
   position: relative;
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  max-height: 180px;
+
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* všechny prvky uvnitř se drží v tom boxu */
-.lab-preview-inner * {
+/* aby se objekt nevelel – přizpůsobí se rámečku */
+/* (funguje pro většinu „normálního“ HTML/CSS, co vygeneruje AI) */
+.lab-preview-frame > * {
   max-width: 100%;
   max-height: 100%;
-  box-sizing: border-box;
 }
 
 .lab-preview-output .placeholder {
   opacity: 0.55;
   font-size: 10px;
   text-align: center;
-}
-
-/* cokoliv, co VaF'i'T vykreslí, drž v rámci okna */
-.lab-preview-output > * {
-  max-width: 100%;
-  max-height: 100%;
 }
 
       /* === PORTÁL PANEL === */
