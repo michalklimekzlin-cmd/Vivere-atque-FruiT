@@ -1327,45 +1327,76 @@ S láskou a důvěrou – Michal.
       }
 
       // ======== TRADING212 – načtení hodnoty portfolia ========
-      async function loadT212Portfolio() {
-        try {
-          const res = await fetch("/api/t212-portfolio");
-          const data = await res.json();
-          console.log("T212 PORTFOLIO:", data);
+      // ======== TRADING212 – načtení hodnoty portfolia + písmenkové tokeny ========
+async function loadT212Portfolio() {
+  try {
+    const res = await fetch("/api/t212-portfolio");
+    const data = await res.json();
+    console.log("T212 PORTFOLIO:", data);
 
-          const bubble = document.getElementById("bubble");
-          if (!bubble) return;
+    const bubble = document.getElementById("bubble");
+    if (!bubble) return;
 
-          if (!data || data.error) {
-            bubble.innerHTML +=
-              "<br><br>⚠️ Nepodařilo se načíst hodnotu portfolia.";
-            if (data && data.note) {
-              bubble.innerHTML += "<br><small>" + data.note + "</small>";
-            }
-            return;
-          }
-
-          const total =
-            typeof data.total === "number"
-              ? data.total
-              : Number(data.total || 0);
-          const practiceLabel = data.practice ? " (tréninkový účet)" : "";
-
-          bubble.innerHTML +=
-            "<br><br><strong>Hodnota portfolia 212:</strong>" +
-            practiceLabel +
-            "<br>💱 " +
-            total.toLocaleString("cs-CZ") +
-            " €";
-        } catch (err) {
-          console.error("FETCH ERROR:", err);
-          const bubble = document.getElementById("bubble");
-          if (bubble) {
-            bubble.innerHTML +=
-              "<br><br>⚠️ Chyba komunikace s API T212, zkus to později.";
-          }
-        }
+    // když přišla chyba z API
+    if (!data || data.error) {
+      bubble.innerHTML +=
+        "<br><br>⚠️ Nepodařilo se načíst hodnotu portfolia.";
+      if (data && data.note) {
+        bubble.innerHTML += "<br><small>" + data.note + "</small>";
       }
+      return;
+    }
+
+    // čísla v €
+    const total =
+      typeof data.total === "number" ? data.total : Number(data.total || 0);
+    const practiceLabel = data.practice ? " (tréninkový účet)" : "";
+
+    // písmenkové tokeny z API (když tam nejsou, dopočítám z total)
+    const lettersInfo = data.letters || {};
+    const lettersPerEuro = lettersInfo.perEuro || 10;
+    const totalLetters =
+      typeof lettersInfo.totalLetters === "number"
+        ? lettersInfo.totalLetters
+        : Math.floor(total * lettersPerEuro);
+
+    // uložíme palivo do localStorage, aby s tím mohl pracovat engine
+    try {
+      const payload = {
+        totalLetters,
+        lettersPerEuro,
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem("vaft.letters.balance", JSON.stringify(payload));
+      console.log("VAFT letters balance saved:", payload);
+    } catch (e) {
+      console.warn("Nemůžu uložit vaft.letters.balance:", e);
+    }
+
+    // výpis do bubliny v hlavní kartě
+    bubble.innerHTML +=
+      "<br><br><strong>Hodnota portfolia 212:</strong>" +
+      practiceLabel +
+      "<br>💱 " +
+      total.toLocaleString("cs-CZ") +
+      " €" +
+      "<br><br><strong>Písmenkové palivo VaF'i'Ta:</strong>" +
+      "<br>🔡 " +
+      totalLetters.toLocaleString("cs-CZ") +
+      " tokenů (písmenek)";
+
+    if (data.note) {
+      bubble.innerHTML += "<br><small>" + data.note + "</small>";
+    }
+  } catch (err) {
+    console.error("FETCH ERROR:", err);
+    const bubble = document.getElementById("bubble");
+    if (bubble) {
+      bubble.innerHTML +=
+        "<br><br>⚠️ Chyba komunikace s API T212, zkus to později.";
+    }
+  }
+}
 
       // ======== UI INIT ========
       document.addEventListener("DOMContentLoaded", () => {
