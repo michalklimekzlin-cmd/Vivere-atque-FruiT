@@ -49,6 +49,7 @@
         display: block;
       }
 
+      /* wrapper na střed labelu */
       .label {
         position: absolute;
         inset: 0;
@@ -67,19 +68,6 @@
         text-align: center;
       }
 
-      .label-title {
-        font-size: 14px;
-        font-weight: 650;
-        letter-spacing: 0.18em;
-      }
-
-      .label-sub {
-        font-size: 10px;
-        opacity: 0.85;
-        letter-spacing: 0.09em;
-        text-transform: uppercase;
-      }
-
       .hud {
         position: absolute;
         left: 18px;
@@ -95,38 +83,43 @@
         font-size: 10px;
         opacity: 0.7;
       }
-      
-    .globe-symbol {
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 1px;
-  color: #f7e7c0;
-  text-shadow: 0 0 14px rgba(255, 210, 140, 0.9);
-  opacity: 0.95;
-  text-align: center;
-  line-height: 1.6;
-  pointer-events: none;
-}
 
-.globe-symbol span {
-  font-size: 17px;
-  font-weight: 700;
-  background: linear-gradient(90deg, #ffe9b0, #ffcc7a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 12px rgba(255, 200, 100, 0.6);
-}
+      /* tvůj symbol + Vivere atque Fru'ii'T uvnitř koule */
+      .globe-symbol {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: #f7e7c0;
+        text-shadow: 0 0 14px rgba(255, 210, 140, 0.9);
+        opacity: 0.95;
+        text-align: center;
+        line-height: 1.6;
+        pointer-events: none;
+      }
+
+      .globe-symbol span {
+        font-size: 17px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #ffe9b0, #ffcc7a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 12px rgba(255, 200, 100, 0.6);
+      }
+    </style>
+  </head>
 
   <body>
     <div class="root">
       <div class="stage">
         <canvas id="globe-canvas"></canvas>
 
-        <div class="label-inner">
-  <div class="globe-symbol">
-    {*(°.).)// <span>Vivere atque Fru'ii'T</span> \\(.(°)*]
-  </div>
-</div>
+        <div class="label">
+          <div class="label-inner">
+            <div class="globe-symbol">
+              {*(°.).)// <span>Vivere atque Fru'ii'T</span> \\(.(.°)*]
+            </div>
+          </div>
+        </div>
 
         <div class="hud">🌀 otáčej kouli prstem / myší</div>
         <div class="hud-right">v0.1 • test koule</div>
@@ -160,7 +153,7 @@
       resize();
       window.addEventListener("resize", resize);
 
-      // jednoduchý 3D model koule – mřížka (šířka/zlaté linky)
+      // jednoduchý 3D model koule – mřížka
       let rotY = 0.5;
       let rotX = -0.3;
       let drag = false;
@@ -176,7 +169,6 @@
         let x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
         let z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
 
-        // jednoduchá ortografická projekce (bez perspektivy)
         const scale = radius * 0.9;
         return {
           x: cx + x2 * scale,
