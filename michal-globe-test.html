@@ -22,22 +22,63 @@
         color: #f5f5f5;
       }
 
-      .root {
+      /* CELÝ RÁMEC KOLEM KOULE */
+      .world-shell {
         position: fixed;
         inset: 0;
         display: flex;
+        flex-direction: column;
+        padding: 10px 10px 14px;
+        box-sizing: border-box;
+        gap: 8px;
+      }
+
+      .world-header {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 11px;
+        opacity: 0.8;
+      }
+
+      .world-header-title {
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .world-header-right {
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      .world-main {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-height: 0;
+      }
+
+      /* STAGE S KOULÍ */
+      .stage-wrap {
+        flex: 1 1 auto;
+        display: flex;
         align-items: center;
         justify-content: center;
+        min-height: 0;
       }
 
       .stage {
         position: relative;
-        width: min(520px, 80vw);
-        height: min(520px, 80vw);
+        width: min(520px, 82vw);
+        height: min(520px, 82vw);
         border-radius: 32px;
         box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
         background: radial-gradient(circle at top, #06091a, #020208);
         border: 1px solid rgba(255, 255, 255, 0.04);
+        overflow: hidden;
       }
 
       #globe-canvas {
@@ -55,6 +96,7 @@
         bottom: 14px;
         font-size: 10px;
         opacity: 0.7;
+        pointer-events: none;
       }
 
       .hud-right {
@@ -63,18 +105,123 @@
         top: 14px;
         font-size: 10px;
         opacity: 0.7;
+        pointer-events: none;
+      }
+
+      /* SPODNÍ PLATFORMa – DOK PRO OBJEKTY / APPKY */
+      .world-dock {
+        flex: 0 0 auto;
+        border-radius: 18px;
+        padding: 8px 10px 9px;
+        background: radial-gradient(circle at top, #080910, #020208);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+        font-size: 11px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .world-dock-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+      }
+
+      .world-dock-title {
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .world-dock-sub {
+        font-size: 10px;
+        opacity: 0.7;
+      }
+
+      .world-dock-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 6px;
+        padding-bottom: 2px;
+      }
+
+      .world-dock-item {
+        flex: 0 0 auto;
+        min-width: 80px;
+        max-width: 130px;
+        padding: 6px 8px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: radial-gradient(circle at top, #151829, #050509);
+        font-size: 10px;
+        line-height: 1.3;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .world-dock-item-label {
+        font-weight: 600;
+        font-size: 10px;
+      }
+
+      .world-dock-item-tag {
+        font-size: 9px;
+        opacity: 0.75;
+      }
+
+      .world-dock-empty {
+        font-size: 10px;
+        opacity: 0.6;
+      }
+
+      .world-dock-item:active {
+        transform: translateY(1px) scale(0.99);
+      }
+
+      @media (max-width: 480px) {
+        .world-dock {
+          padding-inline: 8px;
+        }
       }
     </style>
   </head>
 
   <body>
-    <div class="root">
-      <div class="stage">
-        <canvas id="globe-canvas"></canvas>
+    <div class="world-shell">
+      <header class="world-header">
+        <div class="world-header-title">Vivere atque FruiT • Platforma</div>
+        <div class="world-header-right">Michal Klimek × VaF'i'T × ChatGPT</div>
+      </header>
 
-        <div class="hud">🌀 otáčej kouli prstem / myší • ťukni na destičku pro název světa</div>
-        <div class="hud-right">v0.3 • koule se světy</div>
-      </div>
+      <main class="world-main">
+        <!-- STAGE S 3D KULÍ -->
+        <div class="stage-wrap">
+          <div class="stage">
+            <canvas id="globe-canvas"></canvas>
+
+            <div class="hud">🌀 otáčej kouli prstem / myší</div>
+            <div class="hud-right">v0.3 • koule + platforma</div>
+          </div>
+        </div>
+
+        <!-- SPODNÍ PLATFORMa PRO SVĚTY / APPKY -->
+        <section class="world-dock">
+          <div class="world-dock-header">
+            <div class="world-dock-title">Základní platforma Vivere atque FruiT</div>
+            <div class="world-dock-sub">
+              Tady budeme přidávat světy a aplikace z repozitáře.
+            </div>
+          </div>
+
+          <div id="world-dock-grid" class="world-dock-grid">
+            <!-- sem se budou renderovat položky z WORLD_PLATFORM -->
+          </div>
+        </section>
+      </main>
     </div>
 
     <script>
@@ -108,84 +255,9 @@
       let rotY = 0.5;
       let rotX = -0.3;
       let drag = false;
-      let dragMoved = false;
       let lastX = 0;
       let lastY = 0;
 
-      // === definice destiček (70 ks – 5 řad × 14 sloupců) ===
-      const latBands = 5;
-      const lonBands = 14;
-      const tiles = []; // trvalá data (lat/lon + label/link)
-      const visibleTiles = []; // přepočítané pro aktuální frame (projekce)
-
-      (function initTiles() {
-        const latMargin = 0.4; // nezasahujeme úplně k pólům
-        const latStep = (Math.PI - 2 * latMargin) / latBands;
-
-        let id = 0;
-        for (let i = 0; i < latBands; i++) {
-          const lat0 = -Math.PI / 2 + latMargin + i * latStep;
-          const lat1 = lat0 + latStep;
-
-          for (let j = 0; j < lonBands; j++) {
-            const lon0 = (j / lonBands) * Math.PI * 2;
-            const lon1 = ((j + 1) / lonBands) * Math.PI * 2;
-
-            tiles.push({
-              id,
-              lat0,
-              lat1,
-              lon0,
-              lon1,
-              label: "",
-              link: ""
-            });
-
-            id++;
-          }
-        }
-
-        // předvyplníme dva světy někde kolem "předku" koule
-        const midBand = Math.floor(latBands / 2); // prostřední pás
-        const centerCol = Math.floor(lonBands / 2);
-
-        const idxVaft = midBand * lonBands + centerCol;
-        const idxRevia = midBand * lonBands + centerCol + 1;
-
-        if (tiles[idxVaft]) tiles[idxVaft].label = "VaF'i'T";
-        if (tiles[idxRevia]) tiles[idxRevia].label = "Revia";
-
-        loadTilesState();
-      })();
-
-      function saveTilesState() {
-        try {
-          const minimal = tiles.map((t) => ({ id: t.id, label: t.label, link: t.link }));
-          localStorage.setItem("vaft_globe_tiles_v1", JSON.stringify(minimal));
-        } catch (e) {
-          // nic, jenom fallback – na některých prohlížečích nemusí projít
-        }
-      }
-
-      function loadTilesState() {
-        try {
-          const raw = localStorage.getItem("vaft_globe_tiles_v1");
-          if (!raw) return;
-          const parsed = JSON.parse(raw);
-          const byId = new Map(parsed.map((t) => [t.id, t]));
-          tiles.forEach((t) => {
-            const saved = byId.get(t.id);
-            if (saved) {
-              t.label = saved.label || "";
-              t.link = saved.link || "";
-            }
-          });
-        } catch (e) {
-          // ignorujeme
-        }
-      }
-
-      // projekce 3D → 2D
       function project(x, y, z) {
         // rotace kolem osy X
         let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
@@ -199,7 +271,7 @@
         return {
           x: cx + x2 * scale,
           y: cy + y1 * scale,
-          z: z2
+          z: z2,
         };
       }
 
@@ -253,10 +325,11 @@
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // mřížka – zlaté linky (jen jako atmosféra)
-        ctx.lineWidth = 0.8;
-        ctx.strokeStyle = "rgba(255, 210, 140, 0.45)";
+        // mřížka – zlaté linky
+        ctx.lineWidth = 0.9;
+        ctx.strokeStyle = "rgba(255, 210, 140, 0.9)";
 
+        // podélné kružnice (meridiány)
         const meridians = 12;
         for (let i = 0; i < meridians; i++) {
           const lon = (i / meridians) * Math.PI * 2;
@@ -280,6 +353,7 @@
           ctx.stroke();
         }
 
+        // rovnoběžky (paralely)
         const parallels = 8;
         for (let j = 1; j < parallels; j++) {
           const lat = (j / parallels) * Math.PI - Math.PI / 2;
@@ -303,99 +377,25 @@
           ctx.stroke();
         }
 
-        // === text uvnitř koule (na pásu) ===
+        // === text uvnitř koule (ty a já + logo) ===
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(rotY * 0.15);
-        ctx.font = "700 16px system-ui";
+
+        ctx.font = "700 15px system-ui";
         ctx.fillStyle = "rgba(255, 220, 150, 0.95)";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.shadowColor = "rgba(255, 200, 120, 0.9)";
         ctx.shadowBlur = 14;
+
         ctx.fillText(
           "{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]",
           0,
           0
         );
+
         ctx.restore();
-
-        // === destičky světů ===
-        visibleTiles.length = 0;
-
-        ctx.lineWidth = 1.0;
-        ctx.shadowBlur = 0;
-
-        for (const tile of tiles) {
-          const { lat0, lat1, lon0, lon1 } = tile;
-
-          // 4 rohy destičky
-          const corners3D = [
-            [lat0, lon0],
-            [lat0, lon1],
-            [lat1, lon1],
-            [lat1, lon0]
-          ].map(([lat, lon]) => {
-            const cl = Math.cos(lat);
-            const x = cl * Math.cos(lon);
-            const y = Math.sin(lat);
-            const z = cl * Math.sin(lon);
-            return project(x, y, z);
-          });
-
-          // průměrná Z – zda je destička před kamerou
-          const avgZ =
-            (corners3D[0].z +
-              corners3D[1].z +
-              corners3D[2].z +
-              corners3D[3].z) /
-            4;
-          if (avgZ < 0) continue;
-
-          // tvar destičky
-          ctx.beginPath();
-          ctx.moveTo(corners3D[0].x, corners3D[0].y);
-          for (let i = 1; i < corners3D.length; i++) {
-            ctx.lineTo(corners3D[i].x, corners3D[i].y);
-          }
-          ctx.closePath();
-
-          // lehké podbarvení
-          ctx.fillStyle = "rgba(12, 8, 4, 0.32)";
-          ctx.fill();
-
-          // rámeček
-          ctx.strokeStyle = "rgba(255, 230, 190, 0.8)";
-          ctx.stroke();
-
-          // střed destičky pro label a hitbox
-          const midLat = (lat0 + lat1) / 2;
-          const midLon = (lon0 + lon1) / 2;
-          const cl = Math.cos(midLat);
-          const cx3d = project(
-            cl * Math.cos(midLon),
-            Math.sin(midLat),
-            cl * Math.sin(midLon)
-          );
-
-          let label = tile.label;
-          if (label) {
-            ctx.font = "600 9px system-ui";
-            ctx.fillStyle = "rgba(255, 235, 210, 0.95)";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.shadowColor = "rgba(0,0,0,0.7)";
-            ctx.shadowBlur = 6;
-            ctx.fillText(label, cx3d.x, cx3d.y);
-            ctx.shadowBlur = 0;
-          }
-
-          visibleTiles.push({
-            id: tile.id,
-            corners: corners3D,
-            center: { x: cx3d.x, y: cx3d.y }
-          });
-        }
       }
 
       // plynulé otáčení podle času
@@ -406,7 +406,7 @@
         const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
-        rotY += 0.4 * dt; // vlastní otáčení
+        rotY += 0.4 * dt;
         drawGlobe();
 
         requestAnimationFrame(loop);
@@ -414,47 +414,9 @@
 
       requestAnimationFrame(loop);
 
-      // najde destičku podle bodu v plátně
-      function findTileAt(x, y) {
-        for (let i = visibleTiles.length - 1; i >= 0; i--) {
-          const tile = visibleTiles[i];
-          const poly = tile.corners;
-          ctx.beginPath();
-          ctx.moveTo(poly[0].x, poly[0].y);
-          for (let j = 1; j < poly.length; j++) {
-            ctx.lineTo(poly[j].x, poly[j].y);
-          }
-          ctx.closePath();
-          if (ctx.isPointInPath(x, y)) {
-            return tiles.find((t) => t.id === tile.id) || null;
-          }
-        }
-        return null;
-      }
-
-      function handleTap(clientX, clientY) {
-        const rect = canvas.getBoundingClientRect();
-        const x = (clientX - rect.left);
-        const y = (clientY - rect.top);
-
-        const tile = findTileAt(x, y);
-        if (!tile) return;
-
-        const currentName = tile.label || "";
-        const name = window.prompt(
-          "Název světa v této destičce:",
-          currentName
-        );
-        if (name === null) return;
-
-        tile.label = name.trim();
-        saveTilesState();
-      }
-
       // ovládání prstem / myší
       function pointerDown(e) {
         drag = true;
-        dragMoved = false;
         const touch = e.touches ? e.touches[0] : e;
         lastX = touch.clientX;
         lastY = touch.clientY;
@@ -467,11 +429,6 @@
         const y = touch.clientY;
         const dx = x - lastX;
         const dy = y - lastY;
-
-        if (Math.abs(dx) + Math.abs(dy) > 3) {
-          dragMoved = true;
-        }
-
         lastX = x;
         lastY = y;
 
@@ -480,15 +437,8 @@
         rotX = Math.max(-Math.PI / 2 + 0.2, Math.min(Math.PI / 2 - 0.2, rotX));
       }
 
-      function pointerUp(e) {
-        if (!drag) return;
+      function pointerUp() {
         drag = false;
-
-        const touch = e.changedTouches ? e.changedTouches[0] : e;
-        if (!dragMoved) {
-          // krátké ťuknutí = editace destičky
-          handleTap(touch.clientX, touch.clientY);
-        }
       }
 
       canvas.addEventListener("mousedown", pointerDown);
@@ -498,6 +448,58 @@
       canvas.addEventListener("touchstart", pointerDown, { passive: true });
       window.addEventListener("touchmove", pointerMove, { passive: true });
       window.addEventListener("touchend", pointerUp);
+
+      // ====== PLATFORMa – PŘIPRAVENÉ MÍSTO PRO SVĚTY / APPKY ======
+      const dockGrid = document.getElementById("world-dock-grid");
+      const worldSlots = [];
+
+      function renderDock() {
+        dockGrid.innerHTML = "";
+        if (!worldSlots.length) {
+          const empty = document.createElement("div");
+          empty.className = "world-dock-empty";
+          empty.textContent =
+            "Zatím žádné připojené světy. Brzy sem napojíme Revia, VaF'i'T, MapWorld a další.";
+          dockGrid.appendChild(empty);
+          return;
+        }
+
+        worldSlots.forEach((slot) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "world-dock-item";
+          btn.innerHTML =
+            '<div class="world-dock-item-label">' +
+            (slot.label || "Svět") +
+            "</div>" +
+            (slot.tag
+              ? '<div class="world-dock-item-tag">' + slot.tag + "</div>"
+              : "");
+          if (slot.href) {
+            btn.addEventListener("click", () => {
+              window.location.href = slot.href;
+            });
+          }
+          dockGrid.appendChild(btn);
+        });
+      }
+
+      window.WORLD_PLATFORM = {
+        addObject(slot) {
+          worldSlots.push(slot);
+          renderDock();
+        },
+      };
+
+      // ZATÍM NECHÁVÁM BEZ OBSAHU – AŽ BUDEŠ CHTÍT, PŘIDÁME NAPŘ.:
+      // WORLD_PLATFORM.addObject({
+      //   id: "vafit",
+      //   label: "VaF'i'T Motor",
+      //   tag: "chat + písmenka",
+      //   href: "./VaFiT/index.html"
+      // });
+
+      renderDock();
     </script>
   </body>
 </html>
