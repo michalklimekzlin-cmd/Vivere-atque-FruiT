@@ -73,7 +73,7 @@
         <canvas id="globe-canvas"></canvas>
 
         <div class="hud">🌀 otáčej kouli prstem / myší</div>
-        <div class="hud-right">v0.2 • test koule</div>
+        <div class="hud-right">v0.3 • koule se světy</div>
       </div>
     </div>
 
@@ -110,6 +110,53 @@
       let drag = false;
       let lastX = 0;
       let lastY = 0;
+
+      // data pro budoucí světy – TADY SI PAK PŘEPÍŠEŠ url A name
+      const worldSlots = [
+        {
+          id: "slot-1",
+          name: "VaF'i'T Core",
+          url: "#",
+          lat: 0.1,
+          lon: 0,
+        },
+        {
+          id: "slot-2",
+          name: "Braska-Hlava",
+          url: "#",
+          lat: 0.15,
+          lon: Math.PI / 3,
+        },
+        {
+          id: "slot-3",
+          name: "Revia",
+          url: "#",
+          lat: 0.15,
+          lon: (2 * Math.PI) / 3,
+        },
+        {
+          id: "slot-4",
+          name: "BearHead",
+          url: "#",
+          lat: -0.1,
+          lon: Math.PI / 6,
+        },
+        {
+          id: "slot-5",
+          name: "Comet",
+          url: "#",
+          lat: -0.15,
+          lon: (-2 * Math.PI) / 3,
+        },
+        {
+          id: "slot-6",
+          name: "Doll",
+          url: "#",
+          lat: 0,
+          lon: -Math.PI / 2,
+        },
+      ];
+      // při kreslení do každého slotu doplníme .screenX/.screenY/.hitR
 
       function project(x, y, z) {
         // rotace kolem osy X
@@ -230,10 +277,82 @@
           ctx.stroke();
         }
 
-        // === text uvnitř koule ===
+        // === SLOTY / ČTVEREČKY NA KOULI ===
+        const slotSize = radius * 0.12; // velikost čtverečku podle velikosti koule
+        for (const slot of worldSlots) {
+          const cosLat = Math.cos(slot.lat);
+          const sinLat = Math.sin(slot.lat);
+          const x3 = cosLat * Math.cos(slot.lon);
+          const y3 = sinLat;
+          const z3 = cosLat * Math.sin(slot.lon);
+          const p = project(x3, y3, z3);
+
+          // kresli jen přední stranu
+          if (p.z >= 0) {
+            const w = slotSize;
+            const h = slotSize * 0.65;
+
+            // uložíme pozici pro klikání
+            slot.screenX = p.x;
+            slot.screenY = p.y;
+            slot.hitR = Math.max(w, h) * 0.6;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+
+            // jemné natočení podle "šířky" – jen vizuální efekt
+            ctx.rotate(-rotY * 0.15);
+
+            // podklad čtverečku
+            const grd = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
+            grd.addColorStop(0, "rgba(40, 25, 10, 0.95)");
+            grd.addColorStop(1, "rgba(80, 50, 20, 0.98)");
+            ctx.fillStyle = grd;
+            ctx.strokeStyle = "rgba(255, 210, 140, 0.95)";
+            ctx.lineWidth = 1.2;
+            ctx.shadowColor = "rgba(255, 210, 140, 0.8)";
+            ctx.shadowBlur = 8;
+
+            const r = 6;
+            ctx.beginPath();
+            ctx.moveTo(-w / 2 + r, -h / 2);
+            ctx.lineTo(w / 2 - r, -h / 2);
+            ctx.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
+            ctx.lineTo(w / 2, h / 2 - r);
+            ctx.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
+            ctx.lineTo(-w / 2 + r, h / 2);
+            ctx.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
+            ctx.lineTo(-w / 2, -h / 2 + r);
+            ctx.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // text v čtverečku (zkratka jména)
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "rgba(255, 230, 180, 0.95)";
+            ctx.font = "600 10px system-ui";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            const label =
+              slot.name.length > 10
+                ? slot.name.slice(0, 9) + "…"
+                : slot.name;
+            ctx.fillText(label, 0, 0);
+
+            ctx.restore();
+          } else {
+            // není vidět => pro klikání vypneme
+            slot.screenX = null;
+            slot.screenY = null;
+            slot.hitR = 0;
+          }
+        }
+
+        // === text uvnitř koule (náš glyph) ===
         ctx.save();
         ctx.translate(cx, cy);
-        // lehké natočení podle rotace koule, ať to dýchá
         ctx.rotate(rotY * 0.15);
 
         ctx.font = "700 16px system-ui";
@@ -269,12 +388,17 @@
 
       requestAnimationFrame(loop);
 
-      // ovládání prstem / myší
+      // ovládání prstem / myší + rozlišení drag vs tap
+      let downX = 0;
+      let downY = 0;
+
       function pointerDown(e) {
         drag = true;
         const touch = e.touches ? e.touches[0] : e;
         lastX = touch.clientX;
         lastY = touch.clientY;
+        downX = lastX;
+        downY = lastY;
       }
 
       function pointerMove(e) {
@@ -292,7 +416,40 @@
         rotX = Math.max(-Math.PI / 2 + 0.2, Math.min(Math.PI / 2 - 0.2, rotX));
       }
 
-      function pointerUp() {
+      function handleTap(x, y) {
+        for (const slot of worldSlots) {
+          if (slot.screenX == null) continue;
+          const dx = x - slot.screenX;
+          const dy = y - slot.screenY;
+          if (dx * dx + dy * dy <= (slot.hitR || 0) ** 2) {
+            // když má nastavenou URL, jdeme tam, jinak jen info
+            if (slot.url && slot.url !== "#") {
+              window.location.href = slot.url;
+            } else {
+              alert(
+                "Slot: " +
+                  slot.name +
+                  " • tady později připojíme svět / aplikaci."
+              );
+            }
+            break;
+          }
+        }
+      }
+
+      function pointerUp(e) {
+        const touch = e.changedTouches ? e.changedTouches[0] : e;
+        const upX = touch.clientX;
+        const upY = touch.clientY;
+
+        const moveDist2 =
+          (upX - downX) * (upX - downX) + (upY - downY) * (upY - downY);
+
+        // pokud se prst skoro nepohnul => bereme to jako tap na slot
+        if (moveDist2 < 16) {
+          handleTap(upX, upY);
+        }
+
         drag = false;
       }
 
