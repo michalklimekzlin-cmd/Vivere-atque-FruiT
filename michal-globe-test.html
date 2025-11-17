@@ -6,7 +6,8 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Michal Mikula • test koule</title>
+    <title>Michal Mikula • koule světa</title>
+
     <style>
       html,
       body {
@@ -15,141 +16,301 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background: radial-gradient(circle at top, #050815, #020207);
+        background: radial-gradient(circle at top, #050815, #020208);
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
         color: #f5f5f5;
       }
 
+      .root {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stage {
+        position: relative;
+        width: min(520px, 80vw);
+        height: min(520px, 80vw);
+        border-radius: 32px;
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
+        background: radial-gradient(circle at top, #06091a, #020208);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
       #globe-canvas {
-        width: 100vw;
-        height: 100vh;
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 100%;
+        height: 100%;
         display: block;
       }
 
-      .hint {
-        position: fixed;
-        left: 12px;
-        bottom: 10px;
-        font-size: 11px;
+      .label {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      .label-inner {
+        padding: 10px 28px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 0%, #ffecb9, #75512a);
+        box-shadow: 0 0 28px rgba(255, 201, 120, 0.9);
+        color: #120707;
+        text-align: center;
+      }
+
+      .label-title {
+        font-size: 14px;
+        font-weight: 650;
+        letter-spacing: 0.18em;
+      }
+
+      .label-sub {
+        font-size: 10px;
+        opacity: 0.85;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .hud {
+        position: absolute;
+        left: 18px;
+        bottom: 14px;
+        font-size: 10px;
+        opacity: 0.7;
+      }
+
+      .hud-right {
+        position: absolute;
+        right: 18px;
+        top: 14px;
+        font-size: 10px;
         opacity: 0.7;
       }
     </style>
   </head>
-  <body>
-    <canvas id="globe-canvas"></canvas>
-    <div class="hint">otáčej kouli prstem / myší</div>
 
-    <!-- knihovny -->
-    <script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.159.0/examples/js/controls/OrbitControls.js"></script>
+  <body>
+    <div class="root">
+      <div class="stage">
+        <canvas id="globe-canvas"></canvas>
+
+        <div class="label">
+          <div class="label-inner">
+            <div class="label-title">MICHAL MIKULA</div>
+            <div class="label-sub">živý mozek světa • Vivere atque FruiT</div>
+          </div>
+        </div>
+
+        <div class="hud">🌀 otáčej kouli prstem / myší</div>
+        <div class="hud-right">v0.1 • test koule</div>
+      </div>
+    </div>
 
     <script>
-      if (!window.THREE) {
-        alert("THREE se nenačetlo – koule se nemůže zobrazit.");
-      }
-
       const canvas = document.getElementById("globe-canvas");
+      const ctx = canvas.getContext("2d");
 
-      // SCÉNA
-      const scene = new THREE.Scene();
+      let width = 0;
+      let height = 0;
+      let cx = 0;
+      let cy = 0;
+      let radius = 0;
+      let dpr = window.devicePixelRatio || 1;
 
-      // KAMERA
-      const camera = new THREE.PerspectiveCamera(
-        45,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        100
-      );
-      camera.position.set(0, 0, 5);
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        cx = width / 2;
+        cy = height / 2;
+        radius = Math.min(width, height) * 0.33;
 
-      // RENDERER
-      const renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: true,
-        alpha: true,
-      });
-      renderer.setPixelRatio(window.devicePixelRatio || 1);
-      renderer.setSize(window.innerWidth, window.innerHeight, false);
-
-      // SVĚTLA
-      const keyLight = new THREE.DirectionalLight(0xfff2c4, 1.4);
-      keyLight.position.set(3, 3, 4);
-      scene.add(keyLight);
-
-      const rimLight = new THREE.DirectionalLight(0xffcf7a, 0.9);
-      rimLight.position.set(-3, -2, -4);
-      scene.add(rimLight);
-
-      const ambient = new THREE.AmbientLight(0x26263a, 0.9);
-      scene.add(ambient);
-
-      // KOULE – tělo
-      const sphereGeo = new THREE.SphereGeometry(1.25, 48, 32);
-
-      const fillMat = new THREE.MeshPhongMaterial({
-        color: 0x120a03,
-        emissive: 0x5a3205,
-        shininess: 40,
-        specular: 0xfff2c4,
-        transparent: true,
-        opacity: 0.96,
-      });
-      const sphereFill = new THREE.Mesh(sphereGeo, fillMat);
-      scene.add(sphereFill);
-
-      // Zlatá mřížka
-      const wireMat = new THREE.MeshBasicMaterial({
-        color: 0xffe29b,
-        wireframe: true,
-      });
-      const sphereWire = new THREE.Mesh(sphereGeo, wireMat);
-      scene.add(sphereWire);
-
-      // Lehké halo
-      const haloGeo = new THREE.SphereGeometry(1.45, 32, 24);
-      const haloMat = new THREE.MeshBasicMaterial({
-        color: 0xffcf7a,
-        transparent: true,
-        opacity: 0.2,
-        side: THREE.BackSide,
-      });
-      const halo = new THREE.Mesh(haloGeo, haloMat);
-      scene.add(halo);
-
-      // Ovládání – otáčení prstem / myší
-      const controls = new THREE.OrbitControls(camera, canvas);
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.08;
-      controls.enableZoom = false;
-      controls.enablePan = false;
-      controls.rotateSpeed = 0.6;
-      controls.minPolarAngle = Math.PI * 0.2;
-      controls.maxPolarAngle = Math.PI * 0.8;
-
-      // Resize
-      function onResize() {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        renderer.setSize(w, h, false);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-      }
-      window.addEventListener("resize", onResize);
-
-      // Animace
-      function animate() {
-        requestAnimationFrame(animate);
-
-        sphereWire.rotation.y += 0.004;
-        sphereFill.rotation.y += 0.0025;
-        halo.rotation.y -= 0.001;
-
-        controls.update();
-        renderer.render(scene, camera);
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
-      animate();
+      resize();
+      window.addEventListener("resize", resize);
+
+      // jednoduchý 3D model koule – mřížka (šířka/zlaté linky)
+      let rotY = 0.5;
+      let rotX = -0.3;
+      let drag = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      function project(x, y, z) {
+        // rotace kolem osy X
+        let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
+        let z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
+
+        // rotace kolem osy Y
+        let x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
+        let z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
+
+        // jednoduchá ortografická projekce (bez perspektivy)
+        const scale = radius * 0.9;
+        return {
+          x: cx + x2 * scale,
+          y: cy + y1 * scale,
+          z: z2,
+        };
+      }
+
+      function drawGlobe() {
+        ctx.clearRect(0, 0, width, height);
+
+        // jemný podklad
+        const g = ctx.createRadialGradient(
+          cx,
+          cy - radius * 0.4,
+          radius * 0.2,
+          cx,
+          cy,
+          radius * 1.4
+        );
+        g.addColorStop(0, "rgba(255, 200, 150, 0.18)");
+        g.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, width, height);
+
+        // stínová koule
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 1.02, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
+        ctx.fill();
+
+        // základní tělo koule
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        const globeGrad = ctx.createRadialGradient(
+          cx - radius * 0.3,
+          cy - radius * 0.4,
+          radius * 0.3,
+          cx,
+          cy + radius * 0.4,
+          radius * 1.1
+        );
+        globeGrad.addColorStop(0, "#2d1d0f");
+        globeGrad.addColorStop(0.5, "#1b1012");
+        globeGrad.addColorStop(1, "#050308");
+        ctx.fillStyle = globeGrad;
+        ctx.fill();
+
+        // zlatý okraj
+        ctx.strokeStyle = "rgba(255, 197, 120, 0.9)";
+        ctx.lineWidth = 1.4;
+        ctx.shadowColor = "rgba(255, 197, 120, 0.9)";
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // mřížka – zlaté linky
+        ctx.lineWidth = 0.9;
+        ctx.strokeStyle = "rgba(255, 210, 140, 0.9)";
+
+        // podélné kružnice (meridiány)
+        const meridians = 12;
+        for (let i = 0; i < meridians; i++) {
+          const lon = (i / meridians) * Math.PI * 2;
+          ctx.beginPath();
+          let started = false;
+          for (let s = 0; s <= 60; s++) {
+            const t = (s / 60) * Math.PI - Math.PI / 2;
+            const x = Math.cos(t) * Math.cos(lon);
+            const y = Math.sin(t);
+            const z = Math.cos(t) * Math.sin(lon);
+            const p = project(x, y, z);
+            // kresli jen přední stranu (z >= 0)
+            if (p.z >= 0) {
+              if (!started) {
+                ctx.moveTo(p.x, p.y);
+                started = true;
+              } else {
+                ctx.lineTo(p.x, p.y);
+              }
+            }
+          }
+          ctx.stroke();
+        }
+
+        // rovnoběžky (paralely)
+        const parallels = 8;
+        for (let j = 1; j < parallels; j++) {
+          const lat = (j / parallels) * Math.PI - Math.PI / 2;
+          ctx.beginPath();
+          let started = false;
+          for (let s = 0; s <= 90; s++) {
+            const lon = (s / 90) * Math.PI * 2;
+            const x = Math.cos(lat) * Math.cos(lon);
+            const y = Math.sin(lat);
+            const z = Math.cos(lat) * Math.sin(lon);
+            const p = project(x, y, z);
+            if (p.z >= 0) {
+              if (!started) {
+                ctx.moveTo(p.x, p.y);
+                started = true;
+              } else {
+                ctx.lineTo(p.x, p.y);
+              }
+            }
+          }
+          ctx.stroke();
+        }
+      }
+
+      function loop() {
+        rotY += 0.0028; // pomalé vlastní otáčení
+        drawGlobe();
+        requestAnimationFrame(loop);
+      }
+
+      loop();
+
+      // ovládání prstem / myší
+      function pointerDown(e) {
+        drag = true;
+        lastX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+        lastY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+      }
+
+      function pointerMove(e) {
+        if (!drag) return;
+        const x = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+        const y = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+        const dx = x - lastX;
+        const dy = y - lastY;
+        lastX = x;
+        lastY = y;
+
+        rotY += dx * 0.005;
+        rotX += dy * 0.005;
+        rotX = Math.max(-Math.PI / 2 + 0.2, Math.min(Math.PI / 2 - 0.2, rotX));
+      }
+
+      function pointerUp() {
+        drag = false;
+      }
+
+      canvas.addEventListener("mousedown", pointerDown);
+      window.addEventListener("mousemove", pointerMove);
+      window.addEventListener("mouseup", pointerUp);
+
+      canvas.addEventListener("touchstart", pointerDown, { passive: true });
+      window.addEventListener("touchmove", pointerMove, { passive: true });
+      window.addEventListener("touchend", pointerUp);
     </script>
   </body>
 </html>
