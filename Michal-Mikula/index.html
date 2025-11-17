@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Michal Mikula • Vivere atque FruiT</title>
+
+    <style>
+      :root {
+        --gold: #ffc86b;
+        --bg-deep: #050509;
+        --bg-mid: #111321;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, #141827, var(--bg-deep));
+        color: #f5f5f5;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .mm-shell {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 10px 18px;
+      }
+
+      .mm-header {
+        width: 100%;
+        max-width: 980px;
+        margin-bottom: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 10px;
+      }
+
+      .mm-title {
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+      }
+
+      .mm-sub {
+        font-size: 11px;
+        opacity: 0.7;
+      }
+
+      .mm-badge {
+        font-size: 10px;
+        padding: 2px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 200, 107, 0.6);
+        background: radial-gradient(circle at 30% 10%, #ffe6b8, #3f2d15);
+        color: #140b05;
+        white-space: nowrap;
+      }
+
+      .mm-main {
+        position: relative;
+        width: 100%;
+        max-width: 980px;
+        flex: 1;
+        border-radius: 20px;
+        background: radial-gradient(circle at top, #181b2e, #050509);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.85);
+        border: 1px solid #262a42;
+        overflow: hidden;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+      }
+
+      /* 3D scéna */
+      #mm-scene {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      /* Text uvnitř koule (overlay, ale opticky uprostřed) */
+      .mm-center-label {
+        pointer-events: none;
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .mm-center-label-inner {
+        text-align: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 20% 0, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.8));
+        border: 1px solid rgba(255, 200, 107, 0.65);
+        box-shadow: 0 0 22px rgba(255, 200, 107, 0.45);
+        backdrop-filter: blur(4px);
+      }
+
+      .mm-center-label-title {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .mm-center-label-sub {
+        margin-top: 2px;
+        font-size: 10px;
+        opacity: 0.8;
+      }
+
+      /* Tooltip pro světy */
+      .mm-world-tooltip {
+        position: absolute;
+        left: 50%;
+        bottom: 16px;
+        transform: translateX(-50%);
+        padding: 4px 10px;
+        font-size: 10px;
+        border-radius: 999px;
+        background: rgba(6, 7, 12, 0.95);
+        border: 1px solid rgba(255, 200, 107, 0.5);
+        opacity: 0;
+        transition: opacity 0.18s ease;
+        pointer-events: none;
+        max-width: 90%;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .mm-world-tooltip.visible {
+        opacity: 1;
+      }
+
+      /* Spodní info panel */
+      .mm-footer {
+        margin-top: 8px;
+        width: 100%;
+        max-width: 980px;
+        font-size: 10px;
+        opacity: 0.7;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .mm-footer span {
+        white-space: nowrap;
+      }
+
+      @media (max-width: 640px) {
+        .mm-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .mm-main {
+          border-radius: 18px;
+        }
+        .mm-center-label-title {
+          font-size: 13px;
+          letter-spacing: 0.12em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mm-shell">
+      <div class="mm-header">
+        <div>
+          <div class="mm-title">Michal Mikula • Hlavní sféra</div>
+          <div class="mm-sub">
+            Centrál AI &amp; světy Vivere atque FruiT uložené v jedné 3D kouli.
+          </div>
+        </div>
+        <div class="mm-badge">core&nbsp;AI&nbsp;• Michal&nbsp;Mikula</div>
+      </div>
+
+      <div class="mm-main">
+        <canvas id="mm-scene"></canvas>
+
+        <!-- „nápis uvnitř koule“ -->
+        <div class="mm-center-label">
+          <div class="mm-center-label-inner">
+            <div class="mm-center-label-title">MICHAL&nbsp;MIKULA</div>
+            <div class="mm-center-label-sub">
+              živý mozek světa • Vivere atque FruiT
+            </div>
+          </div>
+        </div>
+
+        <!-- tooltip vybraného světa -->
+        <div id="mm-world-tooltip" class="mm-world-tooltip"></div>
+      </div>
+
+      <div class="mm-footer">
+        <span>🎡 otáčej kouli prstem / myší</span>
+        <span>⬛ klepni na zlatý čtvereček – otevřít svět (zatím demo)</span>
+      </div>
+    </div>
+
+    <!-- Three.js + OrbitControls (z CDN, čistě statické, funguje na GitHub Pages) -->
+    <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+      // ====== ZÁKLAD SCÉNY ======
+      const canvas = document.getElementById("mm-scene");
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const scene = new THREE.Scene();
+      scene.background = null;
+
+      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+      camera.position.set(0, 0, 4.5);
+
+      const controls = new THREE.OrbitControls(camera, canvas);
+      controls.enableDamping = true;
+      controls.enablePan = false;
+      controls.minDistance = 3;
+      controls.maxDistance = 6;
+
+      const light1 = new THREE.DirectionalLight(0xfff3ce, 1.1);
+      light1.position.set(3, 4, 5);
+      scene.add(light1);
+
+      const light2 = new THREE.DirectionalLight(0x90b4ff, 0.7);
+      light2.position.set(-4, -2, -3);
+      scene.add(light2);
+
+      const ambient = new THREE.AmbientLight(0x555577, 0.7);
+      scene.add(ambient);
+
+      // ====== SFÉRA – tělo koule ======
+      const sphereRadius = 1.5;
+      const sphereGeom = new THREE.SphereGeometry(
+        sphereRadius,
+        40,
+        40
+      );
+
+      const sphereMat = new THREE.MeshPhongMaterial({
+        color: 0x050509,
+        emissive: 0x15192a,
+        transparent: true,
+        opacity: 0.92,
+        shininess: 40,
+      });
+
+      const sphereMesh = new THREE.Mesh(sphereGeom, sphereMat);
+      scene.add(sphereMesh);
+
+      // ====== MŘÍŽKA – černé + zlaté linky ======
+      const wireGeom = new THREE.WireframeGeometry(sphereGeom);
+
+      const wireMatGold = new THREE.LineBasicMaterial({
+        color: 0xffc86b,
+        linewidth: 1,
+      });
+
+      const wireMatDark = new THREE.LineBasicMaterial({
+        color: 0x000000,
+        linewidth: 2,
+      });
+
+      const wireGold = new THREE.LineSegments(wireGeom, wireMatGold);
+      const wireDark = new THREE.LineSegments(wireGeom, wireMatDark);
+      wireDark.scale.set(1.003, 1.003, 1.003);
+
+      scene.add(wireDark);
+      scene.add(wireGold);
+
+      // ====== SVĚTOVÉ SLOTY – malé čtverečky na mřížce ======
+      const worldSlots = [
+        { id: "VaFiT", name: "VaF'i'T • Motor světa", lat: 20, lon: 30 },
+        { id: "Revia", name: "Revia • Most mezi světy", lat: -10, lon: 120 },
+        { id: "Bear", name: "VaFT Bear • Dětský svět", lat: 40, lon: -80 },
+        { id: "MichalAI", name: "Michal AI Al Klimek", lat: -35, lon: -150 },
+      ];
+
+      const worldMeshes = [];
+
+      function degToRad(d) {
+        return (d * Math.PI) / 180;
+      }
+
+      const quadGeom = new THREE.PlaneGeometry(0.18, 0.18);
+
+      worldSlots.forEach((slot) => {
+        const mat = new THREE.MeshBasicMaterial({
+          color: 0xffc86b,
+          opacity: 0.9,
+          transparent: true,
+          side: THREE.DoubleSide,
+        });
+
+        const mesh = new THREE.Mesh(quadGeom, mat);
+        mesh.userData.slot = slot;
+
+        const phi = degToRad(90 - slot.lat);
+        const theta = degToRad(slot.lon + 180);
+
+        const r = sphereRadius * 1.01;
+        mesh.position.set(
+          r * Math.sin(phi) * Math.cos(theta),
+          r * Math.cos(phi),
+          r * Math.sin(phi) * Math.sin(theta)
+        );
+
+        mesh.lookAt(0, 0, 0);
+        mesh.rotateY(Math.PI); // aby "čtvereček" čelil ven
+
+        scene.add(mesh);
+        worldMeshes.push(mesh);
+      });
+
+      // ====== VÝBĚR SVĚTA (RAYCASTER) ======
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+      const tooltip = document.getElementById("mm-world-tooltip");
+      let lastHoverWorld = null;
+      let clickDownTime = 0;
+
+      function updatePointer(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x =
+          ( (event.clientX || (event.touches && event.touches[0].clientX)) -
+            rect.left ) / rect.width;
+        const y =
+          ( (event.clientY || (event.touches && event.touches[0].clientY)) -
+            rect.top ) / rect.height;
+        pointer.x = x * 2 - 1;
+        pointer.y = -(y * 2 - 1);
+      }
+
+      function checkIntersections() {
+        raycaster.setFromCamera(pointer, camera);
+        const hits = raycaster.intersectObjects(worldMeshes, false);
+        if (hits.length > 0) {
+          const slot = hits[0].object.userData.slot;
+          lastHoverWorld = slot;
+          tooltip.textContent = "Svět: " + slot.name + " (klepni pro vstup)";
+          tooltip.classList.add("visible");
+        } else {
+          lastHoverWorld = null;
+          tooltip.classList.remove("visible");
+        }
+      }
+
+      canvas.addEventListener("pointermove", (e) => {
+        updatePointer(e);
+        checkIntersections();
+      });
+
+      canvas.addEventListener("pointerdown", (e) => {
+        clickDownTime = performance.now();
+        updatePointer(e);
+        checkIntersections();
+      });
+
+      canvas.addEventListener("pointerup", (e) => {
+        const clickDuration = performance.now() - clickDownTime;
+        updatePointer(e);
+        checkIntersections();
+
+        if (clickDuration < 250 && lastHoverWorld) {
+          const slot = lastHoverWorld;
+          alert(
+            "Otevřít svět: " +
+              slot.name +
+              "\n\nTady později navážeme na konkrétní aplikaci v repozitáři."
+          );
+          // Tady pak můžeš udělat:
+          // window.location.href = "../Vivere-atque-FruiT/" + slot.id + "/index.html";
+        }
+      });
+
+      // ====== REZIZE ======
+      function onResize() {
+        const rect = canvas.getBoundingClientRect();
+        const w = rect.width || window.innerWidth;
+        const h = rect.height || window.innerHeight * 0.7;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener("resize", onResize);
+      onResize();
+
+      // ====== ANIMAČNÍ LOOP ======
+      function loop() {
+        requestAnimationFrame(loop);
+        sphereMesh.rotation.y += 0.0008;
+        wireGold.rotation.y += 0.0008;
+        wireDark.rotation.y += 0.0008;
+
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      loop();
+
+      // ====== MINI AI OBAL – Michal Mikula (přesune se sem VaF'i'T logika) ======
+      const MichalMikulaCore = {
+        name: "Michal Mikula",
+        worlds: worldSlots,
+        greeting() {
+          return (
+            "Ahoj, jsem Michal Mikula – hlavní koule světa. " +
+            "Držím v sobě všechny světy Vivere atque FruiT a hlídám, aby se neztratily."
+          );
+        },
+      };
+
+      console.log(MichalMikulaCore.greeting());
+    </script>
+  </body>
+</html>
