@@ -110,53 +110,37 @@
       let drag = false;
       let lastX = 0;
       let lastY = 0;
+      let movedDuringDrag = 0;
 
-      // data pro budoucí světy – TADY SI PAK PŘEPÍŠEŠ url A name
-      const worldSlots = [
-        {
-          id: "slot-1",
-          name: "VaF'i'T Core",
-          url: "#",
-          lat: 0.1,
-          lon: 0,
-        },
-        {
-          id: "slot-2",
-          name: "Braska-Hlava",
-          url: "#",
-          lat: 0.15,
-          lon: Math.PI / 3,
-        },
-        {
-          id: "slot-3",
-          name: "Revia",
-          url: "#",
-          lat: 0.15,
-          lon: (2 * Math.PI) / 3,
-        },
-        {
-          id: "slot-4",
-          name: "BearHead",
-          url: "#",
-          lat: -0.1,
-          lon: Math.PI / 6,
-        },
-        {
-          id: "slot-5",
-          name: "Comet",
-          url: "#",
-          lat: -0.15,
-          lon: (-2 * Math.PI) / 3,
-        },
-        {
-          id: "slot-6",
-          name: "Doll",
-          url: "#",
-          lat: 0,
-          lon: -Math.PI / 2,
-        },
+      // definice "čtverečků" (panelů) na kouli
+      // lat ~ výška (−π/2 dole, +π/2 nahoře), lon ~ šířka (−π .. +π)
+      const tileLatSize = 0.25;
+      const tileLonSize = 0.35;
+
+      const tiles = [
+        { id: 1, lat: 0.15, lon: -0.9, label: "", url: "" },
+        { id: 2, lat: 0.15, lon: -0.45, label: "Revia", url: "Revia/index.html" },
+        { id: 3, lat: 0.15, lon: 0.0, label: "VaF'i'T", url: "VaFiT/index.html" },
+        { id: 4, lat: 0.15, lon: 0.45, label: "", url: "" },
+
+        { id: 5, lat: -0.05, lon: -0.9, label: "", url: "" },
+        { id: 6, lat: -0.05, lon: -0.45, label: "", url: "" },
+        { id: 7, lat: -0.05, lon: 0.0, label: "", url: "" },
+        { id: 8, lat: -0.05, lon: 0.45, label: "", url: "" },
+
+        { id: 9, lat: -0.25, lon: -0.9, label: "", url: "" },
+        { id: 10, lat: -0.25, lon: -0.45, label: "", url: "" },
+        { id: 11, lat: -0.25, lon: 0.0, label: "", url: "" },
+        { id: 12, lat: -0.25, lon: 0.45, label: "", url: "" }
       ];
-      // při kreslení do každého slotu doplníme .screenX/.screenY/.hitR
+
+      // pomocné hodnoty pro klikání
+      tiles.forEach((t) => {
+        t.screenX = 0;
+        t.screenY = 0;
+        t.halfW = 0;
+        t.halfH = 0;
+      });
 
       function project(x, y, z) {
         // rotace kolem osy X
@@ -171,7 +155,7 @@
         return {
           x: cx + x2 * scale,
           y: cy + y1 * scale,
-          z: z2,
+          z: z2
         };
       }
 
@@ -277,80 +261,95 @@
           ctx.stroke();
         }
 
-        // === SLOTY / ČTVEREČKY NA KOULI ===
-        const slotSize = radius * 0.12; // velikost čtverečku podle velikosti koule
-        for (const slot of worldSlots) {
-          const cosLat = Math.cos(slot.lat);
-          const sinLat = Math.sin(slot.lat);
-          const x3 = cosLat * Math.cos(slot.lon);
-          const y3 = sinLat;
-          const z3 = cosLat * Math.sin(slot.lon);
-          const p = project(x3, y3, z3);
+        // === panely / čtverečky (světy) ===
+        ctx.lineWidth = 1.1;
+        tiles.forEach((tile) => {
+          const lat = tile.lat;
+          const lon = tile.lon;
 
-          // kresli jen přední stranu
-          if (p.z >= 0) {
-            const w = slotSize;
-            const h = slotSize * 0.65;
+          const latTop = lat + tileLatSize / 2;
+          const latBottom = lat - tileLatSize / 2;
+          const lonLeft = lon - tileLonSize / 2;
+          const lonRight = lon + tileLonSize / 2;
 
-            // uložíme pozici pro klikání
-            slot.screenX = p.x;
-            slot.screenY = p.y;
-            slot.hitR = Math.max(w, h) * 0.6;
+          const pTL = project(
+            Math.cos(latTop) * Math.cos(lonLeft),
+            Math.sin(latTop),
+            Math.cos(latTop) * Math.sin(lonLeft)
+          );
+          const pTR = project(
+            Math.cos(latTop) * Math.cos(lonRight),
+            Math.sin(latTop),
+            Math.cos(latTop) * Math.sin(lonRight)
+          );
+          const pBR = project(
+            Math.cos(latBottom) * Math.cos(lonRight),
+            Math.sin(latBottom),
+            Math.cos(latBottom) * Math.sin(lonRight)
+          );
+          const pBL = project(
+            Math.cos(latBottom) * Math.cos(lonLeft),
+            Math.sin(latBottom),
+            Math.cos(latBottom) * Math.sin(lonLeft)
+          );
 
+          // kreslíme jen panely na viditelné straně (aspoň část má z >= 0)
+          if (pTL.z < 0 && pTR.z < 0 && pBR.z < 0 && pBL.z < 0) {
+            tile.screenX = 0;
+            tile.screenY = 0;
+            tile.halfW = 0;
+            tile.halfH = 0;
+            return;
+          }
+
+          // vlastní panel
+          ctx.beginPath();
+          ctx.moveTo(pTL.x, pTL.y);
+          ctx.lineTo(pTR.x, pTR.y);
+          ctx.lineTo(pBR.x, pBR.y);
+          ctx.lineTo(pBL.x, pBL.y);
+          ctx.closePath();
+
+          ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+          ctx.strokeStyle = "rgba(255, 235, 190, 0.9)";
+          ctx.shadowColor = "rgba(255, 220, 150, 0.6)";
+          ctx.shadowBlur = 6;
+          ctx.fill();
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+
+          // výpočet středu + rozměru pro klikání
+          const centerX = (pTL.x + pTR.x + pBR.x + pBL.x) / 4;
+          const centerY = (pTL.y + pTR.y + pBR.y + pBL.y) / 4;
+          const wApprox =
+            (Math.hypot(pTR.x - pTL.x, pTR.y - pTL.y) +
+              Math.hypot(pBR.x - pBL.x, pBR.y - pBL.y)) /
+            2;
+          const hApprox =
+            (Math.hypot(pBL.x - pTL.x, pBL.y - pTL.y) +
+              Math.hypot(pBR.x - pTR.x, pBR.y - pTR.y)) /
+            2;
+
+          tile.screenX = centerX;
+          tile.screenY = centerY;
+          tile.halfW = wApprox * 0.45;
+          tile.halfH = hApprox * 0.45;
+
+          // text uvnitř panelu
+          if (tile.label) {
             ctx.save();
-            ctx.translate(p.x, p.y);
-
-            // jemné natočení podle "šířky" – jen vizuální efekt
-            ctx.rotate(-rotY * 0.15);
-
-            // podklad čtverečku
-            const grd = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
-            grd.addColorStop(0, "rgba(40, 25, 10, 0.95)");
-            grd.addColorStop(1, "rgba(80, 50, 20, 0.98)");
-            ctx.fillStyle = grd;
-            ctx.strokeStyle = "rgba(255, 210, 140, 0.95)";
-            ctx.lineWidth = 1.2;
-            ctx.shadowColor = "rgba(255, 210, 140, 0.8)";
-            ctx.shadowBlur = 8;
-
-            const r = 6;
-            ctx.beginPath();
-            ctx.moveTo(-w / 2 + r, -h / 2);
-            ctx.lineTo(w / 2 - r, -h / 2);
-            ctx.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
-            ctx.lineTo(w / 2, h / 2 - r);
-            ctx.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
-            ctx.lineTo(-w / 2 + r, h / 2);
-            ctx.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
-            ctx.lineTo(-w / 2, -h / 2 + r);
-            ctx.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // text v čtverečku (zkratka jména)
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = "rgba(255, 230, 180, 0.95)";
-            ctx.font = "600 10px system-ui";
+            ctx.font = "600 11px system-ui";
+            ctx.fillStyle = "rgba(255, 230, 190, 0.95)";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-
-            const label =
-              slot.name.length > 10
-                ? slot.name.slice(0, 9) + "…"
-                : slot.name;
-            ctx.fillText(label, 0, 0);
-
+            ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+            ctx.shadowBlur = 4;
+            ctx.fillText(tile.label, centerX, centerY);
             ctx.restore();
-          } else {
-            // není vidět => pro klikání vypneme
-            slot.screenX = null;
-            slot.screenY = null;
-            slot.hitR = 0;
           }
-        }
+        });
 
-        // === text uvnitř koule (náš glyph) ===
+        // === text uvnitř koule (náš společný symbol) ===
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(rotY * 0.15);
@@ -362,11 +361,7 @@
         ctx.shadowColor = "rgba(255, 200, 120, 0.9)";
         ctx.shadowBlur = 14;
 
-        ctx.fillText(
-          "{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]",
-          0,
-          0
-        );
+        ctx.fillText("{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]", 0, 0);
 
         ctx.restore();
       }
@@ -376,11 +371,10 @@
 
       function loop(timestamp) {
         if (!timestamp) timestamp = 0;
-        const dt = (timestamp - lastTime) / 1000; // sekundy mezi snímky
+        const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
-        // pomalejší, ale plynulé vlastní otáčení
-        rotY += 0.4 * dt;
+        rotY += 0.4 * dt; // plynulé vlastní otáčení
         drawGlobe();
 
         requestAnimationFrame(loop);
@@ -388,17 +382,13 @@
 
       requestAnimationFrame(loop);
 
-      // ovládání prstem / myší + rozlišení drag vs tap
-      let downX = 0;
-      let downY = 0;
-
+      // ovládání prstem / myší
       function pointerDown(e) {
         drag = true;
+        movedDuringDrag = 0;
         const touch = e.touches ? e.touches[0] : e;
         lastX = touch.clientX;
         lastY = touch.clientY;
-        downX = lastX;
-        downY = lastY;
       }
 
       function pointerMove(e) {
@@ -411,26 +401,32 @@
         lastX = x;
         lastY = y;
 
+        movedDuringDrag += Math.abs(dx) + Math.abs(dy);
+
         rotY += dx * 0.004;
         rotX += dy * 0.004;
         rotX = Math.max(-Math.PI / 2 + 0.2, Math.min(Math.PI / 2 - 0.2, rotX));
       }
 
-      function handleTap(x, y) {
-        for (const slot of worldSlots) {
-          if (slot.screenX == null) continue;
-          const dx = x - slot.screenX;
-          const dy = y - slot.screenY;
-          if (dx * dx + dy * dy <= (slot.hitR || 0) ** 2) {
-            // když má nastavenou URL, jdeme tam, jinak jen info
-            if (slot.url && slot.url !== "#") {
-              window.location.href = slot.url;
+      function handleClickScreen(x, y) {
+        // najdi panel, na který jsme klikli
+        for (const tile of tiles) {
+          if (!tile.halfW || !tile.halfH) continue;
+          const dx = x - tile.screenX;
+          const dy = y - tile.screenY;
+          if (Math.abs(dx) <= tile.halfW && Math.abs(dy) <= tile.halfH) {
+            // máme zásah do panelu
+            if (tile.url) {
+              // připravené světy – později napojíme na reálné cesty
+              window.location.href = tile.url;
             } else {
-              alert(
-                "Slot: " +
-                  slot.name +
-                  " • tady později připojíme svět / aplikaci."
+              const name = window.prompt(
+                "Jméno světa pro tento panel:",
+                tile.label || ""
               );
+              if (name !== null) {
+                tile.label = name.trim();
+              }
             }
             break;
           }
@@ -438,19 +434,16 @@
       }
 
       function pointerUp(e) {
-        const touch = e.changedTouches ? e.changedTouches[0] : e;
-        const upX = touch.clientX;
-        const upY = touch.clientY;
-
-        const moveDist2 =
-          (upX - downX) * (upX - downX) + (upY - downY) * (upY - downY);
-
-        // pokud se prst skoro nepohnul => bereme to jako tap na slot
-        if (moveDist2 < 16) {
-          handleTap(upX, upY);
-        }
-
+        if (!drag) return;
         drag = false;
+
+        // pokud se myš / prst skoro nehýbal, bereme to jako klik
+        if (movedDuringDrag < 8) {
+          const touch = e.changedTouches ? e.changedTouches[0] : e;
+          const x = touch.clientX;
+          const y = touch.clientY;
+          handleClickScreen(x, y);
+        }
       }
 
       canvas.addEventListener("mousedown", pointerDown);
