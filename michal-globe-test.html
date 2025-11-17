@@ -73,7 +73,7 @@
         <canvas id="globe-canvas"></canvas>
 
         <div class="hud">🌀 otáčej kouli prstem / myší</div>
-        <div class="hud-right">v0.2 • koule světa (B)</div>
+        <div class="hud-right">v0.2 • test koule</div>
       </div>
     </div>
 
@@ -86,39 +86,7 @@
       let cx = 0;
       let cy = 0;
       let radius = 0;
-
-      // omezíme dpr, ať iPad nevaří – B verze
-      let dpr = Math.min(window.devicePixelRatio || 1, 1.6);
-
-      let bgGlow = null;
-      let globeGrad = null;
-
-      function recomputeGradients() {
-        // podkladový glow
-        bgGlow = ctx.createRadialGradient(
-          cx,
-          cy - radius * 0.4,
-          radius * 0.15,
-          cx,
-          cy,
-          radius * 1.4
-        );
-        bgGlow.addColorStop(0, "rgba(255, 200, 150, 0.14)");
-        bgGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
-
-        // gradient těla koule
-        globeGrad = ctx.createRadialGradient(
-          cx - radius * 0.25,
-          cy - radius * 0.35,
-          radius * 0.25,
-          cx,
-          cy + radius * 0.35,
-          radius * 1.05
-        );
-        globeGrad.addColorStop(0, "#2b1c0f");
-        globeGrad.addColorStop(0.5, "#1a1012");
-        globeGrad.addColorStop(1, "#050308");
-      }
+      let dpr = window.devicePixelRatio || 1;
 
       function resize() {
         const rect = canvas.getBoundingClientRect();
@@ -131,16 +99,14 @@
         canvas.width = width * dpr;
         canvas.height = height * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        recomputeGradients();
       }
 
       resize();
       window.addEventListener("resize", resize);
 
-      // ====== 3D koule – B verze (méně čar, hladší) ======
-      let rotY = 0.4;
-      let rotX = -0.25;
+      // stav otáčení
+      let rotY = 0.5;
+      let rotX = -0.3;
       let drag = false;
       let lastX = 0;
       let lastY = 0;
@@ -165,48 +131,65 @@
       function drawGlobe() {
         ctx.clearRect(0, 0, width, height);
 
-        // podkladový glow
-        ctx.fillStyle = bgGlow;
+        // jemný podklad
+        const g = ctx.createRadialGradient(
+          cx,
+          cy - radius * 0.4,
+          radius * 0.2,
+          cx,
+          cy,
+          radius * 1.4
+        );
+        g.addColorStop(0, "rgba(255, 200, 150, 0.18)");
+        g.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = g;
         ctx.fillRect(0, 0, width, height);
 
         // stínová koule
         ctx.beginPath();
         ctx.arc(cx, cy, radius * 1.02, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,0,0,0.78)";
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
         ctx.fill();
 
-        // tělo koule
+        // základní tělo koule
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        const globeGrad = ctx.createRadialGradient(
+          cx - radius * 0.3,
+          cy - radius * 0.4,
+          radius * 0.3,
+          cx,
+          cy + radius * 0.4,
+          radius * 1.1
+        );
+        globeGrad.addColorStop(0, "#2d1d0f");
+        globeGrad.addColorStop(0.5, "#1b1012");
+        globeGrad.addColorStop(1, "#050308");
         ctx.fillStyle = globeGrad;
         ctx.fill();
 
-        // zlatý okraj – menší blur, ať je to lehčí
-        ctx.strokeStyle = "rgba(255, 197, 120, 0.95)";
-        ctx.lineWidth = 1.3;
-        ctx.shadowColor = "rgba(255, 197, 120, 0.65)";
-        ctx.shadowBlur = 4;
+        // zlatý okraj
+        ctx.strokeStyle = "rgba(255, 197, 120, 0.9)";
+        ctx.lineWidth = 1.4;
+        ctx.shadowColor = "rgba(255, 197, 120, 0.9)";
+        ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // mřížka – B verze: méně segmentů
-        ctx.lineWidth = 1;
+        // mřížka – zlaté linky
+        ctx.lineWidth = 0.9;
         ctx.strokeStyle = "rgba(255, 210, 140, 0.9)";
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
 
-        const meridians = 10; // bylo 12
-        const parallels = 6;  // bylo 8
-
-        // meridiány
+        // podélné kružnice (meridiány)
+        const meridians = 12;
         for (let i = 0; i < meridians; i++) {
           const lon = (i / meridians) * Math.PI * 2;
           ctx.beginPath();
           let started = false;
-          for (let s = 0; s <= 40; s++) {
-            const t = (s / 40) * Math.PI - Math.PI / 2;
+          for (let s = 0; s <= 60; s++) {
+            const t = (s / 60) * Math.PI - Math.PI / 2;
             const x = Math.cos(t) * Math.cos(lon);
             const y = Math.sin(t);
             const z = Math.cos(t) * Math.sin(lon);
@@ -220,16 +203,17 @@
               }
             }
           }
-          if (started) ctx.stroke();
+          ctx.stroke();
         }
 
-        // paralely
+        // rovnoběžky (paralely)
+        const parallels = 8;
         for (let j = 1; j < parallels; j++) {
           const lat = (j / parallels) * Math.PI - Math.PI / 2;
           ctx.beginPath();
           let started = false;
-          for (let s = 0; s <= 48; s++) {
-            const lon = (s / 48) * Math.PI * 2;
+          for (let s = 0; s <= 90; s++) {
+            const lon = (s / 90) * Math.PI * 2;
             const x = Math.cos(lat) * Math.cos(lon);
             const y = Math.sin(lat);
             const z = Math.cos(lat) * Math.sin(lon);
@@ -243,37 +227,47 @@
               }
             }
           }
-          if (started) ctx.stroke();
+          ctx.stroke();
         }
 
-        // === text UVNITŘ koule – nakloněný pásek ===
+        // === text uvnitř koule ===
         ctx.save();
+        ctx.translate(cx, cy);
+        // lehké natočení podle rotace koule, ať to dýchá
+        ctx.rotate(rotY * 0.15);
+
         ctx.font = "700 16px system-ui";
-        ctx.fillStyle = "rgba(255, 225, 160, 0.95)";
+        ctx.fillStyle = "rgba(255, 220, 150, 0.95)";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-
-        ctx.translate(cx, cy + rotX * 25);
-        ctx.rotate(rotY * 0.05); // jemné natočení podle rotace
-
         ctx.shadowColor = "rgba(255, 200, 120, 0.9)";
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 14;
+
         ctx.fillText(
-          "{*(°.).)// Vivere atque Fru'ii'T \\(.(.°)*]",
+          "{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]",
           0,
           0
         );
+
         ctx.restore();
       }
 
-      function loop() {
-        // pomalejší vlastní otáčení, aby to bylo hladší
-        rotY += 0.0016;
+      // plynulé otáčení podle času
+      let lastTime = 0;
+
+      function loop(timestamp) {
+        if (!timestamp) timestamp = 0;
+        const dt = (timestamp - lastTime) / 1000; // sekundy mezi snímky
+        lastTime = timestamp;
+
+        // pomalejší, ale plynulé vlastní otáčení
+        rotY += 0.4 * dt;
         drawGlobe();
+
         requestAnimationFrame(loop);
       }
 
-      loop();
+      requestAnimationFrame(loop);
 
       // ovládání prstem / myší
       function pointerDown(e) {
