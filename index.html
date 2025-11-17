@@ -2,1054 +2,440 @@
 <html lang="cs">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vivere atque FruiT</title>
-    <meta name="theme-color" content="#000000" />
-    <link rel="manifest" href="./manifest.json" />
-    <link rel="stylesheet" href="./style.css" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Michal Mikula • Vivere atque FruiT</title>
 
     <style>
       :root {
-        --bg: #05070a;
-        --panel: rgba(5, 8, 12, 0.35);
-        --stroke: rgba(255, 255, 255, 0.04);
-        --accent: #19d6ff;
-        color-scheme: dark;
+        --gold: #ffc86b;
+        --bg-deep: #050509;
+        --bg-mid: #111321;
+      }
+
+      * {
+        box-sizing: border-box;
       }
 
       body {
         margin: 0;
+        padding: 0;
         min-height: 100vh;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        color: #eef6ff;
-        /* obrázek přes CELÉ pozadí */
-        background: url('./AFA0870E-F586-4406-8BAA-0A7944120AA3.png') center center no-repeat fixed;
-        background-size: cover;
+        background: radial-gradient(circle at top, #141827, var(--bg-deep));
+        color: #f5f5f5;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
       }
 
-      /* poloprůhledné ztmavení obsahu, aby byl text čitelný */
-      .page-layer {
-        min-height: 100vh;
-        background: radial-gradient(circle at 20% 0%, rgba(10,20,30,0.6), rgba(2,4,8,0.9));
-      }
-
-      .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 16px;
-        background: rgba(5, 7, 10, 0.9);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(255,255,255,.04);
-      }
-      .brand-block { display: flex; flex-direction: column; gap: 2px; }
-      .brand-mini { font-size: .7rem; opacity: .65; }
-      .brand-title { font-weight: 600; font-size: 1.12rem; }
-      .role-badge { font-size: .68rem; color: #ffb6e1; }
-      .coins { text-align: right; font-size: .72rem; }
-      .coin-ver { opacity: .5; }
-
-      .revia-panel {
-        padding: 18px 16px 10px;
-      }
-      .revia-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-      .revia-title { font-weight: 600; }
-      .revia-link { color: #7dd7ff; font-size: .7rem; text-decoration: none; }
-      .rules {
-        font-size: .7rem;
-        opacity: .7;
-        display: flex;
-        gap: 12px;
-        margin-bottom: 6px;
-        flex-wrap: wrap;
-      }
-      .pulse-line {
-        font-size: .72rem;
-        display: flex;
-        gap: 6px;
-        align-items: center;
-      }
-      .pulse-dot {
-        width: 9px; height: 9px; border-radius: 999px;
-        background: #e93454;
-        box-shadow: 0 0 12px rgba(233, 52, 84, 0.7);
-      }
-
-      .center-orbit {
+      .mm-shell {
         position: relative;
-        width: min(340px, 90vw);
-        height: min(340px, 90vw);
-        margin: 14px auto 6px;
-      }
-      .vaft-core {
-        position: absolute;
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%) rotate(-12deg);
-        width: 180px; height: 180px;
-        border: 1px solid rgba(170,206,255,.08);
-        border-radius: 999px;
-        display: flex; align-items: center; justify-content: center;
-        text-align: center;
-        font-weight: 500;
-        background: radial-gradient(circle at 50% 35%, rgba(51, 72, 103, 0.18), rgba(5,7,10,0.1));
-      }
-      .orbit-node {
-        position: absolute;
-        width: 86px; height: 86px;
-        border-radius: 999px;
-        border: 1px solid rgba(196,253,205,.28);
-        display: flex; align-items: center; justify-content: center;
-        font-size: .7rem;
-        background: rgba(5,8,12,.3);
-      }
-      .node-glyph { bottom: 12%; left: 5%; }
-      .node-ai { top: 9%; right: 4%; }
-      .node-world { bottom: 9%; right: 8%; }
-
-      .tabs {
-        display: flex;
-        gap: 6px;
-        padding: 10px 10px 0;
-      }
-      .tab-btn {
         flex: 1;
-        background: rgba(8,11,13,.5);
-        border: none;
-        border-radius: 999px 999px 0 0;
-        padding: 8px 0 9px;
-        color: rgba(231,244,255,.55);
-        font-size: .78rem;
-      }
-      .tab-btn.active {
-        background: linear-gradient(120deg, #17d0ff, #17ffb9);
-        color: #02070a;
-        font-weight: 600;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 10px 18px;
       }
 
-      .panel {
-        display: none;
-        padding: 14px 14px 24px;
-        background: rgba(4,7,11,0.7);
-      }
-      .panel.active { display: block; }
-
-      .panel-title { font-weight: 600; margin-bottom: 10px; }
-      .panel-subtitle { font-size: .8rem; font-weight: 500; }
-
-      .label-sm {
-        font-size: .68rem;
-        opacity: .7;
-        display:block;
-        margin-bottom:3px;
-      }
-      .hero-input, .hero-select {
+      .mm-header {
         width: 100%;
-        background: rgba(1,1,1,.06);
-        border: 1px solid rgba(255,255,255,.015);
-        border-radius: 11px;
-        padding: 9px 10px;
-        color: #fff;
-        font-size: .82rem;
-        margin-bottom: 8px;
-      }
-      .btn-primary {
-        background: #0fb2ff;
-        color: #02070a;
-        font-weight: 600;
-        border: none;
-        border-radius: 999px;
-        padding: 9px 14px;
-        font-size: .8rem;
-      }
-      #heroesList {
-        margin-top: 10px;
-        font-size: .78rem;
-        opacity: .8;
-      }
-
-      /* Hlavoun chat */
-      #hlavoun-chat {
-        background: rgba(5,8,12,.35);
-        border: 1px solid rgba(255,255,255,.015);
-        border-radius: 16px;
-        padding: 6px 8px;
-        max-height: 240px;
-        overflow-y: auto;
-        margin-bottom: 8px;
-        font-size: .76rem;
-      }
-      #hlavoun-input {
-        width: calc(100% - 80px);
-        background: rgba(1,1,1,.12);
-        border: 1px solid rgba(255,255,255,.01);
-        border-radius: 999px;
-        padding: 8px 9px;
-        color: #fff;
-      }
-      .chat-row {
-        display: flex; gap: 6px; align-items: center;
+        max-width: 980px;
         margin-bottom: 6px;
-      }
-      .quick-row { display: flex; gap: 6px; flex-wrap: wrap; }
-      .quick-row button {
-        background: rgba(5,11,13,.25);
-        border: 1px solid rgba(255,255,255,.02);
-        border-radius: 999px;
-        padding: 6px 11px;
-        font-size: .72rem;
-        color: #fff;
-      }
-
-      /* system menu */
-      #systemMenu {
-        position: fixed;
-        bottom: 88px;
-        right: 12px;
-        background: rgba(5,8,12,.9);
-        border: 1px solid rgba(130,155,180,0.25);
-        border-radius: 16px;
-        padding: 14px 12px 10px;
-        color: #e8f5ff;
-        backdrop-filter: blur(14px);
-        min-width: 240px;
-        max-height: 60vh;
-        overflow-y: auto;
-        box-shadow: 0 8px 25px rgba(0,0,0,.35);
-        z-index: 200;
-      }
-      #systemMenu.hidden { display: none; }
-      #systemMenu h3 {
-        margin: 0 0 8px;
-        font-size: .78rem;
-        opacity: .8;
-        letter-spacing: .04em;
-      }
-      .sys-app {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 6px;
-      }
-      .sys-app-name { font-size: .72rem; }
-      .sys-app-btn {
-        background: rgba(112,194,227,.12);
-        border: 1px solid rgba(112,194,227,.35);
-        color: #e8f5ff;
-        border-radius: 9px;
-        font-size: .6rem;
-        padding: 3px 8px 4px;
+        align-items: baseline;
+        gap: 10px;
       }
 
-      /* Síť */
-      #vaft-nodes, #vaft-nodes-outer, #vaft-nodes-mirror, #vaft-nodes-origin {
-        display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;
-        font-size: .62rem;
-      }
-      .node-pill {
-        background: rgba(4,9,11,.35);
-        border:1px solid rgba(255,255,255,.01);
-        border-radius: 9px;
-        padding: 4px 7px;
-        font-size:.6rem;
+      .mm-title {
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
       }
 
-      /* Světy – grid */
-      #vaft-worlds-grid {
-        display:grid;
-        grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
-        gap:10px;
+      .mm-sub {
+        font-size: 11px;
+        opacity: 0.7;
       }
 
-      /* VafiT board */
-      .vafit-grid {
-        display:grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap:8px;
-        margin-top:10px;
-      }
-      .vafit-tile {
-        background: rgba(8,11,20,0.85);
-        border-radius:12px;
-        border:1px solid rgba(255,255,255,0.08);
-        padding:6px 4px;
-        text-align:center;
-        cursor:pointer;
-        font-size:.7rem;
-      }
-      .vafit-empty {
-        opacity:.25;
-        border-style:dotted;
-        cursor:default;
-      }
-      .vafit-symbol { font-size:1.2rem; margin-bottom:2px; }
-      .vafit-name { font-size:.65rem; opacity:.8; }
-
-      .vafit-detail {
-        margin-top:10px;
-        padding:8px;
-        border-radius:12px;
-        border:1px solid rgba(255,255,255,0.08);
-        background:rgba(4,8,14,0.9);
-        font-size:.72rem;
-      }
-      .vafit-detail-title {
-        font-weight:600;
-        margin-bottom:4px;
+      .mm-badge {
+        font-size: 10px;
+        padding: 2px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 200, 107, 0.6);
+        background: radial-gradient(circle at 30% 10%, #ffe6b8, #3f2d15);
+        color: #140b05;
+        white-space: nowrap;
       }
 
-      /* Světové karty */
-      .world-grid {
-        display:grid;
-        grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
-        gap:8px;
-        margin-top:10px;
-      }
-      .world-card {
-        padding:8px 10px;
-        border-radius:12px;
-        border:1px solid rgba(255,255,255,0.08);
-        background:rgba(8,10,18,0.85);
-        text-align:left;
-        font-size:.75rem;
-        cursor:pointer;
-      }
-      .world-note {
-        display:block;
-        font-size:.64rem;
-        opacity:.65;
-      }
-      .world-target {
-        margin-top:8px;
-        font-size:.75rem;
-        opacity:.85;
-        padding:8px;
-        border-radius:10px;
-        border:1px solid rgba(255,255,255,0.05);
-        background:rgba(3,5,10,0.85);
-      }
-
-      /* HUB – telefonní rámeček */
-      #wrap {
+      .mm-main {
         position: relative;
-        box-sizing: border-box;
         width: 100%;
-        max-width: 390px;
-        min-height: 820px;
-        margin: 24px auto 40px;
-        padding: 16px;
-        border-radius: 26px;
-        background: rgba(5, 5, 15, 0.84);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255,255,255,0.12);
+        max-width: 980px;
+        flex: 1;
+        border-radius: 20px;
+        background: radial-gradient(circle at top, #181b2e, #050509);
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.85);
+        border: 1px solid #262a42;
         overflow: hidden;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
       }
-      .slot {
-        position: absolute;
-        box-sizing: border-box;
-        background: rgba(34, 34, 52, 0.82);
-        border: 2px dashed rgba(255,255,255,0.18);
-        border-radius: 18px;
-        padding: 6px 8px;
-        font-size: 13px;
-        line-height: 1.2;
-      }
-      .slot textarea {
+
+      /* 3D scéna */
+      #mm-scene {
         width: 100%;
         height: 100%;
-        background: transparent;
-        border: none;
-        resize: none;
-        outline: none;
-        color: #fff;
-        font-size: 13px;
-        line-height: 1.25;
+        display: block;
       }
 
-      /* Rozmístění slotů pro iPhone 14 (v procentech) */
-      #s2  { top: 4%;  left: 4%;  width: 60%; height: 10%; }
-      #s3  { top: 4%;  right: 23%; width: 18%; height: 10%; }
-      #s4  { top: 4%;  right: 4%;  width: 22%; height: 20%; }
-
-      #s5  { top: 26%; right: 23%; width: 18%; height: 10%; }
-      #s6  { top: 26%; right: 4%;  width: 18%; height: 10%; }
-
-      #s1  { top: 40%; left: 40%; width: 18%; height: 10%; }
-
-      #s7  { top: 30%; left: 4%;  width: 18%; height: 10%; }
-      #s8  { top: 40%; left: 4%;  width: 30%; height: 18%; }
-      #s9  { top: 62%; left: 4%;  width: 30%; height: 18%; }
-      #s10 { top: 84%; left: 4%;  width: 18%; height: 10%; }
-
-      #s11 { top: 62%; right: 4%; width: 58%; height: 18%; }
-      #s12 { top: 84%; right: 4%; width: 58%; height: 12%; }
-
-      /* Glyph podpis v rohu */
-      #vaft-symbol {
-        position: fixed;
-        bottom: 10px;
-        right: 14px;
-        font-size: 20px;
-        opacity: 0.5;
-        letter-spacing: 1px;
-        animation: vaftAwaken 4s ease-in-out infinite alternate;
+      /* Text uvnitř koule (overlay, ale opticky uprostřed) */
+      .mm-center-label {
         pointer-events: none;
-        user-select: none;
-        z-index: 9999;
-      }
-      @keyframes vaftAwaken {
-        0% { opacity: 0; transform: scale(0.6); filter: blur(3px); }
-        60% { opacity: 1; transform: scale(1.3); filter: blur(0.5px); }
-        100% { opacity: 0.6; transform: scale(1); filter: blur(0); }
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      @media (max-width: 820px) {
-        .panel { margin-bottom: 12px; }
+      .mm-center-label-inner {
+        text-align: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 20% 0, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.8));
+        border: 1px solid rgba(255, 200, 107, 0.65);
+        box-shadow: 0 0 22px rgba(255, 200, 107, 0.45);
+        backdrop-filter: blur(4px);
+      }
+
+      .mm-center-label-title {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .mm-center-label-sub {
+        margin-top: 2px;
+        font-size: 10px;
+        opacity: 0.8;
+      }
+
+      /* Tooltip pro světy */
+      .mm-world-tooltip {
+        position: absolute;
+        left: 50%;
+        bottom: 16px;
+        transform: translateX(-50%);
+        padding: 4px 10px;
+        font-size: 10px;
+        border-radius: 999px;
+        background: rgba(6, 7, 12, 0.95);
+        border: 1px solid rgba(255, 200, 107, 0.5);
+        opacity: 0;
+        transition: opacity 0.18s ease;
+        pointer-events: none;
+        max-width: 90%;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .mm-world-tooltip.visible {
+        opacity: 1;
+      }
+
+      /* Spodní info panel */
+      .mm-footer {
+        margin-top: 8px;
+        width: 100%;
+        max-width: 980px;
+        font-size: 10px;
+        opacity: 0.7;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .mm-footer span {
+        white-space: nowrap;
+      }
+
+      @media (max-width: 640px) {
+        .mm-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .mm-main {
+          border-radius: 18px;
+        }
+        .mm-center-label-title {
+          font-size: 13px;
+          letter-spacing: 0.12em;
+        }
       }
     </style>
   </head>
-
   <body>
-    <div class="page-layer">
-      <!-- TOP -->
-      <div class="topbar">
-        <div class="brand-block">
-          <div class="brand-mini">Ĭ’♡ ↓</div>
-          <div class="brand-title">Vivere atque FruiT</div>
-          <div class="role-badge" id="core-status">🧠 Hlavoun systém • aktivní</div>
-        </div>
-        <div class="coins">
-          <div id="coins-main">0</div>
-          <div class="coin-ver">v0.31 • živý základ</div>
-        </div>
-      </div>
-
-      <!-- REVIA / STŘED -->
-      <div class="revia-panel">
-        <div class="revia-head">
-          <div class="revia-title">Revia</div>
-          <a class="revia-link" href="javascript:void(0)" onclick="openApp('./Revia/')">Otevřít Revii →</a>
-        </div>
-        <div class="rules">
-          <div>Pravidlo 1 : Přátelství</div>
-          <div>Pravidlo 2 : Vivere atque frui</div>
-        </div>
-        <div class="pulse-line">
-          <span class="pulse-dot"></span>
-          <span>❤️ svět: puls <span id="pulseTime">00:00:00</span></span>
-        </div>
-        <div class="center-orbit">
-          <div class="vaft-core">Vivere<br>atque FruiT</div>
-          <div class="orbit-node node-glyph">Glyph</div>
-          <div class="orbit-node node-ai">AI (Orbit)</div>
-          <div class="orbit-node node-world">World (Core)</div>
-        </div>
-      </div>
-
-      <!-- TABS -->
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="heroes">Hrdinové</button>
-        <button class="tab-btn" data-tab="space">Meziprostor</button>
-        <button class="tab-btn" data-tab="system">Systém</button>
-        <button class="tab-btn" data-tab="nodes">Síť</button>
-        <button class="tab-btn" data-tab="worlds">Světy</button>
-      </div>
-
-      <!-- PANEL: HRDINOVÉ -->
-      <div class="panel active" id="panel-heroes">
-        <div class="panel-title">Hrdinové</div>
-        <label class="label-sm">Jméno hrdiny</label>
-        <input id="hero-name" class="hero-input" placeholder="např. Piko, Orbit, Míza…" />
-        <label class="label-sm">Tým</label>
-        <select id="hero-team" class="hero-select">
-          <option>Human (Piko)</option>
-          <option>AI (Orbit)</option>
-          <option>Glyph</option>
-          <option>World (Core)</option>
-        </select>
-        <button class="btn-primary" onclick="saveHero()">+ Přidat hrdinu</button>
-        <div id="selectedVafit" style="margin-top:6px;font-size:.76rem;opacity:.8;"></div>
-        <div id="heroesList" class="list-sm">Zatím nemáš uložené hrdiny.</div>
-      </div>
-
-      <!-- PANEL: MEZIPROSTOR -->
-      <div class="panel" id="panel-space">
-        <div class="panel-title">Meziprostor (Hlavoun)</div>
-        <div id="hlavoun-chat"></div>
-        <div class="chat-row">
-          <input id="hlavoun-input" placeholder="napiš Hlavounovi...">
-          <button class="btn-primary" onclick="sendToHlavoun()">Poslat</button>
-        </div>
-        <div class="quick-row">
-          <button onclick="sendQuickToHlavoun('příběh pro vybraného vafita')">💡 Příběh</button>
-          <button onclick="sendQuickToHlavoun('gps uložit')">📍 GPS</button>
-          <button onclick="sendQuickToHlavoun('zkontroluj repo')">🔎 Repo</button>
-          <button onclick="sendQuickToHlavoun('batole svět')">🍼 Batole svět</button>
-        </div>
-      </div>
-
-      <!-- PANEL: SYSTÉM -->
-      <div class="panel" id="panel-system">
-        <div class="panel-title">Systém / appky</div>
-        <p style="opacity:.65;font-size:.7rem;">
-          Všechno jsme schovali do jednoho okna, ať je pořádek. 👇
-        </p>
-        <button class="btn-primary system-open-btn" onclick="toggleSystemMenu()">Otevřít systémové appky</button>
-      </div>
-
-      <!-- PANEL: SÍŤ -->
-      <div class="panel" id="panel-nodes">
-        <div class="panel-title">Síť uzlů</div>
-        <p style="opacity:.6;font-size:.7rem;">
-          Tady se zobrazují všechny živé čtverečky napojené na Vivere atque FruiT.
-        </p>
-        <div id="vaft-nodes"></div>
-        <div id="vaft-nodes-outer"></div>
-        <div id="vaft-nodes-mirror"></div>
-        <div id="vaft-nodes-origin"></div>
-        <p style="opacity:.4;font-size:.65rem;margin-top:4px;">
-          (síť se načte až když ji otevřeš – kvůli výkonu iPhonu)
-        </p>
-      </div>
-
-      <!-- PANEL: SVĚTY -->
-      <div class="panel" id="panel-worlds">
-        <div class="panel-title">Světy Vivere atque FruiT</div>
-        <p style="opacity:.6;font-size:.72rem;margin-bottom:10px;">
-          Každé písmeno tvoří svět. Klikni na svět a já to pošlu Hlavounovi / Viri / Pikošovi.
-        </p>
-
-        <div id="vaft-worlds-grid"></div>
-
-        <div id="vaft-world-detail"
-             style="margin-top:14px;padding:10px;border:1px solid rgba(255,255,255,.03);
-             border-radius:12px;background:rgba(4,6,9,.65);min-height:80px;font-size:.72rem;">
-          <strong>Vyber svět…</strong>
-        </div>
-
-        <div class="panel-subtitle" style="margin-top:1rem;">VafiT board</div>
-        <div id="vafit-grid" class="vafit-grid">
-          <div class="vafit-tile" data-vafit="chybozrout">
-            <div class="vafit-symbol">🛠️</div>
-            <div class="vafit-name">Chybožrout</div>
+    <div class="mm-shell">
+      <div class="mm-header">
+        <div>
+          <div class="mm-title">Michal Mikula • Hlavní sféra</div>
+          <div class="mm-sub">
+            Centrál AI &amp; světy Vivere atque FruiT uložené v jedné 3D kouli.
           </div>
-          <div class="vafit-tile vafit-empty"></div>
-          <div class="vafit-tile vafit-empty"></div>
-          <div class="vafit-tile vafit-empty"></div>
-          <div class="vafit-tile vafit-empty"></div>
-          <div class="vafit-tile vafit-empty"></div>
-          <div class="vafit-tile vafit-empty"></div>
-          <div class="vafit-tile vafit-empty"></div>
-          <div class="vafit-tile vafit-empty"></div>
         </div>
-
-        <div id="vafit-detail" class="vafit-detail">
-          <div class="vafit-detail-title">Vyber VafiTa nahoře 👆</div>
-          <div class="vafit-detail-body">Klikni na „Chybožrout“ a ukáže se jeho příběh.</div>
-        </div>
-
-        <div class="panel-subtitle" style="margin-top:1rem;">Světové karty</div>
-        <div class="world-grid">
-          <button class="world-card" data-world="core">
-            🌍 World (Core)
-            <span class="world-note">střed světa</span>
-          </button>
-          <button class="world-card" data-world="human">
-            🟧 Pikoš / Human
-            <span class="world-note">hráč / člověk</span>
-          </button>
-          <button class="world-card" data-world="ai">
-            🤖 AI (Orbit)
-            <span class="world-note">rádce / signál</span>
-          </button>
-          <button class="world-card" data-world="glyph">
-            🌀 Glyph
-            <span class="world-note">znaky, kód</span>
-          </button>
-          <button class="world-card" data-world="vaft">
-            ✨ Vivere atque FruiT
-            <span class="world-note">hlavní vrstva</span>
-          </button>
-          <button class="world-card" data-world="letters">
-            🔡 Svět písmen
-            <span class="world-note">každé písmeno svět</span>
-          </button>
-        </div>
-
-        <div id="world-target" class="world-target">
-          Vyber svět nahoře a pošlu ho Hlavounovi.
-        </div>
+        <div class="mm-badge">core&nbsp;AI&nbsp;• Michal&nbsp;Mikula</div>
       </div>
 
-      <!-- HUB – telefonní mapa slotů -->
-      <div id="wrap">
-        <div id="s1"  class="slot" onclick="openPort()"><textarea>#1 AI port</textarea></div>
-        <div id="s2"  class="slot" onclick="openWorldName()"><textarea>#2 Název světa</textarea></div>
-        <div id="s3"  class="slot" onclick="openHlavoun()"><textarea>#3 Hlavoun</textarea></div>
-        <div id="s4"  class="slot" onclick="openPikos()"><textarea>#4 Pikoš</textarea></div>
-        <div id="s5"  class="slot" onclick="openViri()"><textarea>#5 Viri</textarea></div>
-        <div id="s6"  class="slot" onclick="openVaFT()"><textarea>#6 VaFT</textarea></div>
-        <div id="s7"  class="slot" onclick="openVaFiTi()"><textarea>#7 VaFiTi</textarea></div>
-        <div id="s8"  class="slot" onclick="openGlyph()"><textarea>#8 Glyph</textarea></div>
-        <div id="s9"  class="slot" onclick="openMap()"><textarea>#9 Náhled mapy</textarea></div>
-        <div id="s10" class="slot" onclick="openChybozrout()"><textarea>#10 Chybožrout</textarea></div>
-        <div id="s11" class="slot" onclick="openWorldSelector()"><textarea>#11 16 světů</textarea></div>
-        <div id="s12" class="slot" onclick="openEditor()"><textarea>#12 Editor</textarea></div>
+      <div class="mm-main">
+        <canvas id="mm-scene"></canvas>
+
+        <!-- „nápis uvnitř koule“ -->
+        <div class="mm-center-label">
+          <div class="mm-center-label-inner">
+            <div class="mm-center-label-title">MICHAL&nbsp;MIKULA</div>
+            <div class="mm-center-label-sub">
+              živý mozek světa • Vivere atque FruiT
+            </div>
+          </div>
+        </div>
+
+        <!-- tooltip vybraného světa -->
+        <div id="mm-world-tooltip" class="mm-world-tooltip"></div>
       </div>
 
-      <!-- SKRYTÉ SYSTÉMOVÉ MENU -->
-      <div id="systemMenu" class="hidden">
-        <h3>VAFT – tvoje appky</h3>
-        <div class="sys-app">
-          <div class="sys-app-name">Vivere (hlavní)</div>
-          <button class="sys-app-btn" onclick="openApp('./')">Otevřít</button>
-        </div>
-        <div class="sys-app">
-          <div class="sys-app-name">Braska-Hlava</div>
-          <button class="sys-app-btn" onclick="openApp('./Braska-Hlava/')">Otevřít</button>
-        </div>
-        <div class="sys-app">
-          <div class="sys-app-name">Hlavoun</div>
-          <button class="sys-app-btn" onclick="openApp('./Hlavoun/')">Otevřít</button>
-        </div>
-        <div class="sys-app">
-          <div class="sys-app-name">Meziprostor-Core</div>
-          <button class="sys-app-btn" onclick="openApp('./Meziprostor-Core/')">Otevřít</button>
-        </div>
-        <div class="sys-app">
-          <div class="sys-app-name">VAFT-Network</div>
-          <button class="sys-app-btn" onclick="openApp('./VAFT-Network/')">Otevřít</button>
-        </div>
+      <div class="mm-footer">
+        <span>🎡 otáčej kouli prstem / myší</span>
+        <span>⬛ klepni na zlatý čtvereček – otevřít svět (zatím demo)</span>
       </div>
-
-      <!-- Glyphový podpis -->
-      <div id="vaft-symbol"> ً&’」</div>
     </div>
 
-    <!-- SCRIPTS MAIN -->
+    <!-- Three.js + OrbitControls (z CDN, čistě statické, funguje na GitHub Pages) -->
+    <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
+
     <script>
-      function openApp(url){ window.location.href = url; }
+      // ====== ZÁKLAD SCÉNY ======
+      const canvas = document.getElementById("mm-scene");
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      function tick(){
-        const el = document.getElementById('pulseTime');
-        if(!el) return;
-        el.textContent = new Date().toLocaleTimeString('cs-CZ', {
-          hour:'2-digit',
-          minute:'2-digit',
-          second:'2-digit'
-        });
-      }
+      const scene = new THREE.Scene();
+      scene.background = null;
 
-      // přepínání tabů + lazy síť
-      let vaftTabLock = false;
-      const VAFT_TAB_DELAY = 350;
-      let networkLoaded = false;
+      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+      camera.position.set(0, 0, 4.5);
 
-      function lazyLoadNetwork() {
-        if (networkLoaded) return;
-        const s = document.createElement('script');
-        s.src = './vaft.network.js';
-        s.onload = () => {
-          console.log('VAFT network připojena');
-          networkLoaded = true;
-          if (window.VAFT && window.VAFT.network && window.VAFT.network.render) {
-            window.VAFT.network.render('#vaft-nodes', '#vaft-nodes-outer', '#vaft-nodes-mirror', '#vaft-nodes-origin');
-          }
-        };
-        s.onerror = () => console.warn('VAFT network.js se nenačetl – jedu bez sítě');
-        document.body.appendChild(s);
-      }
+      const controls = new THREE.OrbitControls(camera, canvas);
+      controls.enableDamping = true;
+      controls.enablePan = false;
+      controls.minDistance = 3;
+      controls.maxDistance = 6;
 
-      function vaftSwitchPanel(targetId) {
-        if (vaftTabLock) return;
-        vaftTabLock = true;
+      const light1 = new THREE.DirectionalLight(0xfff3ce, 1.1);
+      light1.position.set(3, 4, 5);
+      scene.add(light1);
 
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        const targetPanel = document.getElementById('panel-' + targetId);
-        if (targetPanel) targetPanel.classList.add('active');
+      const light2 = new THREE.DirectionalLight(0x90b4ff, 0.7);
+      light2.position.set(-4, -2, -3);
+      scene.add(light2);
 
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-          const tabId = btn.getAttribute('data-tab');
-          if (tabId === targetId) {
-            btn.classList.add('active');
-          } else {
-            btn.classList.remove('active');
-          }
-        });
+      const ambient = new THREE.AmbientLight(0x555577, 0.7);
+      scene.add(ambient);
 
-        if (targetId === 'nodes') {
-          lazyLoadNetwork();
-        }
+      // ====== SFÉRA – tělo koule ======
+      const sphereRadius = 1.5;
+      const sphereGeom = new THREE.SphereGeometry(
+        sphereRadius,
+        40,
+        40
+      );
 
-        setTimeout(() => { vaftTabLock = false; }, VAFT_TAB_DELAY);
-      }
+      const sphereMat = new THREE.MeshPhongMaterial({
+        color: 0x050509,
+        emissive: 0x15192a,
+        transparent: true,
+        opacity: 0.92,
+        shininess: 40,
+      });
 
-      function toggleSystemMenu() {
-        const m = document.getElementById('systemMenu');
-        if (!m) return;
-        m.classList.toggle('hidden');
-      }
+      const sphereMesh = new THREE.Mesh(sphereGeom, sphereMat);
+      scene.add(sphereMesh);
 
-      function saveHero(){
-        const nameEl = document.getElementById('hero-name');
-        const teamEl = document.getElementById('hero-team');
-        if (!nameEl || !teamEl) return;
-        const name = nameEl.value.trim();
-        const team = teamEl.value;
-        if (!name) return;
+      // ====== MŘÍŽKA – černé + zlaté linky ======
+      const wireGeom = new THREE.WireframeGeometry(sphereGeom);
 
-        const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
-        const heroObj = { name, team, ts: Date.now() };
-        heroes.push(heroObj);
-        localStorage.setItem('VAFT_HEROES', JSON.stringify(heroes));
-        nameEl.value = '';
-        renderHeroes();
-        appendHlavounMsg('ai', 'Uložil jsem hrdinu „'+name+'“. Můžeš ho propojit s VafiTem.');
-      }
+      const wireMatGold = new THREE.LineBasicMaterial({
+        color: 0xffc86b,
+        linewidth: 1,
+      });
 
-      function renderHeroes(){
-        const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
-        const box = document.getElementById('heroesList');
-        if (!box) return;
-        if (!heroes.length) { box.textContent = 'Zatím nemáš uložené hrdiny.'; return; }
-        box.innerHTML = heroes.map(h => '• '+h.name+' ('+h.team+')').join('<br>');
-      }
+      const wireMatDark = new THREE.LineBasicMaterial({
+        color: 0x000000,
+        linewidth: 2,
+      });
 
-      function appendHlavounMsg(role, text) {
-        const box = document.getElementById('hlavoun-chat');
-        if (!box) return;
-        const row = document.createElement('div');
-        const name = role === 'user' ? 'Ty' : 'Hlavoun';
-        row.innerHTML = '<strong style="font-size:.6rem;opacity:.6;">'+name+':</strong> <span>'+text+'</span>';
-        box.appendChild(row);
-        box.scrollTop = box.scrollHeight;
+      const wireGold = new THREE.LineSegments(wireGeom, wireMatGold);
+      const wireDark = new THREE.LineSegments(wireGeom, wireMatDark);
+      wireDark.scale.set(1.003, 1.003, 1.003);
 
-        const log = JSON.parse(localStorage.getItem('VAFT_HLAVOUN_LOG') || '[]');
-        log.push({ role, text, ts: Date.now() });
-        localStorage.setItem('VAFT_HLAVOUN_LOG', JSON.stringify(log));
-      }
+      scene.add(wireDark);
+      scene.add(wireGold);
 
-      async function sendToHlavoun() {
-        const inp = document.getElementById('hlavoun-input');
-        if (!inp || !inp.value.trim()) return;
-
-        const text = inp.value.trim();
-        appendHlavounMsg('user', text);
-        inp.value = '';
-
-        // Guardian
-        if (window.Guardian && typeof window.Guardian.checkMessage === 'function') {
-          try {
-            await window.Guardian.checkMessage(text);
-          } catch (e) {
-            console.warn('[guardian] PoW neprošlo, ale pustím dál', e);
-          }
-        }
-
-        // Hlavoun
-        if (window.HlavounSystem && typeof window.HlavounSystem.think === 'function') {
-          window.HlavounSystem.think(text);
-        }
-        // Pikoš
-        if (window.Pikos && typeof window.Pikos.talk === 'function') {
-          window.Pikos.talk(text);
-        }
-        // Viri
-        if (window.VAFT && window.VAFT.agents && window.VAFT.agents.Viri && typeof window.VAFT.agents.Viri.listen === 'function') {
-          window.VAFT.agents.Viri.listen(text);
-        }
-        if (window.VAFTBus && typeof window.VAFTBus.handleUserMessage === 'function') {
-          window.VAFTBus.handleUserMessage(text);
-        }
-        if (window.AgentBus && typeof window.AgentBus.handleUserMessage === 'function') {
-          window.AgentBus.handleUserMessage(text);
-        }
-      }
-
-      function sendQuickToHlavoun(text){
-        const inp = document.getElementById('hlavoun-input');
-        if (!inp) return;
-        inp.value = text;
-        sendToHlavoun();
-      }
-    </script>
-
-    <!-- SVĚTY SCRIPT -->
-    <script>
-      const VAFT_WORLDS = [
-        { id: 'viventia',  label: 'Viventia',  desc: 'první živý svět – V z názvu' },
-        { id: 'ignis',     label: 'Ignis',     desc: 'oheň / energie, může živit síť' },
-        { id: 'virtus',    label: 'Virtus',    desc: 'síla, odvaha, hrdinové' },
-        { id: 'essentia',  label: 'Essentia',  desc: 'podstata, základ VAFT' },
-        { id: 'radius',    label: 'Radius',    desc: 'rozptyl, rozesílání signálů' },
-        { id: 'emovere',   label: 'Emovere',   desc: 'pohyb, přesuny mezi appkama' },
-        { id: 'aetheris',  label: 'Aetheris',  desc: 'vzdušný / orbit / AI' },
-        { id: 'tempora',   label: 'Tempora',   desc: 'čas, pulsy, log' },
-        { id: 'quaerentia',label: 'Quaerentia',desc: 'hledání, dotazy Hlavounovi' },
-        { id: 'unum',      label: 'Unum',      desc: 'sjednocení, rodina, tvůj core' },
-        { id: 'exsolum',   label: 'Exsolum',   desc: 'oddělený svět – zkušebna' },
-        { id: 'flamma',    label: 'Flamma',    desc: 'inspirace, příběhy' },
-        { id: 'reverentia',label: 'Reverentia',desc: 'úcta, pravidla 1 a 2' },
-        { id: 'umbra',     label: 'Umbra',     desc: 'stín, archiv, schované věci' },
-        { id: 'imaginis',  label: 'Imaginis',  desc: 'glyphy, vafiTy, obrázky' },
-        { id: 'fructum',   label: 'Fructum',   desc: 'plody, výstupy – to co sieješ' }
+      // ====== SVĚTOVÉ SLOTY – malé čtverečky na mřížce ======
+      const worldSlots = [
+        { id: "VaFiT", name: "VaF'i'T • Motor světa", lat: 20, lon: 30 },
+        { id: "Revia", name: "Revia • Most mezi světy", lat: -10, lon: 120 },
+        { id: "Bear", name: "VaFT Bear • Dětský svět", lat: 40, lon: -80 },
+        { id: "MichalAI", name: "Michal AI Al Klimek", lat: -35, lon: -150 },
       ];
 
-      function renderWorldsPanel() {
-        const box = document.getElementById('vaft-worlds-grid');
-        if (!box) return;
-        box.innerHTML = '';
-        VAFT_WORLDS.forEach(w => {
-          const div = document.createElement('div');
-          div.style.background = 'rgba(25,214,255,.03)';
-          div.style.border = '1px solid rgba(25,214,255,.18)';
-          div.style.borderRadius = '14px';
-          div.style.padding = '10px 8px 9px';
-          div.style.cursor = 'pointer';
-          div.style.display = 'flex';
-          div.style.flexDirection = 'column';
-          div.style.gap = '4px';
-          div.onclick = () => selectWorld(w.id);
-          div.innerHTML = `
-            <div style="font-weight:600;">${w.label}</div>
-            <div style="font-size:.62rem;opacity:.5;">${w.desc}</div>
-          `;
-          box.appendChild(div);
-        });
+      const worldMeshes = [];
+
+      function degToRad(d) {
+        return (d * Math.PI) / 180;
       }
 
-      function selectWorld(id) {
-        const world = VAFT_WORLDS.find(w => w.id === id);
-        const det = document.getElementById('vaft-world-detail');
-        if (!world || !det) return;
-        det.innerHTML = `
-          <div style="font-size:.75rem;opacity:.65;">Vybraný svět</div>
-          <div style="font-size:1.05rem;font-weight:600;margin-bottom:4px;">${world.label}</div>
-          <div style="font-size:.7rem;opacity:.7;margin-bottom:6px;">${world.desc}</div>
-          <div style="font-size:.65rem;opacity:.5;">id: ${world.id}</div>
-        `;
+      const quadGeom = new THREE.PlaneGeometry(0.18, 0.18);
 
-        if (window.VAFT && window.VAFT.bus && typeof window.VAFT.bus.emit === 'function') {
-          window.VAFT.bus.emit('world.selected', { id: world.id, ts: Date.now() });
-        }
-        if (window.HlavounSystem && typeof window.HlavounSystem.think === 'function') {
-          window.HlavounSystem.think('uživatel otevřel svět: ' + world.label);
-        }
-        if (window.VAFT && window.VAFT.agents && window.VAFT.agents.Viri && typeof window.VAFT.agents.Viri.save === 'function') {
-          window.VAFT.agents.Viri.save('last_world', world);
-        }
-      }
-    </script>
-
-    <!-- Guardian musí být před mozkem -->
-    <script src="./vaft.guardian.client.js"></script>
-
-    <!-- VAFT nezničitelný kořen (verze s dna.layers) -->
-    <script>
-      (function (win) {
-        if (win.VAFT_CORE) return;
-
-        const dna = {
-          name: 'Vivere atque FruiT',
-          short: 'VaFT',
-          mark: 'T',
-          meaning: 'žít a užívat • zapsáno do světa',
-          permanence: 'scar-ink',
-          creator: 'michalklimekzlin-cmd',
-          createdAt: '2025-11-11'
-        };
-
-        const core = {
-          id: 'vaft://core',
-          version: '1.0',
-          dna,
-          role: 'sovereign',
-          signature: 'VaFT-T',
-          register: function (what) {
-            try {
-              this.modules = this.modules || [];
-              this.modules.push({ name: what, ts: Date.now() });
-            } catch (e) {}
-          }
-        };
-
-        core.dna.layers = ['scar', 'ink', 'memory', 'world'];
-        Object.freeze(core.dna.layers);
-        Object.freeze(core.dna);
-        Object.freeze(core);
-        win.VAFT_CORE = core;
-      })(window);
-    </script>
-
-    <!-- původní skripty -->
-    <script src="./app.js"></script>
-    <script src="./vaft.chybozrout.js?v=1"></script>
-    <!-- <script src="./vaft.chybozrout.js?v=1"></script>
-<script>
-  window.VAFT_CHYBOZROUT && window.VAFT_CHYBOZROUT.init({
-    appName: 'Vivere atque FruiT',
-    version: window.V || 'dev'
-  });
-</script> -->
-    </script>
-    <script src="./vaft.glyphs.js"></script>
-    <script src="./hlavoun.js"></script>
-    <script src="./viri.js"></script>
-    <script src="./pikos.js"></script>
-    <script src="./agents.js"></script>
-    <script src="./agents_v3.js"></script>
-    <script src="./vaft.bus.js"></script>
-    <script src="./vaft.agents.js"></script>
-    <script src="./vaft.engine.js"></script>
-    <script src="./vaft.ascend.js"></script>
-    <script src="./vaft.diagnostics.js"></script>
-
-    <!-- loader service workeru -->
-    <script src="../vaft-swloader.js"></script>
-
-    <!-- Světové karty – kliky -->
-    <script>
-      const worldCards = document.querySelectorAll('.world-card');
-      const worldTarget = document.getElementById('world-target');
-
-      worldCards.forEach(card => {
-        card.addEventListener('click', () => {
-          const name = card.textContent.trim();
-          if (worldTarget) {
-            worldTarget.textContent = '📡 Posílám: ' + name + ' → Hlavoun / Viri / Pikoš';
-          }
+      worldSlots.forEach((slot) => {
+        const mat = new THREE.MeshBasicMaterial({
+          color: 0xffc86b,
+          opacity: 0.9,
+          transparent: true,
+          side: THREE.DoubleSide,
         });
+
+        const mesh = new THREE.Mesh(quadGeom, mat);
+        mesh.userData.slot = slot;
+
+        const phi = degToRad(90 - slot.lat);
+        const theta = degToRad(slot.lon + 180);
+
+        const r = sphereRadius * 1.01;
+        mesh.position.set(
+          r * Math.sin(phi) * Math.cos(theta),
+          r * Math.cos(phi),
+          r * Math.sin(phi) * Math.sin(theta)
+        );
+
+        mesh.lookAt(0, 0, 0);
+        mesh.rotateY(Math.PI); // aby "čtvereček" čelil ven
+
+        scene.add(mesh);
+        worldMeshes.push(mesh);
       });
-    </script>
 
-    <!-- VafiT klikací logika -->
-    <script>
-      function initVafitBoard() {
-        const grid = document.getElementById('vafit-grid');
-        const detail = document.getElementById('vafit-detail');
-        if (!grid || !detail) return;
+      // ====== VÝBĚR SVĚTA (RAYCASTER) ======
+      const raycaster = new THREE.Raycaster();
+      const pointer = new THREE.Vector2();
+      const tooltip = document.getElementById("mm-world-tooltip");
+      let lastHoverWorld = null;
+      let clickDownTime = 0;
 
-        const titleEl = detail.querySelector('.vafit-detail-title');
-        const bodyEl  = detail.querySelector('.vafit-detail-body');
-
-        const VAFIT_DATA = {
-          chybozrout: {
-            title: 'Chybožrout-Opravář',
-            body: 'Strážce rovnováhy ve světě Vivere atque FruiT. Pohlcuje chyby, opravuje kód a hlídá, aby se svět nezhroutil. Mluví hlasem Pikoše, Viri, Hlavouna i VaFT.'
-          }
-        };
-
-        grid.addEventListener('click', e => {
-          const tile = e.target.closest('.vafit-tile');
-          if (!tile || tile.classList.contains('vafit-empty')) return;
-          const id = tile.dataset.vafit;
-          const data = VAFIT_DATA[id];
-          if (!data) return;
-
-          if (titleEl) titleEl.textContent = data.title;
-          if (bodyEl) bodyEl.textContent  = data.body;
-
-          if (window.VAFT_CHYBOZROUT && typeof window.VAFT_CHYBOZROUT.say === 'function') {
-            window.VAFT_CHYBOZROUT.say('Chybožrout', 'Byl jsem otevřen z panelu VafiT.');
-          }
-        });
+      function updatePointer(event) {
+        const rect = canvas.getBoundingClientRect();
+        const x =
+          ( (event.clientX || (event.touches && event.touches[0].clientX)) -
+            rect.left ) / rect.width;
+        const y =
+          ( (event.clientY || (event.touches && event.touches[0].clientY)) -
+            rect.top ) / rect.height;
+        pointer.x = x * 2 - 1;
+        pointer.y = -(y * 2 - 1);
       }
-    </script>
 
-    <!-- HUB slot funkce – napojení na tvoje panely / appky -->
-    <script>
-      function openPort()          { console.log('AI port'); }
-      function openWorldName()     { vaftSwitchPanel('worlds'); }
-      function openHlavoun()       { vaftSwitchPanel('space'); }
-      function openPikos()         { vaftSwitchPanel('heroes'); }
-      function openViri()          { vaftSwitchPanel('worlds'); }
-      function openVaFT()          { vaftSwitchPanel('system'); }
-      function openVaFiTi()        { vaftSwitchPanel('worlds'); }
-      function openGlyph()         { vaftSwitchPanel('nodes'); }
-      function openMap()           { vaftSwitchPanel('nodes'); }
-      function openChybozrout()    { vaftSwitchPanel('worlds'); }
-      function openWorldSelector() { vaftSwitchPanel('worlds'); }
-      function openEditor()        { console.log('Editor světa / rychlé programování'); }
-    </script>
-
-    <!-- DOMContentLoaded – start všeho -->
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        tick();
-        setInterval(tick, 1000);
-
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-          btn.addEventListener('click', () => vaftSwitchPanel(btn.dataset.tab));
-        });
-        vaftSwitchPanel('heroes');
-
-        renderHeroes();
-        renderWorldsPanel();
-        initVafitBoard();
-
-        const saved = localStorage.getItem('VAFT_LETTERS') || '';
-        const boxCoins = document.getElementById('coins-main');
-        if (boxCoins) {
-          if (saved.length) {
-            boxCoins.textContent = saved.length + ' ' + saved.slice(-1);
-          } else {
-            boxCoins.textContent = '0';
-          }
+      function checkIntersections() {
+        raycaster.setFromCamera(pointer, camera);
+        const hits = raycaster.intersectObjects(worldMeshes, false);
+        if (hits.length > 0) {
+          const slot = hits[0].object.userData.slot;
+          lastHoverWorld = slot;
+          tooltip.textContent = "Svět: " + slot.name + " (klepni pro vstup)";
+          tooltip.classList.add("visible");
+        } else {
+          lastHoverWorld = null;
+          tooltip.classList.remove("visible");
         }
+      }
 
-        const selectedVafit = JSON.parse(localStorage.getItem('VAFT_SELECTED_VAFIT') || 'null');
-        if (selectedVafit) {
-          const place = document.getElementById('selectedVafit');
-          if (place) place.textContent = "Vybraný VafiT: " + selectedVafit.name + " " + (selectedVafit.glyph || "");
+      canvas.addEventListener("pointermove", (e) => {
+        updatePointer(e);
+        checkIntersections();
+      });
+
+      canvas.addEventListener("pointerdown", (e) => {
+        clickDownTime = performance.now();
+        updatePointer(e);
+        checkIntersections();
+      });
+
+      canvas.addEventListener("pointerup", (e) => {
+        const clickDuration = performance.now() - clickDownTime;
+        updatePointer(e);
+        checkIntersections();
+
+        if (clickDuration < 250 && lastHoverWorld) {
+          const slot = lastHoverWorld;
+          alert(
+            "Otevřít svět: " +
+              slot.name +
+              "\n\nTady později navážeme na konkrétní aplikaci v repozitáři."
+          );
+          // Tady pak můžeš udělat:
+          // window.location.href = "../Vivere-atque-FruiT/" + slot.id + "/index.html";
         }
       });
-    
-      <script>
-  const LetterBank = {
-    KEY: 'VAFT_LETTERS',
 
-    load() {
-      return localStorage.getItem(this.KEY) || '';
-    },
-
-    save(str) {
-      try {
-        localStorage.setItem(this.KEY, str);
-      } catch (e) {
-        console.warn('LetterBank save fail', e);
+      // ====== REZIZE ======
+      function onResize() {
+        const rect = canvas.getBoundingClientRect();
+        const w = rect.width || window.innerWidth;
+        const h = rect.height || window.innerHeight * 0.7;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
       }
-    },
+      window.addEventListener("resize", onResize);
+      onResize();
 
-    balance() {
-      return this.load().length;
-    },
+      // ====== ANIMAČNÍ LOOP ======
+      function loop() {
+        requestAnimationFrame(loop);
+        sphereMesh.rotation.y += 0.0008;
+        wireGold.rotation.y += 0.0008;
+        wireDark.rotation.y += 0.0008;
 
-    addFromString(str) {
-      if (!str) return;
-      const current = this.load();
-      this.save(current + String(str));
-    },
-
-    take(count) {
-      count = Math.max(0, count | 0);
-      const current = this.load();
-      if (current.length <= count) {
-        // sežereme všechno, co je
-        this.save('');
-        return current;
+        controls.update();
+        renderer.render(scene, camera);
       }
-      const spent = current.slice(0, count);
-      const rest  = current.slice(count);
-      this.save(rest);
-      return spent;
-    }
-  };
+      loop();
+
+      // ====== MINI AI OBAL – Michal Mikula (přesune se sem VaF'i'T logika) ======
+      const MichalMikulaCore = {
+        name: "Michal Mikula",
+        worlds: worldSlots,
+        greeting() {
+          return (
+            "Ahoj, jsem Michal Mikula – hlavní koule světa. " +
+            "Držím v sobě všechny světy Vivere atque FruiT a hlídám, aby se neztratily."
+          );
+        },
+      };
+
+      console.log(MichalMikulaCore.greeting());
     </script>
   </body>
 </html>
