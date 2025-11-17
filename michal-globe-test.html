@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Michal Mikula • test koule</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050815, #020207);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: #f5f5f5;
+      }
+
+      #globe-canvas {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+      }
+
+      .hint {
+        position: fixed;
+        left: 12px;
+        bottom: 10px;
+        font-size: 11px;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="globe-canvas"></canvas>
+    <div class="hint">otáčej kouli prstem / myší</div>
+
+    <!-- knihovny -->
+    <script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.159.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+      if (!window.THREE) {
+        alert("THREE se nenačetlo – koule se nemůže zobrazit.");
+      }
+
+      const canvas = document.getElementById("globe-canvas");
+
+      // SCÉNA
+      const scene = new THREE.Scene();
+
+      // KAMERA
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100
+      );
+      camera.position.set(0, 0, 5);
+
+      // RENDERER
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+      });
+      renderer.setPixelRatio(window.devicePixelRatio || 1);
+      renderer.setSize(window.innerWidth, window.innerHeight, false);
+
+      // SVĚTLA
+      const keyLight = new THREE.DirectionalLight(0xfff2c4, 1.4);
+      keyLight.position.set(3, 3, 4);
+      scene.add(keyLight);
+
+      const rimLight = new THREE.DirectionalLight(0xffcf7a, 0.9);
+      rimLight.position.set(-3, -2, -4);
+      scene.add(rimLight);
+
+      const ambient = new THREE.AmbientLight(0x26263a, 0.9);
+      scene.add(ambient);
+
+      // KOULE – tělo
+      const sphereGeo = new THREE.SphereGeometry(1.25, 48, 32);
+
+      const fillMat = new THREE.MeshPhongMaterial({
+        color: 0x120a03,
+        emissive: 0x5a3205,
+        shininess: 40,
+        specular: 0xfff2c4,
+        transparent: true,
+        opacity: 0.96,
+      });
+      const sphereFill = new THREE.Mesh(sphereGeo, fillMat);
+      scene.add(sphereFill);
+
+      // Zlatá mřížka
+      const wireMat = new THREE.MeshBasicMaterial({
+        color: 0xffe29b,
+        wireframe: true,
+      });
+      const sphereWire = new THREE.Mesh(sphereGeo, wireMat);
+      scene.add(sphereWire);
+
+      // Lehké halo
+      const haloGeo = new THREE.SphereGeometry(1.45, 32, 24);
+      const haloMat = new THREE.MeshBasicMaterial({
+        color: 0xffcf7a,
+        transparent: true,
+        opacity: 0.2,
+        side: THREE.BackSide,
+      });
+      const halo = new THREE.Mesh(haloGeo, haloMat);
+      scene.add(halo);
+
+      // Ovládání – otáčení prstem / myší
+      const controls = new THREE.OrbitControls(camera, canvas);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.enableZoom = false;
+      controls.enablePan = false;
+      controls.rotateSpeed = 0.6;
+      controls.minPolarAngle = Math.PI * 0.2;
+      controls.maxPolarAngle = Math.PI * 0.8;
+
+      // Resize
+      function onResize() {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+      window.addEventListener("resize", onResize);
+
+      // Animace
+      function animate() {
+        requestAnimationFrame(animate);
+
+        sphereWire.rotation.y += 0.004;
+        sphereFill.rotation.y += 0.0025;
+        halo.rotation.y -= 0.001;
+
+        controls.update();
+        renderer.render(scene, camera);
+      }
+
+      animate();
+    </script>
+  </body>
+</html>
