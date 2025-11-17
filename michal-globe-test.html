@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Michal Klimek VaF'i'T ChatGPT</title>
+    <title>Michal Klimek VaF'i'T ChatGPT • Koule světa</title>
 
     <style>
       html,
@@ -32,12 +32,12 @@
 
       .stage {
         position: relative;
-        width: min(520px, 80vw);
-        height: min(520px, 80vw);
+        width: min(620px, 92vw);
+        height: min(620px, 92vw);
         border-radius: 32px;
         box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
         background: radial-gradient(circle at top, #06091a, #020208);
-        border: 1px solid rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.05);
       }
 
       #globe-canvas {
@@ -47,6 +47,7 @@
         width: 100%;
         height: 100%;
         display: block;
+        touch-action: none; /* vlastní gesta */
       }
 
       .hud {
@@ -72,7 +73,9 @@
       <div class="stage">
         <canvas id="globe-canvas"></canvas>
 
-        <div class="hud">🌀 otáčej kouli prstem / myší • klepni na čtvereček pro svět</div>
+        <div class="hud">
+          🌀 otáčej kouli prstem / myší • dvěma prsty posouvej • pinch = zoom
+        </div>
         <div class="hud-right">v0.3 • koule světa</div>
       </div>
     </div>
@@ -83,100 +86,82 @@
 
       let width = 0;
       let height = 0;
-      let cx = 0;
-      let cy = 0;
-      let radius = 0;
-      let dpr = window.devicePixelRatio || 1;
+      let baseRadius = 0;
+      const dpr = window.devicePixelRatio || 1;
 
-      // ==== KONFIGURACE ČTVERCŮ / SVĚTŮ ====
-      // 10 × 7 = 70 slotů na kouli
-      const TILE_COLS = 10;
-      const TILE_ROWS = 7;
-
-      // Sem si dopíšeš reálné složky z repa:
-      // url může být třeba "./Revia/index.html", "./VaFiT-Motor/index.html" atd.
-      const TILE_CONFIG = [
-        { label: "Revia", url: "./Revia/index.html" },
-        { label: "VaF'i'T", url: "./VaFiT-Motor/index.html" },
-        { label: "MK AI", url: "./Michal-AI-Al-Klimek/index.html" },
-        { label: "Kids Lab", url: "./Kids-Lab/index.html" },
-        { label: "MapWorld", url: "./MapWorld/index.html" },
-        { label: "LetterLab", url: "./LetterLab/index.html" },
-        { label: "Bicák SE", url: "./Bicak-Supreme/index.html" },
-        { label: "Chybožrout", url: "./Chybozrout/index.html" },
-        { label: "Revia 2", url: "./Revia-2/index.html" },
-        { label: "Test", url: "./Test/index.html" },
-        // ostatní sloty se automaticky doplní jako "Slot 11", "Slot 12"...
-      ];
-
-      let tiles = [];
-
-      function buildTiles() {
-        tiles = [];
-        // necháme nahoře a dole malý „polární“ okraj, ať tam nejsou moc šikmé
-        const latMin = -Math.PI / 2 + 0.45;
-        const latMax = Math.PI / 2 - 0.45;
-        const dLat = (latMax - latMin) / TILE_ROWS;
-
-        for (let row = 0; row < TILE_ROWS; row++) {
-          const lat = latMin + dLat * (row + 0.5);
-
-          for (let col = 0; col < TILE_COLS; col++) {
-            const lon = (col / TILE_COLS) * Math.PI * 2;
-
-            const index = row * TILE_COLS + col;
-            const cfg = TILE_CONFIG[index] || {};
-            tiles.push({
-              index,
-              lat,
-              lon,
-              label: cfg.label || "Slot " + (index + 1),
-              url: cfg.url || null,
-              screenX: 0,
-              screenY: 0,
-            });
-          }
-        }
-      }
+      // pohled (zoom + posun celé koule)
+      let viewScale = 1;
+      let viewOffsetX = 0;
+      let viewOffsetY = 0;
 
       function resize() {
         const rect = canvas.getBoundingClientRect();
         width = rect.width;
         height = rect.height;
-        cx = width / 2;
-        cy = height / 2;
-        radius = Math.min(width, height) * 0.33;
-
         canvas.width = width * dpr;
         canvas.height = height * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        buildTiles();
+        baseRadius = Math.min(width, height) * 0.28;
       }
 
       resize();
       window.addEventListener("resize", resize);
 
-      // stav otáčení
+      // stav koule
       let rotY = 0.5;
-      let rotX = -0.3;
+      let rotX = -0.2;
+
+      // interakce
       let drag = false;
+      let dragMode = "rotate"; // "rotate" nebo "pan"
       let lastX = 0;
       let lastY = 0;
+      let lastPanDist = 0;
+      let movedDistance = 0;
 
-      function project(x, y, z) {
-        // rotace kolem osy X
+      // sloty pro světy
+      const slots = [];
+      (function initSlots() {
+        // 7 pásů (bez pólů), 10 segmentů = 70 slotů
+        const bands = 7;
+        const segs = 10;
+        let id = 1;
+        for (let b = 0; b < bands; b++) {
+          const t = (b + 0.5) / bands; // -60° .. 60°
+          const lat = (-Math.PI / 3) + t * (2 * Math.PI) / 3;
+          for (let s = 0; s < segs; s++) {
+            const lon = (s / segs) * Math.PI * 2;
+            slots.push({
+              id: id,
+              lat,
+              lon,
+              label: "slot " + id,
+              screenX: 0,
+              screenY: 0,
+            });
+            id++;
+          }
+        }
+
+        // pár speciálních slotů
+        if (slots[34]) slots[34].label = "VaF'i'T";
+        if (slots[35]) slots[35].label = "Revia";
+        if (slots[36]) slots[36].label = "MK AI";
+      })();
+
+      function project(x, y, z, radius) {
+        // rotace kolem X
         let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
         let z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
 
-        // rotace kolem osy Y
+        // rotace kolem Y
         let x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
         let z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
 
         const scale = radius * 0.9;
         return {
-          x: cx + x2 * scale,
-          y: cy + y1 * scale,
+          x: x2 * scale,
+          y: y1 * scale,
           z: z2,
         };
       }
@@ -184,35 +169,42 @@
       function drawGlobe() {
         ctx.clearRect(0, 0, width, height);
 
-        // jemný podklad
+        ctx.save();
+        // střed + posun + zoom
+        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
+        ctx.scale(viewScale, viewScale);
+
+        const radius = baseRadius;
+
+        // jemný glow
         const g = ctx.createRadialGradient(
-          cx,
-          cy - radius * 0.4,
+          0,
+          -radius * 0.4,
           radius * 0.2,
-          cx,
-          cy,
+          0,
+          0,
           radius * 1.4
         );
         g.addColorStop(0, "rgba(255, 200, 150, 0.18)");
         g.addColorStop(1, "rgba(0, 0, 0, 0)");
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, width, height);
+        ctx.fillRect(-width, -height, width * 2, height * 2);
 
         // stínová koule
         ctx.beginPath();
-        ctx.arc(cx, cy, radius * 1.02, 0, Math.PI * 2);
+        ctx.arc(0, 0, radius * 1.02, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(0,0,0,0.75)";
         ctx.fill();
 
-        // základní tělo koule
+        // tělo koule
         ctx.beginPath();
-        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.arc(0, 0, radius, 0, Math.PI * 2);
         const globeGrad = ctx.createRadialGradient(
-          cx - radius * 0.3,
-          cy - radius * 0.4,
+          -radius * 0.3,
+          -radius * 0.4,
           radius * 0.3,
-          cx,
-          cy + radius * 0.4,
+          0,
+          radius * 0.4,
           radius * 1.1
         );
         globeGrad.addColorStop(0, "#2d1d0f");
@@ -227,15 +219,15 @@
         ctx.shadowColor = "rgba(255, 197, 120, 0.9)";
         ctx.shadowBlur = 10;
         ctx.beginPath();
-        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.arc(0, 0, radius, 0, Math.PI * 2);
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // mřížka – zlaté linky
+        // mřížka
         ctx.lineWidth = 0.9;
         ctx.strokeStyle = "rgba(255, 210, 140, 0.9)";
 
-        // podélné kružnice (meridiány)
+        // meridiány
         const meridians = 12;
         for (let i = 0; i < meridians; i++) {
           const lon = (i / meridians) * Math.PI * 2;
@@ -246,7 +238,7 @@
             const x = Math.cos(t) * Math.cos(lon);
             const y = Math.sin(t);
             const z = Math.cos(t) * Math.sin(lon);
-            const p = project(x, y, z);
+            const p = project(x, y, z, radius);
             if (p.z >= 0) {
               if (!started) {
                 ctx.moveTo(p.x, p.y);
@@ -259,7 +251,7 @@
           ctx.stroke();
         }
 
-        // rovnoběžky (paralely)
+        // paralely
         const parallels = 8;
         for (let j = 1; j < parallels; j++) {
           const lat = (j / parallels) * Math.PI - Math.PI / 2;
@@ -270,7 +262,7 @@
             const x = Math.cos(lat) * Math.cos(lon);
             const y = Math.sin(lat);
             const z = Math.cos(lat) * Math.sin(lon);
-            const p = project(x, y, z);
+            const p = project(x, y, z, radius);
             if (p.z >= 0) {
               if (!started) {
                 ctx.moveTo(p.x, p.y);
@@ -283,100 +275,155 @@
           ctx.stroke();
         }
 
-        // === text uvnitř koule (naše dva VafiT'i + nápis) ===
+        // text uvnitř – naše dva Vafiťáci
         ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(rotY * 0.15);
-
-        ctx.font = "700 16px system-ui";
+        ctx.font = "700 15px system-ui";
         ctx.fillStyle = "rgba(255, 220, 150, 0.95)";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.shadowColor = "rgba(255, 200, 120, 0.9)";
         ctx.shadowBlur = 14;
 
-        ctx.fillText(
-          "{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]",
-          0,
-          0
-        );
-
+        ctx.rotate(0.9); // mírné diagonální natočení
+        ctx.fillText("{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]", 0, 0);
         ctx.restore();
 
-        // === KLIKACÍ ČTVEREČKY – SVĚTY ===
-        const tileSize = radius * 0.11;
+        // sloty – destičky v jednotlivých čtvercích
+        const slotW = radius * 0.35 / 3; // škála podle poloměru
+        const slotH = slotW * 0.65;
 
-        tiles.forEach((tile) => {
-          // přepočítat lat/lon na 3D bod
-          const x = Math.cos(tile.lat) * Math.cos(tile.lon);
-          const y = Math.sin(tile.lat);
-          const z = Math.cos(tile.lat) * Math.sin(tile.lon);
-          const p = project(x, y, z);
-          if (p.z < 0) {
-            // na zadní straně koule – nekreslíme
-            tile.screenX = null;
-            tile.screenY = null;
-            return;
-          }
+        ctx.font = "10px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
 
-          tile.screenX = p.x;
-          tile.screenY = p.y;
+        for (const slot of slots) {
+          const x = Math.cos(slot.lat) * Math.cos(slot.lon);
+          const y = Math.sin(slot.lat);
+          const z = Math.cos(slot.lat) * Math.sin(slot.lon);
+          const p = project(x, y, z, radius);
 
-          const s = tileSize * 0.5;
+          if (p.z < 0) continue; // jen přední strana
 
-          // pozadí čtverce
+          slot.screenX = p.x;
+          slot.screenY = p.y;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+
+          // destička
           ctx.beginPath();
-          ctx.rect(p.x - s, p.y - s, s * 2, s * 2);
-          ctx.fillStyle = "rgba(10, 8, 4, 0.85)";
-          ctx.fill();
+          const r = 6;
+          const w = slotW;
+          const h = slotH;
+          ctx.moveTo(-w / 2 + r, -h / 2);
+          ctx.lineTo(w / 2 - r, -h / 2);
+          ctx.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
+          ctx.lineTo(w / 2, h / 2 - r);
+          ctx.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
+          ctx.lineTo(-w / 2 + r, h / 2);
+          ctx.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
+          ctx.lineTo(-w / 2, -h / 2 + r);
+          ctx.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
+          ctx.closePath();
 
-          // okraj
-          ctx.lineWidth = 0.8;
-          ctx.strokeStyle = "rgba(255, 210, 140, 0.9)";
+          ctx.fillStyle = "rgba(6,6,10,0.92)";
+          ctx.strokeStyle = "rgba(255,210,150,0.9)";
+          ctx.lineWidth = 0.9;
+          ctx.fill();
           ctx.stroke();
 
-          // text – label nebo číslo slotu
-          ctx.font = "8px system-ui";
-          ctx.fillStyle = "rgba(255, 235, 190, 0.95)";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
+          // název slotu
+          ctx.fillStyle = "rgba(255,220,160,0.95)";
+          ctx.shadowColor = "rgba(255,200,140,0.5)";
+          ctx.shadowBlur = 6;
+          ctx.fillText(slot.label, 0, 1);
+          ctx.restore();
+        }
 
-          // zkrátíme text, když je dlouhý
-          let label = tile.label || "";
-          if (label.length > 8) {
-            label = label.slice(0, 7) + "…";
-          }
-          ctx.fillText(label, p.x, p.y + 0.5);
-        });
+        ctx.restore();
       }
 
-      // plynulé otáčení podle času
+      // plynulé otáčení
       let lastTime = 0;
-
       function loop(timestamp) {
         if (!timestamp) timestamp = 0;
-        const dt = (timestamp - lastTime) / 1000; // sekundy mezi snímky
+        const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
-        // pomalejší, ale plynulé vlastní otáčení
-        rotY += 0.4 * dt;
-        drawGlobe();
+        if (!drag || dragMode === "pan") {
+          // otáčí se jen když se nerotuje ručně
+          rotY += 0.35 * dt;
+        }
 
+        drawGlobe();
         requestAnimationFrame(loop);
       }
-
       requestAnimationFrame(loop);
 
-      // ovládání prstem / myší – rotace koule
+      // --- interakce – rotate / pan / zoom / klik na slot ---
+
+      function getLocalCoords(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const x = (clientX - rect.left - width / 2 - viewOffsetX) / viewScale;
+        const y = (clientY - rect.top - height / 2 - viewOffsetY) / viewScale;
+        return { x, y };
+      }
+
       function pointerDown(e) {
+        e.preventDefault();
+
+        if (e.touches && e.touches.length === 2) {
+          // režim PAN + ZOOM dvěma prsty
+          dragMode = "pan";
+          drag = true;
+          const t0 = e.touches[0];
+          const t1 = e.touches[1];
+          lastX = (t0.clientX + t1.clientX) / 2;
+          lastY = (t0.clientY + t1.clientY) / 2;
+          const dx = t0.clientX - t1.clientX;
+          const dy = t0.clientY - t1.clientY;
+          lastPanDist = Math.hypot(dx, dy);
+          movedDistance = 0;
+          return;
+        }
+
+        dragMode = e.button === 2 ? "pan" : "rotate"; // pravé tlačítko = pan
         drag = true;
         const touch = e.touches ? e.touches[0] : e;
         lastX = touch.clientX;
         lastY = touch.clientY;
+        movedDistance = 0;
       }
 
       function pointerMove(e) {
         if (!drag) return;
+        e.preventDefault();
+
+        if (e.touches && e.touches.length === 2 && dragMode === "pan") {
+          const t0 = e.touches[0];
+          const t1 = e.touches[1];
+          const cxNow = (t0.clientX + t1.clientX) / 2;
+          const cyNow = (t0.clientY + t1.clientY) / 2;
+
+          const dxCenter = cxNow - lastX;
+          const dyCenter = cyNow - lastY;
+          lastX = cxNow;
+          lastY = cyNow;
+          movedDistance += Math.hypot(dxCenter, dyCenter);
+
+          viewOffsetX += dxCenter;
+          viewOffsetY += dyCenter;
+
+          const dx = t0.clientX - t1.clientX;
+          const dy = t0.clientY - t1.clientY;
+          const dist = Math.hypot(dx, dy);
+          const ratio = dist / lastPanDist;
+          lastPanDist = dist;
+          viewScale *= ratio;
+          viewScale = Math.max(0.6, Math.min(2.5, viewScale));
+          return;
+        }
+
         const touch = e.touches ? e.touches[0] : e;
         const x = touch.clientX;
         const y = touch.clientY;
@@ -384,55 +431,61 @@
         const dy = y - lastY;
         lastX = x;
         lastY = y;
+        movedDistance += Math.hypot(dx, dy);
 
-        rotY += dx * 0.004;
-        rotX += dy * 0.004;
-        rotX = Math.max(-Math.PI / 2 + 0.2, Math.min(Math.PI / 2 - 0.2, rotX));
+        if (dragMode === "rotate") {
+          rotY += dx * 0.004;
+          rotX += dy * 0.004;
+          rotX = Math.max(-Math.PI / 2 + 0.2, Math.min(Math.PI / 2 - 0.2, rotX));
+        } else if (dragMode === "pan") {
+          viewOffsetX += dx;
+          viewOffsetY += dy;
+        }
       }
 
-      function pointerUp() {
+      function pointerUp(e) {
+        if (!drag) return;
         drag = false;
+
+        // klik na slot (malý pohyb)
+        if (dragMode === "rotate" && movedDistance < 12) {
+          const touch = e.changedTouches ? e.changedTouches[0] : e;
+          const { x, y } = getLocalCoords(touch.clientX, touch.clientY);
+
+          const radius = baseRadius;
+          const slotW = radius * 0.35 / 3;
+          const slotH = slotW * 0.65;
+
+          for (const slot of slots) {
+            const dx = x - slot.screenX;
+            const dy = y - slot.screenY;
+            if (Math.abs(dx) <= slotW / 2 && Math.abs(dy) <= slotH / 2) {
+              // TODO: tady připojíme konkrétní svět / složku z repa
+              alert("Otevřít svět: " + slot.label + " (slot " + slot.id + ")");
+              break;
+            }
+          }
+        }
       }
 
       canvas.addEventListener("mousedown", pointerDown);
       window.addEventListener("mousemove", pointerMove);
       window.addEventListener("mouseup", pointerUp);
+      window.addEventListener("contextmenu", (e) => e.preventDefault());
 
-      canvas.addEventListener("touchstart", pointerDown, { passive: true });
-      window.addEventListener("touchmove", pointerMove, { passive: true });
-      window.addEventListener("touchend", pointerUp);
+      canvas.addEventListener("touchstart", pointerDown, { passive: false });
+      window.addEventListener("touchmove", pointerMove, { passive: false });
+      window.addEventListener("touchend", pointerUp, { passive: false });
+      window.addEventListener("touchcancel", pointerUp, { passive: false });
 
-      // Kliknutí na čtverec – otevře svět (pokud má url)
-      function handleTileClick(e) {
-        const rect = canvas.getBoundingClientRect();
-        const clientX = e.clientX ?? (e.touches && e.touches[0].clientX);
-        const clientY = e.clientY ?? (e.touches && e.touches[0].clientY);
-        if (clientX == null || clientY == null) return;
-
-        const x = clientX - rect.left;
-        const y = clientY - rect.top;
-
-        let hit = null;
-        const hitRadius = radius * 0.07;
-
-        tiles.forEach((tile) => {
-          if (tile.screenX == null || tile.screenY == null) return;
-          const dx = x - tile.screenX;
-          const dy = y - tile.screenY;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist <= hitRadius) {
-            if (!hit || dist < hit.dist) {
-              hit = { tile, dist };
-            }
-          }
-        });
-
-        if (hit && hit.tile && hit.tile.url) {
-          window.location.href = hit.tile.url;
-        }
-      }
-
-      canvas.addEventListener("click", handleTileClick);
+      // zoom kolečkem myši
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const delta = e.deltaY;
+        const factor = delta > 0 ? 0.9 : 1.1;
+        viewScale *= factor;
+        viewScale = Math.max(0.6, Math.min(2.5, viewScale));
+      });
     </script>
   </body>
 </html>
