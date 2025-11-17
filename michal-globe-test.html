@@ -49,25 +49,6 @@
         display: block;
       }
 
-      /* wrapper na střed labelu */
-      .label {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-      }
-
-      .label-inner {
-        padding: 10px 28px;
-        border-radius: 999px;
-        background: radial-gradient(circle at 30% 0%, #ffecb9, #75512a);
-        box-shadow: 0 0 28px rgba(255, 201, 120, 0.9);
-        color: #120707;
-        text-align: center;
-      }
-
       .hud {
         position: absolute;
         left: 18px;
@@ -83,28 +64,6 @@
         font-size: 10px;
         opacity: 0.7;
       }
-
-      /* tvůj symbol + Vivere atque Fru'ii'T uvnitř koule */
-      .globe-symbol {
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: 1px;
-        color: #f7e7c0;
-        text-shadow: 0 0 14px rgba(255, 210, 140, 0.9);
-        opacity: 0.95;
-        text-align: center;
-        line-height: 1.6;
-        pointer-events: none;
-      }
-
-      .globe-symbol span {
-        font-size: 17px;
-        font-weight: 700;
-        background: linear-gradient(90deg, #ffe9b0, #ffcc7a);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 12px rgba(255, 200, 100, 0.6);
-      }
     </style>
   </head>
 
@@ -112,14 +71,6 @@
     <div class="root">
       <div class="stage">
         <canvas id="globe-canvas"></canvas>
-
-        <div class="label">
-          <div class="label-inner">
-            <div class="globe-symbol">
-              {*(°.).)// <span>Vivere atque Fru'ii'T</span> \\(.(.°)*]
-            </div>
-          </div>
-        </div>
 
         <div class="hud">🌀 otáčej kouli prstem / myší</div>
         <div class="hud-right">v0.1 • test koule</div>
@@ -153,7 +104,6 @@
       resize();
       window.addEventListener("resize", resize);
 
-      // jednoduchý 3D model koule – mřížka
       let rotY = 0.5;
       let rotX = -0.3;
       let drag = false;
@@ -161,11 +111,9 @@
       let lastY = 0;
 
       function project(x, y, z) {
-        // rotace kolem osy X
         let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
         let z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
 
-        // rotace kolem osy Y
         let x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
         let z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
 
@@ -180,7 +128,7 @@
       function drawGlobe() {
         ctx.clearRect(0, 0, width, height);
 
-        // jemný podklad
+        // jemné světlo nahoře
         const g = ctx.createRadialGradient(
           cx,
           cy - radius * 0.4,
@@ -194,13 +142,13 @@
         ctx.fillStyle = g;
         ctx.fillRect(0, 0, width, height);
 
-        // stínová koule
+        // stín
         ctx.beginPath();
         ctx.arc(cx, cy, radius * 1.02, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(0,0,0,0.75)";
         ctx.fill();
 
-        // základní tělo koule
+        // koule základ
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         const globeGrad = ctx.createRadialGradient(
@@ -227,11 +175,10 @@
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // mřížka – zlaté linky
+        // mřížka
         ctx.lineWidth = 0.9;
         ctx.strokeStyle = "rgba(255, 210, 140, 0.9)";
 
-        // podélné kružnice (meridiány)
         const meridians = 12;
         for (let i = 0; i < meridians; i++) {
           const lon = (i / meridians) * Math.PI * 2;
@@ -243,7 +190,6 @@
             const y = Math.sin(t);
             const z = Math.cos(t) * Math.sin(lon);
             const p = project(x, y, z);
-            // kresli jen přední stranu (z >= 0)
             if (p.z >= 0) {
               if (!started) {
                 ctx.moveTo(p.x, p.y);
@@ -256,7 +202,6 @@
           ctx.stroke();
         }
 
-        // rovnoběžky (paralely)
         const parallels = 8;
         for (let j = 1; j < parallels; j++) {
           const lat = (j / parallels) * Math.PI - Math.PI / 2;
@@ -279,17 +224,33 @@
           }
           ctx.stroke();
         }
+
+        // 🌀 --- TEXT UVNITŘ KOULE ---
+        ctx.save();
+        ctx.font = "700 16px system-ui";
+        ctx.fillStyle = "rgba(255, 220, 150, 0.95)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.translate(cx, cy + rotX * 25);
+        ctx.rotate(rotY * 0.05);
+
+        ctx.shadowColor = "rgba(255, 200, 120, 0.9)";
+        ctx.shadowBlur = 14;
+
+        ctx.fillText("{*(°.).)// Vivere atque Fru'ii'T \\(.(.°)*]", 0, 0);
+
+        ctx.restore();
       }
 
       function loop() {
-        rotY += 0.0028; // pomalé vlastní otáčení
+        rotY += 0.0028;
         drawGlobe();
         requestAnimationFrame(loop);
       }
 
       loop();
 
-      // ovládání prstem / myší
       function pointerDown(e) {
         drag = true;
         lastX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
