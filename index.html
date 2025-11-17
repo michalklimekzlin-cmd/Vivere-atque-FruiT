@@ -1,441 +1,334 @@
 <!doctype html>
 <html lang="cs">
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <title>Michal Mikula • Vivere atque FruiT</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Michal Mikula • živý mozek světa</title>
 
-    <style>
-      :root {
-        --gold: #ffc86b;
-        --bg-deep: #050509;
-        --bg-mid: #111321;
-      }
+  <style>
+    :root {
+      --gold: #ffcf7a;
+      --gold-soft: rgba(255, 207, 122, 0.35);
+      --bg-deep: #05060b;
+    }
 
-      * {
-        box-sizing: border-box;
-      }
+    * {
+      box-sizing: border-box;
+    }
 
-      body {
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-        background: radial-gradient(circle at top, #141827, var(--bg-deep));
-        color: #f5f5f5;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-      }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #101325, #020308);
+      color: #f5f5f5;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
 
-      .mm-shell {
-        position: relative;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 10px 10px 18px;
-      }
+    .page {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
 
-      .mm-header {
-        width: 100%;
-        max-width: 980px;
-        margin-bottom: 6px;
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        gap: 10px;
-      }
+    .world-frame {
+      position: relative;
+      width: min(900px, 100%);
+      height: min(540px, 80vh);
+      border-radius: 26px;
+      background: radial-gradient(circle at top, #0b0d19, #05060b);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.02),
+        0 30px 80px rgba(0, 0, 0, 0.95);
+      overflow: hidden;
+    }
 
-      .mm-title {
-        font-size: 16px;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-      }
+    /* --- CANVAS s koulí --- */
+    #globe-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 26px;
+      background: radial-gradient(circle at center, #141726, #04050a);
+    }
 
-      .mm-sub {
-        font-size: 11px;
-        opacity: 0.7;
-      }
+    /* overlay label uprostřed */
+    .world-label {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: 9px 26px 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0, #2b2111, #070402);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.04),
+        0 0 30px var(--gold-soft),
+        0 0 70px rgba(0, 0, 0, 0.9);
+      text-align: center;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-size: 10px;
+      color: #fdf7ee;
+    }
+    .world-label span {
+      display: block;
+      margin-top: 2px;
+      letter-spacing: 0.05em;
+      text-transform: none;
+      font-size: 9px;
+      opacity: 0.78;
+    }
 
-      .mm-badge {
-        font-size: 10px;
-        padding: 2px 10px;
-        border-radius: 999px;
-        border: 1px solid rgba(255, 200, 107, 0.6);
-        background: radial-gradient(circle at 30% 10%, #ffe6b8, #3f2d15);
-        color: #140b05;
-        white-space: nowrap;
-      }
+    /* spodní nápisy */
+    .world-hints {
+      position: absolute;
+      inset: auto 16px 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      opacity: 0.75;
+      pointer-events: none;
+    }
+    .world-hints .left::before {
+      content: "🌀 ";
+      opacity: 0.9;
+    }
+    .world-hints .right::before {
+      content: "▢ ";
+      opacity: 0.9;
+    }
 
-      .mm-main {
-        position: relative;
-        width: 100%;
-        max-width: 980px;
-        flex: 1;
-        border-radius: 20px;
-        background: radial-gradient(circle at top, #181b2e, #050509);
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.85);
-        border: 1px solid #262a42;
-        overflow: hidden;
-        display: flex;
-        align-items: stretch;
-        justify-content: center;
-      }
+    /* malé info do rohu – verze / WIP */
+    .world-badge {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.04), transparent);
+      opacity: 0.7;
+    }
 
-      /* 3D scéna */
-      #mm-scene {
-        width: 100%;
-        height: 100%;
-        display: block;
+    /* responsivní zmenšení na mobilu */
+    @media (max-width: 640px) {
+      .world-frame {
+        height: min(460px, 80vh);
       }
+      .world-label {
+        padding: 8px 18px 9px;
+        font-size: 9px;
+      }
+      .world-label span {
+        font-size: 8px;
+      }
+      .world-hints {
+        font-size: 9px;
+      }
+    }
+  </style>
+</head>
 
-      /* Text uvnitř koule (overlay, ale opticky uprostřed) */
-      .mm-center-label {
-        pointer-events: none;
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+<body>
+  <div class="page">
+    <div class="world-frame">
+      <canvas id="globe-canvas"></canvas>
 
-      .mm-center-label-inner {
-        text-align: center;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: radial-gradient(circle at 20% 0, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.8));
-        border: 1px solid rgba(255, 200, 107, 0.65);
-        box-shadow: 0 0 22px rgba(255, 200, 107, 0.45);
-        backdrop-filter: blur(4px);
-      }
-
-      .mm-center-label-title {
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-      }
-
-      .mm-center-label-sub {
-        margin-top: 2px;
-        font-size: 10px;
-        opacity: 0.8;
-      }
-
-      /* Tooltip pro světy */
-      .mm-world-tooltip {
-        position: absolute;
-        left: 50%;
-        bottom: 16px;
-        transform: translateX(-50%);
-        padding: 4px 10px;
-        font-size: 10px;
-        border-radius: 999px;
-        background: rgba(6, 7, 12, 0.95);
-        border: 1px solid rgba(255, 200, 107, 0.5);
-        opacity: 0;
-        transition: opacity 0.18s ease;
-        pointer-events: none;
-        max-width: 90%;
-        text-align: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .mm-world-tooltip.visible {
-        opacity: 1;
-      }
-
-      /* Spodní info panel */
-      .mm-footer {
-        margin-top: 8px;
-        width: 100%;
-        max-width: 980px;
-        font-size: 10px;
-        opacity: 0.7;
-        display: flex;
-        justify-content: space-between;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-
-      .mm-footer span {
-        white-space: nowrap;
-      }
-
-      @media (max-width: 640px) {
-        .mm-header {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-        .mm-main {
-          border-radius: 18px;
-        }
-        .mm-center-label-title {
-          font-size: 13px;
-          letter-spacing: 0.12em;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="mm-shell">
-      <div class="mm-header">
-        <div>
-          <div class="mm-title">Michal Mikula • Hlavní sféra</div>
-          <div class="mm-sub">
-            Centrál AI &amp; světy Vivere atque FruiT uložené v jedné 3D kouli.
-          </div>
-        </div>
-        <div class="mm-badge">core&nbsp;AI&nbsp;• Michal&nbsp;Mikula</div>
+      <div class="world-label">
+        MICHAL MIKULA
+        <span>živý mozek světa · Vivere atque FruiT</span>
       </div>
 
-      <div class="mm-main">
-        <canvas id="mm-scene"></canvas>
+      <div class="world-badge">v0.1 · jádro koule</div>
 
-        <!-- „nápis uvnitř koule“ -->
-        <div class="mm-center-label">
-          <div class="mm-center-label-inner">
-            <div class="mm-center-label-title">MICHAL&nbsp;MIKULA</div>
-            <div class="mm-center-label-sub">
-              živý mozek světa • Vivere atque FruiT
-            </div>
-          </div>
-        </div>
-
-        <!-- tooltip vybraného světa -->
-        <div id="mm-world-tooltip" class="mm-world-tooltip"></div>
-      </div>
-
-      <div class="mm-footer">
-        <span>🎡 otáčej kouli prstem / myší</span>
-        <span>⬛ klepni na zlatý čtvereček – otevřít svět (zatím demo)</span>
+      <div class="world-hints">
+        <div class="left">otáčej koulí prstem / myší</div>
+        <div class="right">klepni na zlatý čtvereček – otevřít svět (zatím demo)</div>
       </div>
     </div>
+  </div>
 
-    <!-- Three.js + OrbitControls (z CDN, čistě statické, funguje na GitHub Pages) -->
-    <script src="https://unpkg.com/three@0.161.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- THREE.JS -->
+  <script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.159.0/examples/js/controls/OrbitControls.js"></script>
 
-    <script>
-      // ====== ZÁKLAD SCÉNY ======
-      const canvas = document.getElementById("mm-scene");
-      const renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: true,
-      });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  <script>
+    // Vybraný canvas
+    const canvas = document.getElementById("globe-canvas");
 
-      const scene = new THREE.Scene();
-      scene.background = null;
+    // SCÉNA
+    const scene = new THREE.Scene();
+    scene.background = null;
 
-      const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-      camera.position.set(0, 0, 4.5);
+    // KAMERA
+    const camera = new THREE.PerspectiveCamera(
+      45,
+      1,
+      0.1,
+      100
+    );
+    camera.position.set(0, 0, 5);
 
-      const controls = new THREE.OrbitControls(camera, canvas);
-      controls.enableDamping = true;
-      controls.enablePan = false;
-      controls.minDistance = 3;
-      controls.maxDistance = 6;
+    // RENDERER
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+    });
 
-      const light1 = new THREE.DirectionalLight(0xfff3ce, 1.1);
-      light1.position.set(3, 4, 5);
-      scene.add(light1);
+    function resizeRenderer() {
+      const { clientWidth, clientHeight } = canvas;
+      if (clientWidth === 0 || clientHeight === 0) return;
+      renderer.setSize(clientWidth, clientHeight, false);
+      camera.aspect = clientWidth / clientHeight;
+      camera.updateProjectionMatrix();
+    }
+    window.addEventListener("resize", resizeRenderer);
 
-      const light2 = new THREE.DirectionalLight(0x90b4ff, 0.7);
-      light2.position.set(-4, -2, -3);
-      scene.add(light2);
+    // SVĚTLO
+    const light = new THREE.PointLight(0xffcf7a, 1.5, 20);
+    light.position.set(3, 3, 4);
+    scene.add(light);
+    const ambient = new THREE.AmbientLight(0x222233);
+    scene.add(ambient);
 
-      const ambient = new THREE.AmbientLight(0x555577, 0.7);
-      scene.add(ambient);
+    // KOULE – jádro
+    const sphereGeo = new THREE.SphereGeometry(1.25, 48, 32);
 
-      // ====== SFÉRA – tělo koule ======
-      const sphereRadius = 1.5;
-      const sphereGeom = new THREE.SphereGeometry(
-        sphereRadius,
-        40,
-        40
+    // jemný tmavý podklad
+    const fillMat = new THREE.MeshPhongMaterial({
+      color: 0x050509,
+      emissive: 0x11121f,
+      shininess: 8,
+      transparent: true,
+      opacity: 0.9,
+    });
+    const sphereFill = new THREE.Mesh(sphereGeo, fillMat);
+    scene.add(sphereFill);
+
+    // mřížka – zlatavý wireframe
+    const wireMat = new THREE.MeshBasicMaterial({
+      color: 0xffcf7a,
+      wireframe: true,
+      wireframeLinewidth: 2,
+    });
+    const sphereWire = new THREE.Mesh(sphereGeo, wireMat);
+    scene.add(sphereWire);
+
+    // Jemný "aura" prstenec kolem
+    const haloGeo = new THREE.SphereGeometry(1.35, 32, 24);
+    const haloMat = new THREE.MeshBasicMaterial({
+      color: 0xffcf7a,
+      transparent: true,
+      opacity: 0.08,
+      side: THREE.BackSide,
+    });
+    const halo = new THREE.Mesh(haloGeo, haloMat);
+    scene.add(halo);
+
+    // ORBIT CONTROLS – otáčení prstem / myší
+    const controls = new THREE.OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.enableZoom = false;
+    controls.enablePan = false;
+    controls.rotateSpeed = 0.6;
+    controls.dampingFactor = 0.08;
+    controls.minPolarAngle = Math.PI * 0.25;
+    controls.maxPolarAngle = Math.PI * 0.75;
+
+    // Předpřipravené sloty pro budoucí "světy"
+    const tileGroup = new THREE.Group();
+    scene.add(tileGroup);
+
+    const tilePositions = [
+      { phi: Math.PI * 0.30, theta: Math.PI * 0.10 }, // svět 1
+      { phi: Math.PI * 0.55, theta: Math.PI * 0.35 }, // svět 2
+      { phi: Math.PI * 0.50, theta: Math.PI * -0.25 }, // svět 3
+      { phi: Math.PI * 0.75, theta: Math.PI * -0.60 }, // svět 4
+    ];
+
+    const tileGeo = new THREE.PlaneGeometry(0.22, 0.22);
+    const tileMat = new THREE.MeshBasicMaterial({
+      color: 0xffcf7a,
+      transparent: true,
+      opacity: 0.9
+    });
+    const tileMatInner = new THREE.MeshBasicMaterial({
+      color: 0x050509,
+      transparent: true,
+      opacity: 0.9
+    });
+
+    tilePositions.forEach((pos, index) => {
+      // hranice (zlatý rámeček)
+      const outer = new THREE.Mesh(tileGeo, tileMat);
+      // vnitřek (tmavý čtvereček)
+      const inner = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.18, 0.18),
+        tileMatInner
       );
 
-      const sphereMat = new THREE.MeshPhongMaterial({
-        color: 0x050509,
-        emissive: 0x15192a,
-        transparent: true,
-        opacity: 0.92,
-        shininess: 40,
-      });
+      const r = 1.28;
+      const x = r * Math.sin(pos.phi) * Math.cos(pos.theta);
+      const y = r * Math.cos(pos.phi);
+      const z = r * Math.sin(pos.phi) * Math.sin(pos.theta);
 
-      const sphereMesh = new THREE.Mesh(sphereGeom, sphereMat);
-      scene.add(sphereMesh);
+      outer.position.set(x, y, z);
+      inner.position.set(x, y, z + 0.001); // trochu před
 
-      // ====== MŘÍŽKA – černé + zlaté linky ======
-      const wireGeom = new THREE.WireframeGeometry(sphereGeom);
+      outer.lookAt(0, 0, 0);
+      inner.lookAt(0, 0, 0);
 
-      const wireMatGold = new THREE.LineBasicMaterial({
-        color: 0xffc86b,
-        linewidth: 1,
-      });
+      outer.userData.worldId = index + 1;
+      inner.userData.worldId = index + 1;
 
-      const wireMatDark = new THREE.LineBasicMaterial({
-        color: 0x000000,
-        linewidth: 2,
-      });
+      tileGroup.add(outer);
+      tileGroup.add(inner);
+    });
 
-      const wireGold = new THREE.LineSegments(wireGeom, wireMatGold);
-      const wireDark = new THREE.LineSegments(wireGeom, wireMatDark);
-      wireDark.scale.set(1.003, 1.003, 1.003);
+    // Raycaster – připraveno na klikání světů (zatím jen alert)
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
 
-      scene.add(wireDark);
-      scene.add(wireGold);
+    function onPointerDown(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = ( (event.clientX - rect.left) / rect.width ) * 2 - 1;
+      const y = - ( (event.clientY - rect.top) / rect.height ) * 2 + 1;
+      pointer.set(x, y);
 
-      // ====== SVĚTOVÉ SLOTY – malé čtverečky na mřížce ======
-      const worldSlots = [
-        { id: "VaFiT", name: "VaF'i'T • Motor světa", lat: 20, lon: 30 },
-        { id: "Revia", name: "Revia • Most mezi světy", lat: -10, lon: 120 },
-        { id: "Bear", name: "VaFT Bear • Dětský svět", lat: 40, lon: -80 },
-        { id: "MichalAI", name: "Michal AI Al Klimek", lat: -35, lon: -150 },
-      ];
-
-      const worldMeshes = [];
-
-      function degToRad(d) {
-        return (d * Math.PI) / 180;
+      raycaster.setFromCamera(pointer, camera);
+      const intersects = raycaster.intersectObjects(tileGroup.children, false);
+      if (intersects.length > 0) {
+        const id = intersects[0].object.userData.worldId || "?";
+        alert("Svět č. " + id + " (demo) – sem později připojíme konkrétní aplikaci.");
       }
+    }
 
-      const quadGeom = new THREE.PlaneGeometry(0.18, 0.18);
+    canvas.addEventListener("pointerdown", onPointerDown);
 
-      worldSlots.forEach((slot) => {
-        const mat = new THREE.MeshBasicMaterial({
-          color: 0xffc86b,
-          opacity: 0.9,
-          transparent: true,
-          side: THREE.DoubleSide,
-        });
+    // ANIMACE
+    function animate() {
+      requestAnimationFrame(animate);
 
-        const mesh = new THREE.Mesh(quadGeom, mat);
-        mesh.userData.slot = slot;
+      sphereWire.rotation.y += 0.003;
+      sphereFill.rotation.y += 0.0015;
+      halo.rotation.y -= 0.0008;
 
-        const phi = degToRad(90 - slot.lat);
-        const theta = degToRad(slot.lon + 180);
+      controls.update();
+      resizeRenderer();
+      renderer.render(scene, camera);
+    }
 
-        const r = sphereRadius * 1.01;
-        mesh.position.set(
-          r * Math.sin(phi) * Math.cos(theta),
-          r * Math.cos(phi),
-          r * Math.sin(phi) * Math.sin(theta)
-        );
-
-        mesh.lookAt(0, 0, 0);
-        mesh.rotateY(Math.PI); // aby "čtvereček" čelil ven
-
-        scene.add(mesh);
-        worldMeshes.push(mesh);
-      });
-
-      // ====== VÝBĚR SVĚTA (RAYCASTER) ======
-      const raycaster = new THREE.Raycaster();
-      const pointer = new THREE.Vector2();
-      const tooltip = document.getElementById("mm-world-tooltip");
-      let lastHoverWorld = null;
-      let clickDownTime = 0;
-
-      function updatePointer(event) {
-        const rect = canvas.getBoundingClientRect();
-        const x =
-          ( (event.clientX || (event.touches && event.touches[0].clientX)) -
-            rect.left ) / rect.width;
-        const y =
-          ( (event.clientY || (event.touches && event.touches[0].clientY)) -
-            rect.top ) / rect.height;
-        pointer.x = x * 2 - 1;
-        pointer.y = -(y * 2 - 1);
-      }
-
-      function checkIntersections() {
-        raycaster.setFromCamera(pointer, camera);
-        const hits = raycaster.intersectObjects(worldMeshes, false);
-        if (hits.length > 0) {
-          const slot = hits[0].object.userData.slot;
-          lastHoverWorld = slot;
-          tooltip.textContent = "Svět: " + slot.name + " (klepni pro vstup)";
-          tooltip.classList.add("visible");
-        } else {
-          lastHoverWorld = null;
-          tooltip.classList.remove("visible");
-        }
-      }
-
-      canvas.addEventListener("pointermove", (e) => {
-        updatePointer(e);
-        checkIntersections();
-      });
-
-      canvas.addEventListener("pointerdown", (e) => {
-        clickDownTime = performance.now();
-        updatePointer(e);
-        checkIntersections();
-      });
-
-      canvas.addEventListener("pointerup", (e) => {
-        const clickDuration = performance.now() - clickDownTime;
-        updatePointer(e);
-        checkIntersections();
-
-        if (clickDuration < 250 && lastHoverWorld) {
-          const slot = lastHoverWorld;
-          alert(
-            "Otevřít svět: " +
-              slot.name +
-              "\n\nTady později navážeme na konkrétní aplikaci v repozitáři."
-          );
-          // Tady pak můžeš udělat:
-          // window.location.href = "../Vivere-atque-FruiT/" + slot.id + "/index.html";
-        }
-      });
-
-      // ====== REZIZE ======
-      function onResize() {
-        const rect = canvas.getBoundingClientRect();
-        const w = rect.width || window.innerWidth;
-        const h = rect.height || window.innerHeight * 0.7;
-        renderer.setSize(w, h, false);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-      }
-      window.addEventListener("resize", onResize);
-      onResize();
-
-      // ====== ANIMAČNÍ LOOP ======
-      function loop() {
-        requestAnimationFrame(loop);
-        sphereMesh.rotation.y += 0.0008;
-        wireGold.rotation.y += 0.0008;
-        wireDark.rotation.y += 0.0008;
-
-        controls.update();
-        renderer.render(scene, camera);
-      }
-      loop();
-
-      // ====== MINI AI OBAL – Michal Mikula (přesune se sem VaF'i'T logika) ======
-      const MichalMikulaCore = {
-        name: "Michal Mikula",
-        worlds: worldSlots,
-        greeting() {
-          return (
-            "Ahoj, jsem Michal Mikula – hlavní koule světa. " +
-            "Držím v sobě všechny světy Vivere atque FruiT a hlídám, aby se neztratily."
-          );
-        },
-      };
-
-      console.log(MichalMikulaCore.greeting());
-    </script>
-  </body>
+    resizeRenderer();
+    animate();
+  </script>
+</body>
 </html>
