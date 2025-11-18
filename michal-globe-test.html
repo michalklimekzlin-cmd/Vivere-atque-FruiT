@@ -47,7 +47,7 @@
         width: 100%;
         height: 100%;
         display: block;
-        touch-action: none; /* vlastní gesta */
+        touch-action: none;
       }
 
       .hud {
@@ -85,12 +85,12 @@
         <canvas id="globe-canvas"></canvas>
 
         <div class="hud">
-          🌀 ťukni na kouli → otáčej prstem / myší • dvěma prsty posouvej scénu • pinch / kolečko = zoom
+          🌀 ťukni na slot → kamera se přiblíží • swipe = otáčení prstence • pinch/kolečko = zoom
         </div>
         <div class="hud-center" id="status">
           vybraný svět: Hra + pravidla
         </div>
-        <div class="hud-right">v0.5 • 4 koule světa (orbit)</div>
+        <div class="hud-right">v0.6 • 4 koule světa (orbit + zoom na slot)</div>
       </div>
     </div>
 
@@ -109,8 +109,15 @@
       let viewOffsetX = 0;
       let viewOffsetY = 0;
 
+      // cílový pohled pro plynulé přiblížení
+      let targetViewScale = 1;
+      let targetViewOffsetX = 0;
+      let targetViewOffsetY = 0;
+      const viewLerpSpeed = 6; // jak rychle kamera dojíždí
+
       // globální rotace prstence světů
       let orbitRotation = 0;
+      let orbitAutoSpeed = 0.12; // jemné automatické otáčení
 
       function resize() {
         const rect = canvas.getBoundingClientRect();
@@ -120,7 +127,6 @@
         canvas.height = height * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        // základní poloměr pro „přední“ kouli
         baseRadius = Math.min(width, height) * 0.18;
 
         layoutSpheres();
@@ -148,7 +154,6 @@
           }
         }
 
-        // pár speciálních názvů
         if (template[34]) template[34].label = "VaF'i'T";
         if (template[35]) template[35].label = "Revia";
         if (template[36]) template[36].label = "MK AI";
@@ -166,6 +171,8 @@
           label: s.label,
           screenX: 0,
           screenY: 0,
+          sceneX: 0,
+          sceneY: 0,
         }));
       }
 
@@ -175,7 +182,7 @@
         {
           key: "game",
           name: "Hra + pravidla",
-          angle: Math.PI / 2, // základní pozice na orbitu
+          angle: Math.PI / 2,
           rotX: -0.2,
           rotY: 0.0,
           autoSpeed: 0.35,
@@ -227,27 +234,22 @@
       ];
 
       function layoutSpheres() {
-        // vzdálenost od středu
         const orbitR = baseRadius * 2.5;
-        // zploštění elipsy (aby to bylo víc „z boku“ jako na skice)
         const orbitFlatten = 0.55;
 
         spheres.forEach((s) => {
           const a = s.angle + orbitRotation;
           s.orbitAngle = a;
 
-          // eliptická orbita kolem středu
           s.cx = orbitR * Math.cos(a);
           s.cy = orbitR * orbitFlatten * Math.sin(a);
 
-          // „hloubka“ – dole víc vpředu, nahoře víc vzadu
-          const depth = Math.sin(a); // -1 = nahoře (vzadu), +1 = dole (vpředu)
+          const depth = Math.sin(a);
           s.depth = depth;
 
-          // větší koule vpředu, menší vzadu
           const t = (depth + 1) / 2; // 0..1
-          s.radiusScale = 0.65 + 0.35 * t; // 0.65..1.0
-          s.alpha = 0.4 + 0.6 * t; // průhlednost – vzadu bledší
+          s.radiusScale = 0.65 + 0.35 * t;
+          s.alpha = 0.4 + 0.6 * t;
         });
       }
 
@@ -257,11 +259,9 @@
       // --- projekce pro jednu kouli ---
 
       function projectOnSphere(x, y, z, radius, rotX, rotY) {
-        // rotace kolem X
         let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
         let z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
 
-        // rotace kolem Y
         let x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
         let z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
 
@@ -278,18 +278,16 @@
       function drawScene() {
         ctx.clearRect(0, 0, width, height);
 
-        // přepočet pozic (kvůli orbitRotation)
         layoutSpheres();
 
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
 
-        // středová platforma Vivere atque Fru'ii'T
+        // středová platforma / motor VaF'i'T
         const hubRInner = baseRadius * 1.0;
         const hubROuter = baseRadius * 1.45;
 
-        // jemný glow
         const gCenter = ctx.createRadialGradient(
           0,
           0,
@@ -303,7 +301,6 @@
         ctx.fillStyle = gCenter;
         ctx.fillRect(-width, -height, width * 2, height * 2);
 
-        // donut
         ctx.beginPath();
         ctx.arc(0, 0, hubROuter, 0, Math.PI * 2);
         ctx.arc(0, 0, hubRInner, 0, Math.PI * 2, true);
@@ -321,7 +318,7 @@
         ctx.fillStyle = hubGrad;
         ctx.fill();
 
-        // rozdělení na 4 výseče
+        // čtyři směry – drží sestavu na kříži
         ctx.save();
         ctx.strokeStyle = "rgba(255, 197, 120, 0.5)";
         ctx.lineWidth = 1;
@@ -349,7 +346,7 @@
         ctx.fillText("{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]", 0, 0);
         ctx.restore();
 
-        // čárkovaná orbita
+        // orbita (elipsa)
         ctx.save();
         ctx.setLineDash([6, 6]);
         ctx.strokeStyle = "rgba(255, 210, 150, 0.4)";
@@ -367,7 +364,7 @@
         ctx.stroke();
         ctx.restore();
 
-        // koule kreslíme podle hloubky (vzadu → vpředu)
+        // koule podle hloubky
         const sorted = [...spheres].sort((a, b) => a.depth - b.depth);
         for (const sphere of sorted) {
           drawSphere(sphere);
@@ -383,7 +380,6 @@
         ctx.translate(sphere.cx, sphere.cy);
         ctx.globalAlpha = sphere.alpha || 1;
 
-        // jemný glow kolem koule
         const g = ctx.createRadialGradient(
           0,
           -radius * 0.4,
@@ -397,13 +393,11 @@
         ctx.fillStyle = g;
         ctx.fillRect(-radius * 2, -radius * 2, radius * 4, radius * 4);
 
-        // stínová koule
         ctx.beginPath();
         ctx.arc(0, 0, radius * 1.02, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(0,0,0,0.75)";
         ctx.fill();
 
-        // tělo koule
         ctx.beginPath();
         ctx.arc(0, 0, radius, 0, Math.PI * 2);
         const globeGrad = ctx.createRadialGradient(
@@ -420,7 +414,6 @@
         ctx.fillStyle = globeGrad;
         ctx.fill();
 
-        // zlatý okraj
         ctx.strokeStyle = "rgba(255, 197, 120, 0.9)";
         ctx.lineWidth = 1.4;
         ctx.shadowColor = "rgba(255, 197, 120, 0.9)";
@@ -430,11 +423,9 @@
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // mřížka
         ctx.lineWidth = 0.9;
         ctx.strokeStyle = "rgba(255, 210, 140, 0.9)";
 
-        // meridiány
         const meridians = 12;
         for (let i = 0; i < meridians; i++) {
           const lon = (i / meridians) * Math.PI * 2;
@@ -458,7 +449,6 @@
           ctx.stroke();
         }
 
-        // paralely
         const parallels = 8;
         for (let j = 1; j < parallels; j++) {
           const lat = (j / parallels) * Math.PI - Math.PI / 2;
@@ -482,7 +472,7 @@
           ctx.stroke();
         }
 
-        // název koule pod ní
+        // název koule
         ctx.save();
         ctx.font = "11px system-ui";
         ctx.fillStyle = "rgba(255,220,170,0.92)";
@@ -508,17 +498,21 @@
           const z = Math.cos(slot.lat) * Math.sin(slot.lon);
           const p = projectOnSphere(x, y, z, radius, sphere.rotX, sphere.rotY);
 
-          if (p.z < 0) continue; // jen přední část
+          if (p.z < 0) continue;
 
-          // reálné souřadnice na plátně pro klikání
+          const sceneX = sphere.cx + p.x;
+          const sceneY = sphere.cy + p.y;
+          slot.sceneX = sceneX;
+          slot.sceneY = sceneY;
+
           const screenX =
             width / 2 +
             viewOffsetX +
-            (sphere.cx + p.x) * viewScale;
+            sceneX * viewScale;
           const screenY =
             height / 2 +
             viewOffsetY +
-            (sphere.cy + p.y) * viewScale;
+            sceneY * viewScale;
 
           slot.screenX = screenX;
           slot.screenY = screenY;
@@ -526,7 +520,6 @@
           ctx.save();
           ctx.translate(p.x, p.y);
 
-          // destička
           ctx.beginPath();
           const r = 5;
           const w = slotW;
@@ -570,20 +563,28 @@
         const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
+        // jemné automatické otáčení prstence
+        orbitRotation += orbitAutoSpeed * dt;
+
         for (const sphere of spheres) {
-          // automatické pomalé točení textur
           sphere.rotY += sphere.autoSpeed * dt;
         }
+
+        // kamera dojíždí k cíli (zoom na slot)
+        const k = Math.min(1, viewLerpSpeed * dt);
+        viewScale += (targetViewScale - viewScale) * k;
+        viewOffsetX += (targetViewOffsetX - viewOffsetX) * k;
+        viewOffsetY += (targetViewOffsetY - viewOffsetY) * k;
 
         drawScene();
         requestAnimationFrame(loop);
       }
       requestAnimationFrame(loop);
 
-      // --- interakce: výběr koule, rotace orbitu, pan/zoom, klik na slot ---
+      // --- interakce ---
 
       let drag = false;
-      let dragMode = "rotate"; // "rotate" nebo "pan"
+      let dragMode = "rotate";
       let lastX = 0;
       let lastY = 0;
       let lastPanDist = 0;
@@ -620,7 +621,6 @@
         e.preventDefault();
 
         if (e.touches && e.touches.length === 2) {
-          // pan + zoom celé scény
           dragMode = "pan";
           drag = true;
           const t0 = e.touches[0];
@@ -636,7 +636,6 @@
 
         const touch = e.touches ? e.touches[0] : e;
 
-        // vyber kouli pod prstem / myší
         const hitSphere = chooseSphereForPoint(touch.clientX, touch.clientY);
         if (hitSphere) {
           activeSphere = hitSphere;
@@ -655,7 +654,6 @@
         e.preventDefault();
 
         if (e.touches && e.touches.length === 2 && dragMode === "pan") {
-          // pan + zoom
           const t0 = e.touches[0];
           const t1 = e.touches[1];
           const cxNow = (t0.clientX + t1.clientX) / 2;
@@ -669,14 +667,18 @@
 
           viewOffsetX += dxCenter;
           viewOffsetY += dyCenter;
+          targetViewOffsetX = viewOffsetX;
+          targetViewOffsetY = viewOffsetY;
 
           const dx = t0.clientX - t1.clientX;
           const dy = t0.clientY - t1.clientY;
           const dist = Math.hypot(dx, dy);
           const ratio = dist / lastPanDist;
           lastPanDist = dist;
+
           viewScale *= ratio;
           viewScale = Math.max(0.6, Math.min(2.5, viewScale));
+          targetViewScale = viewScale;
           return;
         }
 
@@ -690,10 +692,10 @@
         movedDistance += Math.hypot(dx, dy);
 
         if (dragMode === "rotate" && activeSphere) {
-          // vodorovný pohyb = rotace celého prstence světů
+          // vodorovný pohyb = ruční rotace prstence
           orbitRotation += dx * 0.004;
 
-          // svislý pohyb = naklonění aktivní koule
+          // svislý pohyb = naklopení aktivní koule
           activeSphere.rotX += dy * 0.004;
           activeSphere.rotX = Math.max(
             -Math.PI / 2 + 0.2,
@@ -702,14 +704,27 @@
         } else if (dragMode === "pan") {
           viewOffsetX += dx;
           viewOffsetY += dy;
+          targetViewOffsetX = viewOffsetX;
+          targetViewOffsetY = viewOffsetY;
         }
+      }
+
+      function focusOnSlot(slot) {
+        // přiblížení kamery přímo na slot
+        let newScale = 2.1;
+        newScale = Math.max(1.2, Math.min(2.3, newScale));
+
+        targetViewScale = newScale;
+
+        // aby byl slot uprostřed obrazovky: offset = -scene * scale
+        targetViewOffsetX = -slot.sceneX * newScale;
+        targetViewOffsetY = -slot.sceneY * newScale;
       }
 
       function pointerUp(e) {
         if (!drag) return;
         drag = false;
 
-        // klik na slot
         if (dragMode === "rotate" && movedDistance < 12 && activeSphere) {
           const touch = e.changedTouches ? e.changedTouches[0] : e;
           const clientX = touch.clientX;
@@ -719,15 +734,12 @@
             const dx = clientX - slot.screenX;
             const dy = clientY - slot.screenY;
             if (Math.abs(dx) <= 12 && Math.abs(dy) <= 10) {
-              alert(
-                "Otevřít svět: " +
-                  activeSphere.name +
-                  " • " +
-                  slot.label +
-                  " (slot " +
-                  slot.id +
-                  ")"
-              );
+              statusEl.textContent =
+                "vybraný svět: " +
+                activeSphere.name +
+                " • " +
+                slot.label;
+              focusOnSlot(slot);
               break;
             }
           }
@@ -744,13 +756,13 @@
       window.addEventListener("touchend", pointerUp, { passive: false });
       window.addEventListener("touchcancel", pointerUp, { passive: false });
 
-      // zoom kolečkem myši
       canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
         const delta = e.deltaY;
         const factor = delta > 0 ? 0.9 : 1.1;
         viewScale *= factor;
         viewScale = Math.max(0.6, Math.min(2.5, viewScale));
+        targetViewScale = viewScale;
       });
     </script>
   </body>
