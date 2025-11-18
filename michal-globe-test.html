@@ -90,7 +90,7 @@
         <div class="hud-center" id="status">
           vybraný svět: Hra + pravidla
         </div>
-        <div class="hud-right">v0.9 • 4 koule světa (kolotoč)</div>
+        <div class="hud-right">v0.91 • 4 koule světa (kolotoč + slot zoom)</div>
       </div>
     </div>
 
@@ -113,7 +113,7 @@
       let targetViewOffsetX = 0;
       let targetViewOffsetY = 0;
 
-      // globální náklon celé sestavy
+      // globální náklon celé sestavy – VOLNÝ
       let globalTiltX = -0.7;
       let globalTiltY = 0.0;
       let targetTiltX = globalTiltX;
@@ -121,9 +121,9 @@
 
       // prstenec světů – rotace + rychlost (pro kolotoč)
       let orbitRotation = 0;
-      let orbitVelocity = 0.12;              // rad/s, může být + i -
-      const orbitDamping = 0.96;             // tlumení rychlosti
-      const orbitBaseDrift = 0.04;           // jemný „samo“ drift
+      let orbitVelocity = 0.12; // rad/s, může být + i -
+      const orbitDamping = 0.96; // tlumení
+      const orbitBaseDrift = 0.04; // jemný drift
 
       function resize() {
         const rect = canvas.getBoundingClientRect();
@@ -357,7 +357,7 @@
         ctx.fillText("{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]", 0, 0);
         ctx.restore();
 
-        // orbit (jen vizuálně v projekci)
+        // orbit
         ctx.save();
         ctx.setLineDash([6, 6]);
         ctx.strokeStyle = "rgba(255, 210, 150, 0.4)";
@@ -584,20 +584,18 @@
         const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
-        // orbit – kolotoč s tlumením + základní drift
+        // orbit – kolotoč
         orbitRotation += orbitVelocity * dt;
-        // lehké přidání driftu do aktuálního směru (aby nikdy úplně nezastavil)
         const drift = orbitBaseDrift * dt;
         orbitVelocity += orbitVelocity >= 0 ? drift : -drift;
-        // tlumení
         orbitVelocity *= Math.pow(orbitDamping, dt * 60);
 
-        // koule auto rotace
+        // auto rotace koulí
         for (const sphere of spheres) {
           sphere.rotY += sphere.autoSpeed * dt;
         }
 
-        // kamera a náklon dojíždí k cíli
+        // kamera + náklon dojíždí k cíli
         const k = Math.min(1, 6 * dt);
         viewScale += (targetViewScale - viewScale) * k;
         viewOffsetX += (targetViewOffsetX - viewOffsetX) * k;
@@ -622,8 +620,6 @@
       let startScale = 1;
       let startOffsetX = 0;
       let startOffsetY = 0;
-      let startTiltX = globalTiltX;
-      let startTiltY = globalTiltY;
       let startDist = 0;
 
       function pointerDown(e) {
@@ -644,8 +640,6 @@
           startScale = viewScale;
           startOffsetX = viewOffsetX;
           startOffsetY = viewOffsetY;
-          startTiltX = globalTiltX;
-          startTiltY = globalTiltY;
           return;
         }
 
@@ -701,9 +695,9 @@
           targetViewOffsetX = startOffsetX + dxCenter;
           targetViewOffsetY = startOffsetY + dyCenter;
 
-          // náklon – BEZ omezení, jen plynule přičítám
-          targetTiltX = startTiltX + dyCenter * -0.01;
-          targetTiltY = startTiltY + dxCenter * 0.01;
+          // VOLNÝ náklon – přičítáme
+          targetTiltX += dyCenter * -0.02;
+          targetTiltY += dxCenter * 0.02;
 
           // zoom
           const dx = t0.clientX - t1.clientX;
@@ -741,13 +735,23 @@
       }
 
       function focusOnSlot(slot) {
-        // auto zoom na slot – kamera, ne HUD
+        // Auto zoom na slot – spočítá offset podle POZICE NA OBRAZOVCE
         let newScale = 2.3;
         newScale = Math.max(1.2, Math.min(3.0, newScale));
         targetViewScale = newScale;
 
-        targetViewOffsetX = -slot.sceneX * newScale;
-        targetViewOffsetY = -slot.sceneY * newScale;
+        // dopočítáme, jak se musí změnit offset, aby se slot dostal doprostřed
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        // odvod: sceneX = (slot.screenX - centerX - viewOffsetX) / viewScale
+        const sceneX =
+          (slot.screenX - centerX - viewOffsetX) / viewScale;
+        const sceneY =
+          (slot.screenY - centerY - viewOffsetY) / viewScale;
+
+        targetViewOffsetX = -sceneX * newScale;
+        targetViewOffsetY = -sceneY * newScale;
       }
 
       function pointerUp(e) {
