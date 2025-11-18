@@ -90,7 +90,7 @@
         <div class="hud-center" id="status">
           vybraný svět: Hra + pravidla
         </div>
-        <div class="hud-right">v0.4 • 4 koule světa</div>
+        <div class="hud-right">v0.5 • 4 koule světa (orbit)</div>
       </div>
     </div>
 
@@ -109,6 +109,9 @@
       let viewOffsetX = 0;
       let viewOffsetY = 0;
 
+      // globální rotace prstence světů
+      let orbitRotation = 0;
+
       function resize() {
         const rect = canvas.getBoundingClientRect();
         width = rect.width;
@@ -117,7 +120,7 @@
         canvas.height = height * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        // základní poloměr pro jednu kouli
+        // základní poloměr pro „přední“ kouli
         baseRadius = Math.min(width, height) * 0.18;
 
         layoutSpheres();
@@ -172,13 +175,15 @@
         {
           key: "game",
           name: "Hra + pravidla",
-          angle: Math.PI / 2,
+          angle: Math.PI / 2, // základní pozice na orbitu
           rotX: -0.2,
           rotY: 0.0,
           autoSpeed: 0.35,
           slots: cloneSlots(),
           cx: 0,
           cy: 0,
+          depth: 0,
+          radiusScale: 1,
         },
         {
           key: "heroes",
@@ -190,6 +195,8 @@
           slots: cloneSlots(),
           cx: 0,
           cy: 0,
+          depth: 0,
+          radiusScale: 1,
         },
         {
           key: "lang",
@@ -201,6 +208,8 @@
           slots: cloneSlots(),
           cx: 0,
           cy: 0,
+          depth: 0,
+          radiusScale: 1,
         },
         {
           key: "earth",
@@ -212,14 +221,33 @@
           slots: cloneSlots(),
           cx: 0,
           cy: 0,
+          depth: 0,
+          radiusScale: 1,
         },
       ];
 
       function layoutSpheres() {
-        const orbitR = baseRadius * 2.6; // vzdálenost od středu
+        // vzdálenost od středu
+        const orbitR = baseRadius * 2.5;
+        // zploštění elipsy (aby to bylo víc „z boku“ jako na skice)
+        const orbitFlatten = 0.55;
+
         spheres.forEach((s) => {
-          s.cx = orbitR * Math.cos(s.angle);
-          s.cy = orbitR * Math.sin(s.angle);
+          const a = s.angle + orbitRotation;
+          s.orbitAngle = a;
+
+          // eliptická orbita kolem středu
+          s.cx = orbitR * Math.cos(a);
+          s.cy = orbitR * orbitFlatten * Math.sin(a);
+
+          // „hloubka“ – dole víc vpředu, nahoře víc vzadu
+          const depth = Math.sin(a); // -1 = nahoře (vzadu), +1 = dole (vpředu)
+          s.depth = depth;
+
+          // větší koule vpředu, menší vzadu
+          const t = (depth + 1) / 2; // 0..1
+          s.radiusScale = 0.65 + 0.35 * t; // 0.65..1.0
+          s.alpha = 0.4 + 0.6 * t; // průhlednost – vzadu bledší
         });
       }
 
@@ -249,6 +277,9 @@
 
       function drawScene() {
         ctx.clearRect(0, 0, width, height);
+
+        // přepočet pozic (kvůli orbitRotation)
+        layoutSpheres();
 
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
@@ -318,19 +349,27 @@
         ctx.fillText("{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]", 0, 0);
         ctx.restore();
 
-        // čárkované orbitální kružnice
+        // čárkovaná orbita
         ctx.save();
         ctx.setLineDash([6, 6]);
         ctx.strokeStyle = "rgba(255, 210, 150, 0.4)";
         ctx.lineWidth = 1;
-        const orbitRadius = baseRadius * 2.6;
+        const orbitRadius = baseRadius * 2.5;
+        const orbitFlatten = 0.55;
         ctx.beginPath();
-        ctx.arc(0, 0, orbitRadius, 0, Math.PI * 2);
+        for (let a = 0; a <= 360; a += 3) {
+          const rad = (a * Math.PI) / 180;
+          const x = orbitRadius * Math.cos(rad);
+          const y = orbitRadius * orbitFlatten * Math.sin(rad);
+          if (a === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
         ctx.stroke();
         ctx.restore();
 
-        // jednotlivé koule
-        for (const sphere of spheres) {
+        // koule kreslíme podle hloubky (vzadu → vpředu)
+        const sorted = [...spheres].sort((a, b) => a.depth - b.depth);
+        for (const sphere of sorted) {
           drawSphere(sphere);
         }
 
@@ -338,10 +377,11 @@
       }
 
       function drawSphere(sphere) {
-        const radius = baseRadius;
+        const radius = baseRadius * (sphere.radiusScale || 1);
 
         ctx.save();
         ctx.translate(sphere.cx, sphere.cy);
+        ctx.globalAlpha = sphere.alpha || 1;
 
         // jemný glow kolem koule
         const g = ctx.createRadialGradient(
@@ -454,7 +494,7 @@
         ctx.restore();
 
         // sloty
-        const slotW = radius * 0.35 / 3;
+        const slotW = (radius * 0.35) / 3;
         const slotH = slotW * 0.65;
 
         ctx.font = "9px system-ui";
@@ -517,6 +557,7 @@
         }
 
         ctx.restore();
+        ctx.globalAlpha = 1;
       }
 
       // --- animace ---
@@ -530,10 +571,8 @@
         lastTime = timestamp;
 
         for (const sphere of spheres) {
-          // pokud zrovna ručně neotáčíme danou kouli, auto-otáčení
-          if (!(drag && dragMode === "rotate" && activeSphere === sphere)) {
-            sphere.rotY += sphere.autoSpeed * dt;
-          }
+          // automatické pomalé točení textur
+          sphere.rotY += sphere.autoSpeed * dt;
         }
 
         drawScene();
@@ -541,7 +580,7 @@
       }
       requestAnimationFrame(loop);
 
-      // --- interakce: výběr koule, rotace, pan/zoom, klik na slot ---
+      // --- interakce: výběr koule, rotace orbitu, pan/zoom, klik na slot ---
 
       let drag = false;
       let dragMode = "rotate"; // "rotate" nebo "pan"
@@ -563,7 +602,7 @@
         const { x, y } = getSceneCoords(clientX, clientY);
         let best = null;
         let bestDist = Infinity;
-        const rHit = baseRadius * 1.1;
+        const rHit = baseRadius * 1.2;
 
         for (const sphere of spheres) {
           const dx = x - sphere.cx;
@@ -651,7 +690,10 @@
         movedDistance += Math.hypot(dx, dy);
 
         if (dragMode === "rotate" && activeSphere) {
-          activeSphere.rotY += dx * 0.004;
+          // vodorovný pohyb = rotace celého prstence světů
+          orbitRotation += dx * 0.004;
+
+          // svislý pohyb = naklonění aktivní koule
           activeSphere.rotX += dy * 0.004;
           activeSphere.rotX = Math.max(
             -Math.PI / 2 + 0.2,
