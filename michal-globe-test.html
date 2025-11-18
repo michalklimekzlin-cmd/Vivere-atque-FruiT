@@ -129,6 +129,9 @@
       let orbitNudgeX = 0;
       let orbitNudgeY = 0;
 
+      // aktuálně vybraná koule – MUSÍ být definovaná dřív, než ji použijeme v layoutSpheres
+      let activeSphere = null;
+
       function resize() {
         const rect = canvas.getBoundingClientRect();
         width = rect.width;
@@ -241,6 +244,9 @@
         },
       ];
 
+      // po vytvoření pole spheres nastavíme default aktivní kouli
+      activeSphere = spheres[0];
+
       function layoutSpheres() {
         const orbitR = baseRadius * 2.7;
 
@@ -262,7 +268,7 @@
           // jemné posunutí ostatních koulí (milimetrové)
           let nudgeX = 0;
           let nudgeY = 0;
-          if (s !== activeSphere) {
+          if (activeSphere && s !== activeSphere) {
             nudgeX = orbitNudgeX;
             nudgeY = orbitNudgeY;
           }
@@ -589,7 +595,6 @@
       // --- animace ---
 
       let lastTime = 0;
-      let activeSphere = spheres[0];
       let sphereDragActive = false;
 
       function loop(timestamp) {
