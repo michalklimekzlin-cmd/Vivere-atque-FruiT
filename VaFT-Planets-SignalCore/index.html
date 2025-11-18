@@ -109,8 +109,10 @@
       let targetViewScale = 1;
       let viewOffsetX = 0;
       let viewOffsetY = 0;
+      let targetViewOffsetX = 0; // FIX – chybějící proměnné
+      let targetViewOffsetY = 0; // FIX – chybějící proměnné
 
-      // globální náklon celé sestavy – použijeme i pro Signal Core
+      // globální náklon celé sestavy
       let globalTiltX = -0.7;
       let globalTiltY = 0.0;
       let targetTiltX = globalTiltX;
@@ -122,7 +124,7 @@
       const orbitDamping = 0.96;
       const orbitBaseDrift = 0.04;
 
-      // jemný náklon ostatních koulí
+      // jemný náklon ostatních koulí při točení aktivní
       let orbitNudgeX = 0;
       let orbitNudgeY = 0;
 
@@ -131,7 +133,6 @@
 
       // ---------- SIGNAL CORE (kužel pod soustavou) ----------
 
-      const signalModes = ["mesh", "letters", "glyph", "vafiti"];
       const glyphs = ["{*(°.)}", "ً&’」", "¡(*)(%)¡", "{°. .}", "(•.°)"];
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -198,14 +199,11 @@
           p.y = y1;
           p.z = z2;
 
-          const sx =
-            width / 2 +
-            viewOffsetX +
-            x2 * viewScale;
+          const sx = width / 2 + viewOffsetX + x2 * viewScale;
           const sy =
             height / 2 +
             viewOffsetY +
-            (y1 + baseRadius * 1.6) * viewScale; // mírně dolů pod koule
+            (y1 + baseRadius * 1.6) * viewScale; // dolů pod koule
 
           p.screenX = sx;
           p.screenY = sy;
@@ -213,7 +211,6 @@
       }
 
       function drawSignalBackground() {
-        // spodní elipsa / podstavec
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
@@ -296,8 +293,7 @@
         for (const p of signalCore.points) {
           const ch = letters[i % len];
           i++;
-          const flicker =
-            0.6 + 0.4 * Math.sin(signalCore.pulse * 2 + p.phase);
+          const flicker = 0.6 + 0.4 * Math.sin(signalCore.pulse * 2 + p.phase);
           ctx.globalAlpha = flicker;
           ctx.fillText(ch, p.screenX, p.screenY);
         }
@@ -332,11 +328,9 @@
         ctx.strokeStyle = "rgba(255, 210, 160, 0.9)";
         ctx.fillStyle = "rgba(255, 210, 160, 0.35)";
         for (const p of signalCore.points) {
-          const wobble =
-            Math.sin(signalCore.pulse * 3 + p.phase) * 4;
+          const wobble = Math.sin(signalCore.pulse * 3 + p.phase) * 4;
           const y = p.screenY - wobble;
-          const size =
-            2 + 1.2 * Math.sin(signalCore.pulse * 2 + p.phase);
+          const size = 2 + 1.2 * Math.sin(signalCore.pulse * 2 + p.phase);
           ctx.beginPath();
           ctx.arc(p.screenX, y, size, 0, Math.PI * 2);
           ctx.fill();
@@ -365,7 +359,7 @@
         }
       }
 
-      // ---------- SLOUPCE / SLOTY / KOULE (původní systém) ----------
+      // ---------- KOULE / SLOTY ----------
 
       function createSlotTemplate() {
         const template = [];
@@ -470,18 +464,10 @@
           let z = orbitR * Math.sin(a);
 
           // globální náklon
-          let y1 =
-            y * Math.cos(globalTiltX) -
-            z * Math.sin(globalTiltX);
-          let z1 =
-            y * Math.sin(globalTiltX) +
-            z * Math.cos(globalTiltX);
-          let x2 =
-            x * Math.cos(globalTiltY) +
-            z1 * Math.sin(globalTiltY);
-          let z2 =
-            -x * Math.sin(globalTiltY) +
-            z1 * Math.cos(globalTiltY);
+          let y1 = y * Math.cos(globalTiltX) - z * Math.sin(globalTiltX);
+          let z1 = y * Math.sin(globalTiltX) + z * Math.cos(globalTiltX);
+          let x2 = x * Math.cos(globalTiltY) + z1 * Math.sin(globalTiltY);
+          let z2 = -x * Math.sin(globalTiltY) + z1 * Math.cos(globalTiltY);
 
           let nudgeX = 0;
           let nudgeY = 0;
@@ -534,9 +520,7 @@
         ctx.save();
         ctx.translate(
           width / 2 + viewOffsetX + sphere.cx * viewScale,
-          height / 2 +
-            viewOffsetY +
-            sphere.cy * viewScale
+          height / 2 + viewOffsetY + sphere.cy * viewScale
         );
         ctx.scale(viewScale, viewScale);
         ctx.globalAlpha = sphere.alpha || 1;
@@ -549,10 +533,7 @@
           0,
           radius * 1.4
         );
-        g.addColorStop(
-          0,
-          "rgba(255, 200, 150, 0.20)"
-        );
+        g.addColorStop(0, "rgba(255, 200, 150, 0.20)");
         g.addColorStop(1, "rgba(0, 0, 0, 0)");
         ctx.fillStyle = g;
         ctx.fillRect(-radius * 2, -radius * 2, radius * 4, radius * 4);
@@ -623,8 +604,7 @@
 
         const parallels = 8;
         for (let j = 1; j < parallels; j++) {
-          const lat =
-            (j / parallels) * Math.PI - Math.PI / 2;
+          const lat = (j / parallels) * Math.PI - Math.PI / 2;
           ctx.beginPath();
           let started = false;
           for (let s = 0; s <= 90; s++) {
@@ -655,8 +635,7 @@
         // název
         ctx.save();
         ctx.font = "11px system-ui";
-        ctx.fillStyle =
-          "rgba(255,220,170,0.92)";
+        ctx.fillStyle = "rgba(255,220,170,0.92)";
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
         ctx.shadowColor = "rgba(0,0,0,0.8)";
@@ -687,17 +666,13 @@
           );
           if (p.z < 0) continue;
 
-          const sceneX =
-            sphere.cx * viewScale + p.x;
-          const sceneY =
-            sphere.cy * viewScale + p.y;
+          const sceneX = sphere.cx * viewScale + p.x;
+          const sceneY = sphere.cy * viewScale + p.y;
           slot.sceneX = sceneX / viewScale;
           slot.sceneY = sceneY / viewScale;
 
-          const screenX =
-            width / 2 + viewOffsetX + sceneX;
-          const screenY =
-            height / 2 + viewOffsetY + sceneY;
+          const screenX = width / 2 + viewOffsetX + sceneX;
+          const screenY = height / 2 + viewOffsetY + sceneY;
 
           slot.screenX = screenX;
           slot.screenY = screenY;
@@ -711,46 +686,23 @@
           const h = slotH;
           ctx.moveTo(-w / 2 + r, -h / 2);
           ctx.lineTo(w / 2 - r, -h / 2);
-          ctx.quadraticCurveTo(
-            w / 2,
-            -h / 2,
-            w / 2,
-            -h / 2 + r
-          );
+          ctx.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
           ctx.lineTo(w / 2, h / 2 - r);
-          ctx.quadraticCurveTo(
-            w / 2,
-            h / 2,
-            w / 2 - r,
-            h / 2
-          );
+          ctx.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
           ctx.lineTo(-w / 2 + r, h / 2);
-          ctx.quadraticCurveTo(
-            -w / 2,
-            h / 2,
-            -w / 2,
-            h / 2 - r
-          );
+          ctx.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
           ctx.lineTo(-w / 2, -h / 2 + r);
-          ctx.quadraticCurveTo(
-            -w / 2,
-            -h / 2,
-            -w / 2 + r,
-            -h / 2
-          );
+          ctx.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
           ctx.closePath();
 
           ctx.fillStyle = "rgba(6,6,10,0.92)";
-          ctx.strokeStyle =
-            "rgba(255,210,150,0.9)";
+          ctx.strokeStyle = "rgba(255,210,150,0.9)";
           ctx.lineWidth = 0.7;
           ctx.fill();
           ctx.stroke();
 
-          ctx.fillStyle =
-            "rgba(255,220,160,0.95)";
-          ctx.shadowColor =
-            "rgba(255,200,140,0.5)";
+          ctx.fillStyle = "rgba(255,220,160,0.95)";
+          ctx.shadowColor = "rgba(255,200,140,0.5)";
           ctx.shadowBlur = 4;
           ctx.fillText(slot.label, 0, 1);
 
@@ -766,10 +718,10 @@
 
         layoutSpheres();
 
-        // Signal Core jako pozadí
+        // Signal Core
         drawSignalCore();
 
-        // středový motor
+        // středový motor + orbit
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
@@ -785,10 +737,7 @@
           0,
           hubROuter * 1.2
         );
-        gCenter.addColorStop(
-          0,
-          "rgba(255, 200, 150, 0.12)"
-        );
+        gCenter.addColorStop(0, "rgba(255, 200, 150, 0.12)");
         gCenter.addColorStop(1, "rgba(0, 0, 0, 0)");
         ctx.fillStyle = gCenter;
         ctx.fillRect(-width, -height, width * 2, height * 2);
@@ -811,8 +760,7 @@
         ctx.fill();
 
         ctx.save();
-        ctx.strokeStyle =
-          "rgba(255, 197, 120, 0.5)";
+        ctx.strokeStyle = "rgba(255, 197, 120, 0.5)";
         ctx.lineWidth = 1;
         for (let i = 0; i < 4; i++) {
           const angle = (i * Math.PI) / 2;
@@ -828,12 +776,10 @@
 
         ctx.save();
         ctx.font = "700 14px system-ui";
-        ctx.fillStyle =
-          "rgba(255, 220, 150, 0.95)";
+        ctx.fillStyle = "rgba(255, 220, 150, 0.95)";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.shadowColor =
-          "rgba(255, 200, 120, 0.9)";
+        ctx.shadowColor = "rgba(255, 200, 120, 0.9)";
         ctx.shadowBlur = 14;
         ctx.rotate(0.8);
         ctx.fillText(
@@ -843,30 +789,21 @@
         );
         ctx.restore();
 
-        // orbit
         ctx.save();
         ctx.setLineDash([6, 6]);
-        ctx.strokeStyle =
-          "rgba(255, 210, 150, 0.4)";
+        ctx.strokeStyle = "rgba(255, 210, 150, 0.4)";
         ctx.lineWidth = 1;
         const orbitR = baseRadius * 2.7;
         ctx.beginPath();
         for (let aDeg = 0; aDeg <= 360; aDeg += 3) {
-          const a =
-            (aDeg * Math.PI) / 180 + orbitRotation;
+          const a = (aDeg * Math.PI) / 180 + orbitRotation;
           let x = orbitR * Math.cos(a);
           let y = 0;
           let z = orbitR * Math.sin(a);
 
-          let y1 =
-            y * Math.cos(globalTiltX) -
-            z * Math.sin(globalTiltX);
-          let z1 =
-            y * Math.sin(globalTiltX) +
-            z * Math.cos(globalTiltX);
-          let x2 =
-            x * Math.cos(globalTiltY) +
-            z1 * Math.sin(globalTiltY);
+          let y1 = y * Math.cos(globalTiltX) - z * Math.sin(globalTiltX);
+          let z1 = y * Math.sin(globalTiltX) + z * Math.cos(globalTiltX);
+          let x2 = x * Math.cos(globalTiltY) + z1 * Math.sin(globalTiltY);
 
           const px = x2;
           const py = y1;
@@ -878,9 +815,7 @@
 
         ctx.restore();
 
-        const sorted = [...spheres].sort(
-          (a, b) => a.depth - b.depth
-        );
+        const sorted = [...spheres].sort((a, b) => a.depth - b.depth);
         for (const s of sorted) drawSphere(s);
       }
 
@@ -891,7 +826,6 @@
         const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
-        // orbit
         if (!sphereDragActive) {
           orbitRotation += orbitVelocity * dt;
           const drift = orbitBaseDrift * dt;
@@ -933,8 +867,6 @@
       let startDist = 0;
       let pinchSceneX = 0;
       let pinchSceneY = 0;
-      let startOffsetX = 0;
-      let startOffsetY = 0;
 
       function pointerDown(e) {
         e.preventDefault();
@@ -960,15 +892,11 @@
           startDist = Math.hypot(dx, dy);
 
           pinchSceneX =
-            (centerX - width / 2 - viewOffsetX) /
-            viewScale;
+            (centerX - width / 2 - viewOffsetX) / viewScale;
           pinchSceneY =
-            (centerY - height / 2 - viewOffsetY) /
-            viewScale;
+            (centerY - height / 2 - viewOffsetY) / viewScale;
 
           startScale = viewScale;
-          startOffsetX = viewOffsetX;
-          startOffsetY = viewOffsetY;
           sphereDragActive = false;
           return;
         }
@@ -992,8 +920,7 @@
 
         if (best) {
           activeSphere = best;
-          statusEl.textContent =
-            "vybraný svět: " + activeSphere.name;
+          statusEl.textContent = "vybraný svět: " + activeSphere.name;
           updateSignalModeForSphere(activeSphere);
           dragMode = "sphere";
           sphereDragActive = true;
@@ -1029,7 +956,6 @@
           lastY = cyNow;
           movedDistance += Math.hypot(dxCenter, dyCenter);
 
-          // zoom na prstech
           const dx = t0.clientX - t1.clientX;
           const dy = t0.clientY - t1.clientY;
           const dist = Math.hypot(dx, dy);
@@ -1038,10 +964,8 @@
           newScale = Math.max(0.7, Math.min(3.2, newScale));
           targetViewScale = newScale;
 
-          targetViewOffsetX =
-            centerX - width / 2 - pinchSceneX * newScale;
-          targetViewOffsetY =
-            centerY - height / 2 - pinchSceneY * newScale;
+          targetViewOffsetX = centerX - width / 2 - pinchSceneX * newScale;
+          targetViewOffsetY = centerY - height / 2 - pinchSceneY * newScale;
 
           targetTiltX += dyCenter * -0.02;
           targetTiltY += dxCenter * 0.02;
