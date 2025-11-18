@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Michal Klimek VaF'i'T ChatGPT • 4 koule světa</title>
+    <title>Michal Klimek VaF'i'T ChatGPT • 4 koule + Signal Core</title>
 
     <style>
       html,
@@ -55,7 +55,7 @@
         left: 18px;
         bottom: 14px;
         font-size: 10px;
-        opacity: 0.7;
+        opacity: 0.75;
       }
 
       .hud-right {
@@ -63,7 +63,7 @@
         right: 18px;
         top: 14px;
         font-size: 10px;
-        opacity: 0.7;
+        opacity: 0.75;
       }
 
       .hud-center {
@@ -72,7 +72,7 @@
         bottom: 14px;
         transform: translateX(-50%);
         font-size: 11px;
-        opacity: 0.8;
+        opacity: 0.85;
         text-align: center;
         white-space: nowrap;
       }
@@ -90,7 +90,7 @@
         <div class="hud-center" id="status">
           vybraný svět: Hra + pravidla
         </div>
-        <div class="hud-right">v1.01 • 4 koule světa (hologram)</div>
+        <div class="hud-right">v1.2 • 4 koule světa + VaF'i'T Signal Core (kornout)</div>
       </div>
     </div>
 
@@ -106,14 +106,13 @@
 
       // kamera
       let viewScale = 1;
+      let targetViewScale = 1;
       let viewOffsetX = 0;
       let viewOffsetY = 0;
-
-      let targetViewScale = 1;
       let targetViewOffsetX = 0;
       let targetViewOffsetY = 0;
 
-      // globální náklon celé sestavy – volný 360°
+      // globální náklon celé sestavy
       let globalTiltX = -0.7;
       let globalTiltY = 0.0;
       let targetTiltX = globalTiltX;
@@ -121,31 +120,277 @@
 
       // orbit (kolotoč)
       let orbitRotation = 0;
-      let orbitVelocity = 0.12; // rad/s, +- podle směru
+      let orbitVelocity = 0.12;
       const orbitDamping = 0.96;
       const orbitBaseDrift = 0.04;
 
-      // jemný „milimetrový“ náklon ostatních koulí
+      // jemný náklon ostatních koulí při točení aktivní
       let orbitNudgeX = 0;
       let orbitNudgeY = 0;
 
-      // aktuálně vybraná koule
       let activeSphere = null;
+      let sphereDragActive = false;
 
-      function resize() {
-        const rect = canvas.getBoundingClientRect();
-        width = rect.width;
-        height = rect.height;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // ---------- SIGNAL CORE (kužel pod soustavou) ----------
+      const glyphs = ["{*(°.)}", "ً&’」", "¡(*)(%)¡", "{°. .}", "(•.°)"];
+      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-        baseRadius = Math.min(width, height) * 0.18;
+      const signalCore = {
+        points: [],
+        rings: 12,
+        segments: 18,
+        pulse: 0,
+        baseRadius: 120,
+        coneHeight: 200,
+        mode: "mesh",
+        offsetY: 0, // scéna Y, kde kornout sedí
+      };
 
-        layoutSpheres();
+      function generateSignalPoints() {
+        signalCore.points = [];
+        const { rings, segments, coneHeight, baseRadius } = signalCore;
+
+        for (let i = 0; i <= rings; i++) {
+          const t = i / rings;
+          // špička dole → top je blíž k motoru
+          const y = coneHeight / 2 - t * coneHeight; // t=0: horní kruh, t=1: špička dole
+          const r = baseRadius * (1.0 - 0.75 * t); // nahoře velké, dole malé
+          for (let j = 0; j < segments; j++) {
+            const a = (j / segments) * Math.PI * 2;
+            const x = r * Math.cos(a);
+            const z = r * Math.sin(a);
+            signalCore.points.push({
+              baseX: x,
+              baseY: y,
+              baseZ: z,
+              x: 0,
+              y: 0,
+              z: 0,
+              screenX: 0,
+              screenY: 0,
+              ring: i,
+              seg: j,
+              phase: Math.random() * Math.PI * 2,
+            });
+          }
+        }
       }
 
-      // --- sloty ---
+      function updateSignalProjection() {
+        const sinX = Math.sin(globalTiltX);
+        const cosX = Math.cos(globalTiltX);
+        const sinY = Math.sin(globalTiltY);
+        const cosY = Math.cos(globalTiltY);
+        const offsetY = signalCore.offsetY;
+
+        for (const p of signalCore.points) {
+          let x = p.baseX;
+          let y = p.baseY;
+          let z = p.baseZ;
+
+          // rotace kolem X
+          let y1 = y * cosX - z * sinX;
+          let z1 = y * sinX + z * cosX;
+
+          // rotace kolem Y
+          let x2 = x * cosY + z1 * sinY;
+          let z2 = -x * sinY + z1 * cosY;
+
+          p.x = x2;
+          p.y = y1 + offsetY;
+          p.z = z2;
+
+          const sx = width / 2 + viewOffsetX + x2 * viewScale;
+          const sy = height / 2 + viewOffsetY + (y1 + offsetY) * viewScale;
+
+          p.screenX = sx;
+          p.screenY = sy;
+        }
+      }
+
+      function drawSignalBackground() {
+        ctx.save();
+        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
+        ctx.scale(viewScale, viewScale);
+
+        const yBase =
+          signalCore.offsetY + signalCore.coneHeight / 2 + 12; // stín pod špičkou
+
+        ctx.beginPath();
+        ctx.ellipse(
+          0,
+          yBase,
+          signalCore.baseRadius * 0.9,
+          signalCore.baseRadius * 0.3,
+          0,
+          0,
+          Math.PI * 2
+        );
+        const eGrad = ctx.createRadialGradient(
+          0,
+          yBase,
+          signalCore.baseRadius * 0.1,
+          0,
+          yBase,
+          signalCore.baseRadius
+        );
+        eGrad.addColorStop(0, "rgba(20,12,8,1)");
+        eGrad.addColorStop(1, "rgba(0,0,0,0.6)");
+        ctx.fillStyle = eGrad;
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      function drawSignalMesh() {
+        ctx.lineWidth = 0.7;
+        ctx.strokeStyle = "rgba(255, 210, 150, 0.9)";
+
+        // horizontální kružnice
+        for (let i = 0; i <= signalCore.rings; i++) {
+          ctx.beginPath();
+          let started = false;
+          for (const p of signalCore.points) {
+            if (p.ring !== i) continue;
+            if (!started) {
+              ctx.moveTo(p.screenX, p.screenY);
+              started = true;
+            } else {
+              ctx.lineTo(p.screenX, p.screenY);
+            }
+          }
+          if (started) ctx.closePath();
+          ctx.stroke();
+        }
+
+        // vertikální linie
+        for (let j = 0; j < signalCore.segments; j++) {
+          ctx.beginPath();
+          let started = false;
+          for (let i = 0; i <= signalCore.rings; i++) {
+            const idx = i * signalCore.segments + j;
+            const p = signalCore.points[idx];
+            if (!p) continue;
+            if (!started) {
+              ctx.moveTo(p.screenX, p.screenY);
+              started = true;
+            } else {
+              ctx.lineTo(p.screenX, p.screenY);
+            }
+          }
+          if (started) ctx.stroke();
+        }
+      }
+
+      function drawSignalLetters() {
+        ctx.font = "10px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "rgba(255, 220, 170, 0.95)";
+        ctx.shadowColor = "rgba(255, 200, 140, 0.7)";
+        ctx.shadowBlur = 6;
+
+        const len = letters.length;
+        let i = 0;
+        for (const p of signalCore.points) {
+          const ch = letters[i % len];
+          i++;
+          const flicker = 0.6 + 0.4 * Math.sin(signalCore.pulse * 2 + p.phase);
+          ctx.globalAlpha = flicker;
+          ctx.fillText(ch, p.screenX, p.screenY);
+        }
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+      }
+
+      function drawSignalGlyph() {
+        ctx.font = "11px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "rgba(255, 225, 180, 0.96)";
+        ctx.shadowColor = "rgba(255, 200, 160, 0.8)";
+        ctx.shadowBlur = 7;
+
+        const len = glyphs.length;
+        let i = 0;
+        for (const p of signalCore.points) {
+          const g = glyphs[i % len];
+          i++;
+          const flicker =
+            0.55 + 0.45 * Math.sin(signalCore.pulse * 1.4 + p.phase);
+          ctx.globalAlpha = flicker;
+          ctx.fillText(g, p.screenX, p.screenY);
+        }
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+      }
+
+      function drawSignalVafiti() {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = "rgba(255, 210, 160, 0.9)";
+        ctx.fillStyle = "rgba(255, 210, 160, 0.35)";
+        for (const p of signalCore.points) {
+          const wobble = Math.sin(signalCore.pulse * 3 + p.phase) * 4;
+          const y = p.screenY - wobble;
+          const size = 2 + 1.2 * Math.sin(signalCore.pulse * 2 + p.phase);
+          ctx.beginPath();
+          ctx.arc(p.screenX, y, size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+
+      // průhledná čtvrtka kužele, která obíhá s orbitem
+      function cutRotatingQuarter() {
+        ctx.save();
+        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
+        ctx.scale(viewScale, viewScale);
+
+        const centerY = signalCore.offsetY - signalCore.coneHeight * 0.1;
+        const outerR = signalCore.baseRadius * 1.2;
+
+        const start = orbitRotation; // svázáno s planetami
+        const end = start + Math.PI / 2; // čtvrtka
+
+        ctx.beginPath();
+        ctx.moveTo(0, centerY);
+        ctx.arc(0, centerY, outerR, start, end);
+        ctx.closePath();
+
+        // vyřízneme díru
+        const oldOp = ctx.globalCompositeOperation;
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.fill();
+        ctx.globalCompositeOperation = oldOp;
+
+        ctx.restore();
+      }
+
+      function drawSignalCore() {
+        signalCore.pulse += 0.016;
+        updateSignalProjection();
+        drawSignalBackground();
+
+        switch (signalCore.mode) {
+          case "mesh":
+            drawSignalMesh();
+            break;
+          case "letters":
+            drawSignalLetters();
+            break;
+          case "glyph":
+            drawSignalGlyph();
+            break;
+          case "vafiti":
+            drawSignalVafiti();
+            break;
+        }
+
+        // rotující průhledná čtvrtka
+        cutRotatingQuarter();
+      }
+
+      // ---------- KOULE / SLOTY ----------
 
       function createSlotTemplate() {
         const template = [];
@@ -162,6 +407,10 @@
               lat,
               lon,
               label: "slot " + id,
+              screenX: 0,
+              screenY: 0,
+              sceneX: 0,
+              sceneY: 0,
             });
             id++;
           }
@@ -175,19 +424,8 @@
       const slotTemplate = createSlotTemplate();
 
       function cloneSlots() {
-        return slotTemplate.map((s) => ({
-          id: s.id,
-          lat: s.lat,
-          lon: s.lon,
-          label: s.label,
-          screenX: 0,
-          screenY: 0,
-          sceneX: 0,
-          sceneY: 0,
-        }));
+        return slotTemplate.map((s) => ({ ...s }));
       }
-
-      // --- 4 koule ---
 
       const spheres = [
         {
@@ -256,15 +494,12 @@
           let y = 0;
           let z = orbitR * Math.sin(a);
 
-          // globální náklon X
+          // globální náklon
           let y1 = y * Math.cos(globalTiltX) - z * Math.sin(globalTiltX);
           let z1 = y * Math.sin(globalTiltX) + z * Math.cos(globalTiltX);
-
-          // globální náklon Y
           let x2 = x * Math.cos(globalTiltY) + z1 * Math.sin(globalTiltY);
           let z2 = -x * Math.sin(globalTiltY) + z1 * Math.cos(globalTiltY);
 
-          // jemné posunutí ostatních koulí (milimetrové)
           let nudgeX = 0;
           let nudgeY = 0;
           if (activeSphere && s !== activeSphere) {
@@ -282,139 +517,44 @@
         });
       }
 
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        baseRadius = Math.min(width, height) * 0.18;
+
+        signalCore.baseRadius = Math.min(width, height) * 0.19;
+        signalCore.coneHeight = signalCore.baseRadius * 1.6;
+        signalCore.offsetY = baseRadius * 0.9; // KUŽEL BLÍŽE K MOTORU
+
+        generateSignalPoints();
+      }
+
       resize();
       window.addEventListener("resize", resize);
 
-      // projekce bodu na kouli
       function projectOnSphere(x, y, z, radius, rotX, rotY) {
         let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
         let z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
-
         let x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
         let z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
-
         const scale = radius * 0.9;
-        return {
-          x: x2 * scale,
-          y: y1 * scale,
-          z: z2,
-        };
-      }
-
-      // --- kreslení scény ---
-
-      function drawScene() {
-        ctx.clearRect(0, 0, width, height);
-
-        layoutSpheres();
-
-        ctx.save();
-        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
-        ctx.scale(viewScale, viewScale);
-
-        // středový motor
-        const hubRInner = baseRadius * 1.0;
-        const hubROuter = baseRadius * 1.45;
-
-        const gCenter = ctx.createRadialGradient(
-          0,
-          0,
-          hubRInner * 0.2,
-          0,
-          0,
-          hubROuter * 1.2
-        );
-        gCenter.addColorStop(0, "rgba(255, 200, 150, 0.12)");
-        gCenter.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = gCenter;
-        ctx.fillRect(-width, -height, width * 2, height * 2);
-
-        ctx.beginPath();
-        ctx.arc(0, 0, hubROuter, 0, Math.PI * 2);
-        ctx.arc(0, 0, hubRInner, 0, Math.PI * 2, true);
-        ctx.closePath();
-        const hubGrad = ctx.createRadialGradient(
-          -hubROuter * 0.2,
-          -hubROuter * 0.2,
-          hubRInner * 0.2,
-          0,
-          hubROuter * 0.4,
-          hubROuter * 1.1
-        );
-        hubGrad.addColorStop(0, "#1b1012");
-        hubGrad.addColorStop(1, "#050308");
-        ctx.fillStyle = hubGrad;
-        ctx.fill();
-
-        // kříž
-        ctx.save();
-        ctx.strokeStyle = "rgba(255, 197, 120, 0.5)";
-        ctx.lineWidth = 1;
-        for (let i = 0; i < 4; i++) {
-          const angle = (i * Math.PI) / 2;
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(
-            hubROuter * Math.cos(angle),
-            hubROuter * Math.sin(angle)
-          );
-          ctx.stroke();
-        }
-        ctx.restore();
-
-        // text
-        ctx.save();
-        ctx.font = "700 14px system-ui";
-        ctx.fillStyle = "rgba(255, 220, 150, 0.95)";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.shadowColor = "rgba(255, 200, 120, 0.9)";
-        ctx.shadowBlur = 14;
-        ctx.rotate(0.8);
-        ctx.fillText("{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]", 0, 0);
-        ctx.restore();
-
-        // orbit
-        ctx.save();
-        ctx.setLineDash([6, 6]);
-        ctx.strokeStyle = "rgba(255, 210, 150, 0.4)";
-        ctx.lineWidth = 1;
-        const orbitR = baseRadius * 2.7;
-        ctx.beginPath();
-        for (let aDeg = 0; aDeg <= 360; aDeg += 3) {
-          const a = (aDeg * Math.PI) / 180;
-
-          let x = orbitR * Math.cos(a);
-          let y = 0;
-          let z = orbitR * Math.sin(a);
-
-          let y1 = y * Math.cos(globalTiltX) - z * Math.sin(globalTiltX);
-          let z1 = y * Math.sin(globalTiltX) + z * Math.cos(globalTiltX);
-          let x2 = x * Math.cos(globalTiltY) + z1 * Math.sin(globalTiltY);
-
-          const px = x2;
-          const py = y1;
-
-          if (aDeg === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.stroke();
-        ctx.restore();
-
-        // koule podle hloubky
-        const sorted = [...spheres].sort((a, b) => a.depth - b.depth);
-        for (const sphere of sorted) {
-          drawSphere(sphere);
-        }
-
-        ctx.restore();
+        return { x: x2 * scale, y: y1 * scale, z: z2 };
       }
 
       function drawSphere(sphere) {
         const radius = baseRadius * (sphere.radiusScale || 1);
 
         ctx.save();
-        ctx.translate(sphere.cx, sphere.cy);
+        ctx.translate(
+          width / 2 + viewOffsetX + sphere.cx * viewScale,
+          height / 2 + viewOffsetY + sphere.cy * viewScale
+        );
+        ctx.scale(viewScale, viewScale);
         ctx.globalAlpha = sphere.alpha || 1;
 
         const g = ctx.createRadialGradient(
@@ -474,7 +614,14 @@
             const x = Math.cos(t) * Math.cos(lon);
             const y = Math.sin(t);
             const z = Math.cos(t) * Math.sin(lon);
-            const p = projectOnSphere(x, y, z, radius, sphere.rotX, sphere.rotY);
+            const p = projectOnSphere(
+              x,
+              y,
+              z,
+              radius,
+              sphere.rotX,
+              sphere.rotY
+            );
             if (p.z >= 0) {
               if (!started) {
                 ctx.moveTo(p.x, p.y);
@@ -497,7 +644,14 @@
             const x = Math.cos(lat) * Math.cos(lon);
             const y = Math.sin(lat);
             const z = Math.cos(lat) * Math.sin(lon);
-            const p = projectOnSphere(x, y, z, radius, sphere.rotX, sphere.rotY);
+            const p = projectOnSphere(
+              x,
+              y,
+              z,
+              radius,
+              sphere.rotX,
+              sphere.rotY
+            );
             if (p.z >= 0) {
               if (!started) {
                 ctx.moveTo(p.x, p.y);
@@ -534,23 +688,23 @@
           const x = Math.cos(slot.lat) * Math.cos(slot.lon);
           const y = Math.sin(slot.lat);
           const z = Math.cos(slot.lat) * Math.sin(slot.lon);
-          const p = projectOnSphere(x, y, z, radius, sphere.rotX, sphere.rotY);
-
+          const p = projectOnSphere(
+            x,
+            y,
+            z,
+            radius,
+            sphere.rotX,
+            sphere.rotY
+          );
           if (p.z < 0) continue;
 
-          const sceneX = sphere.cx + p.x;
-          const sceneY = sphere.cy + p.y;
-          slot.sceneX = sceneX;
-          slot.sceneY = sceneY;
+          const sceneX = sphere.cx * viewScale + p.x;
+          const sceneY = sphere.cy * viewScale + p.y;
+          slot.sceneX = sceneX / viewScale;
+          slot.sceneY = sceneY / viewScale;
 
-          const screenX =
-            width / 2 +
-            viewOffsetX +
-            sceneX * viewScale;
-          const screenY =
-            height / 2 +
-            viewOffsetY +
-            sceneY * viewScale;
+          const screenX = width / 2 + viewOffsetX + sceneX;
+          const screenY = height / 2 + viewOffsetY + sceneY;
 
           slot.screenX = screenX;
           slot.screenY = screenY;
@@ -591,17 +745,119 @@
         ctx.globalAlpha = 1;
       }
 
-      // --- animace ---
+      function drawScene() {
+        ctx.clearRect(0, 0, width, height);
 
+        layoutSpheres();
+
+        // Signal Core
+        drawSignalCore();
+
+        // středový motor + orbit
+        ctx.save();
+        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
+        ctx.scale(viewScale, viewScale);
+
+        const hubRInner = baseRadius * 1.0;
+        const hubROuter = baseRadius * 1.45;
+
+        const gCenter = ctx.createRadialGradient(
+          0,
+          0,
+          hubRInner * 0.2,
+          0,
+          0,
+          hubROuter * 1.2
+        );
+        gCenter.addColorStop(0, "rgba(255, 200, 150, 0.12)");
+        gCenter.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = gCenter;
+        ctx.fillRect(-width, -height, width * 2, height * 2);
+
+        ctx.beginPath();
+        ctx.arc(0, 0, hubROuter, 0, Math.PI * 2);
+        ctx.arc(0, 0, hubRInner, 0, Math.PI * 2, true);
+        ctx.closePath();
+        const hubGrad = ctx.createRadialGradient(
+          -hubROuter * 0.2,
+          -hubROuter * 0.2,
+          hubRInner * 0.2,
+          0,
+          hubROuter * 0.4,
+          hubROuter * 1.1
+        );
+        hubGrad.addColorStop(0, "#1b1012");
+        hubGrad.addColorStop(1, "#050308");
+        ctx.fillStyle = hubGrad;
+        ctx.fill();
+
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 197, 120, 0.5)";
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 4; i++) {
+          const angle = (i * Math.PI) / 2;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(
+            hubROuter * Math.cos(angle),
+            hubROuter * Math.sin(angle)
+          );
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.font = "700 14px system-ui";
+        ctx.fillStyle = "rgba(255, 220, 150, 0.95)";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.shadowColor = "rgba(255, 200, 120, 0.9)";
+        ctx.shadowBlur = 14;
+        ctx.rotate(0.8);
+        ctx.fillText(
+          "{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]",
+          0,
+          0
+        );
+        ctx.restore();
+
+        ctx.save();
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = "rgba(255, 210, 150, 0.4)";
+        ctx.lineWidth = 1;
+        const orbitR = baseRadius * 2.7;
+        ctx.beginPath();
+        for (let aDeg = 0; aDeg <= 360; aDeg += 3) {
+          const a = (aDeg * Math.PI) / 180 + orbitRotation;
+          let x = orbitR * Math.cos(a);
+          let y = 0;
+          let z = orbitR * Math.sin(a);
+
+          let y1 = y * Math.cos(globalTiltX) - z * Math.sin(globalTiltX);
+          let z1 = y * Math.sin(globalTiltX) + z * Math.cos(globalTiltX);
+          let x2 = x * Math.cos(globalTiltY) + z1 * Math.sin(globalTiltY);
+
+          const px = x2;
+          const py = y1;
+          if (aDeg === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.restore();
+
+        const sorted = [...spheres].sort((a, b) => a.depth - b.depth);
+        for (const s of sorted) drawSphere(s);
+      }
+
+      // animace
       let lastTime = 0;
-      let sphereDragActive = false;
-
       function loop(timestamp) {
         if (!timestamp) timestamp = 0;
         const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
-        // orbit – kolotoč
         if (!sphereDragActive) {
           orbitRotation += orbitVelocity * dt;
           const drift = orbitBaseDrift * dt;
@@ -612,16 +868,13 @@
           orbitVelocity *= Math.pow(0.85, dt * 60);
         }
 
-        // auto rotace koulí
         for (const sphere of spheres) {
           sphere.rotY += sphere.autoSpeed * dt;
         }
 
-        // nudge (milimetrový) pomalu mizí
         orbitNudgeX *= Math.pow(0.85, dt * 60);
         orbitNudgeY *= Math.pow(0.85, dt * 60);
 
-        // kamera + náklon dojíždí k cíli
         const k = Math.min(1, 6 * dt);
         viewScale += (targetViewScale - viewScale) * k;
         viewOffsetX += (targetViewOffsetX - viewOffsetX) * k;
@@ -634,54 +887,48 @@
       }
       requestAnimationFrame(loop);
 
-      // --- interakce ---
-
+      // interakce
       let drag = false;
-      let dragMode = "none"; // "sphere" | "orbit" | "two"
+      let dragMode = "none";
       let lastX = 0;
       let lastY = 0;
       let movedDistance = 0;
 
-      // 2 prsty – pinch
+      // pinch zoom
       let startScale = 1;
-      let startOffsetX = 0;
-      let startOffsetY = 0;
       let startDist = 0;
       let pinchSceneX = 0;
       let pinchSceneY = 0;
 
       function pointerDown(e) {
         e.preventDefault();
-
         const rect = canvas.getBoundingClientRect();
 
         if (e.touches && e.touches.length === 2) {
-          // Tilt / posun / zoom (kotvený na prstech)
           drag = true;
           dragMode = "two";
           const t0 = e.touches[0];
           const t1 = e.touches[1];
+          const cx = (t0.clientX + t1.clientX) / 2;
+          const cy = (t0.clientY + t1.clientY) / 2;
 
-          const centerX = (t0.clientX + t1.clientX) / 2 - rect.left;
-          const centerY = (t0.clientY + t1.clientY) / 2 - rect.top;
+          const centerX = cx - rect.left;
+          const centerY = cy - rect.top;
 
-          lastX = (t0.clientX + t1.clientX) / 2;
-          lastY = (t0.clientY + t1.clientY) / 2;
+          lastX = cx;
+          lastY = cy;
+          movedDistance = 0;
 
           const dx = t0.clientX - t1.clientX;
           const dy = t0.clientY - t1.clientY;
           startDist = Math.hypot(dx, dy);
-          movedDistance = 0;
 
-          // světové souřadnice bodu pod prsty
           pinchSceneX =
             (centerX - width / 2 - viewOffsetX) / viewScale;
           pinchSceneY =
             (centerY - height / 2 - viewOffsetY) / viewScale;
 
           startScale = viewScale;
-          startOffsetX = viewOffsetX;
-          startOffsetY = viewOffsetY;
           sphereDragActive = false;
           return;
         }
@@ -693,7 +940,6 @@
         let best = null;
         let bestDist = Infinity;
         const rHit = baseRadius * 1.2 * viewScale;
-
         for (const sphere of spheres) {
           const sx = sphere.cx * viewScale;
           const sy = sphere.cy * viewScale;
@@ -705,13 +951,12 @@
         }
 
         if (best) {
-          // DOTYK NA KOULI -> SPHERE MODE
           activeSphere = best;
           statusEl.textContent = "vybraný svět: " + activeSphere.name;
+          updateSignalModeForSphere(activeSphere);
           dragMode = "sphere";
           sphereDragActive = true;
         } else {
-          // DOTYK MIMO -> ORBIT MODE
           dragMode = "orbit";
           sphereDragActive = false;
         }
@@ -725,7 +970,6 @@
       function pointerMove(e) {
         if (!drag) return;
         e.preventDefault();
-
         const rect = canvas.getBoundingClientRect();
 
         if (dragMode === "two" && e.touches && e.touches.length === 2) {
@@ -744,7 +988,6 @@
           lastY = cyNow;
           movedDistance += Math.hypot(dxCenter, dyCenter);
 
-          // zoom – kotvený na pinchSceneX/Y
           const dx = t0.clientX - t1.clientX;
           const dy = t0.clientY - t1.clientY;
           const dist = Math.hypot(dx, dy);
@@ -753,16 +996,11 @@
           newScale = Math.max(0.7, Math.min(3.2, newScale));
           targetViewScale = newScale;
 
-          // přepočet offsetu tak, aby bod pinchSceneX/Y zůstal pod prsty
-          targetViewOffsetX =
-            centerX - width / 2 - pinchSceneX * newScale;
-          targetViewOffsetY =
-            centerY - height / 2 - pinchSceneY * newScale;
+          targetViewOffsetX = centerX - width / 2 - pinchSceneX * newScale;
+          targetViewOffsetY = centerY - height / 2 - pinchSceneY * newScale;
 
-          // volný náklon – 360°
           targetTiltX += dyCenter * -0.02;
           targetTiltY += dxCenter * 0.02;
-
           return;
         }
 
@@ -776,28 +1014,20 @@
         movedDistance += Math.hypot(dx, dy);
 
         if (dragMode === "sphere" && activeSphere) {
-          // otáčení JEDNÉ koule
           activeSphere.rotY += dx * 0.015;
           activeSphere.rotX += dy * 0.015;
           activeSphere.rotX = Math.max(
             -Math.PI / 2 + 0.2,
             Math.min(Math.PI / 2 - 0.2, activeSphere.rotX)
           );
-
-          // přidání rychlosti prstenci (kolotoč)
           orbitVelocity += dx * 0.01;
-
-          // jemný nudge ostatních koulí
           orbitNudgeX += dx * 0.02;
           orbitNudgeY += dy * 0.02;
-
           const maxNudge = baseRadius * 0.06;
           orbitNudgeX = Math.max(-maxNudge, Math.min(maxNudge, orbitNudgeX));
           orbitNudgeY = Math.max(-maxNudge, Math.min(maxNudge, orbitNudgeY));
-
           sphereDragActive = true;
         } else if (dragMode === "orbit") {
-          // ORBIT MODE – otáčí se celá soustava
           orbitRotation += dx * 0.01;
           orbitVelocity += dx * 0.008;
           sphereDragActive = false;
@@ -805,7 +1035,6 @@
       }
 
       function focusOnSlot(slot) {
-        // auto zoom na konkrétní slot
         let newScale = 2.3;
         newScale = Math.max(1.2, Math.min(3.0, newScale));
         targetViewScale = newScale;
@@ -818,7 +1047,7 @@
 
       function pointerUp(e) {
         if (!drag) return;
-
+        drag = false;
         if (dragMode === "sphere" && movedDistance < 16 && activeSphere) {
           const touch = e.changedTouches ? e.changedTouches[0] : e;
           const clientX = touch.clientX;
@@ -838,9 +1067,15 @@
             }
           }
         }
-
-        drag = false;
         sphereDragActive = false;
+      }
+
+      function updateSignalModeForSphere(sphere) {
+        if (!sphere) return;
+        if (sphere.key === "game") signalCore.mode = "mesh";
+        else if (sphere.key === "heroes") signalCore.mode = "glyph";
+        else if (sphere.key === "lang") signalCore.mode = "letters";
+        else if (sphere.key === "earth") signalCore.mode = "vafiti";
       }
 
       canvas.addEventListener("mousedown", pointerDown);
@@ -853,7 +1088,6 @@
       window.addEventListener("touchend", pointerUp, { passive: false });
       window.addEventListener("touchcancel", pointerUp, { passive: false });
 
-      // wheel zoom (myš) – kotvený na kurzoru
       canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
         const rect = canvas.getBoundingClientRect();
