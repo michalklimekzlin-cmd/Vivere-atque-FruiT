@@ -85,12 +85,12 @@
         <canvas id="globe-canvas"></canvas>
 
         <div class="hud">
-          🌀 1 prst na kouli = otáčení koule • ťuk na slot = auto zoom na slot • 2 prsty = náklon + posun + zoom celé sestavy
+          🌀 1 prst na kouli = otáčení koule • ťuk na slot = zoom na slot • 1 prst mimo koule = orbit • 2 prsty = náklon + posun + zoom
         </div>
         <div class="hud-center" id="status">
           vybraný svět: Hra + pravidla
         </div>
-        <div class="hud-right">v0.91 • 4 koule světa (kolotoč + slot zoom)</div>
+        <div class="hud-right">v1.0 • 4 koule světa (hologram)</div>
       </div>
     </div>
 
@@ -113,17 +113,21 @@
       let targetViewOffsetX = 0;
       let targetViewOffsetY = 0;
 
-      // globální náklon celé sestavy – VOLNÝ
+      // globální náklon celé sestavy – volný 360°
       let globalTiltX = -0.7;
       let globalTiltY = 0.0;
       let targetTiltX = globalTiltX;
       let targetTiltY = globalTiltY;
 
-      // prstenec světů – rotace + rychlost (pro kolotoč)
+      // orbit (kolotoč)
       let orbitRotation = 0;
-      let orbitVelocity = 0.12; // rad/s, může být + i -
-      const orbitDamping = 0.96; // tlumení
-      const orbitBaseDrift = 0.04; // jemný drift
+      let orbitVelocity = 0.12; // rad/s, +- podle směru
+      const orbitDamping = 0.96;
+      const orbitBaseDrift = 0.04;
+
+      // jemný „milimetrový“ náklon ostatních koulí
+      let orbitNudgeX = 0;
+      let orbitNudgeY = 0;
 
       function resize() {
         const rect = canvas.getBoundingClientRect();
@@ -255,8 +259,16 @@
           let x2 = x * Math.cos(globalTiltY) + z1 * Math.sin(globalTiltY);
           let z2 = -x * Math.sin(globalTiltY) + z1 * Math.cos(globalTiltY);
 
-          s.cx = x2;
-          s.cy = y1;
+          // jemné posunutí ostatních koulí (milimetrové)
+          let nudgeX = 0;
+          let nudgeY = 0;
+          if (s !== activeSphere) {
+            nudgeX = orbitNudgeX;
+            nudgeY = orbitNudgeY;
+          }
+
+          s.cx = x2 + nudgeX;
+          s.cy = y1 + nudgeY;
           s.depth = z2;
 
           const t = (z2 + orbitR) / (2 * orbitR);
@@ -578,6 +590,7 @@
 
       let lastTime = 0;
       let activeSphere = spheres[0];
+      let sphereDragActive = false;
 
       function loop(timestamp) {
         if (!timestamp) timestamp = 0;
@@ -585,15 +598,26 @@
         lastTime = timestamp;
 
         // orbit – kolotoč
-        orbitRotation += orbitVelocity * dt;
-        const drift = orbitBaseDrift * dt;
-        orbitVelocity += orbitVelocity >= 0 ? drift : -drift;
-        orbitVelocity *= Math.pow(orbitDamping, dt * 60);
+        if (!sphereDragActive) {
+          // běžné chování
+          orbitRotation += orbitVelocity * dt;
+          const drift = orbitBaseDrift * dt;
+          orbitVelocity += orbitVelocity >= 0 ? drift : -drift;
+          orbitVelocity *= Math.pow(orbitDamping, dt * 60);
+        } else {
+          // během otáčení jedné koule orbit přibrzdíme
+          orbitRotation += orbitVelocity * dt * 0.15;
+          orbitVelocity *= Math.pow(0.85, dt * 60);
+        }
 
         // auto rotace koulí
         for (const sphere of spheres) {
           sphere.rotY += sphere.autoSpeed * dt;
         }
+
+        // nudge (milimetrový) pomalu mizí
+        orbitNudgeX *= Math.pow(0.85, dt * 60);
+        orbitNudgeY *= Math.pow(0.85, dt * 60);
 
         // kamera + náklon dojíždí k cíli
         const k = Math.min(1, 6 * dt);
@@ -611,7 +635,7 @@
       // --- interakce ---
 
       let drag = false;
-      let dragMode = "none";
+      let dragMode = "none"; // "sphere" | "orbit" | "two"
       let lastX = 0;
       let lastY = 0;
       let movedDistance = 0;
@@ -626,6 +650,7 @@
         e.preventDefault();
 
         if (e.touches && e.touches.length === 2) {
+          // Tilt / posun / zoom
           drag = true;
           dragMode = "two";
           const t0 = e.touches[0];
@@ -640,6 +665,7 @@
           startScale = viewScale;
           startOffsetX = viewOffsetX;
           startOffsetY = viewOffsetY;
+          sphereDragActive = false;
           return;
         }
 
@@ -650,7 +676,7 @@
 
         let best = null;
         let bestDist = Infinity;
-        const rHit = baseRadius * 1.3 * viewScale;
+        const rHit = baseRadius * 1.2 * viewScale;
 
         for (const sphere of spheres) {
           const sx = sphere.cx * viewScale;
@@ -663,12 +689,18 @@
         }
 
         if (best) {
+          // DOTYK NA KOULI -> SPHERE MODE
           activeSphere = best;
           statusEl.textContent = "vybraný svět: " + activeSphere.name;
+          dragMode = "sphere";
+          sphereDragActive = true;
+        } else {
+          // DOTYK MIMO -> ORBIT MODE
+          dragMode = "orbit";
+          sphereDragActive = false;
         }
 
         drag = true;
-        dragMode = "one";
         lastX = touch.clientX;
         lastY = touch.clientY;
         movedDistance = 0;
@@ -695,7 +727,7 @@
           targetViewOffsetX = startOffsetX + dxCenter;
           targetViewOffsetY = startOffsetY + dyCenter;
 
-          // VOLNÝ náklon – přičítáme
+          // volný náklon – 360°
           targetTiltX += dyCenter * -0.02;
           targetTiltY += dxCenter * 0.02;
 
@@ -710,55 +742,62 @@
           return;
         }
 
-        if (dragMode === "one") {
-          const touch = e.touches ? e.touches[0] : e;
-          const x = touch.clientX;
-          const y = touch.clientY;
-          const dx = x - lastX;
-          const dy = y - lastY;
-          lastX = x;
-          lastY = y;
-          movedDistance += Math.hypot(dx, dy);
+        const touch = e.touches ? e.touches[0] : e;
+        const x = touch.clientX;
+        const y = touch.clientY;
+        const dx = x - lastX;
+        const dy = y - lastY;
+        lastX = x;
+        lastY = y;
+        movedDistance += Math.hypot(dx, dy);
 
-          if (activeSphere) {
-            // citlivé otáčení koule
-            activeSphere.rotY += dx * 0.015;
-            activeSphere.rotX += dy * 0.015;
-            activeSphere.rotX = Math.max(
-              -Math.PI / 2 + 0.2,
-              Math.min(Math.PI / 2 - 0.2, activeSphere.rotX)
-            );
-            // přidání rychlosti prstenci – směr podle dx
-            orbitVelocity += dx * 0.01;
-          }
+        if (dragMode === "sphere" && activeSphere) {
+          // otáčení JEDNÉ koule
+          activeSphere.rotY += dx * 0.015;
+          activeSphere.rotX += dy * 0.015;
+          activeSphere.rotX = Math.max(
+            -Math.PI / 2 + 0.2,
+            Math.min(Math.PI / 2 - 0.2, activeSphere.rotX)
+          );
+
+          // přidání rychlosti prstenci (kolotoč)
+          orbitVelocity += dx * 0.01;
+
+          // jemný nudge ostatních koulí
+          orbitNudgeX += dx * 0.02;
+          orbitNudgeY += dy * 0.02;
+
+          // omez velikost nudgů (cca pár pixelů = „milimetry“)
+          const maxNudge = baseRadius * 0.06; // malá hodnota
+          orbitNudgeX = Math.max(-maxNudge, Math.min(maxNudge, orbitNudgeX));
+          orbitNudgeY = Math.max(-maxNudge, Math.min(maxNudge, orbitNudgeY));
+
+          sphereDragActive = true;
+        } else if (dragMode === "orbit") {
+          // ORBIT MODE – otáčí se celá soustava
+          orbitRotation += dx * 0.01;
+          orbitVelocity += dx * 0.008;
+          sphereDragActive = false;
         }
       }
 
       function focusOnSlot(slot) {
-        // Auto zoom na slot – spočítá offset podle POZICE NA OBRAZOVCE
+        // auto zoom na konkrétní slot (použijeme scénické souřadnice)
         let newScale = 2.3;
         newScale = Math.max(1.2, Math.min(3.0, newScale));
         targetViewScale = newScale;
 
-        // dopočítáme, jak se musí změnit offset, aby se slot dostal doprostřed
-        const centerX = width / 2;
-        const centerY = height / 2;
+        targetViewOffsetX = -slot.sceneX * newScale;
+        targetViewOffsetY = -slot.sceneY * newScale;
 
-        // odvod: sceneX = (slot.screenX - centerX - viewOffsetX) / viewScale
-        const sceneX =
-          (slot.screenX - centerX - viewOffsetX) / viewScale;
-        const sceneY =
-          (slot.screenY - centerY - viewOffsetY) / viewScale;
-
-        targetViewOffsetX = -sceneX * newScale;
-        targetViewOffsetY = -sceneY * newScale;
+        // při zoomu na slot zastavíme drift
+        orbitVelocity *= 0.4;
       }
 
       function pointerUp(e) {
         if (!drag) return;
-        drag = false;
 
-        if (dragMode === "one" && movedDistance < 16 && activeSphere) {
+        if (dragMode === "sphere" && movedDistance < 16 && activeSphere) {
           const touch = e.changedTouches ? e.changedTouches[0] : e;
           const clientX = touch.clientX;
           const clientY = touch.clientY;
@@ -777,6 +816,9 @@
             }
           }
         }
+
+        drag = false;
+        sphereDragActive = false;
       }
 
       canvas.addEventListener("mousedown", pointerDown);
