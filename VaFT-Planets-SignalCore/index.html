@@ -90,7 +90,7 @@
         <div class="hud-center" id="status">
           vybraný svět: Hra + pravidla
         </div>
-        <div class="hud-right">v1.1 • 4 koule světa + VaF'i'T Signal Core</div>
+        <div class="hud-right">v1.2 • 4 koule světa + VaF'i'T Signal Core (kornout)</div>
       </div>
     </div>
 
@@ -109,8 +109,8 @@
       let targetViewScale = 1;
       let viewOffsetX = 0;
       let viewOffsetY = 0;
-      let targetViewOffsetX = 0; // FIX – chybějící proměnné
-      let targetViewOffsetY = 0; // FIX – chybějící proměnné
+      let targetViewOffsetX = 0;
+      let targetViewOffsetY = 0;
 
       // globální náklon celé sestavy
       let globalTiltX = -0.7;
@@ -132,7 +132,6 @@
       let sphereDragActive = false;
 
       // ---------- SIGNAL CORE (kužel pod soustavou) ----------
-
       const glyphs = ["{*(°.)}", "ً&’」", "¡(*)(%)¡", "{°. .}", "(•.°)"];
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -144,19 +143,20 @@
         baseRadius: 120,
         coneHeight: 200,
         mode: "mesh",
+        offsetY: 0, // scéna Y, kde kornout sedí
       };
 
       function generateSignalPoints() {
         signalCore.points = [];
-        const rings = signalCore.rings;
-        const segs = signalCore.segments;
+        const { rings, segments, coneHeight, baseRadius } = signalCore;
 
         for (let i = 0; i <= rings; i++) {
           const t = i / rings;
-          const y = -signalCore.coneHeight / 2 + t * signalCore.coneHeight;
-          const r = signalCore.baseRadius * (0.3 + 0.7 * t);
-          for (let j = 0; j < segs; j++) {
-            const a = (j / segs) * Math.PI * 2;
+          // špička dole → top je blíž k motoru
+          const y = coneHeight / 2 - t * coneHeight; // t=0: horní kruh, t=1: špička dole
+          const r = baseRadius * (1.0 - 0.75 * t); // nahoře velké, dole malé
+          for (let j = 0; j < segments; j++) {
+            const a = (j / segments) * Math.PI * 2;
             const x = r * Math.cos(a);
             const z = r * Math.sin(a);
             signalCore.points.push({
@@ -181,6 +181,7 @@
         const cosX = Math.cos(globalTiltX);
         const sinY = Math.sin(globalTiltY);
         const cosY = Math.cos(globalTiltY);
+        const offsetY = signalCore.offsetY;
 
         for (const p of signalCore.points) {
           let x = p.baseX;
@@ -196,14 +197,11 @@
           let z2 = -x * sinY + z1 * cosY;
 
           p.x = x2;
-          p.y = y1;
+          p.y = y1 + offsetY;
           p.z = z2;
 
           const sx = width / 2 + viewOffsetX + x2 * viewScale;
-          const sy =
-            height / 2 +
-            viewOffsetY +
-            (y1 + baseRadius * 1.6) * viewScale; // dolů pod koule
+          const sy = height / 2 + viewOffsetY + (y1 + offsetY) * viewScale;
 
           p.screenX = sx;
           p.screenY = sy;
@@ -214,13 +212,16 @@
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
-        const yBase = baseRadius * 1.6 + signalCore.coneHeight / 2 + 10;
+
+        const yBase =
+          signalCore.offsetY + signalCore.coneHeight / 2 + 12; // stín pod špičkou
+
         ctx.beginPath();
         ctx.ellipse(
           0,
           yBase,
-          signalCore.baseRadius * 1.05,
-          signalCore.baseRadius * 0.35,
+          signalCore.baseRadius * 0.9,
+          signalCore.baseRadius * 0.3,
           0,
           0,
           Math.PI * 2
@@ -231,12 +232,13 @@
           signalCore.baseRadius * 0.1,
           0,
           yBase,
-          signalCore.baseRadius * 1.1
+          signalCore.baseRadius
         );
         eGrad.addColorStop(0, "rgba(20,12,8,1)");
         eGrad.addColorStop(1, "rgba(0,0,0,0.6)");
         ctx.fillStyle = eGrad;
         ctx.fill();
+
         ctx.restore();
       }
 
@@ -338,6 +340,32 @@
         }
       }
 
+      // průhledná čtvrtka kužele, která obíhá s orbitem
+      function cutRotatingQuarter() {
+        ctx.save();
+        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
+        ctx.scale(viewScale, viewScale);
+
+        const centerY = signalCore.offsetY - signalCore.coneHeight * 0.1;
+        const outerR = signalCore.baseRadius * 1.2;
+
+        const start = orbitRotation; // svázáno s planetami
+        const end = start + Math.PI / 2; // čtvrtka
+
+        ctx.beginPath();
+        ctx.moveTo(0, centerY);
+        ctx.arc(0, centerY, outerR, start, end);
+        ctx.closePath();
+
+        // vyřízneme díru
+        const oldOp = ctx.globalCompositeOperation;
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.fill();
+        ctx.globalCompositeOperation = oldOp;
+
+        ctx.restore();
+      }
+
       function drawSignalCore() {
         signalCore.pulse += 0.016;
         updateSignalProjection();
@@ -357,6 +385,9 @@
             drawSignalVafiti();
             break;
         }
+
+        // rotující průhledná čtvrtka
+        cutRotatingQuarter();
       }
 
       // ---------- KOULE / SLOTY ----------
@@ -498,6 +529,7 @@
 
         signalCore.baseRadius = Math.min(width, height) * 0.19;
         signalCore.coneHeight = signalCore.baseRadius * 1.6;
+        signalCore.offsetY = baseRadius * 0.9; // KUŽEL BLÍŽE K MOTORU
 
         generateSignalPoints();
       }
