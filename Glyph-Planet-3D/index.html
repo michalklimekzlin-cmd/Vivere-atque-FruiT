@@ -89,10 +89,10 @@
         </div>
 
         <div class="hud-center">
-          Glyph planeta: hvězdné oko • úsměv • ochranný prstenec
+          Glyph planeta: hvězdné oko • úsměv • ochranný prstenec (mřížka)
         </div>
 
-        <div class="hud-right">v0.1 • VaF'i'T Glyph Planet 3D</div>
+        <div class="hud-right">v0.2 • VaF'i'T Glyph Planet 3D</div>
       </div>
     </div>
 
@@ -100,9 +100,7 @@
       import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js";
       import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/controls/OrbitControls.js";
 
-      // (--- ZBYTEK KÓDU JE STEJNÝ ---)
-   
-    const canvas = document.getElementById("scene-canvas");
+      const canvas = document.getElementById("scene-canvas");
 
       const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -136,44 +134,11 @@
       rimLight.position.set(-5, 3, -4);
       scene.add(rimLight);
 
-      // základní materiály
-      const goldMat = new THREE.MeshStandardMaterial({
-        color: 0xffd4a0,
-        emissive: 0xffb060,
-        emissiveIntensity: 0.75,
-        metalness: 0.5,
-        roughness: 0.25,
-      });
-
+      // materiály
       const lineMat = new THREE.LineBasicMaterial({
         color: 0xffe8c0,
-        linewidth: 1,
       });
 
-      const glyphGroup = new THREE.Group();
-      scene.add(glyphGroup);
-
-      // --- HLAVA ---
-      const headGeom = new THREE.BoxGeometry(3.2, 3.6, 1.3);
-      headGeom.translate(0, 0.4, 0);
-      const head = new THREE.Mesh(headGeom, goldMat);
-      glyphGroup.add(head);
-
-      const headEdges = new THREE.LineSegments(
-        new THREE.EdgesGeometry(headGeom),
-        lineMat
-      );
-      glyphGroup.add(headEdges);
-
-      // lehké zaoblení: přidáme "helmet" oblouk nahoře
-      const helmGeom = new THREE.TorusGeometry(2.1, 0.09, 16, 80, Math.PI);
-      const helm = new THREE.Mesh(helmGeom, goldMat);
-      helm.rotation.z = Math.PI;
-      helm.position.set(0, 2.1, 0.65);
-      glyphGroup.add(helm);
-
-      // --- OČI ---
-      const eyeGeom = new THREE.SphereGeometry(0.55, 24, 24);
       const eyeMat = new THREE.MeshStandardMaterial({
         color: 0xfff5dd,
         emissive: 0xffd48a,
@@ -181,6 +146,39 @@
         metalness: 0.2,
         roughness: 0.1,
       });
+
+      const goldSolidMat = new THREE.MeshStandardMaterial({
+        color: 0xffd4a0,
+        emissive: 0xffb060,
+        emissiveIntensity: 0.75,
+        metalness: 0.5,
+        roughness: 0.25,
+      });
+
+      const glyphGroup = new THREE.Group();
+      scene.add(glyphGroup);
+
+      // --- HLAVA (pouze mřížka) ---
+      const headGeom = new THREE.BoxGeometry(3.2, 3.6, 1.3);
+      headGeom.translate(0, 0.4, 0);
+      const headEdges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(headGeom),
+        lineMat
+      );
+      glyphGroup.add(headEdges);
+
+      // horní oblouk / helma – taky jako drát
+      const helmGeom = new THREE.TorusGeometry(2.1, 0.09, 16, 80, Math.PI);
+      const helmWire = new THREE.LineSegments(
+        new THREE.WireframeGeometry(helmGeom),
+        lineMat
+      );
+      helmWire.rotation.z = Math.PI;
+      helmWire.position.set(0, 2.1, 0.65);
+      glyphGroup.add(helmWire);
+
+      // --- OČI (plné, svítící) ---
+      const eyeGeom = new THREE.SphereGeometry(0.55, 24, 24);
 
       const leftEye = new THREE.Mesh(eyeGeom, eyeMat);
       leftEye.position.set(-0.4, 0.7, 0.66);
@@ -191,11 +189,11 @@
       rightEye.scale.set(0.9, 0.9, 0.9);
       glyphGroup.add(rightEye);
 
-      // hvězdné oko – extrudovaná hvězda
+      // hvězdné oko – extrudovaná hvězda (plná)
       function createStarMesh(radiusOuter, radiusInner, depth) {
         const shape = new THREE.Shape();
         const spikes = 5;
-        let rot = Math.PI / 2 * -1;
+        let rot = (-Math.PI / 2);
         const step = Math.PI / spikes;
 
         shape.moveTo(
@@ -220,7 +218,7 @@
           bevelEnabled: false,
         };
         const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-        return new THREE.Mesh(geo, goldMat);
+        return new THREE.Mesh(geo, goldSolidMat);
       }
 
       const starEye = createStarMesh(0.35, 0.17, 0.08);
@@ -228,7 +226,7 @@
       starEye.position.set(-1.35, 1.0, 0.7);
       glyphGroup.add(starEye);
 
-      // malé světélko pod okem
+      // malé světélka pod okem
       const smallDotGeom = new THREE.SphereGeometry(0.2, 20, 20);
       const smallDot = new THREE.Mesh(smallDotGeom, eyeMat);
       smallDot.position.set(0.2, 0.05, 0.69);
@@ -238,43 +236,56 @@
       smallDot2.position.set(0.95, -0.05, 0.69);
       glyphGroup.add(smallDot2);
 
-      // --- ÚSMĚV / MŘÍŽKA ---
+      // --- ÚSMĚV / MŘÍŽKA (jen dráty) ---
       const mouthGeom = new THREE.BoxGeometry(1.9, 0.55, 0.1);
-      const mouth = new THREE.Mesh(mouthGeom, goldMat);
-      mouth.position.set(0.2, -0.9, 0.67);
-      glyphGroup.add(mouth);
+      mouthGeom.translate(0.2, -0.9, 0.67);
+      const mouthEdges = new THREE.LineSegments(
+        new THREE.EdgesGeometry(mouthGeom),
+        lineMat
+      );
+      glyphGroup.add(mouthEdges);
 
       const mouthLines = new THREE.Group();
-      const barMat = goldMat;
 
-      // vertikální sloupky
+      // vertikální sloupky jako drátky
       const vBarGeom = new THREE.BoxGeometry(0.06, 0.52, 0.06);
-      const xOffsets = [-0.7, -0.35, 0, 0.35, 0.7];
-      xOffsets.forEach((x) => {
-        const bar = new THREE.Mesh(vBarGeom, barMat);
-        bar.position.set(x + 0.2, -0.9, 0.72);
-        mouthLines.add(bar);
+      const vOffsets = [-0.7, -0.35, 0, 0.35, 0.7];
+      vOffsets.forEach((x) => {
+        const geo = vBarGeom.clone();
+        geo.translate(x + 0.2, -0.9, 0.72);
+        const edges = new THREE.LineSegments(
+          new THREE.EdgesGeometry(geo),
+          lineMat
+        );
+        mouthLines.add(edges);
       });
 
       // horizontální linky
       const hBarGeom = new THREE.BoxGeometry(1.9, 0.06, 0.06);
       const yOffsets = [-0.75, -0.9, -1.05];
       yOffsets.forEach((y) => {
-        const bar = new THREE.Mesh(hBarGeom, barMat);
-        bar.position.set(0.2, y, 0.72);
-        mouthLines.add(bar);
+        const geo = hBarGeom.clone();
+        geo.translate(0.2, y, 0.72);
+        const edges = new THREE.LineSegments(
+          new THREE.EdgesGeometry(geo),
+          lineMat
+        );
+        mouthLines.add(edges);
       });
 
       glyphGroup.add(mouthLines);
 
-      // --- OCHRANNÝ PRSTENEC / PLÁŠŤ ---
+      // --- OCHRANNÝ PRSTENEC / PLÁŠŤ (wireframe) ---
       const ringGeom = new THREE.TorusGeometry(4.1, 0.08, 16, 120, Math.PI * 1.4);
-      const ring = new THREE.Mesh(ringGeom, goldMat);
-      ring.rotation.set(Math.PI * 0.5, 0, Math.PI * 0.05);
-      ring.position.set(0, -0.1, 0);
-      glyphGroup.add(ring);
+      const ringWire = new THREE.LineSegments(
+        new THREE.WireframeGeometry(ringGeom),
+        lineMat
+      );
+      ringWire.rotation.set(Math.PI * 0.5, 0, Math.PI * 0.05);
+      ringWire.position.set(0, -0.1, 0);
+      glyphGroup.add(ringWire);
 
-      // vnitřní mřížka prstence (drátěný koš)
+      // vnitřní mřížka prstence (drátěný koš – už je z linek)
       const basketGroup = new THREE.Group();
       const basketRadius = 3.1;
       const basketHeight = 2.5;
