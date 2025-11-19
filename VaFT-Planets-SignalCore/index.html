@@ -391,15 +391,15 @@
       // ---------- VELKÝ KUŽEL / KOŠ KOLEM KOULE (BigCone) ----------
 
       const bigCone = {
-        points: [],
-        rings: 14,
-        segments: 24,
-        radiusTop: 300,
-        radiusBottom: 40,
-        height: 400,
-        offsetTopY: 0, // kde je horní okraj v prostoru
-        rotationFactor: 0.35
-      };
+  points: [],
+  rings: 14,
+  segments: 24,
+  radiusTop: 300,     // reálné hodnoty přepíšeme v resize()
+  radiusBottom: 40,
+  height: 400,
+  offsetTopY: 0,
+  rotationFactor: 0.35
+};
 
       function generateBigConePoints() {
         bigCone.points = [];
@@ -503,8 +503,8 @@
 
         // mřížka velkého kuželu
         ctx.save();
-        ctx.lineWidth = 0.85;
-        ctx.strokeStyle = "rgba(255, 210, 150, 0.28)";
+ctx.lineWidth = 1.1;  // trochu silnější čáry
+ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
 
         // horizontální kružnice
         for (let i = 0; i <= bigCone.rings; i++) {
@@ -686,12 +686,12 @@
         signalCore.coneHeight = signalCore.baseRadius * 1.6;
         signalCore.offsetY = baseRadius * 0.9;
 
-        // horní okraj velkého koše zhruba v úrovni koulí,
-        // špička hluboko pod motorem
-        bigCone.radiusTop = baseRadius * 3.1;
-        bigCone.radiusBottom = baseRadius * 0.7;
-        bigCone.height = baseRadius * 3.8;
-        bigCone.offsetTopY = -baseRadius * 0.1;
+// horní okraj velkého koše = těsně pod koulemi,
+// špička hluboko dolů (jako na modelu)
+bigCone.radiusTop = baseRadius * 2.4;   // užší košík, blíž ke koulím
+bigCone.radiusBottom = baseRadius * 0.6;
+bigCone.height = baseRadius * 4.2;      // delší špička dolů
+bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
 
         generateSignalPoints();
         generateBigConePoints();
