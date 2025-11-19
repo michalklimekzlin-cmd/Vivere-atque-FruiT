@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>VaF'i'T • Signal Sphere</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050815, #020208);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: #f5f5f5;
+      }
+
+      .root {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stage {
+        position: relative;
+        width: min(920px, 96vw);
+        height: min(620px, 90vh);
+        border-radius: 32px;
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
+        background: radial-gradient(circle at top, #06091a, #020208);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      #sphere-canvas {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 100%;
+        height: 100%;
+        display: block;
+        touch-action: none;
+      }
+
+      .hud {
+        position: absolute;
+        left: 18px;
+        bottom: 14px;
+        font-size: 10px;
+        opacity: 0.7;
+      }
+
+      .hud-right {
+        position: absolute;
+        right: 18px;
+        top: 14px;
+        font-size: 10px;
+        opacity: 0.7;
+      }
+
+      .hud-center {
+        position: absolute;
+        left: 50%;
+        bottom: 14px;
+        transform: translateX(-50%);
+        font-size: 11px;
+        opacity: 0.8;
+        text-align: center;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="root">
+      <div class="stage">
+        <canvas id="sphere-canvas"></canvas>
+
+        <div class="hud">
+          🌀 1 prst / myš = náklon • ťuk / klik = změna módu • pinch / kolečko = zoom
+        </div>
+        <div class="hud-center" id="status">
+          režim: písmenka / čísla
+        </div>
+        <div class="hud-right">v0.1 · VaF'i'T Signal Sphere</div>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("sphere-canvas");
+      const ctx = canvas.getContext("2d");
+      const statusEl = document.getElementById("status");
+
+      const dpr = window.devicePixelRatio || 1;
+      let width = 0;
+      let height = 0;
+      let radius = 0;
+      let viewScale = 1;
+      let rotX = -0.4;
+      let rotY = 0.5;
+
+      let currentMode = 1; // 0=mesh,1=letters,2=drops,3=glyph
+      const modeNames = [
+        "síť",
+        "písmenka / čísla",
+        "VaF'i'T kapky",
+        "glyph"
+      ];
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        radius = Math.min(width, height) * 0.23;
+      }
+
+      resize();
+      window.addEventListener("resize", resize);
+
+      // --- generování bodů na kouli ---
+
+      function createSpherePoints() {
+        const points = [];
+        const latSteps = 18;
+        const lonSteps = 28;
+        let idx = 0;
+
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const digits = "0123456789";
+        const glyphs = [
+          "{*(°.).)//",
+          "¡(°‿°)¡",
+          "(•◡•)",
+          "{(o,o)}",
+          "7¡A|V|A7¡",
+          "{*(•.)(.•)*}//"
+        ];
+
+        for (let i = 0; i <= latSteps; i++) {
+          const v = i / latSteps; // 0..1
+          const lat = v * Math.PI - Math.PI / 2; // -pi/2..pi/2
+          const y = Math.sin(lat);
+          const r = Math.cos(lat);
+
+          for (let j = 0; j < lonSteps; j++) {
+            const u = j / lonSteps;
+            const lon = u * Math.PI * 2;
+            const x = r * Math.cos(lon);
+            const z = r * Math.sin(lon);
+
+            const letter = letters[idx % letters.length];
+            const digit = digits[idx % digits.length];
+            const glyph = glyphs[idx % glyphs.length];
+
+            points.push({
+              x,
+              y,
+              z,
+              letter,
+              digit,
+              glyph,
+              // pro kapky použijeme jen index pro velikost / jas
+              dropPhase: (idx % 20) / 20
+            });
+
+            idx++;
+          }
+        }
+
+        return points;
+      }
+
+      const points = createSpherePoints();
+
+      function projectPoint(px, py, pz) {
+        // rotace kolem X
+        let y1 = py * Math.cos(rotX) - pz * Math.sin(rotX);
+        let z1 = py * Math.sin(rotX) + pz * Math.cos(rotX);
+        // rotace kolem Y
+        let x2 = px * Math.cos(rotY) + z1 * Math.sin(rotY);
+        let z2 = -px * Math.sin(rotY) + z1 * Math.cos(rotY);
+
+        const scale = radius * viewScale;
+        return {
+          x: x2 * scale,
+          y: y1 * scale,
+          z: z2
+        };
+      }
+
+      // --- kreslení ---
+
+      function drawSphere() {
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.translate(width / 2, height / 2 + 20);
+
+        // jemný glow pozadí
+        const gBg = ctx.createRadialGradient(
+          0,
+          -radius * 1.4,
+          radius * 0.2,
+          0,
+          0,
+          radius * 3.2
+        );
+        gBg.addColorStop(0, "rgba(255, 210, 150, 0.15)");
+        gBg.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gBg;
+        ctx.fillRect(-width, -height, width * 2, height * 2);
+
+        // stín pod koulí
+        ctx.beginPath();
+        ctx.ellipse(0, radius * 1.25, radius * 1.4, radius * 0.55, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
+        ctx.fill();
+
+        // tělo koule (tmavý disk)
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * 1.02 * viewScale, 0, Math.PI * 2);
+        const globeGrad = ctx.createRadialGradient(
+          -radius * 0.3,
+          -radius * 0.4,
+          radius * 0.4,
+          0,
+          radius * 0.5,
+          radius * 1.5
+        );
+        globeGrad.addColorStop(0, "#2d1d0f");
+        globeGrad.addColorStop(0.5, "#1b1012");
+        globeGrad.addColorStop(1, "#050308");
+        ctx.fillStyle = globeGrad;
+        ctx.fill();
+
+        // okraj
+        ctx.strokeStyle = "rgba(255, 197, 120, 0.9)";
+        ctx.lineWidth = 1.4;
+        ctx.shadowColor = "rgba(255, 197, 120, 0.9)";
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(0, 0, radius * viewScale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // seřadíme body podle z, aby vzdálené byly první
+        const projected = points.map((p) => {
+          const proj = projectPoint(p.x, p.y, p.z);
+          return { ...p, sx: proj.x, sy: proj.y, sz: proj.z };
+        });
+        projected.sort((a, b) => a.sz - b.sz);
+
+        // mód 0 = drátová síť
+        if (currentMode === 0) {
+          ctx.strokeStyle = "rgba(255,210,150,0.7)";
+          ctx.lineWidth = 0.7;
+          // spojujeme body v mřížce
+          const latSteps = 18;
+          const lonSteps = 28;
+
+          // horizontální "paralely"
+          for (let i = 0; i <= latSteps; i++) {
+            ctx.beginPath();
+            let started = false;
+            for (let j = 0; j < lonSteps; j++) {
+              const idx = i * lonSteps + j;
+              const p = projected[idx];
+              if (p.sz < 0) continue; // jen přední polokoule
+              if (!started) {
+                ctx.moveTo(p.sx, p.sy);
+                started = true;
+              } else {
+                ctx.lineTo(p.sx, p.sy);
+              }
+            }
+            if (started) ctx.stroke();
+          }
+
+          // vertikální "meridiány"
+          for (let j = 0; j < lonSteps; j++) {
+            ctx.beginPath();
+            let started = false;
+            for (let i = 0; i <= latSteps; i++) {
+              const idx = i * lonSteps + j;
+              const p = projected[idx];
+              if (p.sz < 0) continue;
+              if (!started) {
+                ctx.moveTo(p.sx, p.sy);
+                started = true;
+              } else {
+                ctx.lineTo(p.sx, p.sy);
+              }
+            }
+            if (started) ctx.stroke();
+          }
+        } else {
+          // ostatní módy = částicové systémy
+
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.shadowColor = "rgba(255,210,150,0.8)";
+
+          const now = performance.now() / 1000;
+
+          for (const p of projected) {
+            if (p.sz < 0) continue; // zadní polokoule schováme
+
+            const depthFade = 0.3 + 0.7 * ((p.sz + 1) / 2); // -1..1 → 0..1
+
+            if (currentMode === 1) {
+              // písmenka / čísla
+              const isTop = p.y > 0.35;
+              const char = isTop ? p.letter : p.digit;
+              ctx.font = (isTop ? 11 : 10) + "px system-ui";
+              ctx.fillStyle = `rgba(255, 220, 180, ${0.5 + 0.5 * depthFade})`;
+              ctx.shadowBlur = 6 * depthFade;
+              ctx.fillText(char, p.sx, p.sy);
+            } else if (currentMode === 2) {
+              // kapky
+              const flicker = 0.4 + 0.6 * Math.abs(Math.sin(now * 2 + p.dropPhase * Math.PI * 2));
+              const r = 2.3 * viewScale * (0.5 + depthFade);
+              ctx.beginPath();
+              ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
+              ctx.fillStyle = `rgba(255, 220, 170, ${0.35 + 0.45 * depthFade * flicker})`;
+              ctx.shadowBlur = 8 * depthFade;
+              ctx.fill();
+            } else if (currentMode === 3) {
+              // glyph
+              ctx.font = 9 + "px system-ui";
+              ctx.fillStyle = `rgba(255, 230, 190, ${0.45 + 0.55 * depthFade})`;
+              ctx.shadowBlur = 7 * depthFade;
+              ctx.fillText(p.glyph, p.sx, p.sy);
+            }
+          }
+        }
+
+        ctx.restore();
+      }
+
+      // --- animace ---
+
+      let lastTime = 0;
+      function loop(ts) {
+        if (!ts) ts = 0;
+        const dt = (ts - lastTime) / 1000;
+        lastTime = ts;
+
+        rotY += dt * 0.15; // pomalá auto-rotace
+
+        drawSphere();
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+
+      // --- interakce ---
+
+      let drag = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      function pointerDown(e) {
+        e.preventDefault();
+        const touch = e.touches ? e.touches[0] : e;
+        drag = true;
+        lastX = touch.clientX;
+        lastY = touch.clientY;
+      }
+
+      function pointerMove(e) {
+        if (!drag) return;
+        e.preventDefault();
+        const touch = e.touches ? e.touches[0] : e;
+        const dx = touch.clientX - lastX;
+        const dy = touch.clientY - lastY;
+        lastX = touch.clientX;
+        lastY = touch.clientY;
+
+        rotY += dx * 0.004;
+        rotX += dy * 0.004;
+      }
+
+      function pointerUp(e) {
+        if (!drag) return;
+        e.preventDefault();
+        drag = false;
+      }
+
+      canvas.addEventListener("mousedown", pointerDown);
+      window.addEventListener("mousemove", pointerMove);
+      window.addEventListener("mouseup", pointerUp);
+
+      canvas.addEventListener("touchstart", pointerDown, { passive: false });
+      window.addEventListener("touchmove", pointerMove, { passive: false });
+      window.addEventListener("touchend", pointerUp, { passive: false });
+      window.addEventListener("touchcancel", pointerUp, { passive: false });
+
+      canvas.addEventListener("click", () => {
+        currentMode = (currentMode + 1) % 4;
+        statusEl.textContent = "režim: " + modeNames[currentMode];
+        drawSphere();
+      });
+
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        viewScale *= factor;
+        viewScale = Math.max(0.6, Math.min(2.4, viewScale));
+      });
+    </script>
+  </body>
+</html>
