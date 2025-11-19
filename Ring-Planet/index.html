@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>VaF'i'T • Ring Planet</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050815, #020208);
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+    <script>
+      // základní scéna
+      const scene = new THREE.Scene();
+
+      const camera = new THREE.PerspectiveCamera(
+        45,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        100
+      );
+      camera.position.set(0, 1.6, 4);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      document.body.appendChild(renderer.domElement);
+
+      // světla
+      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambient);
+
+      const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+      dir.position.set(2, 4, 3);
+      scene.add(dir);
+
+      // === RING PLANETA PODLE TVÉHO NÁČRTU ===
+
+      // tvar: torus (donut), ale trochu zploštělý
+      const outerRadius = 1.8; // vnější poloměr
+      const tubeRadius = 0.35; // tloušťka prstence
+
+      const torusGeo = new THREE.TorusGeometry(
+        outerRadius,
+        tubeRadius,
+        48, // segmenty "na výšku"
+        96  // segmenty "dokola"
+      );
+
+      // hlavní hmota – oranžová planeta
+      const solidMat = new THREE.MeshStandardMaterial({
+        color: 0xffa240,
+        metalness: 0.2,
+        roughness: 0.4
+      });
+
+      const ringPlanet = new THREE.Mesh(torusGeo, solidMat);
+      scene.add(ringPlanet);
+
+      // jemná "mřížka" – šedé linky jako ve tvém skicu
+      const wireMat = new THREE.MeshBasicMaterial({
+        color: 0x777777,
+        wireframe: true
+      });
+      const ringWire = new THREE.Mesh(torusGeo, wireMat);
+      ringWire.scale.set(1.002, 1.002, 1.002); // lehce zvětšit, ať nebliká
+      scene.add(ringWire);
+
+      // drobné zploštění, aby to víc vypadalo jako talíř/tvoje skica
+      ringPlanet.scale.set(1, 0.65, 1);
+      ringWire.scale.multiplyScalar(1); // už je zvětšený výše, jen držím poměr
+
+      // rotace
+      let rotY = 0;
+      function animate() {
+        requestAnimationFrame(animate);
+
+        rotY += 0.003;
+        ringPlanet.rotation.y = rotY;
+        ringWire.rotation.y = rotY;
+
+        // lehký náklon osy, jak planeta
+        ringPlanet.rotation.x = 0.4;
+        ringWire.rotation.x = 0.4;
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // přizpůsobení na iPhone / iPad
+      window.addEventListener("resize", () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>
