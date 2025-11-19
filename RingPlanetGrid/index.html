@@ -10,7 +10,7 @@
         margin: 0; padding: 0;
         width: 100%; height: 100%;
         overflow: hidden;
-        background: radial-gradient(circle at center, #020208, #000000);
+        background: radial-gradient(circle at center, #121218, #020208);
       }
       canvas { display: block; }
 
@@ -18,11 +18,12 @@
         position: fixed;
         bottom: 10px; left: 50%;
         transform: translateX(-50%);
-        font-family: system-ui;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI";
         font-size: 11px;
-        opacity: 0.55;
+        opacity: 0.65;
         color: #fff;
         pointer-events: none;
+        white-space: nowrap;
       }
     </style>
   </head>
@@ -32,13 +33,13 @@
       1 prst = otáčení • 2 prsty = posun • štípnutí = zoom
     </div>
 
-    <!-- Three.js – NON-MODULE (funguje 100% všude) -->
+    <!-- Three.js – klasická (non-module) verze + OrbitControls -->
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
     <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
       // ─────────────────────────────────────
-      // SCÉNA
+      // SCÉNA + KAMERA
       // ─────────────────────────────────────
       const scene = new THREE.Scene();
 
@@ -46,11 +47,9 @@
         50,
         window.innerWidth / window.innerHeight,
         0.1,
-        200
+        500
       );
-
-      // Kamera dál -> planeta bude vždy vidět
-      camera.position.set(0, 3.2, 8);
+      camera.position.set(0, 5, 12);
 
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -58,87 +57,96 @@
       document.body.appendChild(renderer.domElement);
 
       // ─────────────────────────────────────
-      // SVĚTLA – silná, aby objekt nikdy nezmizel
+      // SVĚTLA – silná, z více stran
       // ─────────────────────────────────────
-      scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+      scene.add(new THREE.AmbientLight(0xffffff, 0.6));
 
-      const dir1 = new THREE.DirectionalLight(0xffe6b0, 1.25);
-      dir1.position.set(5, 5, 5);
-      scene.add(dir1);
+      const light1 = new THREE.DirectionalLight(0xfff2c0, 1.4);
+      light1.position.set(6, 8, 6);
+      scene.add(light1);
 
-      const dir2 = new THREE.DirectionalLight(0xffc878, 0.6);
-      dir2.position.set(-5, -3, -2);
-      scene.add(dir2);
+      const light2 = new THREE.DirectionalLight(0xffc880, 0.7);
+      light2.position.set(-6, -4, -3);
+      scene.add(light2);
 
       // ─────────────────────────────────────
-      // RING PLANETA
+      // TEST KOSTKA – abychom MUSELI něco vidět
+      // ─────────────────────────────────────
+      const cubeGeo = new THREE.BoxGeometry(3, 3, 3);
+      const cubeMat = new THREE.MeshBasicMaterial({
+        color: 0xffff00,
+        wireframe: true
+      });
+      const cube = new THREE.Mesh(cubeGeo, cubeMat);
+      cube.position.set(0, 0, 0);
+      scene.add(cube);
+
+      // ─────────────────────────────────────
+      // RING PLANETA – zlatá mřížka + černý vnitřek
       // ─────────────────────────────────────
       const planet = new THREE.Group();
       scene.add(planet);
 
-      const outerRadius = 2.2;
-      const tubeRadius = 0.55;
+      const outerRadius = 3.5;
+      const tubeRadius  = 0.6;
 
-      const geometry = new THREE.TorusGeometry(
+      const ringGeo = new THREE.TorusGeometry(
         outerRadius,
         tubeRadius,
         48,
         96
       );
 
-      // ČERNÉ TĚLO PLANETY
       const blackMat = new THREE.MeshStandardMaterial({
         color: 0x000000,
-        metalness: 0.6,
+        metalness: 0.7,
         roughness: 0.25,
-        emissive: 0x070707
+        emissive: 0x050505
       });
-
-      const inner = new THREE.Mesh(geometry, blackMat);
-      inner.scale.set(1, 0.65, 1);
+      const inner = new THREE.Mesh(ringGeo, blackMat);
+      inner.scale.set(1, 0.6, 1);
+      inner.position.set(0, 0, 0);
       planet.add(inner);
 
-      // ZLATÁ MŘÍŽKA
-      const goldGrid = new THREE.MeshBasicMaterial({
+      const goldGridMat = new THREE.MeshBasicMaterial({
         color: 0xffd27a,
         wireframe: true
       });
-
-      const grid = new THREE.Mesh(geometry, goldGrid);
-      grid.scale.set(1.005, 0.66, 1.005);
+      const grid = new THREE.Mesh(ringGeo, goldGridMat);
+      grid.scale.set(1.01, 0.61, 1.01);
+      grid.position.copy(inner.position);
       planet.add(grid);
 
-      // Náklon (podle tvé skici)
-      planet.rotation.x = 0.55;
-      planet.rotation.z = 0.15;
+      planet.rotation.x = 0.6;
+      planet.rotation.z = 0.2;
 
       // ─────────────────────────────────────
-      // OVLÁDÁNÍ – plné manipulace
+      // OVLÁDÁNÍ – plná manipulace
       // ─────────────────────────────────────
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
-
       controls.enableDamping = true;
-      controls.dampingFactor = 0.07;
+      controls.dampingFactor = 0.08;
 
       controls.enableRotate = true;
       controls.enablePan = true;
       controls.enableZoom = true;
-
-      controls.minDistance = 3;
-      controls.maxDistance = 15;
+      controls.minDistance = 5;
+      controls.maxDistance = 30;
 
       controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.4;
+      controls.autoRotateSpeed = 0.35;
 
       // ─────────────────────────────────────
       // ANIMACE
       // ─────────────────────────────────────
       function animate() {
         requestAnimationFrame(animate);
+        cube.rotation.y += 0.01;
+        cube.rotation.x += 0.005;
+
         controls.update();
         renderer.render(scene, camera);
       }
-
       animate();
 
       // ─────────────────────────────────────
@@ -150,6 +158,5 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
       });
     </script>
-
   </body>
 </html>
