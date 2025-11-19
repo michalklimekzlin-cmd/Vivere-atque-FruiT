@@ -2,53 +2,37 @@
 <html lang="cs">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>VaF'i'T • Ring Planet Grid</title>
     <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
+      html, body {
+        margin: 0; padding: 0;
+        width: 100%; height: 100%;
         overflow: hidden;
         background: radial-gradient(circle at top, #040615, #020208);
       }
-      canvas {
-        display: block;
-      }
-
+      canvas { display: block; }
       .hint {
         position: fixed;
-        left: 50%;
-        bottom: 10px;
+        bottom: 10px; left: 50%;
         transform: translateX(-50%);
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
+        color: #fff; opacity: .55;
+        font-family: system-ui;
         font-size: 11px;
-        color: #f5f5f5;
-        opacity: 0.7;
         pointer-events: none;
-        white-space: nowrap;
       }
     </style>
   </head>
   <body>
-    <div class="hint">
-      1 prst = otáčení • 2 prsty = posun • štípnutí = zoom
-    </div>
 
-    <!-- Three.js + OrbitControls (ES moduly) -->
-    <script type="module">
-      import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
-      import { OrbitControls } from "https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js";
+    <div class="hint">1 prst = otáčení • 2 prsty = posun • štípnutí = zoom</div>
 
-      // ─────────────────────────────────────
+    <!-- Three.js + OrbitControls (non-module) -->
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
       // SCÉNA
-      // ─────────────────────────────────────
       const scene = new THREE.Scene();
 
       const camera = new THREE.PerspectiveCamera(
@@ -58,102 +42,73 @@
         100
       );
       camera.position.set(0, 2.2, 4.2);
-      camera.lookAt(0, 0, 0);
 
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.outputEncoding = THREE.sRGBEncoding;
       document.body.appendChild(renderer.domElement);
 
-      // světla – měkké zlaté nasvícení
-      const ambient = new THREE.AmbientLight(0xfff1c7, 0.4);
-      scene.add(ambient);
+      // SVĚTLA
+      const a = new THREE.AmbientLight(0xfff1c7, 0.45);
+      scene.add(a);
 
-      const dir = new THREE.DirectionalLight(0xfff8dc, 0.9);
-      dir.position.set(2.5, 4, 3);
-      scene.add(dir);
+      const d = new THREE.DirectionalLight(0xfff8dc, 0.9);
+      d.position.set(3, 4, 3);
+      scene.add(d);
 
-      const rim = new THREE.DirectionalLight(0xffd27a, 0.4);
-      rim.position.set(-3, -2, -4);
-      scene.add(rim);
+      // RING PLANETA
+      const planet = new THREE.Group();
+      scene.add(planet);
 
-      // ─────────────────────────────────────
-      // RING PLANETA – podle tvého náčrtu
-      // ─────────────────────────────────────
-      const planetGroup = new THREE.Group();
-      scene.add(planetGroup);
+      const outerRadius = 1.6;
+      const tubeRadius  = 0.35;
 
-      // základní torus (donut) – zploštělý = talíř
-      const outerRadius = 1.6; // aby se vešel do soustavy 4 světů
-      const tubeRadius = 0.35;
-
-      const segmentsRadius = 48; // "rovnoběžky"
-      const segmentsTube = 72; // "poledníky"
-
-      const baseGeo = new THREE.TorusGeometry(
+      const geo = new THREE.TorusGeometry(
         outerRadius,
         tubeRadius,
-        segmentsRadius,
-        segmentsTube
+        48,
+        72
       );
 
-      // Vnitřní hmota – černá, lehce lesklá
+      // ČERNÁ HMOTA
       const innerMat = new THREE.MeshStandardMaterial({
         color: 0x000000,
-        metalness: 0.5,
+        metalness: 0.55,
         roughness: 0.25
       });
-      const innerMesh = new THREE.Mesh(baseGeo, innerMat);
-      innerMesh.scale.set(1, 0.55, 1); // vertikální zploštění
-      planetGroup.add(innerMesh);
+      const inner = new THREE.Mesh(geo, innerMat);
+      inner.scale.set(1, 0.55, 1);
+      planet.add(inner);
 
-      // Zlatá mřížka – sloty pro budoucí funkce z repozitáře
-      const gridMat = new THREE.MeshBasicMaterial({
+      // ZLATÁ MŘÍŽKA
+      const wireMat = new THREE.MeshBasicMaterial({
         color: 0xffd27a,
         wireframe: true
       });
-      const gridMesh = new THREE.Mesh(baseGeo, gridMat);
-      gridMesh.scale.set(1.005, 0.56, 1.005); // trochu větší, aby neblikalo
-      planetGroup.add(gridMesh);
+      const wire = new THREE.Mesh(geo, wireMat);
+      wire.scale.set(1.006, 0.56, 1.006);
+      planet.add(wire);
 
-      // základní náklon osy, jako na konceptu
-      planetGroup.rotation.x = 0.5;
-      planetGroup.rotation.z = 0.15;
+      // Náklon osy
+      planet.rotation.x = 0.5;
+      planet.rotation.z = 0.15;
 
-      // ─────────────────────────────────────
-      // ORBIT CONTROLS – otáčení, posun, zoom
-      // ─────────────────────────────────────
-      const controls = new OrbitControls(camera, renderer.domElement);
+      // OVVLÁDÁNÍ
+      const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.06;
 
       controls.enableRotate = true;
-      controls.enableZoom = true;
       controls.enablePan = true;
+      controls.enableZoom = true;
 
-      // limity zoomu – aby se nedalo "vlézt" dovnitř nekonečně
       controls.minDistance = 2;
       controls.maxDistance = 8;
 
-      // auto-rotace jako jemný signál (dá se vypnout)
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.35;
 
-      // ─────────────────────────────────────
-      // SLOTY / MŘÍŽKA – příprava na funkce z repa
-      // ─────────────────────────────────────
-      // Tohle je jen hook do budoucna:
-      // můžeme sem přidat pole "slots" (u, v) -> název funkce / souboru.
-      const ringSlots = {
-        // příklad:
-        // "slot-0-0": { file: "heroes/Orbit.js", label: "Orbit AI" },
-      };
-      // window.VAFT_RING_SLOTS = ringSlots; // kdybys to chtěl číst z jiné části appky
-
-      // ─────────────────────────────────────
       // ANIMACE
-      // ─────────────────────────────────────
       function animate() {
         requestAnimationFrame(animate);
         controls.update();
@@ -161,9 +116,7 @@
       }
       animate();
 
-      // ─────────────────────────────────────
-      // REZIZE
-      // ─────────────────────────────────────
+      // RESIZE
       window.addEventListener("resize", () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
