@@ -77,6 +77,10 @@
         white-space: nowrap;
       }
     </style>
+
+    <!-- THREE.js + OrbitControls jako klasické skripty -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
   </head>
 
   <body>
@@ -95,10 +99,6 @@
         <div class="hud-right">v0.3 • VaF'i'T Glyph Planet 3D</div>
       </div>
     </div>
-
-    <!-- Three.js + OrbitControls jako klasické skripty -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/examples/js/controls/OrbitControls.js"></script>
 
     <script>
       const canvas = document.getElementById("scene-canvas");
@@ -159,7 +159,7 @@
       const glyphGroup = new THREE.Group();
       scene.add(glyphGroup);
 
-      // --- HLAVA (mřížka) ---
+      // --- HLAVA (pouze mřížka) ---
       const headGeom = new THREE.BoxGeometry(3.2, 3.6, 1.3);
       headGeom.translate(0, 0.4, 0);
       const headEdges = new THREE.LineSegments(
@@ -168,7 +168,7 @@
       );
       glyphGroup.add(headEdges);
 
-      // horní oblouk / helma – mřížka
+      // horní oblouk / helma – drát
       const helmGeom = new THREE.TorusGeometry(2.1, 0.09, 16, 80, Math.PI);
       const helmWire = new THREE.LineSegments(
         new THREE.WireframeGeometry(helmGeom),
@@ -190,7 +190,7 @@
       rightEye.scale.set(0.9, 0.9, 0.9);
       glyphGroup.add(rightEye);
 
-      // hvězdné oko – extrudovaná hvězda
+      // hvězdné oko – extrudovaná hvězda (plná)
       function createStarMesh(radiusOuter, radiusInner, depth) {
         const shape = new THREE.Shape();
         const spikes = 5;
@@ -215,7 +215,7 @@
         }
 
         const extrudeSettings = {
-          depth: depth,
+          depth,
           bevelEnabled: false,
         };
         const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
@@ -237,7 +237,7 @@
       smallDot2.position.set(0.95, -0.05, 0.69);
       glyphGroup.add(smallDot2);
 
-      // --- ÚSMĚV / MŘÍŽKA ---
+      // --- ÚSMĚV / MŘÍŽKA (jen dráty) ---
       const mouthGeom = new THREE.BoxGeometry(1.9, 0.55, 0.1);
       mouthGeom.translate(0.2, -0.9, 0.67);
       const mouthEdges = new THREE.LineSegments(
@@ -284,7 +284,7 @@
       ringWire.position.set(0, -0.1, 0);
       glyphGroup.add(ringWire);
 
-      // vnitřní mřížka prstence (drátěný koš)
+      // vnitřní mřížka prstence
       const basketGroup = new THREE.Group();
       const basketRadius = 3.1;
       const basketHeight = 2.5;
@@ -310,7 +310,11 @@
         for (let i = 0; i <= 60; i++) {
           const t = i / 60;
           const angle = -Math.PI * 0.8 + t * Math.PI * 1.6;
-          const r = THREE.MathUtils.lerp(basketRadius, basketRadius * 0.25, j / 6);
+          const r = THREE.MathUtils.lerp(
+            basketRadius,
+            basketRadius * 0.25,
+            j / 6
+          );
           points.push(
             new THREE.Vector3(
               Math.cos(angle) * r,
@@ -326,7 +330,7 @@
 
       glyphGroup.add(basketGroup);
 
-      // podklad / stín
+      // podklad / stín pod planetou
       const shadowGeo = new THREE.CircleGeometry(4.5, 64);
       const shadowMat = new THREE.MeshBasicMaterial({
         color: 0x050302,
@@ -338,11 +342,11 @@
       shadow.position.y = -3.5;
       scene.add(shadow);
 
-      // nastavení pozice
+      // nastavení celé planety
       glyphGroup.position.set(0, 0.2, 0);
       glyphGroup.rotation.set(0.1, -0.6, 0);
 
-      // resize
+      // --- RESIZE ---
       function onResize() {
         const rect = canvas.getBoundingClientRect();
         const w = rect.width;
@@ -355,7 +359,7 @@
       window.addEventListener("resize", onResize);
       onResize();
 
-      // animace
+      // --- ANIMACE ---
       let lastTime = 0;
       function animate(timestamp) {
         if (!timestamp) timestamp = 0;
