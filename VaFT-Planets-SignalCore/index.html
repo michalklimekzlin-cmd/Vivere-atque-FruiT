@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Michal Klimek VaF'i'T ChatGPT • 4 koule + Big Signal Cone</title>
+    <title>Michal Klimek VaF'i'T ChatGPT • 4 koule + VaF'i'T Signal Tower</title>
 
     <style>
       html,
@@ -90,9 +90,7 @@
         <div class="hud-center" id="status">
           vybraný svět: Hra + pravidla
         </div>
-        <div class="hud-right">
-          v1.3 • 4 koule světa + VaF'i'T Signal Tower (dvojitý kornout)
-        </div>
+        <div class="hud-right">v1.3 • 4 koule světa + VaF'i'T Signal Tower</div>
       </div>
     </div>
 
@@ -133,19 +131,19 @@
       let activeSphere = null;
       let sphereDragActive = false;
 
-      // ---------- SIGNAL CORE (spodní kužel pod motorem) ----------
+      // ---------- SIGNAL TOWER (velký kužel pod soustavou) ----------
       const glyphs = ["{*(°.)}", "ً&’」", "¡(*)(%)¡", "{°. .}", "(•.°)"];
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
       const signalCore = {
         points: [],
-        rings: 12,
-        segments: 18,
+        rings: 16,
+        segments: 22,
         pulse: 0,
         baseRadius: 120,
-        coneHeight: 200,
-        mode: "mesh",
-        offsetY: 0
+        coneHeight: 260,
+        mode: "mesh", // mesh / letters / glyph / vafiti
+        offsetY: 0,
       };
 
       function generateSignalPoints() {
@@ -154,8 +152,9 @@
 
         for (let i = 0; i <= rings; i++) {
           const t = i / rings;
+          // špička dole → top je blíž k motoru
           const y = coneHeight / 2 - t * coneHeight;
-          const r = baseRadius * (1.0 - 0.75 * t);
+          const r = baseRadius * (1.0 - 0.8 * t);
           for (let j = 0; j < segments; j++) {
             const a = (j / segments) * Math.PI * 2;
             const x = r * Math.cos(a);
@@ -171,13 +170,14 @@
               screenY: 0,
               ring: i,
               seg: j,
-              phase: Math.random() * Math.PI * 2
+              phase: Math.random() * Math.PI * 2,
             });
           }
         }
       }
 
       function updateSignalProjection() {
+        // kužel lehce reaguje na globální náklon (stejný "svět" jako planety)
         const sinX = Math.sin(globalTiltX);
         const cosX = Math.cos(globalTiltX);
         const sinY = Math.sin(globalTiltY);
@@ -214,14 +214,15 @@
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
 
-        const yBase = signalCore.offsetY + signalCore.coneHeight / 2 + 12;
+        const yBase =
+          signalCore.offsetY + signalCore.coneHeight / 2 + 16; // stín pod špičkou
 
         ctx.beginPath();
         ctx.ellipse(
           0,
           yBase,
-          signalCore.baseRadius * 0.9,
-          signalCore.baseRadius * 0.3,
+          signalCore.baseRadius * 1.05,
+          signalCore.baseRadius * 0.32,
           0,
           0,
           Math.PI * 2
@@ -229,13 +230,13 @@
         const eGrad = ctx.createRadialGradient(
           0,
           yBase,
-          signalCore.baseRadius * 0.1,
+          signalCore.baseRadius * 0.15,
           0,
           yBase,
-          signalCore.baseRadius
+          signalCore.baseRadius * 1.2
         );
         eGrad.addColorStop(0, "rgba(20,12,8,1)");
-        eGrad.addColorStop(1, "rgba(0,0,0,0.6)");
+        eGrad.addColorStop(1, "rgba(0,0,0,0.75)");
         ctx.fillStyle = eGrad;
         ctx.fill();
 
@@ -295,9 +296,10 @@
         for (const p of signalCore.points) {
           const ch = letters[i % len];
           i++;
+          const wobbleY = Math.sin(signalCore.pulse * 2.2 + p.phase) * 3;
           const flicker = 0.6 + 0.4 * Math.sin(signalCore.pulse * 2 + p.phase);
           ctx.globalAlpha = flicker;
-          ctx.fillText(ch, p.screenX, p.screenY);
+          ctx.fillText(ch, p.screenX, p.screenY - wobbleY);
         }
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
@@ -316,10 +318,11 @@
         for (const p of signalCore.points) {
           const g = glyphs[i % len];
           i++;
+          const wobbleY = Math.sin(signalCore.pulse * 1.8 + p.phase) * 3;
           const flicker =
             0.55 + 0.45 * Math.sin(signalCore.pulse * 1.4 + p.phase);
           ctx.globalAlpha = flicker;
-          ctx.fillText(g, p.screenX, p.screenY);
+          ctx.fillText(g, p.screenX, p.screenY - wobbleY);
         }
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
@@ -332,7 +335,7 @@
         for (const p of signalCore.points) {
           const wobble = Math.sin(signalCore.pulse * 3 + p.phase) * 4;
           const y = p.screenY - wobble;
-          const size = 2 + 1.2 * Math.sin(signalCore.pulse * 2 + p.phase);
+          const size = 2.2 + 1.4 * Math.sin(signalCore.pulse * 2 + p.phase);
           ctx.beginPath();
           ctx.arc(p.screenX, y, size, 0, Math.PI * 2);
           ctx.fill();
@@ -340,14 +343,14 @@
         }
       }
 
-      // průhledná čtvrtka kužele, která obíhá s orbitem (výřez z menšího kornoutu)
+      // průhledná čtvrtka kužele, která obíhá s orbitem
       function cutRotatingQuarter() {
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
 
-        const centerY = signalCore.offsetY - signalCore.coneHeight * 0.1;
-        const outerR = signalCore.baseRadius * 1.2;
+        const centerY = signalCore.offsetY - signalCore.coneHeight * 0.12;
+        const outerR = signalCore.baseRadius * 1.22;
 
         const start = orbitRotation;
         const end = start + Math.PI / 2;
@@ -385,163 +388,8 @@
             break;
         }
 
+        // rotující průhledná čtvrtka
         cutRotatingQuarter();
-      }
-
-      // ---------- VELKÝ KUŽEL / KOŠ KOLEM KOULE (BigCone) ----------
-
-      const bigCone = {
-  points: [],
-  rings: 14,
-  segments: 24,
-  radiusTop: 300,     // reálné hodnoty přepíšeme v resize()
-  radiusBottom: 40,
-  height: 400,
-  offsetTopY: 0,
-  rotationFactor: 0.35
-};
-
-      function generateBigConePoints() {
-        bigCone.points = [];
-        const { rings, segments, radiusTop, radiusBottom, height, offsetTopY } =
-          bigCone;
-
-        for (let i = 0; i <= rings; i++) {
-          const t = i / rings;
-          const y = offsetTopY - t * height; // nahoře velký kruh, dole špička
-          const r = radiusTop - (radiusTop - radiusBottom) * t;
-          for (let j = 0; j < segments; j++) {
-            const a = (j / segments) * Math.PI * 2;
-            const x = r * Math.cos(a);
-            const z = r * Math.sin(a);
-            bigCone.points.push({
-              baseX: x,
-              baseY: y,
-              baseZ: z,
-              x: 0,
-              y: 0,
-              z: 0,
-              screenX: 0,
-              screenY: 0,
-              ring: i,
-              seg: j
-            });
-          }
-        }
-      }
-
-      function updateBigConeProjection() {
-        const sinX = Math.sin(globalTiltX);
-        const cosX = Math.cos(globalTiltX);
-        const sinY = Math.sin(globalTiltY);
-        const cosY = Math.cos(globalTiltY);
-
-        // jemná rotace kolem Y svázaná s orbitem
-        const extraRot = orbitRotation * bigCone.rotationFactor;
-        const sinR = Math.sin(extraRot);
-        const cosR = Math.cos(extraRot);
-
-        for (const p of bigCone.points) {
-          let x = p.baseX;
-          let y = p.baseY;
-          let z = p.baseZ;
-
-          // vlastní rotace kolem Y (otáčení "koše" podle orbity)
-          let xR = x * cosR + z * sinR;
-          let zR = -x * sinR + z * cosR;
-
-          // rotace kolem X
-          let y1 = y * cosX - zR * sinX;
-          let z1 = y * sinX + zR * cosX;
-
-          // rotace kolem Y (globální)
-          let x2 = xR * cosY + z1 * sinY;
-          let z2 = -xR * sinY + z1 * cosY;
-
-          p.x = x2;
-          p.y = y1;
-          p.z = z2;
-
-          const sx = width / 2 + viewOffsetX + x2 * viewScale;
-          const sy = height / 2 + viewOffsetY + y1 * viewScale;
-
-          p.screenX = sx;
-          p.screenY = sy;
-        }
-      }
-
-      function drawBigCone() {
-        updateBigConeProjection();
-
-        // jemný stín pod velkým košem
-        ctx.save();
-        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
-        ctx.scale(viewScale, viewScale);
-        ctx.beginPath();
-        ctx.ellipse(
-          0,
-          bigCone.offsetTopY - bigCone.height + bigCone.radiusBottom * 0.45,
-          bigCone.radiusBottom * 1.4,
-          bigCone.radiusBottom * 0.45,
-          0,
-          0,
-          Math.PI * 2
-        );
-        const shadowGrad = ctx.createRadialGradient(
-          0,
-          bigCone.offsetTopY - bigCone.height + bigCone.radiusBottom * 0.45,
-          bigCone.radiusBottom * 0.3,
-          0,
-          bigCone.offsetTopY - bigCone.height + bigCone.radiusBottom * 0.45,
-          bigCone.radiusBottom * 1.7
-        );
-        shadowGrad.addColorStop(0, "rgba(10,6,4,0.9)");
-        shadowGrad.addColorStop(1, "rgba(0,0,0,0.2)");
-        ctx.fillStyle = shadowGrad;
-        ctx.fill();
-        ctx.restore();
-
-        // mřížka velkého kuželu
-        ctx.save();
-ctx.lineWidth = 1.1;  // trochu silnější čáry
-ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
-
-        // horizontální kružnice
-        for (let i = 0; i <= bigCone.rings; i++) {
-          ctx.beginPath();
-          let started = false;
-          for (const p of bigCone.points) {
-            if (p.ring !== i) continue;
-            if (!started) {
-              ctx.moveTo(p.screenX, p.screenY);
-              started = true;
-            } else {
-              ctx.lineTo(p.screenX, p.screenY);
-            }
-          }
-          if (started) ctx.closePath();
-          ctx.stroke();
-        }
-
-        // vertikální linie
-        for (let j = 0; j < bigCone.segments; j++) {
-          ctx.beginPath();
-          let started = false;
-          for (let i = 0; i <= bigCone.rings; i++) {
-            const idx = i * bigCone.segments + j;
-            const p = bigCone.points[idx];
-            if (!p) continue;
-            if (!started) {
-              ctx.moveTo(p.screenX, p.screenY);
-              started = true;
-            } else {
-              ctx.lineTo(p.screenX, p.screenY);
-            }
-          }
-          if (started) ctx.stroke();
-        }
-
-        ctx.restore();
       }
 
       // ---------- KOULE / SLOTY ----------
@@ -564,7 +412,7 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
               screenX: 0,
               screenY: 0,
               sceneX: 0,
-              sceneY: 0
+              sceneY: 0,
             });
             id++;
           }
@@ -593,7 +441,7 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
           cx: 0,
           cy: 0,
           depth: 0,
-          radiusScale: 1
+          radiusScale: 1,
         },
         {
           key: "heroes",
@@ -606,7 +454,7 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
           cx: 0,
           cy: 0,
           depth: 0,
-          radiusScale: 1
+          radiusScale: 1,
         },
         {
           key: "lang",
@@ -619,7 +467,7 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
           cx: 0,
           cy: 0,
           depth: 0,
-          radiusScale: 1
+          radiusScale: 1,
         },
         {
           key: "earth",
@@ -632,8 +480,8 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
           cx: 0,
           cy: 0,
           depth: 0,
-          radiusScale: 1
-        }
+          radiusScale: 1,
+        },
       ];
 
       activeSphere = spheres[0];
@@ -681,20 +529,12 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
 
         baseRadius = Math.min(width, height) * 0.18;
 
-        // velikosti kuželů podle aktuální scény
-        signalCore.baseRadius = Math.min(width, height) * 0.19;
-        signalCore.coneHeight = signalCore.baseRadius * 1.6;
-        signalCore.offsetY = baseRadius * 0.9;
-
-// horní okraj velkého koše = těsně pod koulemi,
-// špička hluboko dolů (jako na modelu)
-bigCone.radiusTop = baseRadius * 2.4;   // užší košík, blíž ke koulím
-bigCone.radiusBottom = baseRadius * 0.6;
-bigCone.height = baseRadius * 4.2;      // delší špička dolů
-bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
+        // velký koš pod koulemi
+        signalCore.baseRadius = Math.min(width, height) * 0.24;
+        signalCore.coneHeight = signalCore.baseRadius * 1.9;
+        signalCore.offsetY = baseRadius * 0.85;
 
         generateSignalPoints();
-        generateBigConePoints();
       }
 
       resize();
@@ -913,10 +753,7 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
 
         layoutSpheres();
 
-        // velký koš/kužel kolem celé soustavy
-        drawBigCone();
-
-        // spodní Signal Core
+        // Signal Tower (velký kužel/koš)
         drawSignalCore();
 
         // středový motor + orbit
@@ -957,18 +794,7 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
         ctx.fillStyle = hubGrad;
         ctx.fill();
 
-        ctx.save();
-        ctx.strokeStyle = "rgba(255, 197, 120, 0.5)";
-        ctx.lineWidth = 1;
-        for (let i = 0; i < 4; i++) {
-          const angle = (i * Math.PI) / 2;
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(hubROuter * Math.cos(angle), hubROuter * Math.sin(angle));
-          ctx.stroke();
-        }
-        ctx.restore();
-
+        // text v centru (bez kříže)
         ctx.save();
         ctx.font = "700 14px system-ui";
         ctx.fillStyle = "rgba(255, 220, 150, 0.95)";
@@ -984,6 +810,7 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
         );
         ctx.restore();
 
+        // orbitální čára
         ctx.save();
         ctx.setLineDash([6, 6]);
         ctx.strokeStyle = "rgba(255, 210, 150, 0.4)";
@@ -1086,8 +913,10 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
           const dy = t0.clientY - t1.clientY;
           startDist = Math.hypot(dx, dy);
 
-          pinchSceneX = (centerX - width / 2 - viewOffsetX) / viewScale;
-          pinchSceneY = (centerY - height / 2 - viewOffsetY) / viewScale;
+          pinchSceneX =
+            (centerX - width / 2 - viewOffsetX) / viewScale;
+          pinchSceneY =
+            (centerY - height / 2 - viewOffsetY) / viewScale;
 
           startScale = viewScale;
           sphereDragActive = false;
@@ -1255,8 +1084,10 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
         const cx = e.clientX - rect.left;
         const cy = e.clientY - rect.top;
 
-        const sceneX = (cx - width / 2 - viewOffsetX) / viewScale;
-        const sceneY = (cy - height / 2 - viewOffsetY) / viewScale;
+        const sceneX =
+          (cx - width / 2 - viewOffsetX) / viewScale;
+        const sceneY =
+          (cy - height / 2 - viewOffsetY) / viewScale;
 
         const factor = e.deltaY > 0 ? 0.9 : 1.1;
         let newScale = viewScale * factor;
