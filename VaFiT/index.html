@@ -807,10 +807,11 @@
           <strong id="bank-players">0</strong>
         </div>
 
-        <div class="fuel-note">
-          Banka běží jen na tomto zařízení. Hodnoty se počítají z portfolia
-          212 a z impulzů, které posíláš do motoru (chat + dílna).
-        </div>
+<div class="fuel-note">
+  Banka běží jen na tomto zařízení. Hodnoty se počítají jen z impulzů,
+  které posíláš do motoru (chat + dílna). Žádné napojení na banku ani
+  Trading212 – jen tvoje písmenkové palivo.
+</div>
       </aside>
     </div>
     <!-- KONEC HLAVNÍ KARTA + PÍSMENKOVÁ BANKA -->
@@ -1408,71 +1409,6 @@ S láskou a důvěrou – Michal.
         return data.reply;
       }
 
-      // ======= TRADING212 – načtení hodnoty portfolia =======
-async function loadT212Portfolio() {
-  try {
-    const res = await fetch("/api/t212-portfolio");
-    const data = await res.json();
-    console.log("T212 PORTFOLIO:", data);
-
-    const bubble = document.getElementById("bubble");
-    if (!bubble) return;
-
-    // když API vrátí chybu
-    if (!data || data.error) {
-      bubble.innerHTML += "<br><br>⚠️ Nepodařilo se načíst hodnotu portfolia.";
-      if (data && data.note) {
-        bubble.innerHTML += "<br><small>" + data.note + "</small>";
-      }
-      return;
-    }
-
-    const total =
-      typeof data.total === "number"
-        ? data.total
-        : Number(data.total || 0);
-
-    const practiceLabel = data.practice ? " (tréninkový účet)" : "";
-
-        const lettersFromPortfolio = Math.max(0, Math.floor(total * 10));
-
-    // informuj banku, kolik písmen dorazilo z portfolia
-    if (window.VAFT_BANK && typeof VAFT_BANK.onPortfolioLoaded === "function") {
-      VAFT_BANK.onPortfolioLoaded(lettersFromPortfolio);
-    }
-
-    // Uložit písmenkové palivo do worldState
-    const ws = VaFiT.storage.worldState || {};
-    ws.letterFuel = lettersFromPortfolio;
-    VaFiT.storage.worldState = ws;
-    VaFiT.saveAll();
-
-    // Formátované stringy
-    const totalStr = total.toLocaleString("cs-CZ");
-    const lettersStr = lettersFromPortfolio.toLocaleString("cs-CZ");
-
-    // Text v bublině nahoře (to co máš na screenshotu)
-    bubble.innerHTML +=
-      "<br><br><strong>Hodnota portfolia 212:</strong>" +
-      practiceLabel +
-      "<br>💶 " +
-      totalStr +
-      " €" +
-      "<br><br><strong>Písmenkové palivo VaF'i'Ta:</strong>" +
-      "<br>🔡 " +
-      lettersStr +
-      " tokenů (písmenek).";
-
-  } catch (err) {
-    console.error("FETCH ERROR:", err);
-    const bubble = document.getElementById("bubble");
-    if (bubble) {
-      bubble.innerHTML +=
-        "<br><br>⚠️ Chyba komunikace s API T212, zkus to později.";
-    }
-  }
-}
-
       // ======== UI INIT ========
       function updateBankUi() {
   const ws = VaFiT.storage.worldState || {};
@@ -1502,8 +1438,7 @@ async function loadT212Portfolio() {
           "Motor aktivní – lokální paměť + AI mozek";
         document.getElementById("mood").textContent = VaFiT.moodLabel;
 
-        // portfolio 212 -> přidá se pod pozdrav
-        loadT212Portfolio();
+        // portfolio 212 -> 
        
         updateBankUi();
 
