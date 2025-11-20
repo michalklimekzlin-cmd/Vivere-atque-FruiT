@@ -4,15 +4,11 @@
     <meta charset="utf-8" />
     <meta
       name="viewport"
-      content="width=device-width,initial-scale=1,viewport-fit=cover"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>VaF'i'T • Ring Planet Grid</title>
+    <title>VaF'i'T • Canvas Ring + Croissant</title>
 
     <style>
-      * {
-        box-sizing: border-box;
-      }
-
       html,
       body {
         margin: 0;
@@ -26,329 +22,423 @@
         color: #f5f5f5;
       }
 
-      #app {
+      .root {
         position: fixed;
         inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      canvas {
-        display: block;
+      .stage {
+        position: relative;
+        width: min(920px, 96vw);
+        height: min(620px, 90vh);
+        border-radius: 32px;
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
+        background: radial-gradient(circle at top, #06091a, #020208);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      #scene {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
+        display: block;
+        touch-action: none;
       }
 
       .hud {
-        position: fixed;
-        left: 12px;
+        position: absolute;
+        left: 16px;
         top: 12px;
-        padding: 8px 12px;
-        background: rgba(5, 8, 20, 0.85);
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        max-width: min(80vw, 320px);
-        font-size: 12px;
-        line-height: 1.4;
-      }
-
-      .hud strong {
-        font-size: 13px;
-      }
-
-      .hud-bottom {
-        position: fixed;
-        right: 12px;
-        bottom: 12px;
-        padding: 6px 10px;
         font-size: 11px;
-        background: rgba(5, 8, 20, 0.85);
-        border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        opacity: 0.8;
+        background: rgba(5, 8, 20, 0.82);
+        padding: 6px 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        opacity: 0.9;
       }
     </style>
-
-    <!-- JEN THREE.JS -->
-    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
   </head>
 
   <body>
-    <div id="app"></div>
-
-    <div class="hud">
-      <strong>Ring Planet Grid</strong><br />
-      • prsty otáčej scénu<br />
-      • dvěma prsty / kolečkem přibližuj / oddaluj<br />
-      • prstenec = „plastelína“<br />
-      • croissant = 3D pečivo ve zlaté mřížce
-    </div>
-
-    <div class="hud-bottom">
-      ً&’」 • Vivere atque FruiT • RingPlanetGrid
+    <div class="root">
+      <div class="stage">
+        <canvas id="scene"></canvas>
+        <div class="hud">
+          Ring + croissant • prsty otáčej scénu (náklon) • pinch / kolečko = zoom
+        </div>
+      </div>
     </div>
 
     <script>
-      const app = document.getElementById("app");
-      const scene = new THREE.Scene();
+      const canvas = document.getElementById("scene");
+      const ctx = canvas.getContext("2d");
+      const dpr = window.devicePixelRatio || 1;
 
-      const camera = new THREE.PerspectiveCamera(
-        60,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        300
-      );
+      let width = 0;
+      let height = 0;
+      let baseSize = 1;
 
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setPixelRatio(window.devicePixelRatio || 1);
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setClearColor(0x020208, 1);
-      renderer.outputEncoding = THREE.sRGBEncoding;
-      app.appendChild(renderer.domElement);
+      // "kamera"
+      let viewScale = 1.1;
+      let targetScale = 1.1;
+      let tiltX = -0.45;
+      let tiltY = 0.4;
+      let targetTiltX = tiltX;
+      let targetTiltY = tiltY;
 
-      // SVĚTLO
-      const ambient = new THREE.AmbientLight(0xffffff, 0.7);
-      scene.add(ambient);
+      let orbitAngle = 0;
 
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
-      dirLight.position.set(12, 20, 10);
-      scene.add(dirLight);
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        baseSize = Math.min(width, height) * 0.22;
+      }
 
-      // MŘÍŽKA
-      const grid = new THREE.GridHelper(40, 40, 0x7f7fff, 0x222244);
-      grid.position.y = -3;
-      scene.add(grid);
+      window.addEventListener("resize", resize);
+      resize();
 
-      // NODY NA MŘÍŽCE
-      const nodeGeom = new THREE.SphereGeometry(0.12, 12, 12);
-      const nodeMat = new THREE.MeshBasicMaterial({ color: 0x7f9dff });
-      const nodes = new THREE.Group();
-      for (let x = -4; x <= 4; x += 2) {
-        for (let z = -4; z <= 4; z += 2) {
-          const n = new THREE.Mesh(nodeGeom, nodeMat);
-          n.position.set(x, -2.95, z);
-          nodes.add(n);
+      // pomocná projekce "pseud 3D" (jen náklon X/Y)
+      function project3D(x, y, z) {
+        // rotace kolem X
+        let y1 = y * Math.cos(tiltX) - z * Math.sin(tiltX);
+        let z1 = y * Math.sin(tiltX) + z * Math.cos(tiltX);
+        // rotace kolem Y
+        let x2 = x * Math.cos(tiltY) + z1 * Math.sin(tiltY);
+        let z2 = -x * Math.sin(tiltY) + z1 * Math.cos(tiltY);
+
+        return {
+          x: x2 * viewScale,
+          y: y1 * viewScale,
+          z: z2,
+        };
+      }
+
+      // --- PODLAHA GRID ---
+      function drawFloor() {
+        ctx.save();
+        ctx.translate(width / 2, height / 2);
+
+        const size = baseSize * 4;
+        const step = baseSize * 0.4;
+
+        ctx.strokeStyle = "rgba(90,110,180,0.4)";
+        ctx.lineWidth = 0.6;
+
+        for (let x = -size; x <= size; x += step) {
+          const p1 = project3D(x, 0, -size);
+          const p2 = project3D(x, 0, size);
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y + baseSize * 1.2);
+          ctx.lineTo(p2.x, p2.y + baseSize * 1.2);
+          ctx.stroke();
         }
-      }
-      scene.add(nodes);
 
-      // HLAVNÍ PRSTENEC – PLASTELÍNA
-      const mainRingGeom = new THREE.TorusGeometry(4, 1.1, 40, 140);
-      const mainRingMat = new THREE.MeshStandardMaterial({
-        color: 0xf5f3ff,
-        metalness: 0.05,
-        roughness: 0.6,
-        emissive: 0x111111,
-        emissiveIntensity: 0.2,
-      });
-
-      const mainRing = new THREE.Mesh(mainRingGeom, mainRingMat);
-      mainRing.scale.set(1.7, 0.7, 1.1);
-      mainRing.position.set(0, 0.8, 0);
-      mainRing.rotation.x = Math.PI / 2.1;
-
-      // drobná nepravidelnost povrchu
-      {
-        const pos = mainRing.geometry.attributes.position;
-        const tmp = new THREE.Vector3();
-        for (let i = 0; i < pos.count; i++) {
-          tmp.fromBufferAttribute(pos, i);
-          const noise =
-            (Math.sin(tmp.x * 3.1) + Math.cos(tmp.z * 2.7)) * 0.03 +
-            (Math.random() - 0.5) * 0.02;
-          tmp.multiplyScalar(1 + noise);
-          pos.setXYZ(i, tmp.x, tmp.y, tmp.z);
+        for (let z = -size; z <= size; z += step) {
+          const p1 = project3D(-size, 0, z);
+          const p2 = project3D(size, 0, z);
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y + baseSize * 1.2);
+          ctx.lineTo(p2.x, p2.y + baseSize * 1.2);
+          ctx.stroke();
         }
-        pos.needsUpdate = true;
-        mainRing.geometry.computeVertexNormals();
+
+        ctx.restore();
       }
-      scene.add(mainRing);
 
-      // CROISSANT – 3D PEČIVO VE ZLATÉ MŘÍŽCE
+      // --- PRSTENEC (v půdorysu kruh, v projekci elipsa) ---
+      function drawRing() {
+        ctx.save();
+        ctx.translate(width / 2, height / 2);
 
-      // cesta (ohnutý rohlík)
-      const croissantPath = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-2.2, 0.0, 0.0),
-        new THREE.Vector3(-1.1, 0.45, 0.1),
-        new THREE.Vector3(0.0, 0.7, 0.0),
-        new THREE.Vector3(1.1, 0.45, -0.1),
-        new THREE.Vector3(2.2, 0.0, 0.0),
-      ]);
+        const rOuter = baseSize * 1.15;
+        const rInner = baseSize * 0.55;
 
-      const croissantRadius = 0.55;
-      const croissantGeom = new THREE.TubeGeometry(
-        croissantPath,
-        90, // délka segmentace
-        croissantRadius,
-        18, // kolik "hran" kolem
-        false
-      );
+        // stín
+        const pShadow = project3D(0, 0, 0);
+        ctx.save();
+        ctx.translate(pShadow.x, pShadow.y + baseSize * 1.05);
+        ctx.scale(viewScale, viewScale * 0.35);
+        const g = ctx.createRadialGradient(0, 0, rInner * 0.1, 0, 0, rOuter);
+        g.addColorStop(0, "rgba(0,0,0,0.9)");
+        g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, rOuter, rOuter, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
 
-      // základní tělo (tmavší pečivo)
-      const croissantBaseMat = new THREE.MeshStandardMaterial({
-        color: 0x1b1309,
-        metalness: 0.15,
-        roughness: 0.85,
-        emissive: 0x110700,
-        emissiveIntensity: 0.35,
-      });
-      const croissantBase = new THREE.Mesh(croissantGeom, croissantBaseMat);
+        // samotný prstenec – nejdřív v lokálním systému, pak náklon
+        const segments = 120;
 
-      // zlatá mřížka jako u 2D koulí
-      const croissantWireGeom = new THREE.WireframeGeometry(croissantGeom);
-      const croissantWireMat = new THREE.LineBasicMaterial({
-        color: 0xffe4aa,
-      });
-      const croissantWire = new THREE.LineSegments(
-        croissantWireGeom,
-        croissantWireMat
-      );
+        function ringPath(radius) {
+          ctx.beginPath();
+          for (let i = 0; i <= segments; i++) {
+            const a = (i / segments) * Math.PI * 2;
+            const x = Math.cos(a) * radius;
+            const z = Math.sin(a) * radius;
+            const p = project3D(x, 0, z);
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+          }
+          ctx.closePath();
+        }
 
-      const croissantBody = new THREE.Group();
-      croissantBody.add(croissantBase);
-      croissantBody.add(croissantWire);
+        // vnější
+        ringPath(rOuter);
+        const gradOuter = ctx.createLinearGradient(
+          -rOuter,
+          -rOuter,
+          rOuter,
+          rOuter
+        );
+        gradOuter.addColorStop(0, "#fdf9ff");
+        gradOuter.addColorStop(0.4, "#f0e9ff");
+        gradOuter.addColorStop(1, "#c7d4ff");
+        ctx.fillStyle = gradOuter;
+        ctx.fill();
 
-      // tvar podobný fotce: mírně zploštit
-      croissantBody.scale.set(0.95, 1.05, 0.9);
-      croissantBody.rotation.x = Math.PI / 2; // položit na bok
-      croissantBody.rotation.z = Math.PI * 0.1;
+        // vnitřní "díra" – vyříznout
+        ctx.save();
+        ctx.globalCompositeOperation = "destination-out";
+        ringPath(rInner);
+        ctx.fill();
+        ctx.restore();
 
-      // orbit kolem prstence
-      const croissantOrbit = new THREE.Group();
-      croissantBody.position.set(6.5, 0.8, 0);
-      croissantOrbit.add(croissantBody);
-      scene.add(croissantOrbit);
+        // okraj
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = "rgba(40,80,150,0.8)";
+        ringPath(rOuter);
+        ctx.stroke();
 
-      // --- OVLÁDÁNÍ KAMERY (DRAG + ZOOM) ---
-      const spherical = {
-        radius: 18,
-        phi: Math.PI / 3,
-        theta: Math.PI / 4,
-      };
-
-      function updateCamera() {
-        const r = spherical.radius;
-        const sinPhi = Math.sin(spherical.phi);
-        camera.position.x = r * sinPhi * Math.cos(spherical.theta);
-        camera.position.y = r * Math.cos(spherical.phi);
-        camera.position.z = r * sinPhi * Math.sin(spherical.theta);
-        camera.lookAt(0, 0, 0);
+        ctx.restore();
       }
-      updateCamera();
+
+      // --- CROISSANT (pečivo + zlatá mřížka) ---
+
+      function drawCroissantBody(localScale = 1) {
+        const w = 2.6 * localScale;
+        const h = 1.2 * localScale;
+
+        ctx.beginPath();
+        // horní hrana
+        ctx.moveTo(-w * 0.9, 0);
+        ctx.quadraticCurveTo(-w * 0.45, -h * 1.0, 0, -h * 1.15);
+        ctx.quadraticCurveTo(w * 0.45, -h * 1.0, w * 0.9, 0);
+        // spodní hrana
+        ctx.quadraticCurveTo(w * 0.45, h * 0.9, 0, h * 1.05);
+        ctx.quadraticCurveTo(-w * 0.45, h * 0.9, -w * 0.9, 0);
+        ctx.closePath();
+
+        // výřez "uštípnutí" vpravo (jako na fotce)
+        ctx.save();
+        ctx.clip();
+
+        ctx.fillStyle = "#1a130b";
+        ctx.fill();
+
+        // jemný světelný přechod
+        const g = ctx.createLinearGradient(-w, -h * 1.3, w, h * 1.3);
+        g.addColorStop(0, "#2a1b10");
+        g.addColorStop(0.3, "#3b2414");
+        g.addColorStop(0.7, "#1c120b");
+        g.addColorStop(1, "#120c08");
+        ctx.fillStyle = g;
+        ctx.fill();
+
+        ctx.restore();
+
+        // obrys pečiva
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = "rgba(255, 210, 150, 0.95)";
+        ctx.shadowColor = "rgba(0,0,0,0.9)";
+        ctx.shadowBlur = 4;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // zlaté "vrásky" nahoře
+        ctx.strokeStyle = "rgba(255, 220, 170, 0.9)";
+        ctx.lineWidth = 1;
+
+        const cuts = 5;
+        for (let i = 0; i < cuts; i++) {
+          const t = (i + 0.5) / cuts;
+          const cx = -w * 0.55 + t * w * 1.1;
+          ctx.beginPath();
+          ctx.moveTo(cx - 0.25 * localScale, -0.25 * localScale);
+          ctx.quadraticCurveTo(
+            cx,
+            -0.65 * localScale,
+            cx + 0.25 * localScale,
+            -0.25 * localScale
+          );
+          ctx.stroke();
+        }
+
+        // mřížka (vertikální + horizontální linky)
+        ctx.lineWidth = 0.7;
+        ctx.globalAlpha = 0.55;
+        const cols = 8;
+        const rows = 4;
+
+        for (let i = 0; i <= cols; i++) {
+          const t = i / cols;
+          const x = -w * 0.9 + t * w * 1.8;
+          ctx.beginPath();
+          ctx.moveTo(x, -h * 0.7);
+          ctx.lineTo(x, h * 0.7);
+          ctx.stroke();
+        }
+
+        for (let j = 0; j <= rows; j++) {
+          const t = j / rows;
+          const y = -h * 0.8 + t * h * 1.6;
+          ctx.beginPath();
+          ctx.moveTo(-w * 0.9, y);
+          ctx.lineTo(w * 0.9, y);
+          ctx.stroke();
+        }
+
+        ctx.globalAlpha = 1;
+      }
+
+      function drawCroissant() {
+        // pozice croissantu na "orbitu" kolem prstence
+        const orbitR = baseSize * 2.1;
+        const a = orbitAngle;
+        const x3 = Math.cos(a) * orbitR;
+        const z3 = Math.sin(a) * orbitR;
+        const y3 = 0.3 * baseSize;
+
+        const p = project3D(x3, y3, z3);
+
+        ctx.save();
+        ctx.translate(width / 2 + p.x, height / 2 + p.y);
+
+        // natočení tak, aby "mířil" k prstenci
+        ctx.rotate(a + Math.PI); // špička k prstenci
+        ctx.scale(baseSize * 0.3, baseSize * 0.3);
+
+        // jemný glow
+        ctx.save();
+        ctx.shadowColor = "rgba(255, 220, 170, 0.7)";
+        ctx.shadowBlur = 12;
+        drawCroissantBody(1);
+        ctx.restore();
+
+        drawCroissantBody(1);
+
+        ctx.restore();
+      }
+
+      // --- OVLÁDÁNÍ DOTYK / MYŠ ---
 
       let isDragging = false;
       let lastX = 0;
       let lastY = 0;
 
-      function onPointerDown(e) {
+      function pointerDown(e) {
+        const t = e.touches ? e.touches[0] : e;
         isDragging = true;
-        lastX = e.clientX;
-        lastY = e.clientY;
+        lastX = t.clientX;
+        lastY = t.clientY;
       }
 
-      function onPointerMove(e) {
+      function pointerMove(e) {
         if (!isDragging) return;
-        const dx = e.clientX - lastX;
-        const dy = e.clientY - lastY;
-        lastX = e.clientX;
-        lastY = e.clientY;
+        const t = e.touches ? e.touches[0] : e;
+        const dx = t.clientX - lastX;
+        const dy = t.clientY - lastY;
+        lastX = t.clientX;
+        lastY = t.clientY;
 
-        spherical.theta -= dx * 0.005;
-        spherical.phi -= dy * 0.005;
-        const eps = 0.15;
-        spherical.phi = Math.max(eps, Math.min(Math.PI - eps, spherical.phi));
-
-        updateCamera();
+        targetTiltY += dx * 0.005;
+        targetTiltX += dy * 0.005;
       }
 
-      function onPointerUp() {
+      function pointerUp() {
         isDragging = false;
       }
 
-      renderer.domElement.addEventListener("pointerdown", onPointerDown);
-      window.addEventListener("pointermove", onPointerMove);
-      window.addEventListener("pointerup", onPointerUp);
-      window.addEventListener("pointerleave", onPointerUp);
+      canvas.addEventListener("mousedown", pointerDown);
+      window.addEventListener("mousemove", pointerMove);
+      window.addEventListener("mouseup", pointerUp);
 
-      // ZOOM – kolečko
-      window.addEventListener(
+      canvas.addEventListener("touchstart", pointerDown, { passive: false });
+      window.addEventListener("touchmove", (e) => {
+        if (e.touches && e.touches.length === 2) return; // pinch řeší wheel
+        pointerMove(e);
+      }, { passive: false });
+      window.addEventListener("touchend", pointerUp);
+      window.addEventListener("touchcancel", pointerUp);
+
+      // zoom kolečkem
+      canvas.addEventListener(
         "wheel",
         (e) => {
           e.preventDefault();
-          const factor = e.deltaY > 0 ? 1.1 : 0.9;
-          spherical.radius *= factor;
-          spherical.radius = Math.max(6, Math.min(60, spherical.radius));
-          updateCamera();
+          const factor = e.deltaY > 0 ? 0.9 : 1.1;
+          targetScale = Math.max(0.7, Math.min(2.5, targetScale * factor));
         },
         { passive: false }
       );
 
-      // PINCH ZOOM – mobil
-      let pinchStartDist = null;
-      function distance(t1, t2) {
-        const dx = t1.clientX - t2.clientX;
-        const dy = t1.clientY - t2.clientY;
-        return Math.sqrt(dx * dx + dy * dy);
-      }
-
-      renderer.domElement.addEventListener(
-        "touchstart",
-        (e) => {
-          if (e.touches.length === 2) {
-            pinchStartDist = distance(e.touches[0], e.touches[1]);
-          }
-        },
-        { passive: false }
-      );
-
-      renderer.domElement.addEventListener(
+      // jednoduchý pinch zoom (jen vzdálenost prstů)
+      let pinchStart = null;
+      window.addEventListener(
         "touchmove",
         (e) => {
-          if (e.touches.length === 2 && pinchStartDist) {
+          if (e.touches && e.touches.length === 2) {
             e.preventDefault();
-            const d = distance(e.touches[0], e.touches[1]);
-            const scale = pinchStartDist / d;
-            spherical.radius *= scale;
-            spherical.radius = Math.max(6, Math.min(60, spherical.radius));
-            pinchStartDist = d;
-            updateCamera();
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const dist = Math.hypot(dx, dy);
+            if (!pinchStart) pinchStart = dist;
+            else {
+              const ratio = dist / pinchStart;
+              targetScale = Math.max(0.7, Math.min(2.5, targetScale * ratio));
+              pinchStart = dist;
+            }
+          } else {
+            pinchStart = null;
           }
         },
         { passive: false }
       );
 
-      renderer.domElement.addEventListener("touchend", () => {
-        pinchStartDist = null;
-      });
+      // --- ANIMACE ---
+      let lastTime = 0;
+      function loop(ts) {
+        if (!ts) ts = 0;
+        const dt = (ts - lastTime) / 1000;
+        lastTime = ts;
 
-      // RESIZE
-      window.addEventListener("resize", () => {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-        renderer.setSize(w, h);
-      });
+        // plynulý přechod kamery
+        const k = Math.min(1, dt * 6);
+        viewScale += (targetScale - viewScale) * k;
+        tiltX += (targetTiltX - tiltX) * k;
+        tiltY += (targetTiltY - tiltY) * k;
 
-      // ANIMACE
-      let t = 0;
-      function animate() {
-        requestAnimationFrame(animate);
-        t += 0.01;
+        orbitAngle += dt * 0.4;
 
-        nodes.rotation.y += 0.001;
-        mainRing.rotation.z = Math.sin(t * 0.4) * 0.06;
+        ctx.clearRect(0, 0, width, height);
 
-        croissantOrbit.rotation.y += 0.01;
-        croissantBase.material.emissiveIntensity =
-          0.3 + 0.15 * Math.sin(t * 2.0);
+        drawFloor();
+        drawRing();
+        drawCroissant();
 
-        renderer.render(scene, camera);
+        requestAnimationFrame(loop);
       }
-
-      animate();
+      requestAnimationFrame(loop);
     </script>
   </body>
 </html>
