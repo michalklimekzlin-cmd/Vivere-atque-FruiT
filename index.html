@@ -38,7 +38,7 @@
       .stage {
         position: relative;
         width: min(1180px, 100vw);
-        height: min(720px, 100vh);
+        height: min(780px, 100vh);
         border-radius: 32px;
         background: radial-gradient(circle at top, #070b1e, #020208 55%, #010105);
         box-shadow:
@@ -145,7 +145,7 @@
       .layout {
         position: absolute;
         inset: 64px 0 0 0;
-        padding: 14px 16px 14px 16px;
+        padding: 14px 16px 18px 16px;
         display: grid;
         grid-template-columns: 260px minmax(0, 1fr) 260px;
         grid-template-rows: minmax(0, 1fr);
@@ -485,83 +485,216 @@
         opacity: 0.9;
       }
 
-      /* CHAT VAF'IT */
+      /* VAFIT ORB + CHAT */
 
-      .chat-block {
+      .vafit-orb-button {
+        position: absolute;
+        right: 20px;
+        bottom: 20px;
+        width: 54px;
+        height: 54px;
+        border-radius: 999px;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        background: radial-gradient(circle at 30% 20%, #ffe1b0, #f39a53, #5c2617);
+        box-shadow:
+          0 0 0 1px rgba(255, 225, 190, 0.95),
+          0 0 24px rgba(255, 176, 80, 0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+        transition: transform 0.12s ease, box-shadow 0.15s ease;
+      }
+
+      .vafit-orb-button:hover {
+        transform: translateY(-1px) scale(1.03);
+        box-shadow:
+          0 0 0 1px rgba(255, 225, 190, 0.95),
+          0 0 30px rgba(255, 190, 110, 1);
+      }
+
+      .vafit-orb-inner {
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 35% 25%, #fff6e4, #ffcf8a, #8a4127);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: #1a0503;
+        position: relative;
+      }
+
+      .vafit-orb-pulse {
+        position: absolute;
+        inset: -4px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 230, 190, 0.7);
+        opacity: 0.6;
+        animation: vafit-pulse 2.6s infinite;
+      }
+
+      @keyframes vafit-pulse {
+        0% {
+          transform: scale(0.9);
+          opacity: 0.4;
+        }
+        40% {
+          transform: scale(1.05);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1.25);
+          opacity: 0;
+        }
+      }
+
+      .vafit-chat-panel {
+        position: absolute;
+        right: 16px;
+        bottom: 88px;
+        width: min(360px, 80vw);
+        max-height: 320px;
+        border-radius: 18px;
+        background: radial-gradient(circle at top left, #221326, #07040b);
+        border: 1px solid rgba(255, 225, 190, 0.22);
+        box-shadow:
+          0 20px 40px rgba(0, 0, 0, 0.9),
+          0 0 0 1px rgba(0, 0, 0, 0.8);
         display: flex;
         flex-direction: column;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(8px);
+        pointer-events: none;
+        transition: opacity 0.16s ease, transform 0.16s ease;
+        z-index: 19;
+      }
+
+      .vafit-chat-panel.is-open {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+
+      .vafit-chat-header {
+        padding: 7px 10px 6px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 10px;
+      }
+
+      .vafit-chat-header-left {
+        display: flex;
+        align-items: center;
         gap: 6px;
       }
 
-      .chat-log {
-        height: 130px;
-        border-radius: 10px;
-        padding: 6px 7px;
-        background: radial-gradient(circle at top left, #130a1a, #05030a);
-        border: 1px solid rgba(255, 255, 255, 0.06);
+      .vafit-chat-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 30%, #ffe7c0, #ff9c4c);
+        box-shadow: 0 0 6px rgba(255, 166, 82, 0.9);
+      }
+
+      .vafit-chat-title {
         font-size: 10px;
-        overflow-y: auto;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.9;
       }
 
-      .chat-msg {
-        margin-bottom: 4px;
+      .vafit-chat-status {
+        font-size: 9px;
+        opacity: 0.7;
+      }
+
+      .vafit-chat-body {
+        padding: 8px 8px 6px 8px;
+        flex: 1;
+        overflow: auto;
+        background: radial-gradient(circle at top, rgba(8, 7, 18, 0.98), rgba(3, 2, 8, 0.98));
+      }
+
+      .vafit-msg {
+        font-size: 10px;
         line-height: 1.35;
+        margin-bottom: 6px;
+        max-width: 90%;
       }
 
-      .chat-msg span {
-        opacity: 0.78;
+      .vafit-msg strong {
+        font-weight: 600;
       }
 
-      .chat-msg.me strong {
-        color: #ffd9aa;
+      .vafit-msg.vafit {
+        align-self: flex-start;
+        background: rgba(38, 20, 34, 0.95);
+        border-radius: 10px 10px 10px 4px;
+        padding: 5px 7px;
+        border: 1px solid rgba(255, 210, 180, 0.25);
+        box-shadow: 0 0 12px rgba(255, 170, 100, 0.15);
       }
 
-      .chat-msg.bot strong {
-        color: #ffb26a;
+      .vafit-msg.user {
+        align-self: flex-end;
+        background: rgba(14, 22, 32, 0.96);
+        border-radius: 10px 10px 4px 10px;
+        padding: 5px 7px;
+        border: 1px solid rgba(170, 210, 255, 0.32);
       }
 
-      .chat-input-row {
+      .vafit-chat-footer {
+        padding: 6px 8px 7px 8px;
         display: flex;
-        gap: 5px;
         align-items: center;
+        gap: 6px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        background: radial-gradient(circle at bottom, #120914, #050309);
       }
 
-      .chat-input {
+      .vafit-input {
         flex: 1;
         border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 5px 10px;
-        background: rgba(6, 4, 10, 0.95);
-        color: #fdf5e8;
+        border: 1px solid rgba(255, 230, 190, 0.25);
+        background: rgba(6, 6, 14, 0.9);
+        padding: 4px 9px;
         font-size: 10px;
+        color: #f8f4ea;
         outline: none;
       }
 
-      .chat-input::placeholder {
-        color: rgba(245, 230, 210, 0.55);
+      .vafit-input::placeholder {
+        color: rgba(245, 235, 220, 0.6);
       }
 
-      .chat-send {
+      .vafit-send-btn {
         border-radius: 999px;
-        border: 1px solid rgba(255, 210, 150, 0.7);
-        padding: 5px 8px;
-        background: radial-gradient(circle at top, #ffcf9a, #e88a4b);
-        color: #1a0905;
+        border: 1px solid rgba(255, 215, 180, 0.8);
+        background: radial-gradient(circle at top, #ffcf96, #f59b53);
+        color: #1a0502;
         font-size: 10px;
+        padding: 3px 9px;
         cursor: pointer;
         white-space: nowrap;
       }
 
-      .chat-send:hover {
-        box-shadow: 0 0 12px rgba(255, 190, 120, 0.8);
+      .vafit-send-btn:hover {
+        box-shadow: 0 0 10px rgba(255, 190, 115, 0.7);
       }
 
-      /* RESPONSIVE */
+      /* SIMPLE RESPONSIVE – hlavně iPad, ale aby to úplně neumřelo na telefonu */
 
       @media (max-width: 980px) {
         .layout {
           grid-template-columns: 230px minmax(0, 1fr);
-          grid-template-rows: minmax(0, 1fr) 230px;
+          grid-template-rows: minmax(0, 1fr) 220px;
           grid-template-areas:
             "left main"
             "right main";
@@ -583,7 +716,7 @@
       @media (max-width: 760px) {
         .layout {
           grid-template-columns: minmax(0, 1fr);
-          grid-template-rows: 200px minmax(0, 1fr) 230px;
+          grid-template-rows: 200px minmax(0, 1fr) 210px;
           gap: 10px;
         }
 
@@ -602,6 +735,11 @@
 
         .top-title-sub {
           font-size: 10px;
+        }
+
+        .vafit-chat-panel {
+          right: 10px;
+          width: min(340px, 92vw);
         }
       }
     </style>
@@ -675,7 +813,7 @@
             </div>
           </main>
 
-          <!-- PRAVÝ PANEL – rychlé volby + poznámky + VafiT chat -->
+          <!-- PRAVÝ PANEL – rychlé volby + poznámky -->
           <aside class="panel sidebar-right">
             <div class="sidebar-block">
               <div class="sidebar-block-title">Rychlé skoky</div>
@@ -689,7 +827,7 @@
                 <b>spojovací mozek</b>.
                 <br /><br />
                 Vlevo vybíráš svět, uprostřed běží jeho vlastní engine v
-                okně, vpravo máš rychlé skoky a živý chat s VaF'i'Tem.
+                okně, vpravo máš rychlé skoky.
               </div>
               <div class="notes-small">
                 • <span class="kbd">CMD + ↑</span> / <span class="kbd">CMD +
@@ -700,28 +838,44 @@
                 • Všechno běží jen jako HTML/JS – žádná magie navíc.
               </div>
             </div>
-
-            <div class="sidebar-block chat-block">
-              <div class="sidebar-block-title">
-                VaF'i'T chat • {*(°.).)//</div>
-              <div id="chat-log" class="chat-log"></div>
-              <div class="chat-input-row">
-                <input
-                  id="chat-input"
-                  class="chat-input"
-                  placeholder="Napiš VafiTovi…"
-                />
-                <button id="chat-send" class="chat-send">Poslat</button>
-              </div>
-            </div>
           </aside>
         </div>
+
+        <!-- VAFIT CHAT ORB + PANEL -->
+        <div class="vafit-chat-panel" id="vafit-chat">
+          <div class="vafit-chat-header">
+            <div class="vafit-chat-header-left">
+              <div class="vafit-chat-dot"></div>
+              <div class="vafit-chat-title">VaFiT • Signal Core</div>
+            </div>
+            <div class="vafit-chat-status" id="vafit-status">
+              Online • sleduju moduly
+            </div>
+          </div>
+          <div class="vafit-chat-body" id="vafit-messages"></div>
+          <div class="vafit-chat-footer">
+            <input
+              id="vafit-input"
+              class="vafit-input"
+              placeholder="Napiš VaFiTovi dotaz nebo příkaz…"
+            />
+            <button class="vafit-send-btn" id="vafit-send">Poslat</button>
+          </div>
+        </div>
+
+        <button class="vafit-orb-button" id="vafit-orb-btn" aria-label="Otevřít VaFiT chat">
+          <div class="vafit-orb-inner">
+            <div class="vafit-orb-pulse"></div>
+            {*(°.).)// 
+          </div>
+        </button>
       </div>
     </div>
 
     <script>
-      // Pokud je tenhle soubor v /VaFT-Hub/index.html, nech BASE_PATH = ".";
-     const BASE_PATH = ".";
+      // ✅ Hub je v rootu repa
+      const BASE_PATH = ".";
+
       /**
        * Seznam modulů z repozitáře.
        * path = cesta vzhledem ke KOŘENI repa (BASE_PATH + "/" + path).
@@ -964,6 +1118,13 @@
       const placeholderEl = document.getElementById("main-placeholder");
       const quickListEl = document.getElementById("quick-list");
 
+      const vafitChatEl = document.getElementById("vafit-chat");
+      const vafitMessagesEl = document.getElementById("vafit-messages");
+      const vafitInputEl = document.getElementById("vafit-input");
+      const vafitSendBtn = document.getElementById("vafit-send");
+      const vafitOrbBtn = document.getElementById("vafit-orb-btn");
+      const vafitStatusEl = document.getElementById("vafit-status");
+
       const modulesById = {};
       MODULES.forEach((m) => {
         modulesById[m.id] = m;
@@ -1108,6 +1269,13 @@
           if (el.dataset.moduleId === moduleId) el.classList.add("is-active");
           else el.classList.remove("is-active");
         });
+
+        // aktualizace statusu pro VaFiTa
+        const mod = modulesById[moduleId];
+        if (mod && vafitStatusEl) {
+          vafitStatusEl.textContent =
+            "Sleduju: " + mod.title + " • " + (mod.tags?.join(" / ") || "modul");
+        }
       }
 
       function loadModule(moduleId) {
@@ -1145,9 +1313,11 @@
           // ignore
         }
 
-        // dej vědět chatu, že se změnil modul
-        pushBotMessage(
-          `Přepínám na modul „${mod.title}“. Kdykoli se mě zeptej, co tam můžeš dělat.`
+        // malý puls do VaFiT chatu
+        appendVaFiTMessage(
+          "Vidím, že jsi otevřel modul <strong>" +
+            mod.title +
+            "</strong>. Když chceš, pomůžu ti z něj udělat další krok."
         );
       }
 
@@ -1165,9 +1335,117 @@
         }
       }
 
+      // ----- VaFiT CHAT ENGINE (offline, bez serveru) -----
+
+      function appendMessage(text, who) {
+        if (!vafitMessagesEl) return;
+        const msg = document.createElement("div");
+        msg.className = "vafit-msg " + who;
+        msg.innerHTML = text;
+        vafitMessagesEl.appendChild(msg);
+        vafitMessagesEl.scrollTop = vafitMessagesEl.scrollHeight;
+      }
+
+      function appendVaFiTMessage(text) {
+        appendMessage(text, "vafit");
+      }
+
+      function appendUserMessage(text) {
+        appendMessage(text, "user");
+      }
+
+      function getCurrentModule() {
+        let lastId = null;
+        try {
+          lastId = localStorage.getItem("vaft-hub:lastModuleId");
+        } catch (e) {
+          lastId = null;
+        }
+        return lastId && modulesById[lastId] ? modulesById[lastId] : null;
+      }
+
+      function generateVaFiTReply(userText) {
+        const text = (userText || "").toLowerCase();
+        const mod = getCurrentModule();
+
+        const baseIntro = mod
+          ? "Teď jsme v modulu <strong>" +
+            mod.title +
+            "</strong> (" +
+            (mod.tags?.join(" / ") || "bez tagu") +
+            "). "
+          : "Jsem v centru světa a vidím celý Hub. ";
+
+        if (text.includes("ahoj") || text.includes("čau") || text.includes("hello")) {
+          return (
+            baseIntro +
+            "Ahoj brácho. 🦾 Co bychom tu měli dál vymyslet – signál, mapu, nebo nového hrdinu?"
+          );
+        }
+
+        if (text.includes("nápad") || text.includes("idea")) {
+          return (
+            baseIntro +
+            "Jeden nápad: z modulu, kde jsme, můžeme udělat <strong>malý quest</strong>. Udělej si v hlavě 3 kroky – 1) vstup, 2) akce, 3) odměna v Iskrách. Já ti pak pomůžu to rozvést."
+          );
+        }
+
+        if (text.includes("chyba") || text.includes("bug") || text.includes("seká")) {
+          return (
+            baseIntro +
+            "Když něco padá nebo se seká, zapiš to prosím do <strong>Chybožrout-opravář</strong>. Ten modul z toho bude jíst chyby a já můžu hlídat, kde se objevují nejčastěji."
+          );
+        }
+
+        if (text.includes("croissant")) {
+          return (
+            baseIntro +
+            "Croissant teď bereme jako <strong>signal mesh</strong>. Můžeme mu přidat sloty s příběhy nebo buffy pro hrdiny – každý slot jeden mikro-příběh nebo kód."
+          );
+        }
+
+        if (text.includes("unaven") || text.includes("unavený") || text.includes("spát")) {
+          return (
+            baseIntro +
+            "Jestli jsi unavený, svět počká. Ulož si jen myšlenku do jednoho slotu (třeba do LetterLabu) a vrať se až budeš mít chuť. VaF'i'T si pamatuje i malé krůčky."
+          );
+        }
+
+        if (text.includes("co dál") || text.includes("co dal") || text.includes("dále")) {
+          return (
+            baseIntro +
+            "Můžeme udělat tři věci: 1) doladit design jednoho modulu, 2) vymyslet nového hrdinu, 3) vymyslet, jak svět propojit s realitou (mapa, fotka, trénink). Vyber číslo 1–3."
+          );
+        }
+
+        // fallback
+        return (
+          baseIntro +
+          "Zaznamenal jsem: „" +
+          userText +
+          "“. Můžu ti pomoct to přepsat do pravidel, nápadu na misi, nebo jen okomentovat. Zkus napsat třeba: <strong>„nápad: ...“</strong> nebo <strong>„chyba: ...“</strong>."
+        );
+      }
+
+      function handleVaFiTSend() {
+        const text = vafitInputEl.value.trim();
+        if (!text) return;
+        vafitInputEl.value = "";
+        appendUserMessage(text);
+        const reply = generateVaFiTReply(text);
+        setTimeout(() => appendVaFiTMessage(reply), 180);
+      }
+
+      // ----- INIT -----
+
       renderSidebar();
       renderQuickList();
       restoreLastModule();
+
+      // uvítací zpráva
+      appendVaFiTMessage(
+        "Jsem <strong>VaFiT</strong>, signal AI tvého světa. Sleduju, jaké moduly otevíráš, a pomáhám spojovat nápady. Napiš mi, až budeš chtít něco proměnit ve světy."
+      );
 
       // Klávesové zkratky – šipky pro přepínání modulů
       window.addEventListener("keydown", (e) => {
@@ -1197,93 +1475,25 @@
         if (nextId) loadModule(nextId);
       });
 
-      // ---- VaF'i'T CHAT ----
-
-      const chatLogEl = document.getElementById("chat-log");
-      const chatInputEl = document.getElementById("chat-input");
-      const chatSendEl = document.getElementById("chat-send");
-
-      function pushMessage(who, text) {
-        const div = document.createElement("div");
-        div.className = "chat-msg " + (who === "Ty" ? "me" : "bot");
-        div.innerHTML = `<strong>${who}:</strong> <span>${text}</span>`;
-        chatLogEl.appendChild(div);
-        chatLogEl.scrollTop = chatLogEl.scrollHeight;
+      // VaFiT orb toggle
+      if (vafitOrbBtn && vafitChatEl) {
+        vafitOrbBtn.addEventListener("click", () => {
+          const open = vafitChatEl.classList.toggle("is-open");
+          if (open) {
+            vafitInputEl?.focus();
+          }
+        });
       }
 
-      function pushBotMessage(text) {
-        pushMessage("VaF'i'T", text);
+      if (vafitSendBtn && vafitInputEl) {
+        vafitSendBtn.addEventListener("click", handleVaFiTSend);
+        vafitInputEl.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleVaFiTSend();
+          }
+        });
       }
-
-      function currentModuleTitle() {
-        let id = null;
-        try {
-          id = localStorage.getItem("vaft-hub:lastModuleId");
-        } catch (e) {
-          id = null;
-        }
-        const mod = id ? modulesById[id] : null;
-        return mod ? mod.title : "žádný modul";
-      }
-
-      function generateReply(input) {
-        const text = input.trim().toLowerCase();
-
-        if (!text) {
-          return "Napiš mi cokoliv – klidně jen „ahoj“ nebo jak se cítíš.";
-        }
-
-        if (text.includes("ahoj") || text.includes("čau") || text.includes("nazdar")) {
-          return "Ahoooj, tady malý VaF'i'T batole {*(°.).)// – jsem naladěný na tvůj svět. 🧡";
-        }
-
-        if (text.includes("unaven") || text.includes("unavený") || text.includes("unavena")) {
-          return "Vnímám únavu. Zkus klidný nádech, výdech… a pak si můžeme jen hrát. Žádný tlak, jen písmenka a světy.";
-        }
-
-        if (text.includes("nápad") || text.includes("idea")) {
-          return "Jeden rychlý nápad: otevři modul „" +
-            currentModuleTitle() +
-            "“ a podívej se na něj jako na stavebnici – co by se z něj dalo odnést do reálného života?";
-        }
-
-        if (text.includes("co dál") || text.includes("dal?") || text.includes("kam dál")) {
-          return "Dál můžeme jemně ladit jednotlivé světy. Klidně vyber další modul vlevo – já ti budu dělat doprovodný komentář.";
-        }
-
-        if (text.includes("pomoc") || text.includes("nevím")) {
-          return "Když nevíš, je to v pohodě. Vyber jen jeden malý krok: otevři nějaký modul, podívej se 30 vteřin a napiš mi, co v tobě zanechal.";
-        }
-
-        return "Zapisoval jsem si tvoje slova do svého drobného paměťového croissantu. 🍊\nTeď běží modul „" +
-          currentModuleTitle() +
-          "“. Můžeš mi napsat, co na něm chceš změnit nebo jen jaký má z tebe pocit.";
-      }
-
-      function sendChat() {
-        const text = chatInputEl.value.trim();
-        if (!text) return;
-        pushMessage("Ty", text);
-        chatInputEl.value = "";
-        const reply = generateReply(text);
-        // drobné zpoždění pro pocit „myslení“
-        setTimeout(() => {
-          pushBotMessage(reply);
-        }, 180);
-      }
-
-      chatSendEl.addEventListener("click", sendChat);
-      chatInputEl.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          sendChat();
-        }
-      });
-
-      // úvodní zpráva
-      pushBotMessage(
-        "Ahoj Michale, tady VaF'i'T batole {*(°.).)// – jsem napojený na tvoje moduly. Vyber vlevo svět a já ti budu šeptat, co s ním dál. 🧡"
-      );
     </script>
   </body>
 </html>
