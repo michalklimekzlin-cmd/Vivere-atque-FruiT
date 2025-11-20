@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>VaF'i'T • Croissant Signal</title>
+    <title>VaF'i'T • Croissant Mesh</title>
     <style>
       html,
       body {
@@ -84,19 +84,18 @@
         <canvas id="sphere-canvas"></canvas>
 
         <div class="hud">
-          🌀 1 prst / myš = náklon • ťuk / klik = změna módu • pinch / kolečko = zoom
+          🌀 1 prst / myš = náklon • pinch / kolečko = zoom
         </div>
-        <div class="hud-center" id="status">
-          režim: písmenka / čísla
+        <div class="hud-center">
+          VaF'i'T Croissant · mřížkovaná síť
         </div>
-        <div class="hud-right">v0.2 · VaF'i'T Croissant Signal</div>
+        <div class="hud-right">v0.3 · VaF'i'T Croissant Mesh</div>
       </div>
     </div>
 
     <script>
       const canvas = document.getElementById("sphere-canvas");
       const ctx = canvas.getContext("2d");
-      const statusEl = document.getElementById("status");
 
       const dpr = window.devicePixelRatio || 1;
       let width = 0;
@@ -105,10 +104,6 @@
       let viewScale = 1;
       let rotX = -0.4;
       let rotY = 0.5;
-
-      // 0 = síť, 1 = písmenka/čísla, 2 = kapky, 3 = glyph
-      let currentMode = 1;
-      const modeNames = ["síť", "písmenka / čísla", "VaF'i'T kapky", "glyph"];
 
       function resize() {
         const rect = canvas.getBoundingClientRect();
@@ -131,18 +126,6 @@
 
       function createCroissantPoints() {
         const points = [];
-        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        const digits = "0123456789";
-        const glyphs = [
-          "{*(°.).)//",
-          "¡(°‿°)¡",
-          "(•◡•)",
-          "{(o,o)}",
-          "7¡A|V|A7¡",
-          "{*(•.)(.•)*}//"
-        ];
-
-        let idx = 0;
 
         // hlavní poloměr a tloušťka (v jednotkách 1 ~ velikost koule)
         const majorR = 1.4;
@@ -169,21 +152,11 @@
             const worldY = ringY;
             const worldZ = ringZ;
 
-            const letter = letters[idx % letters.length];
-            const digit = digits[idx % digits.length];
-            const glyph = glyphs[idx % glyphs.length];
-
             points.push({
               x: worldX,
               y: worldY,
-              z: worldZ,
-              letter,
-              digit,
-              glyph,
-              dropPhase: (idx % 20) / 20
+              z: worldZ
             });
-
-            idx++;
           }
         }
 
@@ -294,103 +267,47 @@
         });
         projected.sort((a, b) => a.sz - b.sz);
 
-        // --- Mód 0: drátová síť croissantu ---
-        if (currentMode === 0) {
-          ctx.strokeStyle = "rgba(255,210,150,0.7)";
-          ctx.lineWidth = 0.7;
+        // mřížka croissantu (drátová síť)
+        ctx.strokeStyle = "rgba(255,210,150,0.7)";
+        ctx.lineWidth = 0.7;
 
-          const cols = CROISSANT_RING_STEPS + 1;
-          const rows = CROISSANT_SPAN_STEPS + 1;
+        const cols = CROISSANT_RING_STEPS + 1;
+        const rows = CROISSANT_SPAN_STEPS + 1;
 
-          // "podélné" linky (po délce croissantu)
-          for (let i = 0; i < rows; i++) {
-            ctx.beginPath();
-            let started = false;
-            for (let j = 0; j < cols; j++) {
-              const idx = i * cols + j;
-              const p = projected[idx];
-              if (p.sz < 0) continue;
-              if (!started) {
-                ctx.moveTo(p.sx, p.sy);
-                started = true;
-              } else {
-                ctx.lineTo(p.sx, p.sy);
-              }
-            }
-            if (started) ctx.stroke();
-          }
-
-          // "pásy" kolem průřezu
+        // "podélné" linky (po délce croissantu)
+        for (let i = 0; i < rows; i++) {
+          ctx.beginPath();
+          let started = false;
           for (let j = 0; j < cols; j++) {
-            ctx.beginPath();
-            let started = false;
-            for (let i = 0; i < rows; i++) {
-              const idx = i * cols + j;
-              const p = projected[idx];
-              if (p.sz < 0) continue;
-              if (!started) {
-                ctx.moveTo(p.sx, p.sy);
-                started = true;
-              } else {
-                ctx.lineTo(p.sx, p.sy);
-              }
-            }
-            if (started) ctx.stroke();
-          }
-        } else {
-          // --- Módy 1–3: písmenka, kapky, glyphy ---
-
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.shadowColor = "rgba(255,210,150,0.8)";
-          const now = performance.now() / 1000;
-
-          for (const p of projected) {
-            if (p.sz < 0) continue; // zadní strana schovaná
-
-            // mapujeme hloubku (-?,? z croissantu) na 0..1
-            const depthNorm = Math.max(
-              0,
-              Math.min(1, (p.sz + 2.2) / 4.4)
-            );
-            const depthFade = 0.3 + 0.7 * depthNorm;
-
-            if (currentMode === 1) {
-              // písmenka / čísla
-              const isOuter = p.y > 0.0; // "vršek" = písmenka, spodek = čísla
-              const char = isOuter ? p.letter : p.digit;
-              ctx.font = (isOuter ? 11 : 10) + "px system-ui";
-              ctx.fillStyle = `rgba(255, 220, 180, ${
-                0.45 + 0.55 * depthFade
-              })`;
-              ctx.shadowBlur = 6 * depthFade;
-              ctx.fillText(char, p.sx, p.sy);
-            } else if (currentMode === 2) {
-              // kapky
-              const flicker =
-                0.4 +
-                0.6 *
-                  Math.abs(
-                    Math.sin(now * 2.2 + p.dropPhase * Math.PI * 2)
-                  );
-              const r = 1.9 * viewScale * (0.6 + depthFade);
-              ctx.beginPath();
-              ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
-              ctx.fillStyle = `rgba(255, 220, 170, ${
-                0.32 + 0.5 * depthFade * flicker
-              })`;
-              ctx.shadowBlur = 8 * depthFade;
-              ctx.fill();
-            } else if (currentMode === 3) {
-              // glyph
-              ctx.font = "9px system-ui";
-              ctx.fillStyle = `rgba(255, 230, 190, ${
-                0.4 + 0.6 * depthFade
-              })`;
-              ctx.shadowBlur = 7 * depthFade;
-              ctx.fillText(p.glyph, p.sx, p.sy);
+            const idx = i * cols + j;
+            const p = projected[idx];
+            if (p.sz < 0) continue; // zadní část schovat
+            if (!started) {
+              ctx.moveTo(p.sx, p.sy);
+              started = true;
+            } else {
+              ctx.lineTo(p.sx, p.sy);
             }
           }
+          if (started) ctx.stroke();
+        }
+
+        // "pásy" kolem průřezu
+        for (let j = 0; j < cols; j++) {
+          ctx.beginPath();
+          let started = false;
+          for (let i = 0; i < rows; i++) {
+            const idx = i * cols + j;
+            const p = projected[idx];
+            if (p.sz < 0) continue;
+            if (!started) {
+              ctx.moveTo(p.sx, p.sy);
+              started = true;
+            } else {
+              ctx.lineTo(p.sx, p.sy);
+            }
+          }
+          if (started) ctx.stroke();
         }
 
         ctx.restore();
@@ -452,13 +369,6 @@
       window.addEventListener("touchmove", pointerMove, { passive: false });
       window.addEventListener("touchend", pointerUp, { passive: false });
       window.addEventListener("touchcancel", pointerUp, { passive: false });
-
-      // klik = změna módu
-      canvas.addEventListener("click", () => {
-        currentMode = (currentMode + 1) % 4;
-        statusEl.textContent = "režim: " + modeNames[currentMode];
-        drawCroissant();
-      });
 
       // zoom
       canvas.addEventListener("wheel", (e) => {
