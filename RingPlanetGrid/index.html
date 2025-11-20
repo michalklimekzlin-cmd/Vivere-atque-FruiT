@@ -42,9 +42,9 @@
         left: 12px;
         top: 12px;
         padding: 8px 12px;
-        background: rgba(5, 8, 20, 0.82);
+        background: rgba(5, 8, 20, 0.85);
         border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         max-width: min(80vw, 320px);
@@ -62,18 +62,17 @@
         bottom: 12px;
         padding: 6px 10px;
         font-size: 11px;
-        background: rgba(5, 8, 20, 0.82);
+        background: rgba(5, 8, 20, 0.85);
         border-radius: 999px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        opacity: 0.8;
+        opacity: 0.9;
       }
     </style>
 
-    <!-- THREE.JS + ORBIT CONTROLS -->
+    <!-- JEN THREE.JS, BEZ ORBITCONTROLS -->
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
   </head>
 
   <body>
@@ -82,7 +81,7 @@
     <div class="hud">
       <strong>Ring Planet Grid</strong><br />
       • prsty otáčej scénu<br />
-      • dvěma prsty přibližuj / oddaluj<br />
+      • dvěma prsty / kolečkem přibližuj / oddaluj<br />
       • planeta = koule + prstenec<br />
       • mřížka = prostor pro další světy
     </div>
@@ -95,37 +94,36 @@
       // ZÁKLAD SCÉNY
       const app = document.getElementById("app");
       const scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x020208, 0.04);
 
       const camera = new THREE.PerspectiveCamera(
         60,
         window.innerWidth / window.innerHeight,
         0.1,
-        200
+        300
       );
-      camera.position.set(10, 10, 16);
 
       const renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setPixelRatio(window.devicePixelRatio || 1);
       renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setClearColor(0x020208, 1);
       renderer.outputEncoding = THREE.sRGBEncoding;
       app.appendChild(renderer.domElement);
 
       // SVĚTLO
-      const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+      const ambient = new THREE.AmbientLight(0xffffff, 0.7);
       scene.add(ambient);
 
       const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
-      dirLight.position.set(10, 18, 8);
+      dirLight.position.set(12, 20, 10);
       scene.add(dirLight);
 
-      // MŘÍŽKA – PODLAHA
+      // MŘÍŽKA
       const grid = new THREE.GridHelper(40, 40, 0x7f7fff, 0x222244);
       grid.position.y = -3;
       scene.add(grid);
 
-      // MALÉ BODY NA MŘÍŽCE – NODy
-      const nodeGeom = new THREE.SphereGeometry(0.08, 10, 10);
+      // NODY NA MŘÍŽCE
+      const nodeGeom = new THREE.SphereGeometry(0.12, 12, 12);
       const nodeMat = new THREE.MeshBasicMaterial({ color: 0x7f9dff });
       const nodes = new THREE.Group();
       for (let x = -4; x <= 4; x += 2) {
@@ -137,67 +135,151 @@
       }
       scene.add(nodes);
 
-      // PLANETA (KOULE)
+      // PLANETA
       const planetGeom = new THREE.SphereGeometry(3, 64, 64);
       const planetMat = new THREE.MeshStandardMaterial({
         color: 0x4f8cff,
-        metalness: 0.3,
+        metalness: 0.25,
         roughness: 0.35,
         emissive: 0x111133,
-        emissiveIntensity: 0.6,
+        emissiveIntensity: 0.7,
       });
       const planet = new THREE.Mesh(planetGeom, planetMat);
       planet.position.set(0, 1, 0);
       scene.add(planet);
 
-      // TEXTURA "PÁSŮ" NA PLANETĚ – jemný noise
-      const ringBandGeom = new THREE.TorusGeometry(3.01, 0.12, 2, 80);
-      const ringBandMat = new THREE.MeshBasicMaterial({
+      // SVĚTLEJ PÁS NA PLANETĚ
+      const bandGeom = new THREE.TorusGeometry(3.05, 0.15, 2, 80);
+      const bandMat = new THREE.MeshBasicMaterial({
         color: 0xaad4ff,
         transparent: true,
-        opacity: 0.35,
+        opacity: 0.5,
       });
-      const ringBand = new THREE.Mesh(ringBandGeom, ringBandMat);
-      ringBand.rotation.x = Math.PI / 2.3;
-      planet.add(ringBand);
+      const band = new THREE.Mesh(bandGeom, bandMat);
+      band.rotation.x = Math.PI / 2.3;
+      planet.add(band);
 
-      // PRSTENEC KOLEM PLANETY
-      const ringGeom = new THREE.TorusGeometry(5.2, 0.4, 18, 120);
-      const ringMat = new THREE.MeshStandardMaterial({
+      // PRSTENEC
+      const ringGeom = new THREE.TorusGeometry(5.2, 0.45, 24, 140);
+      const ringMat = new THREE.MeshBasicMaterial({
         color: 0xf5f0ff,
-        metalness: 0.9,
-        roughness: 0.15,
-        emissive: 0x5555ff,
-        emissiveIntensity: 0.4,
+        transparent: true,
+        opacity: 0.9,
         side: THREE.DoubleSide,
       });
       const ring = new THREE.Mesh(ringGeom, ringMat);
       ring.rotation.x = Math.PI / 2.3;
       scene.add(ring);
 
-      // drobný "orbit" bod na prstenci
-      const orbGeom = new THREE.SphereGeometry(0.35, 16, 16);
-      const orbMat = new THREE.MeshStandardMaterial({
-        color: 0xffdd88,
-        emissive: 0xffcc66,
-        emissiveIntensity: 0.9,
-      });
+      // MALÝ ORB NA PRSTENCI
+      const orbGeom = new THREE.SphereGeometry(0.4, 16, 16);
+      const orbMat = new THREE.MeshBasicMaterial({ color: 0xffdd88 });
       const orb = new THREE.Mesh(orbGeom, orbMat);
       orb.position.set(5.2, 0, 0);
       ring.add(orb);
 
-      // ORBIT CONTROLS – plná manipulace
-      const controls = new THREE.OrbitControls(
-        camera,
-        renderer.domElement
+      // --- VLASTNÍ OVLÁDÁNÍ KAMERY (DRAG + ZOOM) ---
+
+      const spherical = {
+        radius: 18,
+        phi: Math.PI / 3, // výška
+        theta: Math.PI / 4, // natočení okolo
+      };
+
+      function updateCamera() {
+        const r = spherical.radius;
+        const sinPhi = Math.sin(spherical.phi);
+        camera.position.x = r * sinPhi * Math.cos(spherical.theta);
+        camera.position.y = r * Math.cos(spherical.phi);
+        camera.position.z = r * sinPhi * Math.sin(spherical.theta);
+        camera.lookAt(0, 0, 0);
+      }
+      updateCamera();
+
+      let isDragging = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      function onPointerDown(e) {
+        isDragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+
+        spherical.theta -= dx * 0.005;
+        spherical.phi -= dy * 0.005;
+        const eps = 0.15;
+        spherical.phi = Math.max(eps, Math.min(Math.PI - eps, spherical.phi));
+
+        updateCamera();
+      }
+
+      function onPointerUp() {
+        isDragging = false;
+      }
+
+      renderer.domElement.addEventListener("pointerdown", onPointerDown);
+      window.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", onPointerUp);
+      window.addEventListener("pointerleave", onPointerUp);
+
+      // ZOOM – kolečko myši
+      window.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
+          const factor = e.deltaY > 0 ? 1.1 : 0.9;
+          spherical.radius *= factor;
+          spherical.radius = Math.max(6, Math.min(60, spherical.radius));
+          updateCamera();
+        },
+        { passive: false }
       );
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.06;
-      controls.minDistance = 6;
-      controls.maxDistance = 40;
-      controls.enablePan = true;
-      controls.target.set(0, 0, 0);
-      controls.update();
+
+      // PINCH ZOOM – mobil
+      let pinchStartDist = null;
+      function distance(t1, t2) {
+        const dx = t1.clientX - t2.clientX;
+        const dy = t1.clientY - t2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
+      renderer.domElement.addEventListener(
+        "touchstart",
+        (e) => {
+          if (e.touches.length === 2) {
+            pinchStartDist = distance(e.touches[0], e.touches[1]);
+          }
+        },
+        { passive: false }
+      );
+
+      renderer.domElement.addEventListener(
+        "touchmove",
+        (e) => {
+          if (e.touches.length === 2 && pinchStartDist) {
+            e.preventDefault();
+            const d = distance(e.touches[0], e.touches[1]);
+            const scale = pinchStartDist / d;
+            spherical.radius *= scale;
+            spherical.radius = Math.max(6, Math.min(60, spherical.radius));
+            pinchStartDist = d;
+            updateCamera();
+          }
+        },
+        { passive: false }
+      );
+
+      renderer.domElement.addEventListener("touchend", () => {
+        pinchStartDist = null;
+      });
 
       // RESIZE
       window.addEventListener("resize", () => {
@@ -212,14 +294,12 @@
       let t = 0;
       function animate() {
         requestAnimationFrame(animate);
-        t += 0.005;
+        t += 0.01;
 
         planet.rotation.y += 0.0035;
-        ring.rotation.z = Math.sin(t * 0.6) * 0.12;
-        orb.rotation.y += 0.03;
-        nodes.rotation.y += 0.0008;
+        ring.rotation.z = Math.sin(t * 0.4) * 0.12;
+        nodes.rotation.y += 0.001;
 
-        controls.update();
         renderer.render(scene, camera);
       }
 
