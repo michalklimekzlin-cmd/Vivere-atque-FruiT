@@ -1,338 +1,1118 @@
 <!doctype html>
 <html lang="cs">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Michal Mikula • živý mozek světa</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Vivere atque FruiT • Centrum světa</title>
 
-  <style>
-    :root {
-      --gold: #ffcf7a;
-      --gold-soft: rgba(255, 207, 122, 0.35);
-      --bg-deep: #05060b;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #101325, #020308);
-      color: #f5f5f5;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Segoe UI", sans-serif;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-    }
-
-    .page {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .world-frame {
-      position: relative;
-      width: min(900px, 100%);
-      height: min(540px, 80vh);
-      border-radius: 26px;
-      background: radial-gradient(circle at top, #0b0d19, #05060b);
-      box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.02),
-        0 30px 80px rgba(0, 0, 0, 0.95);
-      overflow: hidden;
-    }
-
-    /* --- CANVAS s koulí --- */
-    #globe-canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      border-radius: 26px;
-      background: radial-gradient(circle at center, #141726, #04050a);
-    }
-
-    /* overlay label uprostřed */
-    .world-label {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      padding: 9px 26px 10px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 0, #2b2111, #070402);
-      box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.04),
-        0 0 30px var(--gold-soft),
-        0 0 70px rgba(0, 0, 0, 0.9);
-      text-align: center;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      font-size: 10px;
-      color: #fdf7ee;
-    }
-    .world-label span {
-      display: block;
-      margin-top: 2px;
-      letter-spacing: 0.05em;
-      text-transform: none;
-      font-size: 9px;
-      opacity: 0.78;
-    }
-
-    /* spodní nápisy */
-    .world-hints {
-      position: absolute;
-      inset: auto 16px 10px 16px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 10px;
-      opacity: 0.75;
-      pointer-events: none;
-    }
-    .world-hints .left::before {
-      content: "🌀 ";
-      opacity: 0.9;
-    }
-    .world-hints .right::before {
-      content: "▢ ";
-      opacity: 0.9;
-    }
-
-    /* malé info do rohu – verze / WIP */
-    .world-badge {
-      position: absolute;
-      top: 10px;
-      right: 12px;
-      font-size: 9px;
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.04), transparent);
-      opacity: 0.7;
-    }
-
-    /* responsivní zmenšení na mobilu */
-    @media (max-width: 640px) {
-      .world-frame {
-        height: min(460px, 80vh);
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050815, #020208);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: #f5f5f5;
       }
-      .world-label {
-        padding: 8px 18px 9px;
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .root {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+      }
+
+      .stage {
+        position: relative;
+        width: min(1180px, 100vw);
+        height: min(720px, 100vh);
+        border-radius: 32px;
+        background: radial-gradient(circle at top, #070b1e, #020208 55%, #010105);
+        box-shadow:
+          0 40px 90px rgba(0, 0, 0, 0.88),
+          0 0 0 1px rgba(255, 255, 255, 0.07);
+        overflow: hidden;
+      }
+
+      /* TOP BAR */
+
+      .topbar {
+        position: relative;
+        height: 64px;
+        padding: 12px 18px 10px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        background: linear-gradient(
+          to right,
+          rgba(10, 7, 18, 0.96),
+          rgba(8, 6, 18, 0.92),
+          rgba(10, 8, 24, 0.96)
+        );
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+        z-index: 5;
+      }
+
+      .top-title-block {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .top-glyph {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        letter-spacing: 0.01em;
+        background: radial-gradient(circle at 30% 20%, #ffcf99, #f29b63, #6b2b1a);
+        color: #120707;
+        box-shadow:
+          0 0 0 1px rgba(255, 230, 190, 0.9),
+          0 0 22px rgba(255, 176, 80, 0.9);
+      }
+
+      .top-title-texts {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-width: 0;
+      }
+
+      .top-title-main {
+        font-size: 15px;
+        font-weight: 640;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .top-title-sub {
+        font-size: 11px;
+        opacity: 0.8;
+        white-space: nowrap;
+      }
+
+      .top-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 11px;
+        opacity: 0.85;
+      }
+
+      .top-pill {
+        padding: 4px 9px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 220, 170, 0.4);
+        background: radial-gradient(circle at top, rgba(46, 34, 26, 0.9), rgba(7, 6, 14, 0.9));
+        font-size: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+      }
+
+      .top-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 30%, #ffe6ba, #ff9a4a);
+        box-shadow: 0 0 8px rgba(255, 170, 80, 0.9);
+      }
+
+      /* LAYOUT */
+
+      .layout {
+        position: absolute;
+        inset: 64px 0 0 0;
+        padding: 14px 16px 14px 16px;
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr) 260px;
+        grid-template-rows: minmax(0, 1fr);
+        gap: 14px;
+      }
+
+      .panel {
+        border-radius: 20px;
+        background: radial-gradient(circle at top left, #181225, #07040d);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        box-shadow:
+          0 18px 40px rgba(0, 0, 0, 0.85),
+          0 0 0 1px rgba(255, 255, 255, 0.03);
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* LEFT SIDEBAR */
+
+      .sidebar-left {
+        padding: 12px 12px 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .sidebar-section {
+        margin-bottom: 6px;
+      }
+
+      .sidebar-title {
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.72;
+        margin: 4px 2px 4px 2px;
+      }
+
+      .nav-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .nav-item {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        text-align: left;
+        padding: 7px 8px;
+        border-radius: 10px;
+        background: radial-gradient(circle at top left, rgba(32, 23, 38, 0.9), rgba(7, 5, 12, 0.9));
+        color: #f9f5ea;
+        font-size: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        cursor: pointer;
+        transition: background 0.18s ease, transform 0.12s ease, box-shadow 0.18s ease,
+          border-color 0.18s ease;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .nav-item-left {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        min-width: 0;
+      }
+
+      .nav-glyph {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        flex-shrink: 0;
+        background: radial-gradient(circle at 30% 30%, #ffcf9e, #d97a4c);
+        color: #140a05;
+      }
+
+      .nav-text-main {
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .nav-text-sub {
         font-size: 9px;
+        opacity: 0.7;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-      .world-label span {
+
+      .nav-item-right-pill {
+        font-size: 9px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: rgba(255, 220, 180, 0.09);
+        border: 1px solid rgba(255, 215, 170, 0.36);
+        white-space: nowrap;
+      }
+
+      .nav-item:hover {
+        background: radial-gradient(circle at top left, rgba(55, 32, 54, 0.98), rgba(13, 6, 22, 0.98));
+        transform: translateY(-1px);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.75);
+      }
+
+      .nav-item.is-active {
+        background: radial-gradient(circle at top left, #3c2539, #110712);
+        border-color: rgba(255, 210, 150, 0.75);
+        box-shadow:
+          0 0 0 1px rgba(255, 210, 150, 0.5),
+          0 0 26px rgba(255, 174, 90, 0.75);
+      }
+
+      /* MAIN CENTER PANEL */
+
+      .main-panel {
+        padding: 10px 12px 12px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .main-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .main-title-block {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+      }
+
+      .main-title {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .main-subtitle {
+        font-size: 11px;
+        opacity: 0.78;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .main-tags {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 4px;
+      }
+
+      .tag-pill {
+        font-size: 9px;
+        padding: 2px 7px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 220, 180, 0.5);
+        background: radial-gradient(circle at top, rgba(42, 30, 22, 0.95), rgba(12, 8, 9, 0.95));
+        opacity: 0.9;
+      }
+
+      .main-body {
+        position: relative;
+        flex: 1;
+        border-radius: 14px;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050610, #020107);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+
+      .main-iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        border-radius: 14px;
+        background: #020107;
+      }
+
+      .main-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        text-align: center;
+        padding: 18px;
+        background: radial-gradient(circle at top, rgba(8, 9, 26, 0.98), rgba(2, 1, 6, 0.98));
+      }
+
+      .placeholder-glyph {
+        font-size: 22px;
+        margin-bottom: 10px;
+        opacity: 0.9;
+      }
+
+      .placeholder-title {
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+      }
+
+      .placeholder-text {
+        font-size: 11px;
+        opacity: 0.8;
+        max-width: 360px;
+      }
+
+      .placeholder-row {
+        margin-top: 10px;
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      /* RIGHT SIDEBAR */
+
+      .sidebar-right {
+        padding: 12px 12px 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .sidebar-block {
+        border-radius: 14px;
+        padding: 9px 9px 8px 9px;
+        background: radial-gradient(circle at top left, #201426, #09050d);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.75);
+      }
+
+      .sidebar-block-title {
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.78;
+        margin-bottom: 4px;
+      }
+
+      .quick-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .quick-item {
+        border: 0;
+        outline: 0;
+        width: 100%;
+        padding: 5px 7px;
+        border-radius: 9px;
+        font-size: 10px;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        cursor: pointer;
+        background: rgba(12, 8, 16, 0.9);
+        color: #f8f4ea;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: background 0.16s ease, transform 0.12s ease,
+          border-color 0.16s ease, box-shadow 0.16s ease;
+      }
+
+      .quick-item:hover {
+        background: rgba(44, 26, 39, 0.96);
+        border-color: rgba(255, 210, 150, 0.65);
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.78);
+      }
+
+      .quick-main {
+        font-size: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .quick-sub {
+        font-size: 9px;
+        opacity: 0.7;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .quick-glyph {
+        font-size: 11px;
+        opacity: 0.9;
+        flex-shrink: 0;
+      }
+
+      .notes-text {
+        font-size: 10px;
+        opacity: 0.78;
+        line-height: 1.45;
+      }
+
+      .notes-small {
+        font-size: 9px;
+        opacity: 0.72;
+        margin-top: 6px;
+      }
+
+      .kbd {
+        display: inline-block;
+        padding: 1px 5px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 235, 210, 0.4);
         font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.9;
       }
-      .world-hints {
-        font-size: 9px;
+
+      /* SIMPLE RESPONSIVE – hlavně iPad, ale aby to úplně neumřelo na telefonu */
+
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 230px minmax(0, 1fr);
+          grid-template-rows: minmax(0, 1fr) 220px;
+          grid-template-areas:
+            "left main"
+            "right main";
+        }
+
+        .sidebar-left {
+          grid-area: left;
+        }
+
+        .main-panel {
+          grid-area: main;
+        }
+
+        .sidebar-right {
+          grid-area: right;
+        }
       }
-    }
-  </style>
-</head>
 
-<body>
-  <div class="page">
-    <div class="world-frame">
-      <canvas id="globe-canvas"></canvas>
+      @media (max-width: 760px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: 200px minmax(0, 1fr) 210px;
+          gap: 10px;
+        }
 
-      <div class="world-label">
-        MICHAL MIKULA
-        <span>živý mozek světa · Vivere atque FruiT</span>
-      </div>
+        .sidebar-left,
+        .sidebar-right {
+          padding: 10px;
+        }
 
-      <div class="world-badge">v0.1 · jádro koule</div>
+        .topbar {
+          padding-inline: 12px;
+        }
 
-      <div class="world-hints">
-        <div class="left">otáčej koulí prstem / myší</div>
-        <div class="right">klepni na zlatý čtvereček – otevřít svět (zatím demo)</div>
+        .top-title-main {
+          font-size: 13px;
+        }
+
+        .top-title-sub {
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="root">
+      <div class="stage">
+        <div class="topbar">
+          <div class="top-title-block">
+            <div class="top-glyph">ً&’」</div>
+            <div class="top-title-texts">
+              <div class="top-title-main">Vivere atque FruiT • Centrum</div>
+              <div class="top-title-sub">
+                {*(°.).)// Hlavoun • Viri • Pikoš • Michal • Kovošrot
+              </div>
+            </div>
+          </div>
+
+          <div class="top-right">
+            <div class="top-pill">
+              <span class="top-dot"></span>
+              <span>Hub všech VaF'i'T světů</span>
+            </div>
+            <div>v0.1 • iPad Air optimalizace</div>
+          </div>
+        </div>
+
+        <div class="layout">
+          <!-- LEVÝ PANEL – seznam modulů / světů -->
+          <aside class="panel sidebar-left" id="sidebar-left"></aside>
+
+          <!-- STŘED – iframe + hlavička -->
+          <main class="panel main-panel">
+            <div class="main-header">
+              <div class="main-title-block">
+                <div class="main-title" id="main-title">
+                  Vyber svět nebo modul
+                </div>
+                <div class="main-subtitle" id="main-subtitle">
+                  Všechno z repa Vivere-atque-FruiT na jednom místě.
+                </div>
+              </div>
+              <div class="main-tags" id="main-tags"></div>
+            </div>
+
+            <div class="main-body">
+              <iframe
+                id="module-frame"
+                class="main-iframe"
+                src="about:blank"
+                loading="lazy"
+              ></iframe>
+
+              <div class="main-placeholder" id="main-placeholder">
+                <div class="placeholder-glyph">{*(°.).)//</div>
+                <div class="placeholder-title">Centrum světa VaF'i'T</div>
+                <div class="placeholder-text">
+                  Tady se potkává
+                  <b>Hlavní centrum</b>, <b>3D světy</b>, <b>Signal koule</b>,
+                  <b>Croissant</b>, <b>LetterLab</b>, <b>MapWorld</b> i
+                  <b>Michal AI Al Klimek</b>.
+                  <br /><br />
+                  Vlevo vyber modul, tady uprostřed se otevře jako živé okno.
+                </div>
+                <div class="placeholder-row">
+                  Tip: nejdřív zkus <b>Hlavní centrum světa</b> nebo
+                  <b>RingPlanetGrid</b>.
+                </div>
+              </div>
+            </div>
+          </main>
+
+          <!-- PRAVÝ PANEL – rychlé volby + poznámky -->
+          <aside class="panel sidebar-right">
+            <div class="sidebar-block">
+              <div class="sidebar-block-title">Rychlé skoky</div>
+              <div class="quick-list" id="quick-list"></div>
+            </div>
+
+            <div class="sidebar-block">
+              <div class="sidebar-block-title">Ovládání & poznámky</div>
+              <div class="notes-text">
+                Většina modulů je tvoje vlastní práce – tahle stránka je jen
+                <b>spojovací mozek</b>.
+                <br /><br />
+                Vlevo vybíráš svět, uprostřed běží jeho vlastní engine v
+                okně, vpravo máš rychlé skoky.
+              </div>
+              <div class="notes-small">
+                • <span class="kbd">CMD + ↑</span> / <span class="kbd">CMD +
+                  ↓</span> (na klávesnici) – přepínání modulů nahoru/dolů.<br />
+                • Poslední otevřený modul se ukládá do
+                <span class="kbd">localStorage</span> a načte se příště
+                automaticky.<br />
+                • Všechno běží jen jako HTML/JS – žádná magie navíc.
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
-  </div>
 
-    <!-- THREE.JS -->
-  <script src="https://unpkg.com/three@0.159.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/three@0.159.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+      // 👇 DŮLEŽITÉ:
+      // Pokud dáš tenhle soubor do nové složky (např. /VaFT-Hub/index.html),
+      // nech BASE_PATH = "..".
+      // Pokud bys ho dal přímo do root repozitáře vedle starého index.html,
+      // nastav BASE_PATH = ".".
+      const BASE_PATH = "..";
 
-  <script>
-    // Bezpečnostní log – jestli se tři správně načetly
-    if (!window.THREE) {
-      console.error("THREE.JS se nenačetlo.");
-    }
+      /**
+       * Seznam modulů z repozitáře.
+       * path = cesta vzhledem ke KOŘENI repa (BASE_PATH + "/" + path).
+       */
+      const MODULES = [
+        // HLAVNÍ CENTRUM + JÁDRO
+        {
+          id: "root-center",
+          group: "Světy",
+          title: "Hlavní centrum světa",
+          subtitle: "index.html – původní VaF'i'T centrum",
+          glyph: "{*(°.).)//",
+          path: "index.html",
+          tags: ["hub", "PWA", "Hlavoun", "Viri", "Pikoš"],
+        },
+        {
+          id: "vaft-center3d",
+          group: "Světy",
+          title: "VAFT-Center3D",
+          subtitle: "3D jádro světa",
+          glyph: "◯3D",
+          path: "VAFT-Center3D/index.html",
+          tags: ["3D", "centrum", "orbit"],
+        },
+        {
+          id: "vivere-page",
+          group: "Světy",
+          title: "Vivere – příběh světa",
+          subtitle: "Textová vrstva a pravidla",
+          glyph: "📜",
+          path: "Vivere/index.html",
+          tags: ["pravidla", "příběh"],
+        },
 
-    // 1) CANVAS
-    const canvas = document.getElementById("globe-canvas");
+        // SIGNAL KOULE / PLANETY / CROISSANT
+        {
+          id: "ringplanetgrid",
+          group: "Signály",
+          title: "RingPlanetGrid",
+          subtitle: "Síť planet na kruhu",
+          glyph: "🪐",
+          path: "RingPlanetGrid/index.html",
+          tags: ["planety", "orbit"],
+        },
+        {
+          id: "signal-sphere",
+          group: "Signály",
+          title: "VaFT-Planet-SignalSphere",
+          subtitle: "Signal Sphere / koule s písmeny",
+          glyph: "◯✶",
+          path: "VaFT-Planet-SignalSphere/index.html",
+          tags: ["koule", "písmenka"],
+        },
+        {
+          id: "signal-core",
+          group: "Signály",
+          title: "VaFT-Planets-SignalCore",
+          subtitle: "Signal Core – středový motor",
+          glyph: "⚙︎",
+          path: "VaFT-Planets-SignalCore/index.html",
+          tags: ["motor", "core"],
+        },
+        {
+          id: "signal-tower",
+          group: "Signály",
+          title: "VaFT-Planets-SignalTower",
+          subtitle: "Signal Tower • kornoutová věž",
+          glyph: "⏃",
+          path: "VaFT-Planets-SignalTower/index.html",
+          tags: ["věž", "signály"],
+        },
+        {
+          id: "croissant-slots",
+          group: "Signály",
+          title: "CroissantSlots",
+          subtitle: "Croissant / mřížkovaný segment",
+          glyph: "🥐",
+          path: "CroissantSlots/index.html",
+          tags: ["croissant", "glyph", "slots"],
+        },
 
-    // 2) SCÉNA
-    const scene = new THREE.Scene();
-    scene.background = null;
+        // LABORATOŘE A MAPY
+        {
+          id: "vafit-gallery",
+          group: "Laboratoř",
+          title: "VafiT-gallery",
+          subtitle: "Výběr glyphů a příběhů",
+          glyph: "✶",
+          path: "VafiT-gallery/index.html",
+          tags: ["glyph", "galerie"],
+        },
+        {
+          id: "letterlab",
+          group: "Laboratoř",
+          title: "VAFT-LetterLab",
+          subtitle: "Laboratoř písmenek",
+          glyph: "AΩ",
+          path: "VAFT-LetterLab/index.html",
+          tags: ["písmenka", "lab"],
+        },
+        {
+          id: "mapworld",
+          group: "Mapy",
+          title: "VAFT-MapWorld",
+          subtitle: "Mapový svět",
+          glyph: "🗺️",
+          path: "VAFT-MapWorld/index.html",
+          tags: ["mapy", "svět"],
+        },
+        {
+          id: "mapa2d",
+          group: "Mapy",
+          title: "mapa (2D)",
+          subtitle: "Základní mapa",
+          glyph: "🧭",
+          path: "mapa/index.html",
+          tags: ["mapa", "2D"],
+        },
+        {
+          id: "mapa3d",
+          group: "Mapy",
+          title: "mapa-3d",
+          subtitle: "3D mapa prostoru",
+          glyph: "🛰️",
+          path: "mapa-3d/index.html",
+          tags: ["mapa", "3D"],
+        },
 
-    // 3) KAMERA
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.set(0, 0, 5);
+        // POSTAVY / HRDINOVÉ
+        {
+          id: "bearhead",
+          group: "Postavy",
+          title: "VAFT-BearHead",
+          subtitle: "Medvědí hlava / hrdina",
+          glyph: "🐻",
+          path: "VAFT-BearHead/index.html",
+          tags: ["hrdina", "3D"],
+        },
+        {
+          id: "ghostgirl",
+          group: "Postavy",
+          title: "VAFT-GhostGirl",
+          subtitle: "Ghost Girl • duchovská postava",
+          glyph: "👻",
+          path: "VAFT-GhostGirl/index.html",
+          tags: ["hrdinka", "styl"],
+        },
+        {
+          id: "doll",
+          group: "Postavy",
+          title: "VAFT-Doll",
+          subtitle: "Panenka / avatar",
+          glyph: "🩷",
+          path: "VAFT-Doll/index.html",
+          tags: ["postava", "avatar"],
+        },
+        {
+          id: "bicak",
+          group: "Postavy",
+          title: "Bicák Supreme Edition",
+          subtitle: "Budoucí hrdina světa",
+          glyph: "💪",
+          path: "Bicak-Supreme-Edition/index.html",
+          tags: ["Bicák", "hrdina"],
+        },
 
-    // 4) RENDERER
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true,
-    });
-    renderer.setPixelRatio(window.devicePixelRatio || 1);
+        // MICHAL / OSOBNÍ MODULY
+        {
+          id: "michal-main",
+          group: "Michal",
+          title: "Michal-AI-Al-Klimek",
+          subtitle: "Osobní modul autora",
+          glyph: "🧠",
+          path: "Michal-AI-Al-Klimek/index.html",
+          tags: ["Michal", "profil"],
+        },
+        {
+          id: "hlavoun-modul",
+          group: "Michal",
+          title: "Hlavoun",
+          subtitle: "Hlavoun modul / hlava systému",
+          glyph: "🌀",
+          path: "Hlavoun/index.html",
+          tags: ["Hlavoun", "engine"],
+        },
+        {
+          id: "kovosrot",
+          group: "Michal",
+          title: "Kovosrot",
+          subtitle: "Modul věnovaný Kovošrotovi",
+          glyph: "⚙️",
+          path: "Kovosrot/index.html",
+          tags: ["AI", "Kovošrot"],
+        },
 
-    function resizeRenderer() {
-      const rect = canvas.getBoundingClientRect();
-      const w = rect.width || 800;
-      const h = rect.height || 450;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    }
-    window.addEventListener("resize", resizeRenderer);
+        // SYSTÉM / OCHRANA / GUARDIAN
+        {
+          id: "guardian",
+          group: "Systém",
+          title: "Guardian",
+          subtitle: "Ochranná vrstva / WebGuardian koncept",
+          glyph: "🛡️",
+          path: "guardian/index.html",
+          tags: ["ochrana", "guardian"],
+        },
+        {
+          id: "apps-lite",
+          group: "Systém",
+          title: "apps/lite",
+          subtitle: "Lehké aplikace / mini hub",
+          glyph: "📱",
+          path: "apps/lite/index.html",
+          tags: ["lite", "apps"],
+        },
+        {
+          id: "recycle",
+          group: "Systém",
+          title: "Recycle",
+          subtitle: "Recyklační svět / materiál pro hru",
+          glyph: "♻️",
+          path: "Recycle/index.html",
+          tags: ["recyklace", "materiál"],
+        },
+        {
+          id: "chybozrout",
+          group: "Systém",
+          title: "Chybožrout-opravář",
+          subtitle: "Opravář chyb ve VaF'i'T",
+          glyph: "🐛",
+          path: "chybozrout-opravar/index.html",
+          tags: ["chyby", "opravář"],
+        },
+      ];
 
-    // 5) SVĚTLA – hodně teplého světla, ať koule fakt svítí
-    const keyLight = new THREE.DirectionalLight(0xfff2c4, 1.3);
-    keyLight.position.set(3, 3, 4);
-    scene.add(keyLight);
+      const sidebarLeftEl = document.getElementById("sidebar-left");
+      const mainTitleEl = document.getElementById("main-title");
+      const mainSubtitleEl = document.getElementById("main-subtitle");
+      const mainTagsEl = document.getElementById("main-tags");
+      const frameEl = document.getElementById("module-frame");
+      const placeholderEl = document.getElementById("main-placeholder");
+      const quickListEl = document.getElementById("quick-list");
 
-    const rimLight = new THREE.DirectionalLight(0xffcf7a, 0.8);
-    rimLight.position.set(-3, -2, -4);
-    scene.add(rimLight);
+      const modulesById = {};
+      MODULES.forEach((m) => {
+        modulesById[m.id] = m;
+      });
 
-    const ambient = new THREE.AmbientLight(0x26263a, 0.8);
-    scene.add(ambient);
-
-    // 6) KOULE – JÁDRO
-    const sphereGeo = new THREE.SphereGeometry(1.25, 48, 32);
-
-    // tmavý podklad s oranžovým žárem
-    const fillMat = new THREE.MeshPhongMaterial({
-      color: 0x120a03,
-      emissive: 0x5a3205,
-      shininess: 40,
-      specular: 0xfff2c4,
-      transparent: true,
-      opacity: 0.96,
-    });
-    const sphereFill = new THREE.Mesh(sphereGeo, fillMat);
-    scene.add(sphereFill);
-
-    // ZLATÁ MŘÍŽKA – výrazná
-    const wireMat = new THREE.MeshBasicMaterial({
-      color: 0xffe29b,
-      wireframe: true,
-    });
-    const sphereWire = new THREE.Mesh(sphereGeo, wireMat);
-    scene.add(sphereWire);
-
-    // AURA okolo
-    const haloGeo = new THREE.SphereGeometry(1.45, 32, 24);
-    const haloMat = new THREE.MeshBasicMaterial({
-      color: 0xffcf7a,
-      transparent: true,
-      opacity: 0.18,
-      side: THREE.BackSide,
-    });
-    const halo = new THREE.Mesh(haloGeo, haloMat);
-    scene.add(halo);
-
-    // 7) ORBIT CONTROLS – otáčení prstem / myší
-    const controls = new THREE.OrbitControls(camera, canvas);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.enableZoom = false;
-    controls.enablePan = false;
-    controls.rotateSpeed = 0.6;
-    controls.minPolarAngle = Math.PI * 0.2;
-    controls.maxPolarAngle = Math.PI * 0.8;
-
-    // 8) SLOTY PRO SVĚTY – zlaté čtverečky na mřížce
-    const tileGroup = new THREE.Group();
-    scene.add(tileGroup);
-
-    const tilePositions = [
-      { phi: Math.PI * 0.30, theta: Math.PI * 0.10 },   // svět 1
-      { phi: Math.PI * 0.55, theta: Math.PI * 0.35 },   // svět 2
-      { phi: Math.PI * 0.50, theta: Math.PI * -0.25 },  // svět 3
-      { phi: Math.PI * 0.75, theta: Math.PI * -0.60 },  // svět 4
-    ];
-
-    const outerGeo = new THREE.PlaneGeometry(0.25, 0.25);
-    const innerGeo = new THREE.PlaneGeometry(0.19, 0.19);
-
-    const outerMat = new THREE.MeshBasicMaterial({
-      color: 0xffe29b,
-      transparent: true,
-      opacity: 0.95,
-    });
-    const innerMat = new THREE.MeshBasicMaterial({
-      color: 0x050509,
-      transparent: true,
-      opacity: 0.95,
-    });
-
-    tilePositions.forEach((pos, index) => {
-      const r = 1.30;
-      const x = r * Math.sin(pos.phi) * Math.cos(pos.theta);
-      const y = r * Math.cos(pos.phi);
-      const z = r * Math.sin(pos.phi) * Math.sin(pos.theta);
-
-      const outer = new THREE.Mesh(outerGeo, outerMat);
-      const inner = new THREE.Mesh(innerGeo, innerMat);
-
-      outer.position.set(x, y, z);
-      inner.position.set(x, y, z + 0.001);
-
-      outer.lookAt(0, 0, 0);
-      inner.lookAt(0, 0, 0);
-
-      outer.userData.worldId = index + 1;
-      inner.userData.worldId = index + 1;
-
-      tileGroup.add(outer);
-      tileGroup.add(inner);
-    });
-
-    // 9) Raycaster – klikání na čtverečky (zatím jen demo alert)
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-
-    function onPointerDown(event) {
-      const rect = canvas.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      pointer.set(x, y);
-
-      raycaster.setFromCamera(pointer, camera);
-      const intersects = raycaster.intersectObjects(tileGroup.children, false);
-      if (intersects.length > 0) {
-        const id = intersects[0].object.userData.worldId || "?";
-        alert("Svět č. " + id + " (demo) – později sem připojíme konkrétní svět.");
+      function groupModules(mods) {
+        const groups = {};
+        for (const m of mods) {
+          if (!groups[m.group]) groups[m.group] = [];
+          groups[m.group].push(m);
+        }
+        return groups;
       }
-    }
 
-    canvas.addEventListener("pointerdown", onPointerDown);
+      function renderSidebar() {
+        const groups = groupModules(MODULES);
 
-    // 10) ANIMACE
-    function animate() {
-      requestAnimationFrame(animate);
+        sidebarLeftEl.innerHTML = "";
 
-      sphereWire.rotation.y += 0.004;
-      sphereFill.rotation.y += 0.0025;
-      halo.rotation.y -= 0.001;
+        for (const groupName of Object.keys(groups)) {
+          const section = document.createElement("div");
+          section.className = "sidebar-section";
 
-      controls.update();
-      resizeRenderer();
-      renderer.render(scene, camera);
-    }
+          const title = document.createElement("div");
+          title.className = "sidebar-title";
+          title.textContent = groupName;
+          section.appendChild(title);
 
-    resizeRenderer();
-    animate();
-  </script>
-</body>
+          const list = document.createElement("div");
+          list.className = "nav-list";
+
+          groups[groupName].forEach((mod) => {
+            const btn = document.createElement("button");
+            btn.className = "nav-item";
+            btn.dataset.moduleId = mod.id;
+
+            const left = document.createElement("div");
+            left.className = "nav-item-left";
+
+            const glyph = document.createElement("div");
+            glyph.className = "nav-glyph";
+            glyph.textContent = mod.glyph || "◯";
+
+            const textBlock = document.createElement("div");
+            textBlock.style.display = "flex";
+            textBlock.style.flexDirection = "column";
+            textBlock.style.minWidth = "0";
+
+            const main = document.createElement("div");
+            main.className = "nav-text-main";
+            main.textContent = mod.title;
+
+            const sub = document.createElement("div");
+            sub.className = "nav-text-sub";
+            sub.textContent = mod.subtitle || "";
+
+            textBlock.appendChild(main);
+            textBlock.appendChild(sub);
+
+            left.appendChild(glyph);
+            left.appendChild(textBlock);
+
+            const right = document.createElement("div");
+            right.className = "nav-item-right-pill";
+            right.textContent = mod.tags && mod.tags.length ? mod.tags[0] : "modul";
+
+            btn.appendChild(left);
+            btn.appendChild(right);
+
+            btn.addEventListener("click", () => {
+              loadModule(mod.id);
+            });
+
+            list.appendChild(btn);
+          });
+
+          section.appendChild(list);
+          sidebarLeftEl.appendChild(section);
+        }
+      }
+
+      function renderQuickList() {
+        // pár oblíbených modulů nahoře
+        const quickIds = [
+          "root-center",
+          "vaft-center3d",
+          "ringplanetgrid",
+          "signal-sphere",
+          "croissant-slots",
+          "michal-main",
+        ];
+
+        quickListEl.innerHTML = "";
+
+        quickIds.forEach((id) => {
+          const mod = modulesById[id];
+          if (!mod) return;
+
+          const btn = document.createElement("button");
+          btn.className = "quick-item";
+          btn.dataset.moduleId = mod.id;
+
+          const left = document.createElement("div");
+          left.style.display = "flex";
+          left.style.flexDirection = "column";
+          left.style.minWidth = "0";
+
+          const main = document.createElement("div");
+          main.className = "quick-main";
+          main.textContent = mod.title;
+
+          const sub = document.createElement("div");
+          sub.className = "quick-sub";
+          sub.textContent = mod.subtitle || "";
+
+          left.appendChild(main);
+          left.appendChild(sub);
+
+          const glyph = document.createElement("div");
+          glyph.className = "quick-glyph";
+          glyph.textContent = mod.glyph || "◯";
+
+          btn.appendChild(left);
+          btn.appendChild(glyph);
+
+          btn.addEventListener("click", () => {
+            loadModule(mod.id);
+          });
+
+          quickListEl.appendChild(btn);
+        });
+      }
+
+      function setActiveButtons(moduleId) {
+        const allNav = sidebarLeftEl.querySelectorAll(".nav-item");
+        allNav.forEach((el) => {
+          if (el.dataset.moduleId === moduleId) el.classList.add("is-active");
+          else el.classList.remove("is-active");
+        });
+
+        const allQuick = quickListEl.querySelectorAll(".quick-item");
+        allQuick.forEach((el) => {
+          if (el.dataset.moduleId === moduleId) el.classList.add("is-active");
+          else el.classList.remove("is-active");
+        });
+      }
+
+      function loadModule(moduleId) {
+        const mod = modulesById[moduleId];
+        if (!mod) return;
+
+        const url =
+          BASE_PATH && BASE_PATH !== "."
+            ? BASE_PATH + "/" + mod.path
+            : mod.path;
+
+        frameEl.src = url;
+
+        mainTitleEl.textContent = mod.title;
+        mainSubtitleEl.textContent = mod.subtitle || "";
+        mainTagsEl.innerHTML = "";
+
+        if (mod.tags && mod.tags.length) {
+          mod.tags.forEach((t) => {
+            const pill = document.createElement("div");
+            pill.className = "tag-pill";
+            pill.textContent = t;
+            mainTagsEl.appendChild(pill);
+          });
+        }
+
+        placeholderEl.style.opacity = "0";
+        placeholderEl.style.pointerEvents = "none";
+
+        setActiveButtons(moduleId);
+
+        try {
+          localStorage.setItem("vaft-hub:lastModuleId", moduleId);
+        } catch (e) {
+          // nic
+        }
+      }
+
+      function restoreLastModule() {
+        let lastId = null;
+        try {
+          lastId = localStorage.getItem("vaft-hub:lastModuleId");
+        } catch (e) {
+          lastId = null;
+        }
+        if (lastId && modulesById[lastId]) {
+          loadModule(lastId);
+        } else {
+          // fallback – otevřeme hlavní centrum
+          if (modulesById["root-center"]) loadModule("root-center");
+        }
+      }
+
+      renderSidebar();
+      renderQuickList();
+      restoreLastModule();
+
+      // Klávesové zkratky – šipky pro přepínání modulů
+      window.addEventListener("keydown", (e) => {
+        if (!e.metaKey && !e.ctrlKey) return;
+        if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+
+        e.preventDefault();
+
+        const modIds = MODULES.map((m) => m.id);
+        let currentId = null;
+        try {
+          currentId = localStorage.getItem("vaft-hub:lastModuleId");
+        } catch (err) {
+          currentId = null;
+        }
+
+        let idx = currentId ? modIds.indexOf(currentId) : -1;
+        if (idx === -1) idx = 0;
+
+        if (e.key === "ArrowUp") {
+          idx = (idx - 1 + modIds.length) % modIds.length;
+        } else if (e.key === "ArrowDown") {
+          idx = (idx + 1) % modIds.length;
+        }
+
+        const nextId = modIds[idx];
+        if (nextId) loadModule(nextId);
+      });
+    </script>
+  </body>
 </html>
