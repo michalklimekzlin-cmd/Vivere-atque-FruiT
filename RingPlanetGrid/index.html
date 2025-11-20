@@ -70,7 +70,7 @@
       <div class="stage">
         <canvas id="scene"></canvas>
         <div class="hud">
-          Ring + croissant • prsty otáčej scénu (náklon) • pinch / kolečko = zoom
+          Ring + croissant • prsty = náklon • pinch / kolečko = zoom
         </div>
       </div>
     </div>
@@ -107,12 +107,10 @@
       window.addEventListener("resize", resize);
       resize();
 
-      // pomocná projekce "pseud 3D" (jen náklon X/Y)
+      // pseudo-3D projekce
       function project3D(x, y, z) {
-        // rotace kolem X
         let y1 = y * Math.cos(tiltX) - z * Math.sin(tiltX);
         let z1 = y * Math.sin(tiltX) + z * Math.cos(tiltX);
-        // rotace kolem Y
         let x2 = x * Math.cos(tiltY) + z1 * Math.sin(tiltY);
         let z2 = -x * Math.sin(tiltY) + z1 * Math.cos(tiltY);
 
@@ -123,7 +121,7 @@
         };
       }
 
-      // --- PODLAHA GRID ---
+      // podlaha
       function drawFloor() {
         ctx.save();
         ctx.translate(width / 2, height / 2);
@@ -155,29 +153,13 @@
         ctx.restore();
       }
 
-      // --- PRSTENEC (v půdorysu kruh, v projekci elipsa) ---
+      // prstenec
       function drawRing() {
         ctx.save();
         ctx.translate(width / 2, height / 2);
 
         const rOuter = baseSize * 1.15;
         const rInner = baseSize * 0.55;
-
-        // stín
-        const pShadow = project3D(0, 0, 0);
-        ctx.save();
-        ctx.translate(pShadow.x, pShadow.y + baseSize * 1.05);
-        ctx.scale(viewScale, viewScale * 0.35);
-        const g = ctx.createRadialGradient(0, 0, rInner * 0.1, 0, 0, rOuter);
-        g.addColorStop(0, "rgba(0,0,0,0.9)");
-        g.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, rOuter, rOuter, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        // samotný prstenec – nejdřív v lokálním systému, pak náklon
         const segments = 120;
 
         function ringPath(radius) {
@@ -193,21 +175,35 @@
           ctx.closePath();
         }
 
-        // vnější
+        // stín
+        const pShadow = project3D(0, 0, 0);
+        ctx.save();
+        ctx.translate(pShadow.x, pShadow.y + baseSize * 1.05);
+        ctx.scale(viewScale, viewScale * 0.35);
+        const gs = ctx.createRadialGradient(0, 0, rInner * 0.1, 0, 0, rOuter);
+        gs.addColorStop(0, "rgba(0,0,0,0.9)");
+        gs.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gs;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, rOuter, rOuter, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // prstenec tělo
         ringPath(rOuter);
-        const gradOuter = ctx.createLinearGradient(
+        const gOuter = ctx.createLinearGradient(
           -rOuter,
           -rOuter,
           rOuter,
           rOuter
         );
-        gradOuter.addColorStop(0, "#fdf9ff");
-        gradOuter.addColorStop(0.4, "#f0e9ff");
-        gradOuter.addColorStop(1, "#c7d4ff");
-        ctx.fillStyle = gradOuter;
+        gOuter.addColorStop(0, "#fdf7ff");
+        gOuter.addColorStop(0.4, "#f0e7ff");
+        gOuter.addColorStop(1, "#c7d0ff");
+        ctx.fillStyle = gOuter;
         ctx.fill();
 
-        // vnitřní "díra" – vyříznout
+        // vnitřní díra
         ctx.save();
         ctx.globalCompositeOperation = "destination-out";
         ringPath(rInner);
@@ -223,96 +219,101 @@
         ctx.restore();
       }
 
-      // --- CROISSANT (pečivo + zlatá mřížka) ---
+      // ---------- CROISSANT: styl zlaté koule ----------
 
       function drawCroissantBody(localScale = 1) {
         const w = 2.6 * localScale;
-        const h = 1.2 * localScale;
+        const h = 1.25 * localScale;
 
+        // základní tvar croissantu
         ctx.beginPath();
-        // horní hrana
         ctx.moveTo(-w * 0.9, 0);
-        ctx.quadraticCurveTo(-w * 0.45, -h * 1.0, 0, -h * 1.15);
+        ctx.quadraticCurveTo(-w * 0.45, -h * 1.0, 0, -h * 1.1);
         ctx.quadraticCurveTo(w * 0.45, -h * 1.0, w * 0.9, 0);
-        // spodní hrana
-        ctx.quadraticCurveTo(w * 0.45, h * 0.9, 0, h * 1.05);
-        ctx.quadraticCurveTo(-w * 0.45, h * 0.9, -w * 0.9, 0);
+        ctx.quadraticCurveTo(w * 0.45, h * 0.95, 0, h * 1.05);
+        ctx.quadraticCurveTo(-w * 0.45, h * 0.95, -w * 0.9, 0);
         ctx.closePath();
 
-        // výřez "uštípnutí" vpravo (jako na fotce)
+        // výřez vpravo (uštip)
+        ctx.save();
+        ctx.clip();
+        ctx.beginPath();
+        ctx.arc(w * 0.7, 0, w * 0.55, -Math.PI / 3, Math.PI / 3, false);
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.fill();
+        ctx.restore();
+        ctx.globalCompositeOperation = "source-over";
+
+        // tělo jako tmavá koule se světelným středem
         ctx.save();
         ctx.clip();
 
-        ctx.fillStyle = "#1a130b";
-        ctx.fill();
-
-        // jemný světelný přechod
-        const g = ctx.createLinearGradient(-w, -h * 1.3, w, h * 1.3);
-        g.addColorStop(0, "#2a1b10");
-        g.addColorStop(0.3, "#3b2414");
-        g.addColorStop(0.7, "#1c120b");
-        g.addColorStop(1, "#120c08");
-        ctx.fillStyle = g;
+        const grad = ctx.createRadialGradient(
+          -w * 0.2,
+          -h * 0.3,
+          w * 0.1,
+          0,
+          h * 0.6,
+          w * 1.4
+        );
+        grad.addColorStop(0, "#1b1012");
+        grad.addColorStop(0.45, "#0e0709");
+        grad.addColorStop(1, "#020205");
+        ctx.fillStyle = grad;
         ctx.fill();
 
         ctx.restore();
 
-        // obrys pečiva
-        ctx.lineWidth = 1.4;
-        ctx.strokeStyle = "rgba(255, 210, 150, 0.95)";
-        ctx.shadowColor = "rgba(0,0,0,0.9)";
-        ctx.shadowBlur = 4;
+        // vnější zlatý okraj (jako koule)
+        ctx.lineWidth = 1.6;
+        ctx.strokeStyle = "rgba(255, 210, 150, 0.96)";
+        ctx.shadowColor = "rgba(255, 200, 130, 0.85)";
+        ctx.shadowBlur = 8;
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // zlaté "vrásky" nahoře
-        ctx.strokeStyle = "rgba(255, 220, 170, 0.9)";
-        ctx.lineWidth = 1;
+        // zlatá mřížka – svislé "meridiány"
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 220, 170, 0.85)";
+        ctx.lineWidth = 0.9;
 
-        const cuts = 5;
-        for (let i = 0; i < cuts; i++) {
-          const t = (i + 0.5) / cuts;
-          const cx = -w * 0.55 + t * w * 1.1;
-          ctx.beginPath();
-          ctx.moveTo(cx - 0.25 * localScale, -0.25 * localScale);
-          ctx.quadraticCurveTo(
-            cx,
-            -0.65 * localScale,
-            cx + 0.25 * localScale,
-            -0.25 * localScale
-          );
-          ctx.stroke();
-        }
-
-        // mřížka (vertikální + horizontální linky)
-        ctx.lineWidth = 0.7;
-        ctx.globalAlpha = 0.55;
-        const cols = 8;
-        const rows = 4;
-
+        const cols = 9;
         for (let i = 0; i <= cols; i++) {
           const t = i / cols;
-          const x = -w * 0.9 + t * w * 1.8;
+          const cx = -w * 0.75 + t * w * 1.5;
           ctx.beginPath();
-          ctx.moveTo(x, -h * 0.7);
-          ctx.lineTo(x, h * 0.7);
+          for (let j = 0; j <= 16; j++) {
+            const u = j / 16;
+            const yy = -h * 0.9 + u * h * 1.8;
+            const bend = Math.sin((yy / (h * 1.8)) * Math.PI) * w * 0.05;
+            const x = cx + bend;
+            if (j === 0) ctx.moveTo(x, yy);
+            else ctx.lineTo(x, yy);
+          }
           ctx.stroke();
         }
 
+        // zlatá mřížka – vodorovné "rovnoběžky"
+        const rows = 5;
         for (let j = 0; j <= rows; j++) {
           const t = j / rows;
-          const y = -h * 0.8 + t * h * 1.6;
+          const y = -h * 0.9 + t * h * 1.8;
           ctx.beginPath();
-          ctx.moveTo(-w * 0.9, y);
-          ctx.lineTo(w * 0.9, y);
+          for (let i = 0; i <= 40; i++) {
+            const u = i / 40;
+            const xx = -w * 0.9 + u * w * 1.8;
+            const bulge = Math.cos((xx / (w * 1.8)) * Math.PI) * h * 0.12;
+            const yy = y - bulge;
+            if (i === 0) ctx.moveTo(xx, yy);
+            else ctx.lineTo(xx, yy);
+          }
           ctx.stroke();
         }
 
-        ctx.globalAlpha = 1;
+        ctx.restore();
       }
 
       function drawCroissant() {
-        // pozice croissantu na "orbitu" kolem prstence
         const orbitR = baseSize * 2.1;
         const a = orbitAngle;
         const x3 = Math.cos(a) * orbitR;
@@ -324,14 +325,14 @@
         ctx.save();
         ctx.translate(width / 2 + p.x, height / 2 + p.y);
 
-        // natočení tak, aby "mířil" k prstenci
-        ctx.rotate(a + Math.PI); // špička k prstenci
+        // natočení špičky směrem k prstenci
+        ctx.rotate(a + Math.PI);
         ctx.scale(baseSize * 0.3, baseSize * 0.3);
 
-        // jemný glow
+        // jemný glow kolem
         ctx.save();
         ctx.shadowColor = "rgba(255, 220, 170, 0.7)";
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 14;
         drawCroissantBody(1);
         ctx.restore();
 
@@ -340,8 +341,7 @@
         ctx.restore();
       }
 
-      // --- OVLÁDÁNÍ DOTYK / MYŠ ---
-
+      // interakce
       let isDragging = false;
       let lastX = 0;
       let lastY = 0;
@@ -374,10 +374,14 @@
       window.addEventListener("mouseup", pointerUp);
 
       canvas.addEventListener("touchstart", pointerDown, { passive: false });
-      window.addEventListener("touchmove", (e) => {
-        if (e.touches && e.touches.length === 2) return; // pinch řeší wheel
-        pointerMove(e);
-      }, { passive: false });
+      window.addEventListener(
+        "touchmove",
+        (e) => {
+          if (e.touches && e.touches.length === 2) return;
+          pointerMove(e);
+        },
+        { passive: false }
+      );
       window.addEventListener("touchend", pointerUp);
       window.addEventListener("touchcancel", pointerUp);
 
@@ -392,20 +396,25 @@
         { passive: false }
       );
 
-      // jednoduchý pinch zoom (jen vzdálenost prstů)
+      // jednoduchý pinch zoom
       let pinchStart = null;
       window.addEventListener(
         "touchmove",
         (e) => {
           if (e.touches && e.touches.length === 2) {
             e.preventDefault();
-            const dx = e.touches[0].clientX - e.touches[1].clientX;
-            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const dx =
+              e.touches[0].clientX - e.touches[1].clientX;
+            const dy =
+              e.touches[0].clientY - e.touches[1].clientY;
             const dist = Math.hypot(dx, dy);
             if (!pinchStart) pinchStart = dist;
             else {
               const ratio = dist / pinchStart;
-              targetScale = Math.max(0.7, Math.min(2.5, targetScale * ratio));
+              targetScale = Math.max(
+                0.7,
+                Math.min(2.5, targetScale * ratio)
+              );
               pinchStart = dist;
             }
           } else {
@@ -415,14 +424,13 @@
         { passive: false }
       );
 
-      // --- ANIMACE ---
+      // animace
       let lastTime = 0;
       function loop(ts) {
         if (!ts) ts = 0;
         const dt = (ts - lastTime) / 1000;
         lastTime = ts;
 
-        // plynulý přechod kamery
         const k = Math.min(1, dt * 6);
         viewScale += (targetScale - viewScale) * k;
         tiltX += (targetTiltX - tiltX) * k;
@@ -431,7 +439,6 @@
         orbitAngle += dt * 0.4;
 
         ctx.clearRect(0, 0, width, height);
-
         drawFloor();
         drawRing();
         drawCroissant();
