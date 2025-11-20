@@ -83,7 +83,7 @@
       • prsty otáčej scénu<br />
       • dvěma prsty / kolečkem přibližuj / oddaluj<br />
       • prstenec = „plastelína“<br />
-      • croissant = zlatá mřížka
+      • croissant = 3D pečivo ve zlaté mřížce
     </div>
 
     <div class="hud-bottom">
@@ -91,7 +91,6 @@
     </div>
 
     <script>
-      // ZÁKLAD SCÉNY
       const app = document.getElementById("app");
       const scene = new THREE.Scene();
 
@@ -135,7 +134,7 @@
       }
       scene.add(nodes);
 
-      // HLAVNÍ PRSTENEC – JAKO PLASTELÍNA
+      // HLAVNÍ PRSTENEC – PLASTELÍNA
       const mainRingGeom = new THREE.TorusGeometry(4, 1.1, 40, 140);
       const mainRingMat = new THREE.MeshStandardMaterial({
         color: 0xf5f3ff,
@@ -146,12 +145,11 @@
       });
 
       const mainRing = new THREE.Mesh(mainRingGeom, mainRingMat);
-      // oválnější + mírně placatý
       mainRing.scale.set(1.7, 0.7, 1.1);
       mainRing.position.set(0, 0.8, 0);
       mainRing.rotation.x = Math.PI / 2.1;
 
-      // lehké "nerovnosti" jako u hmoty
+      // drobná nepravidelnost povrchu
       {
         const pos = mainRing.geometry.attributes.position;
         const tmp = new THREE.Vector3();
@@ -166,32 +164,42 @@
         pos.needsUpdate = true;
         mainRing.geometry.computeVertexNormals();
       }
-
       scene.add(mainRing);
 
-      // CROISSANT – ZLATÁ MŘÍŽKA
-      const croissantGeom = new THREE.TorusGeometry(
-        1.5, // poloměr
-        0.4, // tloušťka
-        24,
-        80,
-        Math.PI * 1.25 // výsek -> croissant
+      // CROISSANT – 3D PEČIVO VE ZLATÉ MŘÍŽCE
+
+      // cesta (ohnutý rohlík)
+      const croissantPath = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-2.2, 0.0, 0.0),
+        new THREE.Vector3(-1.1, 0.45, 0.1),
+        new THREE.Vector3(0.0, 0.7, 0.0),
+        new THREE.Vector3(1.1, 0.45, -0.1),
+        new THREE.Vector3(2.2, 0.0, 0.0),
+      ]);
+
+      const croissantRadius = 0.55;
+      const croissantGeom = new THREE.TubeGeometry(
+        croissantPath,
+        90, // délka segmentace
+        croissantRadius,
+        18, // kolik "hran" kolem
+        false
       );
 
-      // tmavší "tělo"
+      // základní tělo (tmavší pečivo)
       const croissantBaseMat = new THREE.MeshStandardMaterial({
-        color: 0x1a1208,
-        metalness: 0.2,
-        roughness: 0.9,
-        emissive: 0x110800,
-        emissiveIntensity: 0.4,
+        color: 0x1b1309,
+        metalness: 0.15,
+        roughness: 0.85,
+        emissive: 0x110700,
+        emissiveIntensity: 0.35,
       });
       const croissantBase = new THREE.Mesh(croissantGeom, croissantBaseMat);
 
-      // drátová zlatá mřížka navrchu
+      // zlatá mřížka jako u 2D koulí
       const croissantWireGeom = new THREE.WireframeGeometry(croissantGeom);
       const croissantWireMat = new THREE.LineBasicMaterial({
-        color: 0xffe6aa,
+        color: 0xffe4aa,
       });
       const croissantWire = new THREE.LineSegments(
         croissantWireGeom,
@@ -202,17 +210,18 @@
       croissantBody.add(croissantBase);
       croissantBody.add(croissantWire);
 
-      // natočení jako na kresbě (ležící rohlík)
-      croissantBody.rotation.x = Math.PI / 2;
-      croissantBody.rotation.z = Math.PI * 0.15;
+      // tvar podobný fotce: mírně zploštit
+      croissantBody.scale.set(0.95, 1.05, 0.9);
+      croissantBody.rotation.x = Math.PI / 2; // položit na bok
+      croissantBody.rotation.z = Math.PI * 0.1;
 
-      // ORBIT skupina pro obíhání kolem prstence
+      // orbit kolem prstence
       const croissantOrbit = new THREE.Group();
-      croissantBody.position.set(6.5, 0.8, 0); // kousek vedle prstence
+      croissantBody.position.set(6.5, 0.8, 0);
       croissantOrbit.add(croissantBody);
       scene.add(croissantOrbit);
 
-      // --- VLASTNÍ OVLÁDÁNÍ KAMERY (DRAG + ZOOM) ---
+      // --- OVLÁDÁNÍ KAMERY (DRAG + ZOOM) ---
       const spherical = {
         radius: 18,
         phi: Math.PI / 3,
@@ -330,11 +339,8 @@
         t += 0.01;
 
         nodes.rotation.y += 0.001;
-
-        // prstenec jemně "dýchá"
         mainRing.rotation.z = Math.sin(t * 0.4) * 0.06;
 
-        // croissant obíhá kolem prstence + jemné pulzování mřížky
         croissantOrbit.rotation.y += 0.01;
         croissantBase.material.emissiveIntensity =
           0.3 + 0.15 * Math.sin(t * 2.0);
