@@ -71,7 +71,7 @@
       }
     </style>
 
-    <!-- JEN THREE.JS, BEZ ORBITCONTROLS -->
+    <!-- JEN THREE.JS -->
     <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
   </head>
 
@@ -82,8 +82,8 @@
       <strong>Ring Planet Grid</strong><br />
       • prsty otáčej scénu<br />
       • dvěma prsty / kolečkem přibližuj / oddaluj<br />
-      • planeta = koule + prstenec<br />
-      • mřížka = prostor pro další světy
+      • tlustý prstenec = hlavní tělo<br />
+      • croissant obíhá kolem prstence
     </div>
 
     <div class="hud-bottom">
@@ -135,55 +135,53 @@
       }
       scene.add(nodes);
 
-      // PLANETA
-      const planetGeom = new THREE.SphereGeometry(3, 64, 64);
-      const planetMat = new THREE.MeshStandardMaterial({
+      // HLAVNÍ PRSTENEC (inspirace plastelína)
+      const mainRingGeom = new THREE.TorusGeometry(4, 1.1, 40, 140);
+      const mainRingMat = new THREE.MeshStandardMaterial({
         color: 0x4f8cff,
-        metalness: 0.25,
+        metalness: 0.15,
         roughness: 0.35,
-        emissive: 0x111133,
-        emissiveIntensity: 0.7,
+        emissive: 0x111733,
+        emissiveIntensity: 0.6,
       });
-      const planet = new THREE.Mesh(planetGeom, planetMat);
-      planet.position.set(0, 1, 0);
-      scene.add(planet);
 
-      // SVĚTLEJ PÁS NA PLANETĚ
-      const bandGeom = new THREE.TorusGeometry(3.05, 0.15, 2, 80);
-      const bandMat = new THREE.MeshBasicMaterial({
-        color: 0xaad4ff,
-        transparent: true,
-        opacity: 0.5,
+      const mainRing = new THREE.Mesh(mainRingGeom, mainRingMat);
+      // zploštíme a trochu natáhneme jako "ovalná guma"
+      mainRing.scale.set(1.6, 0.7, 1.0);
+      mainRing.position.set(0, 0.8, 0);
+      mainRing.rotation.x = Math.PI / 2.1;
+      scene.add(mainRing);
+
+      // CROISSANT – část torusu
+      const croissantGeom = new THREE.TorusGeometry(
+        1.2, // poloměr
+        0.38, // tloušťka
+        24,
+        80,
+        Math.PI * 1.4 // jen část kruhu -> tvar croissantu
+      );
+      const croissantMat = new THREE.MeshStandardMaterial({
+        color: 0xffddaa,
+        metalness: 0.1,
+        roughness: 0.7,
+        emissive: 0x332211,
+        emissiveIntensity: 0.35,
       });
-      const band = new THREE.Mesh(bandGeom, bandMat);
-      band.rotation.x = Math.PI / 2.3;
-      planet.add(band);
+      const croissant = new THREE.Mesh(croissantGeom, croissantMat);
+      croissant.rotation.x = Math.PI / 2; // položíme ho
+      croissant.rotation.z = Math.PI * 0.1;
 
-      // PRSTENEC
-      const ringGeom = new THREE.TorusGeometry(5.2, 0.45, 24, 140);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: 0xf5f0ff,
-        transparent: true,
-        opacity: 0.9,
-        side: THREE.DoubleSide,
-      });
-      const ring = new THREE.Mesh(ringGeom, ringMat);
-      ring.rotation.x = Math.PI / 2.3;
-      scene.add(ring);
-
-      // MALÝ ORB NA PRSTENCI
-      const orbGeom = new THREE.SphereGeometry(0.4, 16, 16);
-      const orbMat = new THREE.MeshBasicMaterial({ color: 0xffdd88 });
-      const orb = new THREE.Mesh(orbGeom, orbMat);
-      orb.position.set(5.2, 0, 0);
-      ring.add(orb);
+      // skupina pro oběh kolem prstence
+      const croissantOrbit = new THREE.Group();
+      croissant.position.set(6.5, 0.8, 0);
+      croissantOrbit.add(croissant);
+      scene.add(croissantOrbit);
 
       // --- VLASTNÍ OVLÁDÁNÍ KAMERY (DRAG + ZOOM) ---
-
       const spherical = {
         radius: 18,
-        phi: Math.PI / 3, // výška
-        theta: Math.PI / 4, // natočení okolo
+        phi: Math.PI / 3,
+        theta: Math.PI / 4,
       };
 
       function updateCamera() {
@@ -296,9 +294,13 @@
         requestAnimationFrame(animate);
         t += 0.01;
 
-        planet.rotation.y += 0.0035;
-        ring.rotation.z = Math.sin(t * 0.4) * 0.12;
         nodes.rotation.y += 0.001;
+
+        // lehký „živý“ pohyb prstence
+        mainRing.rotation.z = Math.sin(t * 0.4) * 0.06;
+
+        // croissant obíhá kolem prstence
+        croissantOrbit.rotation.y += 0.01;
 
         renderer.render(scene, camera);
       }
