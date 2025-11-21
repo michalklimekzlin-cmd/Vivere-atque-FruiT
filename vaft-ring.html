@@ -75,10 +75,10 @@
         <canvas id="ring-canvas"></canvas>
 
         <div class="hud">
-          🌀 1 prst = otáčení prstence • 2 prsty / kolečko = zoom • sloty = budoucí
-          místa pro světy
+          🌀 1 prst = otáčení prstence • 2 prsty / kolečko = zoom • sloty =
+          budoucí místa pro světy
         </div>
-        <div class="hud-right">v0.3 • Prstenec se světy</div>
+        <div class="hud-right">v0.4 • Zmáčknutý prstenec se světy</div>
       </div>
     </div>
 
@@ -126,7 +126,7 @@
       resize();
       window.addEventListener("resize", resize);
 
-      // 3D → 2D projekce (stejně jako u koule)
+      // 3D → 2D projekce
       function projectPoint(x, y, z) {
         // rotace kolem X
         let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
@@ -163,14 +163,37 @@
         const GOLD = "rgba(255, 210, 150, 0.95)";
         const GOLD_SOFT = "rgba(255, 190, 130, 0.35)";
 
-        const R = baseRadius * 1.4; // hlavní poloměr
-        const r = baseRadius * 0.55; // tloušťka prstence
+        // --- TVAR PRSTENCE (ZMÁČKNUTÝ DONUT) ---
+        // základní hodnoty
+        const R = baseRadius * 1.45; // hlavní poloměr (větší – 3 a 4 se roztáhnou)
+        const r = baseRadius * 0.4; // tloušťka těla
+
+        // "zmáčknutí o zem"
+        const stretchXZ = 1.15; // roztáhnout do stran (3,4)
+        const squashY = 0.45; // zmáčknout nahoře/dole (1,2)
 
         const segmentsU = 48; // kolem dokola
         const segmentsV = 18; // přes tloušťku
 
         ctx.lineWidth = 1;
         ctx.strokeStyle = GOLD;
+
+        // pomocná funkce – jeden bod toru po deformaci
+        function torusPoint(u, v) {
+          const cosV = Math.cos(v);
+          const sinV = Math.sin(v);
+
+          let x = (R + r * cosV) * Math.cos(u);
+          let y = r * sinV;
+          let z = (R + r * cosV) * Math.sin(u);
+
+          // deformace
+          x *= stretchXZ;
+          z *= stretchXZ;
+          y *= squashY;
+
+          return projectPoint(x, y, z);
+        }
 
         // měkká aura kolem prstence
         ctx.save();
@@ -182,11 +205,7 @@
           for (let u = 0; u <= segmentsU; u++) {
             const uu = (u / segmentsU) * Math.PI * 2;
 
-            const x = (R + r * Math.cos(vv)) * Math.cos(uu);
-            const y = r * Math.sin(vv);
-            const z = (R + r * Math.cos(vv)) * Math.sin(uu);
-
-            const p = projectPoint(x * 1.02, y * 1.02, z * 1.02);
+            const p = torusPoint(uu, vv);
             if (p.z < 0) continue;
             if (!started) {
               ctx.moveTo(p.x, p.y);
@@ -199,9 +218,7 @@
         }
         ctx.restore();
 
-        // mřížka – podobná kouli se světy, ale na toru
-
-        // 1) "podélné" linie (fixní u)
+        // mřížka – podélné linie (fixní u)
         for (let uIdx = 0; uIdx < segmentsU; uIdx++) {
           const uu = (uIdx / segmentsU) * Math.PI * 2;
           ctx.beginPath();
@@ -209,11 +226,7 @@
           for (let vIdx = 0; vIdx <= segmentsV; vIdx++) {
             const vv = (vIdx / segmentsV) * Math.PI * 2;
 
-            const x = (R + r * Math.cos(vv)) * Math.cos(uu);
-            const y = r * Math.sin(vv);
-            const z = (R + r * Math.cos(vv)) * Math.sin(uu);
-
-            const p = projectPoint(x, y, z);
+            const p = torusPoint(uu, vv);
             if (p.z < 0) continue;
             if (!started) {
               ctx.moveTo(p.x, p.y);
@@ -225,7 +238,7 @@
           if (started) ctx.stroke();
         }
 
-        // 2) "kruhové" linie (fixní v)
+        // mřížka – kruhové linie (fixní v)
         for (let vIdx = 0; vIdx <= segmentsV; vIdx++) {
           const vv = (vIdx / segmentsV) * Math.PI * 2;
           ctx.beginPath();
@@ -233,11 +246,7 @@
           for (let uIdx = 0; uIdx <= segmentsU; uIdx++) {
             const uu = (uIdx / segmentsU) * Math.PI * 2;
 
-            const x = (R + r * Math.cos(vv)) * Math.cos(uu);
-            const y = r * Math.sin(vv);
-            const z = (R + r * Math.cos(vv)) * Math.sin(uu);
-
-            const p = projectPoint(x, y, z);
+            const p = torusPoint(uu, vv);
             if (p.z < 0) continue;
             if (!started) {
               ctx.moveTo(p.x, p.y);
@@ -260,12 +269,7 @@
           let started = false;
           for (let uIdx = 0; uIdx <= segmentsU; uIdx++) {
             const uu = (uIdx / segmentsU) * Math.PI * 2;
-
-            const x = (R + r * Math.cos(vv)) * Math.cos(uu);
-            const y = r * Math.sin(vv);
-            const z = (R + r * Math.cos(vv)) * Math.sin(uu);
-
-            const p = projectPoint(x * 1.01, y * 1.01, z * 1.01);
+            const p = torusPoint(uu, vv);
             if (p.z < 0) continue;
             if (!started) {
               ctx.moveTo(p.x, p.y);
@@ -292,11 +296,7 @@
           const uu = ang;
           const vv = 0; // vnější strana prstence
 
-          const x = (R + r * Math.cos(vv)) * Math.cos(uu);
-          const y = r * Math.sin(vv);
-          const z = (R + r * Math.cos(vv)) * Math.sin(uu);
-
-          const p = projectPoint(x, y, z);
+          const p = torusPoint(uu, vv);
           if (p.z < 0) continue;
 
           const w = slotSize;
