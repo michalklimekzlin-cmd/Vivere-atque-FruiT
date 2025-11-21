@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>VaF'i'T • Prstenec se sloty</title>
+    <title>VaF'i'T • Prstenec + Signal Sphere</title>
 
     <style>
       html,
@@ -75,10 +75,10 @@
         <canvas id="ring-canvas"></canvas>
 
         <div class="hud">
-          🌀 1 prst = otáčení prstence • 2 prsty / kolečko = zoom • sloty =
-          budoucí místa pro světy
+          🌀 1 prst = otáčení prstence • 2 prsty / kolečko = zoom • střed = VaF'i'T
+          Signal Sphere
         </div>
-        <div class="hud-right">v0.5 • Asymetrický prstenec se světy</div>
+        <div class="hud-right">v0.6 • Prstenec + Signal Sphere</div>
       </div>
     </div>
 
@@ -96,7 +96,7 @@
       let viewScale = 1;
       let targetViewScale = 1;
 
-      // rotace prstence
+      // rotace prstence + koule (kamera)
       let rotX = -0.7;
       let rotY = 0.4;
       let targetRotX = rotX;
@@ -112,6 +112,33 @@
       let pinchStartScale = 1;
       let isPinching = false;
 
+      // --- Signal Sphere (čísla) ---
+      const spherePoints = [];
+      const sphereChars = "0123456789";
+      let sphereSpin = 0;
+
+      function initSpherePoints() {
+        spherePoints.length = 0;
+        const bands = 16; // počet "řádků"
+        const segs = 32; // počet bodů v řádku
+
+        let idx = 0;
+        for (let b = 0; b <= bands; b++) {
+          const v = (b / bands) * Math.PI - Math.PI / 2; // -pi/2..pi/2 (šířka)
+          for (let s = 0; s < segs; s++) {
+            const u = (s / segs) * Math.PI * 2; // 0..2pi kolem dokola
+            const ch = sphereChars[idx % sphereChars.length];
+            idx++;
+            spherePoints.push({
+              lat: v,
+              lon: u,
+              char: ch,
+              phase: Math.random() * Math.PI * 2,
+            });
+          }
+        }
+      }
+
       function resize() {
         const rect = canvas.getBoundingClientRect();
         width = rect.width;
@@ -121,12 +148,14 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         baseRadius = Math.min(width, height) * 0.22;
+
+        initSpherePoints();
       }
 
       resize();
       window.addEventListener("resize", resize);
 
-      // 3D → 2D projekce
+      // 3D → 2D projekce (sdílená pro prstenec i kouli)
       function projectPoint(x, y, z) {
         // rotace kolem X
         let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
@@ -143,23 +172,9 @@
         };
       }
 
+      // ---------- PRSTENEC ----------
+
       function drawRing() {
-        ctx.clearRect(0, 0, width, height);
-
-        // pozadí aura
-        const gBg = ctx.createRadialGradient(
-          width / 2,
-          height / 2 - baseRadius * 0.5,
-          baseRadius * 0.1,
-          width / 2,
-          height / 2,
-          baseRadius * 3
-        );
-        gBg.addColorStop(0, "rgba(255, 190, 130, 0.16)");
-        gBg.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = gBg;
-        ctx.fillRect(0, 0, width, height);
-
         const GOLD = "rgba(255, 210, 150, 0.95)";
         const GOLD_SOFT = "rgba(255, 190, 130, 0.35)";
 
@@ -177,14 +192,12 @@
         ctx.lineWidth = 1;
         ctx.strokeStyle = GOLD;
 
-        // pomocná funkce – jeden bod toru po deformaci (asymetrická tloušťka)
         function torusPoint(u, v) {
           const cosV = Math.cos(v);
           const sinV = Math.sin(v);
-
           const sinU = Math.sin(u);
 
-          // přední půlka (sinU > 0) tlustší, zadní půlka tenčí
+          // přední půlka tlustší, zadní tenčí
           const frontFactor = 1.4;
           const backFactor = 0.55;
           const rLocal = rBase * (sinU > 0 ? frontFactor : backFactor);
@@ -193,7 +206,6 @@
           let y = rLocal * sinV;
           let z = (R + rLocal * cosV) * Math.sin(u);
 
-          // globální deformace
           x *= stretchXZ;
           z *= stretchXZ;
           y *= squashY;
@@ -288,8 +300,10 @@
         }
         ctx.restore();
 
-        // sloty – pořád na "přední" části (silnější půlka)
+        // sloty – 4 naznačené
+        const GOLD = "rgba(255, 210, 150, 0.95)";
         const slotPositions = [0, Math.PI / 2.7, -Math.PI / 2.7, Math.PI];
+
         ctx.lineWidth = 1;
         ctx.strokeStyle = GOLD;
         ctx.fillStyle = "rgba(6,6,10,0.95)";
@@ -339,22 +353,164 @@
         ctx.shadowBlur = 0;
       }
 
+      // ---------- SIGNAL SPHERE UPROSTŘED ----------
+
+      function drawSignalSphere() {
+        const rSphere = baseRadius * 0.75; // velikost koule
+        const GOLD = "rgba(255, 210, 150, 0.95)";
+
+        // stín pod koulí
+        const centerProj = projectPoint(0, 0, 0);
+        const rPix = rSphere * viewScale;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(
+          centerProj.x,
+          centerProj.y + rPix * 0.95,
+          rPix * 1.3,
+          rPix * 0.4,
+          0,
+          0,
+          Math.PI * 2
+        );
+        const gShadow = ctx.createRadialGradient(
+          centerProj.x,
+          centerProj.y + rPix * 0.95,
+          rPix * 0.5,
+          centerProj.x,
+          centerProj.y + rPix * 0.95,
+          rPix * 1.4
+        );
+        gShadow.addColorStop(0, "rgba(10,6,4,0.9)");
+        gShadow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gShadow;
+        ctx.fill();
+        ctx.restore();
+
+        // tělo koule (glow + hrana)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(centerProj.x, centerProj.y, rPix * 1.03, 0, Math.PI * 2);
+        const gAura = ctx.createRadialGradient(
+          centerProj.x,
+          centerProj.y - rPix * 0.5,
+          rPix * 0.3,
+          centerProj.x,
+          centerProj.y + rPix * 0.3,
+          rPix * 1.4
+        );
+        gAura.addColorStop(0, "rgba(255, 205, 150, 0.18)");
+        gAura.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gAura;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(centerProj.x, centerProj.y, rPix, 0, Math.PI * 2);
+        const gBall = ctx.createRadialGradient(
+          centerProj.x - rPix * 0.3,
+          centerProj.y - rPix * 0.4,
+          rPix * 0.2,
+          centerProj.x,
+          centerProj.y + rPix * 0.4,
+          rPix * 1.1
+        );
+        gBall.addColorStop(0, "#2d1d0f");
+        gBall.addColorStop(0.6, "#1b1012");
+        gBall.addColorStop(1, "#050308");
+        ctx.fillStyle = gBall;
+        ctx.fill();
+
+        ctx.strokeStyle = "rgba(255, 210, 150, 0.98)";
+        ctx.lineWidth = 1.4;
+        ctx.shadowColor = "rgba(255, 210, 150, 0.9)";
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(centerProj.x, centerProj.y, rPix, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+        ctx.shadowBlur = 0;
+
+        // čísla na povrchu koule
+        ctx.save();
+        ctx.font = "10px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = GOLD;
+        ctx.shadowColor = "rgba(255, 210, 150, 0.8)";
+        ctx.shadowBlur = 6;
+
+        const spin = sphereSpin;
+
+        for (const p0 of spherePoints) {
+          const lat = p0.lat;
+          const lon = p0.lon + spin; // rotace
+          const cl = Math.cos(lat);
+          const sl = Math.sin(lat);
+
+          const x = rSphere * cl * Math.cos(lon);
+          const y = rSphere * sl;
+          const z = rSphere * cl * Math.sin(lon);
+
+          const p = projectPoint(x, y, z);
+          if (p.z < 0) continue; // zadní strana
+
+          // menší flicker
+          const flicker =
+            0.65 + 0.35 * Math.sin(sphereSpin * 2.0 + p0.phase);
+          ctx.globalAlpha = flicker;
+
+          ctx.fillText(p0.char, p.x, p.y);
+        }
+
+        ctx.restore();
+        ctx.globalAlpha = 1;
+      }
+
+      // ---------- SCÉNA ----------
+
+      function drawScene() {
+        ctx.clearRect(0, 0, width, height);
+
+        // pozadí (celková aura)
+        const gBg = ctx.createRadialGradient(
+          width / 2,
+          height / 2 - baseRadius,
+          baseRadius * 0.2,
+          width / 2,
+          height / 2,
+          baseRadius * 4
+        );
+        gBg.addColorStop(0, "rgba(255, 195, 140, 0.16)");
+        gBg.addColorStop(1, "rgba(0,0,0,1)");
+        ctx.fillStyle = gBg;
+        ctx.fillRect(0, 0, width, height);
+
+        // nejdřív prstenec
+        drawRing();
+
+        // pak signal sphere uprostřed
+        drawSignalSphere();
+      }
+
       function loop() {
         if (!dragging && !isPinching) {
           targetRotY += 0.0025;
         }
+
+        sphereSpin += 0.012; // otáčení signální koule
 
         const k = 0.12;
         rotX += (targetRotX - rotX) * k;
         rotY += (targetRotY - rotY) * k;
         viewScale += (targetViewScale - viewScale) * k;
 
-        drawRing();
+        drawScene();
         requestAnimationFrame(loop);
       }
       requestAnimationFrame(loop);
 
-      // interakce
+      // ---------- interakce ----------
 
       function onPointerDown(clientX, clientY) {
         dragging = true;
