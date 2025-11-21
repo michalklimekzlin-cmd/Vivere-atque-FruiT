@@ -119,14 +119,14 @@
 
       function initSpherePoints() {
         spherePoints.length = 0;
-        const bands = 16; // počet "řádků"
-        const segs = 32; // počet bodů v řádku
+        const bands = 16;
+        const segs = 32;
 
         let idx = 0;
         for (let b = 0; b <= bands; b++) {
-          const v = (b / bands) * Math.PI - Math.PI / 2; // -pi/2..pi/2 (šířka)
+          const v = (b / bands) * Math.PI - Math.PI / 2;
           for (let s = 0; s < segs; s++) {
-            const u = (s / segs) * Math.PI * 2; // 0..2pi kolem dokola
+            const u = (s / segs) * Math.PI * 2;
             const ch = sphereChars[idx % sphereChars.length];
             idx++;
             spherePoints.push({
@@ -155,13 +155,11 @@
       resize();
       window.addEventListener("resize", resize);
 
-      // 3D → 2D projekce (sdílená pro prstenec i kouli)
+      // 3D → 2D projekce
       function projectPoint(x, y, z) {
-        // rotace kolem X
         let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
         let z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
 
-        // rotace kolem Y
         let x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
         let z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
 
@@ -173,18 +171,15 @@
       }
 
       // ---------- PRSTENEC ----------
-
       function drawRing() {
         const GOLD = "rgba(255, 210, 150, 0.95)";
         const GOLD_SOFT = "rgba(255, 190, 130, 0.35)";
 
-        // základ prstence
-        const R = baseRadius * 1.45; // hlavní poloměr
-        const rBase = baseRadius * 0.4; // základní tloušťka
+        const R = baseRadius * 1.45;
+        const rBase = baseRadius * 0.4;
 
-        // "zmáčknutí o zem"
-        const stretchXZ = 1.15; // do stran
-        const squashY = 0.45; // nahoře/dole
+        const stretchXZ = 1.15;
+        const squashY = 0.45;
 
         const segmentsU = 48;
         const segmentsV = 18;
@@ -197,7 +192,6 @@
           const sinV = Math.sin(v);
           const sinU = Math.sin(u);
 
-          // přední půlka tlustší, zadní tenčí
           const frontFactor = 1.4;
           const backFactor = 0.55;
           const rLocal = rBase * (sinU > 0 ? frontFactor : backFactor);
@@ -213,7 +207,7 @@
           return projectPoint(x, y, z);
         }
 
-        // měkká aura kolem prstence
+        // aura prstence
         ctx.save();
         ctx.globalAlpha = 0.2;
         for (let v = 0; v <= segmentsV; v++) {
@@ -222,7 +216,6 @@
           let started = false;
           for (let u = 0; u <= segmentsU; u++) {
             const uu = (u / segmentsU) * Math.PI * 2;
-
             const p = torusPoint(uu, vv);
             if (p.z < 0) continue;
             if (!started) {
@@ -243,7 +236,6 @@
           let started = false;
           for (let vIdx = 0; vIdx <= segmentsV; vIdx++) {
             const vv = (vIdx / segmentsV) * Math.PI * 2;
-
             const p = torusPoint(uu, vv);
             if (p.z < 0) continue;
             if (!started) {
@@ -263,7 +255,6 @@
           let started = false;
           for (let uIdx = 0; uIdx <= segmentsU; uIdx++) {
             const uu = (uIdx / segmentsU) * Math.PI * 2;
-
             const p = torusPoint(uu, vv);
             if (p.z < 0) continue;
             if (!started) {
@@ -276,7 +267,7 @@
           if (started) ctx.stroke();
         }
 
-        // lehká aura
+        // jemná aura
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
         ctx.lineWidth = 2;
@@ -300,8 +291,7 @@
         }
         ctx.restore();
 
-        // sloty – 4 naznačené
-        const GOLD = "rgba(255, 210, 150, 0.95)";
+        // SLOTY – používáme už existující GOLD, tady už NIC NEDEKLARUJEME ZNOVU
         const slotPositions = [0, Math.PI / 2.7, -Math.PI / 2.7, Math.PI];
 
         ctx.lineWidth = 1;
@@ -353,16 +343,15 @@
         ctx.shadowBlur = 0;
       }
 
-      // ---------- SIGNAL SPHERE UPROSTŘED ----------
-
+      // ---------- SIGNAL SPHERE ----------
       function drawSignalSphere() {
-        const rSphere = baseRadius * 0.75; // velikost koule
+        const rSphere = baseRadius * 0.75;
         const GOLD = "rgba(255, 210, 150, 0.95)";
 
-        // stín pod koulí
         const centerProj = projectPoint(0, 0, 0);
         const rPix = rSphere * viewScale;
 
+        // stín
         ctx.save();
         ctx.beginPath();
         ctx.ellipse(
@@ -388,7 +377,7 @@
         ctx.fill();
         ctx.restore();
 
-        // tělo koule (glow + hrana)
+        // tělo koule
         ctx.save();
         ctx.beginPath();
         ctx.arc(centerProj.x, centerProj.y, rPix * 1.03, 0, Math.PI * 2);
@@ -431,7 +420,7 @@
         ctx.restore();
         ctx.shadowBlur = 0;
 
-        // čísla na povrchu koule
+        // čísla
         ctx.save();
         ctx.font = "10px system-ui";
         ctx.textAlign = "center";
@@ -444,7 +433,7 @@
 
         for (const p0 of spherePoints) {
           const lat = p0.lat;
-          const lon = p0.lon + spin; // rotace
+          const lon = p0.lon + spin;
           const cl = Math.cos(lat);
           const sl = Math.sin(lat);
 
@@ -453,9 +442,8 @@
           const z = rSphere * cl * Math.sin(lon);
 
           const p = projectPoint(x, y, z);
-          if (p.z < 0) continue; // zadní strana
+          if (p.z < 0) continue;
 
-          // menší flicker
           const flicker =
             0.65 + 0.35 * Math.sin(sphereSpin * 2.0 + p0.phase);
           ctx.globalAlpha = flicker;
@@ -468,11 +456,9 @@
       }
 
       // ---------- SCÉNA ----------
-
       function drawScene() {
         ctx.clearRect(0, 0, width, height);
 
-        // pozadí (celková aura)
         const gBg = ctx.createRadialGradient(
           width / 2,
           height / 2 - baseRadius,
@@ -486,10 +472,7 @@
         ctx.fillStyle = gBg;
         ctx.fillRect(0, 0, width, height);
 
-        // nejdřív prstenec
         drawRing();
-
-        // pak signal sphere uprostřed
         drawSignalSphere();
       }
 
@@ -498,7 +481,7 @@
           targetRotY += 0.0025;
         }
 
-        sphereSpin += 0.012; // otáčení signální koule
+        sphereSpin += 0.012;
 
         const k = 0.12;
         rotX += (targetRotX - rotX) * k;
@@ -511,7 +494,6 @@
       requestAnimationFrame(loop);
 
       // ---------- interakce ----------
-
       function onPointerDown(clientX, clientY) {
         dragging = true;
         lastX = clientX;
@@ -546,7 +528,6 @@
         onPointerUp();
       });
 
-      // touch
       canvas.addEventListener(
         "touchstart",
         (e) => {
@@ -611,7 +592,6 @@
         { passive: false }
       );
 
-      // kolečko myši = zoom
       canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
         const factor = e.deltaY > 0 ? 0.9 : 1.1;
