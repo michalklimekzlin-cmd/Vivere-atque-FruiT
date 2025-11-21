@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>VaF'i'T • 3D Totem z písmenek</title>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050815, #020208);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: #f5f5f5;
+      }
+
+      .root {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stage {
+        position: relative;
+        width: min(920px, 96vw);
+        height: min(620px, 90vh);
+        border-radius: 32px;
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
+        background: radial-gradient(circle at top, #06091a, #020208);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      #totem-canvas {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 100%;
+        height: 100%;
+        display: block;
+        touch-action: none;
+      }
+
+      .hud {
+        position: absolute;
+        left: 18px;
+        bottom: 14px;
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      .hud-right {
+        position: absolute;
+        right: 18px;
+        top: 14px;
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      /* skrytý zdroj totemu – nic nemaž, tady je tvůj text */
+      #totem-source {
+        display: none;
+        white-space: pre;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="root">
+      <div class="stage">
+        <canvas id="totem-canvas"></canvas>
+
+        <div class="hud">
+          🌀 1 prst / myš = náklon • pinch / kolečko = zoom
+        </div>
+        <div class="hud-right">
+          v1.0 • VaF'i'T ASCII Totem 3D
+        </div>
+
+        <!-- TADY JE TVŮJ TOTEM – můžeš ho v klidu upravovat -->
+        <pre id="totem-source">
+                                       .                                     
+                                      :  :
+                                   ([{🫡°]})
+                                     7i_,;‘
+                                   `ˇ`'|'´ˇ´                                  
+                                 ~ KÆ.:Ÿ:.ŚM ~
+                              Vivere atque FruiT   
+                 `¡(•°(•°.)´}:|:[*(°.•.)|(.•.°)*]:|:(”(°.•)°•)¡´
+           į::::ī::::¡::[&,;’{(°•.)(.°•)}:{•[]•}•],;‘#]::ï::::įj::::j
+                `‘.,_i,/`[´'|'`_.:Ÿ:._,7i.•´ˇ’,:.,_,;’`ˇ’.,_i,/`
+                            (“~““´°;)../´/´/´_)_]_} 
+                            `\%.•‘ˇ´1¡;:.|I°”’’´/‘´
+                                `°‘:;i’/☻\i;:‘°´
+                                    ~/`\|/´\~
+                                    `ˇ'ÌīÍ'ˇ´
+                                      q[¥]p
+                                    .,:´|`:,
+                                    (.|0•0|.)
+                                      ()!!()/‘
+        </pre>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("totem-canvas");
+      const ctx = canvas.getContext("2d");
+
+      const dpr = window.devicePixelRatio || 1;
+      let width = 0;
+      let height = 0;
+
+      let viewScale = 1;
+      let targetViewScale = 1;
+      let tiltX = -0.35;
+      let tiltY = 0.2;
+      let targetTiltX = tiltX;
+      let targetTiltY = tiltY;
+
+      let rotationY = 0; // hlavní rotace kolem Y
+      let autoRotate = 0.45;
+
+      // načtení totem textu
+      const rawText = document.getElementById("totem-source").innerText;
+      const lines = rawText
+        .split("\n")
+        .filter((l) => l.trim() !== "" || l.length > 0);
+
+      const maxLen = lines.reduce((m, l) => Math.max(m, l.length), 0);
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      resize();
+      window.addEventListener("resize", resize);
+
+      function projectPoint(x, y, z) {
+        // rotace kolem Y (otáčení totemu)
+        const sinR = Math.sin(rotationY);
+        const cosR = Math.cos(rotationY);
+        let xR = x * cosR + z * sinR;
+        let zR = -x * sinR + z * cosR;
+
+        // náklon kolem X a Y
+        const sinX = Math.sin(tiltX);
+        const cosX = Math.cos(tiltX);
+        const sinY = Math.sin(tiltY);
+        const cosY = Math.cos(tiltY);
+
+        let y1 = y * cosX - zR * sinX;
+        let z1 = y * sinX + zR * cosX;
+
+        let x2 = xR * cosY + z1 * sinY;
+        let z2 = -xR * sinY + z1 * cosY;
+
+        const sx = width / 2 + x2 * viewScale;
+        const sy = height / 2 + y1 * viewScale;
+
+        return { sx, sy, z: z2 };
+      }
+
+      function drawBackground() {
+        const g = ctx.createRadialGradient(
+          width * 0.5,
+          height * 0.1,
+          0,
+          width * 0.5,
+          height * 0.5,
+          height * 0.9
+        );
+        g.addColorStop(0, "#0b0815");
+        g.addColorStop(1, "#020108");
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, width, height);
+      }
+
+      function drawTotem() {
+        const charW = 9;
+        const lineH = 16;
+        const towerHeight = lines.length * lineH;
+        const towerWidth = maxLen * charW;
+
+        const radius = towerWidth * 0.65; // poloměr kolem Y
+        const depth = radius; // pro perspektivu
+
+        ctx.save();
+        ctx.font = "11px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "rgba(255,220,180,0.95)";
+        ctx.shadowColor = "rgba(255,200,150,0.9)";
+        ctx.shadowBlur = 10;
+
+        // 4 strany "sloupu"
+        const sides = 4;
+        const sideStep = (Math.PI * 2) / sides;
+
+        const centerY = height * 0.1; // totem posunutý trochu nahoru
+
+        const points = [];
+
+        for (let s = 0; s < sides; s++) {
+          const sideAngle = s * sideStep;
+
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].padEnd(maxLen, " ");
+            for (let j = 0; j < line.length; j++) {
+              const ch = line[j];
+
+              const localX = (j - maxLen / 2) * charW;
+              const localY = (i - lines.length / 2) * lineH;
+
+              // zakřivení kolem Y – text obtočený kolem sloupu
+              const angle = sideAngle + (localX / towerWidth) * sideStep;
+              const x3d = Math.cos(angle) * radius;
+              const z3d = Math.sin(angle) * radius;
+              const y3d = localY - towerHeight * 0.05;
+
+              const proj = projectPoint(x3d, y3d, z3d + depth);
+
+              points.push({
+                ch,
+                sx: proj.sx,
+                sy: proj.sy + centerY,
+                z: proj.z,
+              });
+            }
+          }
+        }
+
+        // seřadit podle hloubky, zadní dřív
+        points.sort((a, b) => a.z - b.z);
+
+        for (const p of points) {
+          const alpha =
+            0.4 +
+            0.6 *
+              (1 -
+                Math.min(1, (p.z + depth) / (depth * 2 + 1e-5))); // lehké zesvětlení vpředu
+          ctx.globalAlpha = alpha;
+          ctx.fillText(p.ch, p.sx, p.sy);
+        }
+
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+
+      function drawBaseGlow() {
+        ctx.save();
+        const baseY = height * 0.78;
+        const baseR = Math.min(width, height) * 0.18 * viewScale;
+
+        ctx.beginPath();
+        ctx.ellipse(width / 2, baseY, baseR * 1.5, baseR * 0.6, 0, 0, Math.PI * 2);
+        const g = ctx.createRadialGradient(
+          width / 2,
+          baseY,
+          baseR * 0.3,
+          width / 2,
+          baseY,
+          baseR * 1.7
+        );
+        g.addColorStop(0, "rgba(255, 210, 160, 0.35)");
+        g.addColorStop(1, "rgba(0, 0, 0, 0.0)");
+        ctx.fillStyle = g;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function draw(dt) {
+        ctx.clearRect(0, 0, width, height);
+        drawBackground();
+        drawBaseGlow();
+        drawTotem();
+      }
+
+      let lastTime = 0;
+      function loop(t) {
+        if (!t) t = 0;
+        const dt = (t - lastTime) / 1000;
+        lastTime = t;
+
+        // plynulé přibližování / náklon
+        const k = Math.min(1, dt * 5);
+        viewScale += (targetViewScale - viewScale) * k;
+        tiltX += (targetTiltX - tiltX) * k;
+        tiltY += (targetTiltY - tiltY) * k;
+
+        rotationY += autoRotate * dt;
+
+        draw(dt);
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+
+      // ---------- Interakce (drag + zoom) ----------
+
+      let dragging = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      function getPos(e) {
+        if (e.touches && e.touches.length > 0) {
+          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+        return { x: e.clientX, y: e.clientY };
+      }
+
+      canvas.addEventListener("mousedown", (e) => {
+        dragging = true;
+        const p = getPos(e);
+        lastX = p.x;
+        lastY = p.y;
+      });
+
+      window.addEventListener("mouseup", () => (dragging = false));
+
+      window.addEventListener("mousemove", (e) => {
+        if (!dragging) return;
+        const p = getPos(e);
+        const dx = p.x - lastX;
+        const dy = p.y - lastY;
+        lastX = p.x;
+        lastY = p.y;
+
+        targetTiltY += dx * 0.004;
+        targetTiltX += dy * 0.004;
+        targetTiltX = Math.max(-1.2, Math.min(0.1, targetTiltX));
+      });
+
+      canvas.addEventListener(
+        "touchstart",
+        (e) => {
+          dragging = true;
+          const p = getPos(e);
+          lastX = p.x;
+          lastY = p.y;
+        },
+        { passive: false }
+      );
+
+      window.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!dragging) return;
+          const p = getPos(e);
+          const dx = p.x - lastX;
+          const dy = p.y - lastY;
+          lastX = p.x;
+          lastY = p.y;
+
+          targetTiltY += dx * 0.004;
+          targetTiltX += dy * 0.004;
+          targetTiltX = Math.max(-1.2, Math.min(0.1, targetTiltX));
+        },
+        { passive: false }
+      );
+
+      window.addEventListener(
+        "touchend",
+        () => {
+          dragging = false;
+        },
+        { passive: false }
+      );
+
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        let next = targetViewScale * factor;
+        next = Math.max(0.7, Math.min(2.5, next));
+        targetViewScale = next;
+      });
+    </script>
+  </body>
+</html>
