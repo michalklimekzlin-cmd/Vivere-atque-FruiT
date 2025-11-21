@@ -85,15 +85,15 @@
         <canvas id="globe-canvas"></canvas>
 
         <div class="hud">
-          🌀 1 prst na kouli = otáčení koule • ťuk na slot = zoom na slot •
-          1 prst mimo koule = orbit • 2 prsty = náklon + posun + zoom
-          (kotvený na prstech)
+          🌀 1 prst na kouli = otáčení koule • ťuk na slot = zoom na slot • 1 prst
+          mimo koule = orbit • 2 prsty = náklon + posun + zoom (kotvený na prstech)
         </div>
         <div class="hud-center" id="status">
           vybraný svět: Hra + pravidla
         </div>
         <div class="hud-right">
-          v1.5 • 3 koule světa + VaF'i'T Big Signal + Portal Frame + Signal Sphere
+          v1.6 • 3 koule světa + VaF'i'T Big Signal (glyph kužel) + Portal Frame +
+          Ring Sphere
         </div>
       </div>
     </div>
@@ -122,7 +122,7 @@
       let targetTiltX = globalTiltX;
       let targetTiltY = globalTiltY;
 
-      // orbit (kolotoč)
+      // orbit (kolotoč koulí)
       let orbitRotation = 0;
       let orbitVelocity = 0.12;
       const orbitDamping = 0.96;
@@ -135,262 +135,13 @@
       let activeSphere = null;
       let sphereDragActive = false;
 
-      // ---------- SIGNAL CORE (spodní kužel pod motorem) ----------
+      // --- glyph data (použije se na velký kužel) ---
       const glyphs = ["{*(°.)}", "ً&’」", "¡(*)(%)¡", "{°. .}", "(•.°)"];
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      let glyphPulse = 0;
 
-      const signalCore = {
-        points: [],
-        rings: 12,
-        segments: 18,
-        pulse: 0,
-        baseRadius: 120,
-        coneHeight: 200,
-        mode: "mesh",
-        offsetY: 0
-      };
+      // ---------- VELKÝ KUŽEL / PORTÁLOVÝ RÁM (BigCone) ----------
 
-      function generateSignalPoints() {
-        signalCore.points = [];
-        const { rings, segments, coneHeight, baseRadius } = signalCore;
-
-        for (let i = 0; i <= rings; i++) {
-          const t = i / rings;
-          const y = coneHeight / 2 - t * coneHeight;
-          const r = baseRadius * (1.0 - 0.75 * t);
-          for (let j = 0; j < segments; j++) {
-            const a = (j / segments) * Math.PI * 2;
-            const x = r * Math.cos(a);
-            const z = r * Math.sin(a);
-            signalCore.points.push({
-              baseX: x,
-              baseY: y,
-              baseZ: z,
-              x: 0,
-              y: 0,
-              z: 0,
-              screenX: 0,
-              screenY: 0,
-              ring: i,
-              seg: j,
-              phase: Math.random() * Math.PI * 2
-            });
-          }
-        }
-      }
-
-      function updateSignalProjection() {
-        const sinX = Math.sin(globalTiltX);
-        const cosX = Math.cos(globalTiltX);
-        const sinY = Math.sin(globalTiltY);
-        const cosY = Math.cos(globalTiltY);
-        const offsetY = signalCore.offsetY;
-
-        for (const p of signalCore.points) {
-          let x = p.baseX;
-          let y = p.baseY;
-          let z = p.baseZ;
-
-          // rotace kolem X
-          let y1 = y * cosX - z * sinX;
-          let z1 = y * sinX + z * cosX;
-
-          // rotace kolem Y
-          let x2 = x * cosY + z1 * sinY;
-          let z2 = -x * sinY + z1 * cosY;
-
-          p.x = x2;
-          p.y = y1 + offsetY;
-          p.z = z2;
-
-          const sx = width / 2 + viewOffsetX + x2 * viewScale;
-          const sy = height / 2 + viewOffsetY + (y1 + offsetY) * viewScale;
-
-          p.screenX = sx;
-          p.screenY = sy;
-        }
-      }
-
-      function drawSignalBackground() {
-        ctx.save();
-        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
-        ctx.scale(viewScale, viewScale);
-
-        const yBase = signalCore.offsetY + signalCore.coneHeight / 2 + 12;
-
-        ctx.beginPath();
-        ctx.ellipse(
-          0,
-          yBase,
-          signalCore.baseRadius * 0.9,
-          signalCore.baseRadius * 0.3,
-          0,
-          0,
-          Math.PI * 2
-        );
-        const eGrad = ctx.createRadialGradient(
-          0,
-          yBase,
-          signalCore.baseRadius * 0.1,
-          0,
-          yBase,
-          signalCore.baseRadius
-        );
-        eGrad.addColorStop(0, "rgba(20,12,8,1)");
-        eGrad.addColorStop(1, "rgba(0,0,0,0.6)");
-        ctx.fillStyle = eGrad;
-        ctx.fill();
-
-        ctx.restore();
-      }
-
-      function drawSignalMesh() {
-        ctx.lineWidth = 0.7;
-        ctx.strokeStyle = "rgba(255, 210, 150, 0.9)";
-
-        // horizontální kružnice
-        for (let i = 0; i <= signalCore.rings; i++) {
-          ctx.beginPath();
-          let started = false;
-          for (const p of signalCore.points) {
-            if (p.ring !== i) continue;
-            if (!started) {
-              ctx.moveTo(p.screenX, p.screenY);
-              started = true;
-            } else {
-              ctx.lineTo(p.screenX, p.screenY);
-            }
-          }
-          if (started) ctx.closePath();
-          ctx.stroke();
-        }
-
-        // vertikální linie
-        for (let j = 0; j < signalCore.segments; j++) {
-          ctx.beginPath();
-          let started = false;
-          for (let i = 0; i <= signalCore.rings; i++) {
-            const idx = i * signalCore.segments + j;
-            const p = signalCore.points[idx];
-            if (!p) continue;
-            if (!started) {
-              ctx.moveTo(p.screenX, p.screenY);
-              started = true;
-            } else {
-              ctx.lineTo(p.screenX, p.screenY);
-            }
-          }
-          if (started) ctx.stroke();
-        }
-      }
-
-      function drawSignalLetters() {
-        ctx.font = "10px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "rgba(255, 220, 170, 0.95)";
-        ctx.shadowColor = "rgba(255, 200, 140, 0.7)";
-        ctx.shadowBlur = 6;
-
-        const len = letters.length;
-        let i = 0;
-        for (const p of signalCore.points) {
-          const ch = letters[i % len];
-          i++;
-          const flicker = 0.6 + 0.4 * Math.sin(signalCore.pulse * 2 + p.phase);
-          ctx.globalAlpha = flicker;
-          ctx.fillText(ch, p.screenX, p.screenY);
-        }
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
-      }
-
-      function drawSignalGlyph() {
-        ctx.font = "11px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "rgba(255, 225, 180, 0.96)";
-        ctx.shadowColor = "rgba(255, 200, 160, 0.8)";
-        ctx.shadowBlur = 7;
-
-        const len = glyphs.length;
-        let i = 0;
-        for (const p of signalCore.points) {
-          const g = glyphs[i % len];
-          i++;
-          const flicker =
-            0.55 + 0.45 * Math.sin(signalCore.pulse * 1.4 + p.phase);
-          ctx.globalAlpha = flicker;
-          ctx.fillText(g, p.screenX, p.screenY);
-        }
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
-      }
-
-      function drawSignalVafiti() {
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(255, 210, 160, 0.9)";
-        ctx.fillStyle = "rgba(255, 210, 160, 0.35)";
-        for (const p of signalCore.points) {
-          const wobble = Math.sin(signalCore.pulse * 3 + p.phase) * 4;
-          const y = p.screenY - wobble;
-          const size = 2 + 1.2 * Math.sin(signalCore.pulse * 2 + p.phase);
-          ctx.beginPath();
-          ctx.arc(p.screenX, y, size, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-        }
-      }
-
-      // průhledná čtvrtka kužele, která obíhá s orbitem (výřez z menšího kornoutu)
-      function cutRotatingQuarter() {
-        ctx.save();
-        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
-        ctx.scale(viewScale, viewScale);
-
-        const centerY = signalCore.offsetY - signalCore.coneHeight * 0.1;
-        const outerR = signalCore.baseRadius * 1.2;
-
-        const start = orbitRotation;
-        const end = start + Math.PI / 2;
-
-        ctx.beginPath();
-        ctx.moveTo(0, centerY);
-        ctx.arc(0, centerY, outerR, start, end);
-        ctx.closePath();
-
-        const oldOp = ctx.globalCompositeOperation;
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.fill();
-        ctx.globalCompositeOperation = oldOp;
-
-        ctx.restore();
-      }
-
-      function drawSignalCore() {
-        signalCore.pulse += 0.016;
-        updateSignalProjection();
-        drawSignalBackground();
-
-        switch (signalCore.mode) {
-          case "mesh":
-            drawSignalMesh();
-            break;
-          case "letters":
-            drawSignalLetters();
-            break;
-          case "glyph":
-            drawSignalGlyph();
-            break;
-          case "vafiti":
-            drawSignalVafiti();
-            break;
-        }
-
-        cutRotatingQuarter();
-      }
-
-      // ---------- BIG CONE KOLEM SOUSTAVY ----------
       const bigCone = {
         points: [],
         rings: 14,
@@ -399,7 +150,7 @@
         radiusBottom: 40,
         height: 400,
         offsetTopY: 0,
-        rotationFactor: 0.35
+        rotationFactor: 0.35,
       };
 
       function generateBigConePoints() {
@@ -425,7 +176,8 @@
               screenX: 0,
               screenY: 0,
               ring: i,
-              seg: j
+              seg: j,
+              phase: Math.random() * Math.PI * 2,
             });
           }
         }
@@ -437,6 +189,7 @@
         const sinY = Math.sin(globalTiltY);
         const cosY = Math.cos(globalTiltY);
 
+        // jemná rotace kolem Y svázaná s orbitem
         const extraRot = orbitRotation * bigCone.rotationFactor;
         const sinR = Math.sin(extraRot);
         const cosR = Math.cos(extraRot);
@@ -446,7 +199,7 @@
           let y = p.baseY;
           let z = p.baseZ;
 
-          // vlastní rotace kolem Y
+          // vlastní rotace kolem Y (otáčení "koše" podle orbity)
           let xR = x * cosR + z * sinR;
           let zR = -x * sinR + z * cosR;
 
@@ -473,7 +226,7 @@
       function drawBigCone() {
         updateBigConeProjection();
 
-        // jemný stín pod velkým košem
+        // jemný stín pod velkým kuželem
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
@@ -541,291 +294,32 @@
           if (started) ctx.stroke();
         }
 
+        // glyphový povrch – VaF'i'T Big Signal
+        ctx.font = "10px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "rgba(255, 225, 185, 0.96)";
+        ctx.shadowColor = "rgba(255, 200, 150, 0.75)";
+        ctx.shadowBlur = 6;
+
+        let iGlyph = 0;
+        const glyphLen = glyphs.length;
+        for (const p of bigCone.points) {
+          const g = glyphs[iGlyph % glyphLen];
+          iGlyph++;
+          const flicker =
+            0.55 + 0.45 * Math.sin(glyphPulse * 2.1 + p.phase * 1.3);
+          ctx.globalAlpha = flicker;
+          ctx.fillText(g, p.screenX, p.screenY);
+        }
+
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
         ctx.restore();
       }
 
-      // ---------- PORTÁLOVÝ RÁM + SIGNAL SPHERE (jeden celek) ----------
-      const digits = "0123456789";
-
-      const signalSphere = {
-        points: [],
-        latSteps: 26,
-        lonSteps: 40,
-        radius: 100,
-        pulse: 0
-      };
-
-      function generateSignalSpherePoints() {
-        signalSphere.points = [];
-        let idx = 0;
-        for (let i = 0; i <= signalSphere.latSteps; i++) {
-          const v = i / signalSphere.latSteps;
-          const lat = v * Math.PI - Math.PI / 2;
-          const y = Math.sin(lat);
-          const r = Math.cos(lat);
-          for (let j = 0; j < signalSphere.lonSteps; j++) {
-            const u = j / signalSphere.lonSteps;
-            const lon = u * Math.PI * 2;
-
-            // mírná spirála kolem pólu
-            const spiralOffset = (i / signalSphere.latSteps) * 0.6;
-            const lonSpiral = lon + spiralOffset;
-
-            const x = r * Math.cos(lonSpiral);
-            const z = r * Math.sin(lonSpiral);
-
-            signalSphere.points.push({
-              bx: x,
-              by: y,
-              bz: z,
-              char: digits[idx % digits.length],
-              phase: Math.random() * Math.PI * 2
-            });
-            idx++;
-          }
-        }
-      }
-
-      const portalRing = {
-        lines: [],
-        slots: [],
-        majorRadius: 2.0,
-        tubeRadius: 0.55,
-        majorSteps: 56,
-        tubeSteps: 14
-      };
-
-      function generatePortalRing() {
-        portalRing.lines = [];
-        const { majorRadius, tubeRadius, majorSteps, tubeSteps } = portalRing;
-
-        for (let i = 0; i < majorSteps; i++) {
-          const t0 = i / majorSteps;
-          const t1 = (i + 1) / majorSteps;
-
-          const theta0 = t0 * Math.PI * 2;
-          const theta1 = t1 * Math.PI * 2;
-
-          for (let j = 0; j < tubeSteps; j++) {
-            const s0 = j / tubeSteps;
-            const s1 = (j + 1) / tubeSteps;
-
-            const phi0 = s0 * Math.PI * 2;
-            const phi1 = s1 * Math.PI * 2;
-
-            const extraScale0 = 1.0 + 0.25 * Math.cos(theta0);
-            const extraScale1 = 1.0 + 0.25 * Math.cos(theta1);
-
-            const r0 = tubeRadius * extraScale0;
-            const r1 = tubeRadius * extraScale1;
-
-            const p = [];
-
-            p.push({
-              x: (majorRadius + r0 * Math.cos(phi0)) * Math.cos(theta0),
-              y: r0 * Math.sin(phi0),
-              z: (majorRadius + r0 * Math.cos(phi0)) * Math.sin(theta0)
-            });
-            p.push({
-              x: (majorRadius + r0 * Math.cos(phi1)) * Math.cos(theta0),
-              y: r0 * Math.sin(phi1),
-              z: (majorRadius + r0 * Math.cos(phi1)) * Math.sin(theta0)
-            });
-            p.push({
-              x: (majorRadius + r1 * Math.cos(phi1)) * Math.cos(theta1),
-              y: r1 * Math.sin(phi1),
-              z: (majorRadius + r1 * Math.cos(phi1)) * Math.sin(theta1)
-            });
-            p.push({
-              x: (majorRadius + r1 * Math.cos(phi0)) * Math.cos(theta1),
-              y: r1 * Math.sin(phi0),
-              z: (majorRadius + r1 * Math.cos(phi0)) * Math.sin(theta1)
-            });
-
-            portalRing.lines.push({ ax: p[0].x, ay: p[0].y, az: p[0].z, bx: p[1].x, by: p[1].y, bz: p[1].z });
-            portalRing.lines.push({ ax: p[1].x, ay: p[1].y, az: p[1].z, bx: p[2].x, by: p[2].y, bz: p[2].z });
-            portalRing.lines.push({ ax: p[2].x, ay: p[2].y, az: p[2].z, bx: p[3].x, by: p[3].y, bz: p[3].z });
-            portalRing.lines.push({ ax: p[3].x, ay: p[3].y, az: p[3].z, bx: p[0].x, by: p[0].y, bz: p[0].z });
-          }
-        }
-      }
-
-      function generatePortalSlots() {
-        portalRing.slots = [];
-        const count = 4;
-        for (let i = 0; i < count; i++) {
-          const t = i / count;
-          const theta = t * Math.PI * 2;
-          const r = portalRing.majorRadius;
-          const x = r * Math.cos(theta);
-          const z = r * Math.sin(theta);
-          const y = 0;
-          portalRing.slots.push({
-            bx: x,
-            by: y,
-            bz: z,
-            label: "slot"
-          });
-        }
-      }
-
-      // projekce pro portál + písmenkovou kouli (společná kamera)
-      function projectWorld(x, y, z) {
-        const sinX = Math.sin(globalTiltX);
-        const cosX = Math.cos(globalTiltX);
-        const sinY = Math.sin(globalTiltY);
-        const cosY = Math.cos(globalTiltY);
-
-        let y1 = y * cosX - z * sinX;
-        let z1 = y * sinX + z * cosX;
-        let x2 = x * cosY + z1 * sinY;
-        let z2 = -x * sinY + z1 * cosY;
-
-        const sx = width / 2 + viewOffsetX + x2 * viewScale;
-        const sy = height / 2 + viewOffsetY + y1 * viewScale;
-
-        return { sx, sy, z: z2 };
-      }
-
-      function drawPortalRing() {
-        ctx.lineWidth = 0.9;
-        ctx.strokeStyle = "rgba(255, 210, 150, 0.65)";
-
-        const scale = baseRadius;
-
-        ctx.beginPath();
-        for (const seg of portalRing.lines) {
-          const p1 = projectWorld(
-            seg.ax * scale,
-            seg.ay * scale - baseRadius * 0.1,
-            seg.az * scale
-          );
-          const p2 = projectWorld(
-            seg.bx * scale,
-            seg.by * scale - baseRadius * 0.1,
-            seg.bz * scale
-          );
-
-          if (p1.z > 0 && p2.z > 0) continue;
-
-          ctx.moveTo(p1.sx, p1.sy);
-          ctx.lineTo(p2.sx, p2.sy);
-        }
-        ctx.stroke();
-
-        // sloty na portálu
-        ctx.font = "9px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        for (const s of portalRing.slots) {
-          const p = projectWorld(
-            s.bx * scale,
-            s.by * scale - baseRadius * 0.1,
-            s.bz * scale
-          );
-          if (p.z > 0) continue;
-
-          const w = 40;
-          const h = 18;
-          const r = 8;
-
-          ctx.beginPath();
-          ctx.moveTo(p.sx - w / 2 + r, p.sy - h / 2);
-          ctx.lineTo(p.sx + w / 2 - r, p.sy - h / 2);
-          ctx.quadraticCurveTo(
-            p.sx + w / 2,
-            p.sy - h / 2,
-            p.sx + w / 2,
-            p.sy - h / 2 + r
-          );
-          ctx.lineTo(p.sx + w / 2, p.sy + h / 2 - r);
-          ctx.quadraticCurveTo(
-            p.sx + w / 2,
-            p.sy + h / 2,
-            p.sx + w / 2 - r,
-            p.sy + h / 2
-          );
-          ctx.lineTo(p.sx - w / 2 + r, p.sy + h / 2);
-          ctx.quadraticCurveTo(
-            p.sx - w / 2,
-            p.sy + h / 2,
-            p.sx - w / 2,
-            p.sy + h / 2 - r
-          );
-          ctx.lineTo(p.sx - w / 2, p.sy - h / 2 + r);
-          ctx.quadraticCurveTo(
-            p.sx - w / 2,
-            p.sy - h / 2,
-            p.sx - w / 2 + r,
-            p.sy - h / 2
-          );
-          ctx.closePath();
-
-          ctx.fillStyle = "rgba(6,6,10,0.92)";
-          ctx.strokeStyle = "rgba(255,210,150,0.9)";
-          ctx.lineWidth = 0.7;
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.fillStyle = "rgba(255,220,160,0.95)";
-          ctx.shadowColor = "rgba(255,200,140,0.5)";
-          ctx.shadowBlur = 4;
-          ctx.fillText(s.label, p.sx, p.sy + 1);
-          ctx.shadowBlur = 0;
-        }
-      }
-
-      function drawSignalSphereCenter() {
-        signalSphere.pulse += 0.016;
-
-        ctx.font = "11px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.shadowColor = "rgba(255, 200, 150, 0.85)";
-        ctx.shadowBlur = 8;
-
-        const scale = signalSphere.radius;
-
-        for (const pt of signalSphere.points) {
-          const worldX = pt.bx * scale;
-          const worldY = pt.by * scale - baseRadius * 0.1;
-          const worldZ = pt.bz * scale;
-
-          const p = projectWorld(worldX, worldY, worldZ);
-          if (p.z > 0) continue;
-
-          const flicker =
-            0.65 + 0.35 * Math.sin(signalSphere.pulse * 2 + pt.phase);
-          ctx.fillStyle =
-            "rgba(255,220,170," + flicker.toFixed(2) + ")";
-          ctx.fillText(pt.char, p.sx, p.sy);
-        }
-        ctx.shadowBlur = 0;
-
-        // vnější kružnice koule
-        const rimSamples = 80;
-        ctx.beginPath();
-        let first = true;
-        for (let i = 0; i <= rimSamples; i++) {
-          const t = (i / rimSamples) * Math.PI * 2;
-          const x = Math.cos(t) * scale;
-          const y = Math.sin(t) * scale - baseRadius * 0.1;
-          const z = 0;
-          const p = projectWorld(x, y, z);
-          if (first) {
-            ctx.moveTo(p.sx, p.sy);
-            first = false;
-          } else {
-            ctx.lineTo(p.sx, p.sy);
-          }
-        }
-        ctx.strokeStyle = "rgba(255, 210, 150, 0.9)";
-        ctx.lineWidth = 1.4;
-        ctx.stroke();
-      }
-
       // ---------- KOULE / SLOTY ----------
+
       function createSlotTemplate() {
         const template = [];
         const bands = 7;
@@ -844,7 +338,7 @@
               screenX: 0,
               screenY: 0,
               sceneX: 0,
-              sceneY: 0
+              sceneY: 0,
             });
             id++;
           }
@@ -873,7 +367,7 @@
           cx: 0,
           cy: 0,
           depth: 0,
-          radiusScale: 1
+          radiusScale: 1,
         },
         {
           key: "heroes",
@@ -886,12 +380,12 @@
           cx: 0,
           cy: 0,
           depth: 0,
-          radiusScale: 1
+          radiusScale: 1,
         },
         {
           key: "lang",
           name: "Jazyk",
-          baseAngle: Math.PI,
+          baseAngle: 0,
           rotX: -0.25,
           rotY: -0.3,
           autoSpeed: 0.28,
@@ -899,15 +393,14 @@
           cx: 0,
           cy: 0,
           depth: 0,
-          radiusScale: 1
-        }
-        // čtvrtou kouli můžeš kdykoli vrátit
+          radiusScale: 1,
+        },
       ];
 
       activeSphere = spheres[0];
 
       function layoutSpheres() {
-        const orbitR = baseRadius * 2.7;
+        const orbitR = baseRadius * 2.3;
 
         spheres.forEach((s) => {
           const a = s.baseAngle + orbitRotation;
@@ -949,23 +442,13 @@
 
         baseRadius = Math.min(width, height) * 0.18;
 
-        // velikosti kuželů podle scény
-        signalCore.baseRadius = Math.min(width, height) * 0.19;
-        signalCore.coneHeight = signalCore.baseRadius * 1.6;
-        signalCore.offsetY = baseRadius * 0.9;
-
+        // nastavení velkého glyph kuželu
         bigCone.radiusTop = baseRadius * 2.4;
         bigCone.radiusBottom = baseRadius * 0.6;
         bigCone.height = baseRadius * 4.2;
         bigCone.offsetTopY = baseRadius * 0.25;
 
-        signalSphere.radius = baseRadius * 0.9;
-
-        generateSignalPoints();
         generateBigConePoints();
-        generateSignalSpherePoints();
-        generatePortalRing();
-        generatePortalSlots();
       }
 
       resize();
@@ -999,14 +482,14 @@
           0,
           radius * 1.4
         );
-        g.addColorStop(0, "rgba(255, 200, 150, 0.20)");
+        g.addColorStop(0, "rgba(255, 200, 150, 0.2)");
         g.addColorStop(1, "rgba(0, 0, 0, 0)");
         ctx.fillStyle = g;
         ctx.fillRect(-radius * 2, -radius * 2, radius * 4, radius * 4);
 
         ctx.beginPath();
         ctx.arc(0, 0, radius * 1.02, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,0,0,0.75)";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
         ctx.fill();
 
         ctx.beginPath();
@@ -1095,7 +578,7 @@
               }
             }
           }
-        ctx.stroke();
+          ctx.stroke();
         }
 
         // název
@@ -1179,18 +662,19 @@
         ctx.globalAlpha = 1;
       }
 
+      // rotující prstenec kolem středové koule
+      let ringRotation = 0;
+      const ringRotationSpeed = 0.35;
+
       function drawScene() {
         ctx.clearRect(0, 0, width, height);
 
         layoutSpheres();
 
-        // velký koš za vším
+        // velký glyphový kužel / portálový rám
         drawBigCone();
 
-        // spodní Signal Core
-        drawSignalCore();
-
-        // středový motor + orbit
+        // středový motor + prstenec + text
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
@@ -1198,6 +682,7 @@
         const hubRInner = baseRadius * 1.0;
         const hubROuter = baseRadius * 1.45;
 
+        // světlá aura uprostřed
         const gCenter = ctx.createRadialGradient(
           0,
           0,
@@ -1211,6 +696,9 @@
         ctx.fillStyle = gCenter;
         ctx.fillRect(-width, -height, width * 2, height * 2);
 
+        // rotující prstenec (portal ring)
+        ctx.save();
+        ctx.rotate(ringRotation);
         ctx.beginPath();
         ctx.arc(0, 0, hubROuter, 0, Math.PI * 2);
         ctx.arc(0, 0, hubRInner, 0, Math.PI * 2, true);
@@ -1228,8 +716,20 @@
         ctx.fillStyle = hubGrad;
         ctx.fill();
 
+        // jemná kontura prstence
+        ctx.strokeStyle = "rgba(255, 197, 120, 0.75)";
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(0, 0, hubROuter, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 0, hubRInner, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // křížové paprsky z centra
         ctx.save();
-        ctx.strokeStyle = "rgba(255, 197, 120, 0.5)";
+        ctx.strokeStyle = "rgba(255, 197, 120, 0.45)";
         ctx.lineWidth = 1;
         for (let i = 0; i < 4; i++) {
           const angle = (i * Math.PI) / 2;
@@ -1240,6 +740,7 @@
         }
         ctx.restore();
 
+        // nápis v centru (zůstává, neprudí do rotace)
         ctx.save();
         ctx.font = "700 14px system-ui";
         ctx.fillStyle = "rgba(255, 220, 150, 0.95)";
@@ -1248,18 +749,15 @@
         ctx.shadowColor = "rgba(255, 200, 120, 0.9)";
         ctx.shadowBlur = 14;
         ctx.rotate(0.8);
-        ctx.fillText(
-          "{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]",
-          0,
-          0
-        );
+        ctx.fillText("{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]", 0, 0);
         ctx.restore();
 
+        // orbit – pomocná tečkovaná kružnice
         ctx.save();
         ctx.setLineDash([6, 6]);
         ctx.strokeStyle = "rgba(255, 210, 150, 0.4)";
         ctx.lineWidth = 1;
-        const orbitR = baseRadius * 2.7;
+        const orbitR = baseRadius * 2.3;
         ctx.beginPath();
         for (let aDeg = 0; aDeg <= 360; aDeg += 3) {
           const a = (aDeg * Math.PI) / 180 + orbitRotation;
@@ -1281,11 +779,7 @@
 
         ctx.restore();
 
-        // PORTÁL + PÍSMENKOVÁ KOULE ve středu
-        drawPortalRing();
-        drawSignalSphereCenter();
-
-        // světy
+        // koule podle hloubky
         const sorted = [...spheres].sort((a, b) => a.depth - b.depth);
         for (const s of sorted) drawSphere(s);
       }
@@ -1297,6 +791,8 @@
         const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
+        glyphPulse += dt;
+
         if (!sphereDragActive) {
           orbitRotation += orbitVelocity * dt;
           const drift = orbitBaseDrift * dt;
@@ -1306,6 +802,9 @@
           orbitRotation += orbitVelocity * dt * 0.15;
           orbitVelocity *= Math.pow(0.85, dt * 60);
         }
+
+        // rotace prstence
+        ringRotation += ringRotationSpeed * dt;
 
         for (const sphere of spheres) {
           sphere.rotY += sphere.autoSpeed * dt;
@@ -1390,7 +889,6 @@
         if (best) {
           activeSphere = best;
           statusEl.textContent = "vybraný svět: " + activeSphere.name;
-          updateSignalModeForSphere(activeSphere);
           dragMode = "sphere";
           sphereDragActive = true;
         } else {
@@ -1495,10 +993,7 @@
             const dy = clientY - slot.screenY;
             if (Math.abs(dx) <= 16 && Math.abs(dy) <= 14) {
               statusEl.textContent =
-                "vybraný svět: " +
-                activeSphere.name +
-                " • " +
-                slot.label;
+                "vybraný svět: " + activeSphere.name + " • " + slot.label;
               focusOnSlot(slot);
               break;
             }
@@ -1507,11 +1002,8 @@
         sphereDragActive = false;
       }
 
-      function updateSignalModeForSphere(sphere) {
-        if (!sphere) return;
-        if (sphere.key === "game") signalCore.mode = "mesh";
-        else if (sphere.key === "heroes") signalCore.mode = "glyph";
-        else if (sphere.key === "lang") signalCore.mode = "letters";
+      function updateSignalModeForSphere(_) {
+        // placeholder – dřív přepínalo režim kužele, teď nepotřebujeme
       }
 
       canvas.addEventListener("mousedown", pointerDown);
