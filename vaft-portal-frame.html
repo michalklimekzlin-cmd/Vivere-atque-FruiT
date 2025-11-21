@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>VaF'i'T • Portal Frame + Signal Sphere</title>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050815, #020208);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: #f5f5f5;
+      }
+
+      .root {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stage {
+        position: relative;
+        width: min(920px, 96vw);
+        height: min(620px, 90vh);
+        border-radius: 32px;
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
+        background: radial-gradient(circle at top, #06091a, #020208);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      #portal-canvas {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 100%;
+        height: 100%;
+        display: block;
+        touch-action: none;
+      }
+
+      .hud {
+        position: absolute;
+        left: 18px;
+        bottom: 14px;
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      .hud-right {
+        position: absolute;
+        right: 18px;
+        top: 14px;
+        font-size: 10px;
+        opacity: 0.75;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="root">
+      <div class="stage">
+        <canvas id="portal-canvas"></canvas>
+
+        <div class="hud">
+          🌀 1 prst / myš = náklon • 2 prsty / kolečko = zoom • portál = rám
+          pro světy • střed = VaF'i'T Signal Sphere
+        </div>
+        <div class="hud-right">v0.1 • Portal Frame + Signal Sphere (jeden celek)</div>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("portal-canvas");
+      const ctx = canvas.getContext("2d");
+
+      const dpr = window.devicePixelRatio || 1;
+      let width = 0;
+      let height = 0;
+      let baseRadius = 0;
+
+      // "kamera" / globální náklon (společný pro kouli i prstenec)
+      let rotX = -0.35;
+      let rotY = 0.85;
+      let targetRotX = rotX;
+      let targetRotY = rotY;
+
+      let viewScale = 1.2;
+      let targetViewScale = 1.2;
+      let viewOffsetX = 0;
+      let viewOffsetY = 0;
+      let targetViewOffsetX = 0;
+      let targetViewOffsetY = 0;
+
+      // ---------- DATA: SIGNAL SPHERE ----------
+      const digits = "0123456789";
+      const spherePoints = [];
+      const sphereLatSteps = 26;
+      const sphereLonSteps = 40;
+
+      function generateSpherePoints() {
+        spherePoints.length = 0;
+        let idx = 0;
+        for (let i = 0; i <= sphereLatSteps; i++) {
+          const v = i / sphereLatSteps; // 0..1
+          const lat = v * Math.PI - Math.PI / 2; // -90 .. +90
+          const y = Math.sin(lat);
+          const r = Math.cos(lat);
+
+          for (let j = 0; j < sphereLonSteps; j++) {
+            const u = j / sphereLonSteps; // 0..1
+            const lon = u * Math.PI * 2;
+            const x = r * Math.cos(lon);
+            const z = r * Math.sin(lon);
+
+            const ch = digits[idx % digits.length];
+            idx++;
+
+            // spirálka kolem pólu – malý offset podle i
+            const spiralOffset = (i / sphereLatSteps) * 0.6;
+            const lonSpiral = lon + spiralOffset;
+            const xs = r * Math.cos(lonSpiral);
+            const zs = r * Math.sin(lonSpiral);
+
+            spherePoints.push({
+              bx: xs,
+              by: y,
+              bz: zs,
+              char: ch,
+              phase: Math.random() * Math.PI * 2
+            });
+          }
+        }
+      }
+
+      // ---------- DATA: PORTÁLOVÝ PRSTENEC (TORUS) ----------
+      const ringLines = []; // pole úseček {ax,ay,az,bx,by,bz}
+
+      const ringMajorRadius = 2.0; // hlavní poloměr (v násobcích baseRadius)
+      const ringTubeRadius = 0.55; // tloušťka torusu
+      const ringMajorSteps = 56;
+      const ringTubeSteps = 14;
+
+      function addRingSegment(ax, ay, az, bx, by, bz) {
+        ringLines.push({ ax, ay, az, bx, by, bz });
+      }
+
+      function generateRing() {
+        ringLines.length = 0;
+
+        // torus – ale "portál": přední část trochu silnější, zadní slabší
+        for (let i = 0; i < ringMajorSteps; i++) {
+          const t0 = i / ringMajorSteps;
+          const t1 = (i + 1) / ringMajorSteps;
+
+          const theta0 = t0 * Math.PI * 2;
+          const theta1 = t1 * Math.PI * 2;
+
+          for (let j = 0; j < ringTubeSteps; j++) {
+            const s0 = j / ringTubeSteps;
+            const s1 = (j + 1) / ringTubeSteps;
+
+            const phi0 = s0 * Math.PI * 2;
+            const phi1 = s1 * Math.PI * 2;
+
+            const extraScale0 = 1.0 + 0.25 * Math.cos(theta0); // předek silnější
+            const extraScale1 = 1.0 + 0.25 * Math.cos(theta1);
+
+            const r0 = ringTubeRadius * extraScale0;
+            const r1 = ringTubeRadius * extraScale1;
+
+            // čtyři body "čtverečku" na torusu
+            const p = [];
+
+            p.push({
+              x:
+                (ringMajorRadius + r0 * Math.cos(phi0)) * Math.cos(theta0),
+              y: r0 * Math.sin(phi0),
+              z:
+                (ringMajorRadius + r0 * Math.cos(phi0)) * Math.sin(theta0)
+            });
+            p.push({
+              x:
+                (ringMajorRadius + r0 * Math.cos(phi1)) * Math.cos(theta0),
+              y: r0 * Math.sin(phi1),
+              z:
+                (ringMajorRadius + r0 * Math.cos(phi1)) * Math.sin(theta0)
+            });
+            p.push({
+              x:
+                (ringMajorRadius + r1 * Math.cos(phi1)) * Math.cos(theta1),
+              y: r1 * Math.sin(phi1),
+              z:
+                (ringMajorRadius + r1 * Math.cos(phi1)) * Math.sin(theta1)
+            });
+            p.push({
+              x:
+                (ringMajorRadius + r1 * Math.cos(phi0)) * Math.cos(theta1),
+              y: r1 * Math.sin(phi0),
+              z:
+                (ringMajorRadius + r1 * Math.cos(phi0)) * Math.sin(theta1)
+            });
+
+            // hrany "čtverečku"
+            addRingSegment(p[0].x, p[0].y, p[0].z, p[1].x, p[1].y, p[1].z);
+            addRingSegment(p[1].x, p[1].y, p[1].z, p[2].x, p[2].y, p[2].z);
+            addRingSegment(p[2].x, p[2].y, p[2].z, p[3].x, p[3].y, p[3].z);
+            addRingSegment(p[3].x, p[3].y, p[3].z, p[0].x, p[0].y, p[0].z);
+          }
+        }
+      }
+
+      // "Sloty" – čtyři místa, kde se pak budou připojovat světy
+      const slotMarkers = [];
+      function generateSlots() {
+        slotMarkers.length = 0;
+        const slotCount = 4;
+        for (let i = 0; i < slotCount; i++) {
+          const t = i / slotCount;
+          const theta = t * Math.PI * 2;
+          const r = ringMajorRadius;
+          const x = r * Math.cos(theta);
+          const z = r * Math.sin(theta);
+          const y = 0;
+
+          slotMarkers.push({
+            bx: x,
+            by: y,
+            bz: z,
+            label: "slot"
+          });
+        }
+      }
+
+      // ---------- GEOMETRIE & PROJEKCE (společná pro všechno) ----------
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        baseRadius = Math.min(width, height) * 0.18;
+
+        generateSpherePoints();
+        generateRing();
+        generateSlots();
+      }
+
+      function projectPoint(x, y, z) {
+        // nejdřív kouli trochu zvedneme nahoru (portál rámuje kolem)
+        let px = x * baseRadius;
+        let py = y * baseRadius - baseRadius * 0.1;
+        let pz = z * baseRadius;
+
+        // rotace kolem X
+        let y1 = py * Math.cos(rotX) - pz * Math.sin(rotX);
+        let z1 = py * Math.sin(rotX) + pz * Math.cos(rotX);
+
+        // rotace kolem Y
+        let x2 = px * Math.cos(rotY) + z1 * Math.sin(rotY);
+        let z2 = -px * Math.sin(rotY) + z1 * Math.cos(rotY);
+
+        // projekce do plochy
+        const sx = width / 2 + viewOffsetX + x2 * viewScale;
+        const sy = height / 2 + viewOffsetY + y1 * viewScale;
+
+        return { sx, sy, z: z2 };
+      }
+
+      // ---------- KRESLENÍ ----------
+      let pulse = 0;
+
+      function drawBackground() {
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
+        ctx.scale(viewScale, viewScale);
+
+        // jemný glow za objektem
+        const r = baseRadius * 3.4;
+        const g = ctx.createRadialGradient(0, -r * 0.2, r * 0.2, 0, 0, r);
+        g.addColorStop(0, "rgba(255, 200, 150, 0.12)");
+        g.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = g;
+        ctx.fillRect(-r, -r, 2 * r, 2 * r);
+
+        // stín pod objektem
+        ctx.beginPath();
+        ctx.ellipse(
+          0,
+          baseRadius * 1.4,
+          baseRadius * 1.5,
+          baseRadius * 0.5,
+          0,
+          0,
+          Math.PI * 2
+        );
+        const sGrad = ctx.createRadialGradient(
+          0,
+          baseRadius * 1.4,
+          baseRadius * 0.3,
+          0,
+          baseRadius * 1.4,
+          baseRadius * 1.7
+        );
+        sGrad.addColorStop(0, "rgba(5,3,8,0.9)");
+        sGrad.addColorStop(1, "rgba(0,0,0,0.2)");
+        ctx.fillStyle = sGrad;
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      function drawRing() {
+        ctx.lineWidth = 0.9;
+        ctx.strokeStyle = "rgba(255, 210, 150, 0.65)";
+
+        ctx.beginPath();
+        let started = false;
+
+        for (const seg of ringLines) {
+          const p1 = projectPoint(seg.ax, seg.ay, seg.az);
+          const p2 = projectPoint(seg.bx, seg.by, seg.bz);
+
+          // jen přední polovina portálu (aby byl víc "rám" než plný torus)
+          if (p1.z > 0 || p2.z > 0) continue;
+
+          if (!started) {
+            ctx.moveTo(p1.sx, p1.sy);
+            ctx.lineTo(p2.sx, p2.sy);
+            started = true;
+          } else {
+            ctx.moveTo(p1.sx, p1.sy);
+            ctx.lineTo(p2.sx, p2.sy);
+          }
+        }
+        ctx.stroke();
+
+        // sloty
+        ctx.font = "9px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        for (const slot of slotMarkers) {
+          const p = projectPoint(slot.bx, slot.by, slot.bz);
+          if (p.z > 0) continue; // jen přední strana
+
+          const w = 40;
+          const h = 18;
+          const r = 8;
+
+          ctx.beginPath();
+          ctx.moveTo(p.sx - w / 2 + r, p.sy - h / 2);
+          ctx.lineTo(p.sx + w / 2 - r, p.sy - h / 2);
+          ctx.quadraticCurveTo(
+            p.sx + w / 2,
+            p.sy - h / 2,
+            p.sx + w / 2,
+            p.sy - h / 2 + r
+          );
+          ctx.lineTo(p.sx + w / 2, p.sy + h / 2 - r);
+          ctx.quadraticCurveTo(
+            p.sx + w / 2,
+            p.sy + h / 2,
+            p.sx + w / 2 - r,
+            p.sy + h / 2
+          );
+          ctx.lineTo(p.sx - w / 2 + r, p.sy + h / 2);
+          ctx.quadraticCurveTo(
+            p.sx - w / 2,
+            p.sy + h / 2,
+            p.sx - w / 2,
+            p.sy + h / 2 - r
+          );
+          ctx.lineTo(p.sx - w / 2, p.sy - h / 2 + r);
+          ctx.quadraticCurveTo(
+            p.sx - w / 2,
+            p.sy - h / 2,
+            p.sx - w / 2 + r,
+            p.sy - h / 2
+          );
+          ctx.closePath();
+
+          ctx.fillStyle = "rgba(6,6,10,0.92)";
+          ctx.strokeStyle = "rgba(255,210,150,0.9)";
+          ctx.lineWidth = 0.7;
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = "rgba(255,220,160,0.95)";
+          ctx.shadowColor = "rgba(255,200,140,0.5)";
+          ctx.shadowBlur = 4;
+          ctx.fillText(slot.label, p.sx, p.sy + 1);
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      function drawSignalSphere() {
+        pulse += 0.016;
+
+        ctx.font = "11px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.shadowColor = "rgba(255, 200, 150, 0.85)";
+        ctx.shadowBlur = 8;
+
+        for (const pt of spherePoints) {
+          const p = projectPoint(pt.bx, pt.by, pt.bz);
+          if (p.z > 0) continue; // jen přední půlka koule
+
+          const flicker = 0.65 + 0.35 * Math.sin(pulse * 2 + pt.phase);
+          ctx.fillStyle = `rgba(255,220,170,${flicker.toFixed(2)})`;
+          ctx.fillText(pt.char, p.sx, p.sy);
+        }
+        ctx.shadowBlur = 0;
+
+        // vnější kružnice koule (rám)
+        const rimSamples = 80;
+        ctx.beginPath();
+        let first = true;
+        for (let i = 0; i <= rimSamples; i++) {
+          const t = (i / rimSamples) * Math.PI * 2;
+          const x = Math.cos(t);
+          const y = Math.sin(t) * 0.999; // jemně "dopředu"
+          const z = 0;
+          const p = projectPoint(x, y, z);
+          if (first) {
+            ctx.moveTo(p.sx, p.sy);
+            first = false;
+          } else {
+            ctx.lineTo(p.sx, p.sy);
+          }
+        }
+        ctx.strokeStyle = "rgba(255, 210, 150, 0.9)";
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+      }
+
+      function drawScene() {
+        drawBackground();
+        drawRing();
+        drawSignalSphere();
+      }
+
+      // ---------- ANIMACE ----------
+      let lastTime = 0;
+      function loop(timestamp) {
+        if (!timestamp) timestamp = 0;
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+
+        const k = Math.min(1, 6 * dt);
+        rotX += (targetRotX - rotX) * k;
+        rotY += (targetRotY - rotY) * k;
+        viewScale += (targetViewScale - viewScale) * k;
+        viewOffsetX += (targetViewOffsetX - viewOffsetX) * k;
+        viewOffsetY += (targetViewOffsetY - viewOffsetY) * k;
+
+        drawScene();
+        requestAnimationFrame(loop);
+      }
+
+      // ---------- INTERAKCE ----------
+      let dragging = false;
+      let lastX = 0;
+      let lastY = 0;
+      let dragMode = "none"; // "rotate" nebo "two"
+      let startScale = 1;
+      let startDist = 0;
+      let pinchSceneX = 0;
+      let pinchSceneY = 0;
+      let moved = 0;
+
+      function pointerDown(e) {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+
+        if (e.touches && e.touches.length === 2) {
+          dragMode = "two";
+          dragging = true;
+          const t0 = e.touches[0];
+          const t1 = e.touches[1];
+          const cx = (t0.clientX + t1.clientX) / 2;
+          const cy = (t0.clientY + t1.clientY) / 2;
+
+          lastX = cx;
+          lastY = cy;
+          moved = 0;
+
+          const dx = t0.clientX - t1.clientX;
+          const dy = t0.clientY - t1.clientY;
+          startDist = Math.hypot(dx, dy);
+          startScale = viewScale;
+
+          const centerX = cx - rect.left;
+          const centerY = cy - rect.top;
+          pinchSceneX = (centerX - width / 2 - viewOffsetX) / viewScale;
+          pinchSceneY = (centerY - height / 2 - viewOffsetY) / viewScale;
+          return;
+        }
+
+        dragMode = "rotate";
+        dragging = true;
+        const touch = e.touches ? e.touches[0] : e;
+        lastX = touch.clientX;
+        lastY = touch.clientY;
+        moved = 0;
+      }
+
+      function pointerMove(e) {
+        if (!dragging) return;
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+
+        if (dragMode === "two" && e.touches && e.touches.length === 2) {
+          const t0 = e.touches[0];
+          const t1 = e.touches[1];
+
+          const cxNow = (t0.clientX + t1.clientX) / 2;
+          const cyNow = (t0.clientY + t1.clientY) / 2;
+          const dxCenter = cxNow - lastX;
+          const dyCenter = cyNow - lastY;
+          lastX = cxNow;
+          lastY = cyNow;
+          moved += Math.hypot(dxCenter, dyCenter);
+
+          const dx = t0.clientX - t1.clientX;
+          const dy = t0.clientY - t1.clientY;
+          const dist = Math.hypot(dx, dy);
+          const ratio = dist / startDist;
+          let newScale = startScale * ratio;
+          newScale = Math.max(0.7, Math.min(3.0, newScale));
+          targetViewScale = newScale;
+
+          const centerX = cxNow - rect.left;
+          const centerY = cyNow - rect.top;
+          targetViewOffsetX = centerX - width / 2 - pinchSceneX * newScale;
+          targetViewOffsetY = centerY - height / 2 - pinchSceneY * newScale;
+
+          targetRotX += dyCenter * -0.01;
+          targetRotY += dxCenter * 0.01;
+          return;
+        }
+
+        if (dragMode === "rotate") {
+          const touch = e.touches ? e.touches[0] : e;
+          const x = touch.clientX;
+          const y = touch.clientY;
+          const dx = x - lastX;
+          const dy = y - lastY;
+          lastX = x;
+          lastY = y;
+          moved += Math.hypot(dx, dy);
+
+          targetRotY += dx * 0.01;
+          targetRotX += dy * 0.01;
+        }
+      }
+
+      function pointerUp() {
+        dragging = false;
+      }
+
+      canvas.addEventListener("mousedown", pointerDown);
+      window.addEventListener("mousemove", pointerMove);
+      window.addEventListener("mouseup", pointerUp);
+      window.addEventListener("contextmenu", (e) => e.preventDefault());
+
+      canvas.addEventListener("touchstart", pointerDown, { passive: false });
+      window.addEventListener("touchmove", pointerMove, { passive: false });
+      window.addEventListener("touchend", pointerUp, { passive: false });
+      window.addEventListener("touchcancel", pointerUp, { passive: false });
+
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const cx = e.clientX - rect.left;
+        const cy = e.clientY - rect.top;
+
+        const sceneX = (cx - width / 2 - viewOffsetX) / viewScale;
+        const sceneY = (cy - height / 2 - viewOffsetY) / viewScale;
+
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        let newScale = viewScale * factor;
+        newScale = Math.max(0.7, Math.min(3.0, newScale));
+        targetViewScale = newScale;
+
+        targetViewOffsetX = cx - width / 2 - sceneX * newScale;
+        targetViewOffsetY = cy - height / 2 - sceneY * newScale;
+      });
+
+      // init
+      resize();
+      window.addEventListener("resize", resize);
+      requestAnimationFrame(loop);
+    </script>
+  </body>
+</html>
