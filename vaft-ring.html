@@ -78,7 +78,7 @@
           🌀 1 prst = otáčení prstence • 2 prsty / kolečko = zoom • sloty =
           budoucí místa pro světy
         </div>
-        <div class="hud-right">v0.4 • Zmáčknutý prstenec se světy</div>
+        <div class="hud-right">v0.5 • Asymetrický prstenec se světy</div>
       </div>
     </div>
 
@@ -163,31 +163,37 @@
         const GOLD = "rgba(255, 210, 150, 0.95)";
         const GOLD_SOFT = "rgba(255, 190, 130, 0.35)";
 
-        // --- TVAR PRSTENCE (ZMÁČKNUTÝ DONUT) ---
-        // základní hodnoty
-        const R = baseRadius * 1.45; // hlavní poloměr (větší – 3 a 4 se roztáhnou)
-        const r = baseRadius * 0.4; // tloušťka těla
+        // základ prstence
+        const R = baseRadius * 1.45; // hlavní poloměr
+        const rBase = baseRadius * 0.4; // základní tloušťka
 
         // "zmáčknutí o zem"
-        const stretchXZ = 1.15; // roztáhnout do stran (3,4)
-        const squashY = 0.45; // zmáčknout nahoře/dole (1,2)
+        const stretchXZ = 1.15; // do stran
+        const squashY = 0.45; // nahoře/dole
 
-        const segmentsU = 48; // kolem dokola
-        const segmentsV = 18; // přes tloušťku
+        const segmentsU = 48;
+        const segmentsV = 18;
 
         ctx.lineWidth = 1;
         ctx.strokeStyle = GOLD;
 
-        // pomocná funkce – jeden bod toru po deformaci
+        // pomocná funkce – jeden bod toru po deformaci (asymetrická tloušťka)
         function torusPoint(u, v) {
           const cosV = Math.cos(v);
           const sinV = Math.sin(v);
 
-          let x = (R + r * cosV) * Math.cos(u);
-          let y = r * sinV;
-          let z = (R + r * cosV) * Math.sin(u);
+          const sinU = Math.sin(u);
 
-          // deformace
+          // přední půlka (sinU > 0) tlustší, zadní půlka tenčí
+          const frontFactor = 1.4;
+          const backFactor = 0.55;
+          const rLocal = rBase * (sinU > 0 ? frontFactor : backFactor);
+
+          let x = (R + rLocal * cosV) * Math.cos(u);
+          let y = rLocal * sinV;
+          let z = (R + rLocal * cosV) * Math.sin(u);
+
+          // globální deformace
           x *= stretchXZ;
           z *= stretchXZ;
           y *= squashY;
@@ -218,7 +224,7 @@
         }
         ctx.restore();
 
-        // mřížka – podélné linie (fixní u)
+        // mřížka – podélné linie
         for (let uIdx = 0; uIdx < segmentsU; uIdx++) {
           const uu = (uIdx / segmentsU) * Math.PI * 2;
           ctx.beginPath();
@@ -238,7 +244,7 @@
           if (started) ctx.stroke();
         }
 
-        // mřížka – kruhové linie (fixní v)
+        // mřížka – kruhové linie
         for (let vIdx = 0; vIdx <= segmentsV; vIdx++) {
           const vv = (vIdx / segmentsV) * Math.PI * 2;
           ctx.beginPath();
@@ -258,7 +264,7 @@
           if (started) ctx.stroke();
         }
 
-        // lehký okraj – aura
+        // lehká aura
         ctx.save();
         ctx.globalCompositeOperation = "lighter";
         ctx.lineWidth = 2;
@@ -282,7 +288,7 @@
         }
         ctx.restore();
 
-        // budoucí SLOTY – 4 naznačené
+        // sloty – pořád na "přední" části (silnější půlka)
         const slotPositions = [0, Math.PI / 2.7, -Math.PI / 2.7, Math.PI];
         ctx.lineWidth = 1;
         ctx.strokeStyle = GOLD;
@@ -294,7 +300,7 @@
 
         for (const ang of slotPositions) {
           const uu = ang;
-          const vv = 0; // vnější strana prstence
+          const vv = 0;
 
           const p = torusPoint(uu, vv);
           if (p.z < 0) continue;
@@ -334,7 +340,6 @@
       }
 
       function loop() {
-        // jemný auto-rot, když se nedotýkáš
         if (!dragging && !isPinching) {
           targetRotY += 0.0025;
         }
@@ -349,7 +354,7 @@
       }
       requestAnimationFrame(loop);
 
-      // --- interakce ---
+      // interakce
 
       function onPointerDown(clientX, clientY) {
         dragging = true;
