@@ -88,10 +88,10 @@
           🌀 1 prst / myš = náklon scény • pinch / kolečko = zoom
         </div>
         <div class="hud-center">
-          5 koulí světa • glyphový kornout • Vivere prstenec
+          5 koulí světa • živý glyphový kornout • Vivere prstenec
         </div>
         <div class="hud-right">
-          v1.8 • VaF'i'T Icecream Worlds + Big Glyph Cone
+          v1.9 • VaF'i'T Icecream Worlds + Live Glyph Signal Cone
         </div>
       </div>
     </div>
@@ -126,50 +126,64 @@
       let coreScreenX = 0;
       let coreScreenY = 0;
 
-      // ---------- GLYPH KUŽEL (KORNOUT) ----------
+      // ---------- GLYPH KUŽEL (ŽIVÝ KORNOUT / VYSÍLAČ) ----------
 
       const glyphs = ["{*(°.)}", "ً&’」", "¡(*)(%)¡", "{°. .}", "(•.°)"];
+      const letters =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZÁČĎÉĚÍŇÓŘŠŤÚŮÝŽabcdefghijklmnopqrstuvwxyz";
+      const digits = "0123456789";
+      const codeSnippets = [
+        "if(VaFiT){emit(world);}",
+        "glyph[i++] ^= core;",
+        "signalPulse();",
+        "Vivere.atqueFruiT++;",
+        "while(signal){vaft++;}"
+      ];
 
       const bigCone = {
         points: [],
-        rings: 22,
+        rings: 26,
         segments: 40,
         radiusTop: 300,
         radiusBottom: 60,
-        height: 400,
-        offsetY: 0,
+        height: 420,
+        offsetY: 0
       };
 
       function generateBigConePoints() {
         bigCone.points = [];
-        const { rings, segments, radiusTop, radiusBottom, height, offsetY } =
-          bigCone;
+        const { rings, segments } = bigCone;
 
         for (let i = 0; i <= rings; i++) {
-          const t = i / rings;
-          const y = offsetY + t * height; // od horní hrany dolů
-          const r = radiusTop - (radiusTop - radiusBottom) * t;
+          const t = i / rings; // 0..1 po výšce
           for (let j = 0; j < segments; j++) {
-            const a = (j / segments) * Math.PI * 2;
-            const x = r * Math.cos(a);
-            const z = r * Math.sin(a);
+            const angle = (j / segments) * Math.PI * 2;
+            const layer = Math.floor(Math.random() * 4); // 0 glyph, 1 letter, 2 digit, 3 code
+            const phase = Math.random() * Math.PI * 2;
+
+            const codeIndex = Math.floor(Math.random() * codeSnippets.length);
+            const letterIndex = Math.floor(Math.random() * letters.length);
+            const digitIndex = Math.floor(Math.random() * digits.length);
+            const glyphIndex = Math.floor(Math.random() * glyphs.length);
+
             bigCone.points.push({
-              baseX: x,
-              baseY: y,
-              baseZ: z,
-              x: 0,
-              y: 0,
-              z: 0,
-              screenX: 0,
-              screenY: 0,
-              phase: Math.random() * Math.PI * 2,
+              t, // základní pozice v kuželu
+              angle,
+              layer,
+              phase,
+              codeIndex,
+              letterIndex,
+              digitIndex,
+              glyphIndex,
+              sx: 0,
+              sy: 0,
+              z: 0
             });
           }
         }
       }
 
-      function projectPoint(x, y, z) {
-        // globální náklon X, Y
+      function projectPoint3D(x, y, z) {
         const sinX = Math.sin(globalTiltX);
         const cosX = Math.cos(globalTiltX);
         const sinY = Math.sin(globalTiltY);
@@ -188,11 +202,26 @@
       }
 
       function updateBigConeProjection() {
+        const flowSpeed = 0.06; // plynulé proudění nahoru
+
         for (const p of bigCone.points) {
-          const proj = projectPoint(p.baseX, p.baseY, p.baseZ);
-          p.x = proj.sx;
-          p.y = proj.sy;
+          // posun po výšce kuželu (loop)
+          let flowT = (p.t + orbitRotation * flowSpeed + p.phase / Math.PI) % 1;
+          if (flowT < 0) flowT += 1;
+
+          const { radiusTop, radiusBottom, height, offsetY } = bigCone;
+
+          const y = offsetY + flowT * height;
+          const r = radiusTop - (radiusTop - radiusBottom) * flowT;
+
+          const x = r * Math.cos(p.angle);
+          const z = r * Math.sin(p.angle);
+
+          const proj = projectPoint3D(x, y, z);
+          p.sx = proj.sx;
+          p.sy = proj.sy;
           p.z = proj.z;
+          p.depthFactor = 0.3 + 0.7 * (1 - flowT); // dole jasnější
         }
       }
 
@@ -203,13 +232,15 @@
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
+
+        const shadowY =
+          bigCone.offsetY + bigCone.height + bigCone.radiusBottom * 0.45;
         ctx.beginPath();
-        const shadowY = bigCone.offsetY + bigCone.height + bigCone.radiusBottom * 0.3;
         ctx.ellipse(
           0,
           shadowY,
-          bigCone.radiusBottom * 1.6,
-          bigCone.radiusBottom * 0.7,
+          bigCone.radiusBottom * 1.8,
+          bigCone.radiusBottom * 0.75,
           0,
           0,
           Math.PI * 2
@@ -217,10 +248,10 @@
         const shadowGrad = ctx.createRadialGradient(
           0,
           shadowY,
-          bigCone.radiusBottom * 0.3,
+          bigCone.radiusBottom * 0.4,
           0,
           shadowY,
-          bigCone.radiusBottom * 1.9
+          bigCone.radiusBottom * 2.1
         );
         shadowGrad.addColorStop(0, "rgba(10,6,4,0.9)");
         shadowGrad.addColorStop(1, "rgba(0,0,0,0.0)");
@@ -228,26 +259,60 @@
         ctx.fill();
         ctx.restore();
 
-        // glyphy po povrchu kornoutu
+        // datové proudy na povrchu kuželu
         ctx.save();
-        ctx.font = "10px system-ui";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = "rgba(255, 220, 170, 0.86)";
         ctx.shadowColor = "rgba(255, 200, 150, 0.7)";
         ctx.shadowBlur = 6;
 
-        const glyphCount = glyphs.length;
-        let i = 0;
-        for (const p of bigCone.points) {
-          const g = glyphs[i % glyphCount];
-          i++;
+        for (let i = 0; i < bigCone.points.length; i++) {
+          const p = bigCone.points[i];
+
+          // výběr symbolu podle vrstvy
+          let text = "";
+          let fontSize = 10;
+
+          if (p.layer === 0) {
+            // glyphy
+            text = glyphs[p.glyphIndex % glyphs.length];
+            fontSize = 10;
+          } else if (p.layer === 1) {
+            // písmenka
+            text = letters[p.letterIndex % letters.length];
+            fontSize = 9;
+          } else if (p.layer === 2) {
+            // čísla
+            text = digits[p.digitIndex % digits.length];
+            fontSize = 9;
+          } else {
+            // mini-kód
+            text = codeSnippets[p.codeIndex % codeSnippets.length];
+            fontSize = 8;
+          }
+
+          // Easter eggy – občas MK nebo VaF'i'T♡
+          const eggWave = Math.sin(orbitRotation * 0.4 + p.phase + i * 0.01);
+          if (eggWave > 0.998) {
+            text = "MK";
+            fontSize = 11;
+          } else if (eggWave < -0.998) {
+            text = "VaF'i'T♡";
+            fontSize = 10;
+          }
+
+          // jemné blikání
           const flicker =
             0.55 +
-            0.45 * Math.sin(orbitRotation * 0.8 + p.phase + i * 0.05);
-          ctx.globalAlpha = flicker;
-          ctx.fillText(g, p.x, p.y);
+            0.45 * Math.sin(orbitRotation * 1.3 + p.phase * 3.1 + i * 0.02);
+          const alpha = p.depthFactor * flicker;
+
+          ctx.globalAlpha = alpha;
+          ctx.font = `${fontSize}px system-ui`;
+          ctx.fillStyle = "rgba(255, 220, 170, 0.9)";
+          ctx.fillText(text, p.sx, p.sy);
         }
+
         ctx.globalAlpha = 1;
         ctx.shadowBlur = 0;
         ctx.restore();
@@ -265,7 +330,6 @@
       }
 
       const spheres = [
-        // core koule uprostřed
         {
           key: "core",
           name: "Vivere Core",
@@ -276,9 +340,8 @@
           radiusMul: 1.1,
           rotX: -0.3,
           rotY: 0.3,
-          isCore: true,
+          isCore: true
         },
-        // čtyři kopečky kolem
         {
           key: "world1",
           name: "Hra + pravidla",
@@ -289,7 +352,7 @@
           radiusMul: 0.8,
           rotX: -0.25,
           rotY: 0.8,
-          isCore: false,
+          isCore: false
         },
         {
           key: "world2",
@@ -301,7 +364,7 @@
           radiusMul: 0.8,
           rotX: -0.25,
           rotY: -0.8,
-          isCore: false,
+          isCore: false
         },
         {
           key: "world3",
@@ -313,7 +376,7 @@
           radiusMul: 0.75,
           rotX: -0.3,
           rotY: 0.2,
-          isCore: false,
+          isCore: false
         },
         {
           key: "world4",
@@ -325,25 +388,26 @@
           radiusMul: 0.75,
           rotX: -0.15,
           rotY: -0.4,
-          isCore: false,
-        },
+          isCore: false
+        }
       ];
+
+      function projectPoint(x, y, z) {
+        return projectPoint3D(x, y, z);
+      }
 
       function layoutSpheres() {
         const clusterScale = baseRadius * 1.9;
 
         for (const s of spheres) {
-          // základní pozice kopečku
           const px = s.ux * clusterScale;
           const py = s.uy * clusterScale;
           const pz = s.uz * clusterScale;
 
-          // jemná společná rotace kolem Y, aby obíhaly
           const a = orbitRotation * 0.35 + s.phase;
           const xOrbit = px * Math.cos(a) - pz * Math.sin(a);
           const zOrbit = px * Math.sin(a) + pz * Math.cos(a);
 
-          // globální projekce
           const proj = projectPoint(xOrbit, py, zOrbit);
           s.cx = proj.sx;
           s.cy = proj.sy;
@@ -354,18 +418,15 @@
       function drawSphere(s) {
         const radius = baseRadius * s.radiusMul;
 
-        // přesun na střed koule (už v projekci 2D)
         ctx.save();
         ctx.translate(s.cx, s.cy);
         ctx.scale(viewScale, viewScale);
 
-        // pro textový prstenec si zapamatuj obrazovkový střed core koule
         if (s.isCore) {
           coreScreenX = s.cx;
           coreScreenY = s.cy;
         }
 
-        // jemný glow za koulí
         const gGlow = ctx.createRadialGradient(
           0,
           -radius * 0.2,
@@ -379,7 +440,6 @@
         ctx.fillStyle = gGlow;
         ctx.fillRect(-radius * 2, -radius * 2, radius * 4, radius * 4);
 
-        // tělo koule
         ctx.beginPath();
         ctx.arc(0, 0, radius, 0, Math.PI * 2);
         const globeGrad = ctx.createRadialGradient(
@@ -396,7 +456,6 @@
         ctx.fillStyle = globeGrad;
         ctx.fill();
 
-        // kontura
         ctx.strokeStyle = "rgba(255, 197, 120, 0.95)";
         ctx.lineWidth = 1.3;
         ctx.shadowColor = "rgba(255, 197, 120, 0.9)";
@@ -404,7 +463,6 @@
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // drátová mřížka
         ctx.lineWidth = 0.7;
         ctx.strokeStyle = "rgba(255, 210, 145, 0.85)";
 
@@ -455,7 +513,6 @@
           ctx.stroke();
         }
 
-        // název pod koulí (menší)
         if (!s.isCore) {
           ctx.save();
           ctx.font = "9px system-ui";
@@ -468,12 +525,11 @@
           ctx.restore();
         }
 
-        // prstenec jen u core koule
         if (s.isCore) {
           ctx.save();
           const ringRadiusX = radius * 1.25;
           const ringRadiusY = radius * 0.45;
-          ctx.rotate(orbitRotation * 0.6); // otáčení prstence
+          ctx.rotate(orbitRotation * 0.6);
           ctx.beginPath();
           ctx.ellipse(0, 0, ringRadiusX, ringRadiusY, 0, 0, Math.PI * 2);
           ctx.strokeStyle = "rgba(255, 230, 180, 0.95)";
@@ -539,7 +595,7 @@
         bigCone.radiusTop = baseRadius * 2.6;
         bigCone.radiusBottom = baseRadius * 0.55;
         bigCone.height = baseRadius * 3.6;
-        bigCone.offsetY = baseRadius * 0.15;
+        bigCone.offsetY = baseRadius * 0.2;
 
         generateBigConePoints();
       }
@@ -553,7 +609,6 @@
         layoutSpheres();
         drawBigCone();
 
-        // koule – podle hloubky, od nejvzdálenější
         const sorted = [...spheres].sort((a, b) => a.depth - b.depth);
         for (const s of sorted) {
           drawSphere(s);
@@ -568,7 +623,6 @@
         const dt = (timestamp - lastTime) / 1000;
         lastTime = timestamp;
 
-        // hladké přiblížení / náklon
         const k = Math.min(1, dt * 5);
         viewScale += (targetViewScale - viewScale) * k;
         viewOffsetX += (targetViewOffsetX - viewOffsetX) * k;
@@ -616,18 +670,36 @@
         lastX = p.x;
         lastY = p.y;
 
-         targetTiltY += dx * 0.005;
+        targetTiltY += dx * 0.005;
         targetTiltX += dy * 0.005;
-        targetTiltX = Math.max(-1.2, Math.min(-0.1, targetTiltX));
+        targetTiltX = Math.max(-1.6, Math.min(-0.1, targetTiltX));
       });
+
+      // touch (1 prst = náklon, 2 prsty = zoom)
+      let pinch = false;
+      let pinchStartDist = 0;
+      let pinchStartScale = 1;
 
       canvas.addEventListener(
         "touchstart",
         (e) => {
-          dragging = true;
-          const p = getClientPos(e);
-          lastX = p.x;
-          lastY = p.y;
+          e.preventDefault();
+          if (e.touches.length === 1) {
+            pinch = false;
+            dragging = true;
+            const p = getClientPos(e);
+            lastX = p.x;
+            lastY = p.y;
+          } else if (e.touches.length === 2) {
+            dragging = false;
+            pinch = true;
+            const t0 = e.touches[0];
+            const t1 = e.touches[1];
+            const dx = t0.clientX - t1.clientX;
+            const dy = t0.clientY - t1.clientY;
+            pinchStartDist = Math.hypot(dx, dy);
+            pinchStartScale = targetViewScale;
+          }
         },
         { passive: false }
       );
@@ -635,6 +707,20 @@
       window.addEventListener(
         "touchmove",
         (e) => {
+          if (pinch && e.touches.length === 2) {
+            e.preventDefault();
+            const t0 = e.touches[0];
+            const t1 = e.touches[1];
+            const dx = t0.clientX - t1.clientX;
+            const dy = t0.clientY - t1.clientY;
+            const dist = Math.hypot(dx, dy);
+            let factor = dist / pinchStartDist;
+            let newScale = pinchStartScale * factor;
+            newScale = Math.max(0.7, Math.min(3.0, newScale));
+            targetViewScale = newScale;
+            return;
+          }
+
           if (!dragging) return;
           e.preventDefault();
           const p = getClientPos(e);
@@ -645,20 +731,25 @@
 
           targetTiltY += dx * 0.005;
           targetTiltX += dy * 0.005;
-          targetTiltX = Math.max(-1.2, Math.min(-0.1, targetTiltX));
+          targetTiltX = Math.max(-1.6, Math.min(-0.1, targetTiltX));
         },
         { passive: false }
       );
 
-      window.addEventListener("touchend", () => {
-        dragging = false;
-      });
+      window.addEventListener(
+        "touchend",
+        () => {
+          dragging = false;
+          pinch = false;
+        },
+        { passive: false }
+      );
 
       canvas.addEventListener("wheel", (e) => {
         e.preventDefault();
         const factor = e.deltaY > 0 ? 0.9 : 1.1;
         let newScale = targetViewScale * factor;
-        newScale = Math.max(0.7, Math.min(2.6, newScale));
+        newScale = Math.max(0.7, Math.min(3.0, newScale));
         targetViewScale = newScale;
       });
     </script>
