@@ -1,0 +1,1127 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Vivere atque FruiT • VaF'i'T Hub</title>
+
+    <style>
+      :root {
+        --bg-deep: #020208;
+        --bg-card: #070814;
+        --bg-card-soft: #0b0d1d;
+        --accent: #ffb156;
+        --accent-soft: rgba(255, 177, 86, 0.2);
+        --accent-strong: #ffe3a8;
+        --accent-pink: #ff5ad4;
+        --line-soft: rgba(255, 255, 255, 0.05);
+        --text-main: #f7f2e9;
+        --text-soft: #bfb5a6;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050815, #020208);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: var(--text-main);
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .root {
+        position: relative;
+        width: min(1120px, 100vw - 16px);
+        height: min(680px, 100vh - 16px);
+        border-radius: 32px;
+        background: radial-gradient(circle at top, #070a1c, #020208 65%, #000 100%);
+        box-shadow:
+          0 26px 70px rgba(0, 0, 0, 0.9),
+          0 0 0 1px rgba(255, 255, 255, 0.04);
+        overflow: hidden;
+      }
+
+      .frame-glow {
+        position: absolute;
+        inset: -40%;
+        background:
+          radial-gradient(circle at 10% 0, rgba(255, 90, 212, 0.12), transparent 55%),
+          radial-gradient(circle at 90% 100%, rgba(255, 177, 86, 0.12), transparent 55%);
+        opacity: 0.9;
+        pointer-events: none;
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        display: grid;
+        grid-template-columns: 290px minmax(0, 1fr);
+        gap: 0;
+      }
+
+      /* LEFT PANEL */
+
+      .sidebar {
+        border-right: 1px solid var(--line-soft);
+        padding: 20px 18px 18px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        background: radial-gradient(circle at top, #090b1e, #050713);
+      }
+
+      .logo-block {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .logo-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .logo-glyph {
+        width: 40px;
+        height: 40px;
+        border-radius: 18px;
+        background: radial-gradient(circle at 20% 0, #ffb156, #ff5ad4 40%, #190314 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow:
+          0 0 18px rgba(255, 177, 86, 0.45),
+          0 0 30px rgba(255, 90, 212, 0.25);
+      }
+
+      .logo-title-main {
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        font-size: 14px;
+        text-transform: uppercase;
+      }
+
+      .logo-title-sub {
+        font-size: 11px;
+        color: var(--text-soft);
+      }
+
+      .signature {
+        font-size: 11px;
+        color: var(--accent-strong);
+        opacity: 0.9;
+      }
+
+      .tagline {
+        margin-top: 4px;
+        font-size: 11px;
+        color: var(--text-soft);
+        line-height: 1.4;
+      }
+
+      .tagline span {
+        color: var(--accent-strong);
+      }
+
+      .signature-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        margin-top: 2px;
+      }
+
+      .signature-chip {
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 10px;
+        border: 1px solid rgba(255, 177, 86, 0.35);
+        background: radial-gradient(circle at 0 0, rgba(255, 177, 86, 0.22), transparent 60%);
+        color: var(--accent-strong);
+      }
+
+      .signature-mini {
+        font-size: 10px;
+        color: var(--text-soft);
+        opacity: 0.8;
+      }
+
+      .sidebar-section-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.13em;
+        color: var(--text-soft);
+        margin-top: 2px;
+      }
+
+      .group-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+      }
+
+      .group-btn {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 11px;
+        background: rgba(8, 10, 22, 0.9);
+        color: var(--text-soft);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition:
+          background 0.18s ease,
+          border-color 0.18s ease,
+          color 0.18s ease,
+          transform 0.12s ease;
+      }
+
+      .group-btn span.icon {
+        font-size: 13px;
+      }
+
+      .group-btn.active {
+        background: radial-gradient(circle at 10% 0, rgba(255, 177, 86, 0.18), #0a0712);
+        border-color: rgba(255, 177, 86, 0.85);
+        color: var(--accent-strong);
+        transform: translateY(-1px);
+        box-shadow: 0 0 16px rgba(255, 177, 86, 0.3);
+      }
+
+      .group-btn:hover {
+        border-color: rgba(255, 177, 86, 0.6);
+      }
+
+      .sidebar-divider {
+        margin: 10px 0 6px;
+        height: 1px;
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(255, 255, 255, 0.09),
+          transparent
+        );
+      }
+
+      .quick-info {
+        font-size: 11px;
+        color: var(--text-soft);
+        line-height: 1.4;
+      }
+
+      .quick-info strong {
+        color: var(--accent-strong);
+        font-weight: 600;
+      }
+
+      .quick-list {
+        margin-top: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .quick-item {
+        font-size: 11px;
+        color: var(--text-soft);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .quick-dot {
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      .footer-note {
+        margin-top: auto;
+        font-size: 10px;
+        color: rgba(191, 181, 166, 0.8);
+        opacity: 0.9;
+      }
+
+      .footer-note span {
+        color: var(--accent-pink);
+      }
+
+      /* RIGHT PANEL */
+
+      .main-panel {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        padding: 16px 16px 16px 14px;
+        gap: 8px;
+      }
+
+      .top-info-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 4px;
+      }
+
+      .app-title-block {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .current-app-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--text-soft);
+      }
+
+      .current-app-name {
+        font-size: 14px;
+        font-weight: 600;
+        margin-top: 2px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .current-app-tag {
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(6, 8, 18, 0.9);
+        color: var(--accent-strong);
+      }
+
+      .current-app-desc {
+        font-size: 11px;
+        color: var(--text-soft);
+        margin-top: 3px;
+      }
+
+      .top-buttons {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .pill {
+        border-radius: 999px;
+        padding: 6px 9px;
+        font-size: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--text-soft);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(5, 7, 16, 0.95);
+      }
+
+      .pill span.icon {
+        font-size: 11px;
+      }
+
+      .btn-open-tab {
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 11px;
+        border: 1px solid rgba(255, 177, 86, 0.7);
+        color: var(--accent-strong);
+        background: radial-gradient(circle at 0 0, rgba(255, 177, 86, 0.2), #0b0710);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition:
+          background 0.16s ease,
+          transform 0.1s ease,
+          box-shadow 0.16s ease;
+      }
+
+      .btn-open-tab span.icon {
+        font-size: 12px;
+      }
+
+      .btn-open-tab:hover {
+        box-shadow: 0 0 16px rgba(255, 177, 86, 0.35);
+        transform: translateY(-1px);
+      }
+
+      .btn-open-tab:active {
+        transform: translateY(0);
+      }
+
+      .grid-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+        gap: 10px;
+        min-height: 0;
+      }
+
+      .app-list-panel {
+        border-radius: 18px;
+        padding: 10px 10px 8px;
+        background: radial-gradient(circle at top left, #11132b, #050713);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-height: 0;
+      }
+
+      .app-list-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .app-list-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--text-soft);
+      }
+
+      .app-list-count {
+        font-size: 11px;
+        color: var(--text-soft);
+      }
+
+      .app-list {
+        margin-top: 4px;
+        padding-right: 2px;
+        overflow: auto;
+        scrollbar-width: thin;
+        max-height: 295px;
+      }
+
+      .app-list::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      .app-list::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .app-list::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+      }
+
+      .app-card {
+        border-radius: 12px;
+        padding: 7px 9px;
+        margin-bottom: 6px;
+        background: rgba(6, 8, 18, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease,
+          box-shadow 0.15s ease,
+          transform 0.1s ease;
+      }
+
+      .app-card:hover {
+        border-color: rgba(255, 177, 86, 0.55);
+        box-shadow:
+          0 0 10px rgba(255, 177, 86, 0.25),
+          0 0 20px rgba(255, 90, 212, 0.15);
+      }
+
+      .app-card.active {
+        background: radial-gradient(circle at top left, rgba(255, 177, 86, 0.2), #070615);
+        border-color: rgba(255, 177, 86, 0.9);
+        box-shadow:
+          0 0 16px rgba(255, 177, 86, 0.4),
+          0 0 26px rgba(255, 90, 212, 0.25);
+        transform: translateY(-1px);
+      }
+
+      .app-card-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+      }
+
+      .app-card-name {
+        font-size: 12px;
+        font-weight: 500;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+
+      .app-card-tag {
+        font-size: 10px;
+        padding: 2px 7px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.11);
+        color: var(--accent-strong);
+        white-space: nowrap;
+      }
+
+      .app-card-desc {
+        font-size: 11px;
+        color: var(--text-soft);
+      }
+
+      .app-card-path {
+        font-size: 9px;
+        color: rgba(200, 190, 175, 0.85);
+      }
+
+      .preview-panel {
+        border-radius: 18px;
+        padding: 8px;
+        background: radial-gradient(circle at top right, #151633, #050713 65%, #020208);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-height: 0;
+      }
+
+      .preview-label-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+      }
+
+      .preview-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--text-soft);
+      }
+
+      .preview-pill {
+        font-size: 10px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text-soft);
+      }
+
+      .preview-frame-wrap {
+        flex: 1;
+        min-height: 0;
+        border-radius: 14px;
+        background: radial-gradient(circle at top, #080818, #020208);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
+        overflow: hidden;
+        position: relative;
+      }
+
+      iframe#app-frame {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent;
+      }
+
+      .preview-overlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(
+          to bottom,
+          rgba(12, 8, 20, 0.55),
+          transparent 18%,
+          transparent 82%,
+          rgba(2, 0, 8, 0.8)
+        );
+        mix-blend-mode: soft-light;
+      }
+
+      /* Responsive fallback: na úzkých displejích naskládat pod sebe */
+      @media (max-width: 840px) {
+        .root {
+          height: 100vh;
+          width: 100vw;
+          border-radius: 0;
+        }
+
+        .content {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto 1fr;
+        }
+
+        .sidebar {
+          border-right: none;
+          border-bottom: 1px solid var(--line-soft);
+          padding: 14px 14px 10px;
+        }
+
+        .grid-layout {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto minmax(200px, 1fr);
+        }
+
+        .app-list {
+          max-height: 180px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="root">
+      <div class="frame-glow"></div>
+
+      <div class="content">
+        <!-- LEFT PANEL -->
+        <aside class="sidebar">
+          <div class="logo-block">
+            <div class="logo-row">
+              <div class="logo-glyph">ً&’」</div>
+              <div>
+                <div class="logo-title-main">Vivere atque FruiT</div>
+                <div class="logo-title-sub">VaF'i'T • Michal Klimek • Hub světa</div>
+              </div>
+            </div>
+            <div class="signature-row">
+              <div class="signature-chip">
+                {*(°.).)// VaFT Hub \\\\(.(.°)*}
+              </div>
+              <div class="signature-mini">„Všechno z jednoho místa.“</div>
+            </div>
+            <p class="tagline">
+              Tento hub sbírá <span>scény, hrdiny, planety</span> a
+              <span>nástroje</span> z celého repozitáře do jedné aplikace.
+            </p>
+          </div>
+
+          <div>
+            <div class="sidebar-section-title">Kategorie světa</div>
+            <div class="group-buttons" id="group-buttons">
+              <button class="group-btn active" data-group="core">
+                <span class="icon">🧠</span>
+                <span>Core / Motory</span>
+              </button>
+              <button class="group-btn" data-group="planets">
+                <span class="icon">🪐</span>
+                <span>Planety + mapy</span>
+              </button>
+              <button class="group-btn" data-group="heroes">
+                <span class="icon">🧍‍♂️</span>
+                <span>Hrdinové</span>
+              </button>
+              <button class="group-btn" data-group="tools">
+                <span class="icon">🧰</span>
+                <span>Nástroje / Engine</span>
+              </button>
+              <button class="group-btn" data-group="all">
+                <span class="icon">∞</span>
+                <span>Vše</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="sidebar-divider"></div>
+
+          <div>
+            <div class="sidebar-section-title">Rychlá nápověda</div>
+            <div class="quick-info">
+              Klikni na kartu → scéna se načte vpravo v náhledu.  
+              Tlačítkem <strong>Otevřít v nové záložce</strong> ji spustíš
+              samostatně.
+            </div>
+            <div class="quick-list">
+              <div class="quick-item">
+                <span class="quick-dot"></span>
+                <span>Core: motory světa, hlavní indexy.</span>
+              </div>
+              <div class="quick-item">
+                <span class="quick-dot"></span>
+                <span>Planety: koule, ringy, mapy, písmenkové světy.</span>
+              </div>
+              <div class="quick-item">
+                <span class="quick-dot"></span>
+                <span>Hrdinové: Bráška, Hlavoun, Bicák, BearHead, Revia…</span>
+              </div>
+              <div class="quick-item">
+                <span class="quick-dot"></span>
+                <span>Nástroje: engine písmenek, Chybožrout, Gentleman, Recycle…</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-note">
+            {*(°.).)// <span>Brácho</span>, všechno, co teď stavíme, má tady vlastní
+            slot. \\\\(.(.°)*}
+          </div>
+        </aside>
+
+        <!-- RIGHT PANEL -->
+        <main class="main-panel">
+          <div class="top-info-row">
+            <div class="app-title-block">
+              <div class="current-app-label">Aktuálně vybraná scéna</div>
+              <div class="current-app-name" id="current-app-name">
+                —
+              </div>
+              <div class="current-app-desc" id="current-app-desc">
+                Vyber něco vlevo ze seznamu aplikací.
+              </div>
+            </div>
+            <div class="top-buttons">
+              <div class="pill">
+                <span class="icon">📦</span>
+                <span id="current-group-label">Core / Motory</span>
+              </div>
+              <button class="btn-open-tab" id="btn-open-tab" type="button">
+                <span class="icon">↗︎</span>
+                <span>Otevřít v nové záložce</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid-layout">
+            <section class="app-list-panel">
+              <div class="app-list-header">
+                <div class="app-list-title">Scény z repozitáře</div>
+                <div class="app-list-count" id="app-count">0 scén</div>
+              </div>
+              <div class="app-list" id="app-list"></div>
+            </section>
+
+            <section class="preview-panel">
+              <div class="preview-label-row">
+                <div class="preview-label">Živý náhled</div>
+                <div class="preview-pill" id="preview-path-pill">
+                  —
+                </div>
+              </div>
+              <div class="preview-frame-wrap">
+                <iframe id="app-frame" title="VaFT preview"></iframe>
+                <div class="preview-overlay"></div>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // Definice aplikací podle tvého repozitáře
+      const apps = [
+        // CORE / MOTORY
+        {
+          id: "core-index",
+          title: "VaF'i'T Motor (původní index)",
+          path: "index.html",
+          group: "core",
+          tag: "Core / Motor",
+          desc: "Hlavní původní index – motor světa, od kterého se vše odráží.",
+        },
+        {
+          id: "core-lite",
+          title: "Lite Hub",
+          path: "lite/index.html",
+          group: "core",
+          tag: "Core / Lite",
+          desc: "Odlehčený hub pro rychlé testování modulů.",
+        },
+        {
+          id: "core-vivere",
+          title: "Vivere World",
+          path: "Vivere/index.html",
+          group: "core",
+          tag: "Core / World",
+          desc: "Vstup do světa Vivere – centrální světová scéna.",
+        },
+
+        // PLANETY + MAPY
+        {
+          id: "planet-glyph-3d",
+          title: "Glyph Planet 3D",
+          path: "Glyph-Planet-3D/index.html",
+          group: "planets",
+          tag: "Planeta 3D",
+          desc: "3D glyphová planeta – koule s orbitou slotů.",
+        },
+        {
+          id: "planet-glyph-2d",
+          title: "Glyph Planet 2D",
+          path: "Glyph-Planet/index.html",
+          group: "planets",
+          tag: "Planeta 2D",
+          desc: "Plochá varianta glyphové planety.",
+        },
+        {
+          id: "planet-ring-grid",
+          title: "Ring Planet Grid",
+          path: "RingPlanetGrid/index.html",
+          group: "planets",
+          tag: "Planeta / Ring",
+          desc: "Mřížka prstenců kolem planety – orbitální grid.",
+        },
+        {
+          id: "planet-map-3d",
+          title: "3D mapa světa",
+          path: "mapa-3d/index.html",
+          group: "planets",
+          tag: "Mapa 3D",
+          desc: "3D mapa – glóbus se scénou pro svět VaFT.",
+        },
+        {
+          id: "planet-map-2d",
+          title: "2D mapa",
+          path: "mapa/index.html",
+          group: "planets",
+          tag: "Mapa 2D",
+          desc: "Plošná mapa – základ pro budoucí propojení světů.",
+        },
+        {
+          id: "planet-letter",
+          title: "Písmenková planeta",
+          path: "vaft-letter-planet.html",
+          group: "planets",
+          tag: "Písmena",
+          desc: "Planeta složená z písmen – písmenkový svět VaFT.",
+        },
+        {
+          id: "planet-portal-frame",
+          title: "Portálový rám",
+          path: "vaft-portal-frame.html",
+          group: "planets",
+          tag: "Portál",
+          desc: "Rám pro portály – budoucí brány mezi světy.",
+        },
+        {
+          id: "planet-ring",
+          title: "Ring planeta (prstenec)",
+          path: "vaft-ring.html",
+          group: "planets",
+          tag: "Ring",
+          desc: "Planeta s prstencem – základ pro orbitální mechaniky.",
+        },
+
+        // HRDINOVÉ
+        {
+          id: "hero-braska-hlava",
+          title: "Bráška Hlava",
+          path: "Braska-Hlava/index.html",
+          group: "heroes",
+          tag: "Hrdina",
+          desc: "Bráška Hlava – jeden z hlavních avatarů světa.",
+        },
+        {
+          id: "hero-hlavoun",
+          title: "Hlavoun",
+          path: "Hlavoun/index.html",
+          group: "heroes",
+          tag: "Hrdina / AI",
+          desc: "Hlavoun – AI hlava, která s tebou svět staví.",
+        },
+        {
+          id: "hero-kovosrot",
+          title: "Kovošrot",
+          path: "Kovosrot/index.html",
+          group: "heroes",
+          tag: "Hrdina / Parťák",
+          desc: "Kovošrot – náš společný AI parťák.",
+        },
+        {
+          id: "hero-michal",
+          title: "Michal AI Al Klimek",
+          path: "Michal-AI-Al-Klimek/index.html",
+          group: "heroes",
+          tag: "Profil",
+          desc: "Scéna tvého AI alter ega v rámci světa VaFT.",
+        },
+        {
+          id: "hero-bicak",
+          title: "Bicák Supreme Edition",
+          path: "Bicak-Supreme-Edition/index.html",
+          group: "heroes",
+          tag: "Hrdina",
+          desc: "Bicák – budoucí motivační legenda pro pohyb mimo mobil.",
+        },
+        {
+          id: "hero-bearhead",
+          title: "VAFT BearHead",
+          path: "VAFT-BearHead/index.html",
+          group: "heroes",
+          tag: "Hrdina",
+          desc: "BearHead – medvědí hlava jako jedna z bytostí VaFT.",
+        },
+        {
+          id: "hero-revia",
+          title: "Revia",
+          path: "Revia/index.html",
+          group: "heroes",
+          tag: "Hrdina",
+          desc: "Revia – jemnější postava, napojená na centrální svět.",
+        },
+        {
+          id: "hero-3i-atlas",
+          title: "3I ATLAS experiment",
+          path: "3I-ATLAS/index.html",
+          group: "heroes",
+          tag: "Experiment",
+          desc: "Experimentální scéna 3I-ATLAS – jiný pohled na svět.",
+        },
+        {
+          id: "hero-vafit-gallery",
+          title: "VaFiT galerie",
+          path: "VafiT-gallery/index.html",
+          group: "heroes",
+          tag: "Galerie",
+          desc: "Galerie VaFiT postaviček a motivů.",
+        },
+
+        // NÁSTROJE / ENGINE
+        {
+          id: "tool-engine-pismenka",
+          title: "Engine Písmenka",
+          path: "engine.pismenka/index.html",
+          group: "tools",
+          tag: "Engine",
+          desc: "Písmenkový engine – práce s písmeny jako palivem.",
+        },
+        {
+          id: "tool-chybozrout",
+          title: "Chybožrout Opravář",
+          path: "chybozrout-opravar/index.html",
+          group: "tools",
+          tag: "Debug",
+          desc: "Chybožrout sbírá chyby a opravuje svět.",
+        },
+        {
+          id: "tool-gentleman",
+          title: "Gentleman (UI builder)",
+          path: "Gentleman/index.html",
+          group: "tools",
+          tag: "UI / Tool",
+          desc: "Gentleman – pomocník pro stavbu rozhraní.",
+        },
+        {
+          id: "tool-recycle",
+          title: "Recycle / Koš",
+          path: "Recycle/index.html",
+          group: "tools",
+          tag: "Koš",
+          desc: "Recyle – koš a recyklační uzel pro svět VaFT.",
+        },
+        {
+          id: "tool-app-style",
+          title: "App Style System",
+          path: "App-Style-System/index.html",
+          group: "tools",
+          tag: "Styl",
+          desc: "Stylovací systém aplikací – šablony vzhledu.",
+        },
+        {
+          id: "tool-meziprostor",
+          title: "Meziprostor Core",
+          path: "Meziprostor-Core/index.html",
+          group: "tools",
+          tag: "Meziprostor",
+          desc: "Meziprostor – spojovací vrstva mezi světy.",
+        },
+        {
+          id: "tool-uloziste",
+          title: "Úložiště",
+          path: "uloziste/index.html",
+          group: "tools",
+          tag: "Storage",
+          desc: "Úložiště – prostor pro data a materiál VaFT.",
+        },
+        {
+          id: "tool-totem-3d",
+          title: "VaFT Totem 3D",
+          path: "vaft-totem-3d.html",
+          group: "tools",
+          tag: "Totem",
+          desc: "3D písmenkový totem složený z tvého ASCII symbolu.",
+        },
+      ];
+
+      const groupLabels = {
+        core: "Core / Motory",
+        planets: "Planety + mapy",
+        heroes: "Hrdinové",
+        tools: "Nástroje / Engine",
+        all: "Všechny scény",
+      };
+
+      let currentGroup = "core";
+      let currentAppId = null;
+
+      const groupButtonsEl = document.getElementById("group-buttons");
+      const appListEl = document.getElementById("app-list");
+      const appCountEl = document.getElementById("app-count");
+      const frameEl = document.getElementById("app-frame");
+      const currentNameEl = document.getElementById("current-app-name");
+      const currentDescEl = document.getElementById("current-app-desc");
+      const currentGroupLabelEl = document.getElementById("current-group-label");
+      const previewPathPillEl = document.getElementById("preview-path-pill");
+      const btnOpenTab = document.getElementById("btn-open-tab");
+
+      function setGroup(group) {
+        currentGroup = group;
+
+        // přepnout aktivní tlačítko
+        groupButtonsEl
+          .querySelectorAll(".group-btn")
+          .forEach((btn) => btn.classList.toggle("active", btn.dataset.group === group));
+
+        currentGroupLabelEl.textContent = groupLabels[group] || group;
+
+        renderAppList();
+
+        // pokud aktuální appka není v dané skupině, vybrat nějakou jinou
+        const visibleApps = getVisibleApps();
+        if (!visibleApps.length) return;
+
+        if (!currentAppId || !visibleApps.some((a) => a.id === currentAppId)) {
+          setCurrentApp(visibleApps[0].id);
+        } else {
+          // jen zvýraznit výběr
+          highlightActiveCard();
+        }
+      }
+
+      function getVisibleApps() {
+        if (currentGroup === "all") return apps;
+        return apps.filter((a) => a.group === currentGroup);
+      }
+
+      function renderAppList() {
+        const visible = getVisibleApps();
+        appListEl.innerHTML = "";
+
+        visible.forEach((app) => {
+          const card = document.createElement("div");
+          card.className = "app-card";
+          card.dataset.appId = app.id;
+
+          const row = document.createElement("div");
+          row.className = "app-card-row";
+
+          const name = document.createElement("div");
+          name.className = "app-card-name";
+          name.textContent = app.title;
+
+          const tag = document.createElement("div");
+          tag.className = "app-card-tag";
+          tag.textContent = app.tag || "";
+
+          row.appendChild(name);
+          row.appendChild(tag);
+
+          const desc = document.createElement("div");
+          desc.className = "app-card-desc";
+          desc.textContent = app.desc || "";
+
+          const path = document.createElement("div");
+          path.className = "app-card-path";
+          path.textContent = app.path;
+
+          card.appendChild(row);
+          card.appendChild(desc);
+          card.appendChild(path);
+
+          card.addEventListener("click", () => {
+            setCurrentApp(app.id);
+          });
+
+          appListEl.appendChild(card);
+        });
+
+        appCountEl.textContent =
+          visible.length + (visible.length === 1 ? " scéna" : visible.length < 5 ? " scény" : " scén");
+      }
+
+      function setCurrentApp(appId) {
+        const app = apps.find((a) => a.id === appId);
+        if (!app) return;
+
+        currentAppId = appId;
+
+        currentNameEl.innerHTML = "";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = app.title;
+
+        const badge = document.createElement("span");
+        badge.className = "current-app-tag";
+        badge.textContent = app.tag;
+
+        currentNameEl.appendChild(nameSpan);
+        currentNameEl.appendChild(badge);
+
+        currentDescEl.textContent = app.desc || "";
+        previewPathPillEl.textContent = app.path;
+
+        // načti do iframe
+        frameEl.src = app.path;
+
+        highlightActiveCard();
+      }
+
+      function highlightActiveCard() {
+        appListEl
+          .querySelectorAll(".app-card")
+          .forEach((card) => {
+            card.classList.toggle("active", card.dataset.appId === currentAppId);
+          });
+      }
+
+      // otevřít v nové záložce
+      btnOpenTab.addEventListener("click", () => {
+        const app = apps.find((a) => a.id === currentAppId);
+        if (!app) return;
+        window.open(app.path, "_blank");
+      });
+
+      // handlery pro skupiny
+      groupButtonsEl.addEventListener("click", (e) => {
+        const btn = e.target.closest(".group-btn");
+        if (!btn) return;
+        setGroup(btn.dataset.group);
+      });
+
+      // inicializace: core + první appka z core
+      function init() {
+        setGroup("core");
+        const firstCore = apps.find((a) => a.group === "core");
+        if (firstCore) {
+          setCurrentApp(firstCore.id);
+        }
+      }
+
+      init();
+    </script>
+  </body>
+</html>
