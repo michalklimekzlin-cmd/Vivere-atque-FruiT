@@ -35,7 +35,7 @@
         width: min(920px, 96vw);
         height: min(620px, 90vh);
         border-radius: 32px;
-        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.9);
         background: radial-gradient(circle at top, #06091a, #020208);
         border: 1px solid rgba(255, 255, 255, 0.05);
       }
@@ -83,7 +83,7 @@
           🌀 1 prst / myš = náklon • pinch / kolečko = zoom
         </div>
         <div class="hud-right">
-          v1.1 • VaF'i'T ASCII Totem 3D (1 stéla)
+          v1.2 • VaF'i'T ASCII Totem • styl písmenkové planety
         </div>
 
         <!-- TADY JE TVŮJ TOTEM – můžeš ho v klidu upravovat -->
@@ -128,9 +128,9 @@
       let targetTiltX = tiltX;
       let targetTiltY = tiltY;
 
-      // totem se automaticky NEOTÁČÍ – stojí na místě
+      // totem se automaticky NEOTÁČÍ – stojí na místě (jako stéla)
       let rotationY = 0;
-      const autoRotate = 0; // můžeš dát třeba 0.1 pro jemné točení
+      const autoRotate = 0; // když chceš lehké točení, dej třeba 0.1
 
       // načtení textu totemu
       const rawText = document.getElementById("totem-source").innerText;
@@ -139,6 +139,9 @@
         .filter((l) => l.trim() !== "" || l.length > 0);
 
       const maxLen = lines.reduce((m, l) => Math.max(m, l.length), 0);
+
+      // Vivere prstenec jako u planety
+      const vivereText = "{*(°.).)// Vivere atque FruiT \\\\(.(.°)*}";
 
       function resize() {
         const rect = canvas.getBoundingClientRect();
@@ -194,8 +197,8 @@
 
       function drawBaseGlow() {
         ctx.save();
-        const baseY = height * 0.78;
-        const baseR = Math.min(width, height) * 0.18 * viewScale;
+        const baseY = height * 0.8;
+        const baseR = Math.min(width, height) * 0.2 * viewScale;
 
         ctx.beginPath();
         ctx.ellipse(
@@ -222,18 +225,18 @@
         ctx.restore();
       }
 
-      function drawTotem() {
+      function drawTotem(time) {
         const charW = 9;
         const lineH = 16;
 
         const towerHeight = lines.length * lineH;
         const towerWidth = maxLen * charW;
 
-        // mírné zakřivení – čelní stěna do tvaru U
-        const curveRadius = towerWidth * 0.9; // větší = menší zakřivení
-        const curveAngle = Math.PI / 6; // celkový rozsah úhlu (~30°)
+        // mírné zakřivení – čelní stěna do tvaru U (jako 3D stéla)
+        const curveRadius = towerWidth * 0.9;
+        const curveAngle = Math.PI / 6; // cca 30°
 
-        const depthOffset = curveRadius; // aby byl střed stěny trochu vepředu
+        const depthOffset = curveRadius;
 
         ctx.save();
         ctx.font = "11px system-ui";
@@ -243,7 +246,7 @@
         ctx.shadowColor = "rgba(255,200,150,0.9)";
         ctx.shadowBlur = 10;
 
-        const centerY = height * 0.15; // posunutí totemu nahoru
+        const centerY = height * 0.2; // posunutí totemu nahoru
 
         const points = [];
 
@@ -267,9 +270,11 @@
 
             points.push({
               ch,
+              i,
+              j,
               sx: proj.sx,
               sy: proj.sy + centerY,
-              z: proj.z
+              z: proj.z,
             });
           }
         }
@@ -278,12 +283,21 @@
         points.sort((a, b) => a.z - b.z);
 
         for (const p of points) {
-          const alpha =
+          const depthFactor =
             0.45 +
             0.55 *
               (1 -
-                Math.min(1, (p.z + curveRadius) / (curveRadius * 2 + 1e-5)));
-          ctx.globalAlpha = alpha;
+                Math.min(
+                  1,
+                  (p.z + curveRadius) / (curveRadius * 2 + 1e-5)
+                ));
+
+          // jemné "dýchání" jako u písmenkové planety
+          const phase = (p.i * 13 + p.j * 7) * 0.21;
+          const flicker =
+            0.6 + 0.4 * Math.sin(time * 1.4 + phase + p.z * 0.5);
+
+          ctx.globalAlpha = depthFactor * flicker;
           ctx.fillText(p.ch, p.sx, p.sy);
         }
 
@@ -292,11 +306,53 @@
         ctx.restore();
       }
 
-      function draw(dt) {
+      // Vivere prstenec kolem totemu (v 2D prostoru)
+      function drawVivereRing(time) {
+        const text = vivereText;
+        const step = (Math.PI * 2) / text.length;
+
+        const cx = width / 2;
+        const cy = height * 0.42; // kolem "hrudi" totemu
+
+        const radiusX = Math.min(width, height) * 0.22 * viewScale;
+        const radiusY = radiusX * 0.4;
+
+        ctx.save();
+        ctx.font = "10px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "rgba(255, 230, 185, 0.95)";
+        ctx.shadowColor = "rgba(255, 210, 160, 0.9)";
+        ctx.shadowBlur = 8;
+
+        const baseAngle = time * 0.4;
+
+        for (let i = 0; i < text.length; i++) {
+          const ch = text[i];
+          const angle = baseAngle + i * step;
+
+          const x = cx + Math.cos(angle) * radiusX;
+          const y = cy + Math.sin(angle) * radiusY;
+
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(angle + Math.PI / 2);
+          ctx.globalAlpha = 0.75 + 0.25 * Math.sin(time * 1.5 + i * 0.3);
+          ctx.fillText(ch, 0, 0);
+          ctx.restore();
+        }
+
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+        ctx.restore();
+      }
+
+      function draw(time) {
         ctx.clearRect(0, 0, width, height);
         drawBackground();
         drawBaseGlow();
-        drawTotem();
+        drawTotem(time);
+        drawVivereRing(time);
       }
 
       let lastTime = 0;
@@ -305,14 +361,16 @@
         const dt = (t - lastTime) / 1000;
         lastTime = t;
 
+        const timeSec = t / 1000;
+
         const k = Math.min(1, dt * 5);
         viewScale += (targetViewScale - viewScale) * k;
         tiltX += (targetTiltX - tiltX) * k;
         tiltY += (targetTiltY - tiltY) * k;
 
-        rotationY += autoRotate * dt; // teď = 0, stojí na místě
+        rotationY += autoRotate * dt; // teď = 0 ⇒ stojí na místě
 
-        draw(dt);
+        draw(timeSec);
         requestAnimationFrame(loop);
       }
       requestAnimationFrame(loop);
