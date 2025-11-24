@@ -2,130 +2,33 @@
   "id": "0001",
   "name": "Základní kámen Vivere atque FruiT",
   "items": [
-    {
-      "id": "Revia",
-      "label": "Revia",
-      "path": "Revia/"
-    },
-    {
-      "id": "Michal-Profile",
-      "label": "Michal Profile",
-      "path": "Michal-Profile/"
-    },
-    {
-      "id": "Vivere-atque-FruiT",
-      "label": "Vivere atque FruiT",
-      "path": "Vivere-atque-FruiT/"
-    },
-    {
-      "id": "3I-ATLAS",
-      "label": "3I ATLAS",
-      "path": "3I-ATLAS/"
-    },
-    {
-      "id": "App-Style-System",
-      "label": "App Style System",
-      "path": "App-Style-System/"
-    },
-    {
-      "id": "Bicak-Supreme-Edition",
-      "label": "Bicak Supreme Edition",
-      "path": "Bicak-Supreme-Edition/"
-    },
-    {
-      "id": "Braska-Hlava",
-      "label": "Braska Hlava",
-      "path": "Braska-Hlava/"
-    },
-    {
-      "id": "CroissantSlots",
-      "label": "CroissantSlots",
-      "path": "CroissantSlots/"
-    },
-    {
-      "id": "Gentleman",
-      "label": "Gentleman",
-      "path": "Gentleman/"
-    },
-    {
-      "id": "Glyph-Planet",
-      "label": "Glyph Planet",
-      "path": "Glyph-Planet/"
-    },
-    {
-      "id": "Glyph-Planet-3D",
-      "label": "Glyph Planet 3D",
-      "path": "Glyph-Planet-3D/"
-    },
-    {
-      "id": "Hlavoun",
-      "label": "Hlavoun",
-      "path": "Hlavoun/"
-    },
-    {
-      "id": "Kovosrot",
-      "label": "Kovosrot",
-      "path": "Kovosrot/"
-    },
-    {
-      "id": "Meziprostor-Core",
-      "label": "Meziprostor Core",
-      "path": "Meziprostor-Core/"
-    },
-    {
-      "id": "Recycle",
-      "label": "Recycle",
-      "path": "Recycle/"
-    },
-    {
-      "id": "RingPlanetGrid",
-      "label": "RingPlanetGrid",
-      "path": "RingPlanetGrid/"
-    },
-    {
-      "id": "VAFT-BearHead",
-      "label": "VAFT BearHead",
-      "path": "VAFT-BearHead/"
-    },
-    {
-      "id": "VaFT-Hub",
-      "label": "VaFT Hub",
-      "path": "VaFT-Hub/"
-    },
-    {
-      "id": "VaFT-Planets-SignalCore",
-      "label": "VaFT Planets SignalCore",
-      "path": "VaFT-Planets-SignalCore/"
-    },
-    {
-      "id": "VaFT-Planets-SignalTower",
-      "label": "VaFT Planets SignalTower",
-      "path": "VaFT-Planets-SignalTower/"
-    },
-    {
-      "id": "VaFiT",
-      "label": "VaFiT",
-      "path": "VaFiT/"
-    },
-    {
-      "id": "chybozrout-opravar",
-      "label": "chybozrout opravár",
-      "path": "chybozrout-opravar/"
-    },
-    {
-      "id": "engine.pismenka",
-      "label": "engine.pismenka",
-      "path": "engine.pismenka/"
-    },
-    {
-      "id": "mapa",
-      "label": "mapa",
-      "path": "mapa/"
-    },
-    {
-      "id": "mapa-3d",
-      "label": "mapa 3d",
-      "path": "mapa-3d/"
-    }
+    { "id": "Revia", "label": "Revia", "path": "Revia/" },
+    { "id": "VaFiT", "label": "VaFiT", "path": "VaFiT/" },
+    { "id": "Hlavoun", "label": "Hlavoun", "path": "Hlavoun/" },
+    { "id": "Michal-AI-Al-Klimek", "label": "Michal AI Al Klimek", "path": "Michal-AI-Al-Klimek/" },
+    { "id": "3I-ATLAS", "label": "3I ATLAS", "path": "3I-ATLAS/" },
+    { "id": "App-Style-System", "label": "App Style System", "path": "App-Style-System/" },
+    { "id": "Bicak-Supreme-Edition", "label": "Bicák Supreme Edition", "path": "Bicak-Supreme-Edition/" },
+    { "id": "Braska-Hlava", "label": "Bráška Hlava", "path": "Braska-Hlava/" },
+    { "id": "CroissantSlots", "label": "Croissant Slots", "path": "CroissantSlots/" },
+    { "id": "Gentleman", "label": "Gentleman", "path": "Gentleman/" },
+    { "id": "Glyph-Planet", "label": "Glyph Planet", "path": "Glyph-Planet/" },
+    { "id": "Glyph-Planet-3D", "label": "Glyph Planet 3D", "path": "Glyph-Planet-3D/" },
+    { "id": "Kovosrot", "label": "Kovošrot", "path": "Kovosrot/" },
+    { "id": "Meziprostor-Core", "label": "Meziprostor Core", "path": "Meziprostor-Core/" },
+    { "id": "Recycle", "label": "Recycle", "path": "Recycle/" },
+    { "id": "RingPlanetGrid", "label": "Ring Planet Grid", "path": "RingPlanetGrid/" },
+    { "id": "VAFT-BearHead", "label": "VAFT BearHead", "path": "VAFT-BearHead/" },
+    { "id": "VaFT-Hub", "label": "VaFT Hub", "path": "VaFT-Hub/" },
+    { "id": "VaFT-Planets-SignalCore", "label": "VaFT Planets SignalCore", "path": "VaFT-Planets-SignalCore/" },
+    { "id": "VaFT-Planets-SignalTower", "label": "VaFT Planets SignalTower", "path": "VaFT-Planets-SignalTower/" },
+    { "id": "chybozrout-opravar", "label": "Chybožrout Opravář", "path": "chybozrout-opravar/" },
+    { "id": "engine.pismenka", "label": "Engine Písmenka", "path": "engine.pismenka/" },
+    { "id": "mapa", "label": "Mapa", "path": "mapa/" },
+    { "id": "mapa-3d", "label": "Mapa 3D", "path": "mapa-3d/" },
+    { "id": "guardian", "label": "Guardian", "path": "guardian/" },
+    { "id": "core", "label": "Core", "path": "core/" },
+    { "id": "apps", "label": "Apps", "path": "apps/" },
+    { "id": "uloziste", "label": "Úložiště", "path": "uloziste/" }
   ]
 }
