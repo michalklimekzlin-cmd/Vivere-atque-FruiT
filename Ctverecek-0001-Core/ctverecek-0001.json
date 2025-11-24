@@ -1,0 +1,26 @@
+{
+  "id": "0001",
+  "name": "Základní kámen Vivere atque FruiT",
+  "items": [
+    {
+      "id": "Revia",
+      "label": "Revia (anděl/démon)",
+      "path": "Revia/"
+    },
+    {
+      "id": "MichalProfile",
+      "label": "Profil Michal",
+      "path": "Michal-Profile/"
+    },
+    {
+      "id": "WorldSpheres",
+      "label": "Koule světa",
+      "path": "World-Spheres/"
+    },
+    {
+      "id": "RootIndex",
+      "label": "Hlavní index",
+      "path": "index.html"
+    }
+  ]
+}
