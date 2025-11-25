@@ -81,7 +81,7 @@ body {
   background: radial-gradient(circle at top, #050818, #02030a);
 }
 
-/* „Matchmaking“ panel nahoře uprostřed */
+/* "Matchmaking" panel */
 
 .ui-match-panel {
   position: absolute;
@@ -149,7 +149,7 @@ body {
   opacity: 0.8;
 }
 
-/* SPODNÍ HUD – tlačítka */
+/* SPODNÍ HUD */
 
 .ui-bottom {
   height: 70px;
