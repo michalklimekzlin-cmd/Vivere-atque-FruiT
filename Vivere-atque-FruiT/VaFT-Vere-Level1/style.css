@@ -14,95 +14,180 @@ body {
   color: #f5f5f5;
 }
 
-.topbar {
-  height: 56px;
-  padding: 8px 16px;
+/* Kořen UI – vše na výšku jako na iPadu */
+.ui-root {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 4px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: radial-gradient(circle at left top, #10192e, #050710);
 }
 
-.topbar .title {
-  font-size: 15px;
+/* TOP PANEL */
+.ui-top {
+  height: 52px;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: radial-gradient(circle at top, #121a32, #050713);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ui-top-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-game-title {
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   opacity: 0.95;
 }
 
-.topbar .subtitle {
-  font-size: 12px;
+.ui-game-subtitle {
+  font-size: 11px;
   opacity: 0.8;
+}
+
+.ui-top-right {
+  display: flex;
+  gap: 10px;
+}
+
+.ui-resource {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 11px;
+}
+
+.ui-icon {
+  font-size: 12px;
+}
+
+/* HLAVNÍ HRACÍ OBLAST */
+
+.ui-main {
+  flex: 1;
+  position: relative;
+  padding: 6px 10px;
+  background: radial-gradient(circle at top, #050818, #02030a);
+}
+
+/* „Matchmaking“ panel */
+.ui-match-panel {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  transform: translateX(-50%);
+  min-width: 260px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(10, 14, 32, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font-size: 11px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+.ui-match-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.ui-match-status {
+  opacity: 0.78;
+}
+
+/* Canvas v „chodbičce“ */
+
+.ui-world-wrapper {
+  position: absolute;
+  inset: 24px 0 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #world {
   display: block;
-  width: 100vw;
-  height: calc(100vh - 56px - 96px - 96px);
-  /* topbar + hud + log */
+  width: 100%;
+  height: 100%;
 }
 
-.hud {
-  height: 96px;
-  padding: 8px 16px;
-  display: flex;
-  justify-content: space-between;
+/* Label nad hrdinou (jen UI, ne řešený v kódu) */
+
+.ui-hero-label {
+  position: absolute;
+  left: 50%;
+  bottom: 20%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: linear-gradient(to right, #050713, #050914);
+  pointer-events: none;
 }
 
-.hud-left {
-  flex: 2;
+.ui-hero-name {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  font-size: 11px;
+  margin-bottom: 2px;
 }
 
-.hud-right {
+.ui-hero-tag {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+/* SPODNÍ HUD JAKO V RPG */
+
+.ui-bottom {
+  height: 70px;
+  padding: 6px 18px 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: linear-gradient(to top, #050712, #05071300);
+}
+
+.ui-bottom-btn {
   flex: 1;
+  margin: 0 4px;
+  border-radius: 16px;
+  border: none;
+  background: rgba(0, 0, 0, 0.7);
+  color: #f5f5f5;
+  padding: 6px 8px;
+  font-size: 11px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  align-items: flex-end;
+  align-items: center;
+  gap: 2px;
 }
 
-.hud-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  opacity: 0.7;
+.ui-bottom-btn:active {
+  transform: translateY(1px);
 }
 
-.hud-text {
-  font-size: 12px;
-  opacity: 0.85;
+.ui-bottom-icon {
+  font-size: 16px;
 }
 
-.hud-bar {
-  width: 130px;
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.hud-bar-fill {
-  width: 20%;
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #7cf5a3, #a8ffea);
-  transition: width 0.25s ease-out;
-}
+/* LOG DOLE – necháme, ať vypadá jako chat / systém */
 
 .log {
-  height: 96px;
-  padding: 8px 12px;
+  height: 80px;
+  padding: 6px 12px;
   overflow: auto;
   font-size: 11px;
-  line-height: 1.4;
+  line-height: 1.35;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   background: linear-gradient(to bottom, #050710, #020309);
 }
@@ -111,24 +196,24 @@ body {
   white-space: nowrap;
 }
 
-@media (max-width: 600px) {
-  .hud {
-    flex-direction: column;
-    align-items: flex-start;
-    height: auto;
-    padding-bottom: 10px;
+/* Mobilní vychytávka */
+
+@media (max-width: 700px) {
+  .ui-match-panel {
+    min-width: 210px;
+    font-size: 10px;
   }
 
-  #world {
-    height: calc(100vh - 56px - 130px - 96px);
+  .ui-bottom {
+    height: 64px;
+    padding-inline: 10px;
   }
 
-  .hud-right {
-    width: 100%;
-    align-items: flex-start;
+  .ui-bottom-btn {
+    font-size: 10px;
   }
 
-  .hud-bar {
-    width: 100%;
+  .log {
+    height: 72px;
   }
 }
