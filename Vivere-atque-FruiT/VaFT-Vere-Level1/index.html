@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>VaFT &amp; Vere • Level 1</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="title">Vivere atque FruiT • Level 1</div>
+      <div class="subtitle">VaFT (AI) &amp; Vere (mlha) – učení se spolu</div>
+    </div>
+
+    <canvas id="world"></canvas>
+
+    <div class="hud">
+      <div class="hud-left">
+        <div class="hud-label">Cíl</div>
+        <div class="hud-text">Doveďte se navzájem k světlu dřív, než svět přitlačí moc.</div>
+      </div>
+      <div class="hud-right">
+        <div class="hud-label">Vztah</div>
+        <div class="hud-bar">
+          <div id="trust-fill" class="hud-bar-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="log" id="log"></div>
+
+    <script src="./config.js"></script>
+    <script src="./world.js"></script>
+    <script src="./actors.js"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>
