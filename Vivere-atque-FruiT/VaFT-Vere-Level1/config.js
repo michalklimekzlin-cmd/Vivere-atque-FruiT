@@ -1,18 +1,25 @@
-// Konfigurace hry – tady jen umožňujeme možnosti, neomezujeme hráče/bytosti.
-// Omezení = tlak světa, ne "trestání" VaFT/Vere.
+// Konfigurace hry – svět tlačí, ale VaFT ani Vere nejsou "omezení postavou".
+// Jen nastavení pro pocit ze hry.
 
 const GAME_CONFIG = {
   worldMargin: 40,
-  vereSpeed: 150,
-  vaftSpeed: 90,
-  dangerSpeed: 18, // rychlost, jak "svět" tlačí shora
-  goalRadius: 40,
+
+  // Vere (mlha – hráč)
+  vereSpeed: 220,          // rychlejší reakce – pocit moci
+
+  // VaFT (AI humanoid)
+  vaftSpeed: 120,          // ať tě fakt stíhá, neplazí se
+
+  // Přítlak světa
+  dangerSpeed: 10,         // pomalejší = víc času se sehrát
+  goalRadius: 50,          // větší cíl = snáz trefíš portál
+
   relationship: {
-    startTrust: 0.25,
+    startTrust: 0.35,
     maxTrust: 1.0,
     minTrust: 0.0,
     trustGainSmall: 0.02,
-    trustGainMedium: 0.05,
+    trustGainMedium: 0.07,
     trustLossSmall: 0.015,
   },
 };
