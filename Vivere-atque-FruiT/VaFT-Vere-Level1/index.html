@@ -1,40 +1,65 @@
-<!doctype html>
-<html lang="cs">
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <title>VaFT &amp; Vere • Level 1</title>
-    <link rel="stylesheet" href="./style.css" />
-  </head>
   <body>
-    <div class="topbar">
-      <div class="title">Vivere atque FruiT • Level 1</div>
-      <div class="subtitle">VaFT (AI) &amp; Vere (mlha) – učení se spolu</div>
-    </div>
-
-    <canvas id="world"></canvas>
-
-    <div class="hud">
-      <div class="hud-left">
-        <div class="hud-label">Cíl</div>
-        <div class="hud-text">Doveďte se navzájem k světlu dřív, než svět přitlačí moc.</div>
-      </div>
-      <div class="hud-right">
-        <div class="hud-label">Vztah</div>
-        <div class="hud-bar">
-          <div id="trust-fill" class="hud-bar-fill"></div>
+    <div class="ui-root">
+      <!-- TOP PANEL (čas, název, „měna“) -->
+      <header class="ui-top">
+        <div class="ui-top-left">
+          <div class="ui-game-title">Vivere atque FruiT</div>
+          <div class="ui-game-subtitle">VaFT (AI) &amp; Vere (mlha)</div>
         </div>
-      </div>
+        <div class="ui-top-right">
+          <div class="ui-resource">
+            <span class="ui-icon">★</span>
+            <span id="ui-coins">5</span>
+          </div>
+          <div class="ui-resource">
+            <span class="ui-icon">✦</span>
+            <span id="ui-keys">1</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- HLAVNÍ HRACÍ OBLAST -->
+      <main class="ui-main">
+        <!-- „Matchmaking / mise“ pruh uprostřed nahoře -->
+        <div class="ui-match-panel">
+          <div class="ui-match-title">Mission: Level 1 • Co-op</div>
+          <div class="ui-match-status">Connecting VaFT &amp; Vere...</div>
+        </div>
+
+        <!-- Herní canvas -->
+        <div class="ui-world-wrapper">
+          <canvas id="world"></canvas>
+
+          <!-- Jméno hrdiny nad postavou (přes canvas) -->
+          <div class="ui-hero-label">
+            <div class="ui-hero-name">VaFT</div>
+            <div class="ui-hero-tag">AI partner</div>
+          </div>
+        </div>
+      </main>
+
+      <!-- SPODNÍ HUD (tlačítka jako v RPG) -->
+      <footer class="ui-bottom">
+        <button class="ui-bottom-btn">
+          <span class="ui-bottom-icon">⚔</span>
+          <span>Weapons</span>
+        </button>
+        <button class="ui-bottom-btn">
+          <span class="ui-bottom-icon">🗒</span>
+          <span>Tasks</span>
+        </button>
+        <button class="ui-bottom-btn">
+          <span class="ui-bottom-icon">⚙</span>
+          <span>Settings</span>
+        </button>
+      </footer>
+
+      <!-- LOG (chat / systémové zprávy) -->
+      <div class="log" id="log"></div>
+
+      <script src="./config.js"></script>
+      <script src="./world.js"></script>
+      <script src="./actors.js"></script>
+      <script src="./main.js"></script>
     </div>
-
-    <div class="log" id="log"></div>
-
-    <script src="./config.js"></script>
-    <script src="./world.js"></script>
-    <script src="./actors.js"></script>
-    <script src="./main.js"></script>
   </body>
-</html>
