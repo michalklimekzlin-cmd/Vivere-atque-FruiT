@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Vivere atque FruiT • 1O1R</title>
+    <style>
+      :root {
+        --bg: #05060a;
+        --line-world: #f4d7a1;
+        --hero-vafit: #7fffd4;
+        --hero-vivere: #a5fffe;
+        --accent: #5be38a;
+        --text-soft: #adb5d6;
+        --text-strong: #f9fafb;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at top, #0a0c18, #020309);
+        color: var(--text-strong);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        overflow: hidden;
+      }
+
+      .root {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* TOP BAR */
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 0.6rem 1.1rem 0.4rem;
+        font-size: 0.8rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-soft);
+      }
+
+      .topbar-left {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .topbar-title {
+        font-size: 0.8rem;
+        color: var(--text-strong);
+      }
+
+      .topbar-sub {
+        font-size: 0.7rem;
+        opacity: 0.8;
+      }
+
+      .topbar-badge {
+        padding: 0.18rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+      }
+
+      /* MAIN */
+
+      .main {
+        position: relative;
+        flex: 1;
+        display: flex;
+        padding: 0 0.6rem 0.4rem;
+        gap: 0.6rem;
+        box-sizing: border-box;
+      }
+
+      .world-wrapper {
+        position: relative;
+        flex: 1;
+        border-radius: 32px;
+        background: radial-gradient(circle at top, #06091a, #020208);
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        overflow: hidden;
+        min-height: 260px;
+      }
+
+      #world-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        touch-action: none;
+      }
+
+      /* MINI MAPA */
+
+      .minimap {
+        position: absolute;
+        top: 0.7rem;
+        right: 0.7rem;
+        width: 140px;
+        height: 60px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.88);
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        backdrop-filter: blur(16px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        padding: 0.35rem 0.5rem 0.4rem;
+        box-sizing: border-box;
+        pointer-events: none;
+      }
+
+      .minimap-label {
+        font-size: 0.63rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--text-soft);
+        margin-bottom: 0.25rem;
+      }
+
+      #minimap-canvas {
+        flex: 1;
+        width: 100%;
+        border-radius: 999px;
+      }
+
+      /* HUD BOTTOM */
+
+      .hud-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        padding: 0.5rem 0.9rem 0.7rem;
+        gap: 0.8rem;
+        font-size: 0.75rem;
+        color: var(--text-soft);
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .controls-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+      }
+
+      .arrow-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 30px);
+        grid-template-rows: repeat(3, 30px);
+        gap: 0.18rem;
+      }
+
+      .btn-arrow {
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        background: radial-gradient(circle at top, #0b1220, #020617);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        color: var(--text-strong);
+        cursor: pointer;
+        user-select: none;
+        touch-action: manipulation;
+      }
+
+      .btn-arrow.empty {
+        border: none;
+        background: transparent;
+        pointer-events: none;
+      }
+
+      .btn-arrow:active {
+        transform: translateY(1px) scale(0.98);
+        background: radial-gradient(circle at top, #111827, #020617);
+      }
+
+      .hud-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.35rem;
+        text-align: right;
+      }
+
+      .hero-toggle {
+        display: inline-flex;
+        padding: 0.12rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7);
+      }
+
+      .hero-toggle button {
+        border: none;
+        padding: 0.26rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        background: transparent;
+        color: var(--text-soft);
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .hero-toggle button.active {
+        background: radial-gradient(circle at top, #22c55e, #15803d);
+        color: #ecfdf5;
+        box-shadow: 0 0 0 1px rgba(74, 222, 128, 0.8);
+      }
+
+      /* SMĚROVÝ KURZOR */
+
+      .dir-box {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.12rem;
+      }
+
+      .dir-label {
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: rgba(148, 163, 184, 0.9);
+      }
+
+      .dir-circle {
+        position: relative;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        background: radial-gradient(circle at top, #020617, #02010a);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.75);
+        touch-action: none;
+      }
+
+      #dir-arrow {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 2px;
+        height: 16px;
+        background: #5be38a;
+        border-radius: 999px 999px 2px 2px;
+        transform-origin: 50% 90%;
+        transform: translate(-50%, -50%) rotate(0rad);
+        opacity: 0.25;
+        transition: opacity 0.15s ease-out;
+      }
+
+      #dir-arrow::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 72%;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #5be38a;
+        transform: translate(-50%, -50%);
+      }
+
+      .hud-tip {
+        font-size: 0.65rem;
+        opacity: 0.9;
+        max-width: 260px;
+      }
+
+      .hud-world-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: rgba(148, 163, 184, 0.85);
+      }
+
+      .hud-world-label span {
+        color: var(--accent);
+      }
+
+      @media (max-width: 768px) {
+        .main {
+          padding-inline: 0.4rem;
+        }
+
+        .world-wrapper {
+          border-radius: 24px;
+        }
+
+        .hud-bottom {
+          padding-inline: 0.6rem;
+        }
+
+        .hud-tip {
+          max-width: 200px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .hud-bottom {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .hud-right {
+          align-items: flex-start;
+          text-align: left;
+        }
+
+        .dir-box {
+          align-items: flex-start;
+        }
+
+        .hud-world-label {
+          text-align: left;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="root">
+      <div class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-title">Vivere atque Fruit • Mini RPG</div>
+          <div class="topbar-sub">
+            Rámeček = prostor, VaFIT + Vivere = parťáci uvnitř.
+          </div>
+        </div>
+        <div class="topbar-badge">(Level 0 • Test rámečky)</div>
+      </div>
+
+      <div class="main">
+        <div class="world-wrapper">
+          <canvas id="world-canvas"></canvas>
+
+          <div class="minimap">
+            <div class="minimap-label">Mini mapa světů</div>
+            <canvas id="minimap-canvas"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="hud-bottom">
+        <div class="controls">
+          <div class="controls-label">Ovládání pohybu</div>
+          <div class="arrow-grid">
+            <div class="btn-arrow empty"></div>
+            <button class="btn-arrow" data-dir="up">▲</button>
+            <div class="btn-arrow empty"></div>
+
+            <button class="btn-arrow" data-dir="left">◀</button>
+            <div class="btn-arrow empty"></div>
+            <button class="btn-arrow" data-dir="right">▶</button>
+
+            <div class="btn-arrow empty"></div>
+            <button class="btn-arrow" data-dir="down">▼</button>
+            <div class="btn-arrow empty"></div>
+          </div>
+        </div>
+
+        <div class="hud-right">
+          <div class="hero-toggle">
+            <button id="btn-vafit" class="active">VaFIT (Panáček)</button>
+            <button id="btn-vivere">Vivere (Mráček)</button>
+          </div>
+
+          <div class="dir-box">
+            <div class="dir-label">Směr hrdiny</div>
+            <div class="dir-circle">
+              <div id="dir-arrow"></div>
+            </div>
+          </div>
+
+          <div class="hud-tip">
+            Šipky / WASD hýbou postavou. Vpravo kurzorem táhni prstem = směr
+            chůze. Panáček chodí po rámečku, mráček plave kolem.
+          </div>
+          <div class="hud-world-label">
+            Aktuální svět: <span id="world-label">Rámeček 1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ----- CANVAS SETUP -----
+      const canvas = document.getElementById("world-canvas");
+      const ctx = canvas.getContext("2d");
+      const mmCanvas = document.getElementById("minimap-canvas");
+      const mmCtx = mmCanvas.getContext("2d");
+      const worldLabelEl = document.getElementById("world-label");
+      const dirArrow = document.getElementById("dir-arrow");
+      const dirCircle = document.querySelector(".dir-circle");
+      const dpr = window.devicePixelRatio || 1;
+
+      let width = 0;
+      let height = 0;
+
+      const FRAME_COUNT = 4;
+      let frameW = 0;
+      let frameH = 0;
+      let frameSpacing = 0;
+      let frameLeft = 0;
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const mmRect = mmCanvas.getBoundingClientRect();
+        mmCanvas.width = mmRect.width * dpr;
+        mmCanvas.height = mmRect.height * dpr;
+        mmCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // základ pro iPad Air – široké 4 rámečky vedle sebe
+        const base = Math.min(width, height) * 0.45;
+        frameH = base;
+        frameW = base * 0.7;
+        frameSpacing = frameW * 0.18;
+
+        let totalWidth = FRAME_COUNT * frameW + (FRAME_COUNT - 1) * frameSpacing;
+        if (totalWidth > width * 0.9) {
+          const k = (width * 0.9) / totalWidth;
+          frameW *= k;
+          frameH *= k;
+          frameSpacing *= k;
+          totalWidth = FRAME_COUNT * frameW + (FRAME_COUNT - 1) * frameSpacing;
+        }
+        frameLeft = -totalWidth / 2;
+      }
+
+      resize();
+      window.addEventListener("resize", resize);
+
+      // ----- STAV HRDINŮ -----
+      // u = 0..1 (vlevo/vpravo v rámečku), v = 0..1 (dole/nahoře)
+      const hero = { frame: 0, u: 0.5, v: 0.5 };
+      const cloud = { frame: 0, u: 0.55, v: 0.45 };
+      let activeHero = "vafit";
+
+      const moveState = { up: false, down: false, left: false, right: false };
+      const analogDir = { x: 0, y: 0 };
+      let analogActive = false;
+
+      const MOVE_SPEED = 1.3; // v "rámečkových" jednotkách / s
+      const MAX_CLOUD_FRAME_DIST = 1; // mráček max o 1 rámeček dál
+
+      function getActive() {
+        return activeHero === "vafit" ? hero : cloud;
+      }
+
+      function clampToFrame(entity) {
+        if (entity.u < 0) {
+          if (entity.frame > 0) {
+            entity.frame -= 1;
+            entity.u += 1;
+          } else {
+            entity.u = 0;
+          }
+        }
+        if (entity.u > 1) {
+          if (entity.frame < FRAME_COUNT - 1) {
+            entity.frame += 1;
+            entity.u -= 1;
+          } else {
+            entity.u = 1;
+          }
+        }
+        if (entity.v < 0) entity.v = 0;
+        if (entity.v > 1) entity.v = 1;
+      }
+
+      function clampCloudDistance() {
+        let df = cloud.frame - hero.frame;
+        if (df > MAX_CLOUD_FRAME_DIST) {
+          cloud.frame = hero.frame + MAX_CLOUD_FRAME_DIST;
+        } else if (df < -MAX_CLOUD_FRAME_DIST) {
+          cloud.frame = hero.frame - MAX_CLOUD_FRAME_DIST;
+        }
+      }
+
+      // ----- KRESLENÍ -----
+      function frameRect(i) {
+        const y0 = -frameH / 2;
+        const x0 = frameLeft + i * (frameW + frameSpacing);
+        return { x0, y0, x1: x0 + frameW, y1: y0 + frameH };
+      }
+
+      function drawWorld() {
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.translate(width / 2, height / 2);
+
+        // jemné pozadí
+        const gBg = ctx.createRadialGradient(0, -frameH, frameH * 0.2, 0, 0, frameH * 2.2);
+        gBg.addColorStop(0, "rgba(255,210,150,0.06)");
+        gBg.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gBg;
+        ctx.fillRect(-width, -height, width * 2, height * 2);
+
+        // 4 rámečky
+        ctx.strokeStyle = "rgba(244,215,161,0.9)";
+        ctx.lineWidth = 2;
+        ctx.shadowColor = "rgba(244,215,161,0.65)";
+        ctx.shadowBlur = 10;
+
+        for (let i = 0; i < FRAME_COUNT; i++) {
+          const r = frameRect(i);
+          ctx.beginPath();
+          ctx.roundRect(r.x0, r.y0, frameW, frameH, 16);
+          ctx.stroke();
+
+          // vnitřní rámeček
+          const innerMargin = Math.min(frameW, frameH) * 0.08;
+          ctx.beginPath();
+          ctx.roundRect(
+            r.x0 + innerMargin,
+            r.y0 + innerMargin,
+            frameW - innerMargin * 2,
+            frameH - innerMargin * 2,
+            12
+          );
+          ctx.stroke();
+        }
+
+        ctx.shadowBlur = 0;
+
+        // panáček
+        const hR = frameRect(hero.frame);
+        const innerMargin = Math.min(frameW, frameH) * 0.08;
+        const hx =
+          hR.x0 + innerMargin + hero.u * (frameW - innerMargin * 2);
+        const hy =
+          hR.y0 + innerMargin + hero.v * (frameH - innerMargin * 2);
+
+        ctx.save();
+        ctx.translate(hx, hy);
+
+        ctx.strokeStyle = activeHero === "vafit" ? "#7fffd4" : "#4fd1c5";
+        ctx.lineWidth = 2;
+
+        // tělo
+        ctx.beginPath();
+        ctx.moveTo(0, -14);
+        ctx.lineTo(0, 0);
+        ctx.lineTo(0, 12);
+        ctx.stroke();
+
+        // nohy
+        ctx.beginPath();
+        ctx.moveTo(0, 12);
+        ctx.lineTo(-6, 20);
+        ctx.moveTo(0, 12);
+        ctx.lineTo(6, 20);
+        ctx.stroke();
+
+        // ruce
+        ctx.beginPath();
+        ctx.moveTo(-7, -4);
+        ctx.lineTo(7, -4);
+        ctx.stroke();
+
+        // hlava
+        ctx.beginPath();
+        ctx.arc(0, -20, 6, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.restore();
+
+        // mráček
+        const cR = frameRect(cloud.frame);
+        const cx =
+          cR.x0 +
+          innerMargin +
+          cloud.u * (frameW - innerMargin * 2);
+        const cy =
+          cR.y0 +
+          innerMargin +
+          cloud.v * (frameH - innerMargin * 2) -
+          10;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.strokeStyle = activeHero === "vivere" ? "#a5fffe" : "#67e8f9";
+        ctx.lineWidth = 2;
+
+        const rCloud = 9;
+        ctx.beginPath();
+        for (let i = 0; i <= 24; i++) {
+          const t = (i / 24) * Math.PI * 2;
+          const rr = rCloud + Math.sin(t * 3) * 1.6;
+          const x = Math.cos(t) * rr;
+          const y = Math.sin(t) * (rr * 0.55) - 2;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, 4);
+        ctx.lineTo(4, 10);
+        ctx.lineTo(-2, 14);
+        ctx.stroke();
+
+        ctx.restore();
+
+        ctx.restore();
+      }
+
+      function drawMinimap() {
+        const w = mmCanvas.width / dpr;
+        const h = mmCanvas.height / dpr;
+        mmCtx.clearRect(0, 0, w, h);
+
+        mmCtx.fillStyle = "#020617";
+        mmCtx.fillRect(0, 0, w, h);
+
+        const padding = 6;
+        const cellW =
+          (w - padding * 2) / FRAME_COUNT;
+        const cellH = h - padding * 2;
+
+        mmCtx.strokeStyle = "#f4d7a1";
+        mmCtx.lineWidth = 1;
+
+        for (let i = 0; i < FRAME_COUNT; i++) {
+          mmCtx.strokeRect(
+            padding + i * cellW,
+            padding,
+            cellW,
+            cellH
+          );
+        }
+
+        const active = getActive();
+        const baseX = padding + active.frame * cellW;
+        const dotX = baseX + active.u * cellW;
+        const dotY = padding + (1 - active.v) * cellH;
+
+        mmCtx.beginPath();
+        mmCtx.arc(dotX, dotY, 3, 0, Math.PI * 2);
+        mmCtx.fillStyle =
+          activeHero === "vafit" ? "#7fffd4" : "#a5fffe";
+        mmCtx.fill();
+      }
+
+      // ----- POHYB -----
+      function setMove(key, isDown) {
+        if (key === "ArrowUp" || key === "w") moveState.up = isDown;
+        if (key === "ArrowDown" || key === "s") moveState.down = isDown;
+        if (key === "ArrowLeft" || key === "a") moveState.left = isDown;
+        if (key === "ArrowRight" || key === "d") moveState.right = isDown;
+      }
+
+      window.addEventListener("keydown", (e) => setMove(e.key, true));
+      window.addEventListener("keyup", (e) => setMove(e.key, false));
+
+      document.querySelectorAll(".btn-arrow").forEach((btn) => {
+        const dir = btn.dataset.dir;
+        if (!dir) return;
+
+        const start = () => {
+          if (dir === "up") moveState.up = true;
+          if (dir === "down") moveState.down = true;
+          if (dir === "left") moveState.left = true;
+          if (dir === "right") moveState.right = true;
+        };
+        const stop = () => {
+          if (dir === "up") moveState.up = false;
+          if (dir === "down") moveState.down = false;
+          if (dir === "left") moveState.left = false;
+          if (dir === "right") moveState.right = false;
+        };
+
+        btn.addEventListener("mousedown", start);
+        btn.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          start();
+        });
+        window.addEventListener("mouseup", stop);
+        window.addEventListener("touchend", stop);
+        window.addEventListener("touchcancel", stop);
+      });
+
+      function stepMovement(dt) {
+        let ax = analogDir.x;
+        let ay = analogDir.y;
+
+        let kx = 0;
+        let ky = 0;
+        if (moveState.up) ky -= 1;
+        if (moveState.down) ky += 1;
+        if (moveState.left) kx -= 1;
+        if (moveState.right) kx += 1;
+
+        if (kx || ky) {
+          const klen = Math.hypot(kx, ky);
+          kx /= klen;
+          ky /= klen;
+          ax += kx;
+          ay += ky;
+        }
+
+        if (!ax && !ay) {
+          if (!analogActive && !kx && !ky) {
+            dirArrow.style.opacity = "0.25";
+          }
+          return;
+        }
+
+        const len = Math.hypot(ax, ay);
+        ax /= len;
+        ay /= len;
+
+        const e = getActive();
+        e.u += ax * MOVE_SPEED * dt;
+        e.v += ay * MOVE_SPEED * dt;
+
+        clampToFrame(e);
+
+        if (activeHero === "vivere") {
+          clampCloudDistance();
+        }
+
+        worldLabelEl.textContent = `Rámeček ${e.frame + 1}`;
+      }
+
+      // ----- PŘEPÍNAČ HRDINŮ -----
+      const btnVafit = document.getElementById("btn-vafit");
+      const btnVivere = document.getElementById("btn-vivere");
+
+      function setHero(heroName) {
+        activeHero = heroName;
+        btnVafit.classList.toggle("active", heroName === "vafit");
+        btnVivere.classList.toggle("active", heroName === "vivere");
+
+        if (heroName === "vivere") {
+          cloud.frame = hero.frame;
+          cloud.u = hero.u + 0.05;
+          cloud.v = hero.v - 0.05;
+          clampToFrame(cloud);
+        }
+
+        worldLabelEl.textContent = `Rámeček ${getActive().frame + 1}`;
+      }
+
+      btnVafit.addEventListener("click", () => setHero("vafit"));
+      btnVivere.addEventListener("click", () => setHero("vivere"));
+
+      // ----- JOYSTICK -----
+      function updateAnalogFromEvent(e) {
+        const rect = dirCircle.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const point = e.touches ? e.touches[0] : e;
+        const px = point.clientX;
+        const py = point.clientY;
+
+        let jx = (px - cx) / (rect.width / 2);
+        let jy = (py - cy) / (rect.height / 2);
+        let len = Math.hypot(jx, jy);
+
+        if (len < 0.08) {
+          analogDir.x = 0;
+          analogDir.y = 0;
+          if (
+            !moveState.up &&
+            !moveState.down &&
+            !moveState.left &&
+            !moveState.right
+          ) {
+            dirArrow.style.opacity = "0.25";
+          }
+          return;
+        }
+
+        jx /= len;
+        jy /= len;
+        analogDir.x = jx;
+        analogDir.y = jy; // dolu = kladné v
+
+        const angle = Math.atan2(-jy, jx);
+        dirArrow.style.opacity = "1";
+        dirArrow.style.transform =
+          "translate(-50%, -50%) rotate(" + angle + "rad)";
+      }
+
+      dirCircle.addEventListener(
+        "mousedown",
+        (e) => {
+          analogActive = true;
+          updateAnalogFromEvent(e);
+          e.preventDefault();
+          e.stopPropagation();
+        },
+        { passive: false }
+      );
+
+      window.addEventListener(
+        "mousemove",
+        (e) => {
+          if (!analogActive) return;
+          updateAnalogFromEvent(e);
+          e.preventDefault();
+        },
+        { passive: false }
+      );
+
+      window.addEventListener("mouseup", () => {
+        analogActive = false;
+        analogDir.x = 0;
+        analogDir.y = 0;
+      });
+
+      dirCircle.addEventListener(
+        "touchstart",
+        (e) => {
+          analogActive = true;
+          updateAnalogFromEvent(e);
+          e.preventDefault();
+          e.stopPropagation();
+        },
+        { passive: false }
+      );
+
+      window.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!analogActive) return;
+          updateAnalogFromEvent(e);
+          e.preventDefault();
+        },
+        { passive: false }
+      );
+
+      window.addEventListener(
+        "touchend",
+        () => {
+          analogActive = false;
+          analogDir.x = 0;
+          analogDir.y = 0;
+        },
+        { passive: false }
+      );
+
+      window.addEventListener(
+        "touchcancel",
+        () => {
+          analogActive = false;
+          analogDir.x = 0;
+          analogDir.y = 0;
+        },
+        { passive: false }
+      );
+
+      // ----- LOOP -----
+      let lastTime = performance.now();
+
+      function loop(now) {
+        const dt = Math.min((now - lastTime) / 1000, 0.05);
+        lastTime = now;
+
+        stepMovement(dt);
+        drawWorld();
+        drawMinimap();
+
+        requestAnimationFrame(loop);
+      }
+
+      requestAnimationFrame(loop);
+    </script>
+  </body>
+</html>
