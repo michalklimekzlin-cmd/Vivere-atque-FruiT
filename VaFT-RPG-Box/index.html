@@ -7,7 +7,6 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>Vivere atque FruiT • Mini RPG</title>
-
     <style>
       :root {
         --bg: #05060a;
@@ -29,8 +28,8 @@
         height: 100%;
         background: radial-gradient(circle at top, #0a0c18, #020309);
         color: var(--text-strong);
-        font-family: system-ui, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", sans-serif;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
         overflow: hidden;
       }
 
@@ -78,7 +77,7 @@
         text-transform: uppercase;
       }
 
-      /* MAIN AREA */
+      /* MAIN */
 
       .main {
         position: relative;
@@ -92,17 +91,21 @@
       .world-wrapper {
         position: relative;
         flex: 1;
-        border-radius: 18px;
-        background: radial-gradient(circle at bottom, #020308, #020106);
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+        border-radius: 32px;
+        background: radial-gradient(circle at top, #06091a, #020208);
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.05);
         overflow: hidden;
-        min-height: 220px;
+        min-height: 260px;
       }
 
       #world-canvas {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         display: block;
+        touch-action: none;
       }
 
       /* MINI MAPA */
@@ -122,6 +125,7 @@
         flex-direction: column;
         padding: 0.35rem 0.5rem 0.4rem;
         box-sizing: border-box;
+        pointer-events: none;
       }
 
       .minimap-label {
@@ -149,8 +153,6 @@
         font-size: 0.75rem;
         color: var(--text-soft);
       }
-
-      /* OVLÁDÁNÍ POHYBU */
 
       .controls {
         display: flex;
@@ -195,8 +197,6 @@
         transform: translateY(1px) scale(0.98);
         background: radial-gradient(circle at top, #111827, #020617);
       }
-
-      /* HRDINOVÉ / INFO */
 
       .hud-right {
         display: flex;
@@ -251,20 +251,17 @@
         color: var(--accent);
       }
 
-      /* RESPONSIVE */
-
       @media (max-width: 768px) {
         .main {
           padding-inline: 0.4rem;
         }
 
         .world-wrapper {
-          border-radius: 16px;
+          border-radius: 24px;
         }
 
         .hud-bottom {
           padding-inline: 0.6rem;
-          flex-direction: row;
         }
 
         .hud-tip {
@@ -292,7 +289,6 @@
 
   <body>
     <div class="root">
-      <!-- TOPBAR -->
       <div class="topbar">
         <div class="topbar-left">
           <div class="topbar-title">Vivere atque Fruit • Mini RPG</div>
@@ -303,7 +299,6 @@
         <div class="topbar-badge">(Level 0 • Test světy)</div>
       </div>
 
-      <!-- MAIN 3D SCÉNA -->
       <div class="main">
         <div class="world-wrapper">
           <canvas id="world-canvas"></canvas>
@@ -315,7 +310,6 @@
         </div>
       </div>
 
-      <!-- HUD SPODNÍ -->
       <div class="hud-bottom">
         <div class="controls">
           <div class="controls-label">Ovládání pohybu</div>
@@ -336,316 +330,355 @@
 
         <div class="hud-right">
           <div class="hero-toggle">
-            <button id="btn-vafit" class="active">
-              VaFIT (Panáček)
-            </button>
+            <button id="btn-vafit" class="active">VaFIT (Panáček)</button>
             <button id="btn-vivere">Vivere (Mráček)</button>
           </div>
           <div class="hud-tip">
-            Šipky / WASD hýbou postavou. Prsty/myš otáčí kameru, dvěma
-            prsty přiblížíš. Přechod mezi světy proběhne u portálu mezi
+            Šipky / WASD hýbou postavou. Prstem / myší otáčíš kameru, dvěma
+            prsty přibližuješ. Přechod mezi světy proběhne u portálu mezi
             kostkou a čtvercem.
           </div>
           <div class="hud-world-label">
-            Aktuální svět:
-            <span id="world-label">Kostka (Svět 1)</span>
+            Aktuální svět: <span id="world-label">Kostka (Svět 1)</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- THREE.JS + KÓD HRY -->
-    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
-
     <script>
-      // ==========================
-      // ZÁKLADNÍ NASTAVENÍ SCÉNY
-      // ==========================
+      // ----- CANVAS SETUP -----
       const canvas = document.getElementById("world-canvas");
-      const renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: true,
-      });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setClearColor(0x020308, 1);
-
-      const scene = new THREE.Scene();
-
-      const camera = new THREE.PerspectiveCamera(
-        40,
-        window.innerWidth / (window.innerHeight * 0.7),
-        0.1,
-        100
-      );
-      camera.position.set(0, 8, 16);
-
-      const controls = new THREE.OrbitControls(camera, canvas);
-      controls.enableDamping = true;
-      controls.enablePan = false;
-      controls.minDistance = 6;
-      controls.maxDistance = 30;
-      controls.maxPolarAngle = Math.PI * 0.48;
-
-      // SVĚTLO
-      const ambient = new THREE.AmbientLight(0xffffff, 0.7);
-      scene.add(ambient);
-
-      const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
-      dirLight.position.set(10, 15, 10);
-      scene.add(dirLight);
-
-      // ==========================
-      // VYTVOŘENÍ DVOU SVĚTŮ
-      // ==========================
-
-      const worlds = [];
-      const WORLD_HALF_SIZE = 3.2;
-
-      // Materiály
-      const lineMaterial = new THREE.LineBasicMaterial({
-        color: 0xf4d7a1,
-        linewidth: 1,
-      });
-
-      const gridMaterial = new THREE.LineBasicMaterial({
-        color: 0x3b4259,
-        linewidth: 1,
-      });
-
-      // --- Svět 1: Kostka ---
-      (() => {
-        const group = new THREE.Group();
-        group.position.set(-4.5, 0, 0);
-
-        // Kostka - drát
-        const geom = new THREE.BoxGeometry(
-          WORLD_HALF_SIZE * 2,
-          WORLD_HALF_SIZE * 1.5,
-          WORLD_HALF_SIZE * 2
-        );
-        const edges = new THREE.EdgesGeometry(geom);
-        const line = new THREE.LineSegments(edges, lineMaterial);
-        line.position.y = WORLD_HALF_SIZE * 0.75;
-        group.add(line);
-
-        // Podstava
-        const planeGeom = new THREE.CircleGeometry(WORLD_HALF_SIZE * 1.1, 48);
-        const planeMat = new THREE.MeshBasicMaterial({
-          color: 0x050715,
-          transparent: true,
-          opacity: 0.9,
-        });
-        const plane = new THREE.Mesh(planeGeom, planeMat);
-        plane.rotation.x = -Math.PI / 2;
-        plane.position.y = 0.01;
-        group.add(plane);
-
-        // Jemná mříž uvnitř
-        const gridHelper = new THREE.GridHelper(
-          WORLD_HALF_SIZE * 2,
-          10,
-          0x374151,
-          0x111827
-        );
-        gridHelper.position.y = 0.02;
-        group.add(gridHelper);
-
-        scene.add(group);
-
-        worlds.push({
-          type: "box",
-          group,
-          center: group.position.clone(),
-        });
-      })();
-
-      // --- Svět 2: Čtverec ---
-      (() => {
-        const group = new THREE.Group();
-        group.position.set(4.5, 0, 0);
-
-        // Čtvercová plocha
-        const planeGeom = new THREE.PlaneGeometry(
-          WORLD_HALF_SIZE * 2,
-          WORLD_HALF_SIZE * 2
-        );
-        const planeMat = new THREE.MeshBasicMaterial({
-          color: 0x050715,
-          side: THREE.DoubleSide,
-        });
-        const plane = new THREE.Mesh(planeGeom, planeMat);
-        plane.rotation.x = -Math.PI / 2;
-        plane.position.y = 0.01;
-        group.add(plane);
-
-        // Rámeček
-        const frameGeom = new THREE.PlaneGeometry(
-          WORLD_HALF_SIZE * 2,
-          WORLD_HALF_SIZE * 2
-        );
-        const frameEdges = new THREE.EdgesGeometry(frameGeom);
-        const frame = new THREE.LineSegments(frameEdges, lineMaterial);
-        frame.rotation.x = -Math.PI / 2;
-        frame.position.y = 0.03;
-        group.add(frame);
-
-        // Mříž
-        const gridHelper = new THREE.GridHelper(
-          WORLD_HALF_SIZE * 2,
-          10,
-          0x374151,
-          0x111827
-        );
-        gridHelper.position.y = 0.02;
-        group.add(gridHelper);
-
-        scene.add(group);
-
-        worlds.push({
-          type: "square",
-          group,
-          center: group.position.clone(),
-        });
-      })();
-
-      // ==========================
-      // HRDINOVÉ
-      // ==========================
-
-      const heroGroup = new THREE.Group();
-      scene.add(heroGroup);
-
-      // Panáček VaFIT (stick)
-      const vafitGroup = new THREE.Group();
-      (() => {
-        const color = new THREE.Color(0x7fffd4);
-
-        const material = new THREE.LineBasicMaterial({
-          color: color,
-          linewidth: 2,
-        });
-
-        // tělo
-        const bodyGeom = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(0, 0.3, 0),
-          new THREE.Vector3(0, 1.1, 0),
-          new THREE.Vector3(0, 1.7, 0),
-        ]);
-        const body = new THREE.Line(bodyGeom, material);
-        vafitGroup.add(body);
-
-        // nohy
-        const legsGeom = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(0, 0.3, 0),
-          new THREE.Vector3(-0.35, 0, 0),
-          new THREE.Vector3(0, 0.3, 0),
-          new THREE.Vector3(0.35, 0, 0),
-        ]);
-        const legs = new THREE.LineSegments(legsGeom, material);
-        vafitGroup.add(legs);
-
-        // ruce
-        const armsGeom = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(-0.45, 1.15, 0),
-          new THREE.Vector3(0.45, 1.15, 0),
-        ]);
-        const arms = new THREE.Line(armsGeom, material);
-        vafitGroup.add(arms);
-
-        // hlava
-        const headGeom = new THREE.CircleGeometry(0.32, 32);
-        const headEdges = new THREE.EdgesGeometry(headGeom);
-        const head = new THREE.LineSegments(headEdges, material);
-        head.position.y = 2.1;
-        vafitGroup.add(head);
-      })();
-
-      // Mráček Vivere
-      const vivereGroup = new THREE.Group();
-      (() => {
-        const material = new THREE.LineBasicMaterial({
-          color: 0xa5fffe,
-          linewidth: 2,
-        });
-
-        const cloudGeom = new THREE.BufferGeometry();
-        const points = [];
-        const radius = 0.45;
-        for (let i = 0; i <= 24; i++) {
-          const t = (i / 24) * Math.PI * 2;
-          const r = radius + Math.sin(t * 3) * 0.12;
-          points.push(new THREE.Vector3(Math.cos(t) * r, 1.35 + Math.sin(t) * 0.25, 0));
-        }
-        cloudGeom.setFromPoints(points);
-        const cloud = new THREE.LineLoop(cloudGeom, material);
-        vivereGroup.add(cloud);
-
-        const tailGeom = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(0, 0.9, 0),
-          new THREE.Vector3(0.2, 0.4, 0),
-          new THREE.Vector3(-0.1, 0, 0),
-        ]);
-        const tail = new THREE.Line(tailGeom, material);
-        vivereGroup.add(tail);
-      })();
-
-      heroGroup.add(vafitGroup);
-      heroGroup.add(vivereGroup);
-
-      let activeHero = "vafit";
-      vafitGroup.visible = true;
-      vivereGroup.visible = false;
-
-      let currentWorldIndex = 0;
-      let heroPosition = new THREE.Vector3(
-        worlds[0].center.x,
-        0,
-        0
-      ); // x,z na podlaze
-
+      const ctx = canvas.getContext("2d");
+      const mmCanvas = document.getElementById("minimap-canvas");
+      const mmCtx = mmCanvas.getContext("2d");
       const worldLabelEl = document.getElementById("world-label");
+      const dpr = window.devicePixelRatio || 1;
 
-      function updateWorldLabel() {
+      let width = 0;
+      let height = 0;
+      let baseScale = 1;
+      let viewScale = 1;
+
+      let rotX = -0.5;
+      let rotY = 0.7;
+
+      // světy v 3D
+      const WORLD_HALF = 2.2;
+      const worldCenters = [
+        { x: -3.2, z: 0 }, // kostka
+        { x: 3.2, z: 0 }, // čtverec
+      ];
+      let currentWorldIndex = 0;
+
+      const heroPos = { x: worldCenters[0].x, y: 0, z: 0 };
+      let activeHero = "vafit";
+
+      const moveState = { up: false, down: false, left: false, right: false };
+      const MOVE_SPEED = 2.5;
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const mmRect = mmCanvas.getBoundingClientRect();
+        mmCanvas.width = mmRect.width * dpr;
+        mmCanvas.height = mmRect.height * dpr;
+        mmCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        baseScale = Math.min(width, height) * 0.18;
+      }
+
+      resize();
+      window.addEventListener("resize", resize);
+
+      // ----- 3D pomocné funkce -----
+      function projectPoint(x, y, z) {
+        // rotace kolem X
+        let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
+        let z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
+        // rotace kolem Y
+        let x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
+        let z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
+
+        const s = baseScale * viewScale;
+        return {
+          sx: x2 * s,
+          sy: y1 * s,
+          sz: z2,
+        };
+      }
+
+      function clampHeroToWorld() {
+        const c = worldCenters[currentWorldIndex];
+        heroPos.x = Math.max(
+          c.x - WORLD_HALF + 0.2,
+          Math.min(c.x + WORLD_HALF - 0.2, heroPos.x)
+        );
+        heroPos.z = Math.max(
+          -WORLD_HALF + 0.2,
+          Math.min(WORLD_HALF - 0.2, heroPos.z)
+        );
+      }
+
+      function checkPortal() {
+        const c = worldCenters[currentWorldIndex];
+        const threshold = WORLD_HALF - 0.25;
+
+        if (currentWorldIndex === 0) {
+          if (heroPos.x - c.x > threshold) {
+            currentWorldIndex = 1;
+            const c2 = worldCenters[1];
+            heroPos.x = c2.x - WORLD_HALF + 0.3;
+          }
+        } else {
+          if (heroPos.x - c.x < -threshold) {
+            currentWorldIndex = 0;
+            const c1 = worldCenters[0];
+            heroPos.x = c1.x + WORLD_HALF - 0.3;
+          }
+        }
         worldLabelEl.textContent =
           currentWorldIndex === 0 ? "Kostka (Svět 1)" : "Čtverec (Svět 2)";
       }
 
-      updateWorldLabel();
+      // ----- KRESLENÍ SVĚTŮ -----
+      function drawWorlds(time) {
+        ctx.clearRect(0, 0, width, height);
 
-      function placeHero() {
-        heroGroup.position.set(heroPosition.x, 0, heroPosition.z);
+        ctx.save();
+        ctx.translate(width / 2, height / 2 + 20);
+
+        // Glow pozadí
+        const gBg = ctx.createRadialGradient(
+          0,
+          -baseScale * 1.6,
+          baseScale * 0.3,
+          0,
+          0,
+          baseScale * 4
+        );
+        gBg.addColorStop(0, "rgba(255,210,150,0.08)");
+        gBg.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gBg;
+        ctx.fillRect(-width, -height, width * 2, height * 2);
+
+        // stín obou světů
+        ctx.beginPath();
+        ctx.ellipse(
+          0,
+          baseScale * 1.3,
+          baseScale * 2.3,
+          baseScale * 0.8,
+          0,
+          0,
+          Math.PI * 2
+        );
+        ctx.fillStyle = "rgba(0,0,0,0.8)";
+        ctx.fill();
+
+        // "dýchání"
+        const pulse = Math.sin(time * 1.6) * 0.05;
+
+        // --- Svět 1: Kostka ---
+        const c1 = worldCenters[0];
+        const cubeY = WORLD_HALF + 0.4 + pulse * 0.5;
+        const cubePoints = [
+          // spodní
+          { x: c1.x - WORLD_HALF, y: 0, z: -WORLD_HALF },
+          { x: c1.x + WORLD_HALF, y: 0, z: -WORLD_HALF },
+          { x: c1.x + WORLD_HALF, y: 0, z: WORLD_HALF },
+          { x: c1.x - WORLD_HALF, y: 0, z: WORLD_HALF },
+
+          // horní
+          { x: c1.x - WORLD_HALF, y: cubeY * 2, z: -WORLD_HALF },
+          { x: c1.x + WORLD_HALF, y: cubeY * 2, z: -WORLD_HALF },
+          { x: c1.x + WORLD_HALF, y: cubeY * 2, z: WORLD_HALF },
+          { x: c1.x - WORLD_HALF, y: cubeY * 2, z: WORLD_HALF },
+        ];
+
+        const projCube = cubePoints.map((p) =>
+          projectPoint(p.x, p.y, p.z)
+        );
+
+        ctx.strokeStyle = "rgba(244,215,161,0.95)";
+        ctx.lineWidth = 1.2;
+        ctx.shadowColor = "rgba(244,215,161,0.9)";
+        ctx.shadowBlur = 8;
+
+        function lineBetween(a, b) {
+          ctx.beginPath();
+          ctx.moveTo(a.sx, a.sy);
+          ctx.lineTo(b.sx, b.sy);
+          ctx.stroke();
+        }
+
+        // spodní
+        lineBetween(projCube[0], projCube[1]);
+        lineBetween(projCube[1], projCube[2]);
+        lineBetween(projCube[2], projCube[3]);
+        lineBetween(projCube[3], projCube[0]);
+
+        // horní
+        lineBetween(projCube[4], projCube[5]);
+        lineBetween(projCube[5], projCube[6]);
+        lineBetween(projCube[6], projCube[7]);
+        lineBetween(projCube[7], projCube[4]);
+
+        // svislé hrany
+        lineBetween(projCube[0], projCube[4]);
+        lineBetween(projCube[1], projCube[5]);
+        lineBetween(projCube[2], projCube[6]);
+        lineBetween(projCube[3], projCube[7]);
+
+        ctx.shadowBlur = 0;
+
+        // --- Svět 2: Zlatý čtvercový grid ---
+        const c2 = worldCenters[1];
+
+        const gridSteps = 6;
+        const cell = (WORLD_HALF * 2) / gridSteps;
+
+        ctx.lineWidth = 0.8;
+        ctx.strokeStyle = "rgba(244,215,161,0.85)";
+        ctx.shadowColor = "rgba(244,215,161,0.6)";
+        ctx.shadowBlur = 7;
+
+        // horizontální čáry
+        for (let i = 0; i <= gridSteps; i++) {
+          const z = -WORLD_HALF + i * cell;
+          const p1 = projectPoint(c2.x - WORLD_HALF, 0.01, z);
+          const p2 = projectPoint(c2.x + WORLD_HALF, 0.01, z);
+          ctx.beginPath();
+          ctx.moveTo(p1.sx, p1.sy);
+          ctx.lineTo(p2.sx, p2.sy);
+          ctx.stroke();
+        }
+
+        // vertikální čáry
+        for (let j = 0; j <= gridSteps; j++) {
+          const x = c2.x - WORLD_HALF + j * cell;
+          const p1 = projectPoint(x, 0.01, -WORLD_HALF);
+          const p2 = projectPoint(x, 0.01, WORLD_HALF);
+          ctx.beginPath();
+          ctx.moveTo(p1.sx, p1.sy);
+          ctx.lineTo(p2.sx, p2.sy);
+          ctx.stroke();
+        }
+
+        ctx.shadowBlur = 0;
+
+        // portál "u sebe" – mezi světy (jen vizuální pomoc)
+        const portalSize = 0.7;
+        const portal1a = projectPoint(
+          c1.x + WORLD_HALF,
+          0.01,
+          -portalSize
+        );
+        const portal1b = projectPoint(
+          c1.x + WORLD_HALF,
+          0.01,
+          portalSize
+        );
+        ctx.strokeStyle = "rgba(96, 239, 196, 0.9)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(portal1a.sx, portal1a.sy);
+        ctx.lineTo(portal1b.sx, portal1b.sy);
+        ctx.stroke();
+
+        const portal2a = projectPoint(
+          c2.x - WORLD_HALF,
+          0.01,
+          -portalSize
+        );
+        const portal2b = projectPoint(
+          c2.x - WORLD_HALF,
+          0.01,
+          portalSize
+        );
+        ctx.beginPath();
+        ctx.moveTo(portal2a.sx, portal2a.sy);
+        ctx.lineTo(portal2b.sx, portal2b.sy);
+        ctx.stroke();
+
+        // ----- HRDINA -----
+        const heroProj = projectPoint(heroPos.x, 0, heroPos.z);
+        ctx.save();
+        ctx.translate(heroProj.sx, heroProj.sy - 5);
+
+        const floatY = Math.sin(time * 3) * 4;
+
+        if (activeHero === "vafit") {
+          ctx.strokeStyle = "#7fffd4";
+          ctx.lineWidth = 2;
+
+          // tělo
+          ctx.beginPath();
+          ctx.moveTo(0, -12 + floatY);
+          ctx.lineTo(0, -2 + floatY);
+          ctx.lineTo(0, 8 + floatY);
+          ctx.stroke();
+
+          // nohy
+          ctx.beginPath();
+          ctx.moveTo(0, 8 + floatY);
+          ctx.lineTo(-6, 16 + floatY);
+          ctx.moveTo(0, 8 + floatY);
+          ctx.lineTo(6, 16 + floatY);
+          ctx.stroke();
+
+          // ruce
+          ctx.beginPath();
+          ctx.moveTo(-7, 0 + floatY);
+          ctx.lineTo(7, 0 + floatY);
+          ctx.stroke();
+
+          // hlava
+          ctx.beginPath();
+          ctx.arc(0, -18 + floatY, 6, 0, Math.PI * 2);
+          ctx.stroke();
+        } else {
+          // Vivere mráček
+          ctx.strokeStyle = "#a5fffe";
+          ctx.lineWidth = 2;
+
+          ctx.beginPath();
+          const r = 9;
+          for (let i = 0; i <= 24; i++) {
+            const t = (i / 24) * Math.PI * 2;
+            const rr = r + Math.sin(t * 3) * 1.8;
+            const x = Math.cos(t) * rr;
+            const y = Math.sin(t) * (rr * 0.55) - 4 + floatY;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+
+          // ocásek
+          ctx.beginPath();
+          ctx.moveTo(0, 4 + floatY);
+          ctx.lineTo(5, 10 + floatY);
+          ctx.lineTo(-2, 16 + floatY);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+        ctx.restore();
       }
 
-      placeHero();
-
-      // Jemné "dýchání" hrdiny
-      let time = 0;
-
-      // ==========================
-      // MINI MAPA
-      // ==========================
-      const minimapCanvas = document.getElementById("minimap-canvas");
-      const mmCtx = minimapCanvas.getContext("2d");
-
-      function resizeMinimap() {
-        const rect = minimapCanvas.getBoundingClientRect();
-        minimapCanvas.width = rect.width * window.devicePixelRatio;
-        minimapCanvas.height = rect.height * window.devicePixelRatio;
-        mmCtx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
-      }
-
+      // ----- MINI MAPA -----
       function drawMinimap() {
-        const w = minimapCanvas.width / window.devicePixelRatio;
-        const h = minimapCanvas.height / window.devicePixelRatio;
-
+        const w = mmCanvas.width / dpr;
+        const h = mmCanvas.height / dpr;
         mmCtx.clearRect(0, 0, w, h);
 
-        // pozadí
         mmCtx.fillStyle = "#020617";
         mmCtx.fillRect(0, 0, w, h);
 
-        // dva světy jako obdélníky
         const padding = 6;
         const mid = w / 2;
         const worldWidth = (w - padding * 3) / 2;
@@ -655,13 +688,7 @@
         mmCtx.lineWidth = 1;
 
         // svět 1
-        mmCtx.strokeRect(
-          padding,
-          padding,
-          worldWidth,
-          worldHeight
-        );
-
+        mmCtx.strokeRect(padding, padding, worldWidth, worldHeight);
         // svět 2
         mmCtx.strokeRect(
           padding * 2 + worldWidth,
@@ -670,115 +697,34 @@
           worldHeight
         );
 
-        // hero
-        const heroWorldX =
+        // hrdina
+        let heroWorldX =
           currentWorldIndex === 0
             ? padding
             : padding * 2 + worldWidth;
 
-        const tX =
-          ((heroPosition.x -
-            worlds[currentWorldIndex].center.x +
-            WORLD_HALF_SIZE) /
-            (WORLD_HALF_SIZE * 2)) *
+        const c = worldCenters[currentWorldIndex];
+        const tx =
+          ((heroPos.x - c.x + WORLD_HALF) / (WORLD_HALF * 2)) *
           worldWidth;
-
-        const tZ =
-          ((heroPosition.z + WORLD_HALF_SIZE) /
-            (WORLD_HALF_SIZE * 2)) *
+        const tz =
+          ((heroPos.z + WORLD_HALF) / (WORLD_HALF * 2)) *
           worldHeight;
 
         mmCtx.beginPath();
-        mmCtx.arc(heroWorldX + tX, padding + worldHeight - tZ, 3, 0, Math.PI * 2);
-        mmCtx.fillStyle = activeHero === "vafit" ? "#7fffd4" : "#a5fffe";
+        mmCtx.arc(
+          heroWorldX + tx,
+          padding + worldHeight - tz,
+          3,
+          0,
+          Math.PI * 2
+        );
+        mmCtx.fillStyle =
+          activeHero === "vafit" ? "#7fffd4" : "#a5fffe";
         mmCtx.fill();
       }
 
-      resizeMinimap();
-      drawMinimap();
-
-      // ==========================
-      // POHYB HRDINY
-      // ==========================
-
-      const moveState = {
-        up: false,
-        down: false,
-        left: false,
-        right: false,
-      };
-
-      const MOVE_SPEED = 2.2; // jednotky / sekundu
-
-      function clampToCurrentWorld() {
-        const center = worlds[currentWorldIndex].center;
-        heroPosition.x = Math.max(
-          center.x - WORLD_HALF_SIZE + 0.3,
-          Math.min(center.x + WORLD_HALF_SIZE - 0.3, heroPosition.x)
-        );
-        heroPosition.z = Math.max(
-          -WORLD_HALF_SIZE + 0.3,
-          Math.min(WORLD_HALF_SIZE - 0.3, heroPosition.z)
-        );
-      }
-
-      function checkPortals() {
-        const center = worlds[currentWorldIndex].center;
-
-        // Portal mezi světy – na "vnitřních stranách"
-        const threshold = WORLD_HALF_SIZE - 0.35;
-
-        if (currentWorldIndex === 0) {
-          // stojíš u pravé hrany kostky → portál do čtverce
-          if (heroPosition.x - center.x > threshold) {
-            currentWorldIndex = 1;
-            const targetCenter = worlds[1].center;
-            heroPosition.set(
-              targetCenter.x - WORLD_HALF_SIZE + 0.4,
-              0,
-              heroPosition.z
-            );
-            updateWorldLabel();
-          }
-        } else {
-          // stojíš u levé hrany čtverce → portál zpět do kostky
-          if (heroPosition.x - center.x < -threshold) {
-            currentWorldIndex = 0;
-            const targetCenter = worlds[0].center;
-            heroPosition.set(
-              targetCenter.x + WORLD_HALF_SIZE - 0.4,
-              0,
-              heroPosition.z
-            );
-            updateWorldLabel();
-          }
-        }
-      }
-
-      function stepMovement(dt) {
-        let dx = 0;
-        let dz = 0;
-        if (moveState.up) dz -= 1;
-        if (moveState.down) dz += 1;
-        if (moveState.left) dx -= 1;
-        if (moveState.right) dx += 1;
-
-        if (dx !== 0 || dz !== 0) {
-          const len = Math.sqrt(dx * dx + dz * dz);
-          dx /= len;
-          dz /= len;
-
-          heroPosition.x += dx * MOVE_SPEED * dt;
-          heroPosition.z += dz * MOVE_SPEED * dt;
-
-          clampToCurrentWorld();
-          checkPortals();
-          placeHero();
-          drawMinimap();
-        }
-      }
-
-      // Klávesnice
+      // ----- POHYB -----
       function setMove(key, isDown) {
         if (key === "ArrowUp" || key === "w") moveState.up = isDown;
         if (key === "ArrowDown" || key === "s") moveState.down = isDown;
@@ -786,15 +732,9 @@
         if (key === "ArrowRight" || key === "d") moveState.right = isDown;
       }
 
-      window.addEventListener("keydown", (e) => {
-        setMove(e.key, true);
-      });
+      window.addEventListener("keydown", (e) => setMove(e.key, true));
+      window.addEventListener("keyup", (e) => setMove(e.key, false));
 
-      window.addEventListener("keyup", (e) => {
-        setMove(e.key, false);
-      });
-
-      // Tlačítka šipek
       document.querySelectorAll(".btn-arrow").forEach((btn) => {
         const dir = btn.dataset.dir;
         if (!dir) return;
@@ -822,77 +762,163 @@
         window.addEventListener("touchcancel", stop);
       });
 
-      // Přepínač hrdinů
+      function stepMovement(dt) {
+        let dx = 0;
+        let dz = 0;
+        if (moveState.up) dz -= 1;
+        if (moveState.down) dz += 1;
+        if (moveState.left) dx -= 1;
+        if (moveState.right) dx += 1;
+
+        if (dx || dz) {
+          const len = Math.hypot(dx, dz);
+          dx /= len;
+          dz /= len;
+
+          heroPos.x += dx * MOVE_SPEED * dt;
+          heroPos.z += dz * MOVE_SPEED * dt;
+
+          clampHeroToWorld();
+          checkPortal();
+        }
+      }
+
+      // ----- PŘEPÍNAČ HRDINŮ -----
       const btnVafit = document.getElementById("btn-vafit");
       const btnVivere = document.getElementById("btn-vivere");
 
       function setHero(hero) {
         activeHero = hero;
-        vafitGroup.visible = hero === "vafit";
-        vivereGroup.visible = hero === "vivere";
         btnVafit.classList.toggle("active", hero === "vafit");
         btnVivere.classList.toggle("active", hero === "vivere");
-        drawMinimap();
       }
 
       btnVafit.addEventListener("click", () => setHero("vafit"));
       btnVivere.addEventListener("click", () => setHero("vivere"));
 
-      // Dvojité kliknutí/tap na scénu -> kamera se znovu zaměří na postavu
-      canvas.addEventListener("dblclick", () => {
-        controls.target.copy(heroGroup.position);
+      // ----- KAMERA: DRAG + PINCH / KOLEČKO -----
+      let dragging = false;
+      let lastX = 0;
+      let lastY = 0;
+      let pinchDist = 0;
+      let pinchActive = false;
+
+      function getTouchPos(e) {
+        if (e.touches && e.touches.length > 0) {
+          return {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY,
+          };
+        }
+        return { x: e.clientX, y: e.clientY };
+      }
+
+      canvas.addEventListener("mousedown", (e) => {
+        dragging = true;
+        lastX = e.clientX;
+        lastY = e.clientY;
       });
 
-      // ==========================
-      // ANIMACE
-      // ==========================
+      window.addEventListener("mouseup", () => {
+        dragging = false;
+        pinchActive = false;
+      });
 
+      window.addEventListener("mousemove", (e) => {
+        if (!dragging || pinchActive) return;
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+
+        rotY += dx * 0.004;
+        rotX += dy * 0.004;
+        rotX = Math.max(-1.2, Math.min(0.2, rotX));
+      });
+
+      canvas.addEventListener(
+        "touchstart",
+        (e) => {
+          if (e.touches.length === 1) {
+            dragging = true;
+            pinchActive = false;
+            lastX = e.touches[0].clientX;
+            lastY = e.touches[0].clientY;
+          } else if (e.touches.length === 2) {
+            dragging = false;
+            pinchActive = true;
+            const dx =
+              e.touches[0].clientX - e.touches[1].clientX;
+            const dy =
+              e.touches[0].clientY - e.touches[1].clientY;
+            pinchDist = Math.hypot(dx, dy);
+          }
+          e.preventDefault();
+        },
+        { passive: false }
+      );
+
+      window.addEventListener(
+        "touchmove",
+        (e) => {
+          if (pinchActive && e.touches.length === 2) {
+            const dx =
+              e.touches[0].clientX - e.touches[1].clientX;
+            const dy =
+              e.touches[0].clientY - e.touches[1].clientY;
+            const dist = Math.hypot(dx, dy);
+            const factor = dist / pinchDist;
+            pinchDist = dist;
+            viewScale *= factor;
+            viewScale = Math.max(0.7, Math.min(2.2, viewScale));
+          } else if (dragging && e.touches.length === 1) {
+            const t = e.touches[0];
+            const dx = t.clientX - lastX;
+            const dy = t.clientY - lastY;
+            lastX = t.clientX;
+            lastY = t.clientY;
+
+            rotY += dx * 0.004;
+            rotX += dy * 0.004;
+            rotX = Math.max(-1.2, Math.min(0.2, rotX));
+          }
+          e.preventDefault();
+        },
+        { passive: false }
+      );
+
+      window.addEventListener(
+        "touchend",
+        () => {
+          dragging = false;
+          pinchActive = false;
+        },
+        { passive: false }
+      );
+
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        viewScale *= factor;
+        viewScale = Math.max(0.7, Math.min(2.2, viewScale));
+      });
+
+      // ----- LOOP -----
       let lastTime = performance.now();
 
-      function animate(now) {
-        requestAnimationFrame(animate);
+      function loop(now) {
         const dt = Math.min((now - lastTime) / 1000, 0.05);
         lastTime = now;
 
-        time += dt;
-
+        rotY += dt * 0.12; // pomalá auto-rotace
         stepMovement(dt);
-
-        // jemné "dýchání" světa
-        const breathing = Math.sin(time * 1.5) * 0.03;
-        worlds[0].group.position.y = breathing * 0.6;
-        worlds[1].group.position.y = breathing * 0.3;
-
-        // hrdina nad podlahou
-        heroGroup.position.y = 0;
-        heroGroup.children.forEach((child) => {
-          child.position.y = 0.2 + Math.sin(time * 3) * 0.03;
-        });
-
-        // kamera sleduje hrdinu
-        controls.target.lerp(heroGroup.position, 0.15);
-        controls.update();
-
-        renderer.render(scene, camera);
-      }
-
-      requestAnimationFrame(animate);
-
-      // ==========================
-      // RESIZE
-      // ==========================
-      function resize() {
-        const rect = canvas.getBoundingClientRect();
-        renderer.setSize(rect.width, rect.height, false);
-        camera.aspect = rect.width / rect.height;
-        camera.updateProjectionMatrix();
-
-        resizeMinimap();
+        drawWorlds(now / 1000);
         drawMinimap();
+
+        requestAnimationFrame(loop);
       }
 
-      window.addEventListener("resize", resize);
-      resize();
+      requestAnimationFrame(loop);
     </script>
   </body>
 </html>
