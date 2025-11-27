@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>VaF'i'T • 3D rámeček • Glyph</title>
+
+  <style>
+    /*  \\{*(°•.)(.•°)*}//  VAFT • ZÁKLADNÍ PLÁTNO PRO 3D RÁMEČEK  */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at top, #050815, #020208);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      display: block;
+      touch-action: none; /* {°"(.).),,(\/)¡¡(\/),,,(.(.)"°} – nejezdit stránkou při gestu */
+    }
+
+    .popis {
+      position: fixed;
+      left: 50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      font-size: 11px;
+      opacity: 0.8;
+      pointer-events: none;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="platno"></canvas>
+
+  <div class="popis">
+    VaF'i'T • 3D rámeček – 1 prst / myš otáčí, dvojitý ťuk resetuje pohled  \\{*(°•.)(.•°)*}//
+  </div>
+
+<script>
+(function () {
+  "use strict";
+
+  /*  …iT…  NASTAVENÍ PLÁTNA  …iT…  */
+  const platno = document.getElementById("platno");
+  const kontext = platno.getContext("2d");
+
+  let sirka = window.innerWidth;
+  let vyska = window.innerHeight;
+  let stredX = sirka / 2;
+  let stredY = vyska / 2;
+
+  function pripravPlatno() {
+    const dpr = window.devicePixelRatio || 1;
+    const obdelnik = platno.getBoundingClientRect();
+
+    sirka = obdelnik.width;
+    vyska = obdelnik.height;
+    stredX = sirka / 2;
+    stredY = vyska / 2;
+
+    platno.width = obdelnik.width * dpr;
+    platno.height = obdelnik.height * dpr;
+
+    kontext.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  pripravPlatno();
+  window.addEventListener("resize", pripravPlatno);
+
+  /*  「Ī’』  GEOMETRIE RÁMEČKU V 3D  「Ī’』 */
+
+  const velikostVenci = 120;     // vnější “kostka”
+  const velikostVnitrku = 60;    // vnitřní otvor
+  const hloubka = 120;           // hloubka rámečku dopředu/dozadu
+
+  // pomocná funkce na vytvoření vrcholů krychle
+  function vytvorKrychliPolohy(polovicniX, polovicniY, polovicniZ) {
+    return [
+      { x: -polovicniX, y: -polovicniY, z: -polovicniZ },
+      { x:  polovicniX, y: -polovicniY, z: -polovicniZ },
+      { x:  polovicniX, y:  polovicniY, z: -polovicniZ },
+      { x: -polovicniX, y:  polovicniY, z: -polovicniZ },
+
+      { x: -polovicniX, y: -polovicniY, z:  polovicniZ },
+      { x:  polovicniX, y: -polovicniY, z:  polovicniZ },
+      { x:  polovicniX, y:  polovicniY, z:  polovicniZ },
+      { x: -polovicniX, y:  polovicniY, z:  polovicniZ },
+    ];
+  }
+
+  // vnější kvádr (černá kostra)
+  const vrcholyVnejsi = vytvorKrychliPolohy(velikostVenci, velikostVenci, hloubka / 2);
+  // vnitřní otvor (posunutý dovnitř)
+  const vrcholyVnitrni = vytvorKrychliPolohy(velikostVnitrku, velikostVnitrku, hloubka / 2 - 8);
+
+  // hrany (indexy vrcholů) – klasická kostka
+  const hranyKrychle = [
+    [0,1],[1,2],[2,3],[3,0], // přední čtverec
+    [4,5],[5,6],[6,7],[7,4], // zadní čtverec
+    [0,4],[1,5],[2,6],[3,7]  // spojky
+  ];
+
+  // pro rámeček uděláme dvě “krychle” – vnější drátěnou a vnitřní drátěnou
+  const boduCelkem = vrcholyVnejsi.length + vrcholyVnitrni.length;
+  const bodyPracovni = new Array(boduCelkem); // po rotaci
+  const bodyProjekce = new Array(boduCelkem); // po projekci
+
+  for (let i = 0; i < boduCelkem; i++) {
+    bodyPracovni[i] = { x: 0, y: 0, z: 0 };
+    bodyProjekce[i] = { x: 0, y: 0, z: 0 };
+  }
+
+  /*  ΣㅌNŸ  POHLED / KAMERA  ΣㅌNŸ  */
+
+  let uhelX = -0.6;            // základní náklon shora
+  let uhelY = 0.8;             // lehce z boku
+  let cilUhelX = uhelX;
+  let cilUhelY = uhelY;
+
+  let zvetseni = 1.1;
+  let cilZvetseni = 1.1;
+
+  const vzdalenostKamery = 600;  // jednoduchá perspektiva
+
+  /*  _（）（）_  INTERAKCE – TAHÁNÍ A RESET  _（）（）_  */
+
+  let tahneSe = false;
+  let posledniX = 0;
+  let posledniY = 0;
+  let posunSouctem = 0;
+  let casPoslednihoKliknuti = 0;
+
+  function zacatekDotyku(udalost) {
+    const dotyk = udalost.touches ? udalost.touches[0] : udalost;
+    tahneSe = true;
+    posledniX = dotyk.clientX;
+    posledniY = dotyk.clientY;
+    posunSouctem = 0;
+    udalost.preventDefault();
+  }
+
+  function pohybDotyku(udalost) {
+    if (!tahneSe) return;
+    const dotyk = udalost.touches ? udalost.touches[0] : udalost;
+
+    const dx = dotyk.clientX - posledniX;
+    const dy = dotyk.clientY - posledniY;
+    posledniX = dotyk.clientX;
+    posledniY = dotyk.clientY;
+    posunSouctem += Math.abs(dx) + Math.abs(dy);
+
+    // rotace podle pohybu
+    cilUhelY += dx * 0.01;
+    cilUhelX += dy * 0.01;
+
+    udalost.preventDefault();
+  }
+
+  function konecDotyku(udalost) {
+    if (!tahneSe) return;
+    tahneSe = false;
+
+    // jednoduchý double-tap / double-click reset
+    const nyni = performance.now();
+    if (posunSouctem < 8 && (nyni - casPoslednihoKliknuti) < 350) {
+      // reset pohledu
+      cilUhelX = -0.6;
+      cilUhelY = 0.8;
+      cilZvetseni = 1.1;
+    }
+    if (posunSouctem < 8) {
+      casPoslednihoKliknuti = nyni;
+    }
+  }
+
+  platno.addEventListener("mousedown", zacatekDotyku);
+  window.addEventListener("mousemove", pohybDotyku);
+  window.addEventListener("mouseup", konecDotyku);
+
+  platno.addEventListener("touchstart", zacatekDotyku, { passive: false });
+  window.addEventListener("touchmove", pohybDotyku, { passive: false });
+  window.addEventListener("touchend", konecDotyku, { passive: false });
+  window.addEventListener("touchcancel", konecDotyku, { passive: false });
+
+  // zoom kolečkem
+  platno.addEventListener("wheel", (udalost) => {
+    udalost.preventDefault();
+    const faktor = udalost.deltaY > 0 ? 0.9 : 1.1;
+    cilZvetseni *= faktor;
+    cilZvetseni = Math.max(0.5, Math.min(2.5, cilZvetseni));
+  }, { passive: false });
+
+  /*  `,९,´  JEDNODUCHÁ 3D PROJEKCE  `,०’,  */
+
+  function otocAPromitni() {
+    const sinX = Math.sin(uhelX);
+    const cosX = Math.cos(uhelX);
+    const sinY = Math.sin(uhelY);
+    const cosY = Math.cos(uhelY);
+
+    // sloučíme vnější + vnitřní vrcholy do jednoho průchodu
+    const vsechnyVrcholy = vrcholyVnejsi.concat(vrcholyVnitrni);
+
+    for (let i = 0; i < vsechnyVrcholy.length; i++) {
+      const zdroj = vsechnyVrcholy[i];
+      const prac = bodyPracovni[i];
+      const proj = bodyProjekce[i];
+
+      // posun do středu (zatím žádný offset)
+      let x = zdroj.x;
+      let y = zdroj.y;
+      let z = zdroj.z;
+
+      // rotace kolem osy X
+      let y1 = y * cosX - z * sinX;
+      let z1 = y * sinX + z * cosX;
+
+      // rotace kolem osy Y
+      let x2 = x * cosY + z1 * sinY;
+      let z2 = -x * sinY + z1 * cosY;
+
+      prac.x = x2;
+      prac.y = y1;
+      prac.z = z2;
+
+      const meritkoPersp = vzdalenostKamery / (vzdalenostKamery + z2);
+      proj.x = stredX + x2 * meritkoPersp * zvetseni;
+      proj.y = stredY + y1 * meritkoPersp * zvetseni;
+      proj.z = z2;
+    }
+  }
+
+  /*  (`¡´|.ˇ.|`¡´)  KRESLENÍ  (`¡´|.ˇ.|`¡´)  */
+
+  function vykresliPozadi() {
+    kontext.clearRect(0, 0, sirka, vyska);
+
+    const prechod = kontext.createRadialGradient(
+      stredX, stredY - 80, Math.min(sirka, vyska) * 0.1,
+      stredX, stredY, Math.max(sirka, vyska)
+    );
+    prechod.addColorStop(0, "#1b1018");
+    prechod.addColorStop(0.6, "#05030a");
+    prechod.addColorStop(1, "#020208");
+
+    kontext.fillStyle = prechod;
+    kontext.fillRect(0, 0, sirka, vyska);
+  }
+
+  function kresliHrany(vychodziIndex) {
+    kontext.beginPath();
+    for (const dvojice of hranyKrychle) {
+      const a = bodyProjekce[vychodziIndex + dvojice[0]];
+      const b = bodyProjekce[vychodziIndex + dvojice[1]];
+      kontext.moveTo(a.x, a.y);
+      kontext.lineTo(b.x, b.y);
+    }
+    kontext.stroke();
+  }
+
+  function kresliRamecek3D() {
+    // vnější rámeček – tmavší čára
+    kontext.lineWidth = 3;
+    kontext.strokeStyle = "rgba(255, 190, 80, 0.95)";
+    kontext.shadowColor = "rgba(255, 170, 60, 0.7)";
+    kontext.shadowBlur = 10;
+    kresliHrany(0);
+
+    // vnitřní rámeček (otvor) – světlejší
+    kontext.lineWidth = 2;
+    kontext.strokeStyle = "rgba(255, 230, 180, 0.9)";
+    kontext.shadowColor = "rgba(255, 210, 140, 0.8)";
+    kontext.shadowBlur = 6;
+    kresliHrany(vrcholyVnejsi.length);
+
+    // drobná “mřížka” na horní a pravé straně – náznak tvého žlutého vzoru
+    kontext.shadowBlur = 0;
+    kontext.strokeStyle = "rgba(255, 210, 120, 0.7)";
+    kontext.lineWidth = 1.1;
+
+    // vybereme pár bodů horní stěny vnější kostky (hrubý nástřel mřížky)
+    function carujMrizku(indexy) {
+      kontext.beginPath();
+      for (let i = 0; i < indexy.length - 1; i++) {
+        const a = bodyProjekce[indexy[i]];
+        const b = bodyProjekce[indexy[i + 1]];
+        kontext.moveTo(a.x, a.y);
+        kontext.lineTo(b.x, b.y);
+      }
+      kontext.stroke();
+    }
+
+    // horní hrana: 0-1-2-3 (předek) + 4-5-6-7 (zadek) – uděláme šikmé pruhy
+    carujMrizku([0,5,2,7,1,6,3,4]);
+
+    // pravá boční – 1-2-6-5
+    carujMrizku([1,2,6,5,2,6]);
+
+    // přední – 0-1-2-3
+    carujMrizku([0,2,1,3]);
+  }
+
+  /*  ° .//#//.  HLAVNÍ SMYČKA ANIMACE  ° .//#//.  */
+
+  let casMinuly = 0;
+
+  function smycka(cas) {
+    if (!cas) cas = 0;
+    const dt = (cas - casMinuly) / 1000;
+    casMinuly = cas;
+
+    // lehké samootáčení, pokud uživatel netáhne
+    if (!tahneSe) {
+      cilUhelY += 0.15 * dt;
+    }
+
+    // plynulé dorovnání hodnot
+    const koef = Math.min(1, 6 * dt);
+    uhelX += (cilUhelX - uhelX) * koef;
+    uhelY += (cilUhelY - uhelY) * koef;
+    zvetseni += (cilZvetseni - zvetseni) * koef;
+
+    vykresliPozadi();
+    otocAPromitni();
+    kresliRamecek3D();
+
+    requestAnimationFrame(smycka);
+  }
+
+  requestAnimationFrame(smycka);
+
+})();
+</script>
+</body>
+</html>
