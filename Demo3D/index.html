@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Vivere atque FruiT • VAFT-Game-Demo</title>
+
+    <style>
+      /* ｡*ﾟ✲*☆ VaF'i'T – celoplošná scéna ☆*✲ﾟ*｡ */
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050815, #020208);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: #f5f5f5;
+      }
+
+      /* plátno přes celý display */
+      .obal-plátna {
+        position: fixed;
+        inset: 0;
+      }
+
+      canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        touch-action: none; /* aby se stránka neposouvala */
+      }
+
+      /* HUD vrstvy – text nahoře / dole */
+
+      .titulek {
+        position: fixed;
+        left: 12px;
+        top: 10px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(5, 8, 21, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .hud-pravý {
+        position: fixed;
+        right: 12px;
+        top: 10px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(5, 8, 21, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .hud-dolní {
+        position: fixed;
+        left: 50%;
+        bottom: 10px;
+        transform: translateX(-50%);
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: rgba(5, 8, 21, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 10px;
+        white-space: nowrap;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="obal-plátna">
+      <canvas id="mapa-koulí"></canvas>
+    </div>
+
+    <div class="titulek">
+      Vivere atque FruiT • Scéna 2: Mapa koulí (světy na orbitách)
+    </div>
+    <div class="hud-pravý">
+      \\{*(°•.)(.•°)*}// Hlavoun • Viri • Pikoš
+    </div>
+    <div class="hud-dolní">
+      Táhni 1 prstem / myší = pohyb a náklon mapy • Klepni = jemné
+      přiblížení / oddálení
+    </div>
+
+    <script>
+      // ｡*ﾟ✲*☆ VaF'i'T – jádro scény „Mapa koulí“ ☆*✲ﾟ*｡
+
+      const plátno = document.getElementById("mapa-koulí");
+      const kresba = plátno.getContext("2d");
+
+      let šířka = 0;
+      let výška = 0;
+      const dpr = window.devicePixelRatio || 1;
+
+      // střed a kamera
+      let středX = 0;
+      let středY = 0;
+      let měřítko = 1.0;
+      let cílovéMěřítko = 1.0;
+
+      // náklon „soustavy“ (jen 2D simulace)
+      let náklonX = -0.35;
+      let náklonY = 0.0;
+      let cílovýNáklonX = náklonX;
+      let cílovýNáklonY = náklonY;
+
+      // koule – světy
+      const světy = [];
+      const početOrbit = 5;
+      const kouleNaOrbitě = 12;
+      let základníPoloměr = 120;
+
+      // VaFiT jemné chvění
+      function náhodnéFáze() {
+        return Math.random() * Math.PI * 2;
+      }
+
+      function přepočítejVelikost() {
+        const obdelník = plátno.getBoundingClientRect();
+        šířka = obdelník.width;
+        výška = obdelník.height;
+
+        plátno.width = šířka * dpr;
+        plátno.height = výška * dpr;
+        kresba.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        středX = šířka / 2;
+        středY = výška / 2;
+
+        základníPoloměr = Math.min(šířka, výška) * 0.24;
+
+        vytvořSvětovouMapu();
+      }
+
+      function vytvořSvětovouMapu() {
+        světy.length = 0;
+        for (let i = 0; i < početOrbit; i++) {
+          const poměr = (i + 1) / (početOrbit + 1);
+          const poloměrOrbity = základníPoloměr * (0.6 + poměr * 1.6);
+          for (let j = 0; j < kouleNaOrbitě; j++) {
+            const uhel = (j / kouleNaOrbitě) * Math.PI * 2;
+            světy.push({
+              orbita: i,
+              uhel,
+              rychlost: 0.1 + 0.04 * i,
+              poloměrOrbity,
+              fáze: náhodnéFáze(),
+            });
+          }
+        }
+      }
+
+      // pomocná projekce – „šikmý“ pohled
+      function projektujBod(uhel, r) {
+        const x0 = Math.cos(uhel) * r;
+        const y0 = Math.sin(uhel) * r;
+
+        const x = x0 + y0 * náklonY * 0.75;
+        const y = y0 * (1 + náklonX * 0.8);
+
+        return {
+          x: středX + x * měřítko,
+          y: středY + y * měřítko,
+        };
+      }
+
+      function vykresliPozadí() {
+        kresba.clearRect(0, 0, šířka, výška);
+
+        const g = kresba.createRadialGradient(
+          šířka / 2,
+          výška * 0.2,
+          0,
+          šířka / 2,
+          výška,
+          Math.max(šířka, výška)
+        );
+        g.addColorStop(0, "#0d1027");
+        g.addColorStop(0.5, "#050815");
+        g.addColorStop(1, "#020208");
+        kresba.fillStyle = g;
+        kresba.fillRect(0, 0, šířka, výška);
+
+        // jemné hvězdičky
+        kresba.save();
+        kresba.globalAlpha = 0.3;
+        kresba.fillStyle = "#ffffff";
+        const hvězdičky = 40;
+        for (let i = 0; i < hvězdičky; i++) {
+          const x = Math.random() * šířka;
+          const y = Math.random() * výška * 0.7;
+          const r = Math.random() * 1.2;
+          kresba.beginPath();
+          kresba.arc(x, y, r, 0, Math.PI * 2);
+          kresba.fill();
+        }
+        kresba.restore();
+      }
+
+      function vykresliOribity() {
+        kresba.save();
+        kresba.strokeStyle = "rgba(255, 210, 150, 0.22)";
+        kresba.lineWidth = 1;
+
+        for (let i = 0; i < početOrbit; i++) {
+          const poměr = (i + 1) / (početOrbit + 1);
+          const r = základníPoloměr * (0.6 + poměr * 1.6);
+
+          const horní = projektujBod(0, r);
+          const spodní = projektujBod(Math.PI / 2, r);
+          const vodorovná = projektujBod(Math.PI, r);
+
+          const rx = Math.abs(vodorovná.x - středX);
+          const ry = Math.abs(spodní.y - středY);
+
+          kresba.beginPath();
+          kresba.ellipse(středX, středY, rx * měřítko, ry * měřítko, 0, 0, Math.PI * 2);
+          kresba.stroke();
+        }
+
+        kresba.restore();
+      }
+
+      function vykresliJádro(čas) {
+        const velikost = 18 * měřítko;
+        const pulz = 1 + 0.15 * Math.sin(čas * 2.4);
+        const r = velikost * pulz;
+
+        // jemná aura
+        kresba.save();
+        const aura = kresba.createRadialGradient(středX, středY, 0, středX, středY, r * 4);
+        aura.addColorStop(0, "rgba(255, 220, 180, 0.75)");
+        aura.addColorStop(1, "rgba(255, 220, 180, 0)");
+        kresba.fillStyle = aura;
+        kresba.beginPath();
+        kresba.arc(středX, středY, r * 4, 0, Math.PI * 2);
+        kresba.fill();
+
+        // samotné jádro
+        kresba.beginPath();
+        kresba.arc(středX, středY, r, 0, Math.PI * 2);
+        kresba.fillStyle = "#ffde9c";
+        kresba.shadowColor = "rgba(255, 200, 140, 0.85)";
+        kresba.shadowBlur = 18;
+        kresba.fill();
+        kresba.restore();
+
+        // text
+        kresba.font = "18px system-ui";
+        kresba.textAlign = "center";
+        kresba.textBaseline = "top";
+        kresba.fillStyle = "rgba(255, 240, 220, 0.95)";
+        kresba.fillText("Jádro Vivere atque FruiT", středX, středY + r + 10);
+      }
+
+      function vykresliSvěty(čas) {
+        kresba.save();
+        kresba.fillStyle = "#ffc980";
+        kresba.strokeStyle = "rgba(0,0,0,0.25)";
+
+        for (const planeta of světy) {
+          const fázovýPosun = planeta.fáze;
+          const uhel = planeta.uhel + čas * planeta.rychlost;
+
+          const poz = projektujBod(uhel, planeta.poloměrOrbity);
+          const základníVelikost = 6 + planeta.orbita * 1.4;
+          const dýchání =
+            0.9 + 0.25 * Math.sin(čas * 2 + fázovýPosun + planeta.orbita * 0.4);
+
+          const r = (základníVelikost * dýchání * měřítko) / 1.0;
+
+          kresba.beginPath();
+          kresba.arc(poz.x, poz.y, r, 0, Math.PI * 2);
+          kresba.fill();
+        }
+
+        kresba.restore();
+      }
+
+      // VaFiT čas, smyčka
+      let posledníČas = 0;
+
+      function smyčka(časStrojku) {
+        const čas = časStrojku / 1000;
+        const dt = Math.max(0.001, (časStrojku - posledníČas) / 1000);
+        posledníČas = časStrojku;
+
+        // easing
+        const k = Math.min(1, 5 * dt);
+        měřítko += (cílovéMěřítko - měřítko) * k;
+        náklonX += (cílovýNáklonX - náklonX) * k;
+        náklonY += (cílovýNáklonY - náklonY) * k;
+
+        vykresliPozadí();
+        vykresliOribity();
+        vykresliSvěty(čas);
+        vykresliJádro(čas);
+
+        requestAnimationFrame(smyčka);
+      }
+
+      // ───────────── Interakce – drag a klik ─────────────
+
+      let táhneSe = false;
+      let posledníX = 0;
+      let posledníY = 0;
+      let pohybSoučet = 0;
+
+      function začátekVstupu(e) {
+        e.preventDefault();
+        const bod = e.touches ? e.touches[0] : e;
+        táhneSe = true;
+        posledníX = bod.clientX;
+        posledníY = bod.clientY;
+        pohybSoučet = 0;
+      }
+
+      function pohybVstupu(e) {
+        if (!táhneSe) return;
+        e.preventDefault();
+        const bod = e.touches ? e.touches[0] : e;
+        const x = bod.clientX;
+        const y = bod.clientY;
+        const dx = x - posledníX;
+        const dy = y - posledníY;
+        posledníX = x;
+        posledníY = y;
+        pohybSoučet += Math.abs(dx) + Math.abs(dy);
+
+        cílovýNáklonY += dx * 0.0025;
+        cílovýNáklonX += dy * 0.0025;
+      }
+
+      function konecVstupu(e) {
+        if (!táhneSe) return;
+        táhneSe = false;
+
+        // lehký klik = přiblíž / oddal
+        if (pohybSoučet < 8) {
+          if (cílovéMěřítko < 1.25) {
+            cílovéMěřítko *= 1.25;
+          } else {
+            cílovéMěřítko *= 0.8;
+          }
+          cílovéMěřítko = Math.max(0.6, Math.min(2.2, cílovéMěřítko));
+        }
+      }
+
+      plátno.addEventListener("mousedown", začátekVstupu);
+      window.addEventListener("mousemove", pohybVstupu);
+      window.addEventListener("mouseup", konecVstupu);
+
+      plátno.addEventListener("touchstart", začátekVstupu, { passive: false });
+      window.addEventListener("touchmove", pohybVstupu, { passive: false });
+      window.addEventListener("touchend", konecVstupu, { passive: false });
+      window.addEventListener("touchcancel", konecVstupu, { passive: false });
+
+      // kolečko myši = zoom
+      plátno.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const faktor = e.deltaY > 0 ? 0.9 : 1.1;
+        cílovéMěřítko *= faktor;
+        cílovéMěřítko = Math.max(0.6, Math.min(2.5, cílovéMěřítko));
+      });
+
+      přepočítejVelikost();
+      window.addEventListener("resize", přepočítejVelikost);
+      requestAnimationFrame(smyčka);
+    </script>
+  </body>
+</html>
