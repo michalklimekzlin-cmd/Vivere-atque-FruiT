@@ -3,99 +3,164 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VaFT • HoloCore</title>
+  <title>VaFT • HoloCore Kámen 0</title>
   <style>
-    body { margin:0; background:#000; overflow:hidden; }
-    canvas { position:fixed; inset:0; }
-    #err {
-      position:fixed; top:10px; left:10px;
-      background:#300; padding:8px 12px;
-      border-radius:8px; color:#f88;
-      font-family:monospace; display:none;
-      font-size:12px;
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at top, #1a130f, #020102);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+    }
+    #holo-canvas {
+      position: fixed;
+      inset: 0;
+      display: block;
+    }
+    .label {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      font-size: 11px;
+      opacity: 0.7;
+      text-align: center;
+      pointer-events: none;
     }
   </style>
 </head>
-
 <body>
-<canvas id="holo"></canvas>
-<div id="err"></div>
 
-<script type="module">
-  const errBox = document.getElementById("err");
+<canvas id="holo-canvas"></canvas>
+<div class="label">VaFT HoloCore • Kámen 0 – základ všech holografických tvarů</div>
 
-  function showErr(msg) {
-    errBox.style.display = "block";
-    errBox.textContent = msg;
-    console.error(msg);
+<!-- ZÁKLADNÍ KÁMEN -->
+<script src="./VaFT-HoloCore.js"></script>
+
+<script>
+(function () {
+  "use strict";
+
+  var core = window.VaFTHoloCore;
+  if (!core) {
+    document.body.style.background = "#300";
+    alert("VaFTHoloCore se nenačetl – zkontroluj název VaFT-HoloCore.js");
+    return;
   }
 
-  // === AutoLoader s fallbackem ===
-  let core;
-  try {
-    core = await import("./VaFT-HoloCore.js?v=" + Date.now());
-  } catch (e) {
-    showErr("❌ Modul nelze načíst. Zkontroluj název VaFT-HoloCore.js");
-  }
+  var HoloPalette = core.HoloPalette;
+  var createCurve = core.createCurve;
+  var Motion = core.Motion;
+  var createHoloObject = core.createHoloObject;
 
-  if (!core) return;
-
-  const { HoloPalette, createCurve, Motion, createHoloObject } = core;
-
-  const canvas = document.getElementById("holo");
-  const ctx = canvas.getContext("2d");
+  var canvas = document.getElementById("holo-canvas");
+  var ctx = canvas.getContext("2d");
 
   function resize() {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
   }
   resize();
-  addEventListener("resize", resize);
+  window.addEventListener("resize", resize);
 
-  // === Testovací křivka (jen aby bylo něco vidět) ===
-  const test = createCurve({
-    points: Array.from({ length: 80 }, (_, i) => ({
-      x: 0,
-      y: i * 10
-    })),
+  // === ZÁKLADNÍ KŘIVKA – svislá „páteř“ ============================
+  var spineCurve = createCurve({
+    points: Array.from({ length: 80 }, function (_, i) {
+      return { x: 0, y: -220 + i * 6 };
+    }),
     color: HoloPalette.darkRed,
-    width: 2,
-    wave: 4,
+    width: 2.2,
+    wave: 10,
     opacity: 0.9
   });
 
-  const holo = createHoloObject({
-    curves: [test],
-    glow: 0.5,
-    particles: 30
+  var holo = createHoloObject({
+    curves: [spineCurve],
+    particles: 80,
+    glow: 0.6,
+    noise: 0.04,
+    rotation: 0.003
   });
 
-  function draw(t) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function frame(timestamp) {
+    var t = timestamp * 0.001;
+    var w = canvas.width;
+    var h = canvas.height;
+    var cx = w / 2;
+    var cy = h / 2;
 
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
+    // pozadí
+    var bgGrad = ctx.createRadialGradient(cx, cy - 80, 20, cx, cy, Math.max(w, h));
+    bgGrad.addColorStop(0, "#3a2720");
+    bgGrad.addColorStop(0.4, "#140e0b");
+    bgGrad.addColorStop(1, "#020102");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
 
-    holo.tick(t * 0.001);
+    holo.tick(t);
 
-    test.points.forEach((p, i) => {
-      const x = cx + Motion.waveOffset(i, t * 0.002, 12);
-      const y = cy - 300 + i * 8;
+    ctx.save();
+    ctx.translate(cx, cy);
 
-      ctx.globalAlpha = test.opacity;
-      ctx.strokeStyle = test.color;
-      ctx.lineWidth = test.width;
+    // středový krystal
+    var scaleBase = holo.breathe * holo.pulse;
+    ctx.scale(scaleBase, scaleBase);
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 36, 0, Math.PI * 2);
+    ctx.strokeStyle = HoloPalette.lightGray;
+    ctx.lineWidth = 1.4;
+    ctx.globalAlpha = 0.9;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 52, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(196,90,60,0.8)";
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.7;
+    ctx.stroke();
+
+    // páteř – křivka
+    ctx.globalAlpha = spineCurve.opacity;
+    ctx.strokeStyle = spineCurve.color;
+    ctx.lineWidth = spineCurve.width;
+
+    ctx.beginPath();
+    spineCurve.points.forEach(function (p, i) {
+      var offset = Motion.waveOffset(i, t, spineCurve.wave);
+      var x = offset;
+      var y = p.y;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // částice
+    ctx.globalAlpha = 0.35;
+    for (var i = 0; i < holo.particles; i++) {
+      var angle = (i / holo.particles) * Math.PI * 2 + t * 0.15;
+      var radius = 70 + Math.sin(t * 1.2 + i * 0.3) * 16;
+      var px = Math.cos(angle) * radius;
+      var py = Math.sin(angle) * radius;
 
       ctx.beginPath();
-      ctx.moveTo(cx, y);
-      ctx.lineTo(x, y);
-      ctx.stroke();
-    });
+      ctx.arc(px, py, 1.5 + Math.random() * 0.8, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(191,191,191,0.9)";
+      ctx.fill();
+    }
 
-    requestAnimationFrame(draw);
+    ctx.restore();
+
+    requestAnimationFrame(frame);
   }
 
-  requestAnimationFrame(draw);
+  requestAnimationFrame(frame);
+})();
 </script>
 
 </body>
