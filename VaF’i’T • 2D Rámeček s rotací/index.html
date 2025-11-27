@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VaF’i’T • 2D Rámeček s rotací</title>
+
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #140707, #050203);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI";
+    color: #f5f5f5;
+  }
+
+  canvas {
+    position: fixed;
+    inset: 0;
+    display: block;
+    touch-action: none;
+  }
+
+  .popis {
+    position: fixed;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+</style>
+</head>
+
+<body>
+
+<canvas id="platno"></canvas>
+
+<div class="popis">
+  VaF’i’T • 2D rámeček 「Ī’』 – pohyb 1 prstem, rotace 2 prsty  \\{*(°•.)(.•°)*}//
+</div>
+
+<script>
+/* **************************************************************
+   ***   VaF’i’T • Glyph Engine • 2D Rámeček rotující šipky   ***
+   ***   {°"(.).),,(\/)¡¡(\/),,,(.(.)"°}                       ***
+   ************************************************************** */
+
+(function(){
+"use strict";
+
+/* ====== Plátno ******************************************** */
+const platno = document.getElementById("platno");
+const ctx = platno.getContext("2d");
+
+let sirka = window.innerWidth;
+let vyska = window.innerHeight;
+
+function upravPlatno(){
+  const dpr = window.devicePixelRatio || 1;
+  const box = platno.getBoundingClientRect();
+  sirka = box.width;
+  vyska = box.height;
+  platno.width = sirka * dpr;
+  platno.height = vyska * dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+upravPlatno();
+window.addEventListener("resize", upravPlatno);
+
+/* ====== Objekt rámečku ************************************* */
+const ramecek = {
+  x: sirka/2,
+  y: vyska/2,
+  w: 260,
+  h: 260,
+  rotace: 0,
+  rychlostSipky: 0.02
+};
+
+/* ====== Interakce ****************************************** */
+const dotyky = new Map();
+let rezim = null;
+let hlavni = null;
+let druhy = null;
+let posledni = {x:0,y:0};
+let startUhel = 0;
+let startRotace = 0;
+
+function bod(e){ return {x:e.clientX,y:e.clientY}; }
+
+function uvnitr(x,y){
+  return (
+    x >= ramecek.x - ramecek.w/2 &&
+    x <= ramecek.x + ramecek.w/2 &&
+    y >= ramecek.y - ramecek.h/2 &&
+    y <= ramecek.y + ramecek.h/2
+  );
+}
+
+platno.addEventListener("pointerdown", e=>{
+  const p = bod(e);
+  if(!uvnitr(p.x,p.y) && dotyky.size===0) return;
+
+  platno.setPointerCapture(e.pointerId);
+  dotyky.set(e.pointerId,p);
+
+  if(dotyky.size===1){
+    rezim="tah";
+    hlavni=e.pointerId;
+    posledni=p;
+  }
+  else if(dotyky.size===2){
+    rezim="rotace";
+    for(const id of dotyky.keys()){ if(id!==hlavni) druhy=id; }
+    const p1 = dotyky.get(hlavni);
+    const p2 = dotyky.get(druhy);
+    startUhel = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+    startRotace = ramecek.rotace;
+  }
+});
+
+platno.addEventListener("pointermove", e=>{
+  if(!dotyky.has(e.pointerId)) return;
+  const p = bod(e);
+  dotyky.set(e.pointerId,p);
+
+  if(rezim==="tah" && e.pointerId===hlavni){
+    ramecek.x += p.x - posledni.x;
+    ramecek.y += p.y - posledni.y;
+    posledni=p;
+  }
+  else if(rezim==="rotace" && dotyky.has(hlavni) && dotyky.has(druhy)){
+    const p1 = dotyky.get(hlavni);
+    const p2 = dotyky.get(druhy);
+    const u = Math.atan2(p2.y-p1.y,p2.x-p1.x);
+    ramecek.rotace = startRotace + (u - startUhel);
+  }
+});
+
+platno.addEventListener("pointerup", e=>{
+  dotyky.delete(e.pointerId);
+  if(dotyky.size===1){
+    rezim="tah";
+    const [id,p] = dotyky.entries().next().value;
+    hlavni=id;
+    posledni=p;
+  } else if(dotyky.size===0){
+    rezim=null;
+    hlavni=null;
+    druhy=null;
+  }
+});
+
+/* ====== Kreslení ******************************************* */
+let uhelSipky = 0;
+
+function kresli(){
+
+  ctx.clearRect(0,0,sirka,vyska);
+
+  // pozadí
+  const bg = ctx.createRadialGradient(ramecek.x,ramecek.y,60,ramecek.x,ramecek.y,600);
+  bg.addColorStop(0,"#2b0d0f");
+  bg.addColorStop(1,"#080304");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,sirka,vyska);
+
+  ctx.save();
+  ctx.translate(ramecek.x,ramecek.y);
+  ctx.rotate(ramecek.rotace);
+
+  /* vnější rámeček */
+  ctx.lineWidth=4;
+  ctx.strokeStyle="rgba(255,70,70,0.9)";
+  ctx.shadowColor="rgba(255,60,60,0.7)";
+  ctx.shadowBlur=16;
+
+  ctx.strokeRect(-ramecek.w/2,-ramecek.h/2,ramecek.w,ramecek.h);
+
+  /* vnitřní rámeček */
+  ctx.lineWidth=3;
+  ctx.shadowBlur=10;
+  ctx.strokeRect(-ramecek.w/2+30,-ramecek.h/2+30,ramecek.w-60,ramecek.h-60);
+
+  /* rotující šipky kolem dokola */
+  uhelSipky += ramecek.rychlostSipky;
+  const pocet = 6;
+  for(let i=0;i<pocet;i++){
+    const a = uhelSipky + i*(Math.PI*2/pocet);
+    const r = ramecek.w/2 + 25;
+
+    const sx = Math.cos(a)*r;
+    const sy = Math.sin(a)*r;
+
+    ctx.save();
+    ctx.translate(sx,sy);
+    ctx.rotate(a);
+
+    ctx.fillStyle="rgba(255,90,90,0.9)";
+    ctx.beginPath();
+    ctx.moveTo(-10, -4);
+    ctx.lineTo(10,0);
+    ctx.lineTo(-10, 4);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  ctx.restore();
+
+  requestAnimationFrame(kresli);
+}
+kresli();
+
+})();
+</script>
+
+</body>
+</html>
