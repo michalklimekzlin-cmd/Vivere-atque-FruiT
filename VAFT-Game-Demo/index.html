@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Vivere atque FruiT • První demo světa</title>
+
+    <style>
+      /* ً&’ – základní plátno světa */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050815, #020208);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: #f5f5f5;
+      }
+
+      #platno-svet {
+        position: fixed;
+        inset: 0;
+        display: block;
+        touch-action: none;
+      }
+
+      .panel-nahore {
+        position: fixed;
+        left: 16px;
+        top: 10px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(2, 3, 8, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 11px;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+
+      .panel-dole {
+        position: fixed;
+        left: 50%;
+        bottom: 10px;
+        transform: translateX(-50%);
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(2, 3, 8, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 11px;
+        pointer-events: none;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .panel-pravo {
+        position: fixed;
+        right: 14px;
+        top: 10px;
+        padding: 6px 10px;
+        border-radius: 14px;
+        background: rgba(2, 3, 8, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        font-size: 10px;
+        pointer-events: none;
+        text-align: right;
+        max-width: 180px;
+      }
+
+      .glyph-znak {
+        font-size: 11px;
+        opacity: 0.8;
+      }
+
+      .radek-maly {
+        font-size: 10px;
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="platno-svet"></canvas>
+
+    <div class="panel-nahore" id="panel-scena">
+      Vivere atque FruiT • Scéna 1: Úvodní hala
+    </div>
+
+    <div class="panel-dole">
+      Táhni 1 prstem / myší = pohyb / náklon • Klepni = změna scény
+    </div>
+
+    <div class="panel-pravo">
+      <div class="glyph-znak">\\{*(°•.)(.•°)*}//</div>
+      <div class="radek-maly">Hlavoun • Viri • Pikoš</div>
+      <div class="radek-maly">První sjednocené demo světa</div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        /* 「Ī’』 – základní proměnné plátna */
+        const platno = document.getElementById("platno-svet");
+        const kresba = platno.getContext("2d");
+
+        let sirka = 0;
+        let vyska = 0;
+        let stredX = 0;
+        let stredY = 0;
+
+        let casPoslednihoKroku = 0;
+        let casSvet = 0;
+
+        /* {°"(.).),,(\/)¡¡(\/),,,(.(.)"°} – stav hry */
+        const SCENA_UVOD = 0;
+        const SCENA_MAPA = 1;
+        const SCENA_RAMECEK3D = 2;
+
+        let aktivniScena = SCENA_UVOD;
+
+        const panelScena = document.getElementById("panel-scena");
+
+        /* 7i… – kamera a ovládání */
+        let kameraOtoceniY = 0; // kolem svislé osy
+        let kameraSklonX = -0.5; // nahoru / dolů
+        let meritko = 1.0;
+
+        let tahneSe = false;
+        let posledniX = 0;
+        let posledniY = 0;
+        let soucetPohybu = 0;
+
+        /* Úvodní tři koule – rodina světa */
+        const hrdinove = [
+          {
+            jmeno: "Hlavoun",
+            barvaVnitrni: "#ffddaa",
+            barvaVnejsi: "#ffb156",
+            uhelZacatek: -1.4,
+          },
+          {
+            jmeno: "Viri",
+            barvaVnitrni: "#ff9de6",
+            barvaVnejsi: "#ff5ad4",
+            uhelZacatek: 0,
+          },
+          {
+            jmeno: "Pikoš",
+            barvaVnitrni: "#a6c8ff",
+            barvaVnejsi: "#4fa6ff",
+            uhelZacatek: 1.4,
+          },
+        ];
+
+        /* Mapa kouli – jednoduché planety po orbitách */
+        const planety = [];
+        (function pripravPlanety() {
+          const pocetOkruhu = 4;
+          const planetyNaOkruh = 6;
+          for (let i = 0; i < pocetOkruhu; i++) {
+            const polomerOkruhu = 90 + i * 45;
+            for (let j = 0; j < planetyNaOkruh; j++) {
+              const uhel = (j / planetyNaOkruh) * Math.PI * 2;
+              planety.push({
+                okruh: i,
+                polomer: polomerOkruhu,
+                uhelZacatek: uhel,
+                rychlost:
+                  0.1 + i * 0.03 + (Math.random() * 0.04 - 0.02), // každý trošku jinak
+                velikost: 6 + i * 2,
+              });
+            }
+          }
+        })();
+
+        /* Rámeček 3D – hrany kostky (červený rám) */
+        // vrcholy kostky v lokálních souřadnicích
+        const ramecekVrcholy = [
+          { x: -1, y: -1, z: -1 },
+          { x: 1, y: -1, z: -1 },
+          { x: 1, y: 1, z: -1 },
+          { x: -1, y: 1, z: -1 },
+          { x: -1, y: -1, z: 1 },
+          { x: 1, y: -1, z: 1 },
+          { x: 1, y: 1, z: 1 },
+          { x: -1, y: 1, z: 1 },
+        ];
+
+        // hrany kostky (indexy do pole vrcholů)
+        const ramecekHrany = [
+          [0, 1],
+          [1, 2],
+          [2, 3],
+          [3, 0], // spodní čtverec
+          [4, 5],
+          [5, 6],
+          [6, 7],
+          [7, 4], // horní čtverec
+          [0, 4],
+          [1, 5],
+          [2, 6],
+          [3, 7], // svislé hrany
+        ];
+
+        let ramecekOtoceniVlastni = 0;
+
+        /* _（）（）_ – nastavení velikosti plátna */
+        function obnovVelikostPlátna() {
+          const obdelnik = platno.getBoundingClientRect();
+          const dpr = window.devicePixelRatio || 1;
+
+          sirka = obdelnik.width;
+          vyska = obdelnik.height;
+          stredX = sirka / 2;
+          stredY = vyska / 2;
+
+          platno.width = obdelnik.width * dpr;
+          platno.height = obdelnik.height * dpr;
+          kresba.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+          meritko = Math.min(sirka, vyska) * 0.4;
+        }
+
+        window.addEventListener("resize", obnovVelikostPlátna);
+        obnovVelikostPlátna();
+
+        /* Projekce 3D bodu do 2D – prostá orto + trochu perspektivy */
+        function projekce3D(bod) {
+          const ot = kameraOtoceniY;
+          const sk = kameraSklonX;
+
+          // otočení kolem osy Y
+          const cosY = Math.cos(ot);
+          const sinY = Math.sin(ot);
+          let x1 = bod.x * cosY + bod.z * sinY;
+          let z1 = -bod.x * sinY + bod.z * cosY;
+          let y1 = bod.y;
+
+          // náklon kolem X
+          const cosX = Math.cos(sk);
+          const sinX = Math.sin(sk);
+          let y2 = y1 * cosX - z1 * sinX;
+          let z2 = y1 * sinX + z1 * cosX;
+
+          const vzdalenostZ = 3; // vzdálenost kamery
+          const pom = vzdalenostZ / (vzdalenostZ + z2 * 0.9);
+
+          const x2d = stredX + x1 * meritko * pom;
+          const y2d = stredY + y2 * meritko * pom;
+
+          return { x: x2d, y: y2d, meritko: pom };
+        }
+
+        /* Vykreslení pozadí */
+        function vykresliPozadi() {
+          const prechod = kresba.createRadialGradient(
+            stredX,
+            0,
+            Math.min(sirka, vyska) * 0.1,
+            stredX,
+            vyska,
+            Math.max(sirka, vyska)
+          );
+          prechod.addColorStop(0, "#151a30");
+          prechod.addColorStop(0.5, "#050815");
+          prechod.addColorStop(1, "#020208");
+          kresba.fillStyle = prechod;
+          kresba.fillRect(0, 0, sirka, vyska);
+        }
+
+        /* Scéna 1 – úvodní hala s Hlavounem, Virim a Pikošem */
+        function vykresliScenaUvod(dt) {
+          const polomerHaly = Math.min(sirka, vyska) * 0.26;
+          const cas = casSvet;
+
+          // kruhová plošina
+          kresba.save();
+          kresba.translate(stredX, stredY + polomerHaly * 0.1);
+          kresba.scale(1.2, 0.35);
+          kresba.beginPath();
+          kresba.arc(0, 0, polomerHaly, 0, Math.PI * 2);
+          const podGrad = kresba.createRadialGradient(
+            0,
+            0,
+            polomerHaly * 0.1,
+            0,
+            0,
+            polomerHaly
+          );
+          podGrad.addColorStop(0, "rgba(20, 14, 8, 1)");
+          podGrad.addColorStop(1, "rgba(0, 0, 0, 0.9)");
+          kresba.fillStyle = podGrad;
+          kresba.fill();
+          kresba.restore();
+
+          // tři koule
+          hrdinove.forEach(function (hrdina, index) {
+            const uhel =
+              hrdina.uhelZacatek + Math.sin(cas * 0.5 + index) * 0.15;
+            const r = polomerHaly * 0.6;
+
+            const x = stredX + Math.cos(uhel) * r;
+            const y =
+              stredY +
+              Math.sin(uhel) * r * 0.25 -
+              Math.cos(cas * 1.5 + index) * 10;
+
+            const velikost = 32;
+            const vnitGrad = kresba.createRadialGradient(
+              x - velikost * 0.3,
+              y - velikost * 0.4,
+              velikost * 0.3,
+              x,
+              y,
+              velikost
+            );
+            vnitGrad.addColorStop(0, hrdina.barvaVnitrni);
+            vnitGrad.addColorStop(1, hrdina.barvaVnejsi);
+
+            kresba.save();
+            kresba.beginPath();
+            kresba.arc(x, y, velikost, 0, Math.PI * 2);
+            kresba.fillStyle = vnitGrad;
+            kresba.shadowColor = hrdina.barvaVnejsi;
+            kresba.shadowBlur = 24;
+            kresba.fill();
+            kresba.restore();
+
+            // jemný název pod koulí
+            kresba.font = "11px system-ui";
+            kresba.textAlign = "center";
+            kresba.textBaseline = "top";
+            kresba.fillStyle = "rgba(240, 230, 210, 0.9)";
+            kresba.fillText(hrdina.jmeno, x, y + velikost + 4);
+          });
+
+          // VaFiT glyph uprostřed
+          kresba.font = "12px system-ui";
+          kresba.textAlign = "center";
+          kresba.textBaseline = "middle";
+          kresba.fillStyle = "rgba(255, 210, 160, 0.85)";
+          kresba.fillText("\\\\{*(°•.)(.•°)*}//", stredX, stredY - polomerHaly);
+        }
+
+        /* Scéna 2 – mapa kouli (planety na orbitách) */
+        function vykresliScenaMapa(dt) {
+          const maxR = Math.min(sirka, vyska) * 0.4;
+
+          // orbitální kruhy
+          for (let i = 0; i < 4; i++) {
+            const r = 90 + i * 45;
+            kresba.beginPath();
+            kresba.arc(stredX, stredY, r, 0, Math.PI * 2);
+            kresba.strokeStyle = "rgba(160, 180, 220, 0.25)";
+            kresba.lineWidth = 1;
+            kresba.stroke();
+          }
+
+          // planety
+          planety.forEach(function (p) {
+            const uhel = p.uhelZacatek + casSvet * p.rychlost;
+            const x = stredX + Math.cos(uhel) * p.polomer;
+            const y =
+              stredY + Math.sin(uhel) * p.polomer * 0.55; // elipsa kvůli pseudo-3D
+
+            const jas =
+              0.6 +
+              0.4 * Math.sin(casSvet * 2 + p.okruh * 0.8 + p.uhelZacatek);
+            const barvaVnitrni = `rgba(255, 210, 160, ${0.3 + jas * 0.4})`;
+            const barvaVnejsi = `rgba(255, 140, 80, ${0.4 + jas * 0.5})`;
+
+            const grad = kresba.createRadialGradient(
+              x - p.velikost * 0.4,
+              y - p.velikost * 0.4,
+              p.velikost * 0.3,
+              x,
+              y,
+              p.velikost
+            );
+            grad.addColorStop(0, barvaVnitrni);
+            grad.addColorStop(1, barvaVnejsi);
+
+            kresba.save();
+            kresba.beginPath();
+            kresba.arc(x, y, p.velikost, 0, Math.PI * 2);
+            kresba.fillStyle = grad;
+            kresba.shadowColor = barvaVnejsi;
+            kresba.shadowBlur = 12;
+            kresba.fill();
+            kresba.restore();
+          });
+
+          // střed světa
+          kresba.beginPath();
+          kresba.arc(stredX, stredY, 10, 0, Math.PI * 2);
+          kresba.fillStyle = "rgba(255, 230, 190, 0.95)";
+          kresba.fill();
+
+          kresba.font = "11px system-ui";
+          kresba.textAlign = "center";
+          kresba.textBaseline = "top";
+          kresba.fillStyle = "rgba(250, 230, 200, 0.9)";
+          kresba.fillText("Jádro Vivere atque FruiT", stredX, stredY + 14);
+        }
+
+        /* Scéna 3 – 3D červený rámeček */
+        function vykresliScenaRamecek3D(dt) {
+          ramecekOtoceniVlastni += dt * 0.6;
+
+          const otoceniPuv = kameraOtoceniY;
+          kameraOtoceniY = otoceniPuv + Math.sin(casSvet * 0.2) * 0.0005;
+
+          const meritkoRamecku = 0.7;
+
+          // jemné zemní světlo
+          kresba.save();
+          kresba.translate(stredX, stredY + meritko * 0.7);
+          kresba.scale(1.4, 0.35);
+          kresba.beginPath();
+          kresba.arc(0, 0, meritko * 0.6, 0, Math.PI * 2);
+          const pod = kresba.createRadialGradient(
+            0,
+            0,
+            meritko * 0.1,
+            0,
+            0,
+            meritko * 0.6
+          );
+          pod.addColorStop(0, "rgba(40, 8, 8, 1)");
+          pod.addColorStop(1, "rgba(0, 0, 0, 0.9)");
+          kresba.fillStyle = pod;
+          kresba.fill();
+          kresba.restore();
+
+          // hrany kostky
+          kresba.save();
+          kresba.lineWidth = 3;
+          kresba.strokeStyle = "rgba(255, 80, 80, 0.95)";
+          kresba.shadowColor = "rgba(255, 60, 60, 0.9)";
+          kresba.shadowBlur = 18;
+
+          const vrcholy2d = ramecekVrcholy.map(function (bod) {
+            const uhel = ramecekOtoceniVlastni;
+            const cosV = Math.cos(uhel);
+            const sinV = Math.sin(uhel);
+            const bx = bod.x * cosV - bod.z * sinV;
+            const bz = bod.x * sinV + bod.z * cosV;
+            const by = bod.y;
+
+            return projekce3D({
+              x: bx * meritkoRamecku,
+              y: by * meritkoRamecku,
+              z: bz * meritkoRamecku,
+            });
+          });
+
+          ramecekHrany.forEach(function (hrana) {
+            const a = vrcholy2d[hrana[0]];
+            const b = vrcholy2d[hrana[1]];
+            kresba.beginPath();
+            kresba.moveTo(a.x, a.y);
+            kresba.lineTo(b.x, b.y);
+            kresba.stroke();
+          });
+
+          kresba.restore();
+
+          // malý glyph doprostřed rámečku
+          kresba.font = "12px system-ui";
+          kresba.textAlign = "center";
+          kresba.textBaseline = "middle";
+          kresba.fillStyle = "rgba(255, 210, 180, 0.95)";
+          kresba.fillText("“į」", stredX, stredY);
+        }
+
+        /* Přepnutí textu podle scény */
+        function aktualizujPopisekSceny() {
+          if (!panelScena) return;
+          if (aktivniScena === SCENA_UVOD) {
+            panelScena.textContent =
+              "Vivere atque FruiT • Scéna 1: Úvodní hala (Hlavoun / Viri / Pikoš)";
+          } else if (aktivniScena === SCENA_MAPA) {
+            panelScena.textContent =
+              "Vivere atque FruiT • Scéna 2: Mapa kouli (světy na orbitách)";
+          } else if (aktivniScena === SCENA_RAMECEK3D) {
+            panelScena.textContent =
+              "Vivere atque FruiT • Scéna 3: Červený 3D rámeček světa";
+          }
+        }
+
+        /* Ovládání – dotek / myš */
+        function zacatekVstupu(e) {
+          e.preventDefault();
+          const bod = zjistiBod(e);
+          tahneSe = true;
+          posledniX = bod.x;
+          posledniY = bod.y;
+          soucetPohybu = 0;
+        }
+
+        function pohybVstupu(e) {
+          if (!tahneSe) return;
+          e.preventDefault();
+          const bod = zjistiBod(e);
+          const dx = bod.x - posledniX;
+          const dy = bod.y - posledniY;
+
+          posledniX = bod.x;
+          posledniY = bod.y;
+          soucetPohybu += Math.abs(dx) + Math.abs(dy);
+
+          kameraOtoceniY += dx * 0.005;
+          kameraSklonX += dy * 0.005;
+
+          const maxSklon = Math.PI / 2 - 0.2;
+          if (kameraSklonX > maxSklon) kameraSklonX = maxSklon;
+          if (kameraSklonX < -maxSklon) kameraSklonX = -maxSklon;
+        }
+
+        function konecVstupu(e) {
+          if (!tahneSe) return;
+          e.preventDefault();
+          tahneSe = false;
+
+          if (soucetPohybu < 10) {
+            aktivniScena =
+              (aktivniScena + 1) % 3; /* tři scény v cyklu 0–1–2 */
+            aktualizujPopisekSceny();
+          }
+        }
+
+        function zjistiBod(e) {
+          if (e.touches && e.touches.length > 0) {
+            return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          } else {
+            return { x: e.clientX, y: e.clientY };
+          }
+        }
+
+        platno.addEventListener("mousedown", zacatekVstupu);
+        window.addEventListener("mousemove", pohybVstupu);
+        window.addEventListener("mouseup", konecVstupu);
+
+        platno.addEventListener("touchstart", zacatekVstupu, { passive: false });
+        window.addEventListener("touchmove", pohybVstupu, { passive: false });
+        window.addEventListener("touchend", konecVstupu, { passive: false });
+        window.addEventListener("touchcancel", konecVstupu, { passive: false });
+
+        /* Hlavní smyčka – …iT… */
+        function smycka(znackaCasu) {
+          if (!casPoslednihoKroku) casPoslednihoKroku = znackaCasu;
+          const dt = (znackaCasu - casPoslednihoKroku) / 1000;
+          casPoslednihoKroku = znackaCasu;
+          casSvet += dt;
+
+          vykresliPozadi();
+
+          if (aktivniScena === SCENA_UVOD) {
+            vykresliScenaUvod(dt);
+          } else if (aktivniScena === SCENA_MAPA) {
+            vykresliScenaMapa(dt);
+          } else if (aktivniScena === SCENA_RAMECEK3D) {
+            vykresliScenaRamecek3D(dt);
+          }
+
+          requestAnimationFrame(smycka);
+        }
+
+        aktualizujPopisekSceny();
+        requestAnimationFrame(smycka);
+      })();
+    </script>
+  </body>
+</html>
