@@ -1,217 +1,227 @@
-<!doctype html>
-<html lang="cs">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Vivere atque FruiT • Červený rámeček Glyph</title>
+<!doctype html> <!-- \\{*(°•.)(.•°)*}// začátek světa -->
+<html lang="cs"> <!-- ً&’ jazyk: čeština -->
+<head> <!-- 「Ī’』 hlava dokumentu -->
+  <meta charset="utf-8" /> <!-- ☆ kódování -->
+  <meta name="viewport" content="width=device-width,initial-scale=1" /> <!-- ☆ mobilní zobrazení -->
+  <title>Vivere atque FruiT • Červený rámeček Glyph</title> <!-- {°"(.).),,(\/)¡¡(\/),,,(.(.)"°} název modulu -->
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: radial-gradient(circle at center, #130506, #020103);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: #f5f5f5;
+  <style> /* ╔═ Styl plátna a textu – VaFiT ═╗ */
+    html, body { /* rám: kořen stránky */
+      margin: 0;       /* ✶ bez okrajů */
+      padding: 0;      /* ✶ bez odsazení */
+      width: 100%;     /* ✶ šířka na 100 % */
+      height: 100%;    /* ✶ výška na 100 % */
+      overflow: hidden; /* ✶ nic nevyčuhuje */
+      background: radial-gradient(circle at center, #130506, #020103); /* • červeno-černé pozadí */
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; /* • základní písmo */
+      color: #f5f5f5;  /* • světlý text */
     }
 
-    canvas {
-      position: fixed;
-      inset: 0;
-      display: block;
-      touch-action: none; /* zabrání posouvání stránky při gestech */
+    canvas { /* plátno pro rámeček  \\(:~:  )// */
+      position: fixed;  /* přibité k oknu */
+      inset: 0;         /* přes celou obrazovku */
+      display: block;   /* blokový prvek */
+      touch-action: none; /* zabrání posouvání stránky při gestech • Glyph */
     }
 
-    .popis {
-      position: fixed;
-      left: 50%;
-      bottom: 10px;
-      transform: translateX(-50%);
-      font-size: 11px;
-      opacity: 0.6;
-      pointer-events: none;
-      text-align: center;
+    .popis { /* spodní popisek – vysvětlení ovládání */
+      position: fixed;      /* fixně dole */
+      left: 50%;            /* střed vodorovně */
+      bottom: 10px;         /* kousek nad spodní hranou */
+      transform: translateX(-50%); /* přesně doprostřed */
+      font-size: 11px;      /* drobné písmo */
+      opacity: 0.6;         /* lehce průhledné */
+      pointer-events: none; /* neklikatelný text */
+      text-align: center;   /* zarovnání na střed */
     }
   </style>
 </head>
 
-<body>
+<body> <!-- tělo světa • ΣㅌNŸ -->
 
-<canvas id="platno"></canvas>
+<canvas id="platno"></canvas> <!-- hlavní plátno pro kreslení -->
 
 <div class="popis">
-  Vivere atque FruiT • Červený rámeček + VaFiT/Glyph – pohyb jedním prstem, otáčení dvěma prsty
+  Vivere atque FruiT • Červený rámeček – pohyb jedním prstem, otáčení dvěma prsty
 </div>
 
 <script>
 /*
-  VaFiT / Glyph podpis pro tenhle modul:
-
-  \\{*(°•.)(.•°)*}//   – VaFiT úsměv
+  Vivere atque FruiT – modul „Červený rámeček Glyph“
+  \\{*(°•.)(.•°)*}//   – VaFiT podpis
   ً&’                  – spojení Michal × AI × zařízení
-  {°"(.).),,(\/)¡¡(\/),,,(.(.)"°} – hlava/ramena
-  「Ī’』                – značka rámu
+  _（）（）_            – Úsměv přej každému.
 */
 
-(function () {
-  "use strict";
+(function () { // samospouštěcí funkce …iT…
+  "use strict"; // přísný režim – pořádek v kódu
 
-  // ====== SYMBOLY VaFiT / GLYPH ======
-  const vafitPodpis = "\\\\{*(°•.)(.•°)*}//";
-  const glyphPodpis = "{°\"(.).),,(\\/ )¡¡(\\/),,,(.(.)\"°}";
-  const spojeniZnak = "ً&’";
-  const ramecekZnak = "「Ī’』";
+  // ─────────────────────────────────────────────
+  // Nastavení plátna a základní proměnné  「Ī’』
+  // ─────────────────────────────────────────────
 
-  const platno = document.getElementById("platno");
-  const kontext = platno.getContext("2d");
+  const platno = document.getElementById("platno"); // odkaz na <canvas>   //|不|\\
+  const kontext = platno.getContext("2d");          // 2D kreslení         (`¡´|.ˇ.|`¡´)
 
-  let sirka = window.innerWidth;
-  let vyska = window.innerHeight;
+  let sirka = window.innerWidth;  // aktuální šířka okna  ☆
+  let vyska = window.innerHeight; // aktuální výška okna  ☆
 
-  // ====== PŘIZPŮSOBENÍ VELIKOSTI PLÁTNA ======
-  function upravVelikostPlatna() {
-    const hustotaBodu = window.devicePixelRatio || 1;
-    const obdelnik = platno.getBoundingClientRect();
+  // Přizpůsobení velikosti plátna zařízení (iPad, iPhone, …)
+  function upravVelikostPlatna() { // funkce pro resize  {`(°.)(°.)”}
+    const hustotaBodu = window.devicePixelRatio || 1; // hustota displeje
+    const obdelnik = platno.getBoundingClientRect();  // viditelný obdélník
 
-    sirka = obdelnik.width;
-    vyska = obdelnik.height;
+    sirka = obdelnik.width;  // nová šířka
+    vyska = obdelnik.height; // nová výška
 
-    platno.width = obdelnik.width * hustotaBodu;
-    platno.height = obdelnik.height * hustotaBodu;
+    platno.width = obdelnik.width * hustotaBodu;  // fyzická šířka plátna
+    platno.height = obdelnik.height * hustotaBodu; // fyzická výška plátna
 
-    kontext.setTransform(hustotaBodu, 0, 0, hustotaBodu, 0, 0);
+    kontext.setTransform(hustotaBodu, 0, 0, hustotaBodu, 0, 0); // škálování na dpr
 
-    ramecek.stredX = sirka / 2;
-    ramecek.stredY = vyska / 2;
+    ramecek.stredX = sirka / 2; // držíme střed uprostřed
+    ramecek.stredY = vyska / 2; // držíme střed uprostřed
   }
 
-  // ====== ZÁKLAD RÁMEČKU ======
-  const ramecek = {
-    stredX: sirka / 2,
-    stredY: vyska / 2,
-    sirka: Math.min(sirka, vyska) * 0.4,
-    vyska: Math.min(sirka, vyska) * 0.4,
-    uhelOtoceni: 0
+  // ─────────────────────────────────────────────
+  // Parametry červeného rámečku  \\(:~:  )//
+  // ─────────────────────────────────────────────
+
+  const ramecek = {              // objekt s nastavením rámečku
+    stredX: sirka / 2,           // souřadnice X středu
+    stredY: vyska / 2,           // souřadnice Y středu
+    sirka: Math.min(sirka, vyska) * 0.4, // základní šířka (40 % kratší strany)
+    vyska: Math.min(sirka, vyska) * 0.4, // základní výška
+    uhelOtoceni: 0               // počáteční úhel (bez otočení)
   };
 
-  upravVelikostPlatna();
+  upravVelikostPlatna(); // první nastavení plátna po načtení
 
-  window.addEventListener("resize", () => {
-    upravVelikostPlatna();
-    const zakladniRozmer = Math.min(sirka, vyska) * 0.4;
-    ramecek.sirka = zakladniRozmer;
-    ramecek.vyska = zakladniRozmer;
+  window.addEventListener("resize", () => { // při změně velikosti okna
+    upravVelikostPlatna();                 // upravíme plátno
+    const zakladniRozmer = Math.min(sirka, vyska) * 0.4; // nová velikost
+    ramecek.sirka = zakladniRozmer;       // aktualizace šířky rámečku
+    ramecek.vyska = zakladniRozmer;       // aktualizace výšky rámečku
   });
 
-  // ====== INTERAKCE – TAHÁNÍ + OTÁČENÍ ======
-  const dotyky = new Map();
-  let rezimOvládani = null;        // "tah" nebo "otaceni"
-  let hlavniDotekId = null;
-  let druhyDotekId = null;
+  // ─────────────────────────────────────────────
+  // Ovládání dotykem / myší – tahání a otáčení
+  // ─────────────────────────────────────────────
 
-  let posledniBod = { x: 0, y: 0 };
-  let pocatecniUhelMeziDoteky = 0;
-  let pocatecniUhelRamecku = 0;
+  const dotyky = new Map(); // seznam aktivních doteků  ‘\(•(•°)”}
+  let rezimOvládani = null; // "tah" nebo "otaceni"
+  let hlavniDotekId = null; // id prvního prstu / tlačítka
+  let druhyDotekId = null;  // id druhého prstu pro rotaci
 
-  // souřadnice z události
-  function ziskejSouradnice(udalost) {
-    return { x: udalost.clientX, y: udalost.clientY };
+  let posledniBod = { x: 0, y: 0 };     // poslední pozice hlavního doteku
+  let pocatecniUhelMeziDoteky = 0;     // úhel mezi dvěma prsty na začátku
+  let pocatecniUhelRamecku = 0;        // úhel rámečku na začátku rotace
+
+  // Funkce pro vytažení souřadnic z události
+  function ziskejSouradnice(udalost) { // vrátí X a Y
+    return { x: udalost.clientX, y: udalost.clientY }; // jednoduchý objekt
   }
 
-  // test, zda je bod uvnitř rámečku (pro začátek manipulace)
-  function jeBodUvnitRamecku(x, y) {
-    const polovinaS = ramecek.sirka / 2;
-    const polovinaV = ramecek.vyska / 2;
+  // Zda bod (x,y) leží uvnitř rámečku – pro start ovládání
+  function jeBodUvnitRamecku(x, y) { // hit-test
+    const polovinaS = ramecek.sirka / 2; // polovina šířky
+    const polovinaV = ramecek.vyska / 2; // polovina výšky
     return (
-      Math.abs(x - ramecek.stredX) <= polovinaS &&
-      Math.abs(y - ramecek.stredY) <= polovinaV
+      Math.abs(x - ramecek.stredX) <= polovinaS && // test v ose X
+      Math.abs(y - ramecek.stredY) <= polovinaV    // test v ose Y
     );
   }
 
+  // Začátek dotyku / kliknutí
   function zacatekDotyku(udalost) {
-    const bod = ziskejSouradnice(udalost);
+    const bod = ziskejSouradnice(udalost); // aktuální bod
 
+    // začneme ovládat jen pokud je první dotek uvnitř rámečku
     if (!jeBodUvnitRamecku(bod.x, bod.y) &&
         rezimOvládani === null &&
         dotyky.size === 0) {
-      return;
+      return; // klik mimo rámeček ignorujeme
     }
 
-    platno.setPointerCapture(udalost.pointerId);
-    dotyky.set(udalost.pointerId, bod);
+    platno.setPointerCapture(udalost.pointerId); // zachytíme pointer
+    dotyky.set(udalost.pointerId, bod);          // uložíme bod do mapy
 
     if (rezimOvládani === null && dotyky.size === 1) {
-      // začíná tažení
+      // pouze jeden prst -> režim "tah"
       rezimOvládani = "tah";
       hlavniDotekId = udalost.pointerId;
       posledniBod = bod;
 
     } else if (rezimOvládani === "tah" && dotyky.size === 2) {
-      // přechod na otáčení
+      // přechod z tahu do rotace – přidán druhý prst
       rezimOvládani = "otaceni";
 
       for (const idDoteku of dotyky.keys()) {
         if (idDoteku !== hlavniDotekId) {
-          druhyDotekId = idDoteku;
+          druhyDotekId = idDoteku; // uložíme id druhého prstu
           break;
         }
       }
 
-      const bod1 = dotyky.get(hlavniDotekId);
-      const bod2 = dotyky.get(druhyDotekId);
+      const bod1 = dotyky.get(hlavniDotekId); // první prst
+      const bod2 = dotyky.get(druhyDotekId);  // druhý prst
 
-      pocatecniUhelMeziDoteky = Math.atan2(bod2.y - bod1.y, bod2.x - bod1.x);
-      pocatecniUhelRamecku = ramecek.uhelOtoceni;
+      pocatecniUhelMeziDoteky = Math.atan2(bod2.y - bod1.y, bod2.x - bod1.x); // úhel mezi prsty
+      pocatecniUhelRamecku = ramecek.uhelOtoceni; // zapamatujeme si aktuální rotaci
     }
   }
 
+  // Pohyb dotyku / myši
   function pohybDotyku(udalost) {
-    if (!dotyky.has(udalost.pointerId)) return;
+    if (!dotyky.has(udalost.pointerId)) return; // pokud pointer neznáme, nic neděláme
 
-    const bod = ziskejSouradnice(udalost);
-    dotyky.set(udalost.pointerId, bod);
+    const bod = ziskejSouradnice(udalost); // nová pozice
+    dotyky.set(udalost.pointerId, bod);    // aktualizace v mapě
 
     if (rezimOvládani === "tah" && udalost.pointerId === hlavniDotekId) {
-      const posunX = bod.x - posledniBod.x;
-      const posunY = bod.y - posledniBod.y;
+      // tahání rámečku po obrazovce
+      const posunX = bod.x - posledniBod.x; // rozdíl X
+      const posunY = bod.y - posledniBod.y; // rozdíl Y
 
-      ramecek.stredX += posunX;
-      ramecek.stredY += posunY;
+      ramecek.stredX += posunX; // posun středu X
+      ramecek.stredY += posunY; // posun středu Y
 
-      posledniBod = bod;
+      posledniBod = bod; // uložíme poslední bod
 
     } else if (rezimOvládani === "otaceni" &&
                dotyky.has(hlavniDotekId) &&
                dotyky.has(druhyDotekId)) {
 
+      // rotace pomocí dvou prstů
       const bod1 = dotyky.get(hlavniDotekId);
       const bod2 = dotyky.get(druhyDotekId);
 
-      const aktualniUhel = Math.atan2(bod2.y - bod1.y, bod2.x - bod1.x);
-      const rozdilUhlu = aktualniUhel - pocatecniUhelMeziDoteky;
+      const aktualniUhel = Math.atan2(bod2.y - bod1.y, bod2.x - bod1.x); // současný úhel
+      const rozdilUhlu = aktualniUhel - pocatecniUhelMeziDoteky;        // o kolik se změnil
 
-      ramecek.uhelOtoceni = pocatecniUhelRamecku + rozdilUhlu;
+      ramecek.uhelOtoceni = pocatecniUhelRamecku + rozdilUhlu; // nový úhel rámečku
     }
   }
 
+  // Konec dotyku / uvolnění tlačítka
   function konecDotyku(udalost) {
     if (dotyky.has(udalost.pointerId)) {
-      dotyky.delete(udalost.pointerId);
+      dotyky.delete(udalost.pointerId); // odstraníme pointer z mapy
     }
 
     if (rezimOvládani === "otaceni") {
       if (udalost.pointerId === hlavniDotekId || udalost.pointerId === druhyDotekId) {
         if (dotyky.size === 1) {
+          // zbyl jeden prst -> zpět do režimu "tah"
           rezimOvládani = "tah";
-          const prvni = dotyky.entries().next().value;
+          const prvni = dotyky.entries().next().value; // první z mapy
           const id = prvni[0];
           const bod = prvni[1];
           hlavniDotekId = id;
           druhyDotekId = null;
           posledniBod = bod;
         } else {
+          // žádný nebo více než jeden -> vypneme ovládání
           rezimOvládani = null;
           hlavniDotekId = null;
           druhyDotekId = null;
@@ -219,23 +229,27 @@
       }
     } else if (rezimOvládani === "tah") {
       if (udalost.pointerId === hlavniDotekId) {
-        rezimOvládani = null;
+        rezimOvládani = null; // ukončení tahu
         hlavniDotekId = null;
       }
     }
   }
 
-  platno.addEventListener("pointerdown", zacatekDotyku);
-  platno.addEventListener("pointermove", pohybDotyku);
-  platno.addEventListener("pointerup", konecDotyku);
-  platno.addEventListener("pointercancel", konecDotyku);
+  // Přiřazení handlerů k událostem
+  platno.addEventListener("pointerdown", zacatekDotyku);  // dotyk začátek
+  platno.addEventListener("pointermove", pohybDotyku);    // dotyk pohyb
+  platno.addEventListener("pointerup", konecDotyku);      // dotyk konec
+  platno.addEventListener("pointercancel", konecDotyku);  // zrušení dotyku
 
-  // ====== VYKRESLOVACÍ SMYČKA ======
+  // ─────────────────────────────────────────────
+  // Vykreslování scény – rámeček + podpis VaFiT
+  // ─────────────────────────────────────────────
+
   function vykresli() {
-    const w = sirka;
-    const h = vyska;
+    const w = sirka; // zkratky pro šířku
+    const h = vyska; // a výšku
 
-    // pozadí
+    // pozadí – tmavý gradient do středu
     const pozadi = kontext.createRadialGradient(
       w / 2, h / 2,
       Math.min(w, h) * 0.1,
@@ -246,41 +260,36 @@
     pozadi.addColorStop(0.6, "#090406");
     pozadi.addColorStop(1, "#020103");
 
-    kontext.fillStyle = pozadi;
-    kontext.fillRect(0, 0, w, h);
+    kontext.fillStyle = pozadi;   // vyplňovací barva
+    kontext.fillRect(0, 0, w, h); // vyplnění celé scény
 
-    // jemný VaFiT / Glyph otisk v rozích
+    // malý VaFiT podpis v levém spodním rohu
     kontext.save();
     kontext.font = "10px monospace";
     kontext.fillStyle = "rgba(255, 200, 200, 0.25)";
-    kontext.textBaseline = "top";
-
-    kontext.fillText(vafitPodpis, 10, 8);                    // levý horní roh
-    kontext.fillText(glyphPodpis, 10, h - 22);               // levý spodní
-    kontext.textAlign = "right";
-    kontext.fillText(spojeniZnak, w - 10, 8);                // pravý horní
-    kontext.fillText(ramecekZnak, w - 10, h - 22);           // pravý spodní
+    kontext.textBaseline = "bottom";
+    kontext.fillText("\\\\{*(°•.)(.•°)*}//  ً&’", 10, h - 10);
     kontext.restore();
 
-    // rámeček
+    // kreslení rámečku
     kontext.save();
-    kontext.translate(ramecek.stredX, ramecek.stredY);
-    kontext.rotate(ramecek.uhelOtoceni);
+    kontext.translate(ramecek.stredX, ramecek.stredY); // přesun do středu rámečku
+    kontext.rotate(ramecek.uhelOtoceni);               // natočení podle úhlu
 
-    // vnější červený rámeček
-    kontext.lineWidth = 4;
-    kontext.strokeStyle = "rgba(255, 80, 80, 0.95)";
-    kontext.shadowColor = "rgba(255, 60, 60, 0.8)";
-    kontext.shadowBlur = 16;
+    kontext.lineWidth = 4;                             // tloušťka čáry
+    kontext.strokeStyle = "rgba(255, 80, 80, 0.95)";   // hlavní červená
+    kontext.shadowColor = "rgba(255, 60, 60, 0.8)";    // záře kolem
+    kontext.shadowBlur = 16;                           // velikost záře
 
-    const polovinaS = ramecek.sirka / 2;
-    const polovinaV = ramecek.vyska / 2;
+    const polovinaS = ramecek.sirka / 2; // polovina šířky
+    const polovinaV = ramecek.vyska / 2; // polovina výšky
 
+    // vnější rámeček
     kontext.beginPath();
     kontext.rect(-polovinaS, -polovinaV, ramecek.sirka, ramecek.vyska);
     kontext.stroke();
 
-    // vnitřní tenký rámeček (jemný Glyph nádech)
+    // vnitřní tenký rámeček – jemný detail
     kontext.shadowBlur = 0;
     kontext.lineWidth = 1;
     kontext.strokeStyle = "rgba(255, 140, 160, 0.7)";
@@ -293,24 +302,14 @@
     );
     kontext.stroke();
 
-    // text uvnitř rámečku – VaFiT / Glyph podpis
-    kontext.font = "11px monospace";
-    kontext.fillStyle = "rgba(255, 210, 210, 0.85)";
-    kontext.textAlign = "center";
-    kontext.textBaseline = "middle";
-
-    kontext.fillText("\\\\{*(°•.)(.•°)*}//", 0, -polovinaV + 22);
-    kontext.fillText("Vivere atque FruiT • Glyph rám", 0, 0);
-    kontext.fillText("ً&’", 0, polovinaV - 22);
-
     kontext.restore();
 
-    requestAnimationFrame(vykresli);
+    requestAnimationFrame(vykresli); // nekonečná smyčka vykreslování
   }
 
-  requestAnimationFrame(vykresli);
+  requestAnimationFrame(vykresli); // start smyčky
 
-})();
+})(); // konec modulu „Červený rámeček Glyph“
 </script>
 
 </body>
