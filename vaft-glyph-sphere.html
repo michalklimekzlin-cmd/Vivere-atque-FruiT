@@ -19,6 +19,7 @@
       position: fixed;
       inset: 0;
       display: block;
+      touch-action: none; /* aby se stránka neposouvala při otáčení */
     }
     .label {
       position: fixed;
@@ -28,13 +29,16 @@
       font-size: 11px;
       opacity: 0.6;
       pointer-events: none;
+      text-align: center;
     }
   </style>
 </head>
 <body>
 
 <canvas id="sphere"></canvas>
-<div class="label">VaFT • Koule z glyphů (červená + bílá) podle tvé 4×4 tabulky</div>
+<div class="label">
+  VaFT • Koule z glyphů (červená + bílá) podle tvé 4×4 tabulky
+</div>
 
 <script>
 (function () {
@@ -43,18 +47,27 @@
   const canvas = document.getElementById("sphere");
   const ctx = canvas.getContext("2d");
 
+  // reálná viditelná velikost (v CSS pixelech) – aktualizujeme v resize
+  let viewWidth = window.innerWidth;
+  let viewHeight = window.innerHeight;
+
   function resize() {
     const dpr = window.devicePixelRatio || 1;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
+
+    // velikost podle skutečného rectu – to řeší iPad Air / různé poměry
+    const rect = canvas.getBoundingClientRect();
+    viewWidth = rect.width;
+    viewHeight = rect.height;
+
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   resize();
   window.addEventListener("resize", resize);
 
-  // 4×4 tabulka – stejné množství glyphů jako předtím
+  // tvoje 4×4 tabulka glyphů
   const glyphGrid = [
     "ː", "¦", "∙", "!",
     "a", "b", "c", "^",
@@ -62,25 +75,75 @@
     "#", ".", "A", ")"
   ];
 
-  const latSteps = 22;   // stejné hodnoty jako v původní verzi
-  const lonSteps = 44;
+  // stejné rozlišení koule jako původně
+  const latSteps = 22;   // řádky
+  const lonSteps = 44;   // sloupce
 
-  let rotation = 0;
+  // auto rotace + rotace prstem
+  let autoRotation = 0;
+  let dragRotation = 0;
   let lastTime = 0;
 
+  // ovládání prstem / myší
+  let isDragging = false;
+  let lastX = 0;
+
+  function pointerDown(e) {
+    isDragging = true;
+    lastX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+  }
+
+  function pointerMove(e) {
+    if (!isDragging) return;
+    const x = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+    const dx = x - lastX;
+    lastX = x;
+    // citlivost otáčení – můžeš si později doladit
+    dragRotation += dx * 0.005;
+    e.preventDefault();
+  }
+
+  function pointerUp() {
+    isDragging = false;
+  }
+
+  // podporujeme pointer events i touch/mouse fallback
+  if (window.PointerEvent) {
+    canvas.addEventListener("pointerdown", pointerDown);
+    canvas.addEventListener("pointermove", pointerMove);
+    window.addEventListener("pointerup", pointerUp);
+    window.addEventListener("pointercancel", pointerUp);
+  } else {
+    canvas.addEventListener("mousedown", pointerDown);
+    window.addEventListener("mousemove", pointerMove);
+    window.addEventListener("mouseup", pointerUp);
+
+    canvas.addEventListener("touchstart", (e) => pointerDown(e.touches[0]), { passive: false });
+    canvas.addEventListener("touchmove", (e) => pointerMove(e.touches[0]), { passive: false });
+    window.addEventListener("touchend", pointerUp);
+    window.addEventListener("touchcancel", pointerUp);
+  }
+
   function draw(time) {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-
-    const cx = w / 2;          // přesně doprostřed X
-    const cy = h / 2;          // přesně doprostřed Y
-    const radius = Math.min(w, h) * 0.32; // stejná velikost koule
-
     const dt = lastTime ? (time - lastTime) : 16;
     lastTime = time;
-    rotation += dt * 0.0007;   // plynulejší otáčení
 
-    // pozadí
+    // automatické pomalé otáčení
+    autoRotation += dt * 0.0005;
+
+    const w = viewWidth;
+    const h = viewHeight;
+
+    // STŘED – přesně doprostřed iPadu / jakéhokoli zařízení
+    const cx = w / 2;
+    const cy = h / 2;
+
+    // mírně menší radius, aby se celá koule vešla
+    const radius = Math.min(w, h) * 0.27;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // jemné pozadí z do středu
     const bg = ctx.createRadialGradient(cx, cy, 40, cx, cy, Math.max(w, h));
     bg.addColorStop(0.0, "#2a1214");
     bg.addColorStop(0.5, "#0b0507");
@@ -88,20 +151,27 @@
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, w, h);
 
-    // koule – NEUBÍRÁM body ani glyphy
+    // základní rotace (auto + prst)
+    const baseRotation = autoRotation + dragRotation;
+
+    // koule
     for (let i = 0; i <= latSteps; i++) {
       const v = i / latSteps;
-      const lat = (v - 0.5) * Math.PI; // -π/2 .. π/2
+      const lat = (v - 0.5) * Math.PI;   // -π/2 .. π/2
+
+      // každá "široká řada" má trochu jinou rychlost otáčení
+      const rowFactor = 0.6 + 0.8 * (i / latSteps); // 0.6 .. 1.4
+      const rowRotation = baseRotation * rowFactor;
 
       for (let j = 0; j < lonSteps; j++) {
         const u = j / lonSteps;
-        const lon = u * Math.PI * 2 + rotation;
+        const lon = u * Math.PI * 2 + rowRotation;
 
         const x = Math.cos(lat) * Math.cos(lon);
         const y = Math.sin(lat);
         const z = Math.cos(lat) * Math.sin(lon);
 
-        const depth = (z + 1) / 2; // 0..1 vpředu/vzadu
+        const depth = (z + 1) / 2; // 0 (vzadu) .. 1 (vpredu)
 
         const r = radius * (0.9 + depth * 0.15);
         const px = cx + x * r;
@@ -109,7 +179,7 @@
 
         const size = 1.4 + depth * 2.4;
 
-        // světelný bod (gradient – stejné jako dřív)
+        // světelný bod – stejné barevné chování (červená + bílá)
         const grad = ctx.createRadialGradient(px, py, 0, px, py, size * 2.2);
         const whiteFactor = 0.4 + depth * 0.6;
         const redFactor   = 0.6 + (1 - depth) * 0.4;
@@ -123,7 +193,7 @@
         ctx.arc(px, py, size * 2.2, 0, Math.PI * 2);
         ctx.fill();
 
-        // glyph – pořád na všech viditelných bodech jako předtím
+        // glyphy – nechávám stejné chování jako předtím
         if (depth > 0.25) {
           const idx = (i * lonSteps + j) % glyphGrid.length;
           const glyph = glyphGrid[idx];
@@ -133,9 +203,10 @@
           ctx.font = `${8 + depth * 4}px monospace`;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillStyle = depth > 0.6
-            ? "rgba(255,255,255,0.95)"
-            : "rgba(255,200,200,0.9)";
+          ctx.fillStyle =
+            depth > 0.6
+              ? "rgba(255,255,255,0.95)"
+              : "rgba(255,200,200,0.9)";
           ctx.fillText(glyph, 0, 0);
           ctx.restore();
         }
