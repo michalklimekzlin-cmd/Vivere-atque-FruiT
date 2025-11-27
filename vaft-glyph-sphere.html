@@ -57,99 +57,109 @@
   resize();
   window.addEventListener("resize", resize);
 
-  // Tvůj vzor 4×4 – symboly můžeme kdykoliv změnit / doladit
+  // 4×4 tabulka – můžeš kdykoliv změnit na své znaky
   const glyphGrid = [
-    "ː", "¦", "∙", "!",   // horní řádek – jen příklady znaků
+    "ː", "¦", "∙", "!",
     "a", "b", "c", "^",
     "1", "2", "3", "4",
     "#", ".", "A", ")"
   ];
 
-  const latSteps = 22;   // „řádky“ koule
-  const lonSteps = 44;   // „sloupce“ koule
+  // méně bodů = plynulejší animace
+  const latSteps = 16;   // řádky
+  const lonSteps = 32;   // sloupce
+
   let rotation = 0;
+  let lastTime = 0;
 
   function draw(time) {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const cx = w / 2;
-    const cy = h / 2;
-    const radius = Math.min(w, h) * 0.32;
+    const cy = h / 2;                  // STŘED obrazovky
+    const radius = Math.min(w, h) * 0.26; // menší, aby se vešla celá koule
 
-    rotation += 0.0007 * (time || 0);
+    // deltaTime pro plynulou rotaci
+    const dt = lastTime ? (time - lastTime) : 16;
+    lastTime = time;
+    rotation += dt * 0.0004;           // rychlost rotace
 
     ctx.clearRect(0, 0, w, h);
 
-    // jemný podklad
-    const bg = ctx.createRadialGradient(cx, cy - 80, 40, cx, cy, Math.max(w, h));
+    // pozadí
+    const bg = ctx.createRadialGradient(cx, cy - 60, 40, cx, cy, Math.max(w, h));
     bg.addColorStop(0, "#2a1214");
     bg.addColorStop(0.45, "#0b0507");
     bg.addColorStop(1, "#020103");
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, w, h);
 
-    // mírný „stůl“ pod koulí
+    // jemná "podložka" pod koulí
     ctx.save();
     ctx.translate(cx, cy + radius * 1.05);
-    ctx.scale(1.8, 0.45);
+    ctx.scale(1.6, 0.4);
     ctx.beginPath();
     ctx.arc(0, 0, radius * 0.7, 0, Math.PI * 2);
     const baseGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, radius * 0.8);
-    baseGrad.addColorStop(0, "rgba(255,255,255,0.05)");
-    baseGrad.addColorStop(1, "rgba(0,0,0,0.0)");
+    baseGrad.addColorStop(0, "rgba(255,255,255,0.06)");
+    baseGrad.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = baseGrad;
     ctx.fill();
     ctx.restore();
 
-    // kreslení bodů / glyphů na povrchu koule
+    // předvykreslené styly – nebudeme tvořit gradient pro každý bod
+    function pointColor(depth) {
+      const white = 0.4 + depth * 0.6;
+      const red   = 0.6 + (1 - depth) * 0.4;
+      // trochu víc do bíla vpředu
+      const r = Math.floor(255 * (0.6 * red + 0.4 * white));
+      const g = Math.floor(255 * (0.3 * red + 0.7 * white));
+      const b = Math.floor(255 * (0.3 * red + 0.7 * white));
+      const a = 0.55 + depth * 0.35;
+      return `rgba(${r},${g},${b},${a})`;
+    }
+
+    // samotná koule
     for (let i = 0; i <= latSteps; i++) {
-      const v = i / latSteps;               // 0..1
-      const lat = (v - 0.5) * Math.PI;      // -π/2 .. π/2
+      const v = i / latSteps;
+      const lat = (v - 0.5) * Math.PI;          // -π/2 .. π/2
 
       for (let j = 0; j < lonSteps; j++) {
-        const u = j / lonSteps;             // 0..1
+        const u = j / lonSteps;
         const lon = u * Math.PI * 2 + rotation;
 
-        // souřadnice bodu na kouli (jednotková koule)
         const x = Math.cos(lat) * Math.cos(lon);
         const y = Math.sin(lat);
-        const z = Math.cos(lat) * Math.sin(lon); // použijeme pro „hloubku“
+        const z = Math.cos(lat) * Math.sin(lon);
 
-        // projekce do 2D
-        const depth = (z + 1) / 2;          // 0 .. 1
-        const r = radius * (0.9 + depth * 0.15);
+        const depth = (z + 1) / 2;             // 0 .. 1
+        // ignoruj zadní stranu – menší počet bodů = víc fps
+        if (depth < 0.15) continue;
+
+        const r = radius * (0.9 + depth * 0.12);
         const px = cx + x * r;
         const py = cy + y * r;
 
-        // velikost bodu podle hloubky
-        const size = 1.4 + depth * 2.4;
+        const size = 1.2 + depth * 2.0;
 
-        // vyber glyph z tvé 4×4 tabulky
-        const idx = (i * lonSteps + j) % glyphGrid.length;
-        const glyph = glyphGrid[idx];
-
-        // barva – jen červené + bílé odstíny
-        const whiteFactor = 0.4 + depth * 0.6;  // víc bílé vpředu
-        const redFactor   = 0.6 + (1 - depth) * 0.4;
-
-        // nejdřív kulatý „pixel“
-        const grad = ctx.createRadialGradient(px, py, 0, px, py, size * 2.2);
-        grad.addColorStop(0, `rgba(255,255,255,${whiteFactor})`);
-        grad.addColorStop(0.5, `rgba(255,120,120,${redFactor})`);
-        grad.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = grad;
+        // kulatý bod
         ctx.beginPath();
-        ctx.arc(px, py, size * 2.2, 0, Math.PI * 2);
+        ctx.arc(px, py, size, 0, Math.PI * 2);
+        ctx.fillStyle = pointColor(depth);
         ctx.fill();
 
-        // glyph do středu bodu – jen vpředu, ať není přeplácané
-        if (depth > 0.25) {
+        // glyph jen u části bodů, jinak by to bylo moc husté
+        if (depth > 0.45 && (i + j) % 3 === 0) {
+          const idx = (i * lonSteps + j) % glyphGrid.length;
+          const glyph = glyphGrid[idx];
           ctx.save();
           ctx.translate(px, py);
-          ctx.font = `${8 + depth * 4}px monospace`;
+          ctx.font = `${7 + depth * 4}px monospace`;
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
-          ctx.fillStyle = depth > 0.6 ? "rgba(255,255,255,0.9)" : "rgba(255,180,180,0.85)";
+          ctx.fillStyle = depth > 0.7
+            ? "rgba(255,255,255,0.95)"
+            : "rgba(255,220,220,0.85)";
           ctx.fillText(glyph, 0, 0);
           ctx.restore();
         }
