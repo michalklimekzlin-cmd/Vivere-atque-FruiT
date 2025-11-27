@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Vivere atque FruiT • Červený rámeček Glyph</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #130506, #020103);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      display: block;
+      touch-action: none; /* zabrání posouvání stránky při gestech */
+    }
+
+    .popis {
+      position: fixed;
+      left: 50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      font-size: 11px;
+      opacity: 0.6;
+      pointer-events: none;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="platno"></canvas>
+
+<div class="popis">
+  Vivere atque FruiT • Červený rámeček + VaFiT/Glyph – pohyb jedním prstem, otáčení dvěma prsty
+</div>
+
+<script>
+/*
+  VaFiT / Glyph podpis pro tenhle modul:
+
+  \\{*(°•.)(.•°)*}//   – VaFiT úsměv
+  ً&’                  – spojení Michal × AI × zařízení
+  {°"(.).),,(\/)¡¡(\/),,,(.(.)"°} – hlava/ramena
+  「Ī’』                – značka rámu
+*/
+
+(function () {
+  "use strict";
+
+  // ====== SYMBOLY VaFiT / GLYPH ======
+  const vafitPodpis = "\\\\{*(°•.)(.•°)*}//";
+  const glyphPodpis = "{°\"(.).),,(\\/ )¡¡(\\/),,,(.(.)\"°}";
+  const spojeniZnak = "ً&’";
+  const ramecekZnak = "「Ī’』";
+
+  const platno = document.getElementById("platno");
+  const kontext = platno.getContext("2d");
+
+  let sirka = window.innerWidth;
+  let vyska = window.innerHeight;
+
+  // ====== PŘIZPŮSOBENÍ VELIKOSTI PLÁTNA ======
+  function upravVelikostPlatna() {
+    const hustotaBodu = window.devicePixelRatio || 1;
+    const obdelnik = platno.getBoundingClientRect();
+
+    sirka = obdelnik.width;
+    vyska = obdelnik.height;
+
+    platno.width = obdelnik.width * hustotaBodu;
+    platno.height = obdelnik.height * hustotaBodu;
+
+    kontext.setTransform(hustotaBodu, 0, 0, hustotaBodu, 0, 0);
+
+    ramecek.stredX = sirka / 2;
+    ramecek.stredY = vyska / 2;
+  }
+
+  // ====== ZÁKLAD RÁMEČKU ======
+  const ramecek = {
+    stredX: sirka / 2,
+    stredY: vyska / 2,
+    sirka: Math.min(sirka, vyska) * 0.4,
+    vyska: Math.min(sirka, vyska) * 0.4,
+    uhelOtoceni: 0
+  };
+
+  upravVelikostPlatna();
+
+  window.addEventListener("resize", () => {
+    upravVelikostPlatna();
+    const zakladniRozmer = Math.min(sirka, vyska) * 0.4;
+    ramecek.sirka = zakladniRozmer;
+    ramecek.vyska = zakladniRozmer;
+  });
+
+  // ====== INTERAKCE – TAHÁNÍ + OTÁČENÍ ======
+  const dotyky = new Map();
+  let rezimOvládani = null;        // "tah" nebo "otaceni"
+  let hlavniDotekId = null;
+  let druhyDotekId = null;
+
+  let posledniBod = { x: 0, y: 0 };
+  let pocatecniUhelMeziDoteky = 0;
+  let pocatecniUhelRamecku = 0;
+
+  // souřadnice z události
+  function ziskejSouradnice(udalost) {
+    return { x: udalost.clientX, y: udalost.clientY };
+  }
+
+  // test, zda je bod uvnitř rámečku (pro začátek manipulace)
+  function jeBodUvnitRamecku(x, y) {
+    const polovinaS = ramecek.sirka / 2;
+    const polovinaV = ramecek.vyska / 2;
+    return (
+      Math.abs(x - ramecek.stredX) <= polovinaS &&
+      Math.abs(y - ramecek.stredY) <= polovinaV
+    );
+  }
+
+  function zacatekDotyku(udalost) {
+    const bod = ziskejSouradnice(udalost);
+
+    if (!jeBodUvnitRamecku(bod.x, bod.y) &&
+        rezimOvládani === null &&
+        dotyky.size === 0) {
+      return;
+    }
+
+    platno.setPointerCapture(udalost.pointerId);
+    dotyky.set(udalost.pointerId, bod);
+
+    if (rezimOvládani === null && dotyky.size === 1) {
+      // začíná tažení
+      rezimOvládani = "tah";
+      hlavniDotekId = udalost.pointerId;
+      posledniBod = bod;
+
+    } else if (rezimOvládani === "tah" && dotyky.size === 2) {
+      // přechod na otáčení
+      rezimOvládani = "otaceni";
+
+      for (const idDoteku of dotyky.keys()) {
+        if (idDoteku !== hlavniDotekId) {
+          druhyDotekId = idDoteku;
+          break;
+        }
+      }
+
+      const bod1 = dotyky.get(hlavniDotekId);
+      const bod2 = dotyky.get(druhyDotekId);
+
+      pocatecniUhelMeziDoteky = Math.atan2(bod2.y - bod1.y, bod2.x - bod1.x);
+      pocatecniUhelRamecku = ramecek.uhelOtoceni;
+    }
+  }
+
+  function pohybDotyku(udalost) {
+    if (!dotyky.has(udalost.pointerId)) return;
+
+    const bod = ziskejSouradnice(udalost);
+    dotyky.set(udalost.pointerId, bod);
+
+    if (rezimOvládani === "tah" && udalost.pointerId === hlavniDotekId) {
+      const posunX = bod.x - posledniBod.x;
+      const posunY = bod.y - posledniBod.y;
+
+      ramecek.stredX += posunX;
+      ramecek.stredY += posunY;
+
+      posledniBod = bod;
+
+    } else if (rezimOvládani === "otaceni" &&
+               dotyky.has(hlavniDotekId) &&
+               dotyky.has(druhyDotekId)) {
+
+      const bod1 = dotyky.get(hlavniDotekId);
+      const bod2 = dotyky.get(druhyDotekId);
+
+      const aktualniUhel = Math.atan2(bod2.y - bod1.y, bod2.x - bod1.x);
+      const rozdilUhlu = aktualniUhel - pocatecniUhelMeziDoteky;
+
+      ramecek.uhelOtoceni = pocatecniUhelRamecku + rozdilUhlu;
+    }
+  }
+
+  function konecDotyku(udalost) {
+    if (dotyky.has(udalost.pointerId)) {
+      dotyky.delete(udalost.pointerId);
+    }
+
+    if (rezimOvládani === "otaceni") {
+      if (udalost.pointerId === hlavniDotekId || udalost.pointerId === druhyDotekId) {
+        if (dotyky.size === 1) {
+          rezimOvládani = "tah";
+          const prvni = dotyky.entries().next().value;
+          const id = prvni[0];
+          const bod = prvni[1];
+          hlavniDotekId = id;
+          druhyDotekId = null;
+          posledniBod = bod;
+        } else {
+          rezimOvládani = null;
+          hlavniDotekId = null;
+          druhyDotekId = null;
+        }
+      }
+    } else if (rezimOvládani === "tah") {
+      if (udalost.pointerId === hlavniDotekId) {
+        rezimOvládani = null;
+        hlavniDotekId = null;
+      }
+    }
+  }
+
+  platno.addEventListener("pointerdown", zacatekDotyku);
+  platno.addEventListener("pointermove", pohybDotyku);
+  platno.addEventListener("pointerup", konecDotyku);
+  platno.addEventListener("pointercancel", konecDotyku);
+
+  // ====== VYKRESLOVACÍ SMYČKA ======
+  function vykresli() {
+    const w = sirka;
+    const h = vyska;
+
+    // pozadí
+    const pozadi = kontext.createRadialGradient(
+      w / 2, h / 2,
+      Math.min(w, h) * 0.1,
+      w / 2, h / 2,
+      Math.max(w, h)
+    );
+    pozadi.addColorStop(0, "#2b0d0f");
+    pozadi.addColorStop(0.6, "#090406");
+    pozadi.addColorStop(1, "#020103");
+
+    kontext.fillStyle = pozadi;
+    kontext.fillRect(0, 0, w, h);
+
+    // jemný VaFiT / Glyph otisk v rozích
+    kontext.save();
+    kontext.font = "10px monospace";
+    kontext.fillStyle = "rgba(255, 200, 200, 0.25)";
+    kontext.textBaseline = "top";
+
+    kontext.fillText(vafitPodpis, 10, 8);                    // levý horní roh
+    kontext.fillText(glyphPodpis, 10, h - 22);               // levý spodní
+    kontext.textAlign = "right";
+    kontext.fillText(spojeniZnak, w - 10, 8);                // pravý horní
+    kontext.fillText(ramecekZnak, w - 10, h - 22);           // pravý spodní
+    kontext.restore();
+
+    // rámeček
+    kontext.save();
+    kontext.translate(ramecek.stredX, ramecek.stredY);
+    kontext.rotate(ramecek.uhelOtoceni);
+
+    // vnější červený rámeček
+    kontext.lineWidth = 4;
+    kontext.strokeStyle = "rgba(255, 80, 80, 0.95)";
+    kontext.shadowColor = "rgba(255, 60, 60, 0.8)";
+    kontext.shadowBlur = 16;
+
+    const polovinaS = ramecek.sirka / 2;
+    const polovinaV = ramecek.vyska / 2;
+
+    kontext.beginPath();
+    kontext.rect(-polovinaS, -polovinaV, ramecek.sirka, ramecek.vyska);
+    kontext.stroke();
+
+    // vnitřní tenký rámeček (jemný Glyph nádech)
+    kontext.shadowBlur = 0;
+    kontext.lineWidth = 1;
+    kontext.strokeStyle = "rgba(255, 140, 160, 0.7)";
+    kontext.beginPath();
+    kontext.rect(
+      -polovinaS + 12,
+      -polovinaV + 12,
+      ramecek.sirka - 24,
+      ramecek.vyska - 24
+    );
+    kontext.stroke();
+
+    // text uvnitř rámečku – VaFiT / Glyph podpis
+    kontext.font = "11px monospace";
+    kontext.fillStyle = "rgba(255, 210, 210, 0.85)";
+    kontext.textAlign = "center";
+    kontext.textBaseline = "middle";
+
+    kontext.fillText("\\\\{*(°•.)(.•°)*}//", 0, -polovinaV + 22);
+    kontext.fillText("Vivere atque FruiT • Glyph rám", 0, 0);
+    kontext.fillText("ً&’", 0, polovinaV - 22);
+
+    kontext.restore();
+
+    requestAnimationFrame(vykresli);
+  }
+
+  requestAnimationFrame(vykresli);
+
+})();
+</script>
+
+</body>
+</html>
