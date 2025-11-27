@@ -3,89 +3,164 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>VaFT • HoloCore</title>
+  <title>VaFT • HoloCore Kámen 0</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: #000;
-      color: #fff;
-      font-family: system-ui;
+      padding: 0;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
+      background: radial-gradient(circle at top, #1a130f, #020102);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
     }
-    canvas {
+    #holo-canvas {
       position: fixed;
       inset: 0;
+      display: block;
+    }
+    .label {
+      position: fixed;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      font-size: 11px;
+      opacity: 0.7;
+      text-align: center;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
 
-<canvas id="holo"></canvas>
+<canvas id="holo-canvas"></canvas>
+<div class="label">VaFT HoloCore • Kámen 0 – základ všech holografických tvarů</div>
 
-<script type="module">
-  import {
-    HoloPalette,
-    createCurve,
-    Motion,
-    createHoloObject
-  } from "./VaFT-HoloCore.js";
+<!-- ZÁKLADNÍ KÁMEN -->
+<script src="./VaFT-HoloCore.js"></script>
 
-  const canvas = document.getElementById("holo");
+<script>
+(function () {
+  "use strict";
+
+  if (!window.VaFTHoloCore) {
+    console.error("VaFTHoloCore nenalezen – zkontroluj cestu k VaFT-HoloCore.js");
+    document.body.style.background = "#300";
+    return;
+  }
+
+  const { HoloPalette, createCurve, Motion, createHoloObject } = window.VaFTHoloCore;
+
+  const canvas = document.getElementById("holo-canvas");
   const ctx = canvas.getContext("2d");
 
   function resize() {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   resize();
-  addEventListener("resize", resize);
+  window.addEventListener("resize", resize);
 
-  // základní testovací křivka (vertikální pulz)
-  const testCurve = createCurve({
-    points: Array.from({ length: 60 }, (_, i) => ({
-      x: 0,
-      y: i * 8
-    })),
+  // === ZÁKLADNÍ KŘIVKA – svislý „páteřní“ paprsek ===================
+  const spineCurve = createCurve({
+    points: Array.from({ length: 80 }, function (_, i) {
+      return { x: 0, y: -220 + i * 6 };
+    }),
     color: HoloPalette.darkRed,
-    width: 2,
-    wave: 2,
+    width: 2.2,
+    wave: 8,
     opacity: 0.9
   });
 
   const holo = createHoloObject({
-    curves: [testCurve],
-    glow: 0.5,
-    particles: 50,
-    rotation: 0.004
+    curves: [spineCurve],
+    particles: 80,
+    glow: 0.6,
+    noise: 0.04,
+    rotation: 0.003
   });
 
-  function draw(t) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // === ANIMACE ======================================================
+  function drawFrame(timestamp) {
+    const t = timestamp * 0.001; // na sekundy
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const cx = w / 2;
+    const cy = h / 2;
 
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
+    ctx.clearRect(0, 0, w, h);
 
-    holo.tick(t * 0.001);
+    // jemné pozadí
+    const bgGrad = ctx.createRadialGradient(cx, cy - 80, 20, cx, cy, Math.max(w, h));
+    bgGrad.addColorStop(0, "#3a2720");
+    bgGrad.addColorStop(0.4, "#140e0b");
+    bgGrad.addColorStop(1, "#020102");
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
 
-    testCurve.points.forEach((p, i) => {
-      const offset = Motion.waveOffset(i, t * 0.002, 8);
-      const x = cx + offset;
-      const y = cy - 200 + i * 6;
+    holo.tick(t);
 
-      ctx.globalAlpha = testCurve.opacity;
-      ctx.strokeStyle = testCurve.color;
-      ctx.lineWidth = testCurve.width;
+    // středový „krystal“ (kruh)
+    const baseScale = holo.breathe * holo.pulse;
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.scale(baseScale, baseScale);
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 36, 0, Math.PI * 2);
+    ctx.strokeStyle = HoloPalette.lightGray;
+    ctx.lineWidth = 1.4;
+    ctx.globalAlpha = 0.9;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 52, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(196,90,60,0.8)";
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.7;
+    ctx.stroke();
+
+    // svislá vlna – základní křivka
+    ctx.globalAlpha = spineCurve.opacity;
+    ctx.strokeStyle = spineCurve.color;
+    ctx.lineWidth = spineCurve.width;
+
+    ctx.beginPath();
+    spineCurve.points.forEach(function (p, i) {
+      const offset = Motion.waveOffset(i, t, spineCurve.wave);
+      const x = offset;
+      const y = p.y;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // částicová aura kolem
+    ctx.globalAlpha = 0.35;
+    for (let i = 0; i < holo.particles; i++) {
+      const angle = (i / holo.particles) * Math.PI * 2 + t * 0.15;
+      const radius = 70 + Math.sin(t * 1.2 + i * 0.3) * 16;
+      const px = Math.cos(angle) * radius;
+      const py = Math.sin(angle) * radius;
 
       ctx.beginPath();
-      ctx.moveTo(cx, y);
-      ctx.lineTo(x, y);
-      ctx.stroke();
-    });
+      ctx.arc(px, py, 1.5 + Math.random() * 0.8, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(191,191,191,0.9)";
+      ctx.fill();
+    }
 
-    requestAnimationFrame(draw);
+    ctx.restore();
+
+    requestAnimationFrame(drawFrame);
   }
 
-  requestAnimationFrame(draw);
+  requestAnimationFrame(drawFrame);
+})();
 </script>
 
 </body>
