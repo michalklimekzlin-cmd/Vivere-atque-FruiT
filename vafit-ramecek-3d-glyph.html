@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <title>Vivere atque FruiT • 3D rámeček Glyph</title>
+
+  <style>
+    /*  \\{*(°•.)(.•°)*}//  VaFT pozadí  */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #130506, #020103);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      display: block;
+      touch-action: none; /* nebudeme posouvat stránku gesty */
+    }
+
+    .popis {
+      position: fixed;
+      left: 50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      font-size: 11px;
+      opacity: 0.65;
+      pointer-events: none;
+      text-align: center;
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+
+<body>
+
+<canvas id="platno"></canvas>
+
+<div class="popis">
+  VaFT • 3D červený rámeček – pohyb 1 prstem, otáčení 2 prsty  \\{*(°•.)(.•°)*}//
+</div>
+
+<script>
+/*  ─────────────────────────────────────────────────────────────
+    Vivere atque FruiT • 3D červený rámeček Glyph
+    {°"(.).),,(\/)¡¡(\/),,,(.(.)"°} – kódový talisman
+    1 prst = přesun, 2 prsty = rotace (jako kostka ve vzduchu)
+    ───────────────────────────────────────────────────────────── */
+
+(function () {
+  "use strict";
+
+  const platno = document.getElementById("platno");
+  const stetec = platno.getContext("2d");
+
+  let sirkaOkna = window.innerWidth;
+  let vyskaOkna = window.innerHeight;
+
+  /*  ア.•*ं॰°‰ः०•._,
+      Funkce pro úpravu velikosti plátna podle okna
+      (ať to sedí na iPadu, mobilu i PC)
+  */
+  function upravVelikostPlatna() {
+    const dpr = window.devicePixelRatio || 1;
+    const obdelnik = platno.getBoundingClientRect();
+
+    sirkaOkna = obdelnik.width;
+    vyskaOkna = obdelnik.height;
+
+    platno.width = obdelnik.width * dpr;
+    platno.height = obdelnik.height * dpr;
+
+    stetec.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    ramecek.stredX = sirkaOkna / 2;
+    ramecek.stredY = vyskaOkna / 2;
+  }
+
+  /*  3D RÁMEČEK – základní parametry
+      ً&’  – VaFT srdce vprostřed
+  */
+  const ramecek = {
+    stredX: sirkaOkna / 2,
+    stredY: vyskaOkna / 2,
+    sirka: Math.min(sirkaOkna, vyskaOkna) * 0.45,
+    vyska: Math.min(sirkaOkna, vyskaOkna) * 0.45,
+    hloubka: 26,      // „t loušťka“ 3D rámečku
+    rotace: 0
+  };
+
+  upravVelikostPlatna();
+
+  window.addEventListener("resize", () => {
+    upravVelikostPlatna();
+    const zaklad = Math.min(sirkaOkna, vyskaOkna) * 0.45;
+    ramecek.sirka = zaklad;
+    ramecek.vyska = zaklad;
+  });
+
+  /*  INTERAKCE – dotyky / myš
+      _（）（）_  – Úsměv přej každému.
+      1 dotyk  → tah
+      2 dotyky → rotace
+  */
+  const mapaDotyku = new Map();
+  let rezim = null;       // "tah" nebo "rotace"
+  let hlavniID = null;
+  let druhyID = null;
+
+  let posledniBod = { x: 0, y: 0 };
+  let pocatecniUhelMezi = 0;
+  let pocatecniRotace = 0;
+
+  function ziskejSouRadnice(udalost) {
+    return { x: udalost.clientX, y: udalost.clientY };
+  }
+
+  // jednoduchý hit-test – osa X/Y kolem středu
+  function jeUvnitRamecku(x, y) {
+    const pulSirka = ramecek.sirka / 2;
+    const pulVyska = ramecek.vyska / 2;
+    return (
+      Math.abs(x - ramecek.stredX) <= pulSirka &&
+      Math.abs(y - ramecek.stredY) <= pulVyska
+    );
+  }
+
+  function zpracujZacatek(udalost) {
+    const bod = ziskejSouRadnice(udalost);
+
+    // začínat budeme jen když se dotkneš „zhruba“ rámu
+    if (!jeUvnitRamecku(bod.x, bod.y) && rezim === null && mapaDotyku.size === 0) {
+      return;
+    }
+
+    platno.setPointerCapture(udalost.pointerId);
+    mapaDotyku.set(udalost.pointerId, bod);
+
+    if (rezim === null && mapaDotyku.size === 1) {
+      // první prst → tah
+      rezim = "tah";
+      hlavniID = udalost.pointerId;
+      posledniBod = bod;
+
+    } else if (rezim === "tah" && mapaDotyku.size === 2) {
+      // druhý prst → přechod na rotaci
+      rezim = "rotace";
+
+      for (const id of mapaDotyku.keys()) {
+        if (id !== hlavniID) {
+          druhyID = id;
+          break;
+        }
+      }
+
+      const p1 = mapaDotyku.get(hlavniID);
+      const p2 = mapaDotyku.get(druhyID);
+
+      pocatecniUhelMezi = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+      pocatecniRotace = ramecek.rotace;
+    }
+  }
+
+  function zpracujPohyb(udalost) {
+    if (!mapaDotyku.has(udalost.pointerId)) return;
+
+    const bod = ziskejSouRadnice(udalost);
+    mapaDotyku.set(udalost.pointerId, bod);
+
+    if (rezim === "tah" && udalost.pointerId === hlavniID) {
+      const posunX = bod.x - posledniBod.x;
+      const posunY = bod.y - posledniBod.y;
+
+      ramecek.stredX += posunX;
+      ramecek.stredY += posunY;
+
+      posledniBod = bod;
+
+    } else if (rezim === "rotace" && mapaDotyku.has(hlavniID) && mapaDotyku.has(druhyID)) {
+      const p1 = mapaDotyku.get(hlavniID);
+      const p2 = mapaDotyku.get(druhyID);
+
+      const aktualniUhel = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+      const rozdil = aktualniUhel - pocatecniUhelMezi;
+
+      ramecek.rotace = pocatecniRotace + rozdil;
+    }
+  }
+
+  function zpracujKonec(udalost) {
+    if (mapaDotyku.has(udalost.pointerId)) {
+      mapaDotyku.delete(udalost.pointerId);
+    }
+
+    if (rezim === "rotace") {
+      if (udalost.pointerId === hlavniID || udalost.pointerId === druhyID) {
+        if (mapaDotyku.size === 1) {
+          rezim = "tah";
+          const prvni = mapaDotyku.entries().next().value;
+          if (prvni) {
+            const id = prvni[0];
+            const bod = prvni[1];
+            hlavniID = id;
+            druhyID = null;
+            posledniBod = bod;
+          }
+        } else {
+          rezim = null;
+          hlavniID = null;
+          druhyID = null;
+        }
+      }
+    } else if (rezim === "tah") {
+      if (udalost.pointerId === hlavniID) {
+        rezim = null;
+        hlavniID = null;
+      }
+    }
+  }
+
+  platno.addEventListener("pointerdown", zpracujZacatek);
+  platno.addEventListener("pointermove", zpracujPohyb);
+  platno.addEventListener("pointerup", zpracujKonec);
+  platno.addEventListener("pointercancel", zpracujKonec);
+
+  /*  VYKRESLENÍ 3D RÁMEČKU
+      …iT… – přední strana
+      „Ī’』 – zadní strana (posunutá)
+  */
+  function vykresliRamecek3D() {
+    const w = sirkaOkna;
+    const h = vyskaOkna;
+
+    // pozadí – jemná červeno-černá mlha
+    const pozadi = stetec.createRadialGradient(
+      w / 2, h / 2,
+      Math.min(w, h) * 0.1,
+      w / 2, h / 2,
+      Math.max(w, h)
+    );
+    pozadi.addColorStop(0, "#2b0d0f");
+    pozadi.addColorStop(0.6, "#090406");
+    pozadi.addColorStop(1, "#020103");
+
+    stetec.fillStyle = pozadi;
+    stetec.fillRect(0, 0, w, h);
+
+    stetec.save();
+    stetec.translate(ramecek.stredX, ramecek.stredY);
+    stetec.rotate(ramecek.rotace);
+
+    const pulSirka = ramecek.sirka / 2;
+    const pulVyska = ramecek.vyska / 2;
+
+    // posun zadního rámečku (imitace hloubky / perspektivy)
+    const posunX = ramecek.hloubka;
+    const posunY = -ramecek.hloubka * 0.7;
+
+    // souřadnice předního obdélníku
+    const predni = {
+      l: -pulSirka,
+      p: pulSirka,
+      h: -pulVyska,
+      d: pulVyska
+    };
+
+    // souřadnice zadního obdélníku
+    const zadni = {
+      l: predni.l + posunX,
+      p: predni.p + posunX,
+      h: predni.h + posunY,
+      d: predni.d + posunY
+    };
+
+    // nejdřív zadní rámeček (tmavší)
+    stetec.lineWidth = 3;
+    stetec.strokeStyle = "rgba(180, 40, 40, 0.85)";
+    stetec.shadowBlur = 0;
+    stetec.beginPath();
+    stetec.rect(zadni.l, zadni.h, ramecek.sirka, ramecek.vyska);
+    stetec.stroke();
+
+    // spojovací hrany (3D efekt)
+    stetec.strokeStyle = "rgba(255, 90, 90, 0.9)";
+    stetec.lineWidth = 2.4;
+    stetec.beginPath();
+    stetec.moveTo(predni.l, predni.h);
+    stetec.lineTo(zadni.l, zadni.h);
+
+    stetec.moveTo(predni.p, predni.h);
+    stetec.lineTo(zadni.p, zadni.h);
+
+    stetec.moveTo(predni.p, predni.d);
+    stetec.lineTo(zadni.p, zadni.d);
+
+    stetec.moveTo(predni.l, predni.d);
+    stetec.lineTo(zadni.l, zadni.d);
+    stetec.stroke();
+
+    // přední rámeček – zářící
+    stetec.lineWidth = 4;
+    stetec.strokeStyle = "rgba(255, 120, 120, 0.98)";
+    stetec.shadowColor = "rgba(255, 80, 80, 0.95)";
+    stetec.shadowBlur = 20;
+    stetec.beginPath();
+    stetec.rect(predni.l, predni.h, ramecek.sirka, ramecek.vyska);
+    stetec.stroke();
+
+    // vnitřní menší rámeček (tvůj nákres – vnitřní okno)
+    const vnitrniM = 0.58;
+    const vnitrniS = ramecek.sirka * vnitrniM;
+    const vnitrniV = ramecek.vyska * vnitrniM;
+    const vnitrniPulS = vnitrniS / 2;
+    const vnitrniPulV = vnitrniV / 2;
+
+    stetec.lineWidth = 2.2;
+    stetec.strokeStyle = "rgba(255, 180, 180, 0.9)";
+    stetec.shadowBlur = 8;
+    stetec.beginPath();
+    stetec.rect(-vnitrniPulS, -vnitrniPulV, vnitrniS, vnitrniV);
+    stetec.stroke();
+
+    stetec.restore();
+  }
+
+  /*  hlavní smyčka – plynulé vykreslování
+      \\(:~:  )//  – VaFT dech
+  */
+  function smycka() {
+    vykresliRamecek3D();
+    requestAnimationFrame(smycka);
+  }
+
+  requestAnimationFrame(smycka);
+})();
+</script>
+
+</body>
+</html>
