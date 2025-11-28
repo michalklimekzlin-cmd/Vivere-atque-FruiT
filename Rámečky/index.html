@@ -6,15 +6,15 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Vivere atque FruiT • Rámeček</title>
+    <title>Vivere atque FruiT • Rámečky 4×</title>
 
     <style>
       :root {
         --barva-pozadi: #020308;
-        --barva-linky: #14151c;
-        --barva-ramecek-hrana: #111111; /* černá kostra */
-        --barva-ramecek-seda: #6a707a; /* šedé plochy */
-        --barva-ramecek-cervena: #c93b3b; /* střed – energie */
+        --barva-mrizka: #14151c;
+        --barva-hrana: #202020;
+        --barva-hrana-svetlejsi: #404040;
+        --barva-stit: #cccccc;
         --barva-text: #f5f5f5;
         --barva-text-slabsi: #b2b2c7;
         --font-zaklad: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -79,9 +79,9 @@
       .odznak-zivy {
         padding: 2px 6px;
         border-radius: 999px;
-        background: rgba(248, 103, 166, 0.14);
-        border: 1px solid rgba(248, 103, 166, 0.8);
-        color: #ffd7f0;
+        background: rgba(248, 248, 248, 0.04);
+        border: 1px solid rgba(248, 248, 248, 0.28);
+        color: #ffffff;
         font-size: 11px;
       }
 
@@ -104,33 +104,6 @@
         font-size: 11px;
         color: var(--barva-text-slabsi);
       }
-
-      .radek-sloty {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-
-      .odznak-slot {
-        padding: 4px 8px;
-        border-radius: 999px;
-        border: 1px solid rgba(150, 150, 190, 0.6);
-        background: rgba(10, 10, 30, 0.7);
-        font-size: 11px;
-        color: var(--barva-text-slabsi);
-        pointer-events: auto;
-        user-select: none;
-      }
-
-      .odznak-slot--aktivni {
-        border-color: var(--barva-ramecek-cervena);
-        color: #ffe9b0;
-        box-shadow: 0 0 8px rgba(201, 59, 59, 0.7);
-      }
-
-      .odznak-slot-klic {
-        opacity: 0.7;
-      }
     </style>
   </head>
   <body>
@@ -140,149 +113,50 @@
 
     <!-- horní info vrstva \\{*(°•.)(.•°)*}// -->
     <div class="vrstva-horni-panel">
-      <div class="znacka-aplikace">VIVERE ATQUE FRUIT • RÁMEČEK</div>
+      <div class="znacka-aplikace">VIVERE ATQUE FRUIT • RÁMEČKY 4×</div>
       <div class="radek-stav">
-        <span class="odznak-zivy">živý panel • tunel + štít</span>
-        <span id="stav-slot-aktivni">aktivní slot: střed 1</span>
-        <span id="stav-lupa">lupa: střed</span>
+        <span class="odznak-zivy">kostra + prostor + štít z písmenek</span>
       </div>
     </div>
 
-    <!-- spodní info vrstva: připínání modulů -->
+    <!-- spodní info vrstva -->
     <div class="vrstva-spodni-panel">
       <div class="radek-informace-ramecek">
-        Rámeček: vnější kostra, vnitřní tunel, lamely jako prach písmenek (štít)
-        a za nimi prostor pro budoucí objekty „Středu“. Ovládání: otočení tahem
-        prstu, dvojité klepnutí = lupa, volba středu dole.
-      </div>
-      <div class="radek-sloty" id="panel-sloty">
-        <div class="odznak-slot odznak-slot--aktivni" data-slot="0">
-          Střed 1 • písmenka
-        </div>
-        <div class="odznak-slot" data-slot="1">Střed 2 • vlevo</div>
-        <div class="odznak-slot" data-slot="2">Střed 3 • vpravo</div>
-        <div class="odznak-slot" data-slot="3">Střed 4 • vzadu</div>
-        <div class="odznak-slot odznak-slot-klic">≋ budoucí modul: svět</div>
-        <div class="odznak-slot odznak-slot-klic">≋ budoucí modul: AI</div>
-        <div class="odznak-slot odznak-slot-klic">≋ budoucí modul: glyph</div>
-        <div class="odznak-slot odznak-slot-klic">≋ budoucí modul: VaFiT</div>
+        Čtyři základní Rámečky vedle sebe: vnější kostra, vnitřní tunel a
+        zadní stěna s lamelami. Přes tunel je jemný štít z písmenek (prach
+        písmen) připravený pro budoucí „Středy“.
       </div>
     </div>
 
     <script>
       "use strict";
 
-      // …iT… datový model Rámečku \\{*(°•.)(.•°)*}//  — tunel + štít + střed
-
-      class VkladaciStred {
-        constructor(id, popis, typObsahu = "pismenka") {
-          this.id = id;
-          this.popis = popis;
-          this.typObsahu = typObsahu;
-          this.obsah = null;
-        }
-      }
-
-      class ZakladniRamecek {
-        constructor() {
-          this.rezimLupy = "stred"; // "stred" | "cely"
-          this.aktivniStredIndex = 0;
-
-          // pseudo-3D natočení (pro efekt)
-          this.naklonX = -0.18;
-          this.naklonY = 0.25;
-
-          // čtyři středy (sloty)
-          this.stredy = [
-            new VkladaciStred("stred-1", "Střed 1 • písmenka", "pismenka"),
-            new VkladaciStred("stred-2", "Střed 2 • vlevo", "volny"),
-            new VkladaciStred("stred-3", "Střed 3 • vpravo", "volny"),
-            new VkladaciStred("stred-4", "Střed 4 • vzadu", "volny"),
-          ];
-
-          // aktuální a cílová pozice středu (lokální souřadnice uvnitř tunelu)
-          this.poziceStredu = { x: 0, y: 0.1, z: 0.3 };
-          this.cilPoziceStredu = { x: 0, y: 0.1, z: 0.3 };
-        }
-
-        prepniAktivniStred(index) {
-          if (index < 0 || index >= this.stredy.length) return;
-          this.aktivniStredIndex = index;
-
-          // cílové pozice podle slotu
-          if (index === 0) {
-            // základní poloha – střed tunelu
-            this.cilPoziceStredu = { x: 0, y: 0.1, z: 0.3 };
-          } else if (index === 1) {
-            this.cilPoziceStredu = { x: -0.35, y: 0.1, z: 0.25 };
-          } else if (index === 2) {
-            this.cilPoziceStredu = { x: 0.35, y: 0.1, z: 0.25 };
-          } else if (index === 3) {
-            this.cilPoziceStredu = { x: 0, y: 0.1, z: 0.05 };
-          }
-        }
-
-        prepniRezimLupy() {
-          this.rezimLupy = this.rezimLupy === "stred" ? "cely" : "stred";
-        }
-
-        krokAnimaceStredu(faktor) {
-          const p = this.poziceStredu;
-          const c = this.cilPoziceStredu;
-          p.x += (c.x - p.x) * faktor;
-          p.y += (c.y - p.y) * faktor;
-          p.z += (c.z - p.z) * faktor;
-        }
-      }
-
-      // ────────────────────────────────────────────────
-      // Canvas / kreslení
-      // ────────────────────────────────────────────────
-
       const platno = document.getElementById("platno-ramecek");
       const ctx = platno.getContext("2d");
-      const ramecek = new ZakladniRamecek();
 
       let sirkaPx = 0;
       let vyskaPx = 0;
-      let meritkoLupy = 1;
 
       function zmenitVelikostPlatna() {
-        const pomer = window.devicePixelRatio || 1;
+        const dpr = window.devicePixelRatio || 1;
         sirkaPx = window.innerWidth;
         vyskaPx = window.innerHeight;
-        platno.width = sirkaPx * pomer;
-        platno.height = vyskaPx * pomer;
-        ctx.setTransform(pomer, 0, 0, pomer, 0, 0);
+        platno.width = sirkaPx * dpr;
+        platno.height = vyskaPx * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
 
       window.addEventListener("resize", zmenitVelikostPlatna);
       zmenitVelikostPlatna();
 
-      function vykreslitScenu() {
-        ctx.clearRect(0, 0, sirkaPx, vyskaPx);
-
-        vykreslitPozadi();
-
-        const stredX = sirkaPx / 2;
-        const stredY = vyskaPx / 2 + 40;
-
-        const velikost = Math.min(sirkaPx, vyskaPx) * 0.4 * meritkoLupy;
-        const hloubka = velikost * 0.6;
-
-        vykreslitRamecek(
-          stredX,
-          stredY,
-          velikost,
-          hloubka,
-          ramecek.naklonX,
-          ramecek.naklonY,
-          ramecek.poziceStredu
-        );
+      function getCss(nazev) {
+        const styl = getComputedStyle(document.documentElement);
+        return styl.getPropertyValue(nazev).trim() || "#ffffff";
       }
 
       function vykreslitPozadi() {
         ctx.save();
+
         const grd = ctx.createRadialGradient(
           sirkaPx / 2,
           0,
@@ -296,7 +170,7 @@
         ctx.fillStyle = grd;
         ctx.fillRect(0, 0, sirkaPx, vyskaPx);
 
-        ctx.strokeStyle = "rgba(40,45,65,0.32)";
+        ctx.strokeStyle = getCss("--barva-mrizka");
         ctx.lineWidth = 1;
         const krok = 40;
         for (let x = 0; x <= sirkaPx; x += krok) {
@@ -311,20 +185,19 @@
           ctx.lineTo(sirkaPx, y);
           ctx.stroke();
         }
+
         ctx.restore();
       }
 
-      // pseudo-3D projekce Rámečku podle náčrtu
-      function vykreslitRamecek(
-        stredX,
-        stredY,
-        velikost,
-        hloubka,
-        naklonX,
-        naklonY,
-        poziceStredu
-      ) {
-        ctx.save();
+      // hlavní funkce pro vykreslení jednoho rámečku
+      function vykreslitRamecekJednotny(stredX, stredY, velikost) {
+        const hloubka = velikost * 0.55;
+        const naklonX = -0.18;
+        const naklonY = 0.2;
+
+        const barvaHrana = getCss("--barva-hrana");
+        const barvaHranaSvet = getCss("--barva-hrana-svetlejsi");
+        const barvaStit = getCss("--barva-stit");
 
         // přední obdélník
         const pLevo = stredX - velikost / 2;
@@ -332,25 +205,26 @@
         const pNahore = stredY - velikost / 2;
         const pDole = stredY + velikost / 2;
 
-        // offset do "hloubky"
         const dx = hloubka * naklonY;
         const dy = -hloubka * (0.45 + naklonX);
 
-        // body předního vnějšího obdélníku
+        // vnější přední hrana
         const A = { x: pLevo, y: pNahore };
         const B = { x: pPravo, y: pNahore };
         const C = { x: pPravo, y: pDole };
         const D = { x: pLevo, y: pDole };
 
-        // body zadní hrany (pro vršek/bok)
+        // zadní hrany pro horní a pravý bok
         const E = { x: B.x + dx, y: B.y + dy };
         const F = { x: C.x + dx, y: C.y + dy };
         const G = { x: A.x + dx * 0.4, y: A.y + dy };
 
-        // 1) šedý vršek
-        ctx.fillStyle = getCss("--barva-ramecek-seda");
-        ctx.strokeStyle = getCss("--barva-ramecek-hrana");
-        ctx.lineWidth = 2;
+        ctx.save();
+
+        // 1) horní plocha
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = barvaHrana;
+        ctx.lineWidth = 1.4;
 
         ctx.beginPath();
         ctx.moveTo(A.x, A.y);
@@ -361,9 +235,7 @@
         ctx.fill();
         ctx.stroke();
 
-        srafovatPlochu(A, B, G, E, 6);
-
-        // 2) šedý pravý bok
+        // 2) pravý bok
         ctx.beginPath();
         ctx.moveTo(B.x, B.y);
         ctx.lineTo(C.x, C.y);
@@ -373,12 +245,7 @@
         ctx.fill();
         ctx.stroke();
 
-        srafovatPlochu(B, C, E, F, 6);
-
-        // 3) vnější bílá kostra čela
-        ctx.fillStyle = "#fdfdfd";
-        ctx.lineWidth = 3;
-
+        // 3) přední čelo (bílý kvádr)
         ctx.beginPath();
         ctx.moveTo(A.x, A.y);
         ctx.lineTo(B.x, B.y);
@@ -388,7 +255,7 @@
         ctx.fill();
         ctx.stroke();
 
-        // vnitřní otvor
+        // vnitřní otvor v přední stěně
         const vnitOds = velikost * 0.2;
         const iA = { x: A.x + vnitOds, y: A.y + vnitOds };
         const iB = { x: B.x - vnitOds, y: B.y + vnitOds };
@@ -406,7 +273,7 @@
         ctx.fill();
         ctx.restore();
 
-        // obrys otvoru
+        ctx.strokeStyle = barvaHrana;
         ctx.beginPath();
         ctx.moveTo(iA.x, iA.y);
         ctx.lineTo(iB.x, iB.y);
@@ -415,7 +282,7 @@
         ctx.closePath();
         ctx.stroke();
 
-        // 4) tunel za lamelami (tmavší čtverec vzadu)
+        // 4) vnitřní tunel – zadní rám
         const tunelHloubka = hloubka * 0.9;
         const tDx = dx * (tunelHloubka / hloubka);
         const tDy = dy * (tunelHloubka / hloubka);
@@ -425,13 +292,8 @@
         const tC = { x: iC.x + tDx, y: iC.y + tDy };
         const tD = { x: iD.x + tDx, y: iD.y + tDy };
 
-        const tunelGrd = ctx.createLinearGradient(tA.x, tA.y, tC.x, tC.y);
-        tunelGrd.addColorStop(0, "rgba(3,4,10,0.95)");
-        tunelGrd.addColorStop(1, "rgba(8,10,25,0.7)");
-
-        ctx.fillStyle = tunelGrd;
-        ctx.strokeStyle = "rgba(255,255,255,0.08)";
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = barvaHranaSvet;
+        ctx.lineWidth = 1;
 
         ctx.beginPath();
         ctx.moveTo(tA.x, tA.y);
@@ -439,314 +301,79 @@
         ctx.lineTo(tC.x, tC.y);
         ctx.lineTo(tD.x, tD.y);
         ctx.closePath();
-        ctx.fill();
         ctx.stroke();
 
-        // 5) lamely / štít – prach písmenek
-        vykreslitLamelyAPrach(iA, iB, iC, iD, tA, tB, tC, tD);
+        // diagonály tunelu (podle nákresu)
+        ctx.beginPath();
+        ctx.moveTo(iA.x, iA.y);
+        ctx.lineTo(tA.x, tA.y);
+        ctx.moveTo(iB.x, iB.y);
+        ctx.lineTo(tB.x, tB.y);
+        ctx.moveTo(iC.x, iC.y);
+        ctx.lineTo(tC.x, tC.y);
+        ctx.moveTo(iD.x, iD.y);
+        ctx.lineTo(tD.x, tD.y);
+        ctx.stroke();
 
-        // 6) Střed – energetický modul uvnitř tunelu
-        vykreslitStred(
-          iA,
-          iB,
-          iC,
-          iD,
-          tA,
-          tB,
-          tC,
-          tD,
-          dx,
-          dy,
-          hloubka,
-          poziceStredu
-        );
-
-        ctx.restore();
-      }
-
-      function srafovatPlochu(A, B, D, E, pocet) {
-        ctx.save();
-        ctx.strokeStyle = "rgba(0,0,0,0.28)";
-        ctx.lineWidth = 1;
-
-        for (let i = 1; i < pocet; i++) {
-          const t = i / pocet;
-          const p1 = {
-            x: A.x + (B.x - A.x) * t,
-            y: A.y + (B.y - A.y) * t,
-          };
-          const p2 = {
-            x: D.x + (E.x - D.x) * t,
-            y: D.y + (E.y - D.y) * t,
-          };
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-        }
-
-        ctx.restore();
-      }
-
-      // lamely + prach písmenek mezi iA..iD a tA..tD
-      function vykreslitLamelyAPrach(iA, iB, iC, iD, tA, tB, tC, tD) {
-        ctx.save();
-
+        // 5) lamely na zadní stěně (vertikální pruhy)
         const lamelPocet = 9;
-        const prachDetail = meritkoLupy > 1.05; // při lupě více písmenek
-
         for (let i = 0; i < lamelPocet; i++) {
           const t = (i + 0.5) / (lamelPocet + 1);
 
-          // přední bod lamely
           const p1 = {
-            x: iA.x + (iB.x - iA.x) * t,
-            y: iA.y + (iB.y - iA.y) * t,
-          };
-          const p2 = {
-            x: iD.x + (iC.x - iD.x) * t,
-            y: iD.y + (iC.y - iD.y) * t,
-          };
-
-          // zadní bod lamely (blíže tunelu)
-          const q1 = {
             x: tA.x + (tB.x - tA.x) * t,
             y: tA.y + (tB.y - tA.y) * t,
           };
-          const q2 = {
+          const p2 = {
             x: tD.x + (tC.x - tD.x) * t,
             y: tD.y + (tC.y - tD.y) * t,
           };
 
-          // samotná lamela – jemná světelná čára
-          const lamelaGrd = ctx.createLinearGradient(p1.x, p1.y, q2.x, q2.y);
-          lamelaGrd.addColorStop(0, "rgba(255,255,255,0.05)");
-          lamelaGrd.addColorStop(0.5, "rgba(200,200,255,0.22)");
-          lamelaGrd.addColorStop(1, "rgba(255,255,255,0.02)");
-
-          ctx.strokeStyle = lamelaGrd;
-          ctx.lineWidth = 1;
-
+          ctx.strokeStyle = "rgba(64,64,64,0.9)";
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);
-          ctx.lineTo(q2.x, q2.y);
-          ctx.lineTo(q1.x, q1.y);
-          ctx.closePath();
           ctx.stroke();
 
-          // prach písmen – pouze když jsme blíž (lupa)
-          if (prachDetail) {
-            const segmenty = 6;
-            const znaky = ["V", "A", "F", "T", "•"];
-            ctx.fillStyle = "rgba(255,255,255,0.55)";
-            ctx.font = "9px system-ui";
+          // 6) štít z písmenek – jemný prach podél lamely
+          const znaky = ["V", "A", "F", "T"];
+          ctx.font = "8px system-ui";
+          for (let s = 0; s < 4; s++) {
+            const u = (s + 0.5) / 4;
+            const px = p1.x + (p2.x - p1.x) * u;
+            const py = p1.y + (p2.y - p1.y) * u;
 
-            for (let s = 0; s < segmenty; s++) {
-              const u = (s + Math.random() * 0.4) / (segmenty + 0.8);
-              const px = p1.x + (q2.x - p1.x) * u;
-              const py = p1.y + (q2.y - p1.y) * u;
-              const znak = znaky[Math.floor(Math.random() * znaky.length)];
-
-              ctx.save();
-              ctx.globalAlpha = 0.25 + Math.random() * 0.4;
-              ctx.fillText(znak, px, py);
-              ctx.restore();
-            }
+            ctx.save();
+            ctx.fillStyle = "rgba(204,204,204,0.28)";
+            const znak = znaky[(i + s) % znaky.length];
+            ctx.fillText(znak, px - 3, py + 3);
+            ctx.restore();
           }
         }
 
         ctx.restore();
       }
 
-      // vykreslení Středu v tunelu
-      function vykreslitStred(
-        iA,
-        iB,
-        iC,
-        iD,
-        tA,
-        tB,
-        tC,
-        tD,
-        dx,
-        dy,
-        hloubka,
-        poziceStredu
-      ) {
-        ctx.save();
+      function vykreslit() {
+        vykreslitPozadi();
 
-        const zRel = poziceStredu.z; // 0..1 * hloubka
-        const z = hloubka * zRel;
+        // spočítat velikost a pozice 4 rámečků
+        const maxSize = Math.min(sirkaPx * 0.18, vyskaPx * 0.45);
+        const velikost = maxSize;
+        const mezera = velikost * 0.35;
+        const totalWidth = velikost * 4 + mezera * 3;
+        const startX = (sirkaPx - totalWidth) / 2 + velikost / 2;
+        const stredY = vyskaPx / 2 + 10;
 
-        const sDx = dx * (z / hloubka);
-        const sDy = dy * (z / hloubka);
-
-        const ofsX = poziceStredu.x * (Math.abs(iB.x - iA.x) * 0.5);
-        const ofsY = poziceStredu.y * (Math.abs(iD.y - iA.y) * 0.4);
-
-        const sA = {
-          x: lerp(iA.x, tA.x, z / (hloubka * 0.9)) + ofsX,
-          y: lerp(iA.y, tA.y, z / (hloubka * 0.9)) + ofsY,
-        };
-        const sB = {
-          x: lerp(iB.x, tB.x, z / (hloubka * 0.9)) + ofsX,
-          y: lerp(iB.y, tB.y, z / (hloubka * 0.9)) + ofsY,
-        };
-        const sC = {
-          x: lerp(iC.x, tC.x, z / (hloubka * 0.9)) + ofsX,
-          y: lerp(iC.y, tC.y, z / (hloubka * 0.9)) + ofsY,
-        };
-        const sD = {
-          x: lerp(iD.x, tD.x, z / (hloubka * 0.9)) + ofsX,
-          y: lerp(iD.y, tD.y, z / (hloubka * 0.9)) + ofsY,
-        };
-
-        const grd = ctx.createLinearGradient(sA.x, sA.y, sC.x, sC.y);
-        grd.addColorStop(0, "rgba(255,180,160,0.85)");
-        grd.addColorStop(0.5, getCss("--barva-ramecek-cervena"));
-        grd.addColorStop(1, "rgba(120,10,40,0.9)");
-
-        ctx.fillStyle = grd;
-        ctx.strokeStyle = "rgba(255,220,210,0.8)";
-        ctx.lineWidth = 1.8;
-
-        ctx.beginPath();
-        ctx.moveTo(sA.x, sA.y);
-        ctx.lineTo(sB.x, sB.y);
-        ctx.lineTo(sC.x, sC.y);
-        ctx.lineTo(sD.x, sD.y);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // drobná pulsující síť uvnitř středu
-        const cas = performance.now() * 0.002;
-        const pulz = 0.4 + 0.3 * Math.sin(cas);
-
-        ctx.strokeStyle = "rgba(255,255,255,0.45)";
-        ctx.lineWidth = 1;
-
-        const body = [sA, sB, sC, sD];
         for (let i = 0; i < 4; i++) {
-          const p = lerpBody(body[i], body[(i + 2) % 4], pulz);
-          const q = lerpBody(body[(i + 1) % 4], body[(i + 3) % 4], pulz);
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(q.x, q.y);
-          ctx.stroke();
+          const cx = startX + i * (velikost + mezera);
+          vykreslitRamecekJednotny(cx, stredY, velikost);
         }
-
-        ctx.restore();
       }
-
-      function lerp(a, b, t) {
-        return a + (b - a) * t;
-      }
-
-      function lerpBody(p, q, t) {
-        return {
-          x: p.x + (q.x - p.x) * t,
-          y: p.y + (q.y - p.y) * t,
-        };
-      }
-
-      function getCss(nazev) {
-        const styl = getComputedStyle(document.documentElement);
-        return styl.getPropertyValue(nazev).trim() || "#ffffff";
-      }
-
-      // ────────────────────────────────────────────────
-      // Interakce: sloty + lupa + náklon
-      // ────────────────────────────────────────────────
-
-      const panelSloty = document.getElementById("panel-sloty");
-      const textAktivni = document.getElementById("stav-slot-aktivni");
-      const textLupa = document.getElementById("stav-lupa");
-
-      panelSloty.addEventListener("click", (udalost) => {
-        const cil = udalost.target.closest(".odznak-slot");
-        if (!cil) return;
-        const index = Number(cil.dataset.slot);
-        if (Number.isNaN(index)) return;
-
-        ramecek.prepniAktivniStred(index);
-        aktualizovatSlotOdznaky();
-      });
-
-      function aktualizovatSlotOdznaky() {
-        const odznaky = panelSloty.querySelectorAll(".odznak-slot[data-slot]");
-        odznaky.forEach((el) => {
-          const index = Number(el.dataset.slot);
-          if (index === ramecek.aktivniStredIndex) {
-            el.classList.add("odznak-slot--aktivni");
-          } else {
-            el.classList.remove("odznak-slot--aktivni");
-          }
-        });
-
-        const aktivniStred = ramecek.stredy[ramecek.aktivniStredIndex];
-        textAktivni.textContent = "aktivní slot: " + aktivniStred.popis;
-        textLupa.textContent =
-          "lupa: " + (ramecek.rezimLupy === "stred" ? "střed" : "celý rámeček");
-      }
-
-      aktualizovatSlotOdznaky();
-
-      // lupa = dvojité klepnutí na plátno
-      let posledniKlikCas = 0;
-      platno.addEventListener("pointerdown", (e) => {
-        const ted = performance.now();
-        if (ted - posledniKlikCas < 280) {
-          ramecek.prepniRezimLupy();
-          meritkoLupy = ramecek.rezimLupy === "stred" ? 1.18 : 1.0;
-          aktualizovatSlotOdznaky();
-        }
-        posledniKlikCas = ted;
-      });
-
-      // tahem prstu / myši nakláníme rámeček
-      let tahAktivni = false;
-      let posledniX = 0;
-      let posledniY = 0;
-
-      platno.addEventListener("pointerdown", (e) => {
-        tahAktivni = true;
-        posledniX = e.clientX;
-        posledniY = e.clientY;
-        platno.setPointerCapture(e.pointerId);
-      });
-
-      platno.addEventListener("pointermove", (e) => {
-        if (!tahAktivni) return;
-        const dx = e.clientX - posledniX;
-        const dy = e.clientY - posledniY;
-        posledniX = e.clientX;
-        posledniY = e.clientY;
-
-        const k = 0.0025;
-        ramecek.naklonY += dx * k;
-        ramecek.naklonX += dy * k;
-
-        // limity, aby se to "nezlomilo"
-        ramecek.naklonY = Math.max(-0.4, Math.min(0.6, ramecek.naklonY));
-        ramecek.naklonX = Math.max(-0.4, Math.min(0.4, ramecek.naklonX));
-      });
-
-      platno.addEventListener("pointerup", (e) => {
-        tahAktivni = false;
-        platno.releasePointerCapture(e.pointerId);
-      });
-
-      // ────────────────────────────────────────────────
-      // Animace
-      // ────────────────────────────────────────────────
 
       function smycka() {
         requestAnimationFrame(smycka);
-
-        ramecek.krokAnimaceStredu(0.12);
-        vykreslitScenu();
+        vykreslit();
       }
 
       smycka();
