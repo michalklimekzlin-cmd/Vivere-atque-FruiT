@@ -12,8 +12,9 @@
       :root {
         --barva-pozadi: #020308;
         --barva-linky: #14151c;
-        --barva-ramecek-hrana: #111111;
-        --barva-ramecek-mrizka: #f9b233; /* žlutá dle náčrtu */
+        --barva-ramecek-hrana: #111111;   /* černá kostra */
+        --barva-ramecek-seda: #5f646c;    /* šedé šrafované plochy */
+        --barva-ramecek-cervena: #c93b3b; /* červený střed */
         --barva-text: #f5f5f5;
         --barva-text-slabsi: #b2b2c7;
         --font-zaklad: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -122,9 +123,9 @@
       }
 
       .odznak-slot--aktivni {
-        border-color: var(--barva-ramecek-mrizka);
+        border-color: var(--barva-ramecek-cervena);
         color: #ffe9b0;
-        box-shadow: 0 0 8px rgba(249, 178, 51, 0.6);
+        box-shadow: 0 0 8px rgba(201, 59, 59, 0.7);
       }
 
       .odznak-slot-klic {
@@ -137,7 +138,7 @@
       <canvas id="platno-ramecek"></canvas>
     </div>
 
-    <!-- horní info vrstva (Revia / stav rámečku) \\{*(°•.)(.•°)*}// -->
+    <!-- horní info vrstva \\{*(°•.)(.•°)*}// -->
     <div class="vrstva-horni-panel">
       <div class="znacka-aplikace">Vivere atque FruiT • základní rámeček</div>
       <div class="radek-stav">
@@ -150,8 +151,8 @@
     <!-- spodní info vrstva: připínání modulů v budoucnu -->
     <div class="vrstva-spodni-panel">
       <div class="radek-informace-ramecek">
-        Základní 2D rámeček: vnitřní pohyblivá struktura se 4 sloty, přibližování,
-        budoucí přitahovací hák a vkládací místa pro písmenka / objekty / AI.
+        2D rámeček: bílá kostra, šedé šrafované plochy (vršek a bok), červený
+        pohyblivý střed se 4 sloty pro písmenka / objekty / AI.
       </div>
       <div class="radek-sloty" id="panel-sloty">
         <div class="odznak-slot odznak-slot--aktivni" data-slot="0">
@@ -189,19 +190,16 @@
        */
       class ZakladniRamecek {
         constructor() {
-          // pohled / interakce
           this.meritko = 1;
           this.rezimLupy = "stred"; // "stred" | "cely"
           this.aktivniStredIndex = 0;
 
-          // budoucí přitahovací hák (zatím jen konfigurace)
           this.pritahovaciHak = {
             aktivni: true,
             dosah: 24,
             sila: 0.35,
           };
 
-          // čtyři středy podle zadání
           this.stredy = [
             new VkladaciStred("stred-1", "Střed 1 • písmenka", "pismenka"),
             new VkladaciStred("stred-2", "Střed 2 • volný", "volny"),
@@ -226,12 +224,11 @@
       }
 
       // ────────────────────────────────────────────────
-      // Inicializace plátna a kreslení kostry rámečku
+      // Inicializace plátna a kreslení
       // ────────────────────────────────────────────────
 
       const platno = document.getElementById("platno-ramecek");
       const kontext = platno.getContext("2d");
-
       const ramecek = new ZakladniRamecek();
 
       function zmenitVelikostPlatna() {
@@ -254,19 +251,16 @@
         const vyska = platno.height / (window.devicePixelRatio || 1);
         kontext.clearRect(0, 0, sirka, vyska);
 
-        // pozadí – jemná mřížka / atmosféra
         vykreslitPozadi(kontext, sirka, vyska);
-
-        // hlavní kostra rámečku
         vykreslitRamecek2D(kontext, sirka, vyska, ramecek);
       }
 
       function vykreslitPozadi(ctx, sirka, vyska) {
         ctx.save();
-        ctx.strokeStyle = "rgba(40,45,65,0.5)";
+        ctx.strokeStyle = "rgba(40,45,65,0.4)";
         ctx.lineWidth = 1;
 
-        const krok = 32;
+        const krok = 40;
         for (let x = 0; x <= sirka; x += krok) {
           ctx.beginPath();
           ctx.moveTo(x, 0);
@@ -282,84 +276,125 @@
         ctx.restore();
       }
 
-      /**
-       * Vykreslí rámeček podle nákresu: černá kostra + žlutá mřížka.
-       */
+      // hlavní kreslení rámečku podle papírového náčrtu
+
       function vykreslitRamecek2D(ctx, sirka, vyska, stavRamecku) {
         ctx.save();
 
-        const velikost = Math.min(sirka, vyska) * 0.35 * stavRamecku.meritko;
-        const hloubka = velikost * 0.45;
+        const velikost = Math.min(sirka, vyska) * 0.4 * stavRamecku.meritko;
+        const hloubka = velikost * 0.5; // "délka" boků
         const stredX = sirka / 2;
         const stredY = vyska / 2 + velikost * 0.05;
 
-        // souřadnice předního čtverce
+        // přední plášť (bílá kostra)
         const pLevo = stredX - velikost / 2;
         const pPravo = stredX + velikost / 2;
         const pNahore = stredY - velikost / 2;
         const pDole = stredY + velikost / 2;
 
-        // odsazení zadního čtverce (do „hloubky“)
-        const dx = hloubka * 0.6;
-        const dy = -hloubka * 0.5;
+        const dx = hloubka * 0.35;
+        const dy = -hloubka * 0.4;
 
-        // body přední hrany
+        // přední vnější obdélník
         const A = { x: pLevo, y: pNahore };
         const B = { x: pPravo, y: pNahore };
         const C = { x: pPravo, y: pDole };
         const D = { x: pLevo, y: pDole };
 
-        // body zadní hrany
-        const E = { x: A.x + dx, y: A.y + dy };
-        const F = { x: B.x + dx, y: B.y + dy };
-        const G = { x: C.x + dx, y: C.y + dy };
-        const H = { x: D.x + dx, y: D.y + dy };
+        // zadní pravý horní roh kvádru pro horní a boční plochu
+        const E = { x: B.x + dx, y: B.y + dy };
+        const F = { x: C.x + dx, y: C.y + dy };
 
-        ctx.lineJoin = "round";
-
-        // 1) černá kostra rámečku
-        ctx.strokeStyle = getComputedStyle(
-          document.documentElement
-        ).getPropertyValue("--barva-ramecek-hrana");
-        ctx.lineWidth = 3;
-
-        // vnější přední čtverec
-        ctx.beginPath();
-        ctx.moveTo(A.x, A.y);
-        ctx.lineTo(B.x, B.y);
-        ctx.lineTo(C.x, C.y);
-        ctx.lineTo(D.x, D.y);
-        ctx.closePath();
-        ctx.stroke();
-
-        // vnější zadní čtverec
-        ctx.beginPath();
-        ctx.moveTo(E.x, E.y);
-        ctx.lineTo(F.x, F.y);
-        ctx.lineTo(G.x, G.y);
-        ctx.lineTo(H.x, H.y);
-        ctx.closePath();
-        ctx.stroke();
-
-        // spojovací hrany
-        ctx.beginPath();
-        ctx.moveTo(A.x, A.y);
-        ctx.lineTo(E.x, E.y);
-        ctx.moveTo(B.x, B.y);
-        ctx.lineTo(F.x, F.y);
-        ctx.moveTo(C.x, C.y);
-        ctx.lineTo(G.x, G.y);
-        ctx.moveTo(D.x, D.y);
-        ctx.lineTo(H.x, H.y);
-        ctx.stroke();
-
-        // vnitřní "otvor" podle náčrtu
+        // vnitřní "okno" (otevřený prostor)
         const vnitOdsazeni = velikost * 0.18;
         const iA = { x: A.x + vnitOdsazeni, y: A.y + vnitOdsazeni };
         const iB = { x: B.x - vnitOdsazeni, y: B.y + vnitOdsazeni };
         const iC = { x: C.x - vnitOdsazeni, y: C.y - vnitOdsazeni };
         const iD = { x: D.x + vnitOdsazeni, y: D.y - vnitOdsazeni };
 
+        // zadní rovina vnitřního prostoru (červený střed)
+        const zadDx = vnitOdsazeni * 0.6;
+        const zadDy = -vnitOdsazeni * 0.7;
+        const jA = { x: iA.x + zadDx, y: iA.y + zadDy };
+        const jB = { x: iB.x + zadDx, y: iB.y + zadDy };
+        const jC = { x: iC.x + zadDx, y: iC.y + zadDy };
+        const jD = { x: iD.x + zadDx, y: iD.y + zadDy };
+
+        // 1) šedý vršek
+        ctx.fillStyle = getComputedStyle(
+          document.documentElement
+        ).getPropertyValue("--barva-ramecek-seda");
+        ctx.strokeStyle = getComputedStyle(
+          document.documentElement
+        ).getPropertyValue("--barva-ramecek-hrana");
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(B.x, B.y);
+        ctx.lineTo(E.x, E.y);
+        ctx.lineTo(A.x + dx * 0.3, A.y + dy); // mírně kratší horní hrana vzadu
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // šrafování vršku
+        srafovatPlochu(
+          ctx,
+          { x1: A.x, y1: A.y, x2: B.x, y2: B.y },
+          { x1: A.x + dx * 0.3, y1: A.y + dy, x2: E.x, y2: E.y },
+          6,
+          0.8
+        );
+
+        // 2) šedý pravý bok
+        ctx.beginPath();
+        ctx.moveTo(B.x, B.y);
+        ctx.lineTo(C.x, C.y);
+        ctx.lineTo(F.x, F.y);
+        ctx.lineTo(E.x, E.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        srafovatPlochu(
+          ctx,
+          { x1: B.x, y1: B.y, x2: C.x, y2: C.y },
+          { x1: E.x, y1: E.y, x2: F.x, y2: F.y },
+          6,
+          1
+        );
+
+        // 3) bílá kostra přední části
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = getComputedStyle(
+          document.documentElement
+        ).getPropertyValue("--barva-ramecek-hrana");
+        ctx.fillStyle = "#fdfdfd";
+
+        // vnější přední obdélník
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(B.x, B.y);
+        ctx.lineTo(C.x, C.y);
+        ctx.lineTo(D.x, D.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // vyříznutí vnitřního okna (jen kontura)
+        ctx.save();
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.beginPath();
+        ctx.moveTo(iA.x, iA.y);
+        ctx.lineTo(iB.x, iB.y);
+        ctx.lineTo(iC.x, iC.y);
+        ctx.lineTo(iD.x, iD.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        // obrys vnitřního otvoru
         ctx.beginPath();
         ctx.moveTo(iA.x, iA.y);
         ctx.lineTo(iB.x, iB.y);
@@ -368,95 +403,77 @@
         ctx.closePath();
         ctx.stroke();
 
-        // žlutá mřížka – horní plocha + boční + spodní
-        ctx.strokeStyle = getComputedStyle(
+        // 4) červený střed (vnitřní prostor)
+        ctx.fillStyle = getComputedStyle(
           document.documentElement
-        ).getPropertyValue("--barva-ramecek-mrizka");
+        ).getPropertyValue("--barva-ramecek-cervena");
+        ctx.strokeStyle = "#5a1818";
         ctx.lineWidth = 2;
 
-        vykreslitMrizkuHorni(ctx, A, B, F, E);
-        vykreslitMrizkuBocni(ctx, B, C, G, F);
-        vykreslitMrizkuSpodni(ctx, D, C, G, H);
+        ctx.beginPath();
+        ctx.moveTo(jA.x, jA.y);
+        ctx.lineTo(jB.x, jB.y);
+        ctx.lineTo(jC.x, jC.y);
+        ctx.lineTo(jD.x, jD.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // červené šrafování – vertikální + mírně diagonální
+        srafovatPlochu(
+          ctx,
+          { x1: jA.x, y1: jA.y, x2: jB.x, y2: jB.y },
+          { x1: jD.x, y1: jD.y, x2: jC.x, y2: jC.y },
+          10,
+          1,
+          true
+        );
 
         ctx.restore();
       }
 
-      // pomocné funkce pro mřížku (žluté čáry podle náčrtu)
+      function srafovatPlochu(
+        ctx,
+        predniHrana,
+        zadniHrana,
+        pocetCaur,
+        tloustka,
+        diagonala = false
+      ) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(0,0,0,0.25)";
+        ctx.lineWidth = tloustka;
 
-      function interpolace(a, b, t) {
-        return {
-          x: a.x + (b.x - a.x) * t,
-          y: a.y + (b.y - a.y) * t,
-        };
-      }
+        for (let i = 1; i < pocetCaur; i++) {
+          const t = i / pocetCaur;
 
-      function vykreslitMrizkuHorni(ctx, A, B, F, E) {
-        const kroky = 5;
-        for (let i = 1; i < kroky; i++) {
-          const t = i / kroky;
+          const a = {
+            x: predniHrana.x1 + (predniHrana.x2 - predniHrana.x1) * t,
+            y: predniHrana.y1 + (predniHrana.y2 - predniHrana.y1) * t,
+          };
 
-          // "podélné" čáry
-          const p1 = interpolace(A, B, t);
-          const p2 = interpolace(E, F, t);
+          const b = {
+            x: zadniHrana.x1 + (zadniHrana.x2 - zadniHrana.x1) * t,
+            y: zadniHrana.y1 + (zadniHrana.y2 - zadniHrana.y1) * t,
+          };
+
           ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-
-          // "příčné" čáry
-          const q1 = interpolace(A, E, t);
-          const q2 = interpolace(B, F, t);
-          ctx.beginPath();
-          ctx.moveTo(q1.x, q1.y);
-          ctx.lineTo(q2.x, q2.y);
-          ctx.stroke();
-        }
-      }
-
-      function vykreslitMrizkuBocni(ctx, B, C, G, F) {
-        const kroky = 5;
-        for (let i = 1; i < kroky; i++) {
-          const t = i / kroky;
-
-          const p1 = interpolace(B, C, t);
-          const p2 = interpolace(F, G, t);
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-
-          const q1 = interpolace(B, F, t);
-          const q2 = interpolace(C, G, t);
-          ctx.beginPath();
-          ctx.moveTo(q1.x, q1.y);
-          ctx.lineTo(q2.x, q2.y);
+          if (!diagonala) {
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+          } else {
+            // lehce posunutá diagonála pro červený střed
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x + 6, b.y);
+          }
           ctx.stroke();
         }
-      }
 
-      function vykreslitMrizkuSpodni(ctx, D, C, G, H) {
-        const kroky = 5;
-        for (let i = 1; i < kroky; i++) {
-          const t = i / kroky;
-
-          const p1 = interpolace(D, C, t);
-          const p2 = interpolace(H, G, t);
-          ctx.beginPath();
-          ctx.moveTo(p1.x, p1.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.stroke();
-
-          const q1 = interpolace(D, H, t);
-          const q2 = interpolace(C, G, t);
-          ctx.beginPath();
-          ctx.moveTo(q1.x, q1.y);
-          ctx.lineTo(q2.x, q2.y);
-          ctx.stroke();
-        }
+        ctx.restore();
       }
 
       // ────────────────────────────────────────────────
-      // Interakce – připravené háčky pro budoucí moduly
+      // Interakce – připravené háčky
       // ────────────────────────────────────────────────
 
       const panelSloty = document.getElementById("panel-sloty");
@@ -493,7 +510,7 @@
 
       aktualizovatSlotOdznaky();
 
-      // zoom pomocí kolečka / pinch se doplní později modulem
+      // zoom kolečkem (na mobilu později nahradíme pinch gestem)
       window.addEventListener(
         "wheel",
         (e) => {
@@ -504,16 +521,16 @@
         { passive: true }
       );
 
-      // klepnutí na plátno přepíná režim lupy – jednoduchý háček
+      // klepnutí na plátno přepíná režim lupy
       platno.addEventListener("click", () => {
         ramecek.prepniRezimLupy();
         aktualizovatSlotOdznaky();
       });
 
-      // připravené, ale zatím prázdné háčky pro dotykové ovládání:
+      // připravené háčky pro dotykové ovládání prstem (budeme doplňovat moduly)
       platno.addEventListener("pointerdown", (e) => {
-        // TODO: moduly pro "otáčení / ladění / přitahovací hák"
-        // ً&’ zde budeme napojovat detailní ovládání prstem.
+        // ً&’ zde napojíme detailní ovládání:
+        // otáčení, ladění, přibližování s "přitahovacím hákem".
       });
 
       // první vykreslení
