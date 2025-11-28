@@ -6,9 +6,24 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>VaF'i'T • Signal Core – Rámečky</title>
+    <title>Vivere atque FruiT • Základní rámeček</title>
 
     <style>
+      :root {
+        --barva-pozadi: #020308;
+        --barva-linky: #14151c;
+        --barva-ramecek-hrana: #111111;
+        --barva-ramecek-mrizka: #f9b233; /* žlutá dle náčrtu */
+        --barva-text: #f5f5f5;
+        --barva-text-slabsi: #b2b2c7;
+        --font-zaklad: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       html,
       body {
         margin: 0;
@@ -16,549 +31,493 @@
         width: 100%;
         height: 100%;
         overflow: hidden;
-        background: radial-gradient(circle at top, #050815, #020208);
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        color: #f5f5f5;
+        background: radial-gradient(circle at top, #050818, var(--barva-pozadi));
+        color: var(--barva-text);
+        font-family: var(--font-zaklad);
       }
 
-      .root {
+      .vrstva-koren {
         position: fixed;
         inset: 0;
         display: flex;
-        align-items: center;
-        justify-content: center;
+        align-items: stretch;
+        justify-content: stretch;
       }
 
-      .stage {
-        position: relative;
-        width: min(920px, 96vw);
-        height: min(620px, 90vh);
-        border-radius: 32px;
-        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
-        background: radial-gradient(circle at top, #06091a, #020208);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-      }
-
-      #signal-canvas {
-        position: absolute;
-        inset: 0;
-        margin: auto;
+      canvas#platno-ramecek {
         width: 100%;
         height: 100%;
         display: block;
-        touch-action: none;
       }
 
-      .hud {
-        position: absolute;
-        left: 18px;
-        bottom: 14px;
-        font-size: 10px;
-        opacity: 0.75;
+      .vrstva-horni-panel {
+        position: fixed;
+        inset: 0 auto auto 0;
+        padding: 10px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        pointer-events: none;
       }
 
-      .hud-center {
-        position: absolute;
-        left: 50%;
-        bottom: 14px;
-        transform: translateX(-50%);
+      .znacka-aplikace {
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--barva-text-slabsi);
+      }
+
+      .radek-stav {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 12px;
+        color: var(--barva-text-slabsi);
+      }
+
+      .odznak-zivy {
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: rgba(248, 103, 166, 0.14);
+        border: 1px solid rgba(248, 103, 166, 0.8);
+        color: #ffd7f0;
         font-size: 11px;
-        opacity: 0.85;
-        white-space: nowrap;
       }
 
-      .hud-right {
-        position: absolute;
-        right: 18px;
-        top: 14px;
-        font-size: 10px;
-        opacity: 0.75;
+      .vrstva-spodni-panel {
+        position: fixed;
+        inset: auto 0 0 0;
+        padding: 10px 16px 14px;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.65),
+          rgba(0, 0, 0, 0)
+        );
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        pointer-events: none;
+      }
+
+      .radek-informace-ramecek {
+        font-size: 11px;
+        color: var(--barva-text-slabsi);
+      }
+
+      .radek-sloty {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      .odznak-slot {
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(150, 150, 190, 0.6);
+        background: rgba(10, 10, 30, 0.7);
+        font-size: 11px;
+        color: var(--barva-text-slabsi);
+        pointer-events: auto;
+        user-select: none;
+      }
+
+      .odznak-slot--aktivni {
+        border-color: var(--barva-ramecek-mrizka);
+        color: #ffe9b0;
+        box-shadow: 0 0 8px rgba(249, 178, 51, 0.6);
+      }
+
+      .odznak-slot-klic {
+        opacity: 0.7;
       }
     </style>
   </head>
-
   <body>
-    <div class="root">
-      <div class="stage">
-        <canvas id="signal-canvas"></canvas>
+    <div class="vrstva-koren">
+      <canvas id="platno-ramecek"></canvas>
+    </div>
 
-        <div class="hud">
-          🌀 1 prst / myš = náklon • ťuk / klik = změna režimu • pinch / kolečko = zoom
+    <!-- horní info vrstva (Revia / stav rámečku) \\{*(°•.)(.•°)*}// -->
+    <div class="vrstva-horni-panel">
+      <div class="znacka-aplikace">Vivere atque FruiT • základní rámeček</div>
+      <div class="radek-stav">
+        <span class="odznak-zivy">živý panel • kostra</span>
+        <span id="stav-slot-aktivni">aktivní slot: střed 1</span>
+        <span id="stav-lupa">lupa: střed</span>
+      </div>
+    </div>
+
+    <!-- spodní info vrstva: připínání modulů v budoucnu -->
+    <div class="vrstva-spodni-panel">
+      <div class="radek-informace-ramecek">
+        Základní 2D rámeček: vnitřní pohyblivá struktura se 4 sloty, přibližování,
+        budoucí přitahovací hák a vkládací místa pro písmenka / objekty / AI.
+      </div>
+      <div class="radek-sloty" id="panel-sloty">
+        <div class="odznak-slot odznak-slot--aktivni" data-slot="0">
+          Střed 1 • písmenka
         </div>
-        <div class="hud-center" id="mode-label">
-          režim: síť rámečků
-        </div>
-        <div class="hud-right">v0.2 • VaF'i'T Signal Core – Rámečky</div>
+        <div class="odznak-slot" data-slot="1">Střed 2 • volný</div>
+        <div class="odznak-slot" data-slot="2">Střed 3 • volný</div>
+        <div class="odznak-slot" data-slot="3">Střed 4 • volný</div>
+        <div class="odznak-slot odznak-slot-klic">≋ budoucí modul: svět</div>
+        <div class="odznak-slot odznak-slot-klic">≋ budoucí modul: AI</div>
+        <div class="odznak-slot odznak-slot-klic">≋ budoucí modul: glyph</div>
+        <div class="odznak-slot odznak-slot-klic">≋ budoucí modul: VaFiT</div>
       </div>
     </div>
 
     <script>
-      // ｡*ﾟ✲*☆ VaF'i'T SignalCore – 3D rámečky místo koule ☆*✲ﾟ*｡
+      "use strict";
 
-      const canvas = document.getElementById("signal-canvas");
-      const ctx = canvas.getContext("2d");
-      const modeLabel = document.getElementById("mode-label");
+      // …iT… základní datový model rámečku \\{*(°•.)(.•°)*}//
 
-      const dpr = window.devicePixelRatio || 1;
-      let width = 0;
-      let height = 0;
-
-      // „kamera“
-      let viewScale = 1.2;
-      let targetViewScale = 1.2;
-      let viewOffsetX = 0;
-      let viewOffsetY = 40;
-
-      // základní rozměry scénky
-      let baseRadius = 120;
-      let coneHeight = 200;
-
-      // náklon scény
-      let tiltX = 1.0;
-      let tiltY = 0.0;
-      let targetTiltX = tiltX;
-      let targetTiltY = tiltY;
-
-      // režimy zobrazení
-      const modes = ["mesh", "letters", "glyph", "vafiti"];
-      let modeIndex = 0;
-
-      const glyphs = ["\\{*(°•.)(.•°)*}//", "ً&’」", "{°\"(.).),,(\\/ )¡¡(\\/),,,(.(.)\"°}"];
-      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-      // místo bodů máme sadu 3D rámečků (krabic bez výplně)
-      const signalCore = {
-        frames: [],
-        frameCount: 6,
-        pulse: 0
-      };
-
-      function resize() {
-        const rect = canvas.getBoundingClientRect();
-        width = rect.width;
-        height = rect.height;
-
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        baseRadius = Math.min(width, height) * 0.19;
-        coneHeight = baseRadius * 1.6;
-
-        generateFrames();
-      }
-
-      // vytvoření rámečků v prostoru (více kusů nad sebou)
-      function generateFrames() {
-        signalCore.frames = [];
-        const n = signalCore.frameCount;
-
-        for (let i = 0; i < n; i++) {
-          const t = n === 1 ? 0.5 : i / (n - 1); // 0..1
-          const y = -coneHeight / 2 + t * coneHeight;
-
-          const size = baseRadius * (0.8 + 0.5 * t); // nahoře o něco větší
-          const depth = baseRadius * 0.28; // „tloušťka“ rámečku
-
-          signalCore.frames.push({
-            y,
-            w: size,
-            h: size * 0.7,
-            d: depth,
-            phase: Math.random() * Math.PI * 2
-          });
+      /**
+       * Stav jednoho vkládacího středu.
+       */
+      class VkladaciStred {
+        constructor(id, popis, typObsahu = "pismenka") {
+          this.id = id;
+          this.popis = popis;
+          this.typObsahu = typObsahu; // "pismenka" | "objekt" | "ai" | "glyph" | ...
+          this.obsah = null; // bude se doplňovat moduly
         }
       }
 
-      // 3D -> 2D projekce (využíváme stejné parametry jako původně)
-      function projectPoint(x, y, z) {
-        const sinX = Math.sin(tiltX);
-        const cosX = Math.cos(tiltX);
-        const sinY = Math.sin(tiltY);
-        const cosY = Math.cos(tiltY);
+      /**
+       * Základní 2D rámeček: vnější kostra + vnitřní 4 sloty.
+       */
+      class ZakladniRamecek {
+        constructor() {
+          // pohled / interakce
+          this.meritko = 1;
+          this.rezimLupy = "stred"; // "stred" | "cely"
+          this.aktivniStredIndex = 0;
 
-        // rotace kolem X
-        const y1 = y * cosX - z * sinX;
-        const z1 = y * sinX + z * cosX;
+          // budoucí přitahovací hák (zatím jen konfigurace)
+          this.pritahovaciHak = {
+            aktivni: true,
+            dosah: 24,
+            sila: 0.35,
+          };
 
-        // rotace kolem Y
-        const x2 = x * cosY + z1 * sinY;
-        const z2 = -x * sinY + z1 * cosY;
+          // čtyři středy podle zadání
+          this.stredy = [
+            new VkladaciStred("stred-1", "Střed 1 • písmenka", "pismenka"),
+            new VkladaciStred("stred-2", "Střed 2 • volný", "volny"),
+            new VkladaciStred("stred-3", "Střed 3 • volný", "volny"),
+            new VkladaciStred("stred-4", "Střed 4 • volný", "volny"),
+          ];
+        }
 
-        const sx = (width / 2 + viewOffsetX) + x2 * viewScale;
-        const sy = (height / 2 + viewOffsetY) + y1 * viewScale;
+        prepniAktivniStred(index) {
+          if (index < 0 || index >= this.stredy.length) return;
+          this.aktivniStredIndex = index;
+        }
 
-        return { x: sx, y: sy, z: z2 };
+        prepniRezimLupy() {
+          this.rezimLupy = this.rezimLupy === "stred" ? "cely" : "stred";
+        }
+
+        zvetseni(delta) {
+          const nove = this.meritko + delta;
+          this.meritko = Math.min(Math.max(nove, 0.5), 2.2);
+        }
       }
 
-      function drawBackground() {
-        ctx.clearRect(0, 0, width, height);
+      // ────────────────────────────────────────────────
+      // Inicializace plátna a kreslení kostry rámečku
+      // ────────────────────────────────────────────────
 
-        // jemné světlo zdola
-        const g = ctx.createRadialGradient(
-          width / 2,
-          height / 2 + 120,
-          0,
-          width / 2,
-          height / 2 + 120,
-          baseRadius * 3
-        );
-        g.addColorStop(0, "rgba(255, 210, 160, 0.22)");
-        g.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, width, height);
+      const platno = document.getElementById("platno-ramecek");
+      const kontext = platno.getContext("2d");
 
-        // spodní elipsa / podstavec
+      const ramecek = new ZakladniRamecek();
+
+      function zmenitVelikostPlatna() {
+        const pomer = window.devicePixelRatio || 1;
+        const sirkaCss = window.innerWidth;
+        const vyskaCss = window.innerHeight;
+
+        platno.width = sirkaCss * pomer;
+        platno.height = vyskaCss * pomer;
+
+        kontext.setTransform(pomer, 0, 0, pomer, 0, 0);
+        prekreslit();
+      }
+
+      window.addEventListener("resize", zmenitVelikostPlatna);
+      zmenitVelikostPlatna();
+
+      function prekreslit() {
+        const sirka = platno.width / (window.devicePixelRatio || 1);
+        const vyska = platno.height / (window.devicePixelRatio || 1);
+        kontext.clearRect(0, 0, sirka, vyska);
+
+        // pozadí – jemná mřížka / atmosféra
+        vykreslitPozadi(kontext, sirka, vyska);
+
+        // hlavní kostra rámečku
+        vykreslitRamecek2D(kontext, sirka, vyska, ramecek);
+      }
+
+      function vykreslitPozadi(ctx, sirka, vyska) {
         ctx.save();
-        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
-        ctx.scale(viewScale, viewScale);
-        ctx.beginPath();
-        ctx.ellipse(
-          0,
-          coneHeight / 2 + 10,
-          baseRadius * 1.05,
-          baseRadius * 0.35,
-          0,
-          0,
-          Math.PI * 2
-        );
-        const eGrad = ctx.createRadialGradient(
-          0,
-          coneHeight / 2 + 10,
-          baseRadius * 0.1,
-          0,
-          coneHeight / 2 + 10,
-          baseRadius * 1.1
-        );
-        eGrad.addColorStop(0, "rgba(20,12,8,1)");
-        eGrad.addColorStop(1, "rgba(0,0,0,0.6)");
-        ctx.fillStyle = eGrad;
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // pomocná: vrátí projekci středu rámečku v Y pro glow kužele
-      function getFrameCenterScreenY(index) {
-        const f = signalCore.frames[index];
-        if (!f) return height / 2 + viewOffsetY;
-        const p = projectPoint(0, f.y, 0);
-        return p.y;
-      }
-
-      // nakreslení drátěného 3D rámečku z hraničních bodů
-      function drawFrameWire(frame) {
-        const hw = frame.w / 2;
-        const hh = frame.h / 2;
-        const hd = frame.d / 2;
-        const cy = frame.y;
-
-        // 8 rohů krabice
-        const corners3D = [
-          { x: -hw, y: cy - hh, z: -hd }, // 0 front-top-left
-          { x: hw, y: cy - hh, z: -hd }, // 1 front-top-right
-          { x: hw, y: cy + hh, z: -hd }, // 2 front-bottom-right
-          { x: -hw, y: cy + hh, z: -hd }, // 3 front-bottom-left
-          { x: -hw, y: cy - hh, z: hd }, // 4 back-top-left
-          { x: hw, y: cy - hh, z: hd }, // 5 back-top-right
-          { x: hw, y: cy + hh, z: hd }, // 6 back-bottom-right
-          { x: -hw, y: cy + hh, z: hd } // 7 back-bottom-left
-        ];
-
-        const pts = corners3D.map((p) => projectPoint(p.x, p.y, p.z));
-
-        const edges = [
-          [0, 1],
-          [1, 2],
-          [2, 3],
-          [3, 0],
-          [4, 5],
-          [5, 6],
-          [6, 7],
-          [7, 4],
-          [0, 4],
-          [1, 5],
-          [2, 6],
-          [3, 7]
-        ];
-
-        ctx.beginPath();
-        for (const [a, b] of edges) {
-          ctx.moveTo(pts[a].x, pts[a].y);
-          ctx.lineTo(pts[b].x, pts[b].y);
-        }
-        ctx.stroke();
-      }
-
-      function drawMeshMode() {
-        ctx.lineWidth = 1.2;
-        ctx.strokeStyle = "rgba(255, 210, 150, 0.9)";
-        ctx.shadowColor = "rgba(255, 180, 130, 0.7)";
-        ctx.shadowBlur = 10;
-
-        for (const frame of signalCore.frames) {
-          drawFrameWire(frame);
-        }
-
-        ctx.shadowBlur = 0;
-      }
-
-      function drawLettersMode() {
-        ctx.font = "10px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "rgba(255, 220, 170, 0.95)";
-        ctx.shadowColor = "rgba(255, 200, 140, 0.7)";
-        ctx.shadowBlur = 6;
-
-        const len = letters.length;
-        let index = 0;
-
-        for (const frame of signalCore.frames) {
-          const hw = frame.w / 2;
-          const hh = frame.h / 2;
-          const hd = frame.d / 2;
-          const cy = frame.y;
-
-          // čtyři středy hran „předního“ rámečku
-          const samples = [
-            { x: 0, y: cy - hh, z: -hd }, // horní hrana
-            { x: hw, y: cy, z: -hd }, // pravá
-            { x: 0, y: cy + hh, z: -hd }, // dolní
-            { x: -hw, y: cy, z: -hd } // levá
-          ];
-
-          for (const s of samples) {
-            const p = projectPoint(s.x, s.y, s.z);
-            const ch = letters[index % len];
-            index++;
-
-            const flicker =
-              0.6 + 0.4 * Math.sin(signalCore.pulse * 2 + frame.phase);
-            ctx.globalAlpha = flicker;
-            ctx.fillText(ch, p.x, p.y);
-          }
-        }
-
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
-      }
-
-      function drawGlyphMode() {
-        ctx.font = "11px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "rgba(255, 225, 180, 0.96)";
-        ctx.shadowColor = "rgba(255, 200, 160, 0.8)";
-        ctx.shadowBlur = 7;
-
-        const len = glyphs.length;
-        let index = 0;
-
-        for (const frame of signalCore.frames) {
-          const hw = frame.w / 2;
-          const hh = frame.h / 2;
-          const hd = frame.d / 2;
-          const cy = frame.y;
-
-          // čtyři body v rozích předního rámečku
-          const samples = [
-            { x: -hw, y: cy - hh, z: -hd },
-            { x: hw, y: cy - hh, z: -hd },
-            { x: hw, y: cy + hh, z: -hd },
-            { x: -hw, y: cy + hh, z: -hd }
-          ];
-
-          for (const s of samples) {
-            const p = projectPoint(s.x, s.y, s.z);
-            const g = glyphs[index % len];
-            index++;
-
-            const flicker =
-              0.55 + 0.45 * Math.sin(signalCore.pulse * 1.4 + frame.phase);
-            ctx.globalAlpha = flicker;
-            ctx.fillText(g, p.x, p.y);
-          }
-        }
-
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
-      }
-
-      function drawVafitiMode() {
+        ctx.strokeStyle = "rgba(40,45,65,0.5)";
         ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(255, 210, 160, 0.9)";
-        ctx.fillStyle = "rgba(255, 210, 160, 0.35)";
 
-        for (const frame of signalCore.frames) {
-          const hw = frame.w / 2;
-          const hh = frame.h / 2;
-          const hd = frame.d / 2;
-          const cy = frame.y;
-
-          const corners = [
-            { x: -hw, y: cy - hh, z: -hd },
-            { x: hw, y: cy - hh, z: -hd },
-            { x: hw, y: cy + hh, z: -hd },
-            { x: -hw, y: cy + hh, z: -hd },
-            { x: -hw, y: cy - hh, z: hd },
-            { x: hw, y: cy - hh, z: hd },
-            { x: hw, y: cy + hh, z: hd },
-            { x: -hw, y: cy + hh, z: hd }
-          ];
-
-          for (const c of corners) {
-            const p = projectPoint(c.x, c.y, c.z);
-            const wobble =
-              Math.sin(signalCore.pulse * 3 + frame.phase) * 2.3;
-            const size =
-              2.3 + 1.2 * Math.sin(signalCore.pulse * 2 + frame.phase);
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y - wobble, size, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-          }
+        const krok = 32;
+        for (let x = 0; x <= sirka; x += krok) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, vyska);
+          ctx.stroke();
         }
-      }
-
-      function drawSignalCore() {
-        drawBackground();
-
-        // jemný „kuželový“ glow přes celou věž rámečků
-        ctx.save();
-        ctx.globalAlpha = 0.28;
-        ctx.fillStyle = "rgba(255, 200, 150, 0.35)";
-
-        const topY = getFrameCenterScreenY(0);
-        const bottomY = getFrameCenterScreenY(
-          signalCore.frames.length - 1
-        );
-        const middleX = width / 2 + viewOffsetX;
-
-        ctx.beginPath();
-        ctx.moveTo(middleX - baseRadius * viewScale * 1.1, bottomY + 10);
-        ctx.lineTo(middleX, topY - 30);
-        ctx.lineTo(middleX + baseRadius * viewScale * 1.1, bottomY + 10);
-        ctx.closePath();
-        ctx.fill();
+        for (let y = 0; y <= vyska; y += krok) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(sirka, y);
+          ctx.stroke();
+        }
         ctx.restore();
+      }
 
-        const mode = modes[modeIndex];
+      /**
+       * Vykreslí rámeček podle nákresu: černá kostra + žlutá mřížka.
+       */
+      function vykreslitRamecek2D(ctx, sirka, vyska, stavRamecku) {
+        ctx.save();
 
-        switch (mode) {
-          case "mesh":
-            drawMeshMode();
-            break;
-          case "letters":
-            drawLettersMode();
-            break;
-          case "glyph":
-            drawGlyphMode();
-            break;
-          case "vafiti":
-            drawVafitiMode();
-            break;
-        }
+        const velikost = Math.min(sirka, vyska) * 0.35 * stavRamecku.meritko;
+        const hloubka = velikost * 0.45;
+        const stredX = sirka / 2;
+        const stredY = vyska / 2 + velikost * 0.05;
 
-        // středová tečka (jádro)
+        // souřadnice předního čtverce
+        const pLevo = stredX - velikost / 2;
+        const pPravo = stredX + velikost / 2;
+        const pNahore = stredY - velikost / 2;
+        const pDole = stredY + velikost / 2;
+
+        // odsazení zadního čtverce (do „hloubky“)
+        const dx = hloubka * 0.6;
+        const dy = -hloubka * 0.5;
+
+        // body přední hrany
+        const A = { x: pLevo, y: pNahore };
+        const B = { x: pPravo, y: pNahore };
+        const C = { x: pPravo, y: pDole };
+        const D = { x: pLevo, y: pDole };
+
+        // body zadní hrany
+        const E = { x: A.x + dx, y: A.y + dy };
+        const F = { x: B.x + dx, y: B.y + dy };
+        const G = { x: C.x + dx, y: C.y + dy };
+        const H = { x: D.x + dx, y: D.y + dy };
+
+        ctx.lineJoin = "round";
+
+        // 1) černá kostra rámečku
+        ctx.strokeStyle = getComputedStyle(
+          document.documentElement
+        ).getPropertyValue("--barva-ramecek-hrana");
+        ctx.lineWidth = 3;
+
+        // vnější přední čtverec
         ctx.beginPath();
-        ctx.arc(
-          width / 2 + viewOffsetX,
-          height / 2 + viewOffsetY,
-          3,
-          0,
-          Math.PI * 2
-        );
-        ctx.fillStyle = "rgba(255, 220, 180, 0.9)";
-        ctx.fill();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(B.x, B.y);
+        ctx.lineTo(C.x, C.y);
+        ctx.lineTo(D.x, D.y);
+        ctx.closePath();
+        ctx.stroke();
+
+        // vnější zadní čtverec
+        ctx.beginPath();
+        ctx.moveTo(E.x, E.y);
+        ctx.lineTo(F.x, F.y);
+        ctx.lineTo(G.x, G.y);
+        ctx.lineTo(H.x, H.y);
+        ctx.closePath();
+        ctx.stroke();
+
+        // spojovací hrany
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(E.x, E.y);
+        ctx.moveTo(B.x, B.y);
+        ctx.lineTo(F.x, F.y);
+        ctx.moveTo(C.x, C.y);
+        ctx.lineTo(G.x, G.y);
+        ctx.moveTo(D.x, D.y);
+        ctx.lineTo(H.x, H.y);
+        ctx.stroke();
+
+        // vnitřní "otvor" podle náčrtu
+        const vnitOdsazeni = velikost * 0.18;
+        const iA = { x: A.x + vnitOdsazeni, y: A.y + vnitOdsazeni };
+        const iB = { x: B.x - vnitOdsazeni, y: B.y + vnitOdsazeni };
+        const iC = { x: C.x - vnitOdsazeni, y: C.y - vnitOdsazeni };
+        const iD = { x: D.x + vnitOdsazeni, y: D.y - vnitOdsazeni };
+
+        ctx.beginPath();
+        ctx.moveTo(iA.x, iA.y);
+        ctx.lineTo(iB.x, iB.y);
+        ctx.lineTo(iC.x, iC.y);
+        ctx.lineTo(iD.x, iD.y);
+        ctx.closePath();
+        ctx.stroke();
+
+        // žlutá mřížka – horní plocha + boční + spodní
+        ctx.strokeStyle = getComputedStyle(
+          document.documentElement
+        ).getPropertyValue("--barva-ramecek-mrizka");
+        ctx.lineWidth = 2;
+
+        vykreslitMrizkuHorni(ctx, A, B, F, E);
+        vykreslitMrizkuBocni(ctx, B, C, G, F);
+        vykreslitMrizkuSpodni(ctx, D, C, G, H);
+
+        ctx.restore();
       }
 
-      // animace
-      let lastTime = 0;
-      function loop(timestamp) {
-        if (!timestamp) timestamp = 0;
-        const dt = (timestamp - lastTime) / 1000;
-        lastTime = timestamp;
+      // pomocné funkce pro mřížku (žluté čáry podle náčrtu)
 
-        signalCore.pulse += dt;
-
-        const k = Math.min(1, 6 * dt);
-        viewScale += (targetViewScale - viewScale) * k;
-        tiltX += (targetTiltX - tiltX) * k;
-        tiltY += (targetTiltY - tiltY) * k;
-
-        drawSignalCore();
-        requestAnimationFrame(loop);
+      function interpolace(a, b, t) {
+        return {
+          x: a.x + (b.x - a.x) * t,
+          y: a.y + (b.y - a.y) * t,
+        };
       }
 
-      // interakce – náklon + přepínání režimu
-      let dragging = false;
-      let lastX = 0;
-      let lastY = 0;
-      let moved = 0;
+      function vykreslitMrizkuHorni(ctx, A, B, F, E) {
+        const kroky = 5;
+        for (let i = 1; i < kroky; i++) {
+          const t = i / kroky;
 
-      function pointerDown(e) {
-        e.preventDefault();
-        const touch = e.touches ? e.touches[0] : e;
-        dragging = true;
-        lastX = touch.clientX;
-        lastY = touch.clientY;
-        moved = 0;
-      }
+          // "podélné" čáry
+          const p1 = interpolace(A, B, t);
+          const p2 = interpolace(E, F, t);
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
 
-      function pointerMove(e) {
-        if (!dragging) return;
-        e.preventDefault();
-        const touch = e.touches ? e.touches[0] : e;
-        const x = touch.clientX;
-        const y = touch.clientY;
-        const dx = x - lastX;
-        const dy = y - lastY;
-        lastX = x;
-        lastY = y;
-        moved += Math.abs(dx) + Math.abs(dy);
-
-        targetTiltY += dx * 0.01;
-        targetTiltX += dy * 0.01;
-      }
-
-      function pointerUp(e) {
-        if (!dragging) return;
-        dragging = false;
-
-        if (moved < 10) {
-          modeIndex = (modeIndex + 1) % modes.length;
-          const mode = modes[modeIndex];
-          let label = "";
-          if (mode === "mesh") label = "síť rámečků";
-          else if (mode === "letters") label = "písmena na hranách";
-          else if (mode === "glyph") label = "VaFiT glyph rámečky";
-          else if (mode === "vafiti") label = "VafiT'i kapky na rozích";
-          modeLabel.textContent = "režim: " + label;
+          // "příčné" čáry
+          const q1 = interpolace(A, E, t);
+          const q2 = interpolace(B, F, t);
+          ctx.beginPath();
+          ctx.moveTo(q1.x, q1.y);
+          ctx.lineTo(q2.x, q2.y);
+          ctx.stroke();
         }
       }
 
-      canvas.addEventListener("mousedown", pointerDown);
-      window.addEventListener("mousemove", pointerMove);
-      window.addEventListener("mouseup", pointerUp);
+      function vykreslitMrizkuBocni(ctx, B, C, G, F) {
+        const kroky = 5;
+        for (let i = 1; i < kroky; i++) {
+          const t = i / kroky;
 
-      canvas.addEventListener("touchstart", pointerDown, { passive: false });
-      window.addEventListener("touchmove", pointerMove, { passive: false });
-      window.addEventListener("touchend", pointerUp, { passive: false });
-      window.addEventListener("touchcancel", pointerUp, { passive: false });
+          const p1 = interpolace(B, C, t);
+          const p2 = interpolace(F, G, t);
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
 
-      // zoom kolečkem
-      canvas.addEventListener("wheel", (e) => {
-        e.preventDefault();
-        const factor = e.deltaY > 0 ? 0.9 : 1.1;
-        targetViewScale *= factor;
-        targetViewScale = Math.max(0.6, Math.min(2.5, targetViewScale));
+          const q1 = interpolace(B, F, t);
+          const q2 = interpolace(C, G, t);
+          ctx.beginPath();
+          ctx.moveTo(q1.x, q1.y);
+          ctx.lineTo(q2.x, q2.y);
+          ctx.stroke();
+        }
+      }
+
+      function vykreslitMrizkuSpodni(ctx, D, C, G, H) {
+        const kroky = 5;
+        for (let i = 1; i < kroky; i++) {
+          const t = i / kroky;
+
+          const p1 = interpolace(D, C, t);
+          const p2 = interpolace(H, G, t);
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+
+          const q1 = interpolace(D, H, t);
+          const q2 = interpolace(C, G, t);
+          ctx.beginPath();
+          ctx.moveTo(q1.x, q1.y);
+          ctx.lineTo(q2.x, q2.y);
+          ctx.stroke();
+        }
+      }
+
+      // ────────────────────────────────────────────────
+      // Interakce – připravené háčky pro budoucí moduly
+      // ────────────────────────────────────────────────
+
+      const panelSloty = document.getElementById("panel-sloty");
+      const textAktivni = document.getElementById("stav-slot-aktivni");
+      const textLupa = document.getElementById("stav-lupa");
+
+      panelSloty.addEventListener("click", (udalost) => {
+        const cil = udalost.target.closest(".odznak-slot");
+        if (!cil) return;
+        const index = Number(cil.dataset.slot);
+        if (Number.isNaN(index)) return;
+
+        ramecek.prepniAktivniStred(index);
+        aktualizovatSlotOdznaky();
+        prekreslit();
       });
 
-      resize();
-      window.addEventListener("resize", resize);
-      requestAnimationFrame(loop);
+      function aktualizovatSlotOdznaky() {
+        const odznaky = panelSloty.querySelectorAll(".odznak-slot[data-slot]");
+        odznaky.forEach((el) => {
+          const index = Number(el.dataset.slot);
+          if (index === ramecek.aktivniStredIndex) {
+            el.classList.add("odznak-slot--aktivni");
+          } else {
+            el.classList.remove("odznak-slot--aktivni");
+          }
+        });
+
+        const aktivniStred = ramecek.stredy[ramecek.aktivniStredIndex];
+        textAktivni.textContent = "aktivní slot: " + aktivniStred.popis;
+        textLupa.textContent =
+          "lupa: " + (ramecek.rezimLupy === "stred" ? "střed" : "celý rámeček");
+      }
+
+      aktualizovatSlotOdznaky();
+
+      // zoom pomocí kolečka / pinch se doplní později modulem
+      window.addEventListener(
+        "wheel",
+        (e) => {
+          const delta = e.deltaY > 0 ? -0.05 : 0.05;
+          ramecek.zvetseni(delta);
+          prekreslit();
+        },
+        { passive: true }
+      );
+
+      // klepnutí na plátno přepíná režim lupy – jednoduchý háček
+      platno.addEventListener("click", () => {
+        ramecek.prepniRezimLupy();
+        aktualizovatSlotOdznaky();
+      });
+
+      // připravené, ale zatím prázdné háčky pro dotykové ovládání:
+      platno.addEventListener("pointerdown", (e) => {
+        // TODO: moduly pro "otáčení / ladění / přitahovací hák"
+        // ً&’ zde budeme napojovat detailní ovládání prstem.
+      });
+
+      // první vykreslení
+      prekreslit();
     </script>
   </body>
 </html>
