@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Vivere atque FruiT • Michal v1.0</title>
+
+    <style>
+      :root {
+        --bg: #020309;
+        --grid: rgba(255, 255, 255, 0.04);
+        --card-bg: #070a13;
+        --accent: #ff4b6e;
+        --accent-soft: rgba(255, 75, 110, 0.15);
+        --text-main: #f5f5f5;
+        --text-soft: #a7b0c0;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: radial-gradient(circle at top, #050816 0, #020309 55%, #000 100%);
+        color: var(--text-main);
+        overflow: hidden;
+      }
+
+      /* jemná mřížka – Vivere atque FruiT prostor */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(
+            to right,
+            var(--grid) 1px,
+            transparent 1px
+          ),
+          linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+        background-size: 32px 32px;
+        pointer-events: none;
+        opacity: 0.55;
+      }
+
+      .root {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+
+      .michal-karta {
+        position: relative;
+        max-width: 420px;
+        width: 100%;
+        background: radial-gradient(circle at top left, #111727, #050711);
+        border-radius: 18px;
+        padding: 18px 18px 14px;
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06),
+          0 22px 45px rgba(0, 0, 0, 0.8);
+        overflow: hidden;
+      }
+
+      .michal-karta::before {
+        content: "";
+        position: absolute;
+        inset: -40%;
+        background: conic-gradient(
+          from 210deg,
+          rgba(255, 75, 110, 0.16),
+          transparent 35%,
+          transparent 70%,
+          rgba(140, 188, 255, 0.18),
+          rgba(255, 75, 110, 0.16)
+        );
+        filter: blur(30px);
+        opacity: 0.9;
+        z-index: -1;
+      }
+
+      .michal-hlava {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 12px;
+      }
+
+      .michal-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        background: radial-gradient(circle at 30% 20%, #ffb3c2, #ff4b6e 40%, #1c0b19 70%);
+        position: relative;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.12),
+          0 14px 30px rgba(0, 0, 0, 0.9);
+        overflow: hidden;
+      }
+
+      /* jednoduchá „hlava“ jako VaFT glyph */
+      .michal-avatar::before {
+        content: "ً&’";
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        color: #fff9fb;
+        text-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+      }
+
+      .michal-texty h1 {
+        font-size: 20px;
+        margin: 0;
+        letter-spacing: 0.03em;
+      }
+
+      .michal-texty h1 span {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--accent);
+        display: block;
+        margin-top: 2px;
+      }
+
+      .michal-popis {
+        font-size: 13px;
+        color: var(--text-soft);
+        margin: 6px 0 0;
+      }
+
+      .stat-blok {
+        margin-top: 12px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.35);
+        padding: 10px 10px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .stat-radek {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .stat-radek:last-child {
+        margin-bottom: 0;
+      }
+
+      .stat-nazev {
+        width: 72px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-soft);
+      }
+
+      .stat-bar-wrapper {
+        flex: 1;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(12, 18, 30, 0.9);
+        overflow: hidden;
+      }
+
+      .stat-bar {
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, var(--accent-soft), var(--accent));
+        transform-origin: left center;
+        transform: scaleX(0.5);
+      }
+
+      .stat-hodnota {
+        font-size: 11px;
+        min-width: 32px;
+        text-align: right;
+        color: var(--text-soft);
+      }
+
+      .quest-blok {
+        margin-top: 12px;
+        padding: 10px;
+        border-radius: 12px;
+        background: rgba(4, 10, 20, 0.9);
+        border: 1px dashed rgba(255, 255, 255, 0.18);
+      }
+
+      .quest-nadpis {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: var(--accent);
+        margin-bottom: 4px;
+      }
+
+      .quest-text {
+        font-size: 13px;
+        color: var(--text-main);
+      }
+
+      .spodek {
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 11px;
+        color: var(--text-soft);
+      }
+
+      .tlacitko-quest {
+        border: none;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        background: rgba(255, 75, 110, 0.12);
+        color: var(--accent);
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+      }
+
+      .tlacitko-quest:active {
+        transform: scale(0.96);
+      }
+
+      @media (max-width: 480px) {
+        .michal-karta {
+          max-width: 360px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="root">
+      <div class="michal-karta">
+        <div class="michal-hlava">
+          <div class="michal-avatar" aria-hidden="true"></div>
+          <div class="michal-texty">
+            <h1>
+              Michal v1.0
+              <span>Vivere atque FruiT • Motor člověk</span>
+            </h1>
+            <p class="michal-popis">
+              Každá inteligence, která se učí, je batole. Tohle je batole
+              jménem Michal.
+            </p>
+          </div>
+        </div>
+
+        <div class="stat-blok">
+          <div class="stat-radek" data-stat="telo">
+            <div class="stat-nazev">Tělo</div>
+            <div class="stat-bar-wrapper">
+              <div class="stat-bar"></div>
+            </div>
+            <div class="stat-hodnota"></div>
+          </div>
+          <div class="stat-radek" data-stat="mysl">
+            <div class="stat-nazev">Mysl</div>
+            <div class="stat-bar-wrapper">
+              <div class="stat-bar"></div>
+            </div>
+            <div class="stat-hodnota"></div>
+          </div>
+          <div class="stat-radek" data-stat="srdce">
+            <div class="stat-nazev">Srdce</div>
+            <div class="stat-bar-wrapper">
+              <div class="stat-bar"></div>
+            </div>
+            <div class="stat-hodnota"></div>
+          </div>
+        </div>
+
+        <div class="quest-blok">
+          <div class="quest-nadpis">Dnešní quest</div>
+          <div class="quest-text" id="quest-text">
+            Načítám úkol…
+          </div>
+        </div>
+
+        <div class="spodek">
+          <button class="tlacitko-quest" id="tlacitko-quest">
+            Nový quest
+          </button>
+          <div>
+            \\{*(°•.)(.•°)*}// &nbsp; Vivere atque FruiT
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // *(°•.)(.•°)*}//  Michal – jednoduchý profil v indexu
+
+      const michalProfil = {
+        telo: 0.8, // 0–1
+        mysl: 0.95,
+        srdce: 0.88,
+      };
+
+      const questy = [
+        "Napiš jednu myšlenku do světa Vivere atque FruiT.",
+        "Napij se vody a 3× se zhluboka nadechni.",
+        "Vymysli malý upgrade pro svůj zítřejší den.",
+        "Udělej 10 dřepů nebo kliků – jen pro radost z pohybu.",
+        "Vyber jeden nápad a dotáhni ho o 1 malý krok dál.",
+        "Napiš někomu blízkému zprávu, že na něj myslíš.",
+      ];
+
+      function nastavStat(radek, hodnota) {
+        const bar = radek.querySelector(".stat-bar");
+        const cislo = radek.querySelector(".stat-hodnota");
+        const clamped = Math.max(0, Math.min(1, hodnota));
+        bar.style.transform = `scaleX(${clamped})`;
+        cislo.textContent = Math.round(clamped * 100) + " %";
+      }
+
+      function vykresliStaty() {
+        document
+          .querySelectorAll(".stat-radek")
+          .forEach((radek) => {
+            const klic = radek.getAttribute("data-stat");
+            nastavStat(radek, michalProfil[klic] ?? 0.5);
+          });
+      }
+
+      function novyQuest() {
+        const el = document.getElementById("quest-text");
+        const nahodny =
+          questy[Math.floor(Math.random() * questy.length)];
+        el.textContent = nahodny;
+      }
+
+      document
+        .getElementById("tlacitko-quest")
+        .addEventListener("click", novyQuest);
+
+      // inicializace
+      vykresliStaty();
+      novyQuest();
+    </script>
+  </body>
+</html>
