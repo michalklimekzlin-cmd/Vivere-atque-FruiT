@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>VaFT • Oblak / Oblek</title>
+    <style>
+      :root {
+        --bg: #02030a;
+        --mrizka: rgba(255, 220, 140, 0.09);
+        --zlata: #ffd977;
+        --zlata-slabsi: rgba(255, 217, 119, 0.4);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: radial-gradient(circle at top, #05081a 0, #02030a 55%, #000 100%);
+        color: #f5f5f5;
+      }
+
+      body::before {
+        /* jemná mřížka na pozadí */
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(
+            to right,
+            var(--mrizka) 1px,
+            transparent 1px
+          ),
+          linear-gradient(to bottom, var(--mrizka) 1px, transparent 1px);
+        background-size: 40px 40px;
+        mix-blend-mode: screen;
+        pointer-events: none;
+      }
+
+      .obal {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      canvas {
+        max-width: 100%;
+        max-height: 100%;
+        display: block;
+      }
+
+      .popisek {
+        position: fixed;
+        left: 12px;
+        bottom: 10px;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="obal">
+      <canvas id="oblek-platno"></canvas>
+    </div>
+    <div class="popisek">
+      VaFT • Oblak / Oblek • připravený prostor pro motor světa \\{*(°•.)(.•°)*}//
+    </div>
+
+    <script>
+      // *(°•.)(.•°)*}//  VaFT • Oblek / Oblak – základní konstrukce
+      // Vnější obrys = oválný drátěný "oblak", uvnitř zatím prázdný prostor pro budoucí motor.
+
+      const platno = document.getElementById("oblek-platno");
+      const ctx = platno.getContext("2d");
+
+      function nastavPlatnoNaOkno() {
+        const sirkaOkna = window.innerWidth;
+        const vyskaOkna = window.innerHeight;
+
+        const dpr = window.devicePixelRatio || 1;
+        platno.width = sirkaOkna * dpr;
+        platno.height = vyskaOkna * dpr;
+        platno.style.width = sirkaOkna + "px";
+        platno.style.height = vyskaOkna + "px";
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function kresliOblek() {
+        const w = platno.clientWidth;
+        const h = platno.clientHeight;
+
+        ctx.clearRect(0, 0, w, h);
+
+        const stredX = w / 2;
+        const stredY = h / 2;
+
+        // velikost oválu – trošku vyšší než širší
+        const polomerX = Math.min(w, h) * 0.25;
+        const polomerY = polomerX * 1.9;
+
+        // background glow
+        const grd = ctx.createRadialGradient(
+          stredX,
+          stredY,
+          polomerX * 0.1,
+          stredX,
+          stredY,
+          polomerY * 1.1
+        );
+        grd.addColorStop(0, "rgba(255, 217, 119, 0.15)");
+        grd.addColorStop(0.4, "rgba(255, 217, 119, 0.04)");
+        grd.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = "#ffd977";
+        ctx.shadowColor = "rgba(255, 220, 150, 0.55)";
+        ctx.shadowBlur = 10;
+
+        // funkce pro převod (u, v) → 2D (oválný "mrak" kolem)
+        // u = výška (-1..1), v = úhel (0..2π)
+        function proj(u, v) {
+          // tvar – trochu špičatější nahoře/dole
+          const r = Math.sqrt(1 - Math.pow(u, 2) * 0.25);
+          const x3d = r * Math.cos(v);
+          const z3d = r * Math.sin(v);
+          const y3d = u;
+
+          const zScale = 0.4;
+          const x2d = x3d * polomerX * (1 + z3d * zScale);
+          const y2d = y3d * polomerY * (1 + z3d * zScale * 0.6);
+
+          return {
+            x: stredX + x2d,
+            y: stredY + y2d,
+          };
+        }
+
+        // 1) obrys oválu (pohled zepředu)
+        ctx.beginPath();
+        for (let i = 0; i <= 160; i++) {
+          const t = (i / 160) * Math.PI * 2;
+          const x = stredX + polomerX * Math.cos(t);
+          const y = stredY + polomerY * Math.sin(t);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // 2) horizontální "švy" (šířka)
+        const pocetPruhu = 11;
+        for (let j = 0; j <= pocetPruhu; j++) {
+          const u = -1 + (2 * j) / pocetPruhu; // -1..1
+          ctx.beginPath();
+          const kroky = 140;
+          for (let i = 0; i <= kroky; i++) {
+            const v = (i / kroky) * Math.PI * 2;
+            const p = proj(u, v);
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+          }
+          ctx.stroke();
+        }
+
+        // 3) vertikální "meridiány"
+        const pocetMeridianu = 12;
+        const krokyVyska = 80;
+        for (let k = 0; k < pocetMeridianu; k++) {
+          const v = (k / pocetMeridianu) * Math.PI * 2;
+          ctx.beginPath();
+          for (let i = 0; i <= krokyVyska; i++) {
+            const u = -1 + (2 * i) / krokyVyska;
+            const p = proj(u, v);
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+          }
+          ctx.stroke();
+        }
+
+        // 4) jemné vnitřní elipsy – hrubé naznačení prostoru pro motor
+        ctx.shadowBlur = 6;
+        ctx.lineWidth = 1;
+
+        const vnitrnyR = polomerX * 0.55;
+        const vnitrnyY = polomerY * 0.35;
+        ctx.beginPath();
+        for (let i = 0; i <= 80; i++) {
+          const t = (i / 80) * Math.PI * 2;
+          const x = stredX + vnitrnyR * Math.cos(t);
+          const y = stredY + vnitrnyY * Math.sin(t);
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // 5) místo pro motor – jen malý náznak "kotvy"
+        ctx.shadowBlur = 12;
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(stredX, stredY, polomerX * 0.15, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+      }
+
+      function prekresli() {
+        nastavPlatnoNaOkno();
+        kresliOblek();
+      }
+
+      window.addEventListener("resize", prekresli);
+      prekresli();
+    </script>
+  </body>
+</html>
