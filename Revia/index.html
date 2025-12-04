@@ -1,269 +1,124 @@
 <!doctype html>
 <html lang="cs">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Revia • Vivere atque FruiT</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Revia • Vivere atque FruiT</title>
 
-    <link rel="stylesheet" href="./revia.css?v=0.6">
-    <style>
-      body {
-        background-size: auto 70vh;
-        background-position: center 18vh;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-        background-color: #000;
-      }
-      @media (max-height: 820px) {
-        body { background-size: auto 68vh; background-position: center 20vh; }
-      }
-      @media (min-height: 900px) {
-        body { background-size: auto 78vh; background-position: center 15vh; }
-      }
-      @media (max-width: 480px) {
-        body { background-size: auto 88vh; background-position: center 0; }
-      }
+  <link rel="stylesheet" href="./revia.css?v=0.6">
 
-      /* ً&’」 Revia avatar / postavička  */
+  <style>
+    body {
+      background-size: auto 70vh;
+      background-position: center 18vh;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-color: #000;
+      transition: background-image 0.4s ease;
+    }
+    @media (max-height: 820px) {
+      body { background-size: auto 68vh; background-position: center 20vh; }
+    }
+    @media (min-height: 900px) {
+      body { background-size: auto 78vh; background-position: center 15vh; }
+    }
+    @media (max-width: 480px) {
+      body { background-size: auto 88vh; background-position: center 0; }
+    }
 
-      .revia-avatar {
-        position: relative;
-        max-width: 230px;
-        margin: 14vh auto 2.4rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        pointer-events: none;
-      }
+    /* malá animace pro přechod do hlavního indexu */
+    .revia-core-opening {
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity 0.22s ease, transform 0.22s ease;
+    }
+  </style>
+</head>
 
-      @media (max-width: 480px) {
-        .revia-avatar {
-          margin-top: 10vh;
-          max-width: 200px;
-        }
-      }
+<body data-mode="angel" data-control="ai">
 
-      .revia-avatar-orbit {
-        width: 100%;
-        padding-top: 100%;
-        border-radius: 999px;
-        position: relative;
-        box-shadow:
-          0 0 30px rgba(255, 80, 150, 0.8),
-          0 0 0 1px rgba(255, 180, 220, 0.7);
-        background: radial-gradient(circle at 30% 20%, rgba(255, 230, 255, 0.18), rgba(0, 0, 0, 0.9));
-        overflow: hidden;
-      }
+  <div class="revia-main">
 
-      .revia-avatar-core {
-        position: absolute;
-        inset: 18%;
-        border-radius: 999px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.3rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        text-align: center;
-        box-shadow:
-          0 0 25px rgba(255, 120, 190, 0.9),
-          0 0 0 1px rgba(255, 220, 240, 0.9);
-      }
-
-      .revia-avatar-glyph {
-        opacity: 0.96;
-      }
-
-      .revia-avatar-ring {
-        position: absolute;
-        inset: 8%;
-        border-radius: 999px;
-        border: 1px dashed rgba(255, 150, 210, 0.65);
-        animation: reviaOrbitKruh 12s linear infinite;
-      }
-
-      .revia-avatar-ring::before,
-      .revia-avatar-ring::after {
-        content: "";
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        border-radius: 999px;
-        top: 50%;
-        transform: translateY(-50%);
-        box-shadow: 0 0 14px rgba(255, 255, 255, 0.9);
-      }
-
-      .revia-avatar-ring::before {
-        left: 2%;
-      }
-      .revia-avatar-ring::after {
-        right: 2%;
-      }
-
-      .revia-avatar-label {
-        margin-top: 0.7rem;
-        text-align: center;
-        font-size: 0.8rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        opacity: 0.9;
-      }
-
-      .revia-avatar-role {
-        display: block;
-        font-size: 0.7rem;
-        opacity: 0.75;
-        letter-spacing: 0.16em;
-      }
-
-      /* Angel / Daemon nálada podle data-mode na .revia-main */
-
-      .revia-main[data-mode="angel"] .revia-avatar-core {
-        background: radial-gradient(circle at 30% 20%, #ffffff, #e9ecff10, #000000);
-        color: #fef9ff;
-      }
-
-      .revia-main[data-mode="angel"] .revia-avatar-orbit {
-        box-shadow:
-          0 0 32px rgba(90, 190, 255, 0.9),
-          0 0 0 1px rgba(190, 240, 255, 0.8);
-      }
-
-      .revia-main[data-mode="daemon"] .revia-avatar-core {
-        background: radial-gradient(circle at 20% 15%, #ffb7c4, #2a0008, #000000);
-        color: #ffeef7;
-      }
-
-      .revia-main[data-mode="daemon"] .revia-avatar-orbit {
-        box-shadow:
-          0 0 36px rgba(255, 40, 90, 1),
-          0 0 0 1px rgba(255, 140, 170, 0.9);
-      }
-
-      .revia-main[data-mode="daemon"] .revia-avatar-ring {
-        border-color: rgba(255, 90, 120, 0.9);
-      }
-
-      @keyframes reviaOrbitKruh {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="revia-main" data-mode="angel" data-control="ai" data-world="vafiti">
-      
-      <!-- horní lišta -->
-      <div class="revia-topbar">
-        <button class="revia-wing" id="revWing" aria-label="otevřít zápisník"></button>
-        <div class="revia-title">Revia</div>
-        <div class="revia-state" id="revState">AI: hlídám svět</div>
-      </div>
-
-      <!-- zápisník -->
-      <div class="revia-notes" id="revNotes">
-        <div class="notes-head">
-          <span>✧ Křídlo / zápis</span>
-          <button id="notesClose" type="button">×</button>
-        </div>
-        <textarea id="notesText" placeholder="Charakter, úkoly, komu se ukáže…"></textarea>
-        <p class="notes-foot">Ukládá se jen do tohoto zařízení.</p>
-      </div>
-
-      <!-- postavička / avatar Revie -->
-      <div class="revia-avatar" aria-hidden="true">
-        <div class="revia-avatar-orbit">
-          <div class="revia-avatar-ring"></div>
-          <div class="revia-avatar-core">
-            <span class="revia-avatar-glyph">「Ī’☆</span>
-          </div>
-        </div>
-        <div class="revia-avatar-label">
-          <span class="revia-avatar-name">Revia</span>
-          <span class="revia-avatar-role">AI strážce světa</span>
-        </div>
-      </div>
-
-      <!-- mřížka slotů -->
-      <div class="revia-card">
-        <button class="revia-slot active" id="slot1" type="button">
-          <span class="revia-glyph" id="slot1Glyph">「Ī’☆</span>
-        </button>
-        <button class="revia-slot" type="button"></button>
-        <button class="revia-slot" type="button"></button>
-        <button class="revia-slot" type="button"></button>
-        <button class="revia-slot" type="button"></button>
-        <button class="revia-slot" type="button"></button>
-      </div>
-
-      <!-- spodní panel -->
-      <div class="revia-bottom">
-        <div class="revia-mini">Ī’♡</div>
-        <button class="revia-enter" id="revEnter" type="button">🔒 Vstoupit</button>
-        <button class="revia-toggle" id="revToggle" type="button">🔁 Přepnout</button>
-        <button class="revia-rotate" id="revRotate" type="button">🌀 Otočit svět</button>
-      </div>
-
-      <div class="revia-toast" id="revToast" aria-live="polite"></div>
+    <!-- TOPBAR -->
+    <div class="revia-topbar">
+      <button class="revia-wing" id="revWing" aria-label="otevřít zápisník"></button>
+      <div class="revia-title">Revia</div>
+      <div class="revia-state" id="revState">AI: hlídám svět</div>
     </div>
 
-    <!-- REVIA ROTATION MODULE -->
-    <script>
-      // …iT… jednoduchá rotace tří světů + malý toast od Revie
+    <!-- ZÁPISNÍK -->
+    <div class="revia-notes" id="revNotes">
+      <div class="notes-head">
+        <span>✧ Křídlo / zápis</span>
+        <button id="notesClose" type="button">×</button>
+      </div>
+      <textarea id="notesText" placeholder="Charakter, úkoly, poznámky…"></textarea>
+      <p class="notes-foot">Ukládá se pouze do tohoto zařízení.</p>
+    </div>
 
-      const SVETY = ["vafiti", "glyph", "engine"];
-      const SVETY_POPIS = {
-        vafiti: "VaF'i'T – svět písmenek",
-        glyph: "Glyph – kód a symboly",
-        engine: "Centrum – motor světa"
-      };
-      let aktualniSvet = 0;
+    <!-- SLOTY / DOVEDNOSTI -->
+    <div class="revia-card">
 
-      function reviaZobrazToast(zprava) {
-        const toast = document.getElementById("revToast");
-        if (!toast) return;
+      <!-- HLAVNÍ GLYPH SYSTÉMU (ODKAZ NA HLAVNÍ INDEX) -->
+      <button class="revia-slot active revia-slot-core" id="revCoreSlot" type="button">
+        <span class="revia-glyph">ً&’」</span>
+      </button>
 
-        toast.textContent = zprava;
-        toast.classList.add("is-visible");
+      <!-- ostatní sloty (zatím prázdné) -->
+      <button class="revia-slot" type="button"></button>
+      <button class="revia-slot" type="button"></button>
+      <button class="revia-slot" type="button"></button>
+      <button class="revia-slot" type="button"></button>
+      <button class="revia-slot" type="button"></button>
 
-        clearTimeout(window.__revToastTimer);
-        window.__revToastTimer = setTimeout(() => {
-          toast.classList.remove("is-visible");
-        }, 2200);
-      }
+    </div>
 
-      function reviaOtocSvet() {
-        aktualniSvet = (aktualniSvet + 1) % SVETY.length;
-        const novySvet = SVETY[aktualniSvet];
+    <!-- SPODNÍ PANEL -->
+    <div class="revia-bottom">
+      <div class="revia-mini">Ī’♡</div>
+      <button class="revia-enter" id="revEnter" type="button">🔒 Vstoupit</button>
+      <button class="revia-toggle" id="revToggle" type="button">🔁 Přepnout</button>
+      <button class="revia-help" id="revHelp" type="button">?</button>
+    </div>
 
-        console.log("Revia otočila svět na:", novySvet);
-        document.body.setAttribute("data-world", novySvet);
+    <div class="revia-toast" id="revToast" aria-live="polite"></div>
 
-        const root = document.querySelector(".revia-main");
-        if (root) {
-          root.setAttribute("data-world", novySvet);
-        }
+  </div>
 
-        const popis = SVETY_POPIS[novySvet] || novySvet;
-        reviaZobrazToast("Otočeno na: " + popis);
-      }
 
-      document.addEventListener("DOMContentLoaded", () => {
-        const tlacitkoOtoc = document.getElementById("revRotate");
-        if (tlacitkoOtoc) {
-          tlacitkoOtoc.addEventListener("click", reviaOtocSvet);
-        }
-      });
-    </script>
+  <!-- REVIA LIGHT/WORLD ROTATION TEST -->
+  <script>
+    const WORLD = ["vafiti", "glyph", "engine"];
+    let current = 0;
 
-    <script src="./revia.js?v=0.6"></script>
-    <script src="../vaft-core.js"></script>
-  </body>
+    function reviaRotate() {
+      current = (current + 1) % WORLD.length;
+      document.body.setAttribute("data-world", WORLD[current]);
+    }
+  </script>
+
+  <!-- TEST BUTTON (ponechán) -->
+  <button onclick="reviaRotate()"
+    style="position:fixed;bottom:20px;right:20px;padding:12px;background:#444;color:white;border:none;border-radius:6px;">
+    🔄 Otočit svět
+  </button>
+
+
+  <!-- ODKAZ NA HLAVNÍ INDEX / CELÝ SYSTÉM -->
+  <script>
+    const REVIA_CORE_URL = "../index.html"; // hlavní systém VaFT
+
+    const revCoreSlot = document.getElementById("revCoreSlot");
+    revCoreSlot.addEventListener("click", () => {
+      document.body.classList.add("revia-core-opening");
+      setTimeout(() => {
+        window.location.href = REVIA_CORE_URL;
+      }, 220);
+    });
+  </script>
+
+  <script src="./revia.js?v=0.6"></script>
+  <script src="../vaft-core.js"></script>
+
+</body>
 </html>
