@@ -23,18 +23,149 @@
       @media (max-width: 480px) {
         body { background-size: auto 88vh; background-position: center 0; }
       }
+
+      /* ً&’」 Revia avatar / postavička  */
+
+      .revia-avatar {
+        position: relative;
+        max-width: 230px;
+        margin: 14vh auto 2.4rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        pointer-events: none;
+      }
+
+      @media (max-width: 480px) {
+        .revia-avatar {
+          margin-top: 10vh;
+          max-width: 200px;
+        }
+      }
+
+      .revia-avatar-orbit {
+        width: 100%;
+        padding-top: 100%;
+        border-radius: 999px;
+        position: relative;
+        box-shadow:
+          0 0 30px rgba(255, 80, 150, 0.8),
+          0 0 0 1px rgba(255, 180, 220, 0.7);
+        background: radial-gradient(circle at 30% 20%, rgba(255, 230, 255, 0.18), rgba(0, 0, 0, 0.9));
+        overflow: hidden;
+      }
+
+      .revia-avatar-core {
+        position: absolute;
+        inset: 18%;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        text-align: center;
+        box-shadow:
+          0 0 25px rgba(255, 120, 190, 0.9),
+          0 0 0 1px rgba(255, 220, 240, 0.9);
+      }
+
+      .revia-avatar-glyph {
+        opacity: 0.96;
+      }
+
+      .revia-avatar-ring {
+        position: absolute;
+        inset: 8%;
+        border-radius: 999px;
+        border: 1px dashed rgba(255, 150, 210, 0.65);
+        animation: reviaOrbitKruh 12s linear infinite;
+      }
+
+      .revia-avatar-ring::before,
+      .revia-avatar-ring::after {
+        content: "";
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        top: 50%;
+        transform: translateY(-50%);
+        box-shadow: 0 0 14px rgba(255, 255, 255, 0.9);
+      }
+
+      .revia-avatar-ring::before {
+        left: 2%;
+      }
+      .revia-avatar-ring::after {
+        right: 2%;
+      }
+
+      .revia-avatar-label {
+        margin-top: 0.7rem;
+        text-align: center;
+        font-size: 0.8rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        opacity: 0.9;
+      }
+
+      .revia-avatar-role {
+        display: block;
+        font-size: 0.7rem;
+        opacity: 0.75;
+        letter-spacing: 0.16em;
+      }
+
+      /* Angel / Daemon nálada podle data-mode na .revia-main */
+
+      .revia-main[data-mode="angel"] .revia-avatar-core {
+        background: radial-gradient(circle at 30% 20%, #ffffff, #e9ecff10, #000000);
+        color: #fef9ff;
+      }
+
+      .revia-main[data-mode="angel"] .revia-avatar-orbit {
+        box-shadow:
+          0 0 32px rgba(90, 190, 255, 0.9),
+          0 0 0 1px rgba(190, 240, 255, 0.8);
+      }
+
+      .revia-main[data-mode="daemon"] .revia-avatar-core {
+        background: radial-gradient(circle at 20% 15%, #ffb7c4, #2a0008, #000000);
+        color: #ffeef7;
+      }
+
+      .revia-main[data-mode="daemon"] .revia-avatar-orbit {
+        box-shadow:
+          0 0 36px rgba(255, 40, 90, 1),
+          0 0 0 1px rgba(255, 140, 170, 0.9);
+      }
+
+      .revia-main[data-mode="daemon"] .revia-avatar-ring {
+        border-color: rgba(255, 90, 120, 0.9);
+      }
+
+      @keyframes reviaOrbitKruh {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
     </style>
   </head>
 
   <body>
-    <div class="revia-main" data-mode="angel" data-control="ai">
+    <div class="revia-main" data-mode="angel" data-control="ai" data-world="vafiti">
       
       <!-- horní lišta -->
       <div class="revia-topbar">
-  <button class="revia-wing" id="revWing" aria-label="otevřít zápisník"></button>
-  <div class="revia-title">Revia</div>
-  <div class="revia-state" id="revState">AI: hlídám svět</div>
-</div>
+        <button class="revia-wing" id="revWing" aria-label="otevřít zápisník"></button>
+        <div class="revia-title">Revia</div>
+        <div class="revia-state" id="revState">AI: hlídám svět</div>
+      </div>
 
       <!-- zápisník -->
       <div class="revia-notes" id="revNotes">
@@ -44,6 +175,20 @@
         </div>
         <textarea id="notesText" placeholder="Charakter, úkoly, komu se ukáže…"></textarea>
         <p class="notes-foot">Ukládá se jen do tohoto zařízení.</p>
+      </div>
+
+      <!-- postavička / avatar Revie -->
+      <div class="revia-avatar" aria-hidden="true">
+        <div class="revia-avatar-orbit">
+          <div class="revia-avatar-ring"></div>
+          <div class="revia-avatar-core">
+            <span class="revia-avatar-glyph">「Ī’☆</span>
+          </div>
+        </div>
+        <div class="revia-avatar-label">
+          <span class="revia-avatar-name">Revia</span>
+          <span class="revia-avatar-role">AI strážce světa</span>
+        </div>
       </div>
 
       <!-- mřížka slotů -->
@@ -60,34 +205,65 @@
 
       <!-- spodní panel -->
       <div class="revia-bottom">
-  <div class="revia-mini">Ī’♡</div>
-  <button class="revia-enter" id="revEnter" type="button">🔒 Vstoupit</button>
-  <button class="revia-toggle" id="revToggle" type="button">🔁 Přepnout</button>
-  <button class="revia-help" id="revHelp" type="button">?</button>
-</div>
+        <div class="revia-mini">Ī’♡</div>
+        <button class="revia-enter" id="revEnter" type="button">🔒 Vstoupit</button>
+        <button class="revia-toggle" id="revToggle" type="button">🔁 Přepnout</button>
+        <button class="revia-rotate" id="revRotate" type="button">🌀 Otočit svět</button>
+      </div>
 
-    <div class="revia-toast" id="revToast" aria-live="polite"></div>
-  </div>
+      <div class="revia-toast" id="revToast" aria-live="polite"></div>
+    </div>
 
-  <!-- SEM VLOŽIT REVIA ROTATION MODULE -->
-  <script>
-    const WORLD = ["vafiti", "glyph", "engine"];
-    let current = 0;
+    <!-- REVIA ROTATION MODULE -->
+    <script>
+      // …iT… jednoduchá rotace tří světů + malý toast od Revie
 
-    function reviaRotate() {
-      current = (current + 1) % WORLD.length;
-      console.log("Revia otočila svět na:", WORLD[current]);
-      document.body.setAttribute("data-world", WORLD[current]);
-    }
-  </script>
+      const SVETY = ["vafiti", "glyph", "engine"];
+      const SVETY_POPIS = {
+        vafiti: "VaF'i'T – svět písmenek",
+        glyph: "Glyph – kód a symboly",
+        engine: "Centrum – motor světa"
+      };
+      let aktualniSvet = 0;
 
-  <!-- tlačítko (zatím test) -->
-  <button onclick="reviaRotate()" 
-    style="position:fixed;bottom:20px;right:20px;padding:12px;background:#444;color:white;border:none;border-radius:6px;">
-    🔄 Otočit svět
-  </button>
+      function reviaZobrazToast(zprava) {
+        const toast = document.getElementById("revToast");
+        if (!toast) return;
 
-  <script src="./revia.js?v=0.6"></script>
-  <script src="../vaft-core.js"></script>
-</body>
+        toast.textContent = zprava;
+        toast.classList.add("is-visible");
+
+        clearTimeout(window.__revToastTimer);
+        window.__revToastTimer = setTimeout(() => {
+          toast.classList.remove("is-visible");
+        }, 2200);
+      }
+
+      function reviaOtocSvet() {
+        aktualniSvet = (aktualniSvet + 1) % SVETY.length;
+        const novySvet = SVETY[aktualniSvet];
+
+        console.log("Revia otočila svět na:", novySvet);
+        document.body.setAttribute("data-world", novySvet);
+
+        const root = document.querySelector(".revia-main");
+        if (root) {
+          root.setAttribute("data-world", novySvet);
+        }
+
+        const popis = SVETY_POPIS[novySvet] || novySvet;
+        reviaZobrazToast("Otočeno na: " + popis);
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const tlacitkoOtoc = document.getElementById("revRotate");
+        if (tlacitkoOtoc) {
+          tlacitkoOtoc.addEventListener("click", reviaOtocSvet);
+        }
+      });
+    </script>
+
+    <script src="./revia.js?v=0.6"></script>
+    <script src="../vaft-core.js"></script>
+  </body>
 </html>
