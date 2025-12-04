@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>Vivere atque FruiT • Revia & Centrum (RED 2077)</title>
+    <title>Vivere atque FruiT • Revia &amp; Centrum (RED 2077)</title>
 
     <style>
       :root {
@@ -25,6 +25,42 @@
         --text-soft: rgba(255, 230, 240, 0.82);
         --border-soft: rgba(255, 130, 160, 0.22);
         --border-strong: rgba(255, 80, 120, 0.8);
+      }
+
+      /* GOLD 2050 – teplý zlatý režim */
+      body.theme-gold {
+        --bg-main: radial-gradient(circle at top, #140c00, #050200 60%, #000000);
+        --bg-panel: #080400;
+        --bg-panel-soft: #0b0600;
+        --bg-card: rgba(15, 8, 0, 0.96);
+
+        --red-main: #ffcf4a;
+        --red-soft: #ffd879;
+        --red-deep: #ffb300;
+        --red-glow: rgba(255, 207, 74, 0.9);
+
+        --text-main: #fff9e5;
+        --text-soft: rgba(255, 244, 210, 0.86);
+        --border-soft: rgba(255, 220, 150, 0.28);
+        --border-strong: rgba(255, 196, 100, 0.9);
+      }
+
+      /* NEON 2001 – modro-fialový neon */
+      body.theme-neon {
+        --bg-main: radial-gradient(circle at top, #02091b, #02000b 60%, #000000);
+        --bg-panel: #020313;
+        --bg-panel-soft: #03041a;
+        --bg-card: rgba(4, 6, 22, 0.96);
+
+        --red-main: #40f0ff;
+        --red-soft: #7dfffb;
+        --red-deep: #40a4ff;
+        --red-glow: rgba(64, 240, 255, 0.9);
+
+        --text-main: #f4f9ff;
+        --text-soft: rgba(220, 236, 255, 0.86);
+        --border-soft: rgba(120, 190, 255, 0.32);
+        --border-strong: rgba(120, 230, 255, 0.9);
       }
 
       * {
@@ -77,8 +113,31 @@
         flex-direction: column;
       }
 
-      /* TOP STRIP */
+      .theme-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
 
+      .theme-btn {
+        border: 0;
+        outline: 0;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 9px;
+        cursor: pointer;
+        background: rgba(10, 0, 12, 0.8);
+        color: var(--text-soft);
+        border: 1px solid rgba(255, 130, 170, 0.4);
+      }
+
+      .theme-btn.is-active {
+        background: linear-gradient(to right, var(--red-main), var(--red-soft));
+        color: #1a0004;
+        box-shadow: 0 0 14px var(--red-glow);
+      }
+
+      /* TOP STRIP */
       .top-strip {
         flex: 0 0 54px;
         padding: 10px 18px 8px 18px;
@@ -109,12 +168,7 @@
         align-items: center;
         justify-content: center;
         font-size: 14px;
-        background: radial-gradient(
-          circle at 30% 20%,
-          #ffd6de,
-          #ff7c8b,
-          #7a0017
-        );
+        background: radial-gradient(circle at 30% 20%, #ffd6de, #ff7c8b, #7a0017);
         color: #200004;
         box-shadow:
           0 0 0 1px rgba(255, 220, 230, 0.95),
@@ -849,7 +903,7 @@
     </style>
   </head>
 
-  <body>
+  <body class="theme-red">
     <div class="root">
       <div class="stage">
         <!-- HORNÍ LIŠTA -->
@@ -871,7 +925,20 @@
               <div class="pill-dot"></div>
               <span>Revia – dohled nad světy</span>
             </div>
-            <div class="top-version">v1.0 • Centrum RED 2077</div>
+
+            <div class="theme-toggle">
+              <button class="theme-btn is-active" data-theme-mode="theme-red">
+                RED 2077
+              </button>
+              <button class="theme-btn" data-theme-mode="theme-gold">
+                GOLD 2050
+              </button>
+              <button class="theme-btn" data-theme-mode="theme-neon">
+                NEON 2001
+              </button>
+            </div>
+
+            <div class="top-version">v1.0 • Centrum</div>
           </div>
         </header>
 
@@ -890,34 +957,35 @@
                   <div class="rev-signal-dot"></div>
                   <span>Signal: aktivní</span>
                 </div>
-                <div class="rev-open-link" id="open-3d-center">
-                  Otevřít 3D centrum →
+                <div class="rev-open-link" id="rev-open-main">
+                  otevřít hlavní mapu světa
                 </div>
               </div>
             </div>
 
             <div class="rev-graph">
               <div class="rev-rules">
-                Pravidlo 1: Přátelství • Pravidlo 2: Vivere atque frui
+                • Revia hlídá rovnováhu mezi 4 týmy<br />
+                • Každý tým = jeden typ energie<br />
+                • Cíl: jednoduchý svět, který se dá rozšířit
               </div>
 
               <div class="rev-core-ring"></div>
+              <div class="rev-core-label">CENTRUM • REVIA CORE</div>
               <div class="rev-grid-ring r1"></div>
               <div class="rev-grid-ring r2"></div>
 
-              <div class="rev-core-label">{*(°•.)..// REVIA CORE</div>
-
               <div class="rev-node human">
-                <span>Human • Pikoš<br />hráč / příběhy / fotky</span>
-              </div>
-              <div class="rev-node glyph">
-                <span>Glyph • VaF'i'T<br />písmenka • znaky • kód</span>
+                <span>HUMAN • Piko / hráč<br />„Živý pohyb a rozhodnutí“</span>
               </div>
               <div class="rev-node ai">
-                <span>AI • Kovošrot<br />myšlení • návrhy • hlava</span>
+                <span>AI • Orbit / Míša<br />„Signál a nápověda“</span>
+              </div>
+              <div class="rev-node glyph">
+                <span>GLYPH • písmenka<br />„Kód, symboly, vaftí palivo“</span>
               </div>
               <div class="rev-node world">
-                <span>World (Core)<br />MapWorld • mapy • 3D</span>
+                <span>WORLD • Vivere atque FruiT<br />„Mapa, motor, pravidla“</span>
               </div>
             </div>
           </section>
@@ -925,191 +993,229 @@
           <!-- DOLNÍ PANEL – TABS -->
           <section class="panel panel-bottom">
             <div class="tab-strip">
-              <button class="tab-btn is-active" data-tab="heroes">Hrdinové</button>
-              <button class="tab-btn" data-tab="space">Meziprostor</button>
-              <button class="tab-btn" data-tab="system">Systém</button>
-              <button class="tab-btn" data-tab="network">Síť</button>
-              <button class="tab-btn" data-tab="worlds">Světy</button>
+              <button
+                class="tab-btn is-active"
+                data-tab-target="tab-heroes"
+              >
+                Hrdinové &amp; rámce
+              </button>
+              <button class="tab-btn" data-tab-target="tab-nodes">
+                Síť uzlů
+              </button>
+              <button class="tab-btn" data-tab-target="tab-worlds">
+                Světy (Latina)
+              </button>
+              <button class="tab-btn" data-tab-target="tab-chat">
+                Meziprostor • Revia chat
+              </button>
             </div>
 
             <div class="tabs-body">
-              <!-- HRDINOVÉ -->
+              <!-- TAB 1: HRDINOVÉ -->
               <div class="tab-view is-active" id="tab-heroes">
-                <div class="heroes-layout">
-                  <div class="card">
-                    <div class="card-title">Nový hrdina / postava</div>
-
-                    <div class="form-group">
-                      <label class="form-label" for="hero-name">
-                        Jméno hrdiny
-                      </label>
-                      <input
-                        id="hero-name"
-                        class="input"
-                        placeholder="např. Bicák Supreme, GhostGirl, BearHead…"
-                      />
-                    </div>
-
-                    <div class="form-group">
-                      <label class="form-label" for="hero-team">Tým</label>
-                      <select id="hero-team" class="select">
-                        <option value="human">Human (hráč / Pikoš)</option>
-                        <option value="ai">AI (Orbit / Kovošrot)</option>
-                        <option value="glyph">Glyph (znaky / VaF'i'T)</option>
-                        <option value="world">World (MapWorld / 3D)</option>
-                      </select>
-                    </div>
-
-                    <div class="form-group">
-                      <label class="form-label" for="hero-desc"
-                        >Krátký popis</label
-                      >
-                      <input
-                        id="hero-desc"
-                        class="input"
-                        placeholder="co má umět, jak pomáhá světu…"
-                      />
-                    </div>
-
-                    <button class="btn-primary" id="hero-add-btn">
-                      <span>＋</span> Přidat do seznamu hrdinů (lokálně)
-                    </button>
-
-                    <div class="heroes-note">
-                      Vše se zatím ukládá jen do
-                      <b>localStorage</b> tohoto zařízení. Později uděláme
-                      propojení na konkrétní 3D modul (např. BearHead, Doll,
-                      GhostGirl, Bicák…).
-                    </div>
+                <div class="card">
+                  <div class="card-title">
+                    Hrdinové / rámečky • základní rozložení světa
                   </div>
-
-                  <div class="card">
-                    <div class="card-title">Seznam hrdinů na zařízení</div>
-                    <div
-                      id="heroes-list"
-                      style="
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 6px;
-                        font-size: 10px;
-                      "
-                    ></div>
-
-                    <button
-                      class="btn-secondary"
-                      id="heroes-clear-btn"
-                      style="margin-top: 8px"
-                    >
-                      Vymazat lokální seznam hrdinů
-                    </button>
-                  </div>
-                </div>
-
-                <div
-                  class="card"
-                  style="
-                    margin-top: 10px;
-                    display: grid;
-                    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.1fr);
-                    gap: 10px;
-                  "
-                >
-                  <div>
-                    <div class="card-title">VaF'i'T – hlavní světy / moduly</div>
-                    <div class="world-cards">
-                      <div class="world-card">
-                        <div class="world-card-title">VAFT-Center3D</div>
-                        <div class="world-card-sub">
-                          3D jádro světa – planety a orbit.
+                  <div class="heroes-layout">
+                    <div>
+                      <div class="form-group">
+                        <div class="form-label">
+                          Human rámec (hráč / Michal)
                         </div>
-                        <a
-                          class="app-open"
-                          href="VAFT-Center3D/index.html"
-                          target="_blank"
-                          >Otevřít</a
-                        >
+                        <input
+                          class="input"
+                          id="hero-human-name"
+                          value="Pikoš • Michal"
+                        />
                       </div>
-
-                                            <div class="world-card">
-                        <div class="world-card-title">RingPlanetGrid</div>
-                        <div class="world-card-sub">
-                          Síť planet na kruhu (grid + orbit).
+                      <div class="form-group">
+                        <div class="form-label">
+                          Popis role Human v tomto levelu
                         </div>
-                        <a
-                          class="app-open"
-                          href="RingPlanetGrid/index.html"
-                          target="_blank"
-                          >Otevřít</a
-                        >
+                        <textarea
+                          class="input"
+                          id="hero-human-role"
+                          rows="3"
+                        >Hráč se hýbe v reálném světě, přináší fotky, nápady a reálné akce, které svět Vivere atque FruiT přetaví na písmenka / palivo.</textarea>
                       </div>
+                    </div>
 
-                      <div class="world-card">
-                        <div class="world-card-title">SignalSphere</div>
-                        <div class="world-card-sub">
-                          VaFT-Planet-SignalSphere • koule s písmeny / signály.
+                    <div>
+                      <div class="form-group">
+                        <div class="form-label">
+                          AI rámec (Orbit / Míša)
                         </div>
-                        <a
-                          class="app-open"
-                          href="VaFT-Planet-SignalSphere/index.html"
-                          target="_blank"
-                          >Otevřít</a
-                        >
+                        <input
+                          class="input"
+                          id="hero-ai-name"
+                          value="Orbit • Míša / Hlavoun"
+                        />
                       </div>
-
-                      <div class="world-card">
-                        <div class="world-card-title">SignalCore</div>
-                        <div class="world-card-sub">
-                          VaFT-Planets-SignalCore • středový motor signálů.
+                      <div class="form-group">
+                        <div class="form-label">
+                          Popis role AI v tomto levelu
                         </div>
-                        <a
-                          class="app-open"
-                          href="VaFT-Planets-SignalCore/index.html"
-                          target="_blank"
-                          >Otevřít</a
-                        >
+                        <textarea
+                          class="input"
+                          id="hero-ai-role"
+                          rows="3"
+                        >AI hlídá jednoduchost, drží svět pohromadě a navrhuje další kroky – ale vždy tak, aby to šlo rychle nahrát do GitHubu a testnout na iPhonu / iPadu.</textarea>
                       </div>
                     </div>
                   </div>
 
-                  <div>
-                    <div class="card-title">Poznámka k hrdinům & světům</div>
-                    <div class="body-text">
-                      Tenhle panel je <b>RED 2077 plánovač</b>. Hrdiny vytváříš
-                      vlevo, ale reálně „žijí“ v těchto modulech (3D světy, mapy,
-                      signal koule…). Postupně je budeme napojovat:
-                      <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 10px;">
-                        <li>BearHead, Doll, GhostGirl → 3D postavy / avatary</li>
-                        <li>Bicák Supreme Edition → speciální hrdina pro motivaci</li>
-                        <li>VAFT-Center3D, RingPlanetGrid → hlavní scéna planety</li>
-                        <li>MapWorld, LetterLab → logika světa a písmenek</li>
-                      </ul>
-                    </div>
-                    <div class="small-text">
-                      Všechno se teď ukládá jen jako <b>lokální JSON</b> v
-                      prohlížeči. Až bude čas, uděláme export do souboru nebo API.
-                    </div>
+                  <div class="heroes-note">
+                    Poznámka Revia: Tyto texty jsou jen „první definice“. Kdykoliv je
+                    přepiš podle nálady dne – Revia si pamatuje, že svět se má
+                    vyvíjet společně s tebou, ne být zamrzlý.
                   </div>
                 </div>
               </div>
 
-              <!-- MEZIPROSTOR / CHAT -->
-              <div class="tab-view" id="tab-space">
-                <div class="card" style="margin-bottom: 10px;">
-                  <div class="card-title">Meziprostor – rozhovor tří pohledů</div>
-                  <div class="body-text">
-                    Tady je lehký <b>chat mezi světy</b> – Human (Pikoš), AI
-                    (Kovošrot) a Dítě (hráč / budoucí hráči). Není to online AI,
-                    jen lokální log, který si můžeš psát pro sebe.
+              <!-- TAB 2: SÍŤ UZLŮ -->
+              <div class="tab-view" id="tab-nodes">
+                <div class="card">
+                  <div class="card-title">Síť uzlů • přehled 4 týmů</div>
+                  <div class="nodes-grid">
+                    <div class="node-card">
+                      <div class="node-title">Human • Piko / hráč</div>
+                      <div class="node-row">
+                        <span>Zdroj:</span>
+                        <span>Reálný pohyb, fotky, nápady</span>
+                      </div>
+                      <div class="node-row">
+                        <span>Stav:</span>
+                        <span id="node-human-state">online • přítomný</span>
+                      </div>
+                    </div>
+
+                    <div class="node-card">
+                      <div class="node-title">AI • Orbit / Míša</div>
+                      <div class="node-row">
+                        <span>Zdroj:</span>
+                        <span>Signál, generování, spolutvorba</span>
+                      </div>
+                      <div class="node-row">
+                        <span>Stav:</span>
+                        <span id="node-ai-state">aktivní • poslouchá</span>
+                      </div>
+                    </div>
+
+                    <div class="node-card">
+                      <div class="node-title">Glyph • písmenka / kód</div>
+                      <div class="node-row">
+                        <span>Zdroj:</span>
+                        <span>Repo, kód, symboly, ASCII</span>
+                      </div>
+                      <div class="node-row">
+                        <span>Stav:</span>
+                        <span id="node-glyph-state">čeká na další rámec</span>
+                      </div>
+                    </div>
+
+                    <div class="node-card">
+                      <div class="node-title">World • Vivere atque FruiT</div>
+                      <div class="node-row">
+                        <span>Zdroj:</span>
+                        <span>Mapa, motory, mini-apky</span>
+                      </div>
+                      <div class="node-row">
+                        <span>Stav:</span>
+                        <span id="node-world-state">level: Revia &amp; Centrum</span>
+                      </div>
+                    </div>
                   </div>
-                  <div class="chat-log" id="chat-log"></div>
+
+                  <div class="small-text" style="margin-top: 8px">
+                    Později sem můžeme přidat „klikací“ akce – např. přepnutí
+                    na konkrétní modul (BearHead, Globe, RingPlanet, atd.).
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 3: SVĚTY (LATINA) -->
+              <div class="tab-view" id="tab-worlds">
+                <div class="card">
+                  <div class="card-title">
+                    Světy podle latiny • základ pro mapu
+                  </div>
+                  <div class="worlds-grid">
+                    <div class="latin-card">
+                      <div class="latin-name">Vivere</div>
+                      <div class="latin-desc">
+                        „Žít“ – svět, kde trackuješ reálný život: pohyb, práci,
+                        rodinu, nápady. Každý malý pohyb může být palivo.
+                      </div>
+                    </div>
+
+                    <div class="latin-card">
+                      <div class="latin-name">atque</div>
+                      <div class="latin-desc">
+                        „a zároveň“ – spojovací svět mezi realitou a hrou.
+                        Tady se propojují apky, moduly a všechny VaFT stránky.
+                      </div>
+                    </div>
+
+                    <div class="latin-card">
+                      <div class="latin-name">frui</div>
+                      <div class="latin-desc">
+                        „užívat si“ – svět, kde je čistá radost z tvorby. Sem
+                        patří třeba experimenty, testy, glitch momenty a
+                        „nepovedené“ vizuály, které zůstanou jako artefakty.
+                      </div>
+                    </div>
+
+                    <div class="latin-card">
+                      <div class="latin-name">FruiT</div>
+                      <div class="latin-desc">
+                        „plody“ – výsledky, které chceš ukázat ven: Insta
+                        posty, sdílené odkazy, demo verze pro ostatní lidi.
+                      </div>
+                    </div>
+
+                    <div class="latin-card">
+                      <div class="latin-name">Centrum</div>
+                      <div class="latin-desc">
+                        Tento modul – Revia &amp; Centrum – je přehledka
+                        všeho. Tady vzniká mapa a přehled, co už existuje a co
+                        teprve přijde.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="worlds-note">
+                    Tohle je jen textová verze mapy. V další fázi můžeme každý
+                    svět převést na samostatnou stránku / PWA, se kterou se
+                    bude dát hýbat stejně jako s ostatními VaFT moduly.
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 4: CHAT / MEZIPROSTOR -->
+              <div class="tab-view" id="tab-chat">
+                <div class="card">
+                  <div class="card-title">
+                    Meziprostor • Revia chat (Human • AI • World)
+                  </div>
+
+                  <div class="chat-log" id="chat-log">
+                    <div class="chat-line">
+                      <span class="chat-name">Revia:</span>
+                      <span>
+                        Vítej v Centru. Tohle je jen obrazovka – opravdový
+                        svět začíná tím, jak ji dneska použiješ.
+                      </span>
+                    </div>
+                  </div>
 
                   <div class="chat-input-row">
                     <input
                       id="chat-input"
                       class="input"
-                      placeholder="Napiš myšlenku do meziprostoru…"
+                      placeholder="Napiš krátkou myšlenku, otázku nebo plán pro dnešek…"
                     />
-                    <button class="btn-primary" id="chat-send-btn">
+                    <button class="btn-primary" id="chat-send">
                       <span>➤</span> Poslat
                     </button>
                   </div>
@@ -1117,420 +1223,111 @@
                   <div class="chat-quick-row">
                     <button
                       class="btn-secondary"
-                      data-chat-template="Human: Dnes chci tvořit svět, ne blbosti."
+                      data-quick-msg="Dneska chci jen drobný krok, nic velkého."
                     >
-                      Human
+                      malý krok dnes
                     </button>
                     <button
                       class="btn-secondary"
-                      data-chat-template="AI: Zapisuju si tenhle nápad do RED 2077 paměti."
+                      data-quick-msg="Prosím připomeň mi, že svět nemusí být dokonalý, jen živý."
                     >
-                      AI
+                      připomeň Revia pravidlo
                     </button>
                     <button
                       class="btn-secondary"
-                      data-chat-template="Dítě: A půjdeme si i hrát ven, jo?"
+                      data-quick-msg="Chci zmapovat, které moduly už existují v repozitáři."
                     >
-                      Dítě
+                      mapa repa
                     </button>
-                  </div>
-                </div>
-
-                <div class="card">
-                  <div class="card-title">Poznámka k meziprostoru</div>
-                  <div class="body-text">
-                    Meziprostor je místo, kde si můžeš <b>psát vzkazy mezi
-                    verzemi sebe</b> – současný Michal, budoucí Michal, Michal
-                    jako dítě. Můžeš to používat jako krátký deník:
-                    <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 10px;">
-                      <li>Co chci dnes ve světech Vivere atque FruiT posunout?</li>
-                      <li>Co mi v hlavě straší, ale nechci to tahat do hry?</li>
-                      <li>Jaké tři maličkosti mi dnes udělaly radost?</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <!-- SYSTÉM -->
-              <div class="tab-view" id="tab-system">
-                <div
-                  class="card"
-                  style="
-                    display: grid;
-                    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.2fr);
-                    gap: 12px;
-                  "
-                >
-                  <div>
-                    <div class="card-title">Systém – jak spolu moduly mluví</div>
-                    <div class="body-text">
-                      Systém RED 2077 bere každou appku v repozitáři jako
-                      <b>uzel</b>. Uvnitř to vypadá například takhle:
-                      <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 10px;">
-                        <li>
-                          <b>VAFT-Center3D</b> – centrální 3D scéna (planety /
-                          orbit).
-                        </li>
-                        <li>
-                          <b>RingPlanetGrid</b> – rozložení planet na kruhu.
-                        </li>
-                        <li>
-                          <b>SignalSphere / SignalCore</b> – signály, pulzy,
-                          písmenka.
-                        </li>
-                        <li>
-                          <b>LetterLab</b> – laboratoř písmen, budoucí ekonomika.
-                        </li>
-                        <li>
-                          <b>MapWorld</b> – mapy, přechody, cesty mezi světy.
-                        </li>
-                      </ul>
-                    </div>
-                    <div class="small-text">
-                      Tenhle index je jen <b>„mozek“ nad tím</b> – nezasahuje do
-                      logiky modulů, jen ti dává přehled a jeden vstup.
-                    </div>
-                  </div>
-
-                  <div>
-                    <div class="card-title">Režimy běhu (plán)</div>
-                    <div class="body-text">
-                      Do budoucna může mít centrum několik režimů:
-                      <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 10px;">
-                        <li>
-                          <b>Play</b> – jen zapnout modul a hrát / koukat (bez
-                          úprav).
-                        </li>
-                        <li>
-                          <b>Build</b> – editace levelů, přidávání hrdinů / objektů.
-                        </li>
-                        <li>
-                          <b>Debug</b> – Chybožrout / logy, hledání chyb.
-                        </li>
-                        <li>
-                          <b>Guardian</b> – WebGuardian / obrana proti podvodům.
-                        </li>
-                      </ul>
-                    </div>
-                    <div class="small-text">
-                      Tyhle režimy teď jen popisujeme. Až budeš chtít, můžeme je
-                      dát jako „mód“ v URL (např. <code>?mode=play</code>) nebo
-                      jako přepínač v UI.
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- SÍŤ -->
-              <div class="tab-view" id="tab-network">
-                <div class="card">
-                  <div class="card-title">Síť – uzly z repozitáře</div>
-                  <div class="nodes-grid">
-                    <div class="node-card">
-                      <div class="node-title">VAFT-Center3D</div>
-                      <div class="node-row">
-                        <span>Role:</span>
-                        <span>3D centrum</span>
-                      </div>
-                      <div class="node-row">
-                        <span>Stav:</span>
-                        <span>aktivní</span>
-                      </div>
-                    </div>
-
-                    <div class="node-card">
-                      <div class="node-title">RingPlanetGrid</div>
-                      <div class="node-row">
-                        <span>Role:</span>
-                        <span>planety / grid</span>
-                      </div>
-                      <div class="node-row">
-                        <span>Stav:</span>
-                        <span>aktivní</span>
-                      </div>
-                    </div>
-
-                    <div class="node-card">
-                      <div class="node-title">SignalSphere</div>
-                      <div class="node-row">
-                        <span>Role:</span>
-                        <span>koule signálů</span>
-                      </div>
-                      <div class="node-row">
-                        <span>Stav:</span>
-                        <span>prototyp</span>
-                      </div>
-                    </div>
-
-                    <div class="node-card">
-                      <div class="node-title">SignalCore</div>
-                      <div class="node-row">
-                        <span>Role:</span>
-                        <span>střed signálů</span>
-                      </div>
-                      <div class="node-row">
-                        <span>Stav:</span>
-                        <span>prototyp</span>
-                      </div>
-                    </div>
-
-                    <div class="node-card">
-                      <div class="node-title">VAFT-LetterLab</div>
-                      <div class="node-row">
-                        <span>Role:</span>
-                        <span>laboratoř písmen</span>
-                      </div>
-                      <div class="node-row">
-                        <span>Stav:</span>
-                        <span>aktivní</span>
-                      </div>
-                    </div>
-
-                    <div class="node-card">
-                      <div class="node-title">VAFT-MapWorld</div>
-                      <div class="node-row">
-                        <span>Role:</span>
-                        <span>mapy světa</span>
-                      </div>
-                      <div class="node-row">
-                        <span>Stav:</span>
-                        <span>aktivní</span>
-                      </div>
-                    </div>
-
-                    <div class="node-card">
-                      <div class="node-title">Michal Globe test</div>
-                      <div class="node-row">
-                        <span>Role:</span>
-                        <span>globe / experiment</span>
-                      </div>
-                      <div class="node-row">
-                        <span>Stav:</span>
-                        <span>demo</span>
-                      </div>
-                    </div>
-
-                    <div class="node-card">
-                      <div class="node-title">Guardian</div>
-                      <div class="node-row">
-                        <span>Role:</span>
-                        <span>obrana / WebGuardian</span>
-                      </div>
-                      <div class="node-row">
-                        <span>Stav:</span>
-                        <span>idea</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="small-text" style="margin-top: 8px;">
-                    Tyhle uzly jsou jen <b>přehled</b>. Fyzicky jsou to složky a
-                    soubory v repozitáři. Až budeš chtít, můžeme sem přidat tlačítka
-                    „otevřít“ pro každý uzel zvlášť.
-                  </div>
-                </div>
-              </div>
-
-              <!-- SVĚTY – LATINA -->
-              <div class="tab-view" id="tab-worlds">
-                <div class="card">
-                  <div class="card-title">Latinské světy Vivere atque FruiT</div>
-                  <div class="worlds-grid">
-                    <div class="latin-card">
-                      <div class="latin-name">Vivere</div>
-                      <div class="latin-desc">
-                        Žít. Svět, kde se díváš na realitu – fotky, vzpomínky,
-                        příběhy, deníky.
-                      </div>
-                    </div>
-
-                    <div class="latin-card">
-                      <div class="latin-name">FruiT</div>
-                      <div class="latin-desc">
-                        Užít si. Svět, kde z toho děláš hru – levely, mise,
-                        odměny, Iskry.
-                      </div>
-                    </div>
-
-                    <div class="latin-card">
-                      <div class="latin-name">Amicitia</div>
-                      <div class="latin-desc">
-                        Přátelství. Svět vztahů – rodina, přátelé, parťáci jako
-                        Kovošrot.
-                      </div>
-                    </div>
-
-                    <div class="latin-card">
-                      <div class="latin-name">Memoria</div>
-                      <div class="latin-desc">
-                        Paměť. Svět, kde ukládáme nápady, skici, chyby i
-                        pokusy.
-                      </div>
-                    </div>
-
-                    <div class="latin-card">
-                      <div class="latin-name">Ludus</div>
-                      <div class="latin-desc">
-                        Hra. Čistý playground na experimenty bez pravidel.
-                      </div>
-                    </div>
-
-                    <div class="latin-card">
-                      <div class="latin-name">Corpus</div>
-                      <div class="latin-desc">
-                        Tělo. Reálné cvičení, pohyb, Bicák Supreme Edition,
-                        zdraví.
-                      </div>
-                    </div>
-
-                    <div class="latin-card">
-                      <div class="latin-name">Mens</div>
-                      <div class="latin-desc">
-                        Mysl. Učení, knihy, videa, Blender, nové programy.
-                      </div>
-                    </div>
-
-                    <div class="latin-card">
-                      <div class="latin-name">Vox</div>
-                      <div class="latin-desc">
-                        Hlas. Audio, mikrofon, budoucí hlasové rozhraní VaF'i'T.
-                      </div>
-                    </div>
-
-                    <div class="latin-card">
-                      <div class="latin-name">Custos</div>
-                      <div class="latin-desc">
-                        Strážce. Guardian / obranné aplikace proti zneužití.
-                      </div>
-                    </div>
-
-                    <div class="latin-card">
-                      <div class="latin-name">Lux</div>
-                      <div class="latin-desc">
-                        Světlo. Vize budoucnosti, směry, kam chceš svět posunout.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="worlds-note">
-                    Tyhle světy jsou spíš <b>mentální vrstvy</b>. Dole v
-                    repozitáři jsou pak reálné HTML/JS moduly, které můžeme
-                    k těmto názvům postupně připoutat.
                   </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <!-- PRAVÝ PANEL – APPKY / MODULY -->
+          <!-- PRAVÝ PANEL -->
           <aside class="right-panel">
             <div class="right-card">
-              <div class="right-title">VaF'i'T – hlavní appky</div>
+              <div class="right-title">Moduly / mini-světy</div>
               <div class="apps-list">
                 <div class="app-row">
                   <div class="app-main">
-                    <div class="app-name">VAFT-Center3D</div>
-                    <div class="app-sub">3D centrum světa</div>
+                    <div class="app-name">VaFT Globe / koule světa</div>
+                    <div class="app-sub">3D koule + mapy • test na mobilu</div>
                   </div>
                   <a
                     class="app-open"
-                    href="VAFT-Center3D/index.html"
-                    target="_blank"
-                    >Otevřít</a
+                    href="#"
+                    id="open-globe"
                   >
+                    otevřít
+                  </a>
                 </div>
 
                 <div class="app-row">
                   <div class="app-main">
-                    <div class="app-name">RingPlanetGrid</div>
-                    <div class="app-sub">Planety na kruhu</div>
+                    <div class="app-name">RingPlanet / květ / grid</div>
+                    <div class="app-sub">
+                      kruh, květ, grid – základ pro budoucí mapu
+                    </div>
                   </div>
                   <a
                     class="app-open"
-                    href="RingPlanetGrid/index.html"
-                    target="_blank"
-                    >Otevřít</a
+                    href="#"
+                    id="open-ring"
                   >
+                    otevřít
+                  </a>
                 </div>
 
                 <div class="app-row">
                   <div class="app-main">
-                    <div class="app-name">SignalSphere</div>
-                    <div class="app-sub">Koule signálů / písmen</div>
+                    <div class="app-name">BearHead / AI hlava</div>
+                    <div class="app-sub">
+                      budoucí centrum pro AI hrdiny &amp; hlas
+                    </div>
                   </div>
                   <a
                     class="app-open"
-                    href="VaFT-Planet-SignalSphere/index.html"
-                    target="_blank"
-                    >Otevřít</a
+                    href="#"
+                    id="open-bear"
                   >
+                    otevřít
+                  </a>
                 </div>
 
                 <div class="app-row">
                   <div class="app-main">
-                    <div class="app-name">LetterLab</div>
-                    <div class="app-sub">Laboratoř písmen</div>
+                    <div class="app-name">Recycle / Chybožrout</div>
+                    <div class="app-sub">
+                      modul na „žraní chyb“ a udržování pořádků v kódu
+                    </div>
                   </div>
                   <a
                     class="app-open"
-                    href="VAFT-LetterLab/index.html"
-                    target="_blank"
-                    >Otevřít</a
+                    href="#"
+                    id="open-recycle"
                   >
-                </div>
-
-                <div class="app-row">
-                  <div class="app-main">
-                    <div class="app-name">MapWorld</div>
-                    <div class="app-sub">Mapy světa</div>
-                  </div>
-                  <a
-                    class="app-open"
-                    href="VAFT-MapWorld/index.html"
-                    target="_blank"
-                    >Otevřít</a
-                  >
-                </div>
-
-                <div class="app-row">
-                  <div class="app-main">
-                    <div class="app-name">Michal-AI-Al-Klimek</div>
-                    <div class="app-sub">Osobní hub autora</div>
-                  </div>
-                  <a
-                    class="app-open"
-                    href="Michal-AI-Al-Klimek/index.html"
-                    target="_blank"
-                    >Otevřít</a
-                  >
-                </div>
-
-                <div class="app-row">
-                  <div class="app-main">
-                    <div class="app-name">Michal globe test</div>
-                    <div class="app-sub">Globusový test</div>
-                  </div>
-                  <a
-                    class="app-open"
-                    href="michal-globe-test.html"
-                    target="_blank"
-                    >Otevřít</a
-                  >
+                    otevřít
+                  </a>
                 </div>
               </div>
 
               <div class="right-small">
-                To je jen <b>rychlý panel</b>. Když přidáš nové appky do
-                repozitáře, můžeme je sem jednoduše dopsat jako další řádky.
+                Odkazy teď můžou být jen „placeholder“. Jakmile budeš mít
+                konkrétní cesty v repu (např. <code>/Michal-globe.html</code>),
+                jen je sem dopíšeme.
               </div>
             </div>
 
             <div class="right-card">
-              <div class="right-title">Poznámka k RED 2077 režimu</div>
+              <div class="right-title">Revia poznámka pro dnešní verzi</div>
               <div class="body-text">
-                Tenhle vzhled je čistě <b>motivace</b> – RED 2077 mód. Můžeš mít
-                později víc skinů (např. GOLD 2050, BLUE 2001…) a přepínat mezi
-                nimi. Zatím je to jen CSS vrstva nad stejnou logikou.
+                • Tohle Centrum má být přehledné, ne složité.<br />
+                • Vždy můžeš vyhodit cokoliv, co tě ruší – Revia si pamatuje
+                jen princip: 4 týmy, jednoduchý kruh, jedno místo, kde se
+                potkáš se světem.<br />
+                • A hlavně: svět se má chovat podle tebe, ne naopak.
               </div>
             </div>
           </aside>
@@ -1539,279 +1336,154 @@
     </div>
 
     <script>
-      // ----- Tabs -----
-      const tabButtons = document.querySelectorAll(".tab-btn");
-      const tabViews = document.querySelectorAll(".tab-view");
-      const TAB_KEY = "vaft-revia:lastTab";
+      // Přepínání témat
+      (function () {
+        const body = document.body;
+        const buttons = document.querySelectorAll(".theme-btn");
 
-      function activateTab(id) {
-        tabButtons.forEach((btn) => {
-          btn.classList.toggle("is-active", btn.dataset.tab === id);
-        });
-        tabViews.forEach((view) => {
-          view.classList.toggle("is-active", view.id === "tab-" + id);
-        });
-        try {
-          localStorage.setItem(TAB_KEY, id);
-        } catch (e) {}
-      }
+        buttons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const mode = btn.getAttribute("data-theme-mode");
 
-      tabButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          activateTab(btn.dataset.tab);
-        });
-      });
+            buttons.forEach((b) => b.classList.remove("is-active"));
+            btn.classList.add("is-active");
 
-      // restore last tab
-      (function restoreTab() {
-        let last = null;
-        try {
-          last = localStorage.getItem(TAB_KEY);
-        } catch (e) {
-          last = null;
-        }
-        if (last) activateTab(last);
+            body.classList.remove("theme-gold", "theme-neon");
+            if (mode === "theme-gold" || mode === "theme-neon") {
+              body.classList.add(mode);
+            }
+            // theme-red = default :root paleta
+          });
+        });
       })();
 
-      // ----- Revia 3D centrum odkaz -----
-      const open3d = document.getElementById("open-3d-center");
-      if (open3d) {
-        open3d.addEventListener("click", () => {
-          window.open("VAFT-Center3D/index.html", "_blank");
-        });
-      }
+      // Přepínání tabů
+      (function () {
+        const tabButtons = document.querySelectorAll(".tab-btn");
+        const views = document.querySelectorAll(".tab-view");
 
-      // ----- Hrdinové – localStorage -----
-      const HEROES_KEY = "vaft-revia:heroes";
-      const heroNameEl = document.getElementById("hero-name");
-      const heroTeamEl = document.getElementById("hero-team");
-      const heroDescEl = document.getElementById("hero-desc");
-      const heroAddBtn = document.getElementById("hero-add-btn");
-      const heroesListEl = document.getElementById("heroes-list");
-      const heroesClearBtn = document.getElementById("heroes-clear-btn");
+        tabButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const targetId = btn.getAttribute("data-tab-target");
+            if (!targetId) return;
 
-      let heroes = [];
+            tabButtons.forEach((b) => b.classList.remove("is-active"));
+            btn.classList.add("is-active");
 
-      function loadHeroes() {
-        try {
-          const raw = localStorage.getItem(HEROES_KEY);
-          if (!raw) return;
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) heroes = parsed;
-        } catch (e) {}
-      }
-
-      function saveHeroes() {
-        try {
-          localStorage.setItem(HEROES_KEY, JSON.stringify(heroes));
-        } catch (e) {}
-      }
-
-      function renderHeroes() {
-        if (!heroesListEl) return;
-        heroesListEl.innerHTML = "";
-        if (!heroes.length) {
-          const span = document.createElement("span");
-          span.textContent = "Zatím tu nejsou žádní hrdinové. Vytvoř prvního.";
-          span.style.opacity = "0.7";
-          heroesListEl.appendChild(span);
-          return;
-        }
-
-        heroes.forEach((h, idx) => {
-          const pill = document.createElement("div");
-          pill.style.borderRadius = "999px";
-          pill.style.border = "1px solid rgba(255,130,170,0.7)";
-          pill.style.padding = "4px 8px";
-          pill.style.display = "inline-flex";
-          pill.style.flexWrap = "wrap";
-          pill.style.gap = "4px";
-          pill.style.alignItems = "center";
-          pill.style.background = "rgba(10,0,16,0.9)";
-
-          const name = document.createElement("span");
-          name.style.fontWeight = "600";
-          name.textContent = h.name || "Bez jména";
-
-          const team = document.createElement("span");
-          team.style.fontSize = "9px";
-          team.style.opacity = "0.8";
-          team.textContent = "[" + (h.team || "??") + "]";
-
-          const desc = document.createElement("span");
-          desc.style.fontSize = "9px";
-          desc.style.opacity = "0.8";
-          desc.textContent = h.desc || "";
-
-          pill.appendChild(name);
-          pill.appendChild(team);
-          if (h.desc) pill.appendChild(desc);
-
-          // malé X pro smazání jednoho hrdiny
-          const del = document.createElement("button");
-          del.textContent = "×";
-          del.style.border = "0";
-          del.style.marginLeft = "4px";
-          del.style.padding = "0 4px";
-          del.style.cursor = "pointer";
-          del.style.borderRadius = "999px";
-          del.style.background = "rgba(255,40,80,0.3)";
-          del.style.color = "#fff";
-          del.style.fontSize = "10px";
-          del.addEventListener("click", () => {
-            heroes.splice(idx, 1);
-            saveHeroes();
-            renderHeroes();
+            views.forEach((view) => {
+              view.classList.toggle("is-active", view.id === targetId);
+            });
           });
-          pill.appendChild(del);
-
-          heroesListEl.appendChild(pill);
         });
-      }
+      })();
 
-      if (heroAddBtn) {
-        heroAddBtn.addEventListener("click", () => {
-          const name = (heroNameEl.value || "").trim();
-          const team = heroTeamEl.value || "human";
-          const desc = (heroDescEl.value || "").trim();
+      // Chat / meziprostor – jednoduchá pseudoodpověď Revia
+      (function () {
+        const log = document.getElementById("chat-log");
+        const input = document.getElementById("chat-input");
+        const send = document.getElementById("chat-send");
+        const quickButtons = document.querySelectorAll("[data-quick-msg]");
 
-          if (!name) {
-            alert("Zadej prosím jméno hrdiny.");
-            return;
-          }
-
-          heroes.push({ name, team, desc, ts: Date.now() });
-          saveHeroes();
-          renderHeroes();
-
-          heroNameEl.value = "";
-          heroDescEl.value = "";
-        });
-      }
-
-      if (heroesClearBtn) {
-        heroesClearBtn.addEventListener("click", () => {
-          if (!confirm("Opravdu vymazat celý lokální seznam hrdinů?")) return;
-          heroes = [];
-          saveHeroes();
-          renderHeroes();
-        });
-      }
-
-      loadHeroes();
-      renderHeroes();
-
-      // ----- Meziprostor – chat -----
-      const CHAT_KEY = "vaft-revia:chat";
-      const chatLogEl = document.getElementById("chat-log");
-      const chatInputEl = document.getElementById("chat-input");
-      const chatSendBtn = document.getElementById("chat-send-btn");
-      const chatQuickBtns = document.querySelectorAll(
-        "[data-chat-template]"
-      );
-
-      let chatHistory = [];
-
-      function loadChat() {
-        try {
-          const raw = localStorage.getItem(CHAT_KEY);
-          if (!raw) return;
-          const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) chatHistory = parsed;
-        } catch (e) {}
-      }
-
-      function saveChat() {
-        try {
-          localStorage.setItem(CHAT_KEY, JSON.stringify(chatHistory));
-        } catch (e) {}
-      }
-
-      function renderChat() {
-        if (!chatLogEl) return;
-        chatLogEl.innerHTML = "";
-        if (!chatHistory.length) {
-          const p = document.createElement("div");
-          p.textContent =
-            "Začni psát – třeba krátký vzkaz od sebe pro budoucího sebe.";
-          p.style.opacity = "0.75";
-          chatLogEl.appendChild(p);
-          return;
-        }
-
-        chatHistory.forEach((line) => {
+        function appendLine(name, text) {
+          if (!log) return;
           const div = document.createElement("div");
           div.className = "chat-line";
-          const nameSpan = document.createElement("span");
-          nameSpan.className = "chat-name";
-          nameSpan.textContent = line.who + ":";
-
-          const textSpan = document.createElement("span");
-          textSpan.textContent = line.text;
-
-          div.appendChild(nameSpan);
-          div.appendChild(textSpan);
-          chatLogEl.appendChild(div);
-        });
-
-        chatLogEl.scrollTop = chatLogEl.scrollHeight;
-      }
-
-      function pushChatLine(who, text) {
-        chatHistory.push({ who, text, ts: Date.now() });
-        if (chatHistory.length > 200) {
-          chatHistory = chatHistory.slice(-200);
+          const strong = document.createElement("span");
+          strong.className = "chat-name";
+          strong.textContent = name + ":";
+          const span = document.createElement("span");
+          span.textContent = " " + text;
+          div.appendChild(strong);
+          div.appendChild(span);
+          log.appendChild(div);
+          log.scrollTop = log.scrollHeight;
         }
-        saveChat();
-        renderChat();
-      }
 
-      function sendChatFromInput() {
-        if (!chatInputEl) return;
-        const text = chatInputEl.value.trim();
-        if (!text) return;
-        chatInputEl.value = "";
-        pushChatLine("Michal", text);
+        function sendMessage(text) {
+          if (!text || !text.trim()) return;
+          appendLine("Human", text.trim());
+          input.value = "";
 
-        // jednoduchá auto-odpověď VaF'i'T
-        const replies = [
-          "VaF'i'T: Beru tenhle vzkaz do meziprostoru. Můžeme z něj udělat misi.",
-          "VaF'i'T: Zapisuju to jako RED 2077 myšlenku. Můžeš se k ní vrátit kdykoli.",
-          "VaF'i'T: Tohle může být základ nového světa nebo hrdiny."
-        ];
-        const reply =
-          replies[Math.floor(Math.random() * replies.length)];
-        setTimeout(() => {
-          pushChatLine("VaF'i'T", reply);
-        }, 400 + Math.random() * 500);
-      }
+          // jednoduchá Revia odpověď
+          let reply =
+            "Rozumím. Zapisuji si to do Centra jako dnešní drobnou poznámku.";
 
-      if (chatSendBtn) {
-        chatSendBtn.addEventListener("click", sendChatFromInput);
-      }
-
-      if (chatInputEl) {
-        chatInputEl.addEventListener("keydown", (e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            sendChatFromInput();
+          if (text.toLowerCase().includes("malý krok")) {
+            reply =
+              "Stačí jeden malý krok. Vyber si dnes jen jednu věc, kterou zvládneš do 10 minut.";
+          } else if (text.toLowerCase().includes("rep")) {
+            reply =
+              "Až budeme chtít, vymyslíme automatický přehled modulů z repozitáře a napojíme ho sem.";
+          } else if (text.toLowerCase().includes("dokonal")) {
+            reply =
+              "Svět nemusí být dokonalý. Důležité je, že je živý a že se posouvá dopředu.";
           }
-        });
-      }
 
-      chatQuickBtns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const template = btn.getAttribute("data-chat-template") || "";
-          if (!template) return;
-          const [who, ...rest] = template.split(":");
-          const text = rest.join(":").trim();
-          if (!text) return;
-          pushChatLine(who.trim(), text);
-        });
-      });
+          setTimeout(() => {
+            appendLine("Revia", reply);
+          }, 400);
+        }
 
-      loadChat();
-      renderChat();
+        if (send && input) {
+          send.addEventListener("click", () => {
+            sendMessage(input.value);
+          });
+
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              sendMessage(input.value);
+            }
+          });
+        }
+
+        quickButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const msg = btn.getAttribute("data-quick-msg");
+            if (msg) {
+              sendMessage(msg);
+            }
+          });
+        });
+      })();
+
+      // Placeholder akce pro pravý panel (zatím jen info)
+      (function () {
+        function placeholder(id, text) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.addEventListener("click", (e) => {
+            e.preventDefault();
+            alert(
+              text +
+                "\\n\\nAž budeš mít konkrétní cestu v repozitáři, jen ji sem doplníme."
+            );
+          });
+        }
+
+        placeholder("open-globe", "VaFT Globe / koule světa");
+        placeholder("open-ring", "RingPlanet / květ / grid");
+        placeholder("open-bear", "BearHead / AI hlava");
+        placeholder("open-recycle", "Recycle / Chybožrout modul");
+      })();
+
+      // Klik na „otevřít hlavní mapu světa“ – jen malý efekt
+      (function () {
+        const link = document.getElementById("rev-open-main");
+        const core = document.querySelector(".rev-core-ring");
+        if (!link || !core) return;
+
+        link.addEventListener("click", () => {
+          core.style.animation = "none";
+          // force reflow
+          void core.offsetWidth;
+          core.style.animation = "coreGlow 1.8s ease-in-out 1";
+
+          setTimeout(() => {
+            core.style.animation = "coreGlow 4.4s ease-in-out infinite";
+          }, 2000);
+        });
+      })();
     </script>
   </body>
 </html>
