@@ -223,17 +223,36 @@
       }
 
       .pill-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 999px;
-        background: radial-gradient(circle at 30% 30%, #ff8593, #ff2e3f);
-        box-shadow: 0 0 12px rgba(255, 40, 80, 0.95);
-        animation: redPulse 1.6s ease-in-out infinite;
-      }
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, #ff8593, #ff2e3f);
+  box-shadow: 0 0 12px rgba(255, 40, 80, 0.95);
+  animation: redPulse 1.6s ease-in-out infinite;
+}
 
-      .top-version {
-        opacity: 0.82;
-      }
+.back-revia-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  margin-left: 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 140, 170, 0.8);
+  background: radial-gradient(circle at top, rgba(40,0,10,0.98), rgba(10,0,6,0.96));
+  color: var(--text-soft);
+  transition: 0.25s ease;
+}
+
+.back-revia-pill:hover {
+  box-shadow: 0 0 14px rgba(255, 40, 90, 0.9);
+  color: var(--text-main);
+}
+
+.top-version {
+  opacity: 0.82;
+}
 
       /* LAYOUT */
 
@@ -921,25 +940,28 @@
           </div>
 
           <div class="top-right">
-            <div class="pill">
-              <div class="pill-dot"></div>
-              <span>Revia – dohled nad světy</span>
-            </div>
+  <div class="pill">
+    <div class="pill-dot"></div>
+    <span>Revia – dohled nad světy</span>
+  </div>
 
-            <div class="theme-toggle">
-              <button class="theme-btn is-active" data-theme-mode="theme-red">
-                RED 2077
-              </button>
-              <button class="theme-btn" data-theme-mode="theme-gold">
-                GOLD 2050
-              </button>
-              <button class="theme-btn" data-theme-mode="theme-neon">
-                NEON 2001
-              </button>
-            </div>
+  <!-- 🔥 SEM VLOŽIT TLAČÍTKO ZPĚT DO REVIE -->
+  <a href="./Revia/index.html" class="back-revia-pill">← Revia</a>
 
-            <div class="top-version">v1.0 • Centrum</div>
-          </div>
+  <div class="theme-toggle">
+    <button class="theme-btn is-active" data-theme-mode="theme-red">
+      RED 2077
+    </button>
+    <button class="theme-btn" data-theme-mode="theme-gold">
+      GOLD 2050
+    </button>
+    <button class="theme-btn" data-theme-mode="theme-neon">
+      NEON 2001
+    </button>
+  </div>
+
+  <div class="top-version">v1.0 • Centrum</div>
+</div>
         </header>
 
         <div class="layout">
