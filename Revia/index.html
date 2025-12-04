@@ -1,124 +1,160 @@
 <!doctype html>
 <html lang="cs">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Revia • Vivere atque FruiT</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Revia • Vivere atque FruiT</title>
 
-  <link rel="stylesheet" href="./revia.css?v=0.6">
+    <link rel="stylesheet" href="./revia.css?v=0.6" />
+    <style>
+      body {
+        background-size: auto 70vh;
+        background-position: center 18vh;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-color: #000;
+        transition: background-image 0.4s ease;
+      }
+      @media (max-height: 820px) {
+        body { background-size: auto 68vh; background-position: center 20vh; }
+      }
+      @media (min-height: 900px) {
+        body { background-size: auto 78vh; background-position: center 15vh; }
+      }
+      @media (max-width: 480px) {
+        body { background-size: auto 88vh; background-position: center 0; }
+      }
 
-  <style>
-    body {
-      background-size: auto 70vh;
-      background-position: center 18vh;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      background-color: #000;
-      transition: background-image 0.4s ease;
-    }
-    @media (max-height: 820px) {
-      body { background-size: auto 68vh; background-position: center 20vh; }
-    }
-    @media (min-height: 900px) {
-      body { background-size: auto 78vh; background-position: center 15vh; }
-    }
-    @media (max-width: 480px) {
-      body { background-size: auto 88vh; background-position: center 0; }
-    }
+      /* jemná animace při vstupu do hlavního indexu */
+      .revia-core-opening {
+        opacity: 0;
+        transform: scale(1.02);
+        transition: opacity 0.22s ease, transform 0.22s ease;
+      }
+    </style>
+  </head>
 
-    /* malá animace pro přechod do hlavního indexu */
-    .revia-core-opening {
-      opacity: 0;
-      transform: scale(1.02);
-      transition: opacity 0.22s ease, transform 0.22s ease;
-    }
-  </style>
-</head>
+  <body>
+    <div class="revia-main" data-mode="angel" data-control="ai">
+      <!-- HORNÍ LIŠTA -->
+      <div class="revia-topbar">
+        <!-- křídlo = zápisník (vlevo nahoře) -->
+        <button
+          class="revia-wing"
+          id="revWing"
+          aria-label="otevřít zápisník"
+        ></button>
 
-<body data-mode="angel" data-control="ai">
-
-  <div class="revia-main">
-
-    <!-- TOPBAR -->
-    <div class="revia-topbar">
-      <button class="revia-wing" id="revWing" aria-label="otevřít zápisník"></button>
-      <div class="revia-title">Revia</div>
-      <div class="revia-state" id="revState">AI: hlídám svět</div>
-    </div>
-
-    <!-- ZÁPISNÍK -->
-    <div class="revia-notes" id="revNotes">
-      <div class="notes-head">
-        <span>✧ Křídlo / zápis</span>
-        <button id="notesClose" type="button">×</button>
+        <div class="revia-title">Revia</div>
+        <div class="revia-state" id="revState">AI: hlídám svět</div>
       </div>
-      <textarea id="notesText" placeholder="Charakter, úkoly, poznámky…"></textarea>
-      <p class="notes-foot">Ukládá se pouze do tohoto zařízení.</p>
+
+      <!-- ZÁPISNÍK -->
+      <div class="revia-notes" id="revNotes">
+        <div class="notes-head">
+          <span>✧ Křídlo / zápis</span>
+          <button id="notesClose" type="button">×</button>
+        </div>
+        <textarea
+          id="notesText"
+          placeholder="Charakter, úkoly, komu se ukáže…"
+        ></textarea>
+        <p class="notes-foot">Ukládá se jen do tohoto zařízení.</p>
+      </div>
+
+      <!-- MŘÍŽKA SLOTŮ / DOVEDNOSTÍ -->
+      <div class="revia-card">
+        <!-- 1) systémový glyph – odkaz na hlavní index -->
+        <button
+          class="revia-slot active revia-slot-core"
+          id="revCoreSlot"
+          type="button"
+        >
+          <span class="revia-glyph">&amp;」</span>
+        </button>
+
+        <!-- 2) Vstoupit (zámek) -->
+        <button class="revia-slot" id="revEnterSlot" type="button">
+          <span>Vstoupit</span>
+        </button>
+
+        <!-- 3) Přepnout (anděl / démon) -->
+        <button class="revia-slot" id="revToggleSlot" type="button">
+          <span>Přepnout</span>
+        </button>
+
+        <!-- 4) Otočit svět (world rotate) -->
+        <button class="revia-slot" id="revRotateSlot" type="button">
+          <span>Otočit svět</span>
+        </button>
+
+        <!-- 5–6) zatím prázdné dovednosti -->
+        <button class="revia-slot" type="button"></button>
+        <button class="revia-slot" type="button"></button>
+      </div>
+
+      <!-- SPODNÍ PANEL – SCHOVANÝ, kvůli kompatibilitě s revia.js -->
+      <div class="revia-bottom" style="display:none">
+        <div class="revia-mini">Ī’♡</div>
+        <button class="revia-enter" id="revEnter" type="button">Vstoupit</button>
+        <button class="revia-toggle" id="revToggle" type="button">Přepnout</button>
+        <button class="revia-help" id="revHelp" type="button">?</button>
+      </div>
+
+      <div class="revia-toast" id="revToast" aria-live="polite"></div>
     </div>
 
-    <!-- SLOTY / DOVEDNOSTI -->
-    <div class="revia-card">
+    <!-- LOGIKA OTÁČENÍ SVĚTA -->
+    <script>
+      const WORLD = ["vafiti", "glyph", "engine"];
+      let currentWorld = 0;
 
-      <!-- HLAVNÍ GLYPH SYSTÉMU (ODKAZ NA HLAVNÍ INDEX) -->
-      <button class="revia-slot active revia-slot-core" id="revCoreSlot" type="button">
-        <span class="revia-glyph">ً&’」</span>
-      </button>
+      function reviaRotate() {
+        currentWorld = (currentWorld + 1) % WORLD.length;
+        document.body.setAttribute("data-world", WORLD[currentWorld]);
+        console.log("Revia otočila svět na:", WORLD[currentWorld]);
+      }
+    </script>
 
-      <!-- ostatní sloty (zatím prázdné) -->
-      <button class="revia-slot" type="button"></button>
-      <button class="revia-slot" type="button"></button>
-      <button class="revia-slot" type="button"></button>
-      <button class="revia-slot" type="button"></button>
-      <button class="revia-slot" type="button"></button>
+    <!-- PŘEVÁZÁNÍ SLOTŮ NA FUNKCE -->
+    <script>
+      // URL na hlavní index systému
+      const REVIA_CORE_URL = "../index.html";
 
-    </div>
+      const coreSlot   = document.getElementById("revCoreSlot");
+      const enterSlot  = document.getElementById("revEnterSlot");
+      const toggleSlot = document.getElementById("revToggleSlot");
+      const rotateSlot = document.getElementById("revRotateSlot");
 
-    <!-- SPODNÍ PANEL -->
-    <div class="revia-bottom">
-      <div class="revia-mini">Ī’♡</div>
-      <button class="revia-enter" id="revEnter" type="button">🔒 Vstoupit</button>
-      <button class="revia-toggle" id="revToggle" type="button">🔁 Přepnout</button>
-      <button class="revia-help" id="revHelp" type="button">?</button>
-    </div>
+      // skryté původní tlačítko pro kompatibilitu s revia.js
+      const hiddenEnter  = document.getElementById("revEnter");
+      const hiddenToggle = document.getElementById("revToggle");
 
-    <div class="revia-toast" id="revToast" aria-live="polite"></div>
+      // 1) glyph &」 → hlavní index
+      coreSlot.addEventListener("click", () => {
+        document.body.classList.add("revia-core-opening");
+        setTimeout(() => {
+          window.location.href = REVIA_CORE_URL;
+        }, 220);
+      });
 
-  </div>
+      // 2) Vstoupit – přeposlat klik na původní tlačítko (zachová logiku v revia.js)
+      enterSlot.addEventListener("click", () => {
+        if (hiddenEnter) hiddenEnter.click();
+      });
 
+      // 3) Přepnout režim – anděl / démon
+      toggleSlot.addEventListener("click", () => {
+        if (hiddenToggle) hiddenToggle.click();
+      });
 
-  <!-- REVIA LIGHT/WORLD ROTATION TEST -->
-  <script>
-    const WORLD = ["vafiti", "glyph", "engine"];
-    let current = 0;
+      // 4) Otočit svět (interní funkce nahoře)
+      rotateSlot.addEventListener("click", () => {
+        reviaRotate();
+      });
+    </script>
 
-    function reviaRotate() {
-      current = (current + 1) % WORLD.length;
-      document.body.setAttribute("data-world", WORLD[current]);
-    }
-  </script>
-
-  <!-- TEST BUTTON (ponechán) -->
-  <button onclick="reviaRotate()"
-    style="position:fixed;bottom:20px;right:20px;padding:12px;background:#444;color:white;border:none;border-radius:6px;">
-    🔄 Otočit svět
-  </button>
-
-
-  <!-- ODKAZ NA HLAVNÍ INDEX / CELÝ SYSTÉM -->
-  <script>
-    const REVIA_CORE_URL = "../index.html"; // hlavní systém VaFT
-
-    const revCoreSlot = document.getElementById("revCoreSlot");
-    revCoreSlot.addEventListener("click", () => {
-      document.body.classList.add("revia-core-opening");
-      setTimeout(() => {
-        window.location.href = REVIA_CORE_URL;
-      }, 220);
-    });
-  </script>
-
-  <script src="./revia.js?v=0.6"></script>
-  <script src="../vaft-core.js"></script>
-
-</body>
+    <script src="./revia.js?v=0.6"></script>
+    <script src="../vaft-core.js"></script>
+  </body>
 </html>
