@@ -2,13 +2,16 @@
 <html lang="cs">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
     <title>Revia • Vivere atque FruiT</title>
 
-    <!-- Styl Revie (ponecháváme tvoje revia.css) -->
+    <!-- hlavní styl Revia -->
     <link rel="stylesheet" href="./revia.css?v=0.6" />
 
-    <!-- Jemné nastavení pozadí, aby sedělo na iPadu / mobilu -->
+    <!-- jen jemné doladění pozice pozadí podle výšky zařízení -->
     <style>
       body {
         background-size: auto 70vh;
@@ -35,131 +38,207 @@
           background-position: center 0;
         }
       }
+
+      /* nové styly pro víc-záložkový zápisník */
+      .revia-notes {
+        /* zbytek vzhledu máš v revia.css; tady jen jistota pro layout */
+        max-width: 420px;
+      }
+
+      .notes-tabs {
+        display: flex;
+        gap: 6px;
+        margin: 6px 0 4px;
+      }
+
+      .notes-tab {
+        flex: 1;
+        border: 0;
+        padding: 4px 6px;
+        border-radius: 999px;
+        font-size: 11px;
+        background: rgba(0, 0, 0, 0.55);
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+      }
+
+      .notes-tab.is-active {
+        background: linear-gradient(90deg, #40f0ff, #7dfffb);
+        color: #001018;
+      }
+
+      .notes-body {
+        margin-top: 4px;
+      }
+
+      .notes-view {
+        display: none;
+      }
+
+      .notes-view.is-active {
+        display: block;
+      }
+
+      #notesTextDay,
+      #notesTextRule,
+      #notesTextList {
+        width: 100%;
+        min-height: 70px;
+        max-height: 120px;
+        resize: vertical;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(0, 0, 0, 0.65);
+        color: #fff;
+        padding: 6px 8px;
+        font-size: 11px;
+        outline: none;
+      }
     </style>
   </head>
 
   <body>
-    <!-- Hlavní wrapper Revie -->
-    <div
-      class="revia-main"
-      id="reviaMain"
-      data-mode="angel"
-      data-control="ai"
-    >
+    <!-- hlavní kontejner – data-mode: angel / daemon -->
+    <div class="revia-main" data-mode="angel" data-control="ai">
       <!-- horní lišta -->
       <div class="revia-topbar">
-        <!-- křídlo = zápisník -->
         <button
           class="revia-wing"
           id="revWing"
-          type="button"
           aria-label="otevřít zápisník"
         ></button>
-
         <div class="revia-title">Revia</div>
         <div class="revia-state" id="revState">AI: hlídám svět</div>
       </div>
 
-      <!-- zápisník -->
+      <!-- zápisník / křídlo – 3 záložky -->
       <div class="revia-notes" id="revNotes">
         <div class="notes-head">
           <span>✧ Křídlo / zápis</span>
           <button id="notesClose" type="button">×</button>
         </div>
-        <textarea
-          id="notesText"
-          placeholder="Charakter, úkoly, komu se ukáže…"
-        ></textarea>
-        <p class="notes-foot">Ukládá se jen do tohoto zařízení.</p>
+
+        <div class="notes-tabs">
+          <button
+            class="notes-tab is-active"
+            data-notes-target="notes-day"
+            type="button"
+          >
+            Dnes
+          </button>
+          <button
+            class="notes-tab"
+            data-notes-target="notes-rule"
+            type="button"
+          >
+            Pravidlo
+          </button>
+          <button
+            class="notes-tab"
+            data-notes-target="notes-list"
+            type="button"
+          >
+            Seznam
+          </button>
+        </div>
+
+        <div class="notes-body">
+          <div class="notes-view is-active" id="notes-day">
+            <textarea
+              id="notesTextDay"
+              placeholder="Co je dnešní myšlenka nebo pocit?"
+            ></textarea>
+          </div>
+
+          <div class="notes-view" id="notes-rule">
+            <textarea
+              id="notesTextRule"
+              placeholder="Krátké pravidlo, které ti Revia připomíná."
+            ></textarea>
+          </div>
+
+          <div class="notes-view" id="notes-list">
+            <textarea
+              id="notesTextList"
+              placeholder="Nápady, úkoly, věci, které nechceš ztratit…"
+            ></textarea>
+          </div>
+        </div>
+
+        <p class="notes-foot">
+          Všechno se ukládá jen do tohoto zařízení (3 samostatné zápisy).
+        </p>
       </div>
 
-      <!-- mřížka slotů (dovednosti) -->
+      <!-- mřížka slotů – 2×3 -->
       <div class="revia-card">
-        <!-- SLOT 1: portál do Centra (hlavní index) -->
-        <button
-          class="revia-slot active"
-          id="slotPortal"
-          type="button"
-          aria-label="Otevřít Vivere atque FruiT • Revia &amp; Centrum"
-        >
-          <span class="revia-glyph" id="slotPortalGlyph">ً&’」</span>
+        <!-- 1) &』 – odkaz na hlavní Centrum -->
+        <button class="revia-slot" id="slotCentrum" type="button">
+          <span class="revia-glyph">&amp;』</span>
         </button>
 
-        <!-- SLOT 2: Vstoupit (zatím jen toast, bez textu) -->
-        <button
-          class="revia-slot"
-          id="slotEnter"
-          type="button"
-          aria-label="Vstoupit do hry Revia"
-        ></button>
-
-        <!-- SLOT 3: Přepnout AI / Human (bez textu) -->
-        <button
-          class="revia-slot"
-          id="slotControl"
-          type="button"
-          aria-label="Přepnout řízení mezi AI a Human"
-        ></button>
-
-        <!-- SLOT 4: Anděl ❤️ / Ďábel ☆ – přepíná mód světa -->
-        <button
-          class="revia-slot"
-          id="slotMode"
-          type="button"
-          aria-label="Přepnout Revia mód anděl / ďábel"
-        >
-          <span class="revia-glyph" id="slotModeGlyph">「Ī’♡</span>
+        <!-- 2) Vstoupit – zatím jen placeholder, později level / hra -->
+        <button class="revia-slot" id="slotEnter" type="button">
+          <span class="revia-label">Vstoupit</span>
         </button>
 
-        <!-- SLOT 5: Rezerva (zatím info) -->
-        <button
-          class="revia-slot"
-          id="slotWorld"
-          type="button"
-          aria-label="Budoucí světový modul"
-        ></button>
+        <!-- 3) Přepnout svět – volá reviaRotate() -->
+        <button class="revia-slot" id="slotRotate" type="button">
+          <span class="revia-label">Přepnout svět</span>
+        </button>
 
-        <!-- SLOT 6: Rezerva (zatím info) -->
-        <button
-          class="revia-slot"
-          id="slotExtra"
-          type="button"
-          aria-label="Budoucí speciální dovednost"
-        ></button>
+        <!-- 4) Anděl / ďábel – přepínání režimu -->
+        <button class="revia-slot" id="slotModeGlyph" type="button">
+          <span class="revia-glyph" id="slotModeGlyphSpan">Ī’♡</span>
+        </button>
+
+        <!-- 5–6) volné sloty pro další dovednosti -->
+        <button class="revia-slot" type="button"></button>
+        <button class="revia-slot" type="button"></button>
       </div>
 
-      <!-- spodní toast (malé hlášky) -->
+      <!-- spodní „toast“ hlášky -->
       <div class="revia-toast" id="revToast" aria-live="polite"></div>
     </div>
 
+    <!-- jednoduchý modul pro „otáčení světa“ -->
     <script>
-      // Pomocná funkce pro toast
-      function showToast(message) {
-        const toast = document.getElementById("revToast");
-        if (!toast) return;
-        toast.textContent = message;
-        toast.classList.add("is-visible");
-        clearTimeout(toast._hideTimer);
-        toast._hideTimer = setTimeout(() => {
-          toast.classList.remove("is-visible");
-        }, 2200);
-      }
+      const REVIA_WORLD_MODES = ["vafiti", "glyph", "engine"];
+      let revWorldIndex = 0;
 
-      // ZÁPISNÍK (křídlo)
+      function reviaRotate() {
+        revWorldIndex = (revWorldIndex + 1) % REVIA_WORLD_MODES.length;
+        const mode = REVIA_WORLD_MODES[revWorldIndex];
+        document.body.setAttribute("data-world", mode);
+        console.log("Revia otočila svět na:", mode);
+      }
+    </script>
+
+    <!-- hlavní logika Revie (animace, texty, toast) -->
+    <script src="./revia.js?v=0.6"></script>
+    <!-- VaFT core (pokud něco sdílíme mezi moduly) -->
+    <script src="../vaft-core.js"></script>
+
+    <!-- DOPLŇKOVÁ LOGIKA: zápisník + sloty (&』, anděl/ďábel, otočit svět) -->
+    <script>
+      // ZÁPISNÍK (křídlo) – 3 záložky
       (function () {
         const wing = document.getElementById("revWing");
         const notes = document.getElementById("revNotes");
         const closeBtn = document.getElementById("notesClose");
-        const textarea = document.getElementById("notesText");
-        const STORAGE_KEY = "revia-notes-v1";
 
-        // načti uložený text
-        try {
-          const saved = localStorage.getItem(STORAGE_KEY);
-          if (saved) textarea.value = saved;
-        } catch (e) {
-          // nic, jen neukládej
-        }
+        const tabButtons = document.querySelectorAll(".notes-tab");
+        const views = document.querySelectorAll(".notes-view");
+
+        const day = document.getElementById("notesTextDay");
+        const rule = document.getElementById("notesTextRule");
+        const list = document.getElementById("notesTextList");
+
+        const KEYS = {
+          day: "revia-notes-day-v1",
+          rule: "revia-notes-rule-v1",
+          list: "revia-notes-list-v1",
+        };
 
         function openNotes() {
           notes.classList.add("is-open");
@@ -172,119 +251,96 @@
         if (wing) wing.addEventListener("click", openNotes);
         if (closeBtn) closeBtn.addEventListener("click", closeNotes);
 
-        if (textarea) {
-          textarea.addEventListener("input", () => {
+        // přepínání záložek
+        tabButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const targetId = btn.getAttribute("data-notes-target");
+            if (!targetId) return;
+
+            tabButtons.forEach((b) => b.classList.remove("is-active"));
+            btn.classList.add("is-active");
+
+            views.forEach((view) => {
+              view.classList.toggle(
+                "is-active",
+                view.id === targetId
+              );
+            });
+          });
+        });
+
+        // načtení uložených textů
+        try {
+          if (day) day.value = localStorage.getItem(KEYS.day) || "";
+          if (rule) rule.value = localStorage.getItem(KEYS.rule) || "";
+          if (list) list.value = localStorage.getItem(KEYS.list) || "";
+        } catch (e) {
+          // když storage nejede, prostě nic
+        }
+
+        function attachAutosave(el, key) {
+          if (!el) return;
+          el.addEventListener("input", () => {
             try {
-              localStorage.setItem(STORAGE_KEY, textarea.value || "");
+              localStorage.setItem(key, el.value || "");
             } catch (e) {}
           });
         }
+
+        attachAutosave(day, KEYS.day);
+        attachAutosave(rule, KEYS.rule);
+        attachAutosave(list, KEYS.list);
       })();
 
-      // SLOT 1 – portál do Centra (hlavní index)
+      // SLOTY – &』, anděl/ďábel, otočit svět
       (function () {
-        const slotPortal = document.getElementById("slotPortal");
-        if (!slotPortal) return;
-        slotPortal.addEventListener("click", () => {
-          showToast("Otevírám Vivere atque FruiT • Revia & Centrum…");
-          // cesta z /Revia/ do hlavního indexu
-          window.location.href = "../index.html";
-        });
-      })();
+        const main = document.querySelector(".revia-main");
 
-      // SLOT 2 – Vstoupit (zatím jen info)
-      (function () {
-        const slotEnter = document.getElementById("slotEnter");
-        if (!slotEnter) return;
-        slotEnter.addEventListener("click", () => {
-          showToast(
-            "Vstup do Revia levelu ještě ladíme. Dnes stačí, že jsi sem došel."
-          );
-        });
-      })();
+        const slotCentrum = document.getElementById("slotCentrum");
+        const slotRotate = document.getElementById("slotRotate");
+        const slotMode = document.getElementById("slotModeGlyph");
+        const slotModeGlyphSpan = document.getElementById(
+          "slotModeGlyphSpan"
+        );
 
-      // SLOT 3 – Přepnout AI / Human
-      (function () {
-        const main = document.getElementById("reviaMain");
-        const state = document.getElementById("revState");
-        const slotControl = document.getElementById("slotControl");
-
-        if (!main || !state || !slotControl) return;
-
-        function updateState() {
-          const mode = main.getAttribute("data-control") || "ai";
-          if (mode === "ai") {
-            state.textContent = "AI: hlídám svět";
-          } else {
-            state.textContent = "Human: přebírám řízení";
-          }
+        // &』 → hlavní Centrum
+        if (slotCentrum) {
+          slotCentrum.addEventListener("click", () => {
+            window.location.href = "../index.html";
+          });
         }
 
-        updateState();
-
-        slotControl.addEventListener("click", () => {
-          const current = main.getAttribute("data-control") || "ai";
-          const next = current === "ai" ? "human" : "ai";
-          main.setAttribute("data-control", next);
-          updateState();
-
-          if (next === "ai") {
-            showToast("Revia řízení vrací AI, ty jen hlídej, jak se svět chová.");
-          } else {
-            showToast("Revia dává řízení tobě. Svět se přizpůsobí tobě.");
-          }
-        });
-      })();
-
-      // SLOT 4 – Anděl / Ďábel (přepínání režimu + glyph)
-      (function () {
-        const main = document.getElementById("reviaMain");
-        const glyph = document.getElementById("slotModeGlyph");
-        const slotMode = document.getElementById("slotMode");
-
-        if (!main || !glyph || !slotMode) return;
-
-        function setAngel() {
-          main.setAttribute("data-mode", "angel");
-          glyph.textContent = "「Ī’♡";
-          showToast("Revia přepnuta do andělského režimu (hlídá svět jemněji).");
+        // Přepnout svět → volá reviaRotate()
+        if (slotRotate) {
+          slotRotate.addEventListener("click", () => {
+            reviaRotate();
+          });
         }
 
-        function setDaemon() {
-          main.setAttribute("data-mode", "daemon");
-          glyph.textContent = "「Ī’☆";
-          showToast("Revia přepnuta do ďábelského režimu (přísnější dohled).");
-        }
+        // anděl / ďábel → přepínání data-mode + glyphu
+        function setMode(mode) {
+          if (!main) return;
+          main.setAttribute("data-mode", mode);
 
-        // výchozí stav
-        setAngel();
-
-        slotMode.addEventListener("click", () => {
-          const mode = main.getAttribute("data-mode") || "angel";
+          if (!slotModeGlyphSpan) return;
           if (mode === "angel") {
-            setDaemon();
+            slotModeGlyphSpan.textContent = "Ī’♡";
           } else {
-            setAngel();
+            slotModeGlyphSpan.textContent = "Ī’☆";
           }
-        });
-      })();
+        }
 
-      // SLOT 5 + 6 – zatím jen info
-      (function () {
-        const world = document.getElementById("slotWorld");
-        const extra = document.getElementById("slotExtra");
-
-        if (world) {
-          world.addEventListener("click", () => {
-            showToast("Tady bude později přímý vstup na některý z VaFT světů.");
+        if (slotMode) {
+          slotMode.addEventListener("click", () => {
+            const current =
+              (main && main.getAttribute("data-mode")) || "angel";
+            const next = current === "angel" ? "daemon" : "angel";
+            setMode(next);
           });
         }
 
-        if (extra) {
-          extra.addEventListener("click", () => {
-            showToast("Rezervovaný slot pro budoucí speciální dovednost Revie.");
-          });
-        }
+        // jistota: nastavíme start na andělský režim
+        setMode("angel");
       })();
     </script>
   </body>
