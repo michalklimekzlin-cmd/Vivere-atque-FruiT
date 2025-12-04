@@ -65,14 +65,18 @@ html, body {
   animation: fadeInTop 1.6s ease forwards 0.5s;
 }
 @keyframes fadeInTop {
-  to { opacity: 1; transform: translateY(0); }
   from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .revia-title {
   color: #e9f4ff;
   font-size: 1.2rem;
   letter-spacing: .03rem;
   text-shadow: 0 0 12px rgba(0,0,0,.5);
+}
+.revia-state {
+  color: rgba(233,244,255,.8);
+  font-size: 0.8rem;
 }
 
 /* křídlo */
@@ -96,11 +100,11 @@ html, body {
   background: rgba(2,8,12,.25);
 }
 
-/* zápisník */
+/* 🔖 zápisník – malý panel vlevo */
 .revia-notes {
   position: absolute;
   top: 70px;
-  left: -280px;
+  left: -280px;          /* schovaný mimo obraz */
   width: 250px;
   height: 300px;
   background: rgba(3,9,15,0.9);
@@ -113,7 +117,9 @@ html, body {
   transition: left .4s ease;
   z-index: 2;
 }
-.revia-notes.open { left: 10px; }
+.revia-notes.open {       /* když má třídu "open", vyjede dovnitř */
+  left: 10px;
+}
 .notes-head {
   display: flex;
   justify-content: space-between;
@@ -126,6 +132,7 @@ html, body {
   border: none;
   color: #fff;
   font-size: 1.1rem;
+  cursor: pointer;
 }
 #notesText {
   width: 100%;
@@ -243,7 +250,9 @@ html, body {
   transition: opacity .25s;
   z-index: 2;
 }
-.revia-toast.show { opacity: 1; }
+.revia-toast.show {        /* tohle používá JS */
+  opacity: 1;
+}
 
 /* menší displej */
 @media (max-width: 430px) {
