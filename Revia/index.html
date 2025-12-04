@@ -6,50 +6,57 @@
     <title>Revia • Vivere atque FruiT</title>
 
     <link rel="stylesheet" href="./revia.css?v=0.6" />
+
     <style>
+      /* pozadí Revia angel / daemon */
       body {
         background-size: auto 70vh;
         background-position: center 18vh;
         background-repeat: no-repeat;
         background-attachment: fixed;
         background-color: #000;
-        transition: background-image 0.4s ease;
       }
       @media (max-height: 820px) {
-        body { background-size: auto 68vh; background-position: center 20vh; }
+        body {
+          background-size: auto 68vh;
+          background-position: center 20vh;
+        }
       }
       @media (min-height: 900px) {
-        body { background-size: auto 78vh; background-position: center 15vh; }
+        body {
+          background-size: auto 78vh;
+          background-position: center 15vh;
+        }
       }
       @media (max-width: 480px) {
-        body { background-size: auto 88vh; background-position: center 0; }
+        body {
+          background-size: auto 88vh;
+          background-position: center 0;
+        }
       }
 
-      /* jemná animace při vstupu do hlavního indexu */
-      .revia-core-opening {
-        opacity: 0;
-        transform: scale(1.02);
-        transition: opacity 0.22s ease, transform 0.22s ease;
+      /* schovat původní zámek, ale nechat ho v DOM kvůli JS */
+      .revia-enter {
+        display: none;
       }
     </style>
   </head>
 
   <body>
+    <!-- hlavní Revia wrapper – režim angel / daemon -->
     <div class="revia-main" data-mode="angel" data-control="ai">
-      <!-- HORNÍ LIŠTA -->
+      <!-- horní lišta -->
       <div class="revia-topbar">
-        <!-- křídlo = zápisník (vlevo nahoře) -->
         <button
           class="revia-wing"
           id="revWing"
           aria-label="otevřít zápisník"
         ></button>
-
         <div class="revia-title">Revia</div>
         <div class="revia-state" id="revState">AI: hlídám svět</div>
       </div>
 
-      <!-- ZÁPISNÍK -->
+      <!-- zápisník / křídlo -->
       <div class="revia-notes" id="revNotes">
         <div class="notes-head">
           <span>✧ Křídlo / zápis</span>
@@ -62,99 +69,90 @@
         <p class="notes-foot">Ukládá se jen do tohoto zařízení.</p>
       </div>
 
-      <!-- MŘÍŽKA SLOTŮ / DOVEDNOSTÍ -->
+      <!-- mřížka dovedností -->
       <div class="revia-card">
-        <!-- 1) systémový glyph – odkaz na hlavní index -->
-        <button
-          class="revia-slot active revia-slot-core"
-          id="revCoreSlot"
-          type="button"
-        >
-          <span class="revia-glyph">&amp;」</span>
+        <!-- Skill 1: Centrum / Revia & Centrum -->
+        <button class="revia-slot active" id="revSkillCentrum" type="button">
+          <span class="revia-glyph">&」</span>
         </button>
 
-        <!-- 2) Vstoupit (zámek) -->
-        <button class="revia-slot" id="revEnterSlot" type="button">
-          <span>Vstoupit</span>
+        <!-- Skill 2: přepnout režim (anděl / démon) -->
+        <button class="revia-slot" id="revSkillToggle" type="button">
+          <span class="revia-glyph">⇄</span>
         </button>
 
-        <!-- 3) Přepnout (anděl / démon) -->
-        <button class="revia-slot" id="revToggleSlot" type="button">
-          <span>Přepnout</span>
+        <!-- Skill 3: otočit svět (interní rotace Revia) -->
+        <button class="revia-slot" id="revSkillRotate" type="button">
+          <span class="revia-glyph">⟳</span>
         </button>
 
-        <!-- 4) Otočit svět (world rotate) -->
-        <button class="revia-slot" id="revRotateSlot" type="button">
-          <span>Otočit svět</span>
-        </button>
-
-        <!-- 5–6) zatím prázdné dovednosti -->
+        <!-- zbylé 3 sloty zatím prázdné pro budoucí skilly -->
+        <button class="revia-slot" type="button"></button>
         <button class="revia-slot" type="button"></button>
         <button class="revia-slot" type="button"></button>
       </div>
 
-      <!-- SPODNÍ PANEL – SCHOVANÝ, kvůli kompatibilitě s revia.js -->
-      <div class="revia-bottom" style="display:none">
+      <!-- spodní panel (ponechán kvůli JS, zámek schovaný CSS) -->
+      <div class="revia-bottom">
         <div class="revia-mini">Ī’♡</div>
-        <button class="revia-enter" id="revEnter" type="button">Vstoupit</button>
-        <button class="revia-toggle" id="revToggle" type="button">Přepnout</button>
+        <button class="revia-enter" id="revEnter" type="button">
+          🔒 Vstoupit
+        </button>
+        <button class="revia-toggle" id="revToggle" type="button">
+          🔁 Přepnout
+        </button>
         <button class="revia-help" id="revHelp" type="button">?</button>
       </div>
 
       <div class="revia-toast" id="revToast" aria-live="polite"></div>
     </div>
 
-    <!-- LOGIKA OTÁČENÍ SVĚTA -->
+    <!-- Revia rotace světa (dovnitř dat-world) -->
     <script>
-      const WORLD = ["vafiti", "glyph", "engine"];
-      let currentWorld = 0;
+      const REV_WORLD_STATES = ["vafiti", "glyph", "engine"];
+      let revWorldIndex = 0;
 
-      function reviaRotate() {
-        currentWorld = (currentWorld + 1) % WORLD.length;
-        document.body.setAttribute("data-world", WORLD[currentWorld]);
-        console.log("Revia otočila svět na:", WORLD[currentWorld]);
+      function reviaRotateWorld() {
+        revWorldIndex = (revWorldIndex + 1) % REV_WORLD_STATES.length;
+        const main = document.querySelector(".revia-main");
+        if (!main) return;
+        main.setAttribute("data-world", REV_WORLD_STATES[revWorldIndex]);
+        console.log("Revia otočila svět na:", REV_WORLD_STATES[revWorldIndex]);
       }
     </script>
 
-    <!-- PŘEVÁZÁNÍ SLOTŮ NA FUNKCE -->
-    <script>
-      // URL na hlavní index systému
-      const REVIA_CORE_URL = "../index.html";
-
-      const coreSlot   = document.getElementById("revCoreSlot");
-      const enterSlot  = document.getElementById("revEnterSlot");
-      const toggleSlot = document.getElementById("revToggleSlot");
-      const rotateSlot = document.getElementById("revRotateSlot");
-
-      // skryté původní tlačítko pro kompatibilitu s revia.js
-      const hiddenEnter  = document.getElementById("revEnter");
-      const hiddenToggle = document.getElementById("revToggle");
-
-      // 1) glyph &」 → hlavní index
-      coreSlot.addEventListener("click", () => {
-        document.body.classList.add("revia-core-opening");
-        setTimeout(() => {
-          window.location.href = REVIA_CORE_URL;
-        }, 220);
-      });
-
-      // 2) Vstoupit – přeposlat klik na původní tlačítko (zachová logiku v revia.js)
-      enterSlot.addEventListener("click", () => {
-        if (hiddenEnter) hiddenEnter.click();
-      });
-
-      // 3) Přepnout režim – anděl / démon
-      toggleSlot.addEventListener("click", () => {
-        if (hiddenToggle) hiddenToggle.click();
-      });
-
-      // 4) Otočit svět (interní funkce nahoře)
-      rotateSlot.addEventListener("click", () => {
-        reviaRotate();
-      });
-    </script>
-
+    <!-- hlavní Revia logika -->
     <script src="./revia.js?v=0.6"></script>
     <script src="../vaft-core.js"></script>
+
+    <!-- napojení skillů na akce -->
+    <script>
+      (function () {
+        // Skill 1 – Centrum (Revia & Centrum index)
+        const skillCentrum = document.getElementById("revSkillCentrum");
+        if (skillCentrum) {
+          skillCentrum.addEventListener("click", () => {
+            window.location.href = "../index.html";
+          });
+        }
+
+        // Skill 2 – přepnout režim (klikne na původní tlačítko revToggle)
+        const skillToggle = document.getElementById("revSkillToggle");
+        const btnToggle = document.getElementById("revToggle");
+        if (skillToggle && btnToggle) {
+          skillToggle.addEventListener("click", () => {
+            btnToggle.click();
+          });
+        }
+
+        // Skill 3 – otočit svět (Revia rotace)
+        const skillRotate = document.getElementById("revSkillRotate");
+        if (skillRotate) {
+          skillRotate.addEventListener("click", () => {
+            reviaRotateWorld();
+          });
+        }
+      })();
+    </script>
   </body>
 </html>
