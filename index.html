@@ -1,0 +1,1653 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Vivere atque FruiT • Revia & Centrum světa</title>
+
+    <style>
+      :root {
+        --bg-main: #02030a;
+        --bg-panel: #050713;
+        --bg-panel-soft: #080a16;
+        --accent: #37f4ff;
+        --accent-soft: rgba(55, 244, 255, 0.12);
+        --text-main: #f7f8ff;
+        --text-soft: rgba(245, 246, 255, 0.78);
+        --border-soft: rgba(255, 255, 255, 0.09);
+        --card-bg: rgba(8, 11, 22, 0.96);
+        --card-border: rgba(255, 255, 255, 0.09);
+        --card-border-strong: rgba(55, 244, 255, 0.55);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro",
+          "Segoe UI", sans-serif;
+        background: radial-gradient(circle at top, #050815, #010108);
+        color: var(--text-main);
+        overflow: hidden;
+      }
+
+      body {
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+      }
+
+      .root {
+        position: relative;
+        width: 100%;
+        max-width: 1440px;
+        height: 100%;
+        max-height: 900px;
+        margin: auto;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stage {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        border-radius: 28px;
+        background: radial-gradient(circle at top, #070b1f, #020208);
+        box-shadow:
+          0 40px 90px rgba(0, 0, 0, 0.92),
+          0 0 0 1px rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* HORNÍ INFO PRUH */
+
+      .top-strip {
+        position: relative;
+        flex: 0 0 52px;
+        padding: 10px 18px 8px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(
+          to right,
+          rgba(7, 8, 18, 0.96),
+          rgba(6, 7, 16, 0.96),
+          rgba(8, 10, 22, 0.96)
+        );
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        z-index: 5;
+      }
+
+      .top-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .logo-badge {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        background: radial-gradient(circle at 30% 20%, #ffe0b0, #ffb15e, #7a3a1e);
+        color: #120503;
+        box-shadow:
+          0 0 0 1px rgba(255, 230, 200, 0.9),
+          0 0 20px rgba(255, 184, 90, 0.95);
+      }
+
+      .top-title {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .top-title-main {
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .top-title-sub {
+        font-size: 11px;
+        opacity: 0.82;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .top-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 11px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: radial-gradient(
+          circle at top,
+          rgba(18, 20, 32, 0.95),
+          rgba(8, 9, 20, 0.95)
+        );
+        font-size: 10px;
+      }
+
+      .pill-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 30%, #55ffb0, #00ff92);
+        box-shadow: 0 0 10px rgba(0, 255, 150, 0.9);
+      }
+
+      .pill-ver {
+        opacity: 0.82;
+      }
+
+      /* layout pod horním pruhem */
+
+      .layout {
+        position: relative;
+        flex: 1;
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) 300px;
+        grid-template-rows: 230px minmax(0, 1fr);
+        grid-template-areas:
+          "revia right"
+          "bottom right";
+        gap: 10px;
+        padding: 12px 14px 14px 14px;
+      }
+
+      .panel-main {
+        grid-area: revia;
+        border-radius: 18px;
+        background: radial-gradient(circle at top, #050714, #05040b);
+        border: 1px solid var(--border-soft);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9);
+        padding: 14px 16px 10px 16px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .panel-main-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      .panel-title-block {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .panel-title {
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .panel-sub {
+        font-size: 11px;
+        opacity: 0.8;
+      }
+
+      .pulse-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        padding: 3px 9px;
+        border-radius: 999px;
+        background: rgba(16, 10, 20, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        white-space: nowrap;
+      }
+
+      .pulse-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 30%, #ff7d7d, #ff3131);
+        box-shadow: 0 0 10px rgba(255, 80, 80, 0.95);
+      }
+
+      .rev-graph {
+        position: relative;
+        flex: 1;
+        margin-top: 6px;
+        background: radial-gradient(circle at bottom, #050410, #03020a);
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .rev-top-rules {
+        position: absolute;
+        left: 14px;
+        top: 10px;
+        font-size: 10px;
+        opacity: 0.78;
+      }
+
+      .rev-open-link {
+        position: absolute;
+        right: 16px;
+        top: 12px;
+        font-size: 10px;
+        opacity: 0.9;
+      }
+
+      .rev-open-link a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      .rev-open-link a:hover {
+        text-decoration: underline;
+      }
+
+      .rev-center-circle {
+        position: absolute;
+        width: 210px;
+        height: 210px;
+        border-radius: 999px;
+        left: 50%;
+        top: 55%;
+        transform: translate(-50%, -50%);
+        border: 1px dashed rgba(255, 255, 255, 0.16);
+        box-shadow: 0 0 60px rgba(0, 0, 0, 0.9);
+      }
+
+      .rev-center-label {
+        position: absolute;
+        left: 50%;
+        top: 55%;
+        transform: translate(-50%, -50%) rotate(-18deg);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.9;
+        white-space: nowrap;
+      }
+
+      .rev-grid-ring {
+        position: absolute;
+        left: 50%;
+        top: 55%;
+        transform: translate(-50%, -50%);
+        border-radius: 999px;
+        border: 1px dashed rgba(255, 255, 255, 0.08);
+      }
+
+      .rev-grid-ring.r1 {
+        width: 310px;
+        height: 310px;
+      }
+
+      .rev-grid-ring.r2 {
+        width: 420px;
+        height: 420px;
+      }
+
+      .rev-node {
+        position: absolute;
+        width: 96px;
+        height: 96px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: radial-gradient(circle at top, rgba(255, 255, 255, 0.03), transparent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        opacity: 0.92;
+        text-align: center;
+        padding: 6px;
+      }
+
+      .rev-node span {
+        opacity: 0.88;
+      }
+
+      .rev-node.human {
+        left: 16%;
+        top: 24%;
+      }
+
+      .rev-node.ai {
+        right: 15%;
+        top: 22%;
+      }
+
+      .rev-node.glyph {
+        left: 14%;
+        top: 55%;
+      }
+
+      .rev-node.world {
+        right: 19%;
+        top: 58%;
+      }
+
+      /* DOLNÍ TAB PANEL */
+
+      .bottom-panel {
+        grid-area: bottom;
+        border-radius: 18px;
+        background: var(--bg-panel);
+        border: 1px solid var(--border-soft);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .tab-strip {
+        display: flex;
+        align-items: stretch;
+        padding: 0 18px;
+        gap: 6px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .tab-btn {
+        position: relative;
+        flex: 0 0 auto;
+        padding: 10px 14px 8px 14px;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--text-soft);
+        font-size: 12px;
+        cursor: pointer;
+        opacity: 0.8;
+        border-radius: 0;
+      }
+
+      .tab-btn::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 1px;
+        height: 3px;
+        border-radius: 999px 999px 0 0;
+        background: transparent;
+      }
+
+      .tab-btn.is-active {
+        color: var(--text-main);
+        opacity: 1;
+      }
+
+      .tab-btn.is-active::after {
+        background: linear-gradient(
+          to right,
+          #34f6ff,
+          #40ffe2,
+          #4af7ff
+        );
+      }
+
+      .tabs-body {
+        position: relative;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .tab-view {
+        position: absolute;
+        inset: 0;
+        padding: 12px 18px 10px 18px;
+        display: none;
+        overflow-y: auto;
+        opacity: 0;
+        transform: translateY(6px);
+        transition:
+          opacity 0.18s ease,
+          transform 0.18s ease;
+      }
+
+      .tab-view.is-active {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* TAB – HRDINOVÉ */
+
+      .heroes-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.25fr);
+        gap: 12px;
+      }
+
+      .card {
+        border-radius: 14px;
+        padding: 10px 11px 9px 11px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.8);
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          border-color 0.18s ease,
+          background 0.18s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 36px rgba(0, 0, 0, 0.95);
+        border-color: var(--card-border-strong);
+        background: radial-gradient(circle at top, #0d1024, #050713);
+      }
+
+      .card-title {
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.84;
+        margin-bottom: 6px;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 8px;
+        font-size: 11px;
+      }
+
+      .form-label {
+        opacity: 0.8;
+      }
+
+      .input,
+      .select {
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(7, 8, 18, 0.96);
+        color: var(--text-main);
+        font-size: 11px;
+        padding: 6px 9px;
+        outline: none;
+      }
+
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 6px 12px;
+        border: 0;
+        font-size: 11px;
+        color: #020309;
+        background: linear-gradient(to right, #34f6ff, #40ffe2);
+        cursor: pointer;
+        box-shadow: 0 0 16px rgba(55, 244, 255, 0.85);
+      }
+
+      .btn-primary span {
+        font-size: 13px;
+      }
+
+      .heroes-note {
+        font-size: 10px;
+        opacity: 0.76;
+        margin-top: 6px;
+      }
+
+      .world-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 6px;
+      }
+
+      .world-card {
+        flex: 1 1 120px;
+        min-width: 120px;
+        border-radius: 10px;
+        padding: 7px 8px 6px 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: radial-gradient(circle at top left, #101323, #060714);
+        font-size: 10px;
+      }
+
+      .world-card-title {
+        font-weight: 500;
+        margin-bottom: 3px;
+      }
+
+      .world-card-sub {
+        opacity: 0.78;
+      }
+
+      /* TAB – MEZIPROSTOR (CHAT) */
+
+      .chat-log {
+        font-size: 10px;
+        line-height: 1.5;
+        max-height: 160px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
+      .chat-line {
+        margin-bottom: 2px;
+      }
+
+      .chat-name {
+        font-weight: 600;
+        margin-right: 4px;
+      }
+
+      .chat-input-row {
+        margin-top: 8px;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .chat-quick-row {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: 10px;
+      }
+
+      .btn-secondary {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        padding: 4px 10px;
+        font-size: 10px;
+        background: rgba(10, 12, 24, 0.96);
+        color: var(--text-main);
+        cursor: pointer;
+      }
+
+      /* TAB – SYSTÉM */
+
+      .system-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.4fr);
+        gap: 12px;
+      }
+
+      .body-text {
+        font-size: 11px;
+        opacity: 0.86;
+        line-height: 1.6;
+      }
+
+      .small-text {
+        font-size: 10px;
+        opacity: 0.78;
+        margin-top: 6px;
+      }
+
+      /* TAB – SÍŤ */
+
+      .nodes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 8px;
+        font-size: 10px;
+      }
+
+      .node-card {
+        border-radius: 10px;
+        padding: 7px 8px 6px 8px;
+        background: radial-gradient(circle at top left, #0e1020, #050611);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+      }
+
+      .node-title {
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+
+      .node-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 4px;
+      }
+
+      /* TAB – SVĚTY */
+
+      .worlds-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+        font-size: 11px;
+      }
+
+      .latin-card {
+        border-radius: 12px;
+        padding: 8px 9px 6px 9px;
+        background: radial-gradient(circle at top left, #0c0f20, #050715);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .latin-name {
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
+
+      .latin-desc {
+        font-size: 10px;
+        opacity: 0.8;
+      }
+
+      .worlds-note {
+        margin-top: 10px;
+        font-size: 10px;
+        opacity: 0.78;
+      }
+
+      /* PRAVÝ PANEL – APLIKACE */
+
+      .right-panel {
+        grid-area: right;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .right-card {
+        border-radius: 16px;
+        padding: 9px 10px 9px 10px;
+        background: var(--bg-panel-soft);
+        border: 1px solid var(--border-soft);
+        box-shadow: 0 16px 38px rgba(0, 0, 0, 0.88);
+        font-size: 11px;
+      }
+
+      .right-title {
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.8;
+        margin-bottom: 6px;
+      }
+
+      .apps-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .app-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 5px 7px;
+        border-radius: 10px;
+        background: rgba(9, 11, 24, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition:
+          transform 0.16s ease,
+          box-shadow 0.16s ease,
+          border-color 0.16s ease,
+          background 0.16s ease;
+      }
+
+      .app-row:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.9);
+        border-color: rgba(55, 244, 255, 0.5);
+        background: rgba(12, 15, 30, 0.98);
+      }
+
+      .app-main {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-width: 0;
+      }
+
+      .app-name {
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .app-sub {
+        font-size: 9px;
+        opacity: 0.76;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .app-open,
+      .app-open-btn {
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        padding: 3px 10px;
+        font-size: 10px;
+        background: rgba(4, 7, 18, 0.96);
+        color: var(--accent);
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.12s ease,
+          background 0.12s ease;
+      }
+
+      .app-open:active,
+      .app-open-btn:active {
+        transform: translateY(1px) scale(0.98);
+        box-shadow: 0 0 10px rgba(55, 244, 255, 0.6);
+      }
+
+      .right-small {
+        font-size: 10px;
+        opacity: 0.78;
+        margin-top: 4px;
+      }
+
+      /* ANIMACE – Revia + uzly + signál */
+
+      @keyframes pulzRevia {
+        0% {
+          transform: translate(-50%, -50%) scale(1);
+          box-shadow: 0 0 40px rgba(0, 255, 200, 0.1);
+          border-color: rgba(255, 255, 255, 0.16);
+        }
+        50% {
+          transform: translate(-50%, -50%) scale(1.04);
+          box-shadow: 0 0 80px rgba(0, 255, 220, 0.5);
+          border-color: rgba(55, 244, 255, 0.7);
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1);
+          box-shadow: 0 0 40px rgba(0, 255, 200, 0.1);
+          border-color: rgba(255, 255, 255, 0.16);
+        }
+      }
+
+      .rev-center-circle {
+        animation: pulzRevia 4s ease-in-out infinite;
+      }
+
+      @keyframes plutiUzel {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-4px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      .rev-node {
+        animation: plutiUzel 5.5s ease-in-out infinite;
+      }
+
+      .rev-node.human {
+        animation-delay: 0.3s;
+      }
+
+      .rev-node.ai {
+        animation-delay: 1.1s;
+      }
+
+      .rev-node.glyph {
+        animation-delay: 0.7s;
+      }
+
+      .rev-node.world {
+        animation-delay: 1.7s;
+      }
+
+      @keyframes blikSignal {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 6px rgba(0, 255, 150, 0.7);
+          opacity: 0.9;
+        }
+        40% {
+          transform: scale(1.25);
+          box-shadow: 0 0 16px rgba(0, 255, 180, 1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 6px rgba(0, 255, 150, 0.7);
+          opacity: 0.9;
+        }
+      }
+
+      .pill-dot {
+        animation: blikSignal 2.8s ease-in-out infinite;
+      }
+
+      /* RESPONSIVE */
+
+      @media (max-width: 1180px) {
+        .layout {
+          grid-template-columns: minmax(0, 1.35fr) 280px;
+        }
+      }
+
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: minmax(0, 1fr);
+          grid-template-rows: 220px minmax(0, 1fr) 240px;
+          grid-template-areas:
+            "revia"
+            "bottom"
+            "right";
+        }
+
+        .right-panel {
+          flex-direction: row;
+        }
+
+        .right-card {
+          flex: 1;
+        }
+
+        .worlds-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 760px) {
+        .stage {
+          border-radius: 0;
+        }
+
+        .layout {
+          padding: 8px;
+        }
+
+        .panel-main {
+          padding: 10px 10px 8px 10px;
+        }
+
+        .rev-center-circle {
+          width: 180px;
+          height: 180px;
+        }
+
+        .rev-grid-ring.r1 {
+          width: 260px;
+          height: 260px;
+        }
+
+        .rev-grid-ring.r2 {
+          width: 340px;
+          height: 340px;
+        }
+
+        .rev-node {
+          width: 84px;
+          height: 84px;
+        }
+
+        .bottom-panel {
+          border-radius: 14px;
+        }
+
+        .worlds-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .top-strip {
+          padding-inline: 12px;
+        }
+
+        .top-title-main {
+          font-size: 13px;
+        }
+
+        .top-title-sub {
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="root">
+      <div class="stage">
+        <!-- TOP STRIP -->
+        <header class="top-strip">
+          <div class="top-left">
+            <div class="logo-badge">ً&’」</div>
+            <div class="top-title">
+              <div class="top-title-main">Vivere atque FruiT • Revia & Centrum</div>
+              <div class="top-title-sub">
+                {*(°.).)// Michal Klimek • Hlavoun • VaF'i'T Signal • 4 týmy světa
+              </div>
+            </div>
+          </div>
+          <div class="top-right">
+            <div class="pill">
+              <span class="pill-dot"></span>
+              <span>Revia – dohled nad světy</span>
+            </div>
+            <div class="pill pill-ver">v1.0 • Centrum světa</div>
+          </div>
+        </header>
+
+        <!-- LAYOUT -->
+        <main class="layout">
+          <!-- REVIA PANEL -->
+          <section class="panel-main">
+            <div class="panel-main-header">
+              <div class="panel-title-block">
+                <div class="panel-title">Revia – úhel pohledu světa</div>
+                <div class="panel-sub">
+                  4 týmy: Human • AI • Glyph • World – všechno v jednom kruhu.
+                </div>
+              </div>
+              <div class="pulse-pill">
+                <span class="pulse-dot"></span>
+                <span>Signal: aktivní</span>
+              </div>
+            </div>
+
+            <div class="rev-graph">
+              <div class="rev-top-rules">
+                Vivere • atque • FruiT<br />
+                Přátelství • Pohyb • Tvorba
+              </div>
+              <div class="rev-open-link">
+                <a href="VAFT-Center3D/index.html">Otevřít 3D centrum ➜</a>
+              </div>
+
+              <div class="rev-grid-ring r1"></div>
+              <div class="rev-grid-ring r2"></div>
+
+              <div class="rev-center-circle"></div>
+              <div class="rev-center-label">
+                {*(°.).)// Revia Core
+              </div>
+
+              <div class="rev-node human">
+                <span>Human • Pikoš<br />hráč / příběhy / fotky</span>
+              </div>
+              <div class="rev-node ai">
+                <span>AI • Kovošrot<br />myšlení • návrhy • hlava</span>
+              </div>
+              <div class="rev-node glyph">
+                <span>Glyph • VaF'i'T<br />písmenka • znaky • kód</span>
+              </div>
+              <div class="rev-node world">
+                <span>World • MapWorld<br />mapy • 3D světy • mise</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- DOLNÍ TAB PANEL -->
+          <section class="bottom-panel">
+            <div class="tab-strip">
+              <button class="tab-btn is-active" data-tab="heroes">Hrdinové</button>
+              <button class="tab-btn" data-tab="space">Meziprostor</button>
+              <button class="tab-btn" data-tab="system">Systém</button>
+              <button class="tab-btn" data-tab="network">Síť</button>
+              <button class="tab-btn" data-tab="worlds">Světy</button>
+            </div>
+
+            <div class="tabs-body">
+              <!-- TAB: HRDINOVÉ -->
+              <div class="tab-view is-active" id="tab-heroes">
+                <div class="heroes-layout">
+                  <div class="card">
+                    <div class="card-title">Nový hrdina / postava</div>
+                    <div class="form-group">
+                      <label class="form-label">Jméno hrdiny</label>
+                      <input
+                        id="hero-name"
+                        class="input"
+                        placeholder="např. Bicák Supreme, GhostGirl, BearHead…"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Tým</label>
+                      <select id="hero-team" class="select">
+                        <option value="human">Human (hráč / Pikoš)</option>
+                        <option value="ai">AI (Kovošrot / Hlavoun)</option>
+                        <option value="glyph">Glyph (VaF'i'T / písmenka)</option>
+                        <option value="world">World (mapy / krajiny)</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Krátký popis</label>
+                      <input
+                        id="hero-desc"
+                        class="input"
+                        placeholder="co má umět, jak pomáhá světu…"
+                      />
+                    </div>
+                    <button class="btn-primary" id="hero-add-btn">
+                      <span>+</span>
+                      Přidat do seznamu hrdinů (lokálně)
+                    </button>
+                    <div class="heroes-note">
+                      Vše se zatím ukládá jen do <b>localStorage</b> tohoto
+                      zařízení. Později uděláme propojení na konkrétní 3D modul
+                      (např. BearHead, Doll, GhostGirl, Bicák…).
+                    </div>
+                  </div>
+
+                  <div class="card">
+                    <div class="card-title">Seznam hrdinů na zařízení</div>
+                    <div id="hero-list" class="body-text" style="font-size: 10px;">
+                      Zatím žádní hrdinové – začni přidáním prvního. 💫
+                    </div>
+                    <button
+                      class="btn-secondary"
+                      style="margin-top: 8px;"
+                      id="hero-clear-btn"
+                    >
+                      Vymazat lokální seznam hrdinů
+                    </button>
+
+                    <div class="world-cards">
+                      <div class="world-card">
+                        <div class="world-card-title">Bicák Supreme Edition</div>
+                        <div class="world-card-sub">
+                          Budoucí motivátor, který se objeví, když se hráč moc
+                          válí na telefonu. 💪
+                        </div>
+                      </div>
+                      <div class="world-card">
+                        <div class="world-card-title">GhostGirl</div>
+                        <div class="world-card-sub">
+                          Stylová průvodkyně světem – může hlídat temnější části
+                          mapy.
+                        </div>
+                      </div>
+                      <div class="world-card">
+                        <div class="world-card-title">BearHead</div>
+                        <div class="world-card-sub">
+                          Medvědí hlava – síla, ochrana a vstup do 3D světa.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: MEZIPROSTOR -->
+              <div class="tab-view" id="tab-space">
+                <div class="card">
+                  <div class="card-title">Meziprostor – chat mezi světy</div>
+                  <div class="chat-log" id="space-log">
+                    <div class="chat-line">
+                      <span class="chat-name">Revia:</span>
+                      <span>
+                        Sleduju, co tvoříš. Sem si můžeš psát poznámky mezi
+                        světy – jen pro sebe.
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="chat-input-row">
+                    <input
+                      id="space-input"
+                      class="input"
+                      placeholder="napiš myšlenku, nápad nebo úkol, který nechceš ztratit…"
+                    />
+                    <button class="btn-primary" id="space-send-btn">
+                      Zapsat
+                    </button>
+                  </div>
+
+                  <div class="chat-quick-row">
+                    <button class="btn-secondary" data-quick="nápad na nového hrdinu">
+                      💡 nápad na hrdinu
+                    </button>
+                    <button class="btn-secondary" data-quick="co chci dnes udělat ve světě VaF'i'T">
+                      ✅ dnešní krok
+                    </button>
+                    <button class="btn-secondary" data-quick="co z repozitáře chci příště vyčistit nebo sjednotit">
+                      🧹 úklid repozitáře
+                    </button>
+                  </div>
+
+                  <div class="small-text">
+                    Meziprostor se ukládá jen lokálně na zařízení – nic
+                    neposíláme ven. Je to tvůj osobní „mezi-světový zápisník“.
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: SYSTÉM -->
+              <div class="tab-view" id="tab-system">
+                <div class="system-layout">
+                  <div class="card">
+                    <div class="card-title">Motor systému</div>
+                    <div class="body-text">
+                      Tenhle index je <b>centrum</b> – tady se propojují
+                      Revia, světy, hrdinové i aplikace z repozitáře.
+                      <br /><br />
+                      Další krok je vytvořit <b>speciální modul</b>, který se
+                      bude přepisovat (např. <code>dev-playground.html</code>)
+                      a z tohoto centra na něj povede jen jeden odkaz. Tím
+                      pádem nebudeš muset pořád přepisovat celý index –
+                      jen ten jeden „pískoviště modul“.
+                    </div>
+                    <div class="small-text">
+                      Tip: modul pro přepisování může žít třeba v
+                      <code>dev/</code> složce. Tady v centru pak bude jen
+                      jedna položka „DEV – playground“.
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-title">WebGuardian / ochrana</div>
+                    <div class="body-text">
+                      Do budoucna sem můžeme připnout i <b>Guardian</b> modul,
+                      který bude hlídat provoz (bots, scraping, zneužití),
+                      a zároveň z toho udělat herní mechaniku (Iskry za
+                      odhalené pokusy).
+                    </div>
+                    <div class="small-text">
+                      V další verzi: nahoře přidáme malý ukazatel
+                      <i>„Guardian status“</i> + odkaz na
+                      <code>guardian/index.html</code>.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: SÍŤ -->
+              <div class="tab-view" id="tab-network">
+                <div class="card">
+                  <div class="card-title">Síť modulů a světů</div>
+                  <div class="nodes-grid" id="nodes-grid">
+                    <!-- vyplní se z JS podle APP_MODULES -->
+                  </div>
+                  <div class="worlds-note">
+                    Tohle je jen textová mapa spojení. Vpravo máš konkrétní
+                    tlačítka „Otevřít“, tady vidíš, jak spolu moduly souvisí
+                    (centrum, signály, mapy, postavy, Michal).
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: SVĚTY -->
+              <div class="tab-view" id="tab-worlds">
+                <div class="card">
+                  <div class="card-title">Světy Vivere • atque • FruiT</div>
+                  <div class="worlds-grid">
+                    <div class="latin-card">
+                      <div class="latin-name">Vivere</div>
+                      <div class="latin-desc">
+                        „Žít“ – všechno, co se týká reálného života: fotky,
+                        deník, pohyb, zdraví. Zde bude hrát hlavní roli Pikoš
+                        (Human).
+                      </div>
+                    </div>
+                    <div class="latin-card">
+                      <div class="latin-name">atque</div>
+                      <div class="latin-desc">
+                        „A zároveň“ – spojení mezi světy, chyby, které se
+                        mění v materiál (Chybožrout, Recycle, Guardian).
+                      </div>
+                    </div>
+                    <div class="latin-card">
+                      <div class="latin-name">FruiT</div>
+                      <div class="latin-desc">
+                        „Užívat si“ – hra, odměny, Iskry, vtipní hrdinové,
+                        malé radosti a progres.
+                      </div>
+                    </div>
+                    <div class="latin-card">
+                      <div class="latin-name">Signal Sphere</div>
+                      <div class="latin-desc">
+                        Koule s písmeny a glyphy – základní „motor“ signálu
+                        světa.
+                      </div>
+                    </div>
+                    <div class="latin-card">
+                      <div class="latin-name">Ring Planet Grid</div>
+                      <div class="latin-desc">
+                        Planety na kruhu – rozložení světů na orbitu kolem
+                        centra.
+                      </div>
+                    </div>
+                  </div>
+                  <div class="worlds-note">
+                    Později sem můžeme připsat další „slovní světy“ (např.
+                    svět financí, svět rodiny, svět práce), každý s vlastním
+                    modulem v repozitáři.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PRAVÝ PANEL – APLIKACE Z REPA -->
+          <aside class="right-panel">
+            <section class="right-card">
+              <div class="right-title">VaF'i'T – hlavní světy / moduly</div>
+              <div class="apps-list" id="apps-list"></div>
+              <div class="right-small">
+                Všechna tlačítka jsou jen přímé odkazy na <b>HTML moduly v repu</b>.
+                Žádná magie – všechno máš pod kontrolou v GitHubu.
+              </div>
+            </section>
+
+            <section class="right-card">
+              <div class="right-title">Poznámka pro budoucnost</div>
+              <div class="right-small">
+                Tenhle index bereme jako <b>stabilní centrum</b>.  
+                Až budeme chtít experimentovat, vytvoříme jeden
+                <b>playground modul</b> (např.
+                <code>dev/playground.html</code>) a z tohoto centra na něj
+                povede jen jedna položka.  
+                <br /><br />
+                Tím pádem už nebudeš muset přepisovat těchhle ~1500 řádků –
+                jen malý modul na hraní. \\{*(°•.)(.•°)*}//.
+              </div>
+            </section>
+          </aside>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      // --- KONFIG: APPKY (jedno místo, kde to měníš) -----------------------
+
+      const APP_MODULES = [
+        {
+          id: "vaft-center3d",
+          name: "VAFT-Center3D",
+          desc: "3D jádro světa • planety a orbit",
+          path: "VAFT-Center3D/index.html",
+          group: "centrum",
+        },
+        {
+          id: "ringplanetgrid",
+          name: "RingPlanetGrid",
+          desc: "Síť planet na kruhu (RPG grid)",
+          path: "RingPlanetGrid/index.html",
+          group: "signál",
+        },
+        {
+          id: "signalsphere",
+          name: "VaFT-Planet-SignalSphere",
+          desc: "Koule s písmeny a glyphy",
+          path: "VaFT-Planet-SignalSphere/index.html",
+          group: "signál",
+        },
+        {
+          id: "signalcore",
+          name: "VaFT-Planets-SignalCore",
+          desc: "Signal Core – středový motor",
+          path: "VaFT-Planets-SignalCore/index.html",
+          group: "signál",
+        },
+        {
+          id: "signaltower",
+          name: "VaFT-Planets-SignalTower",
+          desc: "Signal Tower – kornoutová věž",
+          path: "VaFT-Planets-SignalTower/index.html",
+          group: "signál",
+        },
+        {
+          id: "letterlab",
+          name: "VAFT-LetterLab",
+          desc: "Laboratoř písmenek a glyphů",
+          path: "VAFT-LetterLab/index.html",
+          group: "lab",
+        },
+        {
+          id: "mapworld",
+          name: "VAFT-MapWorld",
+          desc: "Mapový svět • 2D/3D podklady",
+          path: "VAFT-MapWorld/index.html",
+          group: "mapy",
+        },
+        {
+          id: "map2d",
+          name: "mapa (2D)",
+          desc: "Základní mapa světa",
+          path: "mapa/index.html",
+          group: "mapy",
+        },
+        {
+          id: "map3d",
+          name: "mapa-3d",
+          desc: "3D mapa prostoru",
+          path: "mapa-3d/index.html",
+          group: "mapy",
+        },
+        {
+          id: "bearhead",
+          name: "VAFT-BearHead",
+          desc: "3D medvědí hlava / hrdina",
+          path: "VAFT-BearHead/index.html",
+          group: "postavy",
+        },
+        {
+          id: "ghostgirl",
+          name: "VAFT-GhostGirl",
+          desc: "Ghost Girl – stylová postava",
+          path: "VAFT-GhostGirl/index.html",
+          group: "postavy",
+        },
+        {
+          id: "doll",
+          name: "VAFT-Doll",
+          desc: "Panenka / avatar",
+          path: "VAFT-Doll/index.html",
+          group: "postavy",
+        },
+        {
+          id: "bicak",
+          name: "Bicák Supreme Edition",
+          desc: "Budoucí motivátor a hrdina",
+          path: "Bicak-Supreme-Edition/index.html",
+          group: "postavy",
+        },
+        {
+          id: "michal-module",
+          name: "Michal-AI-Al-Klimek",
+          desc: "Osobní modul autora světa",
+          path: "Michal-AI-Al-Klimek/index.html",
+          group: "michal",
+        },
+        {
+          id: "hlavoun",
+          name: "Hlavoun",
+          desc: "Hlava systému • engine",
+          path: "Hlavoun/index.html",
+          group: "michal",
+        },
+        {
+          id: "guardian",
+          name: "Guardian",
+          desc: "Ochranná vrstva / WebGuardian",
+          path: "guardian/index.html",
+          group: "system",
+        },
+        {
+          id: "recycle",
+          name: "Recycle",
+          desc: "Recyklační svět / materiál pro hru",
+          path: "Recycle/index.html",
+          group: "system",
+        },
+        {
+          id: "chybozrout",
+          name: "Chybožrout-opravář",
+          desc: "Opravář chyb ve VaF'i'T",
+          path: "chybozrout-opravar/index.html",
+          group: "system",
+        },
+      ];
+
+      // --- Taby ------------------------------------------------------------
+
+      const tabButtons = document.querySelectorAll(".tab-btn");
+      const tabViews = document.querySelectorAll(".tab-view");
+
+      tabButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.tab;
+          tabButtons.forEach((b) => b.classList.remove("is-active"));
+          btn.classList.add("is-active");
+          tabViews.forEach((view) => {
+            if (view.id === "tab-" + id) view.classList.add("is-active");
+            else view.classList.remove("is-active");
+          });
+        });
+      });
+
+      // --- Hrdinové – localStorage seznam ---------------------------------
+
+      const HERO_KEY = "vaft:heroes";
+      const heroNameEl = document.getElementById("hero-name");
+      const heroTeamEl = document.getElementById("hero-team");
+      const heroDescEl = document.getElementById("hero-desc");
+      const heroAddBtn = document.getElementById("hero-add-btn");
+      const heroClearBtn = document.getElementById("hero-clear-btn");
+      const heroListEl = document.getElementById("hero-list");
+
+      function loadHeroes() {
+        try {
+          const raw = localStorage.getItem(HERO_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveHeroes(list) {
+        try {
+          localStorage.setItem(HERO_KEY, JSON.stringify(list));
+        } catch {}
+      }
+
+      function renderHeroes() {
+        const heroes = loadHeroes();
+        if (!heroes.length) {
+          heroListEl.innerHTML =
+            "Zatím žádní hrdinové – začni přidáním prvního. 💫";
+          return;
+        }
+        const lines = heroes
+          .map(
+            (h, i) =>
+              `${i + 1}. [${h.team}] ${h.name} – ${h.desc || "bez popisu"}`
+          )
+          .join("<br />");
+        heroListEl.innerHTML = lines;
+      }
+
+      heroAddBtn.addEventListener("click", () => {
+        const name = heroNameEl.value.trim();
+        const team = heroTeamEl.value;
+        const desc = heroDescEl.value.trim();
+        if (!name) return;
+        const heroes = loadHeroes();
+        heroes.push({ name, team, desc, ts: Date.now() });
+        saveHeroes(heroes);
+        renderHeroes();
+        heroNameEl.value = "";
+        heroDescEl.value = "";
+      });
+
+      heroClearBtn.addEventListener("click", () => {
+        if (!confirm("Opravdu vymazat lokální seznam hrdinů?")) return;
+        saveHeroes([]);
+        renderHeroes();
+      });
+
+      renderHeroes();
+
+      // --- Meziprostor – chat ---------------------------------------------
+
+      const SPACE_KEY = "vaft:space-log";
+      const spaceLogEl = document.getElementById("space-log");
+      const spaceInputEl = document.getElementById("space-input");
+      const spaceSendBtn = document.getElementById("space-send-btn");
+      const quickButtons = document.querySelectorAll("[data-quick]");
+
+      function loadSpaceLog() {
+        try {
+          const raw = localStorage.getItem(SPACE_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveSpaceLog(list) {
+        try {
+          localStorage.setItem(SPACE_KEY, JSON.stringify(list));
+        } catch {}
+      }
+
+      function renderSpaceLog() {
+        const log = loadSpaceLog();
+        spaceLogEl.innerHTML = "";
+        const base = document.createElement("div");
+        base.className = "chat-line";
+        base.innerHTML =
+          '<span class="chat-name">Revia:</span><span>Sleduju, co tvoříš. Sem si můžeš psát poznámky mezi světy – jen pro sebe.</span>';
+        spaceLogEl.appendChild(base);
+
+        log.forEach((entry) => {
+          const line = document.createElement("div");
+          line.className = "chat-line";
+          const t = new Date(entry.ts);
+          const hh = String(t.getHours()).padStart(2, "0");
+          const mm = String(t.getMinutes()).padStart(2, "0");
+          line.innerHTML =
+            '<span class="chat-name">' +
+            hh +
+            ":" +
+            mm +
+            " • Meziprostor:</span><span> " +
+            entry.text +
+            "</span>";
+          spaceLogEl.appendChild(line);
+        });
+
+        spaceLogEl.scrollTop = spaceLogEl.scrollHeight;
+      }
+
+      function pushSpaceMessage(text) {
+        if (!text) return;
+        const log = loadSpaceLog();
+        log.push({ text, ts: Date.now() });
+        saveSpaceLog(log);
+        renderSpaceLog();
+      }
+
+      spaceSendBtn.addEventListener("click", () => {
+        const text = spaceInputEl.value.trim();
+        if (!text) return;
+        spaceInputEl.value = "";
+        pushSpaceMessage(text);
+      });
+
+      spaceInputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          spaceSendBtn.click();
+        }
+      });
+
+      quickButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const base = btn.getAttribute("data-quick");
+          if (!base) return;
+          pushSpaceMessage(base);
+        });
+      });
+
+      renderSpaceLog();
+
+      // --- Síť – textová mapa modulů --------------------------------------
+
+      const nodesGridEl = document.getElementById("nodes-grid");
+
+      function renderNodesFromModules() {
+        nodesGridEl.innerHTML = "";
+        APP_MODULES.forEach((mod) => {
+          const card = document.createElement("div");
+          card.className = "node-card";
+          card.innerHTML = `
+            <div class="node-title">${mod.name}</div>
+            <div class="node-row">
+              <span>${mod.desc}</span>
+              <span>[${mod.group}]</span>
+            </div>
+          `;
+          nodesGridEl.appendChild(card);
+        });
+      }
+
+      renderNodesFromModules();
+
+      // --- Pravý panel – appky --------------------------------------------
+
+      const appsListEl = document.getElementById("apps-list");
+
+      function renderAppsPanel() {
+        appsListEl.innerHTML = "";
+        APP_MODULES.forEach((mod) => {
+          const row = document.createElement("div");
+          row.className = "app-row";
+
+          const main = document.createElement("div");
+          main.className = "app-main";
+
+          const name = document.createElement("div");
+          name.className = "app-name";
+          name.textContent = mod.name;
+
+          const sub = document.createElement("div");
+          sub.className = "app-sub";
+          sub.textContent = mod.desc;
+
+          main.appendChild(name);
+          main.appendChild(sub);
+
+          const link = document.createElement("a");
+          link.className = "app-open";
+          link.href = mod.path;
+          link.textContent = "Otevřít";
+          link.target = "_blank";
+          link.rel = "noopener";
+
+          row.appendChild(main);
+          row.appendChild(link);
+          appsListEl.appendChild(row);
+        });
+      }
+
+      renderAppsPanel();
+    </script>
+  </body>
+</html>
