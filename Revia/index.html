@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Revia • Vivere atque FruiT</title>
 
+    <!-- Styl Revie (ponecháváme tvoje revia.css) -->
     <link rel="stylesheet" href="./revia.css?v=0.6" />
 
+    <!-- Jemné nastavení pozadí, aby sedělo na iPadu / mobilu -->
     <style>
-      /* pozadí Revia angel / daemon */
       body {
         background-size: auto 70vh;
         background-position: center 18vh;
@@ -34,29 +35,32 @@
           background-position: center 0;
         }
       }
-
-      /* schovat původní zámek, ale nechat ho v DOM kvůli JS */
-      .revia-enter {
-        display: none;
-      }
     </style>
   </head>
 
   <body>
-    <!-- hlavní Revia wrapper – režim angel / daemon -->
-    <div class="revia-main" data-mode="angel" data-control="ai">
+    <!-- Hlavní wrapper Revie -->
+    <div
+      class="revia-main"
+      id="reviaMain"
+      data-mode="angel"
+      data-control="ai"
+    >
       <!-- horní lišta -->
       <div class="revia-topbar">
+        <!-- křídlo = zápisník -->
         <button
           class="revia-wing"
           id="revWing"
+          type="button"
           aria-label="otevřít zápisník"
         ></button>
+
         <div class="revia-title">Revia</div>
         <div class="revia-state" id="revState">AI: hlídám svět</div>
       </div>
 
-      <!-- zápisník / křídlo -->
+      <!-- zápisník -->
       <div class="revia-notes" id="revNotes">
         <div class="notes-head">
           <span>✧ Křídlo / zápis</span>
@@ -69,87 +73,216 @@
         <p class="notes-foot">Ukládá se jen do tohoto zařízení.</p>
       </div>
 
-      <!-- mřížka dovedností -->
+      <!-- mřížka slotů (dovednosti) -->
       <div class="revia-card">
-        <!-- Skill 1: Centrum / Revia & Centrum -->
-        <button class="revia-slot active" id="revSkillCentrum" type="button">
-          <span class="revia-glyph">&」</span>
+        <!-- SLOT 1: portál do Centra (hlavní index) -->
+        <button
+          class="revia-slot active"
+          id="slotPortal"
+          type="button"
+          aria-label="Otevřít Vivere atque FruiT • Revia &amp; Centrum"
+        >
+          <span class="revia-glyph" id="slotPortalGlyph">ً&’」</span>
         </button>
 
-        <!-- Skill 2: přepnout režim (anděl / démon) -->
-        <button class="revia-slot" id="revSkillToggle" type="button">
-          <span class="revia-glyph">⇄</span>
+        <!-- SLOT 2: Vstoupit (zatím jen toast, bez textu) -->
+        <button
+          class="revia-slot"
+          id="slotEnter"
+          type="button"
+          aria-label="Vstoupit do hry Revia"
+        ></button>
+
+        <!-- SLOT 3: Přepnout AI / Human (bez textu) -->
+        <button
+          class="revia-slot"
+          id="slotControl"
+          type="button"
+          aria-label="Přepnout řízení mezi AI a Human"
+        ></button>
+
+        <!-- SLOT 4: Anděl ❤️ / Ďábel ☆ – přepíná mód světa -->
+        <button
+          class="revia-slot"
+          id="slotMode"
+          type="button"
+          aria-label="Přepnout Revia mód anděl / ďábel"
+        >
+          <span class="revia-glyph" id="slotModeGlyph">「Ī’♡</span>
         </button>
 
-        <!-- Skill 3: otočit svět (interní rotace Revia) -->
-        <button class="revia-slot" id="revSkillRotate" type="button">
-          <span class="revia-glyph">⟳</span>
-        </button>
+        <!-- SLOT 5: Rezerva (zatím info) -->
+        <button
+          class="revia-slot"
+          id="slotWorld"
+          type="button"
+          aria-label="Budoucí světový modul"
+        ></button>
 
-        <!-- zbylé 3 sloty zatím prázdné pro budoucí skilly -->
-        <button class="revia-slot" type="button"></button>
-        <button class="revia-slot" type="button"></button>
-        <button class="revia-slot" type="button"></button>
+        <!-- SLOT 6: Rezerva (zatím info) -->
+        <button
+          class="revia-slot"
+          id="slotExtra"
+          type="button"
+          aria-label="Budoucí speciální dovednost"
+        ></button>
       </div>
 
-      <!-- spodní panel (ponechán kvůli JS, zámek schovaný CSS) -->
-      <div class="revia-bottom">
-        <div class="revia-mini">Ī’♡</div>
-        <button class="revia-enter" id="revEnter" type="button">
-          🔒 Vstoupit
-        </button>
-        <button class="revia-toggle" id="revToggle" type="button">
-          🔁 Přepnout
-        </button>
-        <button class="revia-help" id="revHelp" type="button">?</button>
-      </div>
-
+      <!-- spodní toast (malé hlášky) -->
       <div class="revia-toast" id="revToast" aria-live="polite"></div>
     </div>
 
-    <!-- Revia rotace světa (dovnitř dat-world) -->
     <script>
-      const REV_WORLD_STATES = ["vafiti", "glyph", "engine"];
-      let revWorldIndex = 0;
-
-      function reviaRotateWorld() {
-        revWorldIndex = (revWorldIndex + 1) % REV_WORLD_STATES.length;
-        const main = document.querySelector(".revia-main");
-        if (!main) return;
-        main.setAttribute("data-world", REV_WORLD_STATES[revWorldIndex]);
-        console.log("Revia otočila svět na:", REV_WORLD_STATES[revWorldIndex]);
+      // Pomocná funkce pro toast
+      function showToast(message) {
+        const toast = document.getElementById("revToast");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("is-visible");
+        clearTimeout(toast._hideTimer);
+        toast._hideTimer = setTimeout(() => {
+          toast.classList.remove("is-visible");
+        }, 2200);
       }
-    </script>
 
-    <!-- hlavní Revia logika -->
-    <script src="./revia.js?v=0.6"></script>
-    <script src="../vaft-core.js"></script>
-
-    <!-- napojení skillů na akce -->
-    <script>
+      // ZÁPISNÍK (křídlo)
       (function () {
-        // Skill 1 – Centrum (Revia & Centrum index)
-        const skillCentrum = document.getElementById("revSkillCentrum");
-        if (skillCentrum) {
-          skillCentrum.addEventListener("click", () => {
-            window.location.href = "../index.html";
+        const wing = document.getElementById("revWing");
+        const notes = document.getElementById("revNotes");
+        const closeBtn = document.getElementById("notesClose");
+        const textarea = document.getElementById("notesText");
+        const STORAGE_KEY = "revia-notes-v1";
+
+        // načti uložený text
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) textarea.value = saved;
+        } catch (e) {
+          // nic, jen neukládej
+        }
+
+        function openNotes() {
+          notes.classList.add("is-open");
+        }
+
+        function closeNotes() {
+          notes.classList.remove("is-open");
+        }
+
+        if (wing) wing.addEventListener("click", openNotes);
+        if (closeBtn) closeBtn.addEventListener("click", closeNotes);
+
+        if (textarea) {
+          textarea.addEventListener("input", () => {
+            try {
+              localStorage.setItem(STORAGE_KEY, textarea.value || "");
+            } catch (e) {}
+          });
+        }
+      })();
+
+      // SLOT 1 – portál do Centra (hlavní index)
+      (function () {
+        const slotPortal = document.getElementById("slotPortal");
+        if (!slotPortal) return;
+        slotPortal.addEventListener("click", () => {
+          showToast("Otevírám Vivere atque FruiT • Revia & Centrum…");
+          // cesta z /Revia/ do hlavního indexu
+          window.location.href = "../index.html";
+        });
+      })();
+
+      // SLOT 2 – Vstoupit (zatím jen info)
+      (function () {
+        const slotEnter = document.getElementById("slotEnter");
+        if (!slotEnter) return;
+        slotEnter.addEventListener("click", () => {
+          showToast(
+            "Vstup do Revia levelu ještě ladíme. Dnes stačí, že jsi sem došel."
+          );
+        });
+      })();
+
+      // SLOT 3 – Přepnout AI / Human
+      (function () {
+        const main = document.getElementById("reviaMain");
+        const state = document.getElementById("revState");
+        const slotControl = document.getElementById("slotControl");
+
+        if (!main || !state || !slotControl) return;
+
+        function updateState() {
+          const mode = main.getAttribute("data-control") || "ai";
+          if (mode === "ai") {
+            state.textContent = "AI: hlídám svět";
+          } else {
+            state.textContent = "Human: přebírám řízení";
+          }
+        }
+
+        updateState();
+
+        slotControl.addEventListener("click", () => {
+          const current = main.getAttribute("data-control") || "ai";
+          const next = current === "ai" ? "human" : "ai";
+          main.setAttribute("data-control", next);
+          updateState();
+
+          if (next === "ai") {
+            showToast("Revia řízení vrací AI, ty jen hlídej, jak se svět chová.");
+          } else {
+            showToast("Revia dává řízení tobě. Svět se přizpůsobí tobě.");
+          }
+        });
+      })();
+
+      // SLOT 4 – Anděl / Ďábel (přepínání režimu + glyph)
+      (function () {
+        const main = document.getElementById("reviaMain");
+        const glyph = document.getElementById("slotModeGlyph");
+        const slotMode = document.getElementById("slotMode");
+
+        if (!main || !glyph || !slotMode) return;
+
+        function setAngel() {
+          main.setAttribute("data-mode", "angel");
+          glyph.textContent = "「Ī’♡";
+          showToast("Revia přepnuta do andělského režimu (hlídá svět jemněji).");
+        }
+
+        function setDaemon() {
+          main.setAttribute("data-mode", "daemon");
+          glyph.textContent = "「Ī’☆";
+          showToast("Revia přepnuta do ďábelského režimu (přísnější dohled).");
+        }
+
+        // výchozí stav
+        setAngel();
+
+        slotMode.addEventListener("click", () => {
+          const mode = main.getAttribute("data-mode") || "angel";
+          if (mode === "angel") {
+            setDaemon();
+          } else {
+            setAngel();
+          }
+        });
+      })();
+
+      // SLOT 5 + 6 – zatím jen info
+      (function () {
+        const world = document.getElementById("slotWorld");
+        const extra = document.getElementById("slotExtra");
+
+        if (world) {
+          world.addEventListener("click", () => {
+            showToast("Tady bude později přímý vstup na některý z VaFT světů.");
           });
         }
 
-        // Skill 2 – přepnout režim (klikne na původní tlačítko revToggle)
-        const skillToggle = document.getElementById("revSkillToggle");
-        const btnToggle = document.getElementById("revToggle");
-        if (skillToggle && btnToggle) {
-          skillToggle.addEventListener("click", () => {
-            btnToggle.click();
-          });
-        }
-
-        // Skill 3 – otočit svět (Revia rotace)
-        const skillRotate = document.getElementById("revSkillRotate");
-        if (skillRotate) {
-          skillRotate.addEventListener("click", () => {
-            reviaRotateWorld();
+        if (extra) {
+          extra.addEventListener("click", () => {
+            showToast("Rezervovaný slot pro budoucí speciální dovednost Revie.");
           });
         }
       })();
