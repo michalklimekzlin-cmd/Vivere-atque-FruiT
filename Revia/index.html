@@ -48,7 +48,7 @@
     >
       <!-- horní lišta -->
       <div class="revia-topbar">
-        <!-- křídlo = zápisník -->
+        <!-- křídlo = zápisník / PROGRAM -->
         <button
           class="revia-wing"
           id="revWing"
@@ -60,17 +60,19 @@
         <div class="revia-state" id="revState">AI: hlídám svět</div>
       </div>
 
-      <!-- zápisník -->
+      <!-- zápisník – tady píšeš „programovací text“ pro Revii -->
       <div class="revia-notes" id="revNotes">
         <div class="notes-head">
-          <span>✧ Křídlo / zápis</span>
+          <span>✧ Křídlo / program</span>
           <button id="notesClose" type="button">×</button>
         </div>
         <textarea
           id="notesText"
-          placeholder="Charakter, úkoly, komu se ukáže…"
+          placeholder="Sem napiš PROGRAM pro Revii – jak se má chovat, mluvit, co hlídat…"
         ></textarea>
-        <p class="notes-foot">Ukládá se jen do tohoto zařízení.</p>
+        <p class="notes-foot">
+          Ukládá se jen do tohoto zařízení. Každý dotaz v chatu používá tenhle program.
+        </p>
       </div>
 
       <!-- mřížka slotů (dovednosti) -->
@@ -141,15 +143,15 @@
           <div class="revchat-input-row">
             <textarea
               id="revChatInput"
-              placeholder="Zeptej se Revie na hlídání světa, rady, cokoliv…"
+              placeholder="Zeptej se Revie…"
             ></textarea>
             <button id="revChatSend" type="button">Poslat</button>
           </div>
 
           <p class="revchat-note">
             Revia používá OpenAI přes backend. Historie chatu se ukládá jen do
-            tohoto zařízení a do AI posíláme jen posledních pár zpráv
-            (šetření tokenů).
+            tohoto zařízení a do AI posíláme jen posledních pár zpráv + program z křídla
+            (šetříme tokeny).
           </p>
         </div>
       </div>
@@ -171,7 +173,7 @@
         }, 2200);
       }
 
-      // ========== ZÁPISNÍK (křídlo) ==========
+      // ========== ZÁPISNÍK (křídlo / PROGRAM) ==========
       (function () {
         const wing = document.getElementById("revWing");
         const notes = document.getElementById("revNotes");
@@ -390,6 +392,10 @@
 
           const mode = main?.getAttribute("data-mode") || "angel";
 
+          // 🆕 přečteme PROGRAM z křídla
+          const persona =
+            document.getElementById("notesText")?.value || "";
+
           // připravíme krátkou historii pro backend (jen posledních 8 zpráv)
           const backendMessages = history.slice(-8).map((m) => ({
             role: m.role === "user" ? "user" : "assistant",
@@ -406,21 +412,19 @@
               body: JSON.stringify({
                 messages: backendMessages,
                 mode,
+                persona, // 🆕 program z křídla
               }),
             });
 
             if (!resp.ok) {
-              const text = await resp.text().catch(() => "");
               addMessage(
                 "assistant",
-                "⚠️ Revia backend HTTP " +
-                  resp.status +
-                  (text ? ":\n" + text : " (bez detailu).")
+                "Spojení s Revii backendem spadlo. Zkus to ještě jednou."
               );
               return;
             }
 
-            const data = await resp.json().catch(() => null);
+            const data = await resp.json();
             const reply =
               (data && data.reply) ||
               "Dneska jsem trochu tichá, ale jsem tu s tebou.";
@@ -429,7 +433,7 @@
             console.error(e);
             addMessage(
               "assistant",
-              "⚠️ Někde se ztratilo spojení k AI (síť / server). Zkus to prosím později."
+              "Něco se pokazilo na cestě k AI. Zkus to prosím později."
             );
           }
         }
