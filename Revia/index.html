@@ -48,7 +48,7 @@
     >
       <!-- horní lišta -->
       <div class="revia-topbar">
-        <!-- křídlo = zápisník / PROGRAM -->
+        <!-- křídlo = zápisník -->
         <button
           class="revia-wing"
           id="revWing"
@@ -60,19 +60,17 @@
         <div class="revia-state" id="revState">AI: hlídám svět</div>
       </div>
 
-      <!-- zápisník – tady píšeš „programovací text“ pro Revii -->
+      <!-- zápisník -->
       <div class="revia-notes" id="revNotes">
         <div class="notes-head">
-          <span>✧ Křídlo / program</span>
+          <span>✧ Křídlo / zápis</span>
           <button id="notesClose" type="button">×</button>
         </div>
         <textarea
           id="notesText"
-          placeholder="Sem napiš PROGRAM pro Revii – jak se má chovat, mluvit, co hlídat…"
+          placeholder="Charakter, úkoly, komu se ukáže…"
         ></textarea>
-        <p class="notes-foot">
-          Ukládá se jen do tohoto zařízení. Každý dotaz v chatu používá tenhle program.
-        </p>
+        <p class="notes-foot">Ukládá se jen do tohoto zařízení.</p>
       </div>
 
       <!-- mřížka slotů (dovednosti) -->
@@ -143,15 +141,15 @@
           <div class="revchat-input-row">
             <textarea
               id="revChatInput"
-              placeholder="Zeptej se Revie…"
+              placeholder="Zeptej se Revie na hlídání světa, rady, cokoliv…"
             ></textarea>
             <button id="revChatSend" type="button">Poslat</button>
           </div>
 
           <p class="revchat-note">
             Revia používá OpenAI přes backend. Historie chatu se ukládá jen do
-            tohoto zařízení a do AI posíláme jen posledních pár zpráv + program z křídla
-            (šetříme tokeny).
+            tohoto zařízení a do AI posíláme jen posledních pár zpráv
+            (šetření tokenů).
           </p>
         </div>
       </div>
@@ -173,7 +171,7 @@
         }, 2200);
       }
 
-      // ========== ZÁPISNÍK (křídlo / PROGRAM) ==========
+      // ========== ZÁPISNÍK (křídlo) ==========
       (function () {
         const wing = document.getElementById("revWing");
         const notes = document.getElementById("revNotes");
@@ -303,7 +301,7 @@
         }
       })();
 
-      // ========== CHAT REVIE – SLOT 2 ==========
+      // ========== CHAT REVIE – SLOT 2 + TOKENY ==========
       (function () {
         const main = document.getElementById("reviaMain");
         const slotEnter = document.getElementById("slotEnter");
@@ -313,6 +311,53 @@
         const input = document.getElementById("revChatInput");
         const log = document.getElementById("revChatLog");
         const STORAGE_KEY = "revia.chat.history.v1";
+
+        // ✦ tokenová peněženka
+        const TOKEN_DAILY_LIMIT = 100000; // můžeš si později poladit
+        const TOKEN_MONTHLY_LIMIT = 1000000;
+        const USAGE_KEY = "revia.tokens.usage.v1";
+
+        function loadUsage() {
+          const now = new Date();
+          const today = now.toISOString().slice(0, 10); // YYYY-MM-DD
+          const monthKey =
+            now.getFullYear() +
+            "-" +
+            String(now.getMonth() + 1).padStart(2, "0");
+
+          try {
+            const raw = localStorage.getItem(USAGE_KEY);
+            if (!raw) {
+              return { day: today, month: monthKey, usedToday: 0, usedMonth: 0 };
+            }
+            const parsed = JSON.parse(raw);
+
+            if (parsed.day !== today) {
+              parsed.day = today;
+              parsed.usedToday = 0;
+            }
+
+            if (parsed.month !== monthKey) {
+              parsed.month = monthKey;
+              parsed.usedMonth = 0;
+            }
+
+            return parsed;
+          } catch {
+            return { day: today, month: monthKey, usedToday: 0, usedMonth: 0 };
+          }
+        }
+
+        function saveUsage(usage) {
+          try {
+            localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
+          } catch {}
+        }
+
+        // odhad, kdyby usage z OpenAI nevrátilo nic
+        function estimateTokensPerCall() {
+          return 1200; // 0.7–1.5k je OK, můžeme časem přeladit
+        }
 
         if (!slotEnter || !chat || !sendBtn || !input || !log) return;
 
@@ -339,9 +384,12 @@
               minute: "2-digit",
             }),
           });
-          if (history.length > 30) {
-            history = history.slice(history.length - 30);
+
+          // dlouhá paměť, ale ať se to úplně neurve – necháme max ~500
+          if (history.length > 500) {
+            history = history.slice(history.length - 500);
           }
+
           saveHistory();
           renderLog();
         }
@@ -390,17 +438,45 @@
           input.value = "";
           addMessage("user", text);
 
+          // ✦ tokenová peněženka – načtení stavu
+          let usageState = loadUsage();
+          const estimatedCost = estimateTokensPerCall();
+          const softDaily = TOKEN_DAILY_LIMIT * 0.8;
+          const softMonth = TOKEN_MONTHLY_LIMIT * 0.8;
+
+          // tvrdý limit – Revia už dál „nejde“
+          if (
+            usageState.usedToday + estimatedCost > TOKEN_DAILY_LIMIT ||
+            usageState.usedMonth + estimatedCost > TOKEN_MONTHLY_LIMIT
+          ) {
+            addMessage(
+              "assistant",
+              "Brácho… dneska jsem už vyčerpala svůj tokenový rozpočet. " +
+                "Abych nevycucla účet, počkej prosím do dalšího resetu."
+            );
+            showToast(
+              "Revia: Denní nebo měsíční limit tokenů je vyčerpaný."
+            );
+            return;
+          }
+
+          // měkké varování – blížíme se k limitu
+          if (
+            usageState.usedToday + estimatedCost > softDaily ||
+            usageState.usedMonth + estimatedCost > softMonth
+          ) {
+            showToast(
+              "Revia: Blížíme se tokenovému limitu, zkusme kratší zprávy."
+            );
+          }
+
           const mode = main?.getAttribute("data-mode") || "angel";
 
-          // 🆕 přečteme PROGRAM z křídla
-          const persona =
-            document.getElementById("notesText")?.value || "";
-
-          // připravíme krátkou historii pro backend (jen posledních 8 zpráv)
-          const backendMessages = history.slice(-8).map((m) => ({
+          // připravíme historii pro backend (jen posledních 50 zpráv)
+          const backendMessages = history.slice(-50).map((m) => ({
             role: m.role === "user" ? "user" : "assistant",
             content: m.content,
-          }));
+          ));
 
           try {
             showToast("Revia přemýšlí…");
@@ -412,7 +488,6 @@
               body: JSON.stringify({
                 messages: backendMessages,
                 mode,
-                persona, // 🆕 program z křídla
               }),
             });
 
@@ -425,10 +500,35 @@
             }
 
             const data = await resp.json();
+
             const reply =
               (data && data.reply) ||
               "Dneska jsem trochu tichá, ale jsem tu s tebou.";
             addMessage("assistant", reply);
+
+            // přičtení skutečné spotřeby, pokud ji backend pošle
+            try {
+              if (
+                data &&
+                data.usage &&
+                typeof data.usage.total_tokens === "number"
+              ) {
+                usageState = loadUsage();
+                usageState.usedToday += data.usage.total_tokens;
+                usageState.usedMonth += data.usage.total_tokens;
+                saveUsage(usageState);
+
+                if (usageState.usedToday > softDaily) {
+                  showToast(
+                    "Revia: Za dnešek jsem už použila ~" +
+                      usageState.usedToday +
+                      " tokenů. Ještě chvíli a dám si pauzu."
+                  );
+                }
+              }
+            } catch (e) {
+              // když se to nepovede, nic se neděje
+            }
           } catch (e) {
             console.error(e);
             addMessage(
