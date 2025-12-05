@@ -6,7 +6,7 @@
     <title>Revia • Vivere atque FruiT</title>
 
     <!-- Styl Revie -->
-    <link rel="stylesheet" href="./revia.css?v=0.76" />
+    <link rel="stylesheet" href="./revia.css?v=0.75" />
 
     <!-- Jemné nastavení pozadí (můžeš klidně nechat) -->
     <style>
@@ -391,12 +391,10 @@
           const mode = main?.getAttribute("data-mode") || "angel";
 
           // připravíme krátkou historii pro backend (jen posledních 8 zpráv)
-          const backendMessages = history
-            .slice(-8)
-            .map((m) => ({
-              role: m.role === "user" ? "user" : "assistant",
-              content: m.content,
-            }));
+          const backendMessages = history.slice(-8).map((m) => ({
+            role: m.role === "user" ? "user" : "assistant",
+            content: m.content,
+          }));
 
           try {
             showToast("Revia přemýšlí…");
@@ -412,14 +410,17 @@
             });
 
             if (!resp.ok) {
+              const text = await resp.text().catch(() => "");
               addMessage(
                 "assistant",
-                "Spojení s Revii backendem spadlo. Zkus to ještě jednou."
+                "⚠️ Revia backend HTTP " +
+                  resp.status +
+                  (text ? ":\n" + text : " (bez detailu).")
               );
               return;
             }
 
-            const data = await resp.json();
+            const data = await resp.json().catch(() => null);
             const reply =
               (data && data.reply) ||
               "Dneska jsem trochu tichá, ale jsem tu s tebou.";
@@ -428,7 +429,7 @@
             console.error(e);
             addMessage(
               "assistant",
-              "Něco se pokazilo na cestě k AI. Zkus to prosím později."
+              "⚠️ Někde se ztratilo spojení k AI (síť / server). Zkus to prosím později."
             );
           }
         }
