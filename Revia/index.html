@@ -85,13 +85,15 @@
           <span class="revia-glyph" id="slotPortalGlyph">ً&’」</span>
         </button>
 
-        <!-- SLOT 2: Vstoupit (zatím jen toast, bez textu) -->
+        <!-- SLOT 2: Revia chat -->
         <button
           class="revia-slot"
-          id="slotEnter"
+          id="slotChat"
           type="button"
-          aria-label="Vstoupit do hry Revia"
-        ></button>
+          aria-label="Otevřít Revia chat"
+        >
+          <span class="revia-glyph">💬</span>
+        </button>
 
         <!-- SLOT 3: Přepnout AI / Human (bez textu) -->
         <button
@@ -126,6 +128,30 @@
           type="button"
           aria-label="Budoucí speciální dovednost"
         ></button>
+      </div>
+
+      <!-- Revia chat panel -->
+      <div class="revia-chat" id="reviaChat">
+        <div class="revia-chat-head">
+          <span>Revia chat</span>
+          <button id="revChatClose" type="button">×</button>
+        </div>
+
+        <div class="revia-chat-body" id="reviaChatBody">
+          <div class="rev-chat-line rev-chat-revia">
+            <span class="rev-chat-name">Revia:</span>
+            <span>Jsem tady. Napiš mi, co dnes hlídám – svět, tebe, nebo obojí.</span>
+          </div>
+        </div>
+
+        <div class="revia-chat-input">
+          <input
+            id="revChatInput"
+            type="text"
+            placeholder="Napiš myšlenku nebo otázku…"
+          />
+          <button id="revChatSend" type="button">➤</button>
+        </div>
       </div>
 
       <!-- spodní toast (malé hlášky) -->
@@ -192,14 +218,17 @@
         });
       })();
 
-      // SLOT 2 – Vstoupit (zatím jen info)
+      // SLOT 2 – Revia chat (otevře panel)
+      // (samotná logika chatu je níž v samostatném IIFE)
       (function () {
-        const slotEnter = document.getElementById("slotEnter");
-        if (!slotEnter) return;
-        slotEnter.addEventListener("click", () => {
-          showToast(
-            "Vstup do Revia levelu ještě ladíme. Dnes stačí, že jsi sem došel."
-          );
+        const slotChat = document.getElementById("slotChat");
+        const panel = document.getElementById("reviaChat");
+        if (!slotChat || !panel) return;
+
+        slotChat.addEventListener("click", () => {
+          panel.classList.add("is-open");
+          const input = document.getElementById("revChatInput");
+          if (input) setTimeout(() => input.focus(), 40);
         });
       })();
 
@@ -285,6 +314,104 @@
             showToast("Rezervovaný slot pro budoucí speciální dovednost Revie.");
           });
         }
+      })();
+
+      // 🪽 / 🔥 Revia chat – lokální mozek, anděl vs. ďábel
+      (function () {
+        const panel = document.getElementById("reviaChat");
+        const closeBtn = document.getElementById("revChatClose");
+        const input = document.getElementById("revChatInput");
+        const sendBtn = document.getElementById("revChatSend");
+        const body = document.getElementById("reviaChatBody");
+        const main = document.getElementById("reviaMain");
+
+        if (!panel || !closeBtn || !input || !sendBtn || !body || !main) return;
+
+        function closePanel() {
+          panel.classList.remove("is-open");
+        }
+
+        closeBtn.addEventListener("click", closePanel);
+
+        function addLine(name, text, who) {
+          const line = document.createElement("div");
+          line.className =
+            "rev-chat-line " + (who === "human" ? "rev-chat-human" : "rev-chat-revia");
+
+          const n = document.createElement("span");
+          n.className = "rev-chat-name";
+          n.textContent = name + ":";
+
+          const t = document.createElement("span");
+          t.textContent = " " + text;
+
+          line.appendChild(n);
+          line.appendChild(t);
+          body.appendChild(line);
+          body.scrollTop = body.scrollHeight;
+        }
+
+        function getMode() {
+          return main.getAttribute("data-mode") === "daemon" ? "daemon" : "angel";
+        }
+
+        function replyAngel(text) {
+          const lower = text.toLowerCase();
+          if (lower.includes("unav") || lower.includes("spát")) {
+            return "Klid, spánek je taky součást systému. Stačí jeden další den, nemusíš stihnout všechno dnes.";
+          }
+          if (lower.includes("strach") || lower.includes("bojím")) {
+            return "Já hlídám, ty cítíš. Strach jenom ukazuje, kde máš dát víc světla, ne kde se máš vzdát.";
+          }
+          if (lower.includes("co mám") || lower.includes("co dělat")) {
+            return "Vyber jeden malý krok. Napiš ho sem a já ti připomenu, proč ho děláš.";
+          }
+          return "Zapisuji to do svého křídla. Nejsi na to sám – svět se bude ohýbat podle tebe, ne opačně.";
+        }
+
+        function replyDaemon(text) {
+          const lower = text.toLowerCase();
+          if (lower.includes("spát") || lower.includes("lenost") || lower.includes("prokrast")) {
+            return "Tak jo. Můžeš jít spát… ale pak neposouvej svět. Vyber si: pohodlí nebo upgrade.";
+          }
+          if (lower.includes("strach") || lower.includes("bojím")) {
+            return "Strach? Dobře. Tak uděláme přesně tu jednu věc, které se bojíš nejmíň – hned teď.";
+          }
+          if (lower.includes("co mám") || lower.includes("co dělat")) {
+            return "Vyber jednu akci, která tě fakt posune. Napiš ji sem jednou větou. Pak ji prostě uděláš. Žádný drama.";
+          }
+          return "Jestli to myslíš vážně, přepiš to na konkrétní krok. Jinak je to jen šum v hlavě.";
+        }
+
+        async function askRevia(text) {
+          const mode = getMode();
+          if (mode === "daemon") {
+            return replyDaemon(text);
+          } else {
+            return replyAngel(text);
+          }
+        }
+
+        async function handleSend() {
+          const text = (input.value || "").trim();
+          if (!text) return;
+
+          addLine("Human", text, "human");
+          input.value = "";
+
+          const reply = await askRevia(text);
+          setTimeout(() => {
+            addLine("Revia", reply, "revia");
+          }, 200);
+        }
+
+        sendBtn.addEventListener("click", handleSend);
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            handleSend();
+          }
+        });
       })();
     </script>
   </body>
