@@ -6,7 +6,7 @@
     <title>Revia • Vivere atque FruiT</title>
 
     <!-- Styl Revie -->
-    <link rel="stylesheet" href="./revia.css?v=0.74" />
+    <link rel="stylesheet" href="./revia.css?v=0.75" />
 
     <!-- Jemné nastavení pozadí (můžeš klidně nechat) -->
     <style>
@@ -85,15 +85,13 @@
           <span class="revia-glyph" id="slotPortalGlyph">ً&’」</span>
         </button>
 
-        <!-- SLOT 2: Revia chat -->
+        <!-- SLOT 2: Vstoupit / CHAT REVIA -->
         <button
           class="revia-slot"
-          id="slotChat"
+          id="slotEnter"
           type="button"
-          aria-label="Otevřít Revia chat"
-        >
-          <span class="revia-glyph">💬</span>
-        </button>
+          aria-label="Otevřít chat s Revií"
+        ></button>
 
         <!-- SLOT 3: Přepnout AI / Human (bez textu) -->
         <button
@@ -130,27 +128,29 @@
         ></button>
       </div>
 
-      <!-- Revia chat panel -->
-      <div class="revia-chat" id="reviaChat">
-        <div class="revia-chat-head">
-          <span>Revia chat</span>
-          <button id="revChatClose" type="button">×</button>
-        </div>
-
-        <div class="revia-chat-body" id="reviaChatBody">
-          <div class="rev-chat-line rev-chat-revia">
-            <span class="rev-chat-name">Revia:</span>
-            <span>Jsem tady. Napiš mi, co dnes hlídám – svět, tebe, nebo obojí.</span>
+      <!-- CHAT PANEL REVIE -->
+      <div class="revia-chat" id="revChat">
+        <div class="revia-chat-panel">
+          <div class="revchat-head">
+            <span id="revChatTitle">Revia • andělský režim</span>
+            <button id="revChatClose" type="button">×</button>
           </div>
-        </div>
 
-        <div class="revia-chat-input">
-          <input
-            id="revChatInput"
-            type="text"
-            placeholder="Napiš myšlenku nebo otázku…"
-          />
-          <button id="revChatSend" type="button">➤</button>
+          <div id="revChatLog" class="revchat-log"></div>
+
+          <div class="revchat-input-row">
+            <textarea
+              id="revChatInput"
+              placeholder="Zeptej se Revie na hlídání světa, rady, cokoliv…"
+            ></textarea>
+            <button id="revChatSend" type="button">Poslat</button>
+          </div>
+
+          <p class="revchat-note">
+            Revia používá OpenAI přes backend. Historie chatu se ukládá jen do
+            tohoto zařízení a do AI posíláme jen posledních pár zpráv
+            (šetření tokenů).
+          </p>
         </div>
       </div>
 
@@ -159,7 +159,7 @@
     </div>
 
     <script>
-      // Pomocná funkce pro toast – používá třídu "show", jak máš v CSS
+      // Pomocná funkce pro toast – používá třídu "show"
       function showToast(message) {
         const toast = document.getElementById("revToast");
         if (!toast) return;
@@ -171,7 +171,7 @@
         }, 2200);
       }
 
-      // ZÁPISNÍK (křídlo) – třída "open" podle CSS .revia-notes.open
+      // ========== ZÁPISNÍK (křídlo) ==========
       (function () {
         const wing = document.getElementById("revWing");
         const notes = document.getElementById("revNotes");
@@ -179,13 +179,10 @@
         const textarea = document.getElementById("notesText");
         const STORAGE_KEY = "revia-notes-v1";
 
-        // načti uložený text
         try {
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) textarea.value = saved;
-        } catch (e) {
-          // nic, jen neukládej
-        }
+        } catch (e) {}
 
         function openNotes() {
           notes.classList.add("open");
@@ -207,32 +204,17 @@
         }
       })();
 
-      // SLOT 1 – portál do Centra (hlavní index)
+      // ========== SLOT 1 – portál do Centra ==========
       (function () {
         const slotPortal = document.getElementById("slotPortal");
         if (!slotPortal) return;
         slotPortal.addEventListener("click", () => {
           showToast("Otevírám Vivere atque FruiT • Revia & Centrum…");
-          // cesta z /Revia/ do hlavního indexu
           window.location.href = "../index.html";
         });
       })();
 
-      // SLOT 2 – Revia chat (otevře panel)
-      // (samotná logika chatu je níž v samostatném IIFE)
-      (function () {
-        const slotChat = document.getElementById("slotChat");
-        const panel = document.getElementById("reviaChat");
-        if (!slotChat || !panel) return;
-
-        slotChat.addEventListener("click", () => {
-          panel.classList.add("is-open");
-          const input = document.getElementById("revChatInput");
-          if (input) setTimeout(() => input.focus(), 40);
-        });
-      })();
-
-      // SLOT 3 – Přepnout AI / Human
+      // ========== SLOT 3 – Přepnout AI / Human ==========
       (function () {
         const main = document.getElementById("reviaMain");
         const state = document.getElementById("revState");
@@ -265,23 +247,26 @@
         });
       })();
 
-      // SLOT 4 – Anděl / Ďábel (přepínání režimu + glyph)
+      // ========== SLOT 4 – Anděl / Ďábel ==========
       (function () {
         const main = document.getElementById("reviaMain");
         const glyph = document.getElementById("slotModeGlyph");
         const slotMode = document.getElementById("slotMode");
+        const chatTitle = document.getElementById("revChatTitle");
 
         if (!main || !glyph || !slotMode) return;
 
         function setAngel() {
           main.setAttribute("data-mode", "angel");
           glyph.textContent = "「Ī’♡";
+          if (chatTitle) chatTitle.textContent = "Revia • andělský režim";
           showToast("Revia přepnuta do andělského režimu (hlídá svět jemněji).");
         }
 
         function setDaemon() {
           main.setAttribute("data-mode", "daemon");
           glyph.textContent = "「Ī’☆";
+          if (chatTitle) chatTitle.textContent = "Revia • ďábelský režim";
           showToast("Revia přepnuta do ďábelského režimu (přísnější dohled).");
         }
 
@@ -298,7 +283,7 @@
         });
       })();
 
-      // SLOT 5 + 6 – zatím jen info
+      // ========== SLOT 5 + 6 – placeholdery ==========
       (function () {
         const world = document.getElementById("slotWorld");
         const extra = document.getElementById("slotExtra");
@@ -316,112 +301,157 @@
         }
       })();
 
-      // 🪽 / 🔥 Revia chat – napojení na OpenAI (lehké, krátké odpovědi)
-(function () {
-  const panel = document.getElementById("reviaChat");
-  const closeBtn = document.getElementById("revChatClose");
-  const input = document.getElementById("revChatInput");
-  const sendBtn = document.getElementById("revChatSend");
-  const body = document.getElementById("reviaChatBody");
-  const main = document.getElementById("reviaMain");
+      // ========== CHAT REVIE – SLOT 2 ==========
+      (function () {
+        const main = document.getElementById("reviaMain");
+        const slotEnter = document.getElementById("slotEnter");
+        const chat = document.getElementById("revChat");
+        const closeBtn = document.getElementById("revChatClose");
+        const sendBtn = document.getElementById("revChatSend");
+        const input = document.getElementById("revChatInput");
+        const log = document.getElementById("revChatLog");
+        const STORAGE_KEY = "revia.chat.history.v1";
 
-  if (!panel || !closeBtn || !input || !sendBtn || !body || !main) return;
+        if (!slotEnter || !chat || !sendBtn || !input || !log) return;
 
-  // malá lokální historie pro kontext (jen pár zpráv)
-  let reviaHistorie = [];
+        let history = [];
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) history = JSON.parse(raw);
+        } catch (e) {
+          history = [];
+        }
 
-  function zavritPanel() {
-    panel.classList.remove("is-open");
-  }
+        function saveHistory() {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+          } catch (e) {}
+        }
 
-  closeBtn.addEventListener("click", zavritPanel);
+        function addMessage(role, content) {
+          history.push({
+            role,
+            content,
+            time: new Date().toLocaleTimeString("cs-CZ", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          });
+          if (history.length > 30) {
+            history = history.slice(history.length - 30);
+          }
+          saveHistory();
+          renderLog();
+        }
 
-  function pridejRadek(jmeno, text, role) {
-    const radek = document.createElement("div");
-    radek.className =
-      "rev-chat-line " + (role === "human" ? "rev-chat-human" : "rev-chat-revia");
+        function renderLog() {
+          log.innerHTML = "";
+          history.forEach((m) => {
+            const row = document.createElement("div");
+            row.className =
+              "revchat-msg " +
+              (m.role === "user" ? "revchat-user" : "revchat-bot");
+            const name = m.role === "user" ? "Ty" : "Revia";
+            row.innerHTML =
+              "<small>" +
+              name +
+              " • " +
+              (m.time || "") +
+              "</small><br>" +
+              m.content;
+            log.appendChild(row);
+          });
+          log.scrollTop = log.scrollHeight;
+        }
 
-    const spanJmeno = document.createElement("span");
-    spanJmeno.className = "rev-chat-name";
-    spanJmeno.textContent = jmeno + ":";
+        function openChat() {
+          chat.classList.add("is-open");
+          renderLog();
+          input.focus();
+        }
 
-    const spanText = document.createElement("span");
-    spanText.textContent = " " + text;
+        function closeChat() {
+          chat.classList.remove("is-open");
+        }
 
-    radek.appendChild(spanJmeno);
-    radek.appendChild(spanText);
-    body.appendChild(radek);
-    body.scrollTop = body.scrollHeight;
-  }
+        slotEnter.addEventListener("click", () => {
+          openChat();
+        });
 
-  function ziskejRezim() {
-    return main.getAttribute("data-mode") === "daemon" ? "daemon" : "angel";
-  }
+        if (closeBtn) {
+          closeBtn.addEventListener("click", closeChat);
+        }
 
-  async function dotazNaReviu(text) {
-    const rezim = ziskejRezim();
+        async function handleSend() {
+          const text = (input.value || "").trim();
+          if (!text) return;
+          input.value = "";
+          addMessage("user", text);
 
-    // přidej aktuální zprávu do historie
-    reviaHistorie.push({ role: "user", content: text });
+          const mode = main?.getAttribute("data-mode") || "angel";
 
-    // do backendu posíláme jen posledních pár zpráv kvůli tokenům
-    const zpravyProBackend = reviaHistorie.slice(-6);
+          // připravíme krátkou historii pro backend (jen posledních 8 zpráv)
+          const backendMessages = history
+            .slice(-8)
+            .map((m) => ({
+              role: m.role === "user" ? "user" : "assistant",
+              content: m.content,
+            }));
 
-    const odpoved = await fetch("/api/revia-chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        mode: rezim,
-        messages: zpravyProBackend,
-      }),
-    });
+          try {
+            showToast("Revia přemýšlí…");
+            const resp = await fetch("/api/revia-chat", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                messages: backendMessages,
+                mode,
+              }),
+            });
 
-    if (!odpoved.ok) {
-      console.warn("Revia backend chyba:", odpoved.status);
-      return "Nemám spojení s jádrem. Zkus to ještě jednou, prosím.";
-    }
+            if (!resp.ok) {
+              addMessage(
+                "assistant",
+                "Spojení s Revii backendem spadlo. Zkus to ještě jednou."
+              );
+              return;
+            }
 
-    const data = await odpoved.json();
-    const textOdpovedi = (data && data.reply) || "Ticho z druhé strany…";
+            const data = await resp.json();
+            const reply =
+              (data && data.reply) ||
+              "Dneska jsem trochu tichá, ale jsem tu s tebou.";
+            addMessage("assistant", reply);
+          } catch (e) {
+            console.error(e);
+            addMessage(
+              "assistant",
+              "Něco se pokazilo na cestě k AI. Zkus to prosím později."
+            );
+          }
+        }
 
-    // ulož asistenta do lokální historie
-    reviaHistorie.push({ role: "assistant", content: textOdpovedi });
+        sendBtn.addEventListener("click", handleSend);
 
-    return textOdpovedi;
-  }
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          }
+        });
 
-  async function odeslat() {
-    const text = (input.value || "").trim();
-    if (!text) return;
-
-    pridejRadek("Human", text, "human");
-    input.value = "";
-
-    try {
-      const odpoved = await dotazNaReviu(text);
-      setTimeout(() => {
-        pridejRadek("Revia", odpoved, "revia");
-      }, 120);
-    } catch (e) {
-      console.error(e);
-      pridejRadek(
-        "Revia",
-        "Něco se pokazilo při volání OpenAI. Zkus to prosím znovu.",
-        "revia"
-      );
-    }
-  }
-
-  sendBtn.addEventListener("click", odeslat);
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      odeslat();
-    }
-  });
-})();
+        // první zpráva, pokud je historie prázdná
+        if (history.length === 0) {
+          addMessage(
+            "assistant",
+            "Jsem Revia. Hlídám tvůj svět Vivere atque FruiT. Zeptej se mě na cokoliv, co máš teď v hlavě."
+          );
+        } else {
+          renderLog();
+        }
+      })();
     </script>
   </body>
 </html>
