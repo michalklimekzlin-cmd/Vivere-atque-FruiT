@@ -316,103 +316,112 @@
         }
       })();
 
-      // 🪽 / 🔥 Revia chat – lokální mozek, anděl vs. ďábel
-      (function () {
-        const panel = document.getElementById("reviaChat");
-        const closeBtn = document.getElementById("revChatClose");
-        const input = document.getElementById("revChatInput");
-        const sendBtn = document.getElementById("revChatSend");
-        const body = document.getElementById("reviaChatBody");
-        const main = document.getElementById("reviaMain");
+      // 🪽 / 🔥 Revia chat – napojení na OpenAI (lehké, krátké odpovědi)
+(function () {
+  const panel = document.getElementById("reviaChat");
+  const closeBtn = document.getElementById("revChatClose");
+  const input = document.getElementById("revChatInput");
+  const sendBtn = document.getElementById("revChatSend");
+  const body = document.getElementById("reviaChatBody");
+  const main = document.getElementById("reviaMain");
 
-        if (!panel || !closeBtn || !input || !sendBtn || !body || !main) return;
+  if (!panel || !closeBtn || !input || !sendBtn || !body || !main) return;
 
-        function closePanel() {
-          panel.classList.remove("is-open");
-        }
+  // malá lokální historie pro kontext (jen pár zpráv)
+  let reviaHistorie = [];
 
-        closeBtn.addEventListener("click", closePanel);
+  function zavritPanel() {
+    panel.classList.remove("is-open");
+  }
 
-        function addLine(name, text, who) {
-          const line = document.createElement("div");
-          line.className =
-            "rev-chat-line " + (who === "human" ? "rev-chat-human" : "rev-chat-revia");
+  closeBtn.addEventListener("click", zavritPanel);
 
-          const n = document.createElement("span");
-          n.className = "rev-chat-name";
-          n.textContent = name + ":";
+  function pridejRadek(jmeno, text, role) {
+    const radek = document.createElement("div");
+    radek.className =
+      "rev-chat-line " + (role === "human" ? "rev-chat-human" : "rev-chat-revia");
 
-          const t = document.createElement("span");
-          t.textContent = " " + text;
+    const spanJmeno = document.createElement("span");
+    spanJmeno.className = "rev-chat-name";
+    spanJmeno.textContent = jmeno + ":";
 
-          line.appendChild(n);
-          line.appendChild(t);
-          body.appendChild(line);
-          body.scrollTop = body.scrollHeight;
-        }
+    const spanText = document.createElement("span");
+    spanText.textContent = " " + text;
 
-        function getMode() {
-          return main.getAttribute("data-mode") === "daemon" ? "daemon" : "angel";
-        }
+    radek.appendChild(spanJmeno);
+    radek.appendChild(spanText);
+    body.appendChild(radek);
+    body.scrollTop = body.scrollHeight;
+  }
 
-        function replyAngel(text) {
-          const lower = text.toLowerCase();
-          if (lower.includes("unav") || lower.includes("spát")) {
-            return "Klid, spánek je taky součást systému. Stačí jeden další den, nemusíš stihnout všechno dnes.";
-          }
-          if (lower.includes("strach") || lower.includes("bojím")) {
-            return "Já hlídám, ty cítíš. Strach jenom ukazuje, kde máš dát víc světla, ne kde se máš vzdát.";
-          }
-          if (lower.includes("co mám") || lower.includes("co dělat")) {
-            return "Vyber jeden malý krok. Napiš ho sem a já ti připomenu, proč ho děláš.";
-          }
-          return "Zapisuji to do svého křídla. Nejsi na to sám – svět se bude ohýbat podle tebe, ne opačně.";
-        }
+  function ziskejRezim() {
+    return main.getAttribute("data-mode") === "daemon" ? "daemon" : "angel";
+  }
 
-        function replyDaemon(text) {
-          const lower = text.toLowerCase();
-          if (lower.includes("spát") || lower.includes("lenost") || lower.includes("prokrast")) {
-            return "Tak jo. Můžeš jít spát… ale pak neposouvej svět. Vyber si: pohodlí nebo upgrade.";
-          }
-          if (lower.includes("strach") || lower.includes("bojím")) {
-            return "Strach? Dobře. Tak uděláme přesně tu jednu věc, které se bojíš nejmíň – hned teď.";
-          }
-          if (lower.includes("co mám") || lower.includes("co dělat")) {
-            return "Vyber jednu akci, která tě fakt posune. Napiš ji sem jednou větou. Pak ji prostě uděláš. Žádný drama.";
-          }
-          return "Jestli to myslíš vážně, přepiš to na konkrétní krok. Jinak je to jen šum v hlavě.";
-        }
+  async function dotazNaReviu(text) {
+    const rezim = ziskejRezim();
 
-        async function askRevia(text) {
-          const mode = getMode();
-          if (mode === "daemon") {
-            return replyDaemon(text);
-          } else {
-            return replyAngel(text);
-          }
-        }
+    // přidej aktuální zprávu do historie
+    reviaHistorie.push({ role: "user", content: text });
 
-        async function handleSend() {
-          const text = (input.value || "").trim();
-          if (!text) return;
+    // do backendu posíláme jen posledních pár zpráv kvůli tokenům
+    const zpravyProBackend = reviaHistorie.slice(-6);
 
-          addLine("Human", text, "human");
-          input.value = "";
+    const odpoved = await fetch("/api/revia-chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        mode: rezim,
+        messages: zpravyProBackend,
+      }),
+    });
 
-          const reply = await askRevia(text);
-          setTimeout(() => {
-            addLine("Revia", reply, "revia");
-          }, 200);
-        }
+    if (!odpoved.ok) {
+      console.warn("Revia backend chyba:", odpoved.status);
+      return "Nemám spojení s jádrem. Zkus to ještě jednou, prosím.";
+    }
 
-        sendBtn.addEventListener("click", handleSend);
-        input.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            handleSend();
-          }
-        });
-      })();
+    const data = await odpoved.json();
+    const textOdpovedi = (data && data.reply) || "Ticho z druhé strany…";
+
+    // ulož asistenta do lokální historie
+    reviaHistorie.push({ role: "assistant", content: textOdpovedi });
+
+    return textOdpovedi;
+  }
+
+  async function odeslat() {
+    const text = (input.value || "").trim();
+    if (!text) return;
+
+    pridejRadek("Human", text, "human");
+    input.value = "";
+
+    try {
+      const odpoved = await dotazNaReviu(text);
+      setTimeout(() => {
+        pridejRadek("Revia", odpoved, "revia");
+      }, 120);
+    } catch (e) {
+      console.error(e);
+      pridejRadek(
+        "Revia",
+        "Něco se pokazilo při volání OpenAI. Zkus to prosím znovu.",
+        "revia"
+      );
+    }
+  }
+
+  sendBtn.addEventListener("click", odeslat);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      odeslat();
+    }
+  });
+})();
     </script>
   </body>
 </html>
