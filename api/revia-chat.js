@@ -4,7 +4,6 @@
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    // tohle uvidíš jen když si /api/revia-chat otevřeš v prohlížeči
     res
       .status(405)
       .json({ error: "Method not allowed – používej POST z aplikace." });
@@ -62,7 +61,6 @@ Andělský režim:
 
     if (!apiKey) {
       console.error("OPENAI_API_KEY není nastavený ve Vercel env.");
-      // místo 500 pošleme 200 + text, ať to vidíš přímo v chatu
       res.status(200).json({
         reply:
           "⚠️ Revia backend: OPENAI_API_KEY není nastavený na serveru. Mrkni ve Vercelu do Environment Variables.",
@@ -80,7 +78,7 @@ Andělský režim:
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
+          model: "gpt-4o-mini", // úsporný model
           max_tokens: 260,
           temperature: 0.7,
           messages: [
@@ -95,8 +93,6 @@ Andělský režim:
 
     if (!response.ok) {
       console.error("OpenAI error:", response.status, text);
-
-      // tady ti Revia rovnou napíše, co přesně OpenAI vrací
       res.status(200).json({
         reply:
           "⚠️ Revia backend – OpenAI vrátil chybu " +
