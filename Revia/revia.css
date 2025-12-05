@@ -1,4 +1,5 @@
-/* 🌌 Revia v0.76 – full-screen background + zápisník + chat */
+/* 🌌 Revia v0.77 – full-screen anděl/ďábel + zápisník + chat */
+/* Michal ♡ Revia \\{*(°•.)(.•°)*}// */
 
 /* základ */
 html,
@@ -18,18 +19,18 @@ body {
   width: 100%;
   height: 100%;
   background-image: url("./revia-bg-angel.jpg");
-  background-size: cover !important;
-  background-position: center top !important;
+  background-size: cover;
+  background-position: center top;
   background-repeat: no-repeat;
   background-attachment: scroll;
   transition: background-image 1s ease-in-out, filter 1s ease-in-out;
-  filter: brightness(1.08) saturate(1.1);
+  filter: brightness(1.06) saturate(1.1);
 }
 
 /* režim démon */
 .revia-main[data-mode="daemon"] {
   background-image: url("./revia-bg-daemon.jpg");
-  filter: brightness(0.88) saturate(1.2);
+  filter: brightness(0.88) saturate(1.22);
 }
 
 /* přechod dole, aby to nebylo utnuté */
@@ -43,7 +44,7 @@ body {
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0) 0%,
-    rgba(0, 0, 0, 0.65) 55%,
+    rgba(0, 0, 0, 0.68) 55%,
     #000 100%
   );
   pointer-events: none;
@@ -61,12 +62,12 @@ body {
   justify-content: space-between;
   align-items: center;
   box-sizing: border-box;
-  z-index: 2;
+  z-index: 3;
   opacity: 0;
-  animation: fadeInTop 1.6s ease forwards 0.5s;
+  animation: reviaFadeTop 1.6s ease forwards 0.5s;
 }
 
-@keyframes fadeInTop {
+@keyframes reviaFadeTop {
   from {
     opacity: 0;
     transform: translateY(-10px);
@@ -85,51 +86,54 @@ body {
 }
 
 .revia-state {
-  color: rgba(233, 244, 255, 0.8);
-  font-size: 0.8rem;
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  color: rgba(230, 244, 255, 0.85);
+  font-size: 0.85rem;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }
 
-/* křídlo (zápisník) */
+/* křídlo = zápisník */
 .revia-wing {
   width: 40px;
   height: 40px;
   border: none;
-  background: rgba(2, 8, 12, 0.15);
   border-radius: 14px;
+  background: rgba(2, 8, 12, 0.18);
   backdrop-filter: blur(6px);
-  background-image: url("data:image/svg+xml,%3Csvg width='70' height='70' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 46 C16 18 30 11 45 10 C38 19 33 27 31 34 C28 42 24 49 15 51 C12 52 7 49 8 46 Z' fill='%23ffffff' fill-opacity='0.75'/%3E%3C/svg%3E");
+  cursor: pointer;
+  transition: 0.28s;
+  z-index: 3;
+
+  background-image: url("data:image/svg+xml,%3Csvg width='70' height='70' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 46 C16 18 30 11 45 10 C38 19 33 27 31 34 C28 42 24 49 15 51 C12 52 7 49 8 46 Z' fill='%23ffffff' fill-opacity='0.78'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 74%;
-  cursor: pointer;
-  transition: 0.3s;
-  z-index: 2;
-}
-.revia-wing:hover {
-  transform: scale(1.05);
-  background: rgba(2, 8, 12, 0.25);
 }
 
-/* zápisník */
+.revia-wing:hover {
+  transform: scale(1.05);
+  background: rgba(2, 8, 12, 0.28);
+}
+
+/* zápisník (křídlo) */
 .revia-notes {
   position: absolute;
   top: 70px;
-  left: -280px;
-  width: 250px;
-  height: 300px;
-  background: rgba(3, 9, 15, 0.9);
+  left: -290px;
+  width: 260px;
+  height: 320px;
+  background: rgba(3, 9, 15, 0.92);
   border: 1px solid rgba(233, 244, 255, 0.08);
-  border-radius: 16px;
-  backdrop-filter: blur(8px);
+  border-radius: 18px;
+  backdrop-filter: blur(10px);
   color: #e9f4ff;
   padding: 10px 12px;
   box-sizing: border-box;
   transition: left 0.4s ease;
-  z-index: 2;
+  z-index: 3;
 }
+
 .revia-notes.open {
-  left: 10px;
+  left: 12px;
 }
 
 .notes-head {
@@ -137,33 +141,39 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
+  font-size: 0.78rem;
 }
+
 .notes-head span {
   font-weight: 500;
 }
+
 #notesClose {
   background: transparent;
   border: none;
-  color: #fff;
+  color: #ffffff;
   font-size: 1.1rem;
   cursor: pointer;
 }
+
 #notesText {
   width: 100%;
-  height: 210px;
-  background: rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 10px;
+  height: 220px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
   color: inherit;
   outline: none;
   resize: none;
   padding: 6px 8px;
   box-sizing: border-box;
+  font-size: 0.8rem;
 }
+
 .notes-foot {
-  font-size: 0.67rem;
-  opacity: 0.4;
-  margin-top: 4px;
+  font-size: 0.65rem;
+  opacity: 0.5;
+  margin-top: 5px;
 }
 
 /* mřížka slotů */
@@ -186,204 +196,215 @@ body {
   width: 108px;
   height: 108px;
   border-radius: 22px;
-  border: 1px solid rgba(121, 193, 255, 0.08);
+  border: 1px solid rgba(121, 193, 255, 0.1);
   background: radial-gradient(
     circle at 30% 30%,
-    rgba(255, 255, 255, 0.18),
-    rgba(1, 7, 12, 0.07)
+    rgba(255, 255, 255, 0.2),
+    rgba(1, 7, 12, 0.06)
   );
   backdrop-filter: blur(10px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25),
-    inset 0 0 15px rgba(255, 255, 255, 0.03);
+    inset 0 0 15px rgba(255, 255, 255, 0.04);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: 0.25s;
 }
+
 .revia-slot:hover {
   transform: scale(1.03);
   border-color: rgba(134, 208, 255, 0.4);
 }
+
 .revia-slot.active {
-  box-shadow: 0 0 25px rgba(160, 233, 255, 0.55);
+  box-shadow: 0 0 24px rgba(160, 233, 255, 0.6);
 }
 
 /* glyph */
 .revia-glyph {
   font-size: 2.2rem;
   color: #f2fbff;
-  text-shadow: 0 0 12px rgba(196, 238, 255, 0.5);
+  text-shadow: 0 0 12px rgba(196, 238, 255, 0.55);
 }
 
-/* toast */
+/* spodní toast */
 .revia-toast {
   position: absolute;
-  top: 60px;
+  top: 64px;
   right: 16px;
-  background: rgba(3, 10, 15, 0.85);
-  border: 1px solid rgba(232, 244, 255, 0.06);
-  color: #fff;
+  background: rgba(3, 10, 15, 0.88);
+  border: 1px solid rgba(232, 244, 255, 0.08);
+  color: #ffffff;
   border-radius: 12px;
   padding: 8px 12px;
   font-size: 0.8rem;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.25s;
-  z-index: 3;
+  z-index: 4;
 }
+
 .revia-toast.show {
   opacity: 1;
 }
 
-/* 🎭 CHAT PANEL – Revia */
-.revia-chat {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  padding: 0 14px 14px;
-  box-sizing: border-box;
-  z-index: 4;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
+/* === CHAT REVIE – panel vpravo dole === */
 
-.revia-chat.is-open {
-  opacity: 1;
-  pointer-events: auto;
+.revia-chat {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
 }
 
 .revia-chat-panel {
-  width: min(420px, 100%);
+  position: absolute;
+  right: 14px;
+  bottom: 4vh;
+  width: min(420px, 94vw);
   max-height: 80vh;
-  background: radial-gradient(circle at top, rgba(3, 9, 18, 0.98), #020308);
+
+  background: radial-gradient(circle at top, rgba(4, 10, 18, 0.98), #030509);
   border-radius: 22px;
-  border: 1px solid rgba(234, 244, 255, 0.16);
+  border: 1px solid rgba(230, 244, 255, 0.16);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.85);
-  color: #e9f4ff;
-  padding: 10px 14px 12px;
+  padding: 12px 14px 10px;
   box-sizing: border-box;
+
   display: flex;
   flex-direction: column;
+  gap: 8px;
+
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
 }
 
+/* při otevření */
+.revia-chat.is-open .revia-chat-panel {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* hlavička chatu */
 .revchat-head {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
-  font-size: 0.9rem;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: #f4f7ff;
+}
+
+#revChatTitle {
   font-weight: 600;
 }
-#revChatTitle {
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-}
+
 #revChatClose {
-  background: transparent;
   border: none;
-  color: #f8fcff;
-  font-size: 1.2rem;
+  background: transparent;
+  color: #ffffff;
+  font-size: 1.1rem;
   cursor: pointer;
 }
 
-/* log */
+/* log zpráv – tady se dělá scroll */
 .revchat-log {
   flex: 1 1 auto;
-  min-height: 120px;
-  max-height: 46vh;
+  max-height: 48vh;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-right: 6px;
+  margin-top: 4px;
+}
+
+/* jednotlivé zprávy */
+.revchat-msg {
+  font-size: 0.86rem;
+  line-height: 1.4;
   margin-bottom: 8px;
 }
 
-/* jednotlivé zprávy – vysoký kontrast */
-.revchat-msg {
-  font-size: 0.8rem;
-  line-height: 1.35;
-  margin-bottom: 6px;
-}
 .revchat-msg small {
-  display: block;
-  opacity: 0.75;
-  margin-bottom: 2px;
-}
-.revchat-user {
-  color: #ffe0ae;
-}
-.revchat-bot {
-  color: #e9f4ff;
+  font-size: 0.68rem;
+  opacity: 0.7;
 }
 
-/* input řádek */
+.revchat-user {
+  color: #a8d5ff;
+}
+
+.revchat-bot {
+  color: #f4f4ff;
+}
+
+/* řádek s inputem */
 .revchat-input-row {
   display: flex;
-  gap: 6px;
   align-items: flex-end;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-top: 4px;
 }
 
 #revChatInput {
   flex: 1 1 auto;
-  min-height: 46px;
+  min-height: 42px;
   max-height: 90px;
   resize: vertical;
   border-radius: 12px;
-  border: 1px solid rgba(70, 96, 144, 0.8);
-  background: rgba(3, 6, 14, 0.9);
-  color: #f4fbff;
+  border: 1px solid #283046;
+  background: rgba(2, 4, 10, 0.9);
+  color: #f4f7ff;
   padding: 6px 8px;
-  font-size: 0.8rem;
+  font-size: 0.84rem;
   outline: none;
 }
+
 #revChatInput::placeholder {
-  color: rgba(210, 230, 255, 0.6);
+  color: rgba(200, 214, 240, 0.7);
 }
 
 #revChatSend {
   flex: 0 0 auto;
   border-radius: 999px;
   border: none;
-  padding: 8px 14px;
+  padding: 9px 16px;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
-  background: linear-gradient(90deg, #4fb5ff, #7fd4ff);
-  color: #021019;
-  box-shadow: 0 0 14px rgba(39, 151, 255, 0.8);
+  background: linear-gradient(90deg, #51b6ff, #8bd8ff);
+  color: #041018;
+  box-shadow: 0 0 14px rgba(70, 190, 255, 0.6);
 }
 
 .revchat-note {
-  font-size: 0.68rem;
-  opacity: 0.7;
-  margin: 0;
+  font-size: 0.7rem;
+  opacity: 0.65;
+  margin: 2px 2px 0;
+  color: #c6d5f3;
 }
 
-/* menší displej */
+/* menší displej – iPhone atd. */
 @media (max-width: 430px) {
   .revia-card {
     bottom: 21%;
     gap: 10px;
   }
+
   .revia-slot {
     width: 100px;
     height: 100px;
   }
-  .revia-glyph {
-    font-size: 1.9rem;
-  }
-  .revia-chat-panel {
-    width: 100%;
-  }
-}
 
-/* 🎯 iPhone 14 / 14 Pro na výšku */
-@media screen and (max-width: 400px) and (min-height: 820px) and (max-height: 900px) {
-  .revia-main {
-    background-size: contain !important;
-    background-position: center top !important;
-    background-attachment: scroll !important;
+  .revia-glyph {
+    font-size: 2rem;
+  }
+
+  .revia-chat-panel {
+    right: 8px;
+    left: 8px;
+    width: auto;
   }
 }
