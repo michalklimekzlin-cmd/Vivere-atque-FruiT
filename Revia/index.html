@@ -88,15 +88,12 @@
         </button>
 
         <!-- SLOT 2: Vstoupit / CHAT REVIA -->
-<!-- SLOT 2: Vstoupit / CHAT REVIA -->
-<button
-  class="revia-slot"
-  id="slotEnter"
-  type="button"
-  aria-label="Otevřít chat s Revií"
->
-  <span class="revia-glyph" id="slotEnterGlyph">{*(°•.)(.•°)*}//</span>
-</button>
+        <button
+          class="revia-slot"
+          id="slotEnter"
+          type="button"
+          aria-label="Otevřít chat s Revií"
+        ></button>
 
         <!-- SLOT 3: Přepnout AI / Human (bez textu) -->
         <button
@@ -306,166 +303,48 @@
         }
       })();
 
-// ========== CHAT REVIE – SLOT 2 ==========
-(function () {
-  const main = document.getElementById("reviaMain");
-  const slotEnter = document.getElementById("slotEnter");
-  const glyphEnter = document.getElementById("slotEnterGlyph");
-  const chat = document.getElementById("revChat");
-  const closeBtn = document.getElementById("revChatClose");
-  const sendBtn = document.getElementById("revChatSend");
-  const input = document.getElementById("revChatInput");
-  const log = document.getElementById("revChatLog");
-  const STORAGE_KEY = "revia.chat.history.v1";
+      // ========== CHAT REVIE – SLOT 2 ==========
+      (function () {
+        const main = document.getElementById("reviaMain");
+        const slotEnter = document.getElementById("slotEnter");
+        const chat = document.getElementById("revChat");
+        const closeBtn = document.getElementById("revChatClose");
+        const sendBtn = document.getElementById("revChatSend");
+        const input = document.getElementById("revChatInput");
+        const log = document.getElementById("revChatLog");
+        const STORAGE_KEY = "revia.chat.history.v1";
 
-  if (!slotEnter || !chat || !sendBtn || !input || !log) return;
+        if (!slotEnter || !chat || !sendBtn || !input || !log) return;
 
-  // 🔁 Přepínání glyphu: {*(°•.)(.•°)*}// <-> {(°•.)(.•°)}
-  function toggleGlyph() {
-    if (!glyphEnter) return;
-    const current = glyphEnter.textContent || "";
-    if (current.includes("*")) {
-      glyphEnter.textContent = "{(°•.)(.•°)}";
-    } else {
-      glyphEnter.textContent = "{*(°•.)(.•°)*}//";
-    }
-  }
+        let history = [];
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) history = JSON.parse(raw);
+        } catch (e) {
+          history = [];
+        }
 
-  let history = [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) history = JSON.parse(raw);
-  } catch (e) {
-    history = [];
-  }
+        function saveHistory() {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+          } catch (e) {}
+        }
 
-  function saveHistory() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-    } catch (e) {}
-  }
-
-  function addMessage(role, content) {
-    history.push({
-      role,
-      content,
-      time: new Date().toLocaleTimeString("cs-CZ", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    });
-    if (history.length > 30) {
-      history = history.slice(history.length - 30);
-    }
-    saveHistory();
-    renderLog();
-  }
-
-  function renderLog() {
-    log.innerHTML = "";
-    history.forEach((m) => {
-      const row = document.createElement("div");
-      row.className =
-        "revchat-msg " +
-        (m.role === "user" ? "revchat-user" : "revchat-bot");
-      const name = m.role === "user" ? "Ty" : "Revia";
-      row.innerHTML =
-        "<small>" +
-        name +
-        " • " +
-        (m.time || "") +
-        "</small><br>" +
-        m.content;
-      log.appendChild(row);
-    });
-    log.scrollTop = log.scrollHeight;
-  }
-
-  function openChat() {
-    chat.classList.add("is-open");
-    renderLog();
-    input.focus();
-  }
-
-  function closeChat() {
-    chat.classList.remove("is-open");
-  }
-
-  slotEnter.addEventListener("click", () => {
-    toggleGlyph();
-    openChat();
-  });
-
-  if (closeBtn) {
-    closeBtn.addEventListener("click", closeChat);
-  }
-
-  async function handleSend() {
-    const text = (input.value || "").trim();
-    if (!text) return;
-    input.value = "";
-    addMessage("user", text);
-
-    const mode = main?.getAttribute("data-mode") || "angel";
-
-    const backendMessages = history.slice(-8).map((m) => ({
-      role: m.role === "user" ? "user" : "assistant",
-      content: m.content,
-    }));
-
-    try {
-      showToast("Revia přemýšlí…");
-      const resp = await fetch("/api/revia-chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          messages: backendMessages,
-          mode,
-        }),
-      });
-
-      if (!resp.ok) {
-        addMessage(
-          "assistant",
-          "Spojení s Revii backendem spadlo. Zkus to ještě jednou."
-        );
-        return;
-      }
-
-      const data = await resp.json();
-      const reply =
-        (data && data.reply) ||
-        "Dneska jsem trochu tichá, ale jsem tu s tebou.";
-      addMessage("assistant", reply);
-    } catch (e) {
-      console.error(e);
-      addMessage(
-        "assistant",
-        "Něco se pokazilo na cestě k AI. Zkus to prosím později."
-      );
-    }
-  }
-
-  sendBtn.addEventListener("click", handleSend);
-
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  });
-
-  if (history.length === 0) {
-    addMessage(
-      "assistant",
-      "Jsem Revia. Hlídám tvůj svět Vivere atque FruiT. Zeptej se mě na cokoliv, co máš teď v hlavě."
-    );
-  } else {
-    renderLog();
-  }
-})();
+        function addMessage(role, content) {
+          history.push({
+            role,
+            content,
+            time: new Date().toLocaleTimeString("cs-CZ", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          });
+          if (history.length > 30) {
+            history = history.slice(history.length - 30);
+          }
+          saveHistory();
+          renderLog();
+        }
 
         function renderLog() {
           log.innerHTML = "";
