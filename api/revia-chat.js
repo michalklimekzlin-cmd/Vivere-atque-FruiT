@@ -1,16 +1,13 @@
 // api/revia-chat.js
 // Revia • hlídací anděl / ďábel – úsporný backend přes OpenAI
-// Tahle verze místo tichého 500 vrací chybu v reply, ať ji vidíme v chatu.
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    res
-      .status(405)
-      .json({ error: "Method not allowed – používej POST z aplikace." });
+    res.status(405).json({ error: "Method not allowed" });
     return;
   }
 
-  // --- bezpečné načtení těla (funguje i když je to string) ---
+  // bezpečné načtení těla (string / objekt)
   let body = req.body;
   if (!body || typeof body === "string") {
     try {
@@ -24,11 +21,11 @@ export default async function handler(req, res) {
     ? body.messages
     : [];
   const mode = body.mode === "daemon" ? "daemon" : "angel";
+  const persona = typeof body.persona === "string" ? body.persona : "";
 
-  // Pošleme jen posledních pár zpráv (šetření tokenů)
+  // krátká historie – šetříme tokeny
   const shortHistory = messagesFromClient.slice(-6);
 
-  // --- systémová zpráva – jiná pro anděla a pro „ďábla“ ---
   const baseSystemPrompt = `
 Jsi Revia, hlídací inteligence světa Vivere atque FruiT pro Michala.
 Mluvíš česky, krátce a jasně. Odpověď má být maximálně několik vět.
@@ -54,81 +51,63 @@ Andělský režim:
 `;
 
   const systemPrompt =
-    baseSystemPrompt + (mode === "angel" ? styleAngel : styleDaemon);
+    baseSystemPrompt +
+    (mode === "angel" ? styleAngel : styleDaemon) +
+    `
+-------------------------
+PROGRAMOVACÍ TEXT OD UŽIVATELE (z křídla):
+${persona}
+-------------------------
+Dodržuj tyto instrukce co nejpřesněji, pokud nejsou v rozporu s bezpečností.
+`;
 
   try {
     const apiKey = process.env.OPENAI_API_KEY;
-
     if (!apiKey) {
       console.error("OPENAI_API_KEY není nastavený ve Vercel env.");
-      res.status(200).json({
-        reply:
-          "⚠️ Revia backend: OPENAI_API_KEY není nastavený na serveru. Mrkni ve Vercelu do Environment Variables.",
-        error: true,
-      });
+      res
+        .status(500)
+        .json({ error: "Missing OPENAI_API_KEY on the server." });
       return;
     }
 
-    const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini", // úsporný model
-          max_tokens: 260,
-          temperature: 0.7,
-          messages: [
-            { role: "system", content: systemPrompt.trim() },
-            ...shortHistory,
-          ],
-        }),
-      }
-    );
-
-    const text = await response.text().catch(() => "");
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini", // úsporný model
+        max_tokens: 260,      // krátké odpovědi
+        temperature: 0.7,
+        messages: [
+          { role: "system", content: systemPrompt.trim() },
+          ...shortHistory,
+        ],
+      }),
+    });
 
     if (!response.ok) {
+      const text = await response.text().catch(() => "");
       console.error("OpenAI error:", response.status, text);
-      res.status(200).json({
-        reply:
-          "⚠️ Revia backend – OpenAI vrátil chybu " +
-          response.status +
-          ":\n" +
-          (text || "(bez detailu)"),
-        error: true,
+      res.status(500).json({
+        error: "OpenAI request failed",
+        status: response.status,
       });
       return;
     }
 
-    let data;
-    try {
-      data = JSON.parse(text || "{}");
-    } catch (e) {
-      console.error("JSON parse error from OpenAI:", e);
-      res.status(200).json({
-        reply:
-          "⚠️ Revia backend: Nepodařilo se přečíst odpověď z OpenAI (JSON parse).",
-        error: true,
-      });
-      return;
-    }
-
+    const data = await response.json();
     const reply =
-      data?.choices?.[0]?.message?.content?.trim() ||
+      data?.choices?.[0]?.message?.content ||
       "Dneska jsem trochu tichá, ale jsem tu s tebou.";
 
     res.status(200).json({ reply });
   } catch (err) {
     console.error("Revia backend error:", err);
-    res.status(200).json({
-      reply:
-        "⚠️ Revia backend: Neočekávaná chyba na serveru – " +
-        (err?.message || String(err)),
-      error: true,
+    res.status(500).json({
+      error: "Unexpected server error",
     });
   }
 }
