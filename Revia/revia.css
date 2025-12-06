@@ -1,4 +1,4 @@
-/* 🌌 Revia v0.77 – full-screen anděl/ďábel + zápisník + chat */
+/* 🌌 Revia v0.78 – full-screen anděl/ďábel + zápisník + chat */
 /* Michal ♡ Revia \\{*(°•.)(.•°)*}// */
 
 /* základ */
@@ -40,7 +40,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 38vh;
+  height: 40vh; /* malinko víc, aby byl podklad za chatem i sloty */
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0) 0%,
@@ -176,10 +176,10 @@ body {
   margin-top: 5px;
 }
 
-/* mřížka slotů */
+/* mřížka slotů – POSUNUTÁ NÍŽ */
 .revia-card {
   position: absolute;
-  bottom: 23%;
+  bottom: 9%; /* dřív 23 %, teď níž k okraji */
   left: 50%;
   transform: translateX(-50%);
   width: min(480px, 92vw);
@@ -249,7 +249,7 @@ body {
   opacity: 1;
 }
 
-/* === CHAT REVIE – panel vpravo dole === */
+/* === CHAT REVIE – PODÉLNÝ PÁS UPROSTŘED === */
 
 .revia-chat {
   position: absolute;
@@ -258,26 +258,27 @@ body {
   z-index: 3;
 }
 
+/* centrum, podélný tvar */
 .revia-chat-panel {
   position: absolute;
-  right: 14px;
-  bottom: 4vh;
-  width: min(420px, 94vw);
-  max-height: 80vh;
+  left: 50%;
+  bottom: 26vh; /* nad sloty, v oblasti 2 */
+  width: min(720px, 94vw);
+  max-height: 32vh;
 
   background: radial-gradient(circle at top, rgba(4, 10, 18, 0.98), #030509);
-  border-radius: 22px;
+  border-radius: 20px;
   border: 1px solid rgba(230, 244, 255, 0.16);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.85);
-  padding: 12px 14px 10px;
+  padding: 10px 14px 8px;
   box-sizing: border-box;
 
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 
   opacity: 0;
-  transform: translateY(10px);
+  transform: translate(-50%, 10px); /* centrování + jemný drop */
   transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: none;
 }
@@ -285,7 +286,7 @@ body {
 /* při otevření */
 .revia-chat.is-open .revia-chat-panel {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(-50%, 0);
   pointer-events: auto;
 }
 
@@ -311,20 +312,20 @@ body {
   cursor: pointer;
 }
 
-/* log zpráv – tady se dělá scroll */
+/* log zpráv – scroll uvnitř panelu */
 .revchat-log {
   flex: 1 1 auto;
-  max-height: 48vh;
+  max-height: 20vh;
   overflow-y: auto;
   padding-right: 6px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 /* jednotlivé zprávy */
 .revchat-msg {
   font-size: 0.86rem;
   line-height: 1.4;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .revchat-msg small {
@@ -345,13 +346,13 @@ body {
   display: flex;
   align-items: flex-end;
   gap: 6px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 #revChatInput {
   flex: 1 1 auto;
-  min-height: 42px;
-  max-height: 90px;
+  min-height: 40px;
+  max-height: 80px;
   resize: vertical;
   border-radius: 12px;
   border: 1px solid #283046;
@@ -370,7 +371,7 @@ body {
   flex: 0 0 auto;
   border-radius: 999px;
   border: none;
-  padding: 9px 16px;
+  padding: 8px 16px;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
@@ -382,14 +383,14 @@ body {
 .revchat-note {
   font-size: 0.7rem;
   opacity: 0.65;
-  margin: 2px 2px 0;
+  margin: 0 2px 0;
   color: #c6d5f3;
 }
 
 /* menší displej – iPhone atd. */
 @media (max-width: 430px) {
   .revia-card {
-    bottom: 21%;
+    bottom: 7%;
     gap: 10px;
   }
 
@@ -403,8 +404,14 @@ body {
   }
 
   .revia-chat-panel {
-    right: 8px;
-    left: 8px;
+    bottom: 30vh;
     width: auto;
+    left: 50%;
+    right: auto;
+    max-height: 34vh;
+  }
+
+  .revchat-log {
+    max-height: 22vh;
   }
 }
