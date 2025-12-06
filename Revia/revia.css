@@ -1,4 +1,4 @@
-/* 🌌 Revia v0.78 – full-screen anděl/ďábel + zápisník + chat */
+/* 🌌 Revia v0.79 – full-screen anděl/ďábel + zápisník + chat */
 /* Michal ♡ Revia \\{*(°•.)(.•°)*}// */
 
 /* základ */
@@ -40,7 +40,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 40vh; /* malinko víc, aby byl podklad za chatem i sloty */
+  height: 40vh; /* podklad za chatem i sloty */
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 0) 0%,
@@ -176,10 +176,10 @@ body {
   margin-top: 5px;
 }
 
-/* mřížka slotů – POSUNUTÁ NÍŽ */
+/* mřížka slotů – dole */
 .revia-card {
   position: absolute;
-  bottom: 9%; /* dřív 23 %, teď níž k okraji */
+  bottom: 9%;
   left: 50%;
   transform: translateX(-50%);
   width: min(480px, 92vw);
@@ -262,9 +262,9 @@ body {
 .revia-chat-panel {
   position: absolute;
   left: 50%;
-  bottom: 26vh; /* nad sloty, v oblasti 2 */
+  bottom: 32vh;              /* výš nad sloty, aby na ně nesahal */
   width: min(720px, 94vw);
-  max-height: 32vh;
+  max-height: 28vh;           /* trochu nižší panel */
 
   background: radial-gradient(circle at top, rgba(4, 10, 18, 0.98), #030509);
   border-radius: 20px;
@@ -315,7 +315,7 @@ body {
 /* log zpráv – scroll uvnitř panelu */
 .revchat-log {
   flex: 1 1 auto;
-  max-height: 20vh;
+  max-height: 18vh;          /* menší, aby panel nepřerůstal */
   overflow-y: auto;
   padding-right: 6px;
   margin-top: 2px;
@@ -404,14 +404,14 @@ body {
   }
 
   .revia-chat-panel {
-    bottom: 30vh;
+    bottom: 34vh;           /* proporčně výš i na mobilu */
     width: auto;
     left: 50%;
     right: auto;
-    max-height: 34vh;
+    max-height: 30vh;
   }
 
   .revchat-log {
-    max-height: 22vh;
+    max-height: 20vh;
   }
 }
