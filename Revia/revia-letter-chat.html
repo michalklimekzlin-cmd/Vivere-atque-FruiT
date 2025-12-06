@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Revia • Zlaté psací okno</title>
+
+    <style>
+      /* …iT… Vivere atque FruiT • Revia Letter Chat  */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at top, #050611, #020208 55%, #000 100%);
+        font-family: -apple-system, system-ui, sans-serif;
+        color: #fdf6e6;
+        overflow: hidden;
+      }
+
+      .scena {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* hlavní „planetární“ okno */
+      .zlate-okno {
+        position: relative;
+        width: min(860px, 96vw);
+        max-height: 70vh;
+        padding: 14px 18px 12px;
+        box-sizing: border-box;
+
+        background: radial-gradient(
+          circle at 50% 0%,
+          rgba(255, 220, 160, 0.12),
+          rgba(3, 3, 6, 0.95)
+        );
+        border-radius: 26px;
+        border: 1px solid rgba(255, 215, 160, 0.5);
+        box-shadow:
+          0 0 40px rgba(255, 210, 150, 0.35),
+          0 24px 70px rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      /* jemný prstenec kolem – náznak planety z písmen */
+      .zlate-okno::before {
+        content: "V  A  F  ’  i  T   •   R  e  v  i  a   •   \\{*(°•.)(.•°)*}//";
+        position: absolute;
+        inset: -18px;
+        border-radius: 38px;
+        border: 1px dashed rgba(255, 225, 170, 0.45);
+        pointer-events: none;
+        font-size: 0.6rem;
+        letter-spacing: 0.35rem;
+        text-align: center;
+        line-height: 3.2rem;
+        color: rgba(255, 230, 190, 0.55);
+        text-shadow: 0 0 8px rgba(255, 210, 150, 0.5);
+        opacity: 0.9;
+      }
+
+      .hlavicka {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+      }
+
+      .hlavicka-titul {
+        font-weight: 600;
+        letter-spacing: 0.06rem;
+        color: #ffe9b8;
+        text-shadow: 0 0 12px rgba(255, 210, 150, 0.7);
+      }
+
+      .hlavicka-rezim {
+        font-size: 0.8rem;
+        color: rgba(255, 236, 200, 0.85);
+      }
+
+      /* oblast zpráv – scroll */
+      .zpravy {
+        flex: 1 1 auto;
+        max-height: 44vh;
+        overflow-y: auto;
+        padding-right: 4px;
+        margin-top: 2px;
+      }
+
+      .zprava {
+        font-size: 0.86rem;
+        line-height: 1.4;
+        margin-bottom: 7px;
+      }
+
+      .zprava small {
+        font-size: 0.65rem;
+        opacity: 0.75;
+      }
+
+      .zprava-uzivatel {
+        color: #ffe1a4;
+      }
+
+      .zprava-revia {
+        color: #fff4d0;
+      }
+
+      /* drobné zlaté odlesky mezi zprávami */
+      .oddelovac {
+        height: 1px;
+        margin: 3px 0 6px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 220, 170, 0.75),
+          transparent
+        );
+        opacity: 0.4;
+      }
+
+      /* vstupní řádek */
+      .radek-vstup {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        margin-top: 4px;
+      }
+
+      .vstup-zpravy {
+        flex: 1 1 auto;
+        min-height: 42px;
+        max-height: 90px;
+        resize: vertical;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 220, 170, 0.7);
+        background: radial-gradient(circle at top left, #171009, #050308 65%);
+        color: #fff5dd;
+        padding: 7px 9px;
+        font-size: 0.85rem;
+        outline: none;
+        box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.85);
+      }
+
+      .vstup-zpravy::placeholder {
+        color: rgba(255, 227, 190, 0.6);
+      }
+
+      .tlacitko-poslat {
+        flex: 0 0 auto;
+        border-radius: 999px;
+        border: none;
+        padding: 9px 18px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: radial-gradient(circle at 30% 0, #ffe9b8, #ffb554);
+        color: #3b1f03;
+        box-shadow:
+          0 0 14px rgba(255, 209, 140, 0.7),
+          0 0 40px rgba(255, 210, 150, 0.4);
+      }
+
+      .poznamka {
+        font-size: 0.7rem;
+        opacity: 0.7;
+        margin-top: 2px;
+        color: #ffe8c0;
+      }
+
+      /* drobné „hvězdičky“ v pozadí */
+      .hv {
+        position: fixed;
+        width: 2px;
+        height: 2px;
+        background: #ffdd99;
+        border-radius: 50%;
+        opacity: 0.6;
+        box-shadow: 0 0 8px rgba(255, 216, 150, 0.9);
+        pointer-events: none;
+        animation: blik 3.7s infinite ease-in-out alternate;
+      }
+
+      @keyframes blik {
+        from {
+          transform: scale(0.7);
+          opacity: 0.3;
+        }
+        to {
+          transform: scale(1.4);
+          opacity: 0.9;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .zlate-okno {
+          max-height: 72vh;
+          padding: 12px 12px 10px;
+        }
+        .zpravy {
+          max-height: 46vh;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="scena">
+      <div class="zlate-okno">
+        <div class="hlavicka">
+          <div class="hlavicka-titul">
+            Revia • Zlaté psací okno \\{*(°•.)(.•°)*}//
+          </div>
+          <div class="hlavicka-rezim">Režim: andělský test</div>
+        </div>
+
+        <div id="zpravy" class="zpravy">
+          <div class="zprava zprava-revia">
+            <small>Revia • 16:42</small><br />
+            Jsem jen testovací verze psacího okna, ale už svítím jako tvoje
+            písmenková planeta. Napiš mi zprávu, ať vidíš, jak to běhá.
+          </div>
+        </div>
+
+        <div class="radek-vstup">
+          <textarea
+            id="vstup"
+            class="vstup-zpravy"
+            placeholder="Napiš zprávu Revií… písmenka se rozsvítí jako na planetě…"
+          ></textarea>
+          <button id="poslat" class="tlacitko-poslat">Poslat</button>
+        </div>
+
+        <div class="poznamka">
+          v0.1 • VaF'i'T Letter Chat • jen lokální demo (žádný backend, jen
+          vizuál a plynulé psaní).
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // jednoduché lokální přidávání zpráv – ať to žije
+      const vstup = document.getElementById("vstup");
+      const zpravy = document.getElementById("zpravy");
+      const poslat = document.getElementById("poslat");
+
+      function pridejZpravu(role, text) {
+        const blok = document.createElement("div");
+        blok.className = "zprava " + (role === "ty" ? "zprava-uzivatel" : "zprava-revia");
+
+        const cas = new Date().toLocaleTimeString("cs-CZ", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        blok.innerHTML =
+          "<small>" +
+          (role === "ty" ? "Ty" : "Revia") +
+          " • " +
+          cas +
+          "</small><br>" +
+          text;
+
+        zpravy.appendChild(blok);
+
+        const odd = document.createElement("div");
+        odd.className = "oddelovac";
+        zpravy.appendChild(odd);
+
+        zpravy.scrollTop = zpravy.scrollHeight;
+      }
+
+      function odeslat() {
+        const text = (vstup.value || "").trim();
+        if (!text) return;
+        vstup.value = "";
+        pridejZpravu("ty", text);
+
+        // malá „odpověď planety“ – jen demo
+        setTimeout(() => {
+          pridejZpravu(
+            "revia",
+            "Planeta písmen si zapisuje: „" +
+              text +
+              "“. Jedno písmenko se právě rozsvítilo navíc. ✶"
+          );
+        }, 400);
+      }
+
+      poslat.addEventListener("click", odeslat);
+      vstup.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          odeslat();
+        }
+      });
+
+      // pár zlatých „hvězdiček“ v pozadí
+      for (let i = 0; i < 18; i++) {
+        const h = document.createElement("div");
+        h.className = "hv";
+        h.style.top = Math.random() * 100 + "vh";
+        h.style.left = Math.random() * 100 + "vw";
+        h.style.animationDelay = (Math.random() * 4).toFixed(2) + "s";
+        document.body.appendChild(h);
+      }
+    </script>
+  </body>
+</html>
