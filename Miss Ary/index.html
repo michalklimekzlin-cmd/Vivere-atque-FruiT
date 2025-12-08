@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vivere atque FruiT • Letter Chat</title>
+
+<style>
+/* ===== ZÁKLAD ===== */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #05070c;
+  font-family: -apple-system, system-ui, sans-serif;
+  overflow: hidden;
+  color: #f6e7c6;
+}
+
+/* jemné hvězdy v pozadí */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(1px 1px at 10% 30%, #fff 30%, transparent 31%),
+    radial-gradient(1px 1px at 70% 60%, #fff 30%, transparent 31%),
+    radial-gradient(1px 1px at 40% 80%, #fff 30%, transparent 31%);
+  opacity: 0.15;
+}
+
+/* ===== CHAT PANEL ===== */
+.letter-chat-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(860px, 92vw);
+  height: min(420px, 70vh);
+  background:
+    radial-gradient(circle at top, rgba(20,16,8,0.95), #090a0f);
+  border-radius: 22px;
+  border: 1px solid rgba(249,217,149,0.25);
+  box-shadow: 0 25px 60px rgba(0,0,0,0.9);
+  padding: 48px 18px 16px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ===== ORBITA TEXTU ===== */
+.vaft-orbit {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  right: 20px;
+  height: 20px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.vaft-orbit::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(249,217,149,0.8),
+    transparent
+  );
+  opacity: 0.5;
+}
+
+.vaft-orbit-track {
+  position: absolute;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #f9d995;
+  text-shadow: 0 0 10px rgba(249,217,149,0.9);
+  animation: orbitMove 22s linear infinite;
+}
+
+.vaft-orbit-track span {
+  margin-right: 40px;
+}
+
+/* pohyb */
+@keyframes orbitMove {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ===== LOG ZPRÁV ===== */
+.chat-log {
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.msg {
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.msg small {
+  opacity: 0.6;
+  font-size: 0.7rem;
+}
+
+.msg.user {
+  color: #d8f0ff;
+}
+
+.msg.revia {
+  color: #ffe9b5;
+  text-shadow: 0 0 6px rgba(249,217,149,0.4);
+}
+
+/* ===== INPUT ===== */
+.chat-input {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input textarea {
+  flex: 1;
+  min-height: 44px;
+  max-height: 90px;
+  border-radius: 14px;
+  border: 1px solid rgba(249,217,149,0.3);
+  background: rgba(10,9,5,0.9);
+  color: #f6e7c6;
+  padding: 8px 10px;
+  resize: vertical;
+  font-size: 0.9rem;
+}
+
+.chat-input textarea::placeholder {
+  color: rgba(249,217,149,0.5);
+}
+
+.chat-input button {
+  border-radius: 999px;
+  border: none;
+  padding: 0 22px;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(90deg, #f0c777, #ffdca0);
+  color: #302006;
+  box-shadow: 0 0 16px rgba(249,217,149,0.8);
+}
+
+/* ===== FOOTNOTE ===== */
+.footer-note {
+  position: absolute;
+  right: 16px;
+  bottom: 4px;
+  font-size: 0.65rem;
+  opacity: 0.45;
+}
+</style>
+</head>
+
+<body>
+
+<div class="letter-chat-panel">
+
+  <!-- ORBITA -->
+  <div class="vaft-orbit">
+    <div class="vaft-orbit-track">
+      <span>Vivere atque FruiT ·</span>
+      <span>Vivere atque FruiT ·</span>
+      <span>Vivere atque FruiT ·</span>
+      <span>Vivere atque FruiT ·</span>
+      <span>Vivere atque FruiT ·</span>
+    </div>
+  </div>
+
+  <!-- ZPRÁVY -->
+  <div class="chat-log" id="log">
+    <div class="msg revia">
+      <small>Revia · 16:42</small><br>
+      Jsem jen testovací verze psacího okna, ale už svítím jako tvoje písmenková planeta.
+    </div>
+    <div class="msg user">
+      <small>Ty · 16:43</small><br>
+      Kuk
+    </div>
+    <div class="msg revia">
+      <small>Revia · 16:43</small><br>
+      Planeta písmen si zapisuje: „Kuk.“ Jedno písmenko
