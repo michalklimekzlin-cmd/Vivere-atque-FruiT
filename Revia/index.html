@@ -6,7 +6,7 @@
     <title>Revia • Vivere atque FruiT</title>
 
     <!-- Styl Revie -->
-    <link rel="stylesheet" href="./revia.css?v=0.75" />
+    <link rel="stylesheet" href="./revia.css?v=0.78" />
 
     <!-- Jemné nastavení pozadí (můžeš klidně nechat) -->
     <style>
@@ -313,13 +313,13 @@
         const STORAGE_KEY = "revia.chat.history.v1";
 
         // ✦ tokenová peněženka
-        const TOKEN_DAILY_LIMIT = 100000; // můžeš si později poladit
+        const TOKEN_DAILY_LIMIT = 100000;
         const TOKEN_MONTHLY_LIMIT = 1000000;
         const USAGE_KEY = "revia.tokens.usage.v1";
 
         function loadUsage() {
           const now = new Date();
-          const today = now.toISOString().slice(0, 10); // YYYY-MM-DD
+          const today = now.toISOString().slice(0, 10);
           const monthKey =
             now.getFullYear() +
             "-" +
@@ -343,7 +343,7 @@
             }
 
             return parsed;
-          } catch (e) {
+          } catch {
             return { day: today, month: monthKey, usedToday: 0, usedMonth: 0 };
           }
         }
@@ -351,12 +351,12 @@
         function saveUsage(usage) {
           try {
             localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
-          } catch (e) {}
+          } catch {}
         }
 
         // odhad, kdyby usage z OpenAI nevrátilo nic
         function estimateTokensPerCall() {
-          return 1200; // 0.7–1.5k je OK, můžeme časem přeladit
+          return 1200;
         }
 
         if (!slotEnter || !chat || !sendBtn || !input || !log) return;
@@ -365,14 +365,14 @@
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
           if (raw) history = JSON.parse(raw);
-        } catch (e) {
+        } catch {
           history = [];
         }
 
         function saveHistory() {
           try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-          } catch (e) {}
+          } catch {}
         }
 
         function addMessage(role, content) {
@@ -385,7 +385,6 @@
             }),
           });
 
-          // dlouhá paměť, ale ať se to úplně neurve – necháme max ~500
           if (history.length > 500) {
             history = history.slice(history.length - 500);
           }
@@ -424,13 +423,8 @@
           chat.classList.remove("is-open");
         }
 
-        slotEnter.addEventListener("click", () => {
-          openChat();
-        });
-
-        if (closeBtn) {
-          closeBtn.addEventListener("click", closeChat);
-        }
+        slotEnter.addEventListener("click", openChat);
+        if (closeBtn) closeBtn.addEventListener("click", closeChat);
 
         async function handleSend() {
           const text = (input.value || "").trim();
@@ -438,13 +432,11 @@
           input.value = "";
           addMessage("user", text);
 
-          // ✦ tokenová peněženka – načtení stavu
           let usageState = loadUsage();
           const estimatedCost = estimateTokensPerCall();
           const softDaily = TOKEN_DAILY_LIMIT * 0.8;
           const softMonth = TOKEN_MONTHLY_LIMIT * 0.8;
 
-          // tvrdý limit – Revia už dál „nejde“
           if (
             usageState.usedToday + estimatedCost > TOKEN_DAILY_LIMIT ||
             usageState.usedMonth + estimatedCost > TOKEN_MONTHLY_LIMIT
@@ -460,7 +452,6 @@
             return;
           }
 
-          // měkké varování – blížíme se k limitu
           if (
             usageState.usedToday + estimatedCost > softDaily ||
             usageState.usedMonth + estimatedCost > softMonth
@@ -473,7 +464,6 @@
           const mode =
             (main && main.getAttribute("data-mode")) || "angel";
 
-          // připravíme historii pro backend (jen posledních 50 zpráv)
           const backendMessages = history.slice(-50).map((m) => ({
             role: m.role === "user" ? "user" : "assistant",
             content: m.content,
@@ -500,14 +490,18 @@
               return;
             }
 
-            const data = await resp.json();
+            let data;
+            try {
+              data = await resp.json();
+            } catch {
+              data = null;
+            }
 
             const reply =
               (data && data.reply) ||
               "Dneska jsem trochu tichá, ale jsem tu s tebou.";
             addMessage("assistant", reply);
 
-            // přičtení skutečné spotřeby, pokud ji backend pošle
             try {
               if (
                 data &&
@@ -527,9 +521,7 @@
                   );
                 }
               }
-            } catch (e) {
-              // když se to nepovede, nic se neděje
-            }
+            } catch {}
           } catch (e) {
             console.error(e);
             addMessage(
@@ -548,7 +540,6 @@
           }
         });
 
-        // první zpráva, pokud je historie prázdná
         if (history.length === 0) {
           addMessage(
             "assistant",
