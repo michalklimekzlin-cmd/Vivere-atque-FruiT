@@ -1,58 +1,18 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VaFT Glyph Globe 0.1</title>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><title>VaFT Glyph Core</title>
 <style>
-body{
-margin:0;background:#050505;color:#d8b16a;
-font-family:Arial,sans-serif;
-display:flex;justify-content:center;align-items:center;
-height:100vh;overflow:hidden;
-}
-.globe{
-position:relative;width:700px;height:700px;
-animation:float 8s ease-in-out infinite;
-}
-.sphere{
-position:absolute;inset:0;border:2px solid rgba(216,177,106,.4);
-border-radius:50%;
-box-shadow:0 0 40px rgba(216,177,106,.2);
-}
-.line{position:absolute;border:1px solid rgba(216,177,106,.25);border-radius:50%;}
-.eq1{left:5%;top:30%;width:90%;height:40%;}
-.eq2{left:10%;top:15%;width:80%;height:70%;}
-.m1{left:30%;top:0;width:40%;height:100%;}
-.m2{left:10%;top:0;width:80%;height:100%;}
-.slot{
-position:absolute;width:90px;height:90px;
-display:flex;align-items:center;justify-content:center;
-border:1px solid rgba(216,177,106,.6);
-border-radius:12px;text-decoration:none;color:#d8b16a;
-background:rgba(0,0,0,.35);
-box-shadow:0 0 20px rgba(216,177,106,.2);
-transition:.3s;
-}
-.slot:hover{transform:scale(1.08);box-shadow:0 0 30px rgba(216,177,106,.6);}
-@keyframes float{
-50%{transform:translateY(-10px);}
-}
-</style>
-</head>
-<body>
-<div class="globe">
-<div class="sphere"></div>
-<div class="line eq1"></div><div class="line eq2"></div>
-<div class="line m1"></div><div class="line m2"></div>
-
-<a class="slot" style="left:220px;top:430px" href="7i_.html">7i_</a>
-<a class="slot" style="left:390px;top:430px" href="ai.html">°&</a>
-<a class="slot" style="left:315px;top:310px" href="ii.html">`ii´</a>
-<a class="slot" style="left:180px;top:310px" href="dotline.html">,_.</a>
-<a class="slot" style="left:90px;top:250px" href="otazka.html">¿</a>
-<a class="slot" style="left:260px;top:180px" href="j.html">j’</a>
-<a class="slot" style="left:400px;top:180px" href="i.html">i’</a>
-<a class="slot" style="left:500px;top:250px" href="signal.html">,!,</a>
-</div>
-</body></html>
+body{background:#050505;color:#d8b16a;font-family:Arial;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(4,180px);gap:30px;justify-content:center}
+.glyph{width:180px;height:180px;border:2px solid #d8b16a;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:64px}
+a{color:#d8b16a;text-decoration:none}
+</style></head><body>
+<h1>VaFT</h1><p>Vivere atque Fru`ii´T</p>
+<div class="grid">
+<div class="glyph"><a href="7i_.html">7i_</a></div>
+<div class="glyph"><a href="ai.html">°&</a></div>
+<div class="glyph"><a href="ii.html">`ii´</a></div>
+<div class="glyph"><a href="dotline.html">,_.</a></div>
+<div class="glyph"><a href="otazka.html">¿</a></div>
+<div class="glyph"><a href="j.html">j’</a></div>
+<div class="glyph"><a href="i.html">i’</a></div>
+<div class="glyph"><a href="signal.html">,!,</a></div>
+</div></body></html>
