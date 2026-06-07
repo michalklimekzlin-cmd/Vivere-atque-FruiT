@@ -385,7 +385,7 @@
 
         // jemná tečka ve středu (jádro)
         ctx.beginPath();
-        ctx.arc(width / 2 + viewOffsetX, height / 2 + viewOffsetY, 3, 0, Math.PI * 2);
+        ctx.arc(width / 2 + viewOffsetX, height / 2 + viewOffsetY, 3 + Math.sin(signalCore.pulse * 2.5) * 1.5, 0, Math.PI * 2);
         ctx.fillStyle = "rgba(255, 220, 180, 0.9)";
         ctx.fill();
       }
