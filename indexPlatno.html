@@ -3,135 +3,55 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Vivere atque Fru`ii´T</title>
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif;
-}
-
-body{
-    background:#0f1117;
-    color:white;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-.app{
-    width:100%;
-    max-width:430px;
-    min-height:100vh;
-    padding:30px 20px;
-}
-
-.logo{
-    margin-top:40px;
-    text-align:center;
-}
-
-.symbol{
-    font-size:24px;
-    color:#8cffb0;
-    margin-bottom:15px;
-}
-
-.title{
-    font-size:32px;
-    font-weight:700;
-    line-height:1.2;
-}
-
-.subtitle{
-    margin-top:15px;
-    color:#a8b0c0;
-}
-
-.cards{
-    margin-top:40px;
-    display:flex;
-    flex-direction:column;
-    gap:15px;
-}
-
-.card{
-    background:#181d27;
-    border:1px solid #2a3240;
-    border-radius:20px;
-    padding:20px;
-    font-size:18px;
-    transition:0.2s;
-}
-
-.card:active{
-    transform:scale(0.98);
-}
-
-.footer{
-    margin-top:40px;
-    text-align:center;
-    color:#7f8aa0;
-    font-size:14px;
-}
-
-.status{
-    margin-top:15px;
-    color:#8cffb0;
-}
-</style>
+<link rel="stylesheet" href="indexPlatno.css">
 </head>
 
 <body>
 
-<div class="app">
+<div id="splash">
 
-    <div class="logo">
-        <div class="symbol">{*(°.).)//</div>
-
-        <div class="title">
-            Vivere atque<br>
-            Fru`ii´T
-        </div>
-
-        <div class="subtitle">
-            Vítej zpět.
-        </div>
+    <div class="splash-symbol">
+        {*(°.).)//
     </div>
 
-    <div class="cards">
-
-        <div class="card">
-            🤖 Vive
-        </div>
-
-        <div class="card">
-            📖 Poznámky
-        </div>
-
-        <div class="card">
-            🗂 Projekty
-        </div>
-
-        <div class="card">
-            ⚙ Nastavení
-        </div>
-
+    <div class="splash-title">
+        Vivere atque Fru`ii´T
     </div>
 
-    <div class="footer">
-        VaFT 0.1 Alpha
-
-        <div class="status">
-            ✓ Aktivní<br>
-            ✓ Připraveno
-        </div>
+    <div class="splash-loading">
+        Inicializace...
     </div>
 
 </div>
+
+<div class="app">
+
+    <h1>VaFT 0.1 Alpha</h1>
+
+    <p>
+        Hlavní obrazovka bude tady.
+    </p>
+
+</div>
+
+<script>
+
+setTimeout(() => {
+
+    document.getElementById("splash").style.opacity = "0";
+
+    setTimeout(() => {
+
+        document.getElementById("splash").remove();
+
+    }, 1000);
+
+}, 3000);
+
+</script>
 
 </body>
 </html>
