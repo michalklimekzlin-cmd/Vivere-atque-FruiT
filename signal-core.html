@@ -406,8 +406,11 @@
 
         signalCore.pulse += dt;
 
-        // easing
-        const k = Math.min(1, 6 * dt);
+targetTiltY = Math.sin(signalCore.pulse * 0.4) * 0.4;
+targetTiltX = 1.0 + Math.sin(signalCore.pulse * 0.25) * 0.12;
+
+// easing
+const k = Math.min(1, 6 * dt);
         viewScale += (targetViewScale - viewScale) * k;
         tiltX += (targetTiltX - tiltX) * k;
         tiltY += (targetTiltY - tiltY) * k;
