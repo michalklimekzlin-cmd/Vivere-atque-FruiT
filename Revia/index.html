@@ -82,7 +82,7 @@
           type="button"
           aria-label="Otevřít Vivere atque FruiT • Revia &amp; Centrum"
         >
-          <span class="revia-glyph" id="slotPortalGlyph">ً&’」</span>
+          <span class="revia-glyph" id="slotPortalGlyph">ً&'」</span>
         </button>
 
         <!-- SLOT 2: Vstoupit / CHAT REVIA -->
@@ -108,7 +108,7 @@
           type="button"
           aria-label="Přepnout Revia mód anděl / ďábel"
         >
-          <span class="revia-glyph" id="slotModeGlyph">「Ī’♡</span>
+          <span class="revia-glyph" id="slotModeGlyph">「Ī'♡</span>
         </button>
 
         <!-- SLOT 5: Rezerva (zatím info) -->
@@ -159,6 +159,17 @@
     </div>
 
     <script>
+      // ============================================
+      // KONFIGURACE BACKENDU
+      // ============================================
+      // Pro iOS/lokál: http://localhost:3000
+      // Pro produkci: https://tvůj-server.com
+      const BACKEND_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3000' 
+        : window.location.origin;
+
+      console.log('[REVIA] Backend URL:', BACKEND_URL);
+
       // Pomocná funkce pro toast – používá třídu "show"
       function showToast(message) {
         const toast = document.getElementById("revToast");
@@ -169,6 +180,11 @@
         toast._hideTimer = setTimeout(() => {
           toast.classList.remove("show");
         }, 2200);
+      }
+
+      // Pomocná funkce pro debug logy (vidíš v F12 → Console)
+      function debugLog(title, data) {
+        console.log(`[REVIA] ${title}:`, data);
       }
 
       // ========== ZÁPISNÍK (křídlo) ==========
@@ -182,7 +198,9 @@
         try {
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) textarea.value = saved;
-        } catch (e) {}
+        } catch (e) {
+          debugLog("localStorage čtení - zápisník", e.message);
+        }
 
         function openNotes() {
           notes.classList.add("open");
@@ -199,7 +217,9 @@
           textarea.addEventListener("input", () => {
             try {
               localStorage.setItem(STORAGE_KEY, textarea.value || "");
-            } catch (e) {}
+            } catch (e) {
+              debugLog("localStorage zápis - zápisník", e.message);
+            }
           });
         }
       })();
@@ -258,14 +278,14 @@
 
         function setAngel() {
           main.setAttribute("data-mode", "angel");
-          glyph.textContent = "「Ī’♡";
+          glyph.textContent = "「Ī'♡";
           if (chatTitle) chatTitle.textContent = "Revia • andělský režim";
           showToast("Revia přepnuta do andělského režimu (hlídá svět jemněji).");
         }
 
         function setDaemon() {
           main.setAttribute("data-mode", "daemon");
-          glyph.textContent = "「Ī’☆";
+          glyph.textContent = "「Ī'☆";
           if (chatTitle) chatTitle.textContent = "Revia • ďábelský režim";
           showToast("Revia přepnuta do ďábelského režimu (přísnější dohled).");
         }
@@ -343,7 +363,8 @@
             }
 
             return parsed;
-          } catch {
+          } catch (e) {
+            debugLog("loadUsage chyba", e.message);
             return { day: today, month: monthKey, usedToday: 0, usedMonth: 0 };
           }
         }
@@ -351,7 +372,9 @@
         function saveUsage(usage) {
           try {
             localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
-          } catch {}
+          } catch (e) {
+            debugLog("saveUsage chyba", e.message);
+          }
         }
 
         // odhad, kdyby usage z OpenAI nevrátilo nic
@@ -365,14 +388,17 @@
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
           if (raw) history = JSON.parse(raw);
-        } catch {
+        } catch (e) {
+          debugLog("chat history čtení", e.message);
           history = [];
         }
 
         function saveHistory() {
           try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-          } catch {}
+          } catch (e) {
+            debugLog("chat history zápis", e.message);
+          }
         }
 
         function addMessage(role, content) {
@@ -471,7 +497,14 @@
 
           try {
             showToast("Revia přemýšlí…");
-            const resp = await fetch("/api/revia-chat", {
+            
+            debugLog("Posílám na backend", {
+              url: `${BACKEND_URL}/api/revia-chat`,
+              mode,
+              messageCount: backendMessages.length
+            });
+
+            const resp = await fetch(`${BACKEND_URL}/api/revia-chat`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -482,26 +515,44 @@
               }),
             });
 
+            debugLog("Backend odpověď - status", resp.status);
+
             if (!resp.ok) {
+              debugLog("Backend chyba", {
+                status: resp.status,
+                statusText: resp.statusText,
+              });
               addMessage(
                 "assistant",
-                "Spojení s Revii backendem spadlo. Zkus to ještě jednou."
+                `❌ Chyba ${resp.status}: Revia backend není dostupný. Zkontroluj jestli běží server na ${BACKEND_URL}`
               );
+              showToast("Chyba: Backend není dostupný");
               return;
             }
 
             let data;
             try {
               data = await resp.json();
-            } catch {
+              debugLog("Parsovaná data z backendu", data);
+            } catch (parseErr) {
+              debugLog("JSON parse chyba", parseErr.message);
               data = null;
             }
 
-            const reply =
-              (data && data.reply) ||
-              "Dneska jsem trochu tichá, ale jsem tu s tebou.";
-            addMessage("assistant", reply);
+            if (!data || !data.reply) {
+              debugLog("Backend vrátil prázdná data", data);
+              addMessage(
+                "assistant",
+                "Backend vrátil prázdnou odpověď. Zkus to prosím znova."
+              );
+              return;
+            }
 
+            const reply = data.reply;
+            addMessage("assistant", reply);
+            debugLog("Zpráva přidána", reply);
+
+            // Zpracování tokenů
             try {
               if (
                 data &&
@@ -512,6 +563,7 @@
                 usageState.usedToday += data.usage.total_tokens;
                 usageState.usedMonth += data.usage.total_tokens;
                 saveUsage(usageState);
+                debugLog("Tokeny aktualizovány", usageState);
 
                 if (usageState.usedToday > softDaily) {
                   showToast(
@@ -521,13 +573,16 @@
                   );
                 }
               }
-            } catch {}
+            } catch (tokenErr) {
+              debugLog("Token tracking chyba", tokenErr.message);
+            }
           } catch (e) {
-            console.error(e);
+            debugLog("Fetch/Network chyba", e.message);
             addMessage(
               "assistant",
-              "Něco se pokazilo na cestě k AI. Zkus to prosím později."
+              `🔴 Síťová chyba: ${e.message}. Zkontroluj jestli je backend dostupný na ${BACKEND_URL}`
             );
+            showToast("Síťová chyba - zkus to později");
           }
         }
 
