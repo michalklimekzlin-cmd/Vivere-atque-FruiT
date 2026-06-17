@@ -1,10 +1,6 @@
 {
-  "buildCommand": "true",
+  "buildCommand": "",
   "outputDirectory": ".",
-  "framework": "other",
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  }
+  "installCommand": "",
+  "framework": "other"
 }
