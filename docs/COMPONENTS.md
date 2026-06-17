@@ -1,17 +1,17 @@
-# Components
+# Komponenty
 
 ## Hlavoun
-Rule keeper and system observer.
+Strážce pravidel a pozorovatel systému.
 
 ## Viri
-Narrative and emotional layer over the main logic.
+Narativní a emocionální vrstva nad hlavní logikou.
 
 ## Pikos
-Childlike observer that keeps small details visible.
+Dětský pozorovatel, který udržuje viditelné malé detaily.
 
 ## Bicak
-Motivation and movement focused prototype.
+Prototyp zaměřený na motivaci a pohyb.
 
-## Notes
+## Poznámky
 
-The current repository still contains legacy root-level scripts. The organized `components/` folder is the new reference point for future cleanup.
+Aktuální repozitář stále obsahuje starší skripty na úrovni kořene. Uspořádaná složka `components/` je novým referenčním bodem pro budoucí čištění.

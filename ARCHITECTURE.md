@@ -1,36 +1,36 @@
-# Architecture
+# Architektura
 
-## Overview
+## Přehled
 
-Vivere atque FruiT is currently a static browser project with many self-contained HTML worlds and lightweight JavaScript modules.
+Vivere atque FruiT je v současnosti statický browserový projekt s mnoha samostatnými HTML světy a lehkými JavaScriptovými moduly.
 
-The repository now uses a staged structure:
+Repozitář nyní používá postupnou strukturu:
 
 1. `src/`
-   - repository-facing entrypoint
-   - shared presentation for the organized layout
-   - explicit `agents_v3.js` compatibility file
+   - vstupní bod repozitáře
+   - sdílená prezentace pro uspořádané rozložení
+   - explicitní soubor kompatibility `agents_v3.js`
 2. `components/`
-   - family modules such as Hlavoun, Viri, Pikos, and Bicak
-   - each component keeps its current browser implementation or prototype files
+   - rodinné moduly jako Hlavoun, Viri, Pikos a Bicak
+   - každá komponenta si uchovává aktuální implementaci pro prohlížeč nebo prototypové soubory
 3. `worlds/`
-   - organized copies of the main experiences
-   - `VAFT-Center3D` is now self-contained with the scripts it references
-   - `Revia` stays grouped as its own world
+   - uspořádané kopie hlavních zážitků
+   - `VAFT-Center3D` je nyní samostatný se skripty, na které odkazuje
+   - `Revia` zůstává seskupena jako vlastní svět
 4. `docs/`
-   - philosophy, component overview, and API notes
+   - filozofie, přehled komponent a poznámky k API
 5. `assets/`
-   - loose images and zip archives grouped away from the root
+   - volné obrázky a zip archivy seskupené mimo kořen
 
-## Runtime model
+## Model běhu
 
-- The project is served as static files.
-- Browser JavaScript coordinates the worlds and agents.
-- Netlify functions remain configured through `netlify.toml` for guardian endpoints.
-- GitHub Pages and static hosting can still publish from the repository root.
+- Projekt se obsluhuje jako statické soubory.
+- Browserový JavaScript koordinuje světy a agenty.
+- Netlify funkce zůstávají nakonfigurovány přes `netlify.toml` pro endpointy strážce.
+- GitHub Pages a statický hosting mohou nadále publikovat z kořene repozitáře.
 
-## Current migration policy
+## Aktuální pravidla migrace
 
-- Keep existing legacy paths until their links are reviewed.
-- Add organized copies before removing original workshop files.
-- Prefer small, reversible moves over a destructive full rewrite.
+- Zachovávejte existující starší cesty, dokud nebudou jejich odkazy zkontrolovány.
+- Přidávejte uspořádané kopie před odstraněním původních souborů z dílny.
+- Upřednostňujte malé, reverzibilní přesuny před destruktivním úplným přepisem.

@@ -1,12 +1,12 @@
-# Guardian guide
+# Průvodce strážcem
 
-This repository contains a browser guardian client and Netlify functions for challenge and submit flows.
+Tento repozitář obsahuje browserového klienta strážce a Netlify funkce pro toky výzvy a odeslání.
 
-Current files:
+Aktuální soubory:
 - `vaft.guardian.client.js`
 - `config/guardian-config.json`
 - `netlify/functions/`
 
-Integration note:
-- keep the guardian client loaded before features that depend on `window.VAFT.guardian`
-- validate any external endpoint changes before deployment
+Poznámka k integraci:
+- načtěte klienta strážce před funkcemi, které závisejí na `window.VAFT.guardian`
+- před nasazením ověřte všechny změny externích endpointů

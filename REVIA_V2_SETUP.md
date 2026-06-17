@@ -1,15 +1,15 @@
-# Revia setup note
+# Poznámka k nastavení Revia
 
-The current repository ships Revia as static content under `Revia/` and `worlds/Revia/`.
+Aktuální repozitář dodává Revii jako statický obsah ve složkách `Revia/` a `worlds/Revia/`.
 
-Recommended local run:
+Doporučené lokální spuštění:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Then open:
+Poté otevřete:
 
 - `http://localhost:8000/worlds/Revia/index.html`
 
-For general repository setup, use `SETUP.md`.
+Pro obecné nastavení repozitáře použijte `SETUP.md`.
