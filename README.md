@@ -53,6 +53,6 @@ Původní soubory a složky v kořeni repozitáře zůstávají dostupné, aby s
 
 ## Pravidla pro jazyk a formátování
 
-- Dokumentace v tomto repozitáři by měla být psána v čistě české jazyce.
+- Dokumentace v tomto repozitáři by měla být psána v čistě českém jazyce.
 - Vyhýbejte se dekorativním unicode znakům, textu v azbuce a emoji v dokumentaci.
 - Příklady a diagramy udržujte ve formátu kompatibilním s ASCII.
