@@ -1,8 +1,8 @@
-# Other worlds
+# Ostatní světy
 
-This folder tracks legacy worlds that still live at the repository root while the project is being reorganized.
+Tato složka sleduje starší světy, které stále žijí v kořeni repozitáře, zatímco projekt se reorganizuje.
 
-Current notable world folders at the root include:
+Aktuálně pozoruhodné složky světů v kořeni zahrnují:
 - `AI-Hero-Playground`
 - `Demo3D`
 - `Glyph-Planet`
@@ -19,4 +19,4 @@ Current notable world folders at the root include:
 - `VafiT-gallery`
 - `Vivere`
 
-The staged plan is to move or copy them into structured folders only after their links and runtime assets are reviewed.
+Postupný plán je přesunout nebo zkopírovat je do strukturovaných složek teprve po přezkoumání jejich odkazů a prostředků potřebných pro běh.

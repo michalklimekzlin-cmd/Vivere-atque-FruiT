@@ -1,18 +1,18 @@
 # API
 
-## Static entrypoints
+## Statické vstupní body
 
-- `src/index.html` - repository source hub
-- `worlds/VAFT-Center3D/index.html` - main organized world copy
-- `worlds/Revia/index.html` - Revia world copy
+- `src/index.html` - zdrojový uzel repozitáře
+- `worlds/VAFT-Center3D/index.html` - hlavní uspořádaná kopie světa
+- `worlds/Revia/index.html` - kopie světa Revia
 
-## Browser modules
+## Browserové moduly
 
-- `src/agents_v3.js` - family runtime compatibility file
-- `components/Viri/viri.js` - Viri browser module
-- `components/Pikos/pikos.js` - Pikos browser module
-- `components/Hlavoun/hlavoun.js` - Hlavoun browser module
+- `src/agents_v3.js` - soubor kompatibility rodinného runtime
+- `components/Viri/viri.js` - browserový modul Viri
+- `components/Pikos/pikos.js` - browserový modul Pikos
+- `components/Hlavoun/hlavoun.js` - browserový modul Hlavoun
 
-## Serverless endpoints
+## Bezserverové endpointy
 
-The repository contains Netlify functions under `netlify/functions` and routes them with `netlify.toml`.
+Repozitář obsahuje Netlify funkce ve složce `netlify/functions` a směruje je přes `netlify.toml`.

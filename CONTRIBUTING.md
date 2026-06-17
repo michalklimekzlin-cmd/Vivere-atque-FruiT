@@ -1,21 +1,21 @@
-# Contributing
+# Přispívání
 
-## Goals
+## Cíle
 
-Keep Vivere atque FruiT readable, organized, and safe to extend.
+Udržet Vivere atque FruiT čitelné, přehledné a bezpečné pro rozšiřování.
 
-## Rules
+## Pravidla
 
-1. Preserve existing files unless there is a strong reason to remove them.
-2. Prefer plain Czech or English in documentation.
-3. Avoid decorative unicode, Cyrillic text, and emoji in docs.
-4. Keep HTML, CSS, and JavaScript changes small and reviewable.
-5. When reorganizing folders, add compatibility copies or redirects before deleting old paths.
-6. Do not commit secrets, API keys, or personal credentials.
+1. Zachovávejte existující soubory, pokud není silný důvod je odstraňovat.
+2. V dokumentaci pište výhradně česky.
+3. Vyhýbejte se dekorativním unicode znakům, textu v azbuce a emoji v dokumentaci.
+4. Udržujte změny v HTML, CSS a JavaScriptu malé a přehledné.
+5. Při reorganizaci složek přidejte kopie pro kompatibilitu nebo přesměrování, než smažete staré cesty.
+6. Necommitujte tajné klíče, API klíče ani osobní přihlašovací údaje.
 
-## Recommended workflow
+## Doporučený postup
 
-1. Review the affected world or component first.
-2. Make the smallest useful change.
-3. Validate the affected HTML entrypoints in a local static server.
-4. Update docs when the structure changes.
+1. Nejprve si prohlédněte dotčený svět nebo komponentu.
+2. Proveďte co nejmenší užitečnou změnu.
+3. Ověřte dotčené HTML vstupní body na lokálním statickém serveru.
+4. Aktualizujte dokumentaci, pokud se mění struktura.

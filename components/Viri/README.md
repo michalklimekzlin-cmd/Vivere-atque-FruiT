@@ -1,11 +1,11 @@
 # Viri
 
-Viri is the narrative layer of Vivere atque FruiT.
+Viri je narativní vrstva Vivere atque FruiT.
 
-Files in this folder:
-- `viri.js` - current browser implementation copied from the legacy root.
+Soubory v této složce:
+- `viri.js` - aktuální implementace pro prohlížeč zkopírovaná ze starší verze kořene.
 
 Role:
-- adds story tone on top of Hlavoun
-- reacts to repo, story, and status prompts
-- keeps the experience human and playful
+- přidává příběhový tón na vrcholu Hlavouna
+- reaguje na podněty repozitáře, příběhu a stavu
+- udržuje zážitek lidský a hravý

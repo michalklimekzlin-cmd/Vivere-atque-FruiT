@@ -1,11 +1,11 @@
 # Pikos
 
-Pikos is the childlike observer inside Vivere atque FruiT.
+Pikos je dětský pozorovatel ve světě Vivere atque FruiT.
 
-Files in this folder:
-- `pikos.js` - current browser implementation copied from the legacy root.
+Soubory v této složce:
+- `pikos.js` - aktuální implementace pro prohlížeč zkopírovaná ze starší verze kořene.
 
 Role:
-- reacts to child world prompts
-- keeps small details visible
-- adds soft encouragement and playful feedback
+- reaguje na podněty dětského světa
+- udržuje viditelné malé detaily
+- přidává jemné povzbuzení a hravou zpětnou vazbu

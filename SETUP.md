@@ -1,35 +1,35 @@
-# Setup
+# Nastavení
 
-## Local run
+## Lokální spuštění
 
-This repository does not currently require a build step for the main static content.
+Tento repozitář aktuálně nevyžaduje krok sestavení pro hlavní statický obsah.
 
-### Option 1: Python
+### Možnost 1: Python
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Then open:
+Poté otevřete:
 
 - `http://localhost:8000/src/index.html`
 - `http://localhost:8000/worlds/VAFT-Center3D/index.html`
 - `http://localhost:8000/worlds/Revia/index.html`
 
-### Option 2: Any static host
+### Možnost 2: Libovolný statický hosting
 
-You can also use any simple static file server that serves the repository root.
+Můžete také použít jakýkoliv jednoduchý statický souborový server, který obsluhuje kořen repozitáře.
 
-## Netlify functions
+## Netlify funkce
 
-`netlify.toml` points function traffic to `netlify/functions`.
+`netlify.toml` směruje provoz funkcí do `netlify/functions`.
 
-If you need the guardian endpoints locally, review:
+Pokud potřebujete endpointy strážce lokálně, prohlédněte si:
 - `GUIDE.md`
 - `config/guardian-config.json`
 - `netlify/functions/`
 
-## Notes
+## Poznámky
 
-- There is no verified Node test suite in this repository yet.
-- The project currently behaves like a static site with optional serverless endpoints.
+- V tomto repozitáři zatím neexistuje ověřená testovací sada pro Node.
+- Projekt se momentálně chová jako statická stránka s volitelnými bezserverovými endpointy.

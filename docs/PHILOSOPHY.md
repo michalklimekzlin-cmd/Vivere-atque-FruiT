@@ -1,9 +1,9 @@
-# Philosophy
+# Filozofie
 
-Vivere atque FruiT treats software as a world that should stay human, curious, and open to growth.
+Vivere atque FruiT vnímá software jako svět, který by měl zůstat lidský, zvědavý a otevřený růstu.
 
-Core ideas:
-- build worlds that invite participation
-- keep AI and human collaboration visible and ethical
-- reward curiosity, care, and playful experimentation
-- let structure support creativity instead of blocking it
+Základní myšlenky:
+- budovat světy, které zvou k účasti
+- udržovat spolupráci AI a člověka viditelnou a etickou
+- odměňovat zvědavost, péči a hravé experimentování
+- nechat strukturu podporovat kreativitu místo jejího blokování

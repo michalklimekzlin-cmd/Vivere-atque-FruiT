@@ -1,10 +1,10 @@
 # Vivere atque FruiT
 
-Vivere atque FruiT is a growing static web project about worldbuilding, AI and human collaboration, and ethical digital experimentation.
+Vivere atque FruiT je rostoucí statický webový projekt o budování světů, spolupráci člověka a umělé inteligence a etickém digitálním experimentování.
 
-This repository now keeps a cleaner project structure while preserving the original workshop files.
+Repozitář nyní udržuje přehlednější strukturu projektu a zároveň zachovává původní soubory z dílny.
 
-## Project structure
+## Struktura projektu
 
 ```text
 .
@@ -33,26 +33,26 @@ This repository now keeps a cleaner project structure while preserving the origi
 `-- assets/
 ```
 
-## What is included
+## Co je součástí
 
-- `src/` contains the new repository hub and the explicit `agents_v3.js` file requested for the organized layout.
-- `components/` groups the core family modules and their current browser files.
-- `worlds/` contains organized copies of the main playable worlds.
-- `docs/` contains plain, professional project documentation.
-- `assets/` groups loose media and archive files from the repository root.
+- `src/` obsahuje nový uzel repozitáře a explicitní soubor `agents_v3.js` vyžádaný pro uspořádané rozložení.
+- `components/` sdružuje základní rodinné moduly a jejich aktuální soubory pro prohlížeč.
+- `worlds/` obsahuje uspořádané kopie hlavních herních světů.
+- `docs/` obsahuje jednoduchou a přehlednou dokumentaci projektu.
+- `assets/` sdružuje volné mediální soubory a archivy z kořene repozitáře.
 
-## Main entrypoints
+## Hlavní vstupní body
 
-- Source hub: `src/index.html`
-- Main world: `worlds/VAFT-Center3D/index.html`
-- Revia world: `worlds/Revia/index.html`
+- Zdrojový uzel: `src/index.html`
+- Hlavní svět: `worlds/VAFT-Center3D/index.html`
+- Svět Revia: `worlds/Revia/index.html`
 
-## Legacy compatibility
+## Zpětná kompatibilita
 
-The original root files and folders remain available so current links are not removed during this cleanup. The new structure is a staged migration path for future work.
+Původní soubory a složky v kořeni repozitáře zůstávají dostupné, aby stávající odkazy nebyly odstraněny při tomto čištění. Nová struktura je postupný migrační plán pro budoucí práci.
 
-## Language and formatting rules
+## Pravidla pro jazyk a formátování
 
-- Documentation in this repository should stay in plain Czech or English.
-- Avoid decorative unicode, Cyrillic text, and emoji in docs.
-- Keep examples and diagrams ASCII friendly.
+- Dokumentace v tomto repozitáři by měla být psána v čistě českém jazyce.
+- Vyhýbejte se dekorativním unicode znakům, textu v azbuce a emoji v dokumentaci.
+- Příklady a diagramy udržujte ve formátu kompatibilním s ASCII.

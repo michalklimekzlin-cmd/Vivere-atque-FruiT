@@ -1,11 +1,11 @@
-# VAFT main interface concept
+# Hlavní rozhraní VAFT – koncept
 
-This file is kept as a short legacy pointer.
+Tento soubor je zachován jako stručný odkaz na starší verzi.
 
-The current maintained documentation is now split into:
+Aktuální udržovaná dokumentace je nyní rozdělena do:
 - `ARCHITECTURE.md`
 - `docs/PHILOSOPHY.md`
 - `docs/COMPONENTS.md`
 - `docs/API.md`
 
-The original concept remains represented by the organized source hub in `src/` and the component folders.
+Původní koncept je reprezentován uspořádaným zdrojovým uzlem v `src/` a složkami komponent.

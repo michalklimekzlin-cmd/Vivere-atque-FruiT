@@ -1,12 +1,12 @@
-# App Style System
+# Systém vzhledu aplikace
 
-This folder describes a future system for unlocking visual customization inside Vivere atque FruiT.
+Tato složka popisuje budoucí systém pro odemykání vizuálního přizpůsobení v rámci Vivere atque FruiT.
 
-Planned goals:
-- tie visual customization to progress or level systems
-- keep the main application stable while offering player expression
-- separate workshop experiments from the production facing world
+Plánované cíle:
+- provázat vizuální přizpůsobení s postupem nebo systémem úrovní
+- udržovat hlavní aplikaci stabilní a zároveň nabízet možnost vyjádření hráče
+- oddělit experimenty z dílny od světa určeného pro produkci
 
-Status:
-- concept only
-- no dedicated build or runtime integration yet
+Stav:
+- pouze koncept
+- zatím žádná dedikovaná integrace sestavení nebo runtime
