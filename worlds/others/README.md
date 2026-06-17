@@ -19,4 +19,4 @@ Aktuálně pozoruhodné složky světů v kořeni zahrnují:
 - `VafiT-gallery`
 - `Vivere`
 
-Postupný plán je přesunout nebo zkopírovat je do strukturovaných složek, teprve po přezkoumání jejich odkazů a runtime aktiv.
+Postupný plán je přesunout nebo zkopírovat je do strukturovaných složek teprve po přezkoumání jejich odkazů a prostředků potřebných pro běh.
