@@ -160,15 +160,20 @@
 
     <script>
       // ============================================
-      // KONFIGURACE BACKENDU
+      // KONFIGURACE BACKENDU – DYNAMICKÉ ROUTOVÁNÍ
       // ============================================
-      // Pro iOS/lokál: http://localhost:3000
-      // Pro produkci: https://tvůj-server.com
-      const BACKEND_URL = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3000' 
-        : window.location.origin;
+      const BACKEND_URL = (() => {
+        if (window.location.hostname === 'localhost') {
+          return 'http://localhost:3000'; // Lokální vývoj
+        }
+        if (window.location.hostname.includes('github.io')) {
+          return 'https://vivere-atque-frui-t.vercel.app'; // GitHub Pages (iPad) → Vercel backend
+        }
+        return window.location.origin; // Přímý přístup na Vercel
+      })();
 
       console.log('[REVIA] Backend URL:', BACKEND_URL);
+      console.log('[REVIA] Hostname:', window.location.hostname);
 
       // Pomocná funkce pro toast – používá třídu "show"
       function showToast(message) {
@@ -427,13 +432,11 @@
               "revchat-msg " +
               (m.role === "user" ? "revchat-user" : "revchat-bot");
             const name = m.role === "user" ? "Ty" : "Revia";
-            row.innerHTML =
-              "<small>" +
-              name +
-              " • " +
-              (m.time || "") +
-              "</small><br>" +
-              m.content;
+            const meta = document.createElement("small");
+            meta.textContent = name + " • " + (m.time || "");
+            row.appendChild(meta);
+            row.appendChild(document.createElement("br"));
+            row.appendChild(document.createTextNode(m.content || ""));
             log.appendChild(row);
           });
           log.scrollTop = log.scrollHeight;
