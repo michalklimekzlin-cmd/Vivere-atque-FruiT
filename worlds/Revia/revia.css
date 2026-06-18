@@ -415,3 +415,57 @@ body {
     max-height: 20vh;
   }
 }
+
+/* panel osobnosti Revie – vyjíždí zprava */
+.revia-persona {
+  position: absolute;
+  top: 70px;
+  right: -300px;
+  width: 270px;
+  max-height: 400px;
+  background: rgba(3, 9, 15, 0.92);
+  border: 1px solid rgba(233, 244, 255, 0.08);
+  border-radius: 18px;
+  backdrop-filter: blur(10px);
+  color: #e9f4ff;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  transition: right 0.4s ease;
+  z-index: 3;
+  overflow-y: auto;
+}
+
+.revia-persona.open {
+  right: 12px;
+}
+
+.persona-core {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  padding: 6px 8px;
+  margin-bottom: 8px;
+  line-height: 1.45;
+}
+
+.persona-label {
+  display: block;
+  font-size: 0.72rem;
+  opacity: 0.75;
+  margin-bottom: 4px;
+}
+
+#personaText {
+  width: 100%;
+  height: 160px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  color: inherit;
+  outline: none;
+  resize: none;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  font-size: 0.8rem;
+}

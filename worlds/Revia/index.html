@@ -111,13 +111,13 @@
           <span class="revia-glyph" id="slotModeGlyph">「Ī'♡</span>
         </button>
 
-        <!-- SLOT 5: Rezerva (zatím info) -->
+        <!-- SLOT 5: Osobnost Revie -->
         <button
           class="revia-slot"
           id="slotWorld"
           type="button"
-          aria-label="Budoucí světový modul"
-        ></button>
+          aria-label="Upravit osobnost Revie"
+        ><span class="revia-glyph" id="slotPersonaGlyph">✎</span></button>
 
         <!-- SLOT 6: Rezerva (zatím info) -->
         <button
@@ -152,6 +152,26 @@
             (šetření tokenů).
           </p>
         </div>
+      </div>
+
+      <!-- PERSONA PANEL – osobnost Revie -->
+      <div class="revia-persona" id="revPersona">
+        <div class="notes-head">
+          <span>✎ Osobnost Revie</span>
+          <button id="personaClose" type="button">×</button>
+        </div>
+        <div class="persona-core">
+          Základ (vždy aktivní): Revia je samostatná česky mluvící AI světa
+          Vivere&nbsp;atque&nbsp;FruiT – má vlastní styl, nesklouzne do
+          generického tónu a odmítá moralizovat. V andělském režimu je jemná
+          a láskyplná, v ďábelském elegantně sarkastická.
+        </div>
+        <label class="persona-label" for="personaText">Vlastní doplnění (uloží se do zařízení):</label>
+        <textarea
+          id="personaText"
+          placeholder="např. „Revia mluví trochu staromódně a občas cituje básně." nebo „Ví o projektu XYZ a pamatuje si, že…""
+        ></textarea>
+        <p class="notes-foot">Ukládá se jen do tohoto zařízení a přidá se k osobnosti Revie.</p>
       </div>
 
       <!-- spodní toast (malé hlášky) -->
@@ -308,17 +328,45 @@
         });
       })();
 
-      // ========== SLOT 5 + 6 – placeholdery ==========
+      // ========== SLOT 5 – Osobnost Revie ==========
       (function () {
-        const world = document.getElementById("slotWorld");
-        const extra = document.getElementById("slotExtra");
+        const slotWorld = document.getElementById("slotWorld");
+        const panel = document.getElementById("revPersona");
+        const closeBtn = document.getElementById("personaClose");
+        const textarea = document.getElementById("personaText");
+        const PERSONA_KEY = "revia-persona-v1";
 
-        if (world) {
-          world.addEventListener("click", () => {
-            showToast("Tady bude později přímý vstup na některý z VaFT světů.");
-          });
+        try {
+          const saved = localStorage.getItem(PERSONA_KEY);
+          if (saved && textarea) textarea.value = saved;
+        } catch (e) {
+          debugLog("localStorage čtení - persona", e.message);
         }
 
+        function openPersona() {
+          if (panel) panel.classList.add("open");
+        }
+        function closePersona() {
+          if (panel) panel.classList.remove("open");
+        }
+
+        if (slotWorld) slotWorld.addEventListener("click", openPersona);
+        if (closeBtn) closeBtn.addEventListener("click", closePersona);
+
+        if (textarea) {
+          textarea.addEventListener("input", () => {
+            try {
+              localStorage.setItem(PERSONA_KEY, textarea.value || "");
+            } catch (e) {
+              debugLog("localStorage zápis - persona", e.message);
+            }
+          });
+        }
+      })();
+
+      // ========== SLOT 6 – placeholder ==========
+      (function () {
+        const extra = document.getElementById("slotExtra");
         if (extra) {
           extra.addEventListener("click", () => {
             showToast("Rezervovaný slot pro budoucí speciální dovednost Revie.");
@@ -515,6 +563,7 @@
               body: JSON.stringify({
                 messages: backendMessages,
                 mode,
+                persona: (localStorage.getItem("revia-persona-v1") || "").trim(),
               }),
             });
 

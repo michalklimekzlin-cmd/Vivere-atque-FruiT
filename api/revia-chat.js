@@ -21,6 +21,8 @@ export default async function handler(req, res) {
     ? body.messages
     : [];
   const mode = body.mode === "daemon" ? "daemon" : "angel";
+  const rawPersona = typeof body.persona === "string" ? body.persona.trim() : "";
+  const persona = rawPersona.slice(0, 1000); // bezpečnostní limit délky
 
   // Pošleme jen posledních ~50 zpráv (frontend si drží celou historii)
   const shortHistory = messagesFromClient.slice(-50);
@@ -90,6 +92,7 @@ Styl:
     ROLE_ANCHOR,
     "",
     mode === "angel" ? ANGEL_PROMPT : DAEMON_PROMPT,
+    ...(persona ? ["", "Vlastní doplnění osobnosti od uživatele:\n" + persona] : []),
   ].join("\n\n");
 
   try {
