@@ -6,7 +6,7 @@
     <title>Revia • Vivere atque FruiT</title>
 
     <!-- Styl Revie -->
-    <link rel="stylesheet" href="./revia.css?v=0.78" />
+    <link rel="stylesheet" href="./revia.css?v=0.79" />
 
     <!-- Jemné nastavení pozadí (můžeš klidně nechat) -->
     <style>
@@ -48,29 +48,47 @@
     >
       <!-- horní lišta -->
       <div class="revia-topbar">
-        <!-- křídlo = zápisník -->
+        <!-- křídlo = PROGRAMMOVACÍ PANEL -->
         <button
           class="revia-wing"
           id="revWing"
           type="button"
-          aria-label="otevřít zápisník"
+          aria-label="otevřít programovací panel"
+          title="Programuj Revii - definuj její chování"
         ></button>
 
         <div class="revia-title">Revia</div>
         <div class="revia-state" id="revState">AI: hlídám svět</div>
       </div>
 
-      <!-- zápisník -->
+      <!-- PROGRAMMOVACÍ PANEL (křídlo) -->
       <div class="revia-notes" id="revNotes">
         <div class="notes-head">
-          <span>✧ Křídlo / zápis</span>
+          <span>⚙️ Programování Revie</span>
           <button id="notesClose" type="button">×</button>
         </div>
-        <textarea
-          id="notesText"
-          placeholder="Charakter, úkoly, komu se ukáže…"
-        ></textarea>
-        <p class="notes-foot">Ukládá se jen do tohoto zařízení.</p>
+        
+        <div class="notes-section">
+          <label for="notesText" class="notes-label">📝 Definuj Reviin charakter:</label>
+          <textarea
+            id="notesText"
+            placeholder="Napiš jak se má Revia chovat...&#10;Příklady:&#10;• Bud vtipnější a používej emojis&#10;• V andělském režimu bud inspirující&#10;• V demon režimu bud analytická a skeptická&#10;• Odpovídej jako 90s chatbot&#10;&#10;Revia si to přečte a bude se tím řídit!"
+          ></textarea>
+        </div>
+
+        <div class="notes-controls">
+          <button id="notesApply" type="button" class="btn-apply">✓ Aplikovat</button>
+          <button id="notesClear" type="button" class="btn-clear">🔄 Reset</button>
+        </div>
+
+        <div class="notes-info">
+          <strong>Jak to funguje:</strong><br/>
+          1. Napiš instrukce jak se má Revia chovat<br/>
+          2. Klikni "Aplikovat"<br/>
+          3. Zkus chat - Revia bude následovat tvoje pokyny!<br/>
+          <br/>
+          💾 Uloží se jen v tomto zařízení • Bez historie na serveru
+        </div>
       </div>
 
       <!-- mřížka slotů (dovednosti) -->
@@ -141,15 +159,13 @@
           <div class="revchat-input-row">
             <textarea
               id="revChatInput"
-              placeholder="Zeptej se Revie na hlídání světa, rady, cokoliv…"
+              placeholder="Zeptej se Revie na cokoliv…"
             ></textarea>
             <button id="revChatSend" type="button">Poslat</button>
           </div>
 
           <p class="revchat-note">
-            Revia používá OpenAI přes backend. Historie chatu se ukládá jen do
-            tohoto zařízení a do AI posíláme jen posledních pár zpráv
-            (šetření tokenů).
+            Revia používá OpenAI přes backend. Její chování se řídí tím, co napíšeš v Programování (Křídlo).
           </p>
         </div>
       </div>
@@ -175,7 +191,7 @@
       console.log('[REVIA] Backend URL:', BACKEND_URL);
       console.log('[REVIA] Hostname:', window.location.hostname);
 
-      // Pomocná funkce pro toast – používá třídu "show"
+      // Pomocná funkce pro toast
       function showToast(message) {
         const toast = document.getElementById("revToast");
         if (!toast) return;
@@ -187,46 +203,82 @@
         }, 2200);
       }
 
-      // Pomocná funkce pro debug logy (vidíš v F12 → Console)
+      // Debug
       function debugLog(title, data) {
         console.log(`[REVIA] ${title}:`, data);
       }
 
-      // ========== ZÁPISNÍK (křídlo) ==========
+      // ========== PROGRAMMOVACÍ PANEL (křídlo) ==========
       (function () {
         const wing = document.getElementById("revWing");
         const notes = document.getElementById("revNotes");
         const closeBtn = document.getElementById("notesClose");
         const textarea = document.getElementById("notesText");
-        const STORAGE_KEY = "revia-notes-v1";
+        const applyBtn = document.getElementById("notesApply");
+        const clearBtn = document.getElementById("notesClear");
+        const STORAGE_KEY = "revia-character-v1";
 
         try {
           const saved = localStorage.getItem(STORAGE_KEY);
           if (saved) textarea.value = saved;
         } catch (e) {
-          debugLog("localStorage čtení - zápisník", e.message);
+          debugLog("localStorage čtení - charakter", e.message);
         }
 
-        function openNotes() {
+        function openPanel() {
           notes.classList.add("open");
         }
 
-        function closeNotes() {
+        function closePanel() {
           notes.classList.remove("open");
         }
 
-        if (wing) wing.addEventListener("click", openNotes);
-        if (closeBtn) closeBtn.addEventListener("click", closeNotes);
+        function applyCharacter() {
+          const character = textarea.value.trim();
+          if (!character) {
+            showToast("Revia: Napiš mi instrukce, ať vím jak se mám chovat!");
+            return;
+          }
+          try {
+            localStorage.setItem(STORAGE_KEY, character);
+            showToast("Revia: Rozumím! Pamatuju si to. 💙");
+            debugLog("Charakter uložen", character.substring(0, 100) + "...");
+          } catch (e) {
+            debugLog("localStorage zápis - charakter", e.message);
+          }
+        }
+
+        function resetCharacter() {
+          if (confirm("Smazat všechny instrukce pro Reviu?")) {
+            textarea.value = "";
+            try {
+              localStorage.removeItem(STORAGE_KEY);
+              showToast("Revia: Reset! Jsem opět sama sebou.");
+            } catch (e) {
+              debugLog("localStorage smazání", e.message);
+            }
+          }
+        }
+
+        if (wing) wing.addEventListener("click", openPanel);
+        if (closeBtn) closeBtn.addEventListener("click", closePanel);
+        if (applyBtn) applyBtn.addEventListener("click", applyCharacter);
+        if (clearBtn) clearBtn.addEventListener("click", resetCharacter);
 
         if (textarea) {
-          textarea.addEventListener("input", () => {
-            try {
-              localStorage.setItem(STORAGE_KEY, textarea.value || "");
-            } catch (e) {
-              debugLog("localStorage zápis - zápisník", e.message);
+          textarea.addEventListener("keydown", (e) => {
+            // Ctrl+Enter = Aplikovat
+            if (e.ctrlKey && e.key === "Enter") {
+              e.preventDefault();
+              applyCharacter();
             }
           });
         }
+
+        // Exportuj funkcí pro chat
+        window.getReviaCharacter = function() {
+          return localStorage.getItem(STORAGE_KEY) || "";
+        };
       })();
 
       // ========== SLOT 1 – portál do Centra ==========
@@ -285,17 +337,16 @@
           main.setAttribute("data-mode", "angel");
           glyph.textContent = "「Ī'♡";
           if (chatTitle) chatTitle.textContent = "Revia • andělský režim";
-          showToast("Revia přepnuta do andělského režimu (hlídá svět jemněji).");
+          showToast("Revia přepnuta do andělského režimu ✨");
         }
 
         function setDaemon() {
           main.setAttribute("data-mode", "daemon");
           glyph.textContent = "「Ī'☆";
           if (chatTitle) chatTitle.textContent = "Revia • ďábelský režim";
-          showToast("Revia přepnuta do ďábelského režimu (přísnější dohled).");
+          showToast("Revia přepnuta do ďábelského režimu ⚡");
         }
 
-        // výchozí stav – anděl
         setAngel();
 
         slotMode.addEventListener("click", () => {
@@ -326,7 +377,7 @@
         }
       })();
 
-      // ========== CHAT REVIE – SLOT 2 + TOKENY ==========
+      // ========== CHAT REVIE – SLOT 2 + TOKENY + CHARACTER ==========
       (function () {
         const main = document.getElementById("reviaMain");
         const slotEnter = document.getElementById("slotEnter");
@@ -382,7 +433,6 @@
           }
         }
 
-        // odhad, kdyby usage z OpenAI nevrátilo nic
         function estimateTokensPerCall() {
           return 1200;
         }
@@ -493,6 +543,9 @@
           const mode =
             (main && main.getAttribute("data-mode")) || "angel";
 
+          // 🆕 获取 PROGRAMMOVACÍ INSTRUKCE
+          const character = window.getReviaCharacter() || "";
+
           const backendMessages = history.slice(-50).map((m) => ({
             role: m.role === "user" ? "user" : "assistant",
             content: m.content,
@@ -504,6 +557,7 @@
             debugLog("Posílám na backend", {
               url: `${BACKEND_URL}/api/revia-chat`,
               mode,
+              hasCharacter: !!character,
               messageCount: backendMessages.length
             });
 
@@ -515,6 +569,7 @@
               body: JSON.stringify({
                 messages: backendMessages,
                 mode,
+                character: character,  // 🆕 Pošli i instrukce!
               }),
             });
 
