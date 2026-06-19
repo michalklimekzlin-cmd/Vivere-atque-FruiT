@@ -1,6 +1,6 @@
-# Vivere atque FruiT
+# Vivere atque Frui¡'T
 
-Vivere atque FruiT je rostoucí statický webový projekt o budování světů, spolupráci člověka a umělé inteligence a etickém digitálním experimentování.
+Vivere atque Frui¡'T je rostoucí statický webový projekt o budování světů, spolupráci člověka a umělé inteligence a etickém digitálním experimentování.
 
 Repozitář nyní udržuje přehlednější strukturu projektu a zároveň zachovává původní soubory z dílny.
 

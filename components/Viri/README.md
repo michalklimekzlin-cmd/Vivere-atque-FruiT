@@ -1,6 +1,6 @@
 # Viri
 
-Viri je narativní vrstva Vivere atque FruiT.
+Viri je narativní vrstva Vivere atque Frui¡'T.
 
 Soubory v této složce:
 - `viri.js` - aktuální implementace pro prohlížeč zkopírovaná ze starší verze kořene.

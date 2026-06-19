@@ -2,7 +2,7 @@
 
 ## Přehled
 
-Vivere atque FruiT je v současnosti statický browserový projekt s mnoha samostatnými HTML světy a lehkými JavaScriptovými moduly.
+Vivere atque Frui¡'T je v současnosti statický browserový projekt s mnoha samostatnými HTML světy a lehkými JavaScriptovými moduly.
 
 Repozitář nyní používá postupnou strukturu:
 

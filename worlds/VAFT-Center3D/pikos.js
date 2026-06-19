@@ -1,4 +1,4 @@
-// 👶 Pikoš – dětská vrstva Vivere atque FruiT
+// 👶 Pikoš – dětská vrstva Vivere atque Frui¡'T
 // autor: ty + svět + AI rodina
 
 const Pikos = {

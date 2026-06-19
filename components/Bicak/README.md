@@ -1,6 +1,6 @@
 # Bicak Supreme Edition
 
-Bicak je plánovaná motivační komponenta pro Vivere atque FruiT.
+Bicak je plánovaná motivační komponenta pro Vivere atque Frui¡'T.
 
 Aktuální směr:
 - podněcovat pohyb a krátkou aktivitu v reálném světě

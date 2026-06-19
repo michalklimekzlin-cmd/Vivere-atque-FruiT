@@ -1,4 +1,4 @@
-// vaft.kernel.js — Vivere atque FruiT – centrální inteligence
+// vaft.kernel.js — Vivere atque Frui¡'T – centrální inteligence
 // verze jádra:
 (function () {
   const KERNEL_VERSION = "1.1.0";
@@ -28,7 +28,7 @@
 
   // základní semínka světa – seed jazyk
   const SEEDS = [
-    "Vivere atque FruiT",
+    "Vivere atque Frui¡'T",
     "strom z meziprostoru",
     "panenka se srdcem",
     "duchová slečna",

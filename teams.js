@@ -1,5 +1,5 @@
 // teams.js
-// definice 4 týmů Vivere atque FruiT
+// definice 4 týmů Vivere atque Frui¡'T
 
 window.VAF_teams = [
   {

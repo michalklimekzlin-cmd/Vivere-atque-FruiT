@@ -1,5 +1,5 @@
 // agents_v3.js
-// Vivere atque FruiT – rodina tří: Hlavoun, Viri, Pikoš
+// Vivere atque Frui¡'T – rodina tří: Hlavoun, Viri, Pikoš
 // všichni mají stejná práva, ale jiný pohled
 
 const VAFT_FAMILY_RULES = [
@@ -40,7 +40,7 @@ const VAFTBus = {
 
     // označení v UI
     const el = document.getElementById("core-status");
-    if (el) el.textContent = "🧠💖👶 Vivere atque FruiT – rodina aktivní";
+    if (el) el.textContent = "🧠💖👶 Vivere atque Frui¡'T – rodina aktivní";
   },
 
   register(agent) {
@@ -111,7 +111,7 @@ function readJSON(key) {
 const HlavounAgent = {
   name: "Hlavoun",
   init(state, bus) {
-    appendHlavounMsg('ai', '🧠 Hlavoun: svět běží. Držím Pravidla Vivere atque FruiT.');
+    appendHlavounMsg('ai', '🧠 Hlavoun: svět běží. Držím Pravidla Vivere atque Frui¡'T.');
     // hned připomenout pravidla 1 a 2
     appendHlavounMsg('ai', '🧠 Hlavoun: ' + VAFT_FAMILY_RULES[0] + ' • ' + VAFT_FAMILY_RULES[1]);
   },

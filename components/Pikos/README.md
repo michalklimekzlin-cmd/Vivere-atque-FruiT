@@ -1,6 +1,6 @@
 # Pikos
 
-Pikos je dětský pozorovatel ve světě Vivere atque FruiT.
+Pikos je dětský pozorovatel ve světě Vivere atque Frui¡'T.
 
 Soubory v této složce:
 - `pikos.js` - aktuální implementace pro prohlížeč zkopírovaná ze starší verze kořene.

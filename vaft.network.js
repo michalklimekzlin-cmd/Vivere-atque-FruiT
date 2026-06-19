@@ -1,4 +1,4 @@
-// VAFT Network — živá síť uzlů Vivere atque FruiT (bez pádu)
+// VAFT Network — živá síť uzlů Vivere atque Frui¡'T (bez pádu)
 (function (window, document) {
   console.log("%c[VAFT-Network] startuje...", "color:#7fffd4");
 

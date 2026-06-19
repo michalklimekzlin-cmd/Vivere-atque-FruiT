@@ -1,5 +1,5 @@
 // vaft.fuel.js
-// centrální nádrž paliva pro Vivere atque FruiT
+// centrální nádrž paliva pro Vivere atque Frui¡'T
 // palivo = písmenka
 
 window.VAFT = window.VAFT || {};

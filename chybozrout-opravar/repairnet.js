@@ -1,5 +1,5 @@
 // 🛠️ RepairNet v2.3-stable
-// Modul sítě oprav a diagnostiky pro systém Vivere atque FruiT
+// Modul sítě oprav a diagnostiky pro systém Vivere atque Frui¡'T
 // Autor: Michal & Kovošrot 🧠🦾
 
 window.RepairNet = (function () {

@@ -1,4 +1,4 @@
-// ===== Vivere atque FruiT • Centrální multi-app Service Worker =====
+// ===== Vivere atque Frui¡'T • Centrální multi-app Service Worker =====
 // Jeden worker pro celý svět, více cache podle cesty
 // Michal & Kovošrot 2025 🧩
 

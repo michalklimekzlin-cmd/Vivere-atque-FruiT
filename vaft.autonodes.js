@@ -1,5 +1,5 @@
 // vaft.autonodes.js
-// živé uzly napojené na Pikoše, Viriho, Hlavouna a Vivere atque FruiT
+// živé uzly napojené na Pikoše, Viriho, Hlavouna a Vivere atque Frui¡'T
 
 (function (window, document) {
   window.VAFT = window.VAFT || {};
@@ -118,7 +118,7 @@
     ['pikos.output', 'Pikoš'],
     ['viri.output', 'Viri'],
     ['hlavoun.output', 'Hlavoun'],
-    ['vaft.world', 'Vivere atque FruiT']
+    ['vaft.world', 'Vivere atque Frui¡'T']
   ];
   listeners.forEach(([channel, label]) => {
     BUS.on(channel, (data) => {

@@ -1,5 +1,5 @@
 // vaft.spell.js
-// jednoduchý "řečový" modul pro Vivere atque FruiT
+// jednoduchý "řečový" modul pro Vivere atque Frui¡'T
 // čte věty typu: "2 stromy u baráku" a volá akci ve světě
 
 window.VAFT = window.VAFT || {};

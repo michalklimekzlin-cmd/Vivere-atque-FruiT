@@ -1,4 +1,4 @@
-// jednoduchý registr appek pro Vivere atque FruiT
+// jednoduchý registr appek pro Vivere atque Frui¡'T
 // můžeš sem pak přidávat další moduly
 window.VAFT = window.VAFT || {};
 VAFT.apps = [

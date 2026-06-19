@@ -1,5 +1,5 @@
 // vaft.guardian.client.js
-// klientská stráž pro Vivere atque FruiT
+// klientská stráž pro Vivere atque Frui¡'T
 // mluví s Netlify Functions na vivereatquefruit.netlify.app
 
 ;(function (win) {

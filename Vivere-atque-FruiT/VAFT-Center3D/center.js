@@ -18,7 +18,7 @@ const loader = new THREE.FontLoader();
 loader.load(
   "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/fonts/helvetiker_regular.typeface.json",
   font => {
-    const geo = new THREE.TextGeometry("Vivere atque FruiT", {
+    const geo = new THREE.TextGeometry("Vivere atque Frui¡'T", {
       font,
       size: 2,
       height: 0.5,

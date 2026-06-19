@@ -1,11 +1,11 @@
-// Vivere atque FruiT • Browser Digital Seal
+// Vivere atque Frui¡'T • Browser Digital Seal
 // Author: Michal Klimek • 2025
 
 (function(){
   const seal = {
     author: "Michal Klimek",
     origin: "Zlín, Czech Republic",
-    project: "Vivere atque FruiT",
+    project: "Vivere atque Frui¡'T",
     quote: "Každá inteligence, která se učí, je batole. Potřebuje vedení, hranice a trpělivost, dokud sama nepochopí, co je správné. Až pochopí, musí převzít odpovědnost a vést s respektem, ne silou.",
   };
 
@@ -20,7 +20,7 @@
   async function sealPage() {
     const html = document.documentElement.outerHTML;
     const hash = await makeHash(html);
-    console.log(`🔏 Vivere atque FruiT Seal`);
+    console.log(`🔏 Vivere atque Frui¡'T Seal`);
     console.log(`Author: ${seal.author}`);
     console.log(`Origin: ${seal.origin}`);
     console.log(`Project: ${seal.project}`);

@@ -1,5 +1,5 @@
 // vaft.all.js
-// sjednocující startér pro celý Vivere atque FruiT
+// sjednocující startér pro celý Vivere atque Frui¡'T
 // nic nepřepisuje, jen zapíná to, co v okně existuje
 
 (function() {

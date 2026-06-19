@@ -14,7 +14,7 @@ window.addEventListener("load", () => {
       accent: "#8cf3ff",
       posX: 0.25,
       lines: [
-        "Analyzuju mapu Vivere atque FruiT.",
+        "Analyzuju mapu Vivere atque Frui¡'T.",
         "Bezpečná zóna vypadá čistě.",
         "Chci chránit hráče i svět.",
       ],
@@ -71,7 +71,7 @@ window.addEventListener("load", () => {
       heroes.push(hero);
       world.addHero(hero);
       brain.resetTimer();
-      logMessage(`${cfg.name} (${cfg.role}) se probudil(a) ve světě Vivere atque FruiT.`);
+      logMessage(`${cfg.name} (${cfg.role}) se probudil(a) ve světě Vivere atque Frui¡'T.`);
     });
   }
 

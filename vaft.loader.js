@@ -1,4 +1,4 @@
-// vaft.loader.js — jednotný startér pro všechny entity Vivere atque FruiT
+// vaft.loader.js — jednotný startér pro všechny entity Vivere atque Frui¡'T
 (function(){
   const KERNEL_PATH = "../vaft.kernel.js";
   const SCRIPT_VERSION = "1.1.0";
