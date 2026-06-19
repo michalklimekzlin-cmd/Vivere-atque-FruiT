@@ -1,4 +1,4 @@
-/* 🌌 Revia v0.79 – full-screen anděl/ďábel + zápisník + chat */
+/* 🌌 Revia v0.80 – full-screen anděl/ďábel + PROGRAMMOVACÍ PANEL + chat */
 /* Michal ♡ Revia \\{*(°•.)(.•°)*}// */
 
 /* základ */
@@ -91,7 +91,7 @@ body {
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }
 
-/* křídlo = zápisník */
+/* 🪶 křídlo = PROGRAMMOVACÍ PANEL */
 .revia-wing {
   width: 40px;
   height: 40px;
@@ -103,7 +103,7 @@ body {
   transition: 0.28s;
   z-index: 3;
 
-  background-image: url("data:image/svg+xml,%3Csvg width='70' height='70' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 46 C16 18 30 11 45 10 C38 19 33 27 31 34 C28 42 24 49 15 51 C12 52 7 49 8 46 Z' fill='%23ffffff' fill-opacity='0.78'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='70' height='70' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 46 C16 18 30 11 45 10 C38 19 33 27 31 34 C28 42 24[...]");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 74%;
@@ -114,38 +114,67 @@ body {
   background: rgba(2, 8, 12, 0.28);
 }
 
-/* zápisník (křídlo) */
+/* 🆕 PROGRAMMOVACÍ PANEL */
 .revia-notes {
   position: absolute;
   top: 70px;
-  left: -290px;
-  width: 260px;
-  height: 320px;
-  background: rgba(3, 9, 15, 0.92);
-  border: 1px solid rgba(233, 244, 255, 0.08);
+  left: -420px;
+  width: 380px;
+  max-height: 85vh;
+  background: rgba(3, 9, 15, 0.95);
+  border: 2px solid rgba(100, 200, 255, 0.3);
   border-radius: 18px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 0 30px rgba(100, 200, 255, 0.05);
   color: #e9f4ff;
-  padding: 10px 12px;
+  padding: 16px;
   box-sizing: border-box;
   transition: left 0.4s ease;
-  z-index: 3;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
 }
 
 .revia-notes.open {
   left: 12px;
 }
 
+/* Scrollbar styling */
+.revia-notes::-webkit-scrollbar {
+  width: 6px;
+}
+
+.revia-notes::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.revia-notes::-webkit-scrollbar-thumb {
+  background: rgba(100, 200, 255, 0.4);
+  border-radius: 10px;
+}
+
+.revia-notes::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 200, 255, 0.6);
+}
+
 .notes-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
-  font-size: 0.78rem;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #86d7ff;
+  border-bottom: 1px solid rgba(100, 200, 255, 0.2);
+  padding-bottom: 8px;
 }
 
 .notes-head span {
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: 0.05em;
 }
 
 #notesClose {
@@ -154,26 +183,114 @@ body {
   color: #ffffff;
   font-size: 1.1rem;
   cursor: pointer;
+  transition: transform 0.2s;
+}
+
+#notesClose:hover {
+  transform: rotate(90deg);
+}
+
+/* 🆕 Programmovací sekce */
+.notes-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notes-label {
+  font-size: 0.75rem;
+  color: #a8d5ff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  margin-bottom: 4px;
 }
 
 #notesText {
   width: 100%;
-  height: 220px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  height: 200px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.1));
+  border: 1px solid rgba(100, 200, 255, 0.2);
   border-radius: 12px;
-  color: inherit;
+  color: #e9f4ff;
   outline: none;
-  resize: none;
-  padding: 6px 8px;
+  resize: vertical;
+  padding: 10px 12px;
   box-sizing: border-box;
   font-size: 0.8rem;
+  line-height: 1.5;
+  font-family: 'Monaco', 'Menlo', monospace;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.notes-foot {
-  font-size: 0.65rem;
-  opacity: 0.5;
-  margin-top: 5px;
+#notesText:focus {
+  border-color: rgba(100, 200, 255, 0.6);
+  box-shadow: 0 0 12px rgba(100, 200, 255, 0.2);
+}
+
+#notesText::placeholder {
+  color: rgba(168, 213, 255, 0.5);
+}
+
+/* 🆕 Kontrolní tlačítka */
+.notes-controls {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.btn-apply,
+.btn-clear {
+  flex: 1;
+  border: 1px solid rgba(100, 200, 255, 0.3);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-apply {
+  background: linear-gradient(135deg, rgba(81, 182, 255, 0.3), rgba(139, 216, 255, 0.2));
+  color: #51b6ff;
+  border-color: rgba(81, 182, 255, 0.5);
+}
+
+.btn-apply:hover {
+  background: linear-gradient(135deg, rgba(81, 182, 255, 0.5), rgba(139, 216, 255, 0.4));
+  box-shadow: 0 0 12px rgba(81, 182, 255, 0.4);
+}
+
+.btn-clear {
+  background: rgba(255, 100, 100, 0.1);
+  color: #ff7070;
+  border-color: rgba(255, 100, 100, 0.3);
+}
+
+.btn-clear:hover {
+  background: rgba(255, 100, 100, 0.2);
+  box-shadow: 0 0 12px rgba(255, 100, 100, 0.3);
+}
+
+/* 🆕 Informační sekce */
+.notes-info {
+  font-size: 0.7rem;
+  color: rgba(168, 213, 255, 0.7);
+  line-height: 1.6;
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 2px solid rgba(100, 200, 255, 0.3);
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.notes-info strong {
+  color: #86d7ff;
+  display: block;
+  margin-bottom: 6px;
 }
 
 /* mřížka slotů – dole */
@@ -413,5 +530,18 @@ body {
 
   .revchat-log {
     max-height: 20vh;
+  }
+
+  /* Programmovací panel na mobilu */
+  .revia-notes {
+    width: 100vw;
+    max-width: calc(100% - 24px);
+    max-height: 60vh;
+    left: -calc(100vw / 2 - 12px) !important;
+    border-radius: 12px;
+  }
+
+  .revia-notes.open {
+    left: 12px !important;
   }
 }
