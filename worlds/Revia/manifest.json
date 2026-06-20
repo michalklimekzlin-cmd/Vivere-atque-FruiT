@@ -10,14 +10,14 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "./revia-bg-angel.jpg",
+      "src": "../../assets/images/AFA0870E-F586-4406-8BAA-0A7944120AA3.png",
       "sizes": "192x192",
-      "type": "image/jpeg"
+      "type": "image/png"
     },
     {
-      "src": "./revia-bg-daemon.jpg",
+      "src": "../../assets/images/50F62985-1E64-4F1B-934A-64A8C4DC98CB.png",
       "sizes": "512x512",
-      "type": "image/jpeg"
+      "type": "image/png"
     }
   ]
 }
