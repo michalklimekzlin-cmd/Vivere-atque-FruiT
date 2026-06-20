@@ -17,8 +17,8 @@ const OFFLINE_URLS = [
   './vaft.ascend.js',
   './vaft.diagnostics.js',
   './vaft.guardian.client.js',
-  '/assets/images/AFA0870E-F586-4406-8BAA-0A7944120AA3.png',
-  '/assets/images/50F62985-1E64-4F1B-934A-64A8C4DC98CB.png'
+  '../../assets/images/AFA0870E-F586-4406-8BAA-0A7944120AA3.png',
+  '../../assets/images/50F62985-1E64-4F1B-934A-64A8C4DC98CB.png'
 ];
 
 self.addEventListener('install', (event) => {
