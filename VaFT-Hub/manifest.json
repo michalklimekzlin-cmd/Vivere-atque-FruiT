@@ -1,20 +1,20 @@
 {
-  "name": "Vivere atque Frui¡'T • Hub",
-  "short_name": "VAFT Hub",
-  "description": "Centrální rozcestník modulů světa Vivere atque Frui¡'T.",
+  "name": "VaFT-Hub",
+  "short_name": "VaFT-Hub",
+  "description": "VaFT-Hub progressive web app in the Vivere-atque-FruiT repository.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#020208",
   "theme_color": "#020208",
+  "background_color": "#020208",
   "icons": [
     {
-      "src": "../assets/images/AFA0870E-F586-4406-8BAA-0A7944120AA3.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "../assets/images/50F62985-1E64-4F1B-934A-64A8C4DC98CB.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

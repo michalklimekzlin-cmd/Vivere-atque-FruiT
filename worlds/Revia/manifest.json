@@ -1,23 +1,22 @@
 {
-  "name": "Revia • Vivere atque Frui¡'T",
+  "name": "Revia",
   "short_name": "Revia",
-  "description": "Strážkyně světla světa Vivere atque Frui¡'T.",
+  "description": "Revia progressive web app in the Vivere-atque-FruiT repository.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#000010",
   "theme_color": "#0a0e1f",
-  "orientation": "portrait",
+  "background_color": "#0a0e1f",
   "icons": [
     {
-      "src": "../../assets/images/AFA0870E-F586-4406-8BAA-0A7944120AA3.png",
+      "src": "./revia-bg-angel.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpeg"
     },
     {
-      "src": "../../assets/images/50F62985-1E64-4F1B-934A-64A8C4DC98CB.png",
+      "src": "./revia-bg-daemon.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg"
     }
   ]
 }

@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="cs">
 <head>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Vivere atque Frui¡'T • Letter Chat</title>
@@ -200,3 +203,11 @@ body::before {
     <div class="msg revia">
       <small>Revia · 16:43</small><br>
       Planeta písmen si zapisuje: „Kuk.“ Jedno písmenko
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>

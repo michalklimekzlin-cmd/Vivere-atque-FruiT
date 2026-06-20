@@ -1,7 +1,9 @@
 <!doctype html>
 <html lang="cs">
 <head>
-  <meta charset="utf-8">
+    <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+<meta charset="utf-8">
   <title>Bráška Hlava – VAFT</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -70,5 +72,13 @@
   VAFT.boot && VAFT.boot();
 </script>
 
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
 </body>
 </html>

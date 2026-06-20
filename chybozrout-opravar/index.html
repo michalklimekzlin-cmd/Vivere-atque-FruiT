@@ -1,7 +1,9 @@
 <!doctype html>
 <html lang="cs">
 <head>
-  <meta charset="utf-8" />
+    <link rel="manifest" href="./manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Chybožrout-Opravář v2.6 • Tiles + Drawer</title>
   <meta name="theme-color" content="#000000" />
@@ -493,5 +495,13 @@ logLine("🫀 CORE aktivován");
     (function renderLoop(){ renderKPI(); renderList(); setTimeout(renderLoop, 1000); })();
   })();
   </script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
 </body>
 </html>

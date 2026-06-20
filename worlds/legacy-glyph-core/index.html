@@ -1,4 +1,8 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><title>VaFT Glyph Core</title>
+<!DOCTYPE html><html><head>  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="UTF-8"><title>VaFT Glyph Core</title>
 <style>
 body{background:#050505;color:#d8b16a;font-family:Arial;text-align:center}
 .grid{display:grid;grid-template-columns:repeat(4,180px);gap:30px;justify-content:center}
@@ -15,4 +19,12 @@ a{color:#d8b16a;text-decoration:none}
 <div class="glyph"><a href="j.html">j’</a></div>
 <div class="glyph"><a href="i.html">i’</a></div>
 <div class="glyph"><a href="signal.html">,!,</a></div>
-</div></body></html>
+</div>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body></html>
