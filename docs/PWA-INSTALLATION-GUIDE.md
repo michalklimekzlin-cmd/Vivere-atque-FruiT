@@ -21,7 +21,7 @@
 
 ## 3) Installable app links
 
-> Use these links directly from your deployed site domain (example: `https://vivere-atque-frui-t.vercel.app/<path>/index.html`).
+> These are production links for this repository deployment on Vercel (`https://vivere-atque-frui-t.vercel.app`). If you deploy elsewhere, replace the domain and keep the same path.
 
 - [1O1R](https://vivere-atque-frui-t.vercel.app/1O1R/index.html)
 - [3D ramecek](https://vivere-atque-frui-t.vercel.app/3D%20ramecek/index.html)
