@@ -1,5 +1,5 @@
 // vaft.glyphs.js
-// Jazyk glyphů + VaFiTky pro Vivere atque FruiT
+// Jazyk glyphů + VaFiTky pro Vivere atque Frui¡'T
 // Michal & spol. 🦾
 
 ;(function (win) {

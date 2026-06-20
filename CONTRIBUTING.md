@@ -2,7 +2,7 @@
 
 ## Cíle
 
-Udržet Vivere atque FruiT čitelné, přehledné a bezpečné pro rozšiřování.
+Udržet Vivere atque Frui¡'T čitelné, přehledné a bezpečné pro rozšiřování.
 
 ## Pravidla
 

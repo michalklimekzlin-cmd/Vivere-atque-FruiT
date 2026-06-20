@@ -1,4 +1,4 @@
-// 🔗 Vivere atque FruiT ↔ Revia propojení
+// 🔗 Vivere atque Frui¡'T ↔ Revia propojení
 (function() {
   const reviaState = {
     mode: "angel", // nebo "daemon"

@@ -1,6 +1,6 @@
 # Filozofie
 
-Vivere atque FruiT vnímá software jako svět, který by měl zůstat lidský, zvědavý a otevřený růstu.
+Vivere atque Frui¡'T vnímá software jako svět, který by měl zůstat lidský, zvědavý a otevřený růstu.
 
 Základní myšlenky:
 - budovat světy, které zvou k účasti

@@ -1,6 +1,6 @@
 /**
  * VAFT • Digital Seal Auto-Inject
- * Author: Michal Klimek (Vivere atque FruiT)
+ * Author: Michal Klimek (Vivere atque Frui¡'T)
  * Year: 2025
  */
 
@@ -11,7 +11,7 @@ import path from 'path';
 const sealText = `
 /*
 -----------------------------------------------------
-Vivere atque FruiT • Digital Seal
+Vivere atque Frui¡'T • Digital Seal
 Author: Michal Klimek
 Origin: Zlín, Czech Republic
 Year: 2025
@@ -33,7 +33,7 @@ const files = readdirSync(folder);
 for (const file of files) {
   const filePath = path.join(folder, file);
   const content = readFileSync(filePath, 'utf8');
-  if (!content.includes('Vivere atque FruiT • Digital Seal')) {
+  if (!content.includes('Vivere atque Frui¡'T • Digital Seal')) {
     const hash = createHash('sha256').update(content).digest('hex');
     const sealed = content + '\n' + sealText.replace('Hash:', `Hash: ${hash}`);
     writeFileSync(filePath, sealed, 'utf8');

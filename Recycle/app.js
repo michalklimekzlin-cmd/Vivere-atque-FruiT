@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const symbols = symbolsBox.textContent || "";
 
     const summaryText =
-      "Mám digitální šrot pro Vivere atque FruiT. " +
+      "Mám digitální šrot pro Vivere atque Frui¡'T. " +
       "Písmenka: " +
       letters.length +
       ", čísla: " +

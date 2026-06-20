@@ -1,4 +1,4 @@
-// 🧩 Fallback app.js pro moduly Vivere atque FruiT
+// 🧩 Fallback app.js pro moduly Vivere atque Frui¡'T
 console.warn("[Fallback app.js] Načten – používám záložní UI logiku.");
 document.body.innerHTML = `
   <div style="color:#ff4747;font-family:monospace;padding:2rem;text-align:center">

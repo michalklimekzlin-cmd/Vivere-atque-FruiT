@@ -1,4 +1,4 @@
-// Vivere atque FruiT – vykreslení písmenkové mapy
+// Vivere atque Frui¡'T – vykreslení písmenkové mapy
 (function(global){
   const stateEl = document.getElementById('vaft-state');
 

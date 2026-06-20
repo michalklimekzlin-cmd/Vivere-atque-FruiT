@@ -10,7 +10,7 @@ const amb=new THREE.AmbientLight(0x4488ff,0.6);scene.add(amb);
 const point=new THREE.PointLight(0xffffff,1.2);point.position.set(10,10,10);scene.add(point);
 const loader=new THREE.FontLoader();
 loader.load("https://cdn.jsdelivr.net/npm/three@0.165.0/examples/fonts/helvetiker_regular.typeface.json",font=>{
-  const geo=new THREE.TextGeometry("Vivere atque FruiT",{font,size:2,height:0.5,curveSegments:12,bevelEnabled:true,bevelThickness:0.05,bevelSize:0.05,bevelSegments:5});
+  const geo=new THREE.TextGeometry("Vivere atque Frui¡'T",{font,size:2,height:0.5,curveSegments:12,bevelEnabled:true,bevelThickness:0.05,bevelSize:0.05,bevelSegments:5});
   geo.center();
   const mat=new THREE.MeshStandardMaterial({color:0x33aaff,emissive:0x112244,metalness:0.5,roughness:0.4});
   const mesh=new THREE.Mesh(geo,mat);scene.add(mesh);

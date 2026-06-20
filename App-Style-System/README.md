@@ -1,6 +1,6 @@
 # Systém vzhledu aplikace
 
-Tato složka popisuje budoucí systém pro odemykání vizuálního přizpůsobení v rámci Vivere atque FruiT.
+Tato složka popisuje budoucí systém pro odemykání vizuálního přizpůsobení v rámci Vivere atque Frui¡'T.
 
 Plánované cíle:
 - provázat vizuální přizpůsobení s postupem nebo systémem úrovní

@@ -1,4 +1,4 @@
-// Vivere atque FruiT – společný store světa
+// Vivere atque Frui¡'T – společný store světa
 (function(global){
   const KEY = 'VAFT_WORLD_V1';
 
