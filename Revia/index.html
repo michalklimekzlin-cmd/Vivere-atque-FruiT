@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#0a0e1f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Revia" />
+    <link rel="manifest" href="./manifest.json" />
     <title>Revia • Vivere atque Frui¡'T</title>
 
     <!-- Styl Revie -->
@@ -662,6 +666,13 @@
           renderLog();
         }
       })();
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
     </script>
   </body>
 </html>

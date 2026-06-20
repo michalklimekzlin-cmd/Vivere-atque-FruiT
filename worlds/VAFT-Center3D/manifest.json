@@ -1,9 +1,22 @@
 {
-  "name": "Vivere atque Frui¡'T",
-  "short_name": "VAFT",
+  "name": "Vivere atque Frui¡'T • Center3D",
+  "short_name": "Center3D",
+  "description": "Hlavní 3D centrum světa Vivere atque Frui¡'T.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#020617",
-  "icons": []
+  "icons": [
+    {
+      "src": "../../assets/images/AFA0870E-F586-4406-8BAA-0A7944120AA3.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../../assets/images/50F62985-1E64-4F1B-934A-64A8C4DC98CB.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }

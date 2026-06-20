@@ -3,6 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#05070a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Network" />
+    <link rel="manifest" href="./manifest.json" />
     <title>VAFT Network</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
@@ -25,6 +29,13 @@
     </div>
 
     <!-- náš jeden velký skript -->
-    <script src="./vaft.network.js"></script>
+    <script src="../vaft.network.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>

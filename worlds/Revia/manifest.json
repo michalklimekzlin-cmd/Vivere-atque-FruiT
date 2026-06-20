@@ -3,20 +3,21 @@
   "short_name": "Revia",
   "description": "Strážkyně světla světa Vivere atque Frui¡'T.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#000010",
   "theme_color": "#0a0e1f",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "assets/revia-icon.png",
+      "src": "./revia-bg-angel.jpg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/jpeg"
     },
     {
-      "src": "assets/revia-icon-512.png",
+      "src": "./revia-bg-daemon.jpg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/jpeg"
     }
   ]
 }

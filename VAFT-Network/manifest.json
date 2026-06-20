@@ -1,12 +1,12 @@
 {
-  "name": "VafiT výběr",
-  "short_name": "VafiT",
-  "description": "Galerie výběru modulů VafiT pro rychlé spuštění.",
+  "name": "VAFT Network",
+  "short_name": "Network",
+  "description": "Síťový modul světa Vivere atque Frui¡'T.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#050507",
-  "theme_color": "#050507",
+  "background_color": "#05070a",
+  "theme_color": "#05070a",
   "icons": [
     {
       "src": "../assets/images/AFA0870E-F586-4406-8BAA-0A7944120AA3.png",

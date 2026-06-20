@@ -3,6 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="VAFT Game">
+  <link rel="manifest" href="./manifest.json">
   <title>VAFT Game</title>
   <style>
     body {background:#000;color:#cfc;font-family:system-ui;padding:1rem;}
@@ -29,13 +33,19 @@
         ${data.entities.map(e=>`<div class="item">💫 ${e.text || e.label || "(bezejmenné)"}</div>`).join("")}
       `;
     }
+  </script>
   <script src="../vaft.loader.js"></script>
-<script src="../vaft.core.js"></script>
-<script src="../vaft.heartbeat.js"></script>
-
-<script>
-  VAFT.boot && VAFT.boot();
-</script>
+  <script src="../vaft.heartbeat.js"></script>
+  <script>
+    if (window.VAFT && typeof window.VAFT.boot === "function") {
+      window.VAFT.boot();
+    }
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      });
+    }
+  </script>
 
 </body>
 </html>

@@ -6,6 +6,10 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
+    <meta name="theme-color" content="#020208" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="VAFT Hub" />
+    <link rel="manifest" href="./manifest.json" />
     <title>Vivere atque Frui¡'T • Centrum světa</title>
 
     <style>
@@ -1113,6 +1117,13 @@
         const nextId = modIds[idx];
         if (nextId) loadModule(nextId);
       });
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
     </script>
   </body>
 </html>

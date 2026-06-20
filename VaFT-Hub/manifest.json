@@ -1,12 +1,12 @@
 {
-  "name": "VafiT výběr",
-  "short_name": "VafiT",
-  "description": "Galerie výběru modulů VafiT pro rychlé spuštění.",
+  "name": "Vivere atque Frui¡'T • Hub",
+  "short_name": "VAFT Hub",
+  "description": "Centrální rozcestník modulů světa Vivere atque Frui¡'T.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#050507",
-  "theme_color": "#050507",
+  "background_color": "#020208",
+  "theme_color": "#020208",
   "icons": [
     {
       "src": "../assets/images/AFA0870E-F586-4406-8BAA-0A7944120AA3.png",

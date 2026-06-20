@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#05070c" />
   <title>VAFT – Lilie 🌸</title>
 
   <!-- vlastní manifest, aby se na iPhonu neotevřela hlavní hra -->
@@ -146,6 +147,13 @@
 
     // řekni mámě že Lilie je online
     VAFT.bridge.send('core', { from: 'Lilie', online: true });
+  </script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>
