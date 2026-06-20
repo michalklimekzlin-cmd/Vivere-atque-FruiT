@@ -1,22 +1,14 @@
 {
   "name": "Oblak",
   "short_name": "Oblak",
-  "description": "Oblak progressive web app in the Vivere-atque-FruiT repository.",
+  "description": "Oblak - Progressive Web App",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "theme_color": "#111111",
-  "background_color": "#111111",
+  "theme_color": "#0a0e1f",
+  "background_color": "#1a1a2e",
   "icons": [
-    {
-      "src": "./icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "./icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    {"src": "./icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "./icon-512.png", "sizes": "512x512", "type": "image/png"}
   ]
 }
