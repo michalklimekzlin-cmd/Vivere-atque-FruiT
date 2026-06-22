@@ -138,20 +138,40 @@ Načítám jádro...
 </div>
 <div class="card">
 <h2>📦 VaFT Sklad</h2>
-
 <div class="stat">
 <span>Místní paměť</span>
 <span id="localSize">0 KB</span>
 </div>
-
 <div class="stat">
 <span>Vyrovnávací paměť</span>
 <span id="cacheSize">0 položek</span>
 </div>
-
 <button onclick="ulozitDoSkladu()">
 📦 Uložit do skladu
 </button>
+<hr>
+
+<input
+type=“file”
+id=“souborInput”
+hidden
+onchange=“vlozitSoubor(event)”
+
+<input
+type=“file”
+accept=“image/*”
+id=“obrazekInput”
+hidden
+onchange=“vlozitObrazek(event)”
+
+<button onclick="document.getElementById('souborInput').click()">
+📄 Vložit soubor
+</button>
+<button onclick="document.getElementById('obrazekInput').click()">
+🖼️ Vložit obrázek
+</button>
+<div id="seznamSouboru" style="margin-top:10px;font-size:.8rem;">
+Zatím nejsou vloženy žádné soubory.
 </div>
 <div class="card">
 <h2>🦆 Chybožrout</h2>
@@ -286,6 +306,64 @@ new Date().toISOString().slice(0,10) +
 ".json";
   a.click();
 }
+
+let pocetSouboru = 0;
+let pocetObrazku = 0;
+
+function vlozitSoubor(event){
+
+  const file = event.target.files[0];
+
+  if(!file) return;
+
+  pocetSouboru++;
+
+  const seznam =
+    document.getElementById(
+      "seznamSouboru"
+    );
+
+  if(seznam){
+    seznam.innerHTML =
+      "📄 " + file.name;
+  }
+
+}
+
+function vlozitObrazek(event){
+
+  const file = event.target.files[0];
+
+  if(!file) return;
+
+  pocetObrazku++;
+
+  const reader =
+    new FileReader();
+
+  reader.onload = function(e){
+
+    const img =
+      document.getElementById(
+        "nahledObrazku"
+      );
+
+    if(img){
+
+      img.src =
+        e.target.result;
+
+      img.style.display =
+        "block";
+
+    }
+
+  };
+
+  reader.readAsDataURL(file);
+
+}
+  
 (async function(){
   const ok =
     await loadKernel();
