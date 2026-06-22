@@ -281,7 +281,9 @@ function ulozitDoSkladu(){
   a.href =
     URL.createObjectURL(blob);
   a.download =
-    "vaft-sklad.json";
+"vaft-sklad-" +
+new Date().toISOString().slice(0,10) +
+".json";
   a.click();
 }
 (async function(){
