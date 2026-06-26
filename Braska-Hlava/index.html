@@ -10,6 +10,7 @@
 <title>Bráška Hlava – VAFT</title>
 
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="glyph/glyph.css">
 </head>
 <body>
 <div class="wrapper">
@@ -47,8 +48,8 @@ Načítám jádro...
 <span>Vyrovnávací paměť</span>
 <span id="cacheSize">0 položek</span>
 </div>
-<button onclick="ulozitDoSkladu()">
-📦 Uložit do skladu
+<button class="vaft-storage" onclick="ulozitDoSkladu()">
+Do skladu
 </button>
 <hr>
 
@@ -67,11 +68,11 @@ hidden
 onchange="vlozitObrazek(event)"
 >
 
-<button onclick="document.getElementById('souborInput').click()">
-📄 Vložit soubor
+<button class="vaft-file" onclick="document.getElementById('souborInput').click()">
+Soubor
 </button>
-<button onclick="document.getElementById('obrazekInput').click()">
-🖼️ Vložit obrázek
+<button class="vaft-image" onclick="document.getElementById('obrazekInput').click()">
+Obrázek
 </button>
 <div id="seznamSouboru" style="margin-top:10px;font-size:.8rem;">
 Zatím nejsou vloženy žádné soubory.
@@ -87,8 +88,8 @@ border-radius:12px;
 </div>
 <div class="card">
 <h2>🦆 Chybožrout</h2>
-<button onclick="prohledatSystem()">
-🦆 Prohledat systém
+<button class="vaft-system" onclick="prohledatSystem()">
+Systém
 </button>
 <pre id="diagnosticOutput">
 Připraven k hledání.
@@ -351,5 +352,6 @@ if("serviceWorker" in navigator){
   );
 }
 </script>
+<script src="glyph/glyph.js"></script>
 </body>
 </html>
