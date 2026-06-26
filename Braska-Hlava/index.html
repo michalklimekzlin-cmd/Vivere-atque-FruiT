@@ -24,33 +24,23 @@ Načítám jádro...
 </div>
 <div class="dashboard">
 <div class="card">
-<h2>🧠 Stav jádra</h2>
-<div class="stat">
-<span>Kernel</span>
-<span id="kernelState">boot...</span>
-</div>
-<div class="stat">
-<span>Bytosti</span>
-<span id="registryCount">0</span>
-</div>
-<div class="stat">
-<span>Materiály</span>
-<span id="materialCount">0</span>
-</div>
-</div>
-<div class="card">
+
 <h2>📦 VaFT Sklad</h2>
+
 <div class="stat">
 <span>Místní paměť</span>
 <span id="localSize">0 KB</span>
 </div>
+
 <div class="stat">
 <span>Vyrovnávací paměť</span>
 <span id="cacheSize">0 položek</span>
 </div>
-<button class="vaft-storage" onclick="ulozitDoSkladu()">
-Do skladu
+
+<button onclick="ulozitDoSkladu()">
+｡*ﾟ✲*☆(˘◡˘)☆*✲ﾟ*｡ Do skladu
 </button>
+
 <hr>
 
 <input
@@ -68,15 +58,18 @@ hidden
 onchange="vlozitObrazek(event)"
 >
 
-<button class="vaft-file" onclick="document.getElementById('souborInput').click()">
-Soubor
+<button onclick="document.getElementById('souborInput').click()">
+(∩^O^)⊃━☆ﾟ.*･｡ Soubor
 </button>
-<button class="vaft-image" onclick="document.getElementById('obrazekInput').click()">
-Obrázek
+
+<button onclick="document.getElementById('obrazekInput').click()">
+(∩^O^)⊃━☆ﾟ.*･｡ Obrázek
 </button>
+
 <div id="seznamSouboru" style="margin-top:10px;font-size:.8rem;">
 Zatím nejsou vloženy žádné soubory.
 </div>
+
 <img
 id="nahledObrazku"
 style="
@@ -88,8 +81,8 @@ border-radius:12px;
 </div>
 <div class="card">
 <h2>🦆 Chybožrout</h2>
-<button class="vaft-system" onclick="prohledatSystem()">
-Systém
+<button onclick="prohledatSystem()">
+•ﾟ✧٩(ˊᗜˋ*)و✧ﾟ• Systém
 </button>
 <pre id="diagnosticOutput">
 Připraven k hledání.
