@@ -1,88 +1,49 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="cs">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="utf-8">
-
-<meta
-name="viewport"
-content="width=device-width,initial-scale=1,viewport-fit=cover">
-
-<meta
-name="theme-color"
-content="#2A2A2A">
-
-<meta
-name="apple-mobile-web-app-capable"
-content="yes">
+<title>Glyph</title>
 
 <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111111">
 
 <link rel="stylesheet" href="style.css">
-
-<title>Glyph Vault • VaFT</title>
-
 </head>
 
 <body>
 
-<div class="wrapper">
+<header>
+    <h1>📖 Glyph</h1>
+    <div id="date"></div>
+</header>
 
-<div class="hero">
+<main>
 
-<h1>Glyph Vault</h1>
+<textarea
+id="journal"
+placeholder="Začni psát...
+Nic se nikam neodesílá.
+Vše zůstává pouze v tomto zařízení."
+spellcheck="true">
+</textarea>
 
-<p>
-Soukromý lokální Glyph prostor
-</p>
+</main>
 
-</div>
-
-<div class="toolbar">
-
-<select id="fontSelect">
-
-<option value="system-ui">
-System
-</option>
-
-<option value="monospace">
-Monospace
-</option>
-
-<option value="serif">
-Serif
-</option>
-
-<option value="'Courier New'">
-Courier New
-</option>
-
-<option value="'Times New Roman'">
-Times New Roman
-</option>
-
-</select>
-
-<button id="clearAll">
-
-Vymazat vše
-
-</button>
-
-</div>
-
-<div
-id="glyphSpace"
-class="glyph-space">
-
-</div>
-
-</div>
+<footer>
+    <span id="status">
+        ● Uloženo pouze v tomto zařízení
+    </span>
+</footer>
 
 <script src="app.js"></script>
 
-</body>
+<script>
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+}
+</script>
 
+</body>
 </html>
