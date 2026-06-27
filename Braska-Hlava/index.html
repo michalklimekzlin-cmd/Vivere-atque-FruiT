@@ -132,8 +132,9 @@ režim: mesh
 ====================================== -->
 
 <div class="dashboard">
+
 <!-- ======================================
-     📦 VAFT SKLAD
+     📦 VaF`i¡´T SKLAD
 ====================================== -->
 
 <div class="card">
@@ -141,88 +142,85 @@ režim: mesh
 <h2>VaF`i¡´T Sklad ᕕ(◕‿◕)ᕗ 📦</h2>
 
 <div class="stat">
-<span>Místní paměť</span>
-<span id="localSize">0 KB</span>
+    <span>Místní paměť</span>
+    <span id="localSize">0 KB</span>
 </div>
 
 <div class="stat">
-<span>Vyrovnávací paměť</span>
-<span id="cacheSize">0 položek</span>
+    <span>Vyrovnávací paměť</span>
+    <span id="cacheSize">0 položek</span>
 </div>
 
 <div class="stat">
-<span>Stav jádra</span>
-<span id="kernelState">Spouštím...</span>
+    <span>Stav jádra</span>
+    <span id="kernelState">Spouštím...</span>
 </div>
 
 <div class="stat">
-<span>Registry</span>
-<span id="registryCount">0</span>
+    <span>Registry</span>
+    <span id="registryCount">0</span>
 </div>
 
 <div class="stat">
-<span>Materiály</span>
-<span id="materialCount">0</span>
+    <span>Materiály</span>
+    <span id="materialCount">0</span>
 </div>
 
-<button onclick="ulozitDoSkladu()">
- Vivere atque FruiT
+<!-- Hlavní vstup do skladu -->
+<input
+    type="file"
+    id="skladInput"
+    multiple
+    hidden
+    onchange="vlozitDoSkladu(event)"
+>
+
+<button onclick="document.getElementById('skladInput').click()">
+ᕕ(◕‿◕)ᕗ 📦 Vivere atque FruiT
 </button>
 
 <hr>
 
+<!-- Soubor -->
 <input
-type="file"
-id="skladInput"
-multiple
-hidden
-onchange="vlozitDoSkladu(event)"
+    type="file"
+    id="souborInput"
+    hidden
+    onchange="vlozitSoubor(event)"
 >
-
-<input
-type="file"
-id="souborInput"
-hidden
-onchange="vlozitSoubor(event)"
->
-
-<input
-type="file"
-accept="image/*"
-id="obrazekInput"
-hidden
-onchange="vlozitObrazek(event)"
->
-
-<button onclick="document.getElementById('skladInput').click()">
-ᕕ(◕‿◕)ᕗ 📦 Sklad
-</button>
 
 <button onclick="document.getElementById('souborInput').click()">
 ( •_•)つ📄 Soubor
 </button>
+
+<!-- Obrázek -->
+<input
+    type="file"
+    accept="image/*"
+    id="obrazekInput"
+    hidden
+    onchange="vlozitObrazek(event)"
+>
 
 <button onclick="document.getElementById('obrazekInput').click()">
 (∩^O^)⊃━☆ﾟ.*･｡ 🖼️ Obrázek
 </button>
 
 <div
-id="seznamSouboru"
-style="margin-top:12px;font-size:.85rem;"
+    id="seznamSouboru"
+    style="margin-top:12px;font-size:.85rem;"
 >
-
-Zatím nejsou vloženy žádné soubory.
-
+    Zatím nejsou vloženy žádné soubory.
 </div>
 
 <img
-id="nahledObrazku"
-style="
-display:none;
-max-width:100%;
-margin-top:12px;
-border-radius:12px;
-"
+    id="nahledObrazku"
+    style="
+        display:none;
+        max-width:100%;
+        margin-top:12px;
+        border-radius:12px;
+    "
 >
 
 </div>
