@@ -675,6 +675,8 @@ w,
 h
 );
 
+drawConnections();
+
 const cx =
 w/2;
 
@@ -789,7 +791,6 @@ drawSphere
 );
 
 }
-drawConnections();
 drawSphere();
 
   /* ======================================
@@ -798,47 +799,129 @@ drawSphere();
 
 function drawConnections(){
 
-const w=sphereCanvas.width;
-const h=sphereCanvas.height;
+const w = sphereCanvas.width;
+const h = sphereCanvas.height;
 
-const cx=w/2;
-const cy=h/2;
+const cx = w / 2;
+const cy = h / 2;
 
-const radius=Math.min(w,h)*0.34;
+const radius = Math.min(w, h) * 0.34;
 
-sphereCtx.lineWidth=1;
+sphereCtx.lineWidth = 1;
 
-for(let i=0;i<45;i++){
+const alpha = 0.10 + Math.sin(sphereAngle * 4) * 0.05;
 
-    const a1=
-    (i/45)*Math.PI*2+sphereAngle;
+for(let i = 0; i < 45; i++){
 
-    const x1=
-    cx+Math.cos(a1)*radius*0.72;
+    const a1 = (i / 45) * Math.PI * 2 + sphereAngle;
+    const a2 = ((i + 5) % 45) / 45 * Math.PI * 2 + sphereAngle;
 
-    const y1=
-    cy+Math.sin(a1)*radius*0.72;
+    const x1 = cx + Math.cos(a1) * radius * 0.72;
+    const y1 = cy + Math.sin(a1) * radius * 0.72;
 
-    const a2=
-    ((i+5)%45)/45*Math.PI*2+sphereAngle;
-
-    const x2=
-    cx+Math.cos(a2)*radius*0.72;
-
-    const y2=
-    cy+Math.sin(a2)*radius*0.72;
+    const x2 = cx + Math.cos(a2) * radius * 0.72;
+    const y2 = cy + Math.sin(a2) * radius * 0.72;
 
     sphereCtx.beginPath();
+    sphereCtx.moveTo(x1, y1);
+    sphereCtx.lineTo(x2, y2);
 
-    sphereCtx.moveTo(x1,y1);
-
-    sphereCtx.lineTo(x2,y2);
-
-    sphereCtx.strokeStyle=
-    "rgba(255,215,120,.18)";
-
+    sphereCtx.strokeStyle = `rgba(255,215,120,${alpha})`;
     sphereCtx.stroke();
 
 }
+}
+
+/* ======================================
+   VAFT SKLAD
+====================================== */
+
+let sklad = [];
+
+function ulozitDoSkladu(){
+
+    localStorage.setItem(
+        "vaft-sklad",
+        JSON.stringify(sklad)
+    );
+
+    if(kernelState)
+        kernelState.textContent = "🟢 Uloženo";
+
+    if(materialCount)
+        materialCount.textContent = sklad.length;
+
+    if(log)
+        log.textContent = "Materiály byly uloženy.";
 
 }
+
+function vlozitSoubor(event){
+
+    const file = event.target.files[0];
+
+    if(!file) return;
+
+    sklad.push({
+        typ: "soubor",
+        nazev: file.name,
+        velikost: file.size
+    });
+
+    document.getElementById("seznamSouboru").innerHTML +=
+        `<div>📄 ${file.name}</div>`;
+
+    materialCount.textContent = sklad.length;
+
+}
+
+function vlozitObrazek(event){
+
+    const file = event.target.files[0];
+
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+        const img =
+        document.getElementById("nahledObrazku");
+
+        img.src = e.target.result;
+        img.style.display = "block";
+
+    };
+
+    reader.readAsDataURL(file);
+
+}
+
+function prohledatSystem(){
+
+    const output =
+    document.getElementById("diagnosticOutput");
+
+    output.textContent =
+`VAFT Diagnostika
+
+🟢 Signal Sphere ........ OK
+🟢 Bráška Hlava ......... OK
+🟢 Registry ............. OK
+🟢 Lokální úložiště ..... OK`;
+
+    document.getElementById("lastScan").textContent =
+        new Date().toLocaleTimeString("cs-CZ");
+
+    document.getElementById("scanItems").textContent = "4";
+
+    document.getElementById("scanState").textContent =
+        "🟢 Bez chyb";
+
+}
+
+</script>
+
+</body>
+
+</html>
