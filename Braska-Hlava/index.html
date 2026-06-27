@@ -1,5 +1,4 @@
 <!doctype html>
-
 <html lang="cs">
 
 <head>
@@ -21,6 +20,11 @@ content="#020617"
 <meta
 name="apple-mobile-web-app-capable"
 content="yes"
+>
+
+<meta
+name="apple-mobile-web-app-status-bar-style"
+content="black-translucent"
 >
 
 <title>
@@ -46,7 +50,13 @@ href="glyph/glyph.css"
 <div class="wrapper">
 
 <!-- ======================================
-     HERO
+     HORNÍ ROZLOŽENÍ
+====================================== -->
+
+<div class="topLayout">
+
+<!-- ======================================
+     LEVÁ ČÁST
 ====================================== -->
 
 <div class="hero">
@@ -66,13 +76,36 @@ Načítám jádro...
 </div>
 
 <!-- ======================================
+     PRAVÁ ČÁST
+====================================== -->
+
+<div class="signalSphere">
+
+<canvas id="sphere-canvas"></canvas>
+
+<div class="sphereTitle">
+
+Signal Sphere
+
+</div>
+
+<div id="status">
+
+režim: písmenka / čísla
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ======================================
      DASHBOARD
 ====================================== -->
 
 <div class="dashboard">
-
-<!-- ======================================
-     VAFT SKLAD
+  <!-- ======================================
+     📦 VaFT SKLAD
 ====================================== -->
 
 <div class="card">
@@ -110,6 +143,54 @@ Vyrovnávací paměť
 <span id="cacheSize">
 
 0 položek
+
+</span>
+
+</div>
+
+<div class="stat">
+
+<span>
+
+Stav jádra
+
+</span>
+
+<span id="kernelState">
+
+Spouštím...
+
+</span>
+
+</div>
+
+<div class="stat">
+
+<span>
+
+Registry
+
+</span>
+
+<span id="registryCount">
+
+0
+
+</span>
+
+</div>
+
+<div class="stat">
+
+<span>
+
+Materiály
+
+</span>
+
+<span id="materialCount">
+
+0
 
 </span>
 
@@ -159,8 +240,8 @@ onclick="document.getElementById('obrazekInput').click()"
 <div
 id="seznamSouboru"
 style="
-margin-top:10px;
-font-size:.8rem;
+margin-top:12px;
+font-size:.85rem;
 "
 >
 
@@ -169,18 +250,22 @@ Zatím nejsou vloženy žádné soubory.
 </div>
 
 <img
+
 id="nahledObrazku"
+
 style="
 display:none;
 max-width:100%;
-margin-top:10px;
+margin-top:12px;
 border-radius:12px;
-">
+"
+
+>
 
 </div>
 
-<!-- ======================================
-     CHYBOŽROUT
+  <!-- ======================================
+     🦆 CHYBOŽROUT
 ====================================== -->
 
 <div class="card">
@@ -191,13 +276,21 @@ border-radius:12px;
 
 </h2>
 
+<p>
+
+Diagnostika systému VaFT.
+
+</p>
+
 <button
 onclick="prohledatSystem()"
 >
 
-•ﾟ✧٩(ˊᗜˋ*)و✧ﾟ• Systém
+•ﾟ✧٩(ˊᗜˋ*)و✧ﾟ• Prohledat systém
 
 </button>
+
+<hr>
 
 <pre id="diagnosticOutput">
 
@@ -205,10 +298,58 @@ Připraven k hledání.
 
 </pre>
 
+<div class="stat">
+
+<span>
+
+Poslední kontrola
+
+</span>
+
+<span id="lastScan">
+
+Nikdy
+
+</span>
+
 </div>
 
-<!-- ======================================
-     PŘENOS DAT
+<div class="stat">
+
+<span>
+
+Nalezené položky
+
+</span>
+
+<span id="scanItems">
+
+0
+
+</span>
+
+</div>
+
+<div class="stat">
+
+<span>
+
+Stav
+
+</span>
+
+<span id="scanState">
+
+🟢 Připraven
+
+</span>
+
+</div>
+
+</div>
+
+  <!-- ======================================
+     ☁️ PŘENOS DAT
 ====================================== -->
 
 <div class="card">
@@ -221,25 +362,208 @@ Připraven k hledání.
 
 <p>
 
-Připojení vzdálených skladů se připravuje.
+Připraveno pro propojení dalších modulů VaFT.
 
 </p>
 
+<div class="stat">
+
+<span>
+
+GitHub
+
+</span>
+
+<span>
+
+⚪ Nepřipojeno
+
+</span>
+
+</div>
+
+<div class="stat">
+
+<span>
+
+Cloud
+
+</span>
+
+<span>
+
+⚪ Nepřipojeno
+
+</span>
+
+</div>
+
+<div class="stat">
+
+<span>
+
+Synchronizace
+
+</span>
+
+<span id="syncState">
+
+Připraveno
+
+</span>
+
+</div>
+
+<hr>
+
 <button disabled>
 
-GitHub sklad
+📦 GitHub sklad
 
 </button>
 
 <button disabled>
 
-Google Drive sklad
+☁️ Cloud sklad
+
+</button>
+
+<button disabled>
+
+🔄 Synchronizovat
+
+</button>
+
+</div>
+
+  <!-- ======================================
+     📜 LOG SYSTÉMU
+====================================== -->
+
+<div class="card">
+
+<h2>
+
+📜 Log systému
+
+</h2>
+
+<pre id="systemLog">
+
+[VAFT]
+Inicializuji...
+
+Signal Sphere...
+čekám...
+
+Bráška Hlava...
+online...
+
+</pre>
+
+<button>
+
+🧹 Vyčistit log
 
 </button>
 
 </div>
 
 </div>
+
+<!-- konec dashboardu -->
+
+  <!-- ======================================
+     🧠 BRÁŠKA HLAVA
+====================================== -->
+
+<section class="card">
+
+<h2>
+
+🧠 Bráška Hlava
+
+</h2>
+
+<div class="stat">
+
+<span>
+
+Stav AI
+
+</span>
+
+<span id="brainState">
+
+🟢 Online
+
+</span>
+
+</div>
+
+<div class="stat">
+
+<span>
+
+Aktivní modul
+
+</span>
+
+<span id="brainModule">
+
+Signal Sphere
+
+</span>
+
+</div>
+
+<div class="stat">
+
+<span>
+
+Poslední akce
+
+</span>
+
+<span id="brainAction">
+
+Inicializace...
+
+</span>
+
+</div>
+
+<hr>
+
+<pre id="brainConsole">
+
+VAFT Boot...
+
+Kontrola modulů...
+
+Signal Sphere připojena.
+
+Čekám na příkaz...
+
+</pre>
+
+<div style="margin-top:18px;">
+
+<button id="restartBrain">
+
+♻ Restart AI
+
+</button>
+
+<button id="clearBrainLog">
+
+🧹 Vyčistit
+
+</button>
+
+</div>
+
+</section>
 
 </div>
 
@@ -274,425 +598,233 @@ document.getElementById("registryCount");
 const materialCount =
 document.getElementById("materialCount");
 
+const brainState =
+document.getElementById("brainState");
+
+const brainModule =
+document.getElementById("brainModule");
+
+const brainAction =
+document.getElementById("brainAction");
+
+const brainConsole =
+document.getElementById("brainConsole");
+
+const systemLog =
+document.getElementById("systemLog");
+
 /* ======================================
-   NAČTENÍ JÁDRA
+   SIGNAL SPHERE
 ====================================== */
 
-async function loadKernel(){
+const sphereCanvas =
+document.getElementById("sphere-canvas");
 
-  try{
+const sphereCtx =
+sphereCanvas.getContext("2d");
 
-    const res =
-      await fetch(
-        "../vaft.kernel.js?v=" +
-        Date.now()
-      );
+let sphereAngle = 0;
 
-    if(!res.ok)
-      throw new Error();
+function resizeSphere(){
 
-    const txt =
-      await res.text();
+sphereCanvas.width =
+sphereCanvas.clientWidth;
 
-    const script =
-      document.createElement("script");
-
-    script.textContent = txt;
-
-    document.body.appendChild(script);
-
-    return true;
-
-  }catch(err){
-
-    return false;
-
-  }
+sphereCanvas.height =
+sphereCanvas.clientHeight;
 
 }
+
+resizeSphere();
+
+window.addEventListener(
+"resize",
+resizeSphere
+);
+
   /* ======================================
-   INFORMACE O ÚLOŽIŠTI
+   KRESLENÍ SIGNAL SPHERE
 ====================================== */
 
-function updateStorageInfo(){
+function drawSphere(){
 
-  let total = 0;
+const w =
+sphereCanvas.width;
 
-  for(let key in localStorage){
+const h =
+sphereCanvas.height;
 
-    if(localStorage.hasOwnProperty(key)){
+sphereCtx.clearRect(
+0,
+0,
+w,
+h
+);
 
-      total += key.length;
-      total += localStorage[key].length;
+const cx =
+w/2;
 
-    }
+const cy =
+h/2;
 
-  }
+const radius =
+Math.min(w,h)*0.34;
 
-  document.getElementById(
-    "localSize"
-  ).textContent =
-    (total / 1024).toFixed(2) +
-    " KB";
+sphereCtx.beginPath();
 
-}
+sphereCtx.arc(
+cx,
+cy,
+radius,
+0,
+Math.PI*2
+);
 
-/* ======================================
-   CACHE
-====================================== */
+const grad =
+sphereCtx.createRadialGradient(
 
-async function updateCacheInfo(){
+cx-radius*0.35,
+cy-radius*0.35,
+radius*0.15,
 
-  if(!("caches" in window))
-    return;
+cx,
+cy,
+radius
 
-  const keys =
-    await caches.keys();
+);
 
-  document.getElementById(
-    "cacheSize"
-  ).textContent =
-    keys.length +
-    " položek";
+grad.addColorStop(
+0,
+"#fff5cf"
+);
 
-}
+grad.addColorStop(
+0.35,
+"#ffc96a"
+);
 
-/* ======================================
-   CHYBOŽROUT
-====================================== */
+grad.addColorStop(
+1,
+"#513315"
+);
 
-function prohledatSystem(){
+sphereCtx.fillStyle =
+grad;
 
-  const result = [];
+sphereCtx.fill();
 
-  for(let i = 0; i < localStorage.length; i++){
+sphereCtx.lineWidth = 2;
 
-    const key =
-      localStorage.key(i);
+sphereCtx.strokeStyle =
+"#ffd87a";
 
-    const value =
-      localStorage.getItem(key);
+sphereCtx.shadowColor =
+"#ffb84d";
 
-    result.push(
+sphereCtx.shadowBlur =
+20;
 
-      key +
-      " → " +
-      value.length +
-      " znaků"
+sphereCtx.stroke();
 
-    );
+sphereCtx.shadowBlur = 0;
 
-  }
-
-  document.getElementById(
-    "diagnosticOutput"
-  ).textContent =
-
-    result.join("\n") ||
-
-    "Sklad je prázdný.";
-
-}
-
-/* ======================================
-   EXPORT SKLADU
-====================================== */
-
-function ulozitDoSkladu(){
-
-  const backup = {};
-
-  for(let i = 0; i < localStorage.length; i++){
-
-    const key =
-      localStorage.key(i);
-
-    backup[key] =
-      localStorage.getItem(key);
-
-  }
-
-  const blob =
-    new Blob(
-
-      [
-
-        JSON.stringify(
-          backup,
-          null,
-          2
-        )
-
-      ],
-
-      {
-
-        type:
-        "application/json"
-
-      }
-
-    );
-
-  const a =
-    document.createElement("a");
-
-  a.href =
-    URL.createObjectURL(blob);
-
-  a.download =
-
-    "vaft-sklad-" +
-
-    new Date()
-      .toISOString()
-      .slice(0,10) +
-
-    ".json";
-
-  a.click();
-
-}
   /* ======================================
-   SOUBORY A OBRÁZKY
+   VNITŘNÍ BODY
 ====================================== */
 
-let pocetSouboru = 0;
-let pocetObrazku = 0;
+for(let i=0;i<45;i++){
 
-/* ======================================
-   VLOŽIT SOUBOR
-====================================== */
+const a =
+(i/45)*Math.PI*2
++sphereAngle;
 
-function vlozitSoubor(event){
+const r =
+radius*0.72;
 
-  const file = event.target.files[0];
+const x =
+cx+
+Math.cos(a)*r;
 
-  if(!file) return;
+const y=
+cy+
+Math.sin(a)*r;
 
-  pocetSouboru++;
+sphereCtx.beginPath();
 
-  const seznam =
-    document.getElementById(
-      "seznamSouboru"
-    );
+sphereCtx.arc(
 
-  if(seznam){
+x,
+y,
+2.3,
+0,
+Math.PI*2
 
-    seznam.innerHTML =
+);
 
-      "📄 " +
+sphereCtx.fillStyle=
+"#ffe39b";
 
-      file.name +
-
-      "<br><small>Celkem souborů: " +
-
-      pocetSouboru +
-
-      "</small>";
-
-  }
+sphereCtx.fill();
 
 }
 
-/* ======================================
-   VLOŽIT OBRÁZEK
-====================================== */
+sphereAngle+=0.01;
 
-function vlozitObrazek(event){
-
-  const file = event.target.files[0];
-
-  if(!file) return;
-
-  pocetObrazku++;
-
-  const reader =
-    new FileReader();
-
-  reader.onload = function(e){
-
-    const img =
-      document.getElementById(
-        "nahledObrazku"
-      );
-
-    if(img){
-
-      img.src =
-        e.target.result;
-
-      img.style.display =
-        "block";
-
-    }
-
-    const seznam =
-      document.getElementById(
-        "seznamSouboru"
-      );
-
-    if(seznam){
-
-      seznam.innerHTML +=
-
-      "<br>🖼️ " +
-
-      file.name +
-
-      "<br><small>Celkem obrázků: " +
-
-      pocetObrazku +
-
-      "</small>";
-
-    }
-
-  };
-
-  reader.readAsDataURL(file);
+requestAnimationFrame(
+drawSphere
+);
 
 }
+drawConnections();
+drawSphere();
+
   /* ======================================
-   START VAFT
+   PROPOJENÍ BODŮ
 ====================================== */
 
-(async function(){
+function drawConnections(){
 
-  const ok =
-    await loadKernel();
+const w=sphereCanvas.width;
+const h=sphereCanvas.height;
 
-  if(ok && window.VAFT){
+const cx=w/2;
+const cy=h/2;
 
-    const state =
-      VAFT.boot(
-        "braska-hlava"
-      );
+const radius=Math.min(w,h)*0.34;
 
-    if(kernelState)
-      kernelState.textContent =
-      "Aktivní";
+sphereCtx.lineWidth=1;
 
-    sphere.style.boxShadow =
-      "0 0 40px lime";
+for(let i=0;i<45;i++){
 
-    if(registryCount)
-      registryCount.textContent =
-      state.registry.length;
+    const a1=
+    (i/45)*Math.PI*2+sphereAngle;
 
-    if(materialCount)
-      materialCount.textContent =
-      state.materials.length;
+    const x1=
+    cx+Math.cos(a1)*radius*0.72;
 
-    log.textContent =
-      "VAFT je aktivní.";
+    const y1=
+    cy+Math.sin(a1)*radius*0.72;
 
-  }else{
+    const a2=
+    ((i+5)%45)/45*Math.PI*2+sphereAngle;
 
-    if(kernelState)
-      kernelState.textContent =
-      "Nouzový provoz";
+    const x2=
+    cx+Math.cos(a2)*radius*0.72;
 
-    sphere.style.boxShadow =
-      "0 0 40px orange";
+    const y2=
+    cy+Math.sin(a2)*radius*0.72;
 
-    const matsKey =
-      "vaft_materials_v1";
+    sphereCtx.beginPath();
 
-    const mats =
-      JSON.parse(
+    sphereCtx.moveTo(x1,y1);
 
-        localStorage.getItem(
-          matsKey
-        ) || "[]"
+    sphereCtx.lineTo(x2,y2);
 
-      );
+    sphereCtx.strokeStyle=
+    "rgba(255,215,120,.18)";
 
-    mats.unshift({
-
-      id:"mini-"+Date.now(),
-
-      ts:Date.now()
-
-    });
-
-    localStorage.setItem(
-
-      matsKey,
-
-      JSON.stringify(
-        mats.slice(0,200)
-      )
-
-    );
-
-    log.textContent =
-      "Nouzový záznam uložen.";
-
-  }
-
-  updateStorageInfo();
-
-  updateCacheInfo();
-
-  setInterval(()=>{
-
-    if(window.VAFT){
-
-      try{
-
-        const reg =
-          VAFT.getRegistry();
-
-        const mats =
-          VAFT.getMaterials();
-
-        if(registryCount)
-          registryCount.textContent =
-          reg.length;
-
-        if(materialCount)
-          materialCount.textContent =
-          mats.length;
-
-      }catch(e){}
-
-    }
-
-    updateStorageInfo();
-
-  },4000);
-
-})();
-
-/* ======================================
-   SERVICE WORKER
-====================================== */
-
-if("serviceWorker" in navigator){
-
-  window.addEventListener(
-
-    "load",
-
-    ()=>{
-
-      navigator.serviceWorker
-      .register(
-        "./service-worker.js"
-      )
-      .catch(()=>{});
-
-    }
-
-  );
+    sphereCtx.stroke();
 
 }
 
-</script>
-
-<script src="glyph/glyph.js"></script>
-
-</body>
-
-</html>
+}
