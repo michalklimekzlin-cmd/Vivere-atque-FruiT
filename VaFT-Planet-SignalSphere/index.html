@@ -78,6 +78,37 @@
         text-align: center;
         white-space: nowrap;
       }
+      #corePanel{
+  position:absolute;
+  top:24px;
+  left:24px;
+  padding:18px 22px;
+  border-radius:18px;
+  background:rgba(10,15,25,.82);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,210,120,.25);
+  box-shadow:0 0 30px rgba(255,190,80,.08);
+  z-index:20;
+}
+
+.coreHead{
+  font-size:26px;
+  font-weight:700;
+  color:#ffe2a6;
+  margin-bottom:8px;
+}
+
+.coreStatus{
+  font-size:15px;
+  color:#cfcfcf;
+  animation:pulseText 2s infinite;
+}
+
+@keyframes pulseText{
+  0%{opacity:.4;}
+  50%{opacity:1;}
+  100%{opacity:.4;}
+}
     </style>
   </head>
 
@@ -85,7 +116,17 @@
     <div class="root">
       <div class="stage">
         <canvas id="sphere-canvas"></canvas>
+<div id="corePanel">
 
+    <div class="coreHead">
+        Bráška Hlava
+    </div>
+
+    <div class="coreStatus">
+        Načítám jádro...
+    </div>
+
+</div>
         <div class="hud">
           🌀 1 prst / myš = náklon • ťuk / klik = změna módu • pinch / kolečko = zoom
         </div>
@@ -420,6 +461,61 @@
         viewScale *= factor;
         viewScale = Math.max(0.6, Math.min(2.4, viewScale));
       });
+    /* ===========================================
+   Bráška Hlava
+=========================================== */
+
+const coreStatus =
+document.querySelector(".coreStatus");
+
+const coreMessages=[
+
+"Načítám jádro...",
+
+"Inicializuji Signal Sphere...",
+
+"Synchronizuji neurony...",
+
+"Kontroluji paměť...",
+
+"Jádro připraveno."
+
+];
+
+let coreIndex=0;
+
+setInterval(()=>{
+
+coreStatus.textContent=
+coreMessages[coreIndex];
+
+coreIndex++;
+
+if(coreIndex>=coreMessages.length){
+
+coreIndex=0;
+
+}
+
+},3000);
+
+/* ===========================================
+   Kliknutí na Bráška Hlava
+=========================================== */
+
+document
+.querySelector("#corePanel")
+.addEventListener("click",()=>{
+
+alert(
+
+"🧠 Bráška Hlava\n\n"+
+"Signal Sphere běží.\n"+
+"Jádro je aktivní."
+
+);
+
+});
     </script>
   
     <script>
