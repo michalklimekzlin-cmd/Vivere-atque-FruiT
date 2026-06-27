@@ -1,44 +1,126 @@
 <!doctype html>
 
 <html lang="cs">
-<head>
-<link rel="manifest" href="./manifest.json">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#020617">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>Bráška Hlava – VAFT</title>
 
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="glyph/glyph.css">
+<head>
+
+<link rel="manifest" href="./manifest.json">
+
+<meta charset="utf-8">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1,viewport-fit=cover"
+>
+
+<meta
+name="theme-color"
+content="#020617"
+>
+
+<meta
+name="apple-mobile-web-app-capable"
+content="yes"
+>
+
+<title>
+
+Bráška Hlava • VAFT
+
+</title>
+
+<link
+rel="stylesheet"
+href="style.css"
+>
+
+<link
+rel="stylesheet"
+href="glyph/glyph.css"
+>
+
 </head>
+
 <body>
+
 <div class="wrapper">
+
+<!-- ======================================
+     HERO
+====================================== -->
+
 <div class="hero">
+
 <div id="sphere">
+
 Bráška Hlava
+
 </div>
+
 <div id="log">
+
 Načítám jádro...
+
 </div>
+
 </div>
+
+<!-- ======================================
+     DASHBOARD
+====================================== -->
+
 <div class="dashboard">
+
+<!-- ======================================
+     VAFT SKLAD
+====================================== -->
+
 <div class="card">
 
-<h2>📦 VaFT Sklad</h2>
+<h2>
+
+📦 VaFT Sklad
+
+</h2>
 
 <div class="stat">
-<span>Místní paměť</span>
-<span id="localSize">0 KB</span>
+
+<span>
+
+Místní paměť
+
+</span>
+
+<span id="localSize">
+
+0 KB
+
+</span>
+
 </div>
 
 <div class="stat">
-<span>Vyrovnávací paměť</span>
-<span id="cacheSize">0 položek</span>
+
+<span>
+
+Vyrovnávací paměť
+
+</span>
+
+<span id="cacheSize">
+
+0 položek
+
+</span>
+
 </div>
 
-<button onclick="ulozitDoSkladu()">
+<button
+onclick="ulozitDoSkladu()"
+>
+
 ｡*ﾟ✲*☆(˘◡˘)☆*✲ﾟ*｡ Do skladu
+
 </button>
 
 <hr>
@@ -58,16 +140,32 @@ hidden
 onchange="vlozitObrazek(event)"
 >
 
-<button onclick="document.getElementById('souborInput').click()">
+<button
+onclick="document.getElementById('souborInput').click()"
+>
+
 (∩^O^)⊃━☆ﾟ.*･｡ Soubor
+
 </button>
 
-<button onclick="document.getElementById('obrazekInput').click()">
+<button
+onclick="document.getElementById('obrazekInput').click()"
+>
+
 (∩^O^)⊃━☆ﾟ.*･｡ Obrázek
+
 </button>
 
-<div id="seznamSouboru" style="margin-top:10px;font-size:.8rem;">
+<div
+id="seznamSouboru"
+style="
+margin-top:10px;
+font-size:.8rem;
+"
+>
+
 Zatím nejsou vloženy žádné soubory.
+
 </div>
 
 <img
@@ -78,143 +176,293 @@ max-width:100%;
 margin-top:10px;
 border-radius:12px;
 ">
+
 </div>
+
+<!-- ======================================
+     CHYBOŽROUT
+====================================== -->
+
 <div class="card">
-<h2>🦆 Chybožrout</h2>
-<button onclick="prohledatSystem()">
+
+<h2>
+
+🦆 Chybožrout
+
+</h2>
+
+<button
+onclick="prohledatSystem()"
+>
+
 •ﾟ✧٩(ˊᗜˋ*)و✧ﾟ• Systém
+
 </button>
+
 <pre id="diagnosticOutput">
+
 Připraven k hledání.
+
 </pre>
+
 </div>
+
+<!-- ======================================
+     PŘENOS DAT
+====================================== -->
+
 <div class="card">
-<h2>☁️ Přenos dat</h2>
+
+<h2>
+
+☁️ Přenos dat
+
+</h2>
+
 <p>
+
 Připojení vzdálených skladů se připravuje.
+
 </p>
+
 <button disabled>
+
 GitHub sklad
+
 </button>
+
 <button disabled>
+
 Google Drive sklad
+
 </button>
+
 </div>
+
 </div>
+
 </div>
+
+<!-- ======================================
+     VAFT MODULY
+====================================== -->
+
 <script src="../vaft.loader.js"></script>
+
 <script src="../vaft.core.js"></script>
+
 <script src="../vaft.heartbeat.js"></script>
+
 <script>
+
+/* ======================================
+   ZÁKLADNÍ PRVKY
+====================================== */
+
 const log =
 document.getElementById("log");
+
 const sphere =
 document.getElementById("sphere");
+
 const kernelState =
 document.getElementById("kernelState");
+
 const registryCount =
 document.getElementById("registryCount");
+
 const materialCount =
 document.getElementById("materialCount");
+
+/* ======================================
+   NAČTENÍ JÁDRA
+====================================== */
+
 async function loadKernel(){
+
   try{
+
     const res =
       await fetch(
         "../vaft.kernel.js?v=" +
         Date.now()
       );
+
     if(!res.ok)
       throw new Error();
+
     const txt =
       await res.text();
+
     const script =
       document.createElement("script");
+
     script.textContent = txt;
+
     document.body.appendChild(script);
+
     return true;
+
   }catch(err){
+
     return false;
+
   }
+
 }
+  /* ======================================
+   INFORMACE O ÚLOŽIŠTI
+====================================== */
+
 function updateStorageInfo(){
+
   let total = 0;
+
   for(let key in localStorage){
+
     if(localStorage.hasOwnProperty(key)){
+
       total += key.length;
       total += localStorage[key].length;
+
     }
+
   }
+
   document.getElementById(
     "localSize"
   ).textContent =
-    (total/1024).toFixed(2) +
+    (total / 1024).toFixed(2) +
     " KB";
+
 }
+
+/* ======================================
+   CACHE
+====================================== */
+
 async function updateCacheInfo(){
+
   if(!("caches" in window))
     return;
+
   const keys =
     await caches.keys();
+
   document.getElementById(
     "cacheSize"
   ).textContent =
     keys.length +
     " položek";
+
 }
+
+/* ======================================
+   CHYBOŽROUT
+====================================== */
+
 function prohledatSystem(){
+
   const result = [];
-  for(let i=0;i<localStorage.length;i++){
+
+  for(let i = 0; i < localStorage.length; i++){
+
     const key =
       localStorage.key(i);
+
     const value =
       localStorage.getItem(key);
+
     result.push(
+
       key +
       " → " +
       value.length +
       " znaků"
+
     );
+
   }
+
   document.getElementById(
     "diagnosticOutput"
   ).textContent =
+
     result.join("\n") ||
+
     "Sklad je prázdný.";
+
 }
+
+/* ======================================
+   EXPORT SKLADU
+====================================== */
+
 function ulozitDoSkladu(){
+
   const backup = {};
-  for(let i=0;i<localStorage.length;i++){
+
+  for(let i = 0; i < localStorage.length; i++){
+
     const key =
       localStorage.key(i);
+
     backup[key] =
       localStorage.getItem(key);
+
   }
+
   const blob =
     new Blob(
+
       [
+
         JSON.stringify(
           backup,
           null,
           2
         )
+
       ],
+
       {
-        type:"application/json"
+
+        type:
+        "application/json"
+
       }
+
     );
+
   const a =
     document.createElement("a");
+
   a.href =
     URL.createObjectURL(blob);
+
   a.download =
-"vaft-sklad-" +
-new Date().toISOString().slice(0,10) +
-".json";
+
+    "vaft-sklad-" +
+
+    new Date()
+      .toISOString()
+      .slice(0,10) +
+
+    ".json";
+
   a.click();
+
 }
+  /* ======================================
+   SOUBORY A OBRÁZKY
+====================================== */
 
 let pocetSouboru = 0;
 let pocetObrazku = 0;
+
+/* ======================================
+   VLOŽIT SOUBOR
+====================================== */
 
 function vlozitSoubor(event){
 
@@ -230,11 +478,26 @@ function vlozitSoubor(event){
     );
 
   if(seznam){
+
     seznam.innerHTML =
-      "📄 " + file.name;
+
+      "📄 " +
+
+      file.name +
+
+      "<br><small>Celkem souborů: " +
+
+      pocetSouboru +
+
+      "</small>";
+
   }
 
 }
+
+/* ======================================
+   VLOŽIT OBRÁZEK
+====================================== */
 
 function vlozitObrazek(event){
 
@@ -264,87 +527,172 @@ function vlozitObrazek(event){
 
     }
 
+    const seznam =
+      document.getElementById(
+        "seznamSouboru"
+      );
+
+    if(seznam){
+
+      seznam.innerHTML +=
+
+      "<br>🖼️ " +
+
+      file.name +
+
+      "<br><small>Celkem obrázků: " +
+
+      pocetObrazku +
+
+      "</small>";
+
+    }
+
   };
 
   reader.readAsDataURL(file);
 
 }
-  
+  /* ======================================
+   START VAFT
+====================================== */
+
 (async function(){
+
   const ok =
     await loadKernel();
+
   if(ok && window.VAFT){
+
     const state =
       VAFT.boot(
         "braska-hlava"
       );
-    kernelState.textContent =
+
+    if(kernelState)
+      kernelState.textContent =
       "Aktivní";
-      sphere.style.boxShadow =
-  "0 0 40px lime";
-    registryCount.textContent =
+
+    sphere.style.boxShadow =
+      "0 0 40px lime";
+
+    if(registryCount)
+      registryCount.textContent =
       state.registry.length;
-    materialCount.textContent =
+
+    if(materialCount)
+      materialCount.textContent =
       state.materials.length;
+
     log.textContent =
       "VAFT je aktivní.";
+
   }else{
-    kernelState.textContent =
+
+    if(kernelState)
+      kernelState.textContent =
       "Nouzový provoz";
-      sphere.style.boxShadow =
-  "0 0 40px orange";
+
+    sphere.style.boxShadow =
+      "0 0 40px orange";
+
     const matsKey =
       "vaft_materials_v1";
+
     const mats =
       JSON.parse(
+
         localStorage.getItem(
           matsKey
         ) || "[]"
+
       );
+
     mats.unshift({
+
       id:"mini-"+Date.now(),
+
       ts:Date.now()
+
     });
+
     localStorage.setItem(
+
       matsKey,
+
       JSON.stringify(
         mats.slice(0,200)
       )
+
     );
+
     log.textContent =
       "Nouzový záznam uložen.";
+
   }
+
   updateStorageInfo();
+
   updateCacheInfo();
+
   setInterval(()=>{
+
     if(window.VAFT){
+
       try{
+
         const reg =
           VAFT.getRegistry();
+
         const mats =
           VAFT.getMaterials();
-        registryCount.textContent =
+
+        if(registryCount)
+          registryCount.textContent =
           reg.length;
-        materialCount.textContent =
+
+        if(materialCount)
+          materialCount.textContent =
           mats.length;
+
       }catch(e){}
+
     }
+
     updateStorageInfo();
+
   },4000);
+
 })();
+
+/* ======================================
+   SERVICE WORKER
+====================================== */
+
 if("serviceWorker" in navigator){
+
   window.addEventListener(
+
     "load",
+
     ()=>{
+
       navigator.serviceWorker
       .register(
         "./service-worker.js"
       )
       .catch(()=>{});
+
     }
+
   );
+
 }
+
 </script>
+
 <script src="glyph/glyph.js"></script>
+
 </body>
+
 </html>
