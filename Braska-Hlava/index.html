@@ -173,6 +173,14 @@ režim: mesh
 
 <input
 type="file"
+id="skladInput"
+multiple
+hidden
+onchange="vlozitDoSkladu(event)"
+>
+
+<input
+type="file"
 id="souborInput"
 hidden
 onchange="vlozitSoubor(event)"
@@ -185,6 +193,10 @@ id="obrazekInput"
 hidden
 onchange="vlozitObrazek(event)"
 >
+
+<button onclick="document.getElementById('skladInput').click()">
+ᕕ(◕‿◕)ᕗ 📦 Sklad
+</button>
 
 <button onclick="document.getElementById('souborInput').click()">
 ( •_•)つ📄 Soubor
