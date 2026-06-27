@@ -79,45 +79,59 @@ Načítám jádro...
      PRAVÁ ČÁST
 ====================================== -->
 
-<div class="signalSphere">
+/* ======================================
+   SIGNAL CORE
+====================================== */
 
-    <canvas id="sphere-canvas"></canvas>
+const canvas = document.getElementById("signal-canvas");
+const ctx = canvas.getContext("2d");
 
-    <div class="sphereOverlay">
+const modeLabel = document.getElementById("mode-label");
 
-        <div class="sphereName">
-            Signal Sphere
-        </div>
+let width = 0;
+let height = 0;
 
-        <div class="sphereState">
-            🟢 Online
-        </div>
+let viewScale = 1.2;
+let targetViewScale = 1.2;
 
-        <div class="spherePulse">
-            Synchronizuji...
-        </div>
+let viewOffsetX = 0;
+let viewOffsetY = 40;
 
-    </div>
+let baseRadius = 120;
+let coneHeight = 200;
 
-    <div class="sphereTitle">
-        Signal Sphere
-    </div>
+let tiltX = 1.0;
+let tiltY = 0.0;
 
-    <div id="status">
-        režim: písmenka / čísla
-    </div>
+let targetTiltX = tiltX;
+let targetTiltY = tiltY;
 
-</div>
+const modes = [
+    "mesh",
+    "letters",
+    "glyph",
+    "vafiti"
+];
 
-</div>
+let modeIndex = 0;
 
-</div>
+const glyphs = [
+    "{*(°.)}",
+    "ً&’」",
+    "¡(*)(%)¡",
+    "{°. .}",
+    "(•.°)"
+];
 
-<!-- ======================================
-     DASHBOARD
-====================================== -->
+const letters =
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-<div class="dashboard">
+const signalCore = {
+    points: [],
+    rings: 12,
+    segments: 18,
+    pulse: 0
+};
   <!-- ======================================
      📦 VaFT SKLAD
 ====================================== -->
