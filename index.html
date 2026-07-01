@@ -1,12 +1,37 @@
 <!doctype html>
-<html lang="en">
+<html lang="cs">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0; url=./src/index.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vivere atque Frui¡'T</title>
+    <meta name="theme-color" content="#111827" />
+    <link rel="manifest" href="./manifest.json" />
+    <title>Vivere atque Fru'i¡'T</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #020617; color: #f8fafc; }
+      main { max-width: 880px; margin: 0 auto; padding: 28px; }
+      a { color: #34d399; }
+      .card { padding: 16px; border-radius: 12px; background: #111827; margin-bottom: 12px; }
+    </style>
   </head>
   <body>
-    <p>Open the organized source hub at <a href="./src/index.html">src/index.html</a>.</p>
+    <main>
+      <h1>VIVERE atque Fru'i¡'T</h1>
+      <div class="card">
+        <p>Hlavní vstup pro teaching workflow a PWA instalaci.</p>
+        <ul>
+          <li><a href="./TEACHER_STUDIO.html">Otevřít Teacher Studio</a></li>
+          <li><a href="./src/index.html">Otevřít zdrojový hub</a></li>
+          <li><a href="./KNOWLEDGE_MAP.md">Zobrazit KNOWLEDGE_MAP</a></li>
+        </ul>
+      </div>
+    </main>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>

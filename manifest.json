@@ -1,9 +1,19 @@
 {
-  "name": "Vivere atque Frui¡'T",
-  "short_name": "VAFT",
-  "start_url": "./index.html",
+  "name": "Vivere atque Fru'i¡'T",
+  "short_name": "Fru'i¡'T",
+  "description": "Teacher-directed Czech AI studio with persistent semantic learning.",
+  "start_url": "./TEACHER_STUDIO.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#020617",
-  "icons": []
+  "background_color": "#020617",
+  "theme_color": "#111827",
+  "lang": "cs",
+  "icons": [
+    {
+      "src": "./AFA0870E-F586-4406-8BAA-0A7944120AA3.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
