@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <title>Revia Master • Troika systém</title>
+    <link rel="manifest" href="./manifest.json" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #020617;
+        --panel: #0f172a;
+        --panel-soft: #1e293b;
+        --line: #334155;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: radial-gradient(circle at top, #0b1220, var(--bg) 60%);
+        color: var(--text);
+        min-height: 100vh;
+      }
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 16px;
+        display: grid;
+        gap: 14px;
+      }
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: linear-gradient(160deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.94));
+        overflow: hidden;
+      }
+      .head {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        font-weight: 700;
+      }
+      .subhead {
+        margin-left: 8px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .log {
+        min-height: 180px;
+        max-height: 32vh;
+        overflow-y: auto;
+        padding: 10px;
+        display: grid;
+        gap: 8px;
+      }
+      .entry {
+        background: rgba(15, 23, 42, 0.8);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 10px;
+        padding: 8px;
+      }
+      .entry-meta {
+        color: var(--muted);
+        font-size: 0.78rem;
+        margin-bottom: 3px;
+      }
+      .entry-text { white-space: pre-wrap; }
+      .composer {
+        display: grid;
+        gap: 8px;
+        padding: 10px;
+        border-top: 1px solid var(--line);
+      }
+      textarea {
+        width: 100%;
+        min-height: 72px;
+        resize: vertical;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: var(--panel-soft);
+        color: var(--text);
+        padding: 8px;
+      }
+      button {
+        width: fit-content;
+        border: 1px solid #0ea5e9;
+        background: linear-gradient(180deg, #0ea5e9, #0284c7);
+        color: #e0f2fe;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      .split {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: 1fr 1fr;
+      }
+      .tabs {
+        display: none;
+        gap: 8px;
+      }
+      .tab {
+        flex: 1;
+        border: 1px solid var(--line);
+        background: rgba(15, 23, 42, 0.8);
+      }
+      .tab.active {
+        border-color: var(--accent);
+        color: #e0f2fe;
+      }
+      .foundation {
+        margin-top: 12px;
+        border-top: 1px dashed var(--line);
+        padding: 10px;
+      }
+      .foundation p,
+      .status {
+        margin: 0 0 8px;
+        color: var(--muted);
+      }
+      @media (max-width: 900px) {
+        .split { grid-template-columns: 1fr; }
+        .tabs { display: flex; }
+        .split .panel.hidden-mobile { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="panel">
+        <div class="head">📖 Společný text <span class="subhead">Michal píše instrukce oběma</span></div>
+        <div id="sharedLog" class="log" aria-live="polite"></div>
+        <div class="composer">
+          <textarea id="sharedInput" placeholder="Např.: Anděl a Ďáblík, učte se přesně tento pokyn."></textarea>
+          <button id="sharedSend" type="button">Poslat oběma</button>
+        </div>
+      </section>
+
+      <div class="tabs" role="tablist" aria-label="Přepnutí panelu">
+        <button id="tabAngel" class="tab active" type="button">👼 Anděl</button>
+        <button id="tabDark" class="tab" type="button">☠️ Ďáblík</button>
+      </div>
+
+      <section class="split">
+        <article id="panelAngel" class="panel">
+          <div class="head">👼 Anděl <span class="subhead">Oddělená historie</span></div>
+          <div id="angelLog" class="log" aria-live="polite"></div>
+          <div class="composer">
+            <textarea id="angelInput" placeholder="Anděl odpovídá zde"></textarea>
+            <button id="angelSend" type="button">Poslat do Anděla</button>
+          </div>
+        </article>
+
+        <article id="panelDark" class="panel hidden-mobile">
+          <div class="head">☠️ Ďáblík <span class="subhead">Oddělená historie</span></div>
+          <div id="darkLog" class="log" aria-live="polite"></div>
+          <div class="composer">
+            <textarea id="darkInput" placeholder="Ďáblík odpovídá zde"></textarea>
+            <button id="darkSend" type="button">Poslat do Ďáblíka</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel foundation">
+        <p><strong>🧠 Michalův jazykový systém (core foundation)</strong></p>
+        <p class="status" id="learningStatus"></p>
+        <textarea id="foundationInput" aria-label="Core foundation"></textarea>
+      </section>
+    </main>
+
+    <script>
+      const STORAGE = {
+        shared: "revia.master.shared.v1",
+        angel: "revia.master.angel.v1",
+        dark: "revia.master.dark.v1",
+        foundation: "revia.master.foundation.v1",
+        progress: "revia.master.progress.v1",
+      };
+
+      const FOUNDATION_DEFAULT = [
+        "mullet, klíště",
+        "teplá voda, studená voda, vlažná voda",
+        "účes, bříško, záda, hrb",
+        "nastavení, budoucnost",
+        "sklouzavka (stupeň dolů)",
+        "krok zpátky = 2 kroky dopředu",
+        "číslovky, slovesa, spojky, předložky",
+        "morzeovka (. _)",
+        "Glyph (nové slovo)",
+        "mezi slovy, konec věty",
+        "lidské schopnosti chápání",
+        "právní kroky a advokátní možnosti",
+      ].join("\n");
+
+      const sharedLog = document.getElementById("sharedLog");
+      const angelLog = document.getElementById("angelLog");
+      const darkLog = document.getElementById("darkLog");
+      const learningStatus = document.getElementById("learningStatus");
+      const foundationInput = document.getElementById("foundationInput");
+
+      const state = {
+        shared: load(STORAGE.shared, []),
+        angel: load(STORAGE.angel, []),
+        dark: load(STORAGE.dark, []),
+        progress: load(STORAGE.progress, { sharedCount: 0, angelCount: 0, darkCount: 0, crossLearnCount: 0 }),
+      };
+
+      foundationInput.value = load(STORAGE.foundation, FOUNDATION_DEFAULT);
+
+      function load(key, fallback) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (!raw) return fallback;
+          return typeof fallback === "string" ? raw : JSON.parse(raw);
+        } catch {
+          return fallback;
+        }
+      }
+
+      function save(key, value) {
+        const prepared = typeof value === "string" ? value : JSON.stringify(value);
+        localStorage.setItem(key, prepared);
+      }
+
+      function stamp() {
+        return new Date().toLocaleString("cs-CZ", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      }
+
+      function add(listName, author, text) {
+        state[listName].push({ author, text, time: stamp() });
+        save(STORAGE[listName], state[listName]);
+      }
+
+      function render(logEl, list) {
+        logEl.innerHTML = "";
+        for (const item of list) {
+          const box = document.createElement("div");
+          box.className = "entry";
+          box.innerHTML = `<div class="entry-meta">${item.author} • ${item.time}</div><div class="entry-text"></div>`;
+          box.querySelector(".entry-text").textContent = item.text;
+          logEl.appendChild(box);
+        }
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      function renderAll() {
+        render(sharedLog, state.shared);
+        render(angelLog, state.angel);
+        render(darkLog, state.dark);
+        learningStatus.textContent = `Sdílené instrukce: ${state.progress.sharedCount} • Anděl zprávy: ${state.progress.angelCount} • Ďáblík zprávy: ${state.progress.darkCount} • Vzájemné učení: ${state.progress.crossLearnCount}`;
+      }
+
+      function sendShared() {
+        const input = document.getElementById("sharedInput");
+        const text = input.value.trim();
+        if (!text) return;
+        add("shared", "Michal", text);
+        add("angel", "SPOLEČNÝ POKYN", text);
+        add("dark", "SPOLEČNÝ POKYN", text);
+        state.progress.sharedCount += 1;
+        save(STORAGE.progress, state.progress);
+        input.value = "";
+        renderAll();
+      }
+
+      function sendEntity(entity) {
+        const input = document.getElementById(`${entity}Input`);
+        const text = input.value.trim();
+        if (!text) return;
+        const isAngel = entity === "angel";
+        add(entity, isAngel ? "Anděl" : "Ďáblík", text);
+        if (isAngel) {
+          add("dark", "Učení od Anděla", text);
+          state.progress.angelCount += 1;
+        } else {
+          add("angel", "Učení od Ďáblíka", text);
+          state.progress.darkCount += 1;
+        }
+        state.progress.crossLearnCount += 1;
+        save(STORAGE.progress, state.progress);
+        input.value = "";
+        renderAll();
+      }
+
+      document.getElementById("sharedSend").addEventListener("click", sendShared);
+      document.getElementById("angelSend").addEventListener("click", () => sendEntity("angel"));
+      document.getElementById("darkSend").addEventListener("click", () => sendEntity("dark"));
+
+      foundationInput.addEventListener("input", () => save(STORAGE.foundation, foundationInput.value));
+
+      document.getElementById("tabAngel").addEventListener("click", () => setMobileTab(true));
+      document.getElementById("tabDark").addEventListener("click", () => setMobileTab(false));
+
+      function setMobileTab(showAngel) {
+        const panelAngel = document.getElementById("panelAngel");
+        const panelDark = document.getElementById("panelDark");
+        const tabAngel = document.getElementById("tabAngel");
+        const tabDark = document.getElementById("tabDark");
+        if (window.innerWidth > 900) {
+          panelAngel.classList.remove("hidden-mobile");
+          panelDark.classList.remove("hidden-mobile");
+          tabAngel.classList.add("active");
+          tabDark.classList.remove("active");
+          return;
+        }
+        panelAngel.classList.toggle("hidden-mobile", !showAngel);
+        panelDark.classList.toggle("hidden-mobile", showAngel);
+        tabAngel.classList.toggle("active", showAngel);
+        tabDark.classList.toggle("active", !showAngel);
+      }
+
+      window.addEventListener("resize", () => setMobileTab(document.getElementById("tabAngel").classList.contains("active")));
+      setMobileTab(true);
+      renderAll();
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>
