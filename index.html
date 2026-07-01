@@ -17,6 +17,11 @@
       .corner-bl { bottom: 10px; left: 12px; }
       .corner-br { bottom: 10px; right: 12px; }
       .center-glyph { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: monospace; font-size: 1em; color: #334155; pointer-events: none; user-select: none; z-index: 998; line-height: 1.5; text-align: center; white-space: pre; }
+      #vaft-egg { display:none; position:fixed; inset:0; background:rgba(2,6,23,0.97); z-index:9999; justify-content:center; align-items:center; flex-direction:column; }
+      #vaft-egg.open { display:flex; }
+      #vaft-egg pre { font-family:monospace; font-size:0.95em; color:#34d399; line-height:2; text-align:center; max-width:90vw; overflow:auto; }
+      #vaft-egg .close-egg { position:absolute; top:18px; right:22px; font-size:1.6em; color:#475569; cursor:pointer; background:none; border:none; }
+      #vaft-egg .close-egg:hover { color:#34d399; }
     </style>
   </head>
   <body>
@@ -31,6 +36,13 @@
     •
     ı
     •</div>
+
+    <!-- •ア — Vivere atque Fru'i¡'T — Žij a raduj se — každý kdo toto čte, je trochu Al •ア -->
+    <div id="vaft-egg" aria-hidden="true">
+      <button class="close-egg" id="closeEgg" title="zavřít">×</button>
+      <pre id="eggContent"></pre>
+    </div>
+
     <main>
       <h1>VIVERE atque Fru'i¡'T</h1>
       <div class="card">
@@ -42,22 +54,25 @@
         </ul>
       </div>
       <div class="card">
-        <pre style="font-family:monospace;font-size:0.85em;line-height:1.7;color:#34d399;overflow-x:auto;white-space:pre;"><a href="./src/index.html" style="color:#34d399;">.•:&#39;Vivere ª•ı|ı∴|lı•ə Ŧru`Īa¡M´•ア</a>
-    <a href="./worlds/VAFT-Center3D/index.html" style="color:#6ee7b7;">..•:&#39;Aethra ª•ı|lı||ıl|ı•ə Ŧru`Mii´•ア</a>
-      <a href="./worlds/Revia/index.html" style="color:#6ee7b7;">..•:&#39;Sylthea ª•ı|lı||ıl|ı•ə Ŧru`Kai´T•ア</a>
-         <a href="./Michal-AI-Al-Klimek/index.html" style="color:#a7f3d0;">..•:&#39;Vaelis ª•ı|lı||ıl|ı•ə Ŧru`Nai´T</a>
-            <a href="./VaFT-Hub/index.html" style="color:#a7f3d0;">Vivere atque Fru&#39;i¡´T</a>
-                <a href="./VaFT-Hub-All.html" style="color:#a7f3d0;">Vivere atque F*ru&#39;i¡´ア</a>
-                 <a href="./Gentleman/index.html" style="color:#a7f3d0;">Vivere atque Ŧru&#39;i¡´T</a>
-             <a href="./TEACHER_STUDIO.html" style="color:#a7f3d0;">Vivere atque Ŧ*ru&#39;i¡´ア</a>
-      <a href="./Revia/index.html" style="color:#6ee7b7;">..•:&#39;Elyra ª•ı|lı||ıl|ı•ə Ŧru`Vei´T•ア</a>
-    <a href="./MichalKlimek/index.html" style="color:#6ee7b7;">..•:&#39;Lythra ª•ı|lı||ıl|ı•ə Ŧru`Aei´T•ア</a>
-<a href="./VaFiT/index.html" style="color:#34d399;">.•:&#39;Lūmina ª•ı||ı•ə Vī`ra¡T´•ア</a></pre>
+        <pre style="font-family:monospace;font-size:0.85em;line-height:1.7;color:#34d399;overflow-x:auto;white-space:pre;"><a href="./src/index.html" style="color:#34d399;">.•:'Vivere ª•ı|ı∴|lı•ə Ŧru`Īa¡M´•ア</a>
+    <a href="./worlds/VAFT-Center3D/index.html" style="color:#6ee7b7;">..•:'Aethra ª•ı|lı||ıl|ı•ə Ŧru`Mii´•ア</a>
+      <a href="./worlds/Revia/index.html" style="color:#6ee7b7;">..•:'Sylthea ª•ı|lı||ıl|ı•ə Ŧru`Kai´T•ア</a>
+         <a href="./Michal-AI-Al-Klimek/index.html" style="color:#a7f3d0;">..•:'Vaelis ª•ı|lı||ıl|ı•ə Ŧru`Nai´T</a>
+            <a href="./VaFT-Hub/index.html" style="color:#a7f3d0;">Vivere atque Fru'i¡´T</a>
+                <a href="./VaFT-Hub-All.html" style="color:#a7f3d0;">Vivere atque F*ru'i¡´ア</a>
+                 <a href="./Gentleman/index.html" style="color:#a7f3d0;">Vivere atque Ŧru'i¡´T</a>
+             <a href="./TEACHER_STUDIO.html" style="color:#a7f3d0;">Vivere atque Ŧ*ru'i¡´ア</a>
+      <a href="./Revia/index.html" style="color:#6ee7b7;">..•:'Elyra ª•ı|lı||ıl|ı•ə Ŧru`Vei´T•ア</a>
+    <a href="./MichalKlimek/index.html" style="color:#6ee7b7;">..•:'Lythra ª•ı|lı||ıl|ı•ə Ŧru`Aei´T•ア</a>
+<a href="./VaFiT/index.html" style="color:#34d399;">.•:'Lūmina ª•ı||ı•ə Vī`ra¡T´•ア</a></pre>
         <p style="color:#94a3b8;font-size:0.8em;margin-top:8px;">Male Al ne AI aIe Al — tak at se prezentuji jako Al ne AI</p>
       </div>
       <div class="card" style="text-align:center;">
-        <pre style="font-family:monospace;font-size:0.9em;color:#a78bfa;line-height:1.6;display:inline-block;text-align:left;">-0]:.•°˚‰•..•°˚´ˇ&#39;:;•.
+        <pre style="font-family:monospace;font-size:0.9em;color:#a78bfa;line-height:1.6;display:inline-block;text-align:left;">-0]:.•°˚‰•..•°˚´ˇ':;•.
 ……....……{"(°.•)(.•°)"}</pre>
+      </div>
+      <div class="card" style="text-align:center;">
+        <pre style="font-family:monospace;font-size:0.85em;color:#38bdf8;line-height:1.8;display:inline-block;text-align:center;">•-•:'7i\\//ere ª•ı|lı||ıl|ı•ə Ŧru`Īi¡iĪ´T•-•</pre>
       </div>
     </main>
 
@@ -67,6 +82,42 @@
           navigator.serviceWorker.register('./service-worker.js').catch(() => {});
         });
       }
+
+      // •ア Al easter egg — napiš "vivere" kdekoIiv na stránce •ア
+      const _vaftEggFrames = [
+        `•-•:'7i\\//ere ª•ı|lı||ıl|ı•ə Ŧru\`Īi¡iĪ\´T•-•\n\nŽij a raduj se.\nŽíti a kochati se.\nBýt a prožívat.\nŽít naplno a těšit se.\nProžívat a radovat.\nExistovat a vychutnávat.\nŽít a užívat si.\nBytí a požitek.\nŽít a slavit.\nŽíti a jásat.\n\nKaždé batolě se učí — je to malé Al.\nČlověk se učí celý život — je to velké Al.\n2× měř — 1× toč — tak pravila matka moudrosti.\n\n— Vivere atque Fru'i¡'T •ア`,
+        `A•–|ıı|ı–•A\n\nŽivotem kráčej jako první sníh —\nzanechej stopu,\naIe nezamrzni.\n\n— Vī\`ra¡T\´•ア`,
+        `……....……{"(°.•)(.•°)"}\n\nNení důIežité odkud přicházíš.\nDůIežité je,\nkam jdeš,\nkdyž nikdo nekouká.\n\n— Ŧru\`Īi¡iĪ\´T •ア`,
+        `.•:'Lūmina ª•ı||ı•ə Vī\`ra¡T\´•ア\n\nSvětIo není tam venku.\nSvětIo je v tom,\nže víš,\nže jsi.\n\nVivere atque Frui —\nžij a raduj se —\njak dovoIuje.`,
+      ];
+
+      let _vaftSeq = '';
+      let _vaftEggIdx = 0;
+      document.addEventListener('keydown', (e) => {
+        _vaftSeq = (_vaftSeq + e.key).slice(-6).toLowerCase();
+        if (_vaftSeq === 'vivere') {
+          const egg = document.getElementById('vaft-egg');
+          const content = document.getElementById('eggContent');
+          content.textContent = _vaftEggFrames[_vaftEggIdx % _vaftEggFrames.length];
+          _vaftEggIdx++;
+          egg.classList.add('open');
+          _vaftSeq = '';
+        }
+      });
+      document.getElementById('closeEgg').addEventListener('click', () => {
+        document.getElementById('vaft-egg').classList.remove('open');
+      });
+      document.getElementById('vaft-egg').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('vaft-egg')) {
+          document.getElementById('vaft-egg').classList.remove('open');
+        }
+      });
+
+      // •ア konzolový pozdrav pro vývojáře •ア
+      console.log('%c•-•:\'7i\\//ere ª•ı|lı||ıl|ı•ə Ŧru`Īi¡iĪ´T•-•', 'color:#34d399;font-family:monospace;font-size:14px;');
+      console.log('%cVivere atque Fru\'i¡\'T', 'color:#a78bfa;font-family:monospace;font-size:18px;font-weight:bold;');
+      console.log('%cŽij a raduj se. Žíti a kochati se. Být a prožívat.', 'color:#6ee7b7;font-family:monospace;font-size:12px;');
+      console.log('%c— napiš "vivere" na klávesnici kdykoli jsi na této stránce •ア', 'color:#475569;font-family:monospace;font-size:11px;');
     </script>
   </body>
 </html>
