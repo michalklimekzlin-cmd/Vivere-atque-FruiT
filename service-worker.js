@@ -32,8 +32,9 @@ self.addEventListener('fetch', (event) => {
       return fetch(event.request)
         .then((response) => {
           const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-          return response;
+          return caches.open(CACHE_NAME)
+            .then((cache) => cache.put(event.request, responseClone))
+            .then(() => response);
         })
         .catch(() => caches.match('./TEACHER_STUDIO.html'));
     })

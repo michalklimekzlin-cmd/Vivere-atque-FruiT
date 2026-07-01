@@ -2,7 +2,7 @@
 (function initFruiTMemory(global) {
   const STORAGE_KEY = 'fruit.memory.v1';
 
-  class FruITMemorySystem {
+  class FruiTMemorySystem {
     constructor() {
       this.state = {
         shortTerm: [],
@@ -94,5 +94,5 @@
     }
   }
 
-  global.fruiTMemorySystem = global.fruiTMemorySystem || new FruITMemorySystem();
+  global.fruiTMemorySystem = global.fruiTMemorySystem || new FruiTMemorySystem();
 })(window);
