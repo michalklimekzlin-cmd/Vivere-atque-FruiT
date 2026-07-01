@@ -1,21 +1,52 @@
-# Přispívání
+# Přispívání do projektu Vivere atque Fru'i¡'T
 
-## Cíle
+Děkujeme, že chcete přispět do projektu.
 
-Udržet Vivere atque Frui¡'T čitelné, přehledné a bezpečné pro rozšiřování.
+Vivere atque Fru'i¡'T je otevřený projekt založený na spolupráci, sdílení znalostí a neustálém zlepšování.
+
+## Naše hodnoty
+
+- Respekt ke každému přispěvateli.
+- Otevřená komunikace.
+- Přehledný a kvalitní kód.
+- Ochota učit se a pomáhat ostatním.
+- Dlouhodobá udržitelnost projektu.
+
+## Jak přispět
+
+Můžete pomoci například:
+
+- opravou chyb,
+- návrhem nových funkcí,
+- vylepšením dokumentace,
+- testováním,
+- optimalizací výkonu,
+- překlady.
 
 ## Pravidla
 
-1. Zachovávejte existující soubory, pokud není silný důvod je odstraňovat.
-2. V dokumentaci pište výhradně česky.
-3. Vyhýbejte se dekorativním unicode znakům, textu v azbuce a emoji v dokumentaci.
-4. Udržujte změny v HTML, CSS a JavaScriptu malé a přehledné.
-5. Při reorganizaci složek přidejte kopie pro kompatibilitu nebo přesměrování, než smažete staré cesty.
-6. Necommitujte tajné klíče, API klíče ani osobní přihlašovací údaje.
+- Pište čitelný a přehledný kód.
+- Dodržujte strukturu projektu.
+- Významnější změny popište.
+- Před odesláním změny projekt otestujte.
+- Respektujte licenci Apache License 2.0.
 
-## Doporučený postup
+## Pull Request
 
-1. Nejprve si prohlédněte dotčený svět nebo komponentu.
-2. Proveďte co nejmenší užitečnou změnu.
-3. Ověřte dotčené HTML vstupní body na lokálním statickém serveru.
-4. Aktualizujte dokumentaci, pokud se mění struktura.
+Každý Pull Request by měl obsahovat:
+
+- stručný popis změn,
+- důvod změny,
+- způsob otestování.
+
+## Diskuze
+
+Máte nápad?
+
+Nejdříve vytvořte Issue nebo otevřete diskuzi. Společně najdeme nejlepší řešení.
+
+## Poděkování
+
+Každý příspěvek pomáhá projekt posouvat dál.
+
+Děkujeme, že jste součástí Vivere atque Fru'i¡'T.
