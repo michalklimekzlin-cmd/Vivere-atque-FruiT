@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#141f44" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Revia-Master" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./revia-master.css" />
+    <title>Revia-Master</title>
+  </head>
+  <body data-entity="angel">
+    <main class="master-app" id="masterApp" style="background-image:url('./assets/angel-bg.jpg')">
+      <header class="topbar">
+        <button id="entitySwitch" class="switch" type="button">❤️ Angel</button>
+        <strong>Revia-Master • <span id="entityLabel">Angel</span></strong>
+        <button id="stateBtn" class="state-btn" type="button">AI hlídá</button>
+      </header>
+
+      <section class="layout">
+        <section class="panel">
+          <div class="avatar" id="avatar">❤️</div>
+          <h2 id="chatTitle">Angel chat</h2>
+          <div id="chatLog" class="chat-log"></div>
+          <div class="chat-input">
+            <textarea id="chatInput" placeholder="Napiš česky: Angel, hlídej kód..."></textarea>
+            <button id="chatSend" type="button">Poslat</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h3>📚 Repository Hub</h3>
+          <div class="hub-tabs">
+            <button class="hub-tab active" data-tab="components" type="button">Components</button>
+            <button class="hub-tab" data-tab="worlds" type="button">Worlds</button>
+            <button class="hub-tab" data-tab="docs" type="button">Docs</button>
+            <button class="hub-tab" data-tab="source" type="button">Source Code</button>
+          </div>
+          <div id="hubList" class="hub-list"></div>
+
+          <h3>📝 Sdílené poznámky</h3>
+          <textarea id="notes" class="notes" placeholder="Poznámky sdílené pro Angel i Dark"></textarea>
+
+          <h3>🧠 AI Learning</h3>
+          <div>
+            <div>Angel se učí repo mapu a citové kontexty.</div>
+            <div class="progress"><span id="angelProgress" style="width:0%"></span></div>
+          </div>
+          <div style="margin-top:10px">
+            <div>Dark se učí technické struktury a kontrolu kvality.</div>
+            <div class="progress"><span id="darkProgress" style="width:0%"></span></div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module">
+      import { loadAngelHistory, angelReply, ANGEL_STORAGE_KEY } from './revia-angel.js';
+      import { loadDarkHistory, darkReply, DARK_STORAGE_KEY } from './revia-dark.js';
+      import { parseCzechCommand } from './revia-command.js';
+      import { renderHubTab } from './revia-repo-hub.js';
+
+      const SHARED_NOTES_KEY = 'revia-master-shared-notes';
+      const state = {
+        entity: 'angel',
+        control: 'ai',
+        activeTab: 'components',
+        activeItem: '',
+        histories: {
+          angel: loadAngelHistory(),
+          dark: loadDarkHistory()
+        }
+      };
+
+      const masterApp = document.getElementById('masterApp');
+      const entitySwitch = document.getElementById('entitySwitch');
+      const entityLabel = document.getElementById('entityLabel');
+      const stateBtn = document.getElementById('stateBtn');
+      const avatar = document.getElementById('avatar');
+      const chatTitle = document.getElementById('chatTitle');
+      const chatLog = document.getElementById('chatLog');
+      const chatInput = document.getElementById('chatInput');
+      const chatSend = document.getElementById('chatSend');
+      const notes = document.getElementById('notes');
+      const hubList = document.getElementById('hubList');
+      const tabs = [...document.querySelectorAll('.hub-tab')];
+      const angelProgress = document.getElementById('angelProgress');
+      const darkProgress = document.getElementById('darkProgress');
+
+      notes.value = localStorage.getItem(SHARED_NOTES_KEY) || '';
+
+      function saveCurrentHistory() {
+        localStorage.setItem(ANGEL_STORAGE_KEY, JSON.stringify(state.histories.angel));
+        localStorage.setItem(DARK_STORAGE_KEY, JSON.stringify(state.histories.dark));
+      }
+
+      function renderChat() {
+        const history = state.histories[state.entity];
+        chatLog.innerHTML = history
+          .map((msg) => `<div class="message ${msg.role}"><strong>${msg.role === 'user' ? 'Ty' : state.entity === 'angel' ? 'Angel' : 'Dark'}:</strong> ${msg.content}</div>`)
+          .join('');
+        chatLog.scrollTop = chatLog.scrollHeight;
+      }
+
+      function renderLearning() {
+        const angelValue = Math.min(100, state.histories.angel.length * 10);
+        const darkValue = Math.min(100, state.histories.dark.length * 10);
+        angelProgress.style.width = `${angelValue}%`;
+        darkProgress.style.width = `${darkValue}%`;
+      }
+
+      function setEntity(nextEntity) {
+        state.entity = nextEntity;
+        const isAngel = nextEntity === 'angel';
+        document.body.dataset.entity = nextEntity;
+        masterApp.style.backgroundImage = isAngel
+          ? "url('./assets/angel-bg.jpg')"
+          : "url('./assets/dark-bg.jpg')";
+        entitySwitch.textContent = isAngel ? '❤️ Angel' : '☆ Dark';
+        entityLabel.textContent = isAngel ? 'Angel' : 'Dark';
+        avatar.textContent = isAngel ? '❤️' : '☆';
+        chatTitle.textContent = isAngel ? 'Angel chat' : 'Dark chat';
+        renderChat();
+      }
+
+      function renderHub() {
+        renderHubTab(hubList, state.activeTab, state.activeItem);
+        tabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === state.activeTab));
+      }
+
+      function processInput() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+        chatInput.value = '';
+
+        state.histories[state.entity].push({ role: 'user', content: message });
+
+        const command = parseCzechCommand(message);
+        if (command?.entity) setEntity(command.entity);
+        if (command?.item) {
+          state.activeTab = command.item.tab;
+          state.activeItem = command.item.name;
+          renderHub();
+        }
+
+        const reply = state.entity === 'angel'
+          ? angelReply(message, { commandHint: command?.hint })
+          : darkReply(message, { commandHint: command?.hint });
+
+        state.histories[state.entity].push({ role: 'assistant', content: reply });
+
+        saveCurrentHistory();
+        renderChat();
+        renderLearning();
+      }
+
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          state.activeTab = tab.dataset.tab;
+          state.activeItem = '';
+          renderHub();
+        });
+      });
+
+      entitySwitch.addEventListener('click', () => setEntity(state.entity === 'angel' ? 'dark' : 'angel'));
+      stateBtn.addEventListener('click', () => {
+        state.control = state.control === 'ai' ? 'human' : 'ai';
+        stateBtn.textContent = state.control === 'ai' ? 'AI hlídá' : 'Human řídí';
+      });
+      chatSend.addEventListener('click', processInput);
+      chatInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          processInput();
+        }
+      });
+      notes.addEventListener('input', () => localStorage.setItem(SHARED_NOTES_KEY, notes.value));
+
+      renderHub();
+      renderChat();
+      renderLearning();
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>
