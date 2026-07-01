@@ -173,6 +173,8 @@
     </main>
 
     <script>
+      const MOBILE_BREAKPOINT = 900;
+
       const STORAGE = {
         shared: "revia.master.shared.v1",
         angel: "revia.master.angel.v1",
@@ -201,12 +203,13 @@
       const darkLog = document.getElementById("darkLog");
       const learningStatus = document.getElementById("learningStatus");
       const foundationInput = document.getElementById("foundationInput");
+      let activeTabIsAngel = true;
 
       const state = {
         shared: load(STORAGE.shared, []),
         angel: load(STORAGE.angel, []),
         dark: load(STORAGE.dark, []),
-        progress: load(STORAGE.progress, { sharedCount: 0, angelCount: 0, darkCount: 0, crossLearnCount: 0 }),
+        progress: load(STORAGE.progress, { sharedCount: 0, angelCount: 0, darkCount: 0 }),
       };
 
       foundationInput.value = load(STORAGE.foundation, FOUNDATION_DEFAULT);
@@ -227,7 +230,14 @@
       }
 
       function stamp() {
-        return new Date().toLocaleString("cs-CZ", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        return new Date().toLocaleString("cs-CZ", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit"
+        });
       }
 
       function add(listName, author, text) {
@@ -239,9 +249,15 @@
         logEl.innerHTML = "";
         for (const item of list) {
           const box = document.createElement("div");
+          const meta = document.createElement("div");
+          const text = document.createElement("div");
           box.className = "entry";
-          box.innerHTML = `<div class="entry-meta">${item.author} • ${item.time}</div><div class="entry-text"></div>`;
-          box.querySelector(".entry-text").textContent = item.text;
+          meta.className = "entry-meta";
+          text.className = "entry-text";
+          meta.textContent = `${item.author} • ${item.time}`;
+          text.textContent = item.text;
+          box.appendChild(meta);
+          box.appendChild(text);
           logEl.appendChild(box);
         }
         logEl.scrollTop = logEl.scrollHeight;
@@ -251,7 +267,7 @@
         render(sharedLog, state.shared);
         render(angelLog, state.angel);
         render(darkLog, state.dark);
-        learningStatus.textContent = `Sdílené instrukce: ${state.progress.sharedCount} • Anděl zprávy: ${state.progress.angelCount} • Ďáblík zprávy: ${state.progress.darkCount} • Vzájemné učení: ${state.progress.crossLearnCount}`;
+        learningStatus.textContent = `Sdílené instrukce: ${state.progress.sharedCount} • Anděl zprávy: ${state.progress.angelCount} • Ďáblík zprávy: ${state.progress.darkCount}`;
       }
 
       function sendShared() {
@@ -274,13 +290,12 @@
         const isAngel = entity === "angel";
         add(entity, isAngel ? "Anděl" : "Ďáblík", text);
         if (isAngel) {
-          add("dark", "Učení od Anděla", text);
+          add("dark", "Sdíleno od Anděla", text);
           state.progress.angelCount += 1;
         } else {
-          add("angel", "Učení od Ďáblíka", text);
+          add("angel", "Sdíleno od Ďáblíka", text);
           state.progress.darkCount += 1;
         }
-        state.progress.crossLearnCount += 1;
         save(STORAGE.progress, state.progress);
         input.value = "";
         renderAll();
@@ -296,14 +311,15 @@
       document.getElementById("tabDark").addEventListener("click", () => setMobileTab(false));
 
       function setMobileTab(showAngel) {
+        activeTabIsAngel = showAngel;
         const panelAngel = document.getElementById("panelAngel");
         const panelDark = document.getElementById("panelDark");
         const tabAngel = document.getElementById("tabAngel");
         const tabDark = document.getElementById("tabDark");
-        if (window.innerWidth > 900) {
+        if (window.innerWidth > MOBILE_BREAKPOINT) {
           panelAngel.classList.remove("hidden-mobile");
           panelDark.classList.remove("hidden-mobile");
-          tabAngel.classList.add("active");
+          tabAngel.classList.remove("active");
           tabDark.classList.remove("active");
           return;
         }
@@ -313,13 +329,15 @@
         tabDark.classList.toggle("active", !showAngel);
       }
 
-      window.addEventListener("resize", () => setMobileTab(document.getElementById("tabAngel").classList.contains("active")));
+      window.addEventListener("resize", () => setMobileTab(activeTabIsAngel));
       setMobileTab(true);
       renderAll();
 
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+          navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+            console.error("Registrace service workeru selhala:", error);
+          });
         });
       }
     </script>
