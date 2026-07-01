@@ -1,50 +1,41 @@
-// service-worker.js
-const CACHE_NAME = 'vaft-cache-v3';
-
-// podle potřeby můžeš přidat další soubory
-const OFFLINE_URLS = [
+const CACHE_NAME = 'fruit-cache-v1';
+const APP_SHELL = [
   './',
   './index.html',
-  './style.css',
+  './TEACHER_STUDIO.html',
   './manifest.json',
-  './AFA0870E-F586-4406-8BAA-0A7944120AA3.png'
+  './VIVERE_atque_FruiT_CORE.js',
+  './fruiT_learning_engine.js',
+  './fruiT_memory_system.js'
 ];
 
-self.addEventListener('install', event => {
-  console.log('[VAFT SW] install');
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(OFFLINE_URLS);
-    })
-  );
+self.addEventListener('install', (event) => {
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
   self.skipWaiting();
 });
 
-self.addEventListener('activate', event => {
-  console.log('[VAFT SW] activate');
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(k => k !== CACHE_NAME)
-          .map(k => caches.delete(k))
-      )
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
     )
   );
   self.clients.claim();
 });
 
-self.addEventListener('fetch', event => {
+self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then(resp => {
-      if (resp) return resp;
-
-      return fetch(event.request).catch(() => {
-        // fallback na index, když jsme offline
-        return caches.match('./index.html');
-      });
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request)
+        .then((response) => {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+          return response;
+        })
+        .catch(() => caches.match('./TEACHER_STUDIO.html'));
     })
   );
 });

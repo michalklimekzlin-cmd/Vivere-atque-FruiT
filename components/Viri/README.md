@@ -1,11 +1,9 @@
-# Viri
+# Vivere atque Fru'i¡'T (legacy: Viri)
 
-Viri je narativní vrstva Vivere atque Frui¡'T.
+Tato složka drží kompatibilní bridge pro starší odkazy na `Viri`.
 
-Soubory v této složce:
-- `viri.js` - aktuální implementace pro prohlížeč zkopírovaná ze starší verze kořene.
+- Canonical název: **Vivere atque Fru'i¡'T**
+- Shorthand: **Fru'i¡'T**
+- Legacy alias: `window.Viri`
 
-Role:
-- přidává příběhový tón na vrcholu Hlavouna
-- reaguje na podněty repozitáře, příběhu a stavu
-- udržuje zážitek lidský a hravý
+Aktuální hlavní implementace je v `/VIVERE_atque_FruiT_CORE.js`.
