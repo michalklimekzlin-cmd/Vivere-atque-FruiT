@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vivere atque Fru'i¡'T — Jádro systému</title>
+  <style>
+    :root {
+      --barva-pozadi: #0a0a0f;
+      --barva-tekst:  #e8e8f0;
+      --barva-zlata:  #ffd700;
+      --barva-modra:  #4a9eff;
+      --barva-zelena: #4aff8a;
+      --barva-cervena: #ff4a4a;
+      --barva-fialova: #b84aff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--barva-pozadi);
+      color: var(--barva-tekst);
+      font-family: 'Courier New', monospace;
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .hlavicka {
+      text-align: center;
+      padding: 2rem 0;
+      border-bottom: 1px solid #333;
+      margin-bottom: 2rem;
+    }
+
+    .hlavicka h1 {
+      font-size: 2rem;
+      color: var(--barva-zlata);
+      margin-bottom: 0.5rem;
+    }
+
+    .hlavicka .glyph {
+      font-size: 1.5rem;
+      color: var(--barva-modra);
+    }
+
+    .mrizka {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .karta {
+      background: #111118;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .karta h2 {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .karta h2.zelen  { color: var(--barva-zelena); }
+    .karta h2.modra  { color: var(--barva-modra); }
+    .karta h2.zlata  { color: var(--barva-zlata); }
+    .karta h2.fialova { color: var(--barva-fialova); }
+
+    .tlacitko {
+      background: transparent;
+      border: 1px solid currentColor;
+      color: inherit;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+      margin: 0.2rem;
+      transition: background 0.2s;
+    }
+
+    .tlacitko:hover { background: rgba(255,255,255,0.1); }
+    .tlacitko.zelen { color: var(--barva-zelena); }
+    .tlacitko.modra { color: var(--barva-modra); }
+    .tlacitko.zlata { color: var(--barva-zlata); }
+
+    .vstup {
+      width: 100%;
+      background: #0a0a15;
+      border: 1px solid #444;
+      border-radius: 4px;
+      color: var(--barva-tekst);
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.6rem;
+      margin: 0.4rem 0;
+      resize: vertical;
+    }
+
+    .vystup {
+      background: #000008;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 0.8rem;
+      font-size: 0.8rem;
+      min-height: 60px;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-top: 0.5rem;
+    }
+
+    .ok    { color: var(--barva-zelena); }
+    .chyba { color: var(--barva-cervena); }
+    .info  { color: var(--barva-modra); }
+    .zdroj { color: #888; font-size: 0.75rem; }
+
+    .stav-modul {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0;
+      font-size: 0.85rem;
+    }
+
+    .konzole {
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1rem;
+      height: 200px;
+      overflow-y: auto;
+      font-size: 0.8rem;
+    }
+
+    .konzole-radek { padding: 0.1rem 0; border-bottom: 1px solid #111; }
+
+    label { font-size: 0.8rem; color: #888; display: block; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+  <div class="hlavicka">
+    <h1>Vivere atque Fru'i¡'T</h1>
+    <div class="glyph">(∩^o^)⊃━☆ﾟ.*･｡</div>
+    <div style="color:#888;font-size:0.85rem;margin-top:0.5rem;">
+      Jádro systému — Michal Klimek © 2025
+    </div>
+  </div>
+
+  <!-- Stav modulů -->
+  <div class="karta" style="margin-bottom:1.5rem;">
+    <h2 class="zelen">📡 Stav systému</h2>
+    <div id="stavModulu">Načítání...</div>
+    <br>
+    <button class="tlacitko zelen" onclick="zobrazStavModulu()">Obnovit stav</button>
+  </div>
+
+  <div class="mrizka">
+
+    <!-- Autenticita -->
+    <div class="karta">
+      <h2 class="modra">🔐 Autenticita</h2>
+      <label>Jméno autora:</label>
+      <input type="text" class="vstup" id="autorJmeno" value="Michal Klimek" style="resize:none;height:36px;">
+      <label>Zpráva:</label>
+      <textarea class="vstup" id="autorZprava" rows="3">Ahoj! (∩^o^)⊃━☆ Jak se máte? Pojďme stavět Fru'i¡'T!</textarea>
+      <button class="tlacitko modra" onclick="testujAutenticitu()">Ověřit autora</button>
+      <div class="vystup" id="vysledekAutenticity">...</div>
+    </div>
+
+    <!-- Trezor symbolů -->
+    <div class="karta">
+      <h2 class="zlata">💎 Trezor symbolů</h2>
+      <label>Kategorie:</label>
+      <input type="text" class="vstup" id="trezorKategorie" value="moje" style="resize:none;height:36px;">
+      <label>Symbol:</label>
+      <input type="text" class="vstup" id="trezorSymbol" value="🌺" style="resize:none;height:36px;">
+      <button class="tlacitko zlata" onclick="pridejSymbol()">Přidat symbol</button>
+      <button class="tlacitko zlata" onclick="vytvorZalohu()">Vytvořit zálohu</button>
+      <button class="tlacitko zlata" onclick="zkontrolujTrezor()">Zkontrolovat integritu</button>
+      <div class="vystup" id="vysledekTrezoru">...</div>
+    </div>
+
+    <!-- Učení -->
+    <div class="karta">
+      <h2 class="zelen">🧠 Učení</h2>
+      <label>Název lekce:</label>
+      <input type="text" class="vstup" id="lekceNazev" value="Glyph Michala" style="resize:none;height:36px;">
+      <label>Kategorie (cestina/hra/znalosti/...):</label>
+      <input type="text" class="vstup" id="lekceKategorie" value="cestina" style="resize:none;height:36px;">
+      <label>Obsah lekce:</label>
+      <textarea class="vstup" id="lekceObsah" rows="2">Glyph (∩^o^)⊃━☆ je podpis Michala Klimka.</textarea>
+      <button class="tlacitko zelen" onclick="ucSeLekci()">Naučit se</button>
+      <button class="tlacitko zelen" onclick="zobrazPrehledUceni()">Přehled vědomostí</button>
+      <div class="vystup" id="vysledekUceni">...</div>
+    </div>
+
+    <!-- Stavěč her -->
+    <div class="karta">
+      <h2 class="fialova">🎮 Stavěč her</h2>
+      <label>Název hry:</label>
+      <input type="text" class="vstup" id="hraNazev" value="Les s pokladem" style="resize:none;height:36px;">
+      <label>Typ světa:</label>
+      <input type="text" class="vstup" id="hraSvetTyp" value="dobrodruzstvi" style="resize:none;height:36px;">
+      <button class="tlacitko" style="color:var(--barva-fialova);" onclick="vytvorHru()">Postavit hru</button>
+      <button class="tlacitko" style="color:var(--barva-fialova);" onclick="testujHru()">Fru'i¡'T testuje hru</button>
+      <div class="vystup" id="vysledekHry">...</div>
+    </div>
+
+    <!-- Sesterstvo -->
+    <div class="karta">
+      <h2 class="modra">👯‍♀️ Sesterstvo</h2>
+      <label>Jméno sestry:</label>
+      <input type="text" class="vstup" id="sestraNazev" value="Sestra Stratéga" style="resize:none;height:36px;">
+      <label>Role (STRATEG/TVORCE/UCITELKA/STRAZCE):</label>
+      <input type="text" class="vstup" id="sestraRole" value="STRATEG" style="resize:none;height:36px;">
+      <button class="tlacitko modra" onclick="registrujSestru()">Registrovat sestru</button>
+      <button class="tlacitko modra" onclick="zobrazHierarchii()">Zobrazit hierarchii</button>
+      <div class="vystup" id="vysledekSesterstva">...</div>
+    </div>
+
+    <!-- Audit log -->
+    <div class="karta">
+      <h2 class="zlata">📋 Audit log</h2>
+      <button class="tlacitko zlata" onclick="zobrazAuditLog()">Posledních 5 záznamů</button>
+      <button class="tlacitko zlata" onclick="exportujAuditLog()">Exportovat log</button>
+      <div class="vystup" id="vysledekAuditLogu">...</div>
+    </div>
+
+  </div>
+
+  <!-- Konzole -->
+  <div class="karta">
+    <h2 class="zelen">💻 Systémová konzole</h2>
+    <div class="konzole" id="konzole"></div>
+  </div>
+
+  <!-- Načtení všech modulů (správné pořadí) -->
+  <script src="konfigurace/hlavni.konfigurace.js"></script>
+  <script src="bezpecnost/bezpecnostni-jadro.js"></script>
+  <script src="komunikace/autenticita.js"></script>
+  <script src="trezor/trezor-symbolu.js"></script>
+  <script src="uceni/ucici-architektura.js"></script>
+  <script src="stavec-her/stavec-her.js"></script>
+  <script src="sesterstvo/sesterstvo.js"></script>
+  <script src="nacitac.js"></script>
+
+  <script>
+    // ── Konzole interceptor ───────────────────────────────────────────────
+    const originalLog = console.log;
+    const originalError = console.error;
+    const konzole = document.getElementById('konzole');
+
+    function pridejDoKonzole(text, trida) {
+      const radek = document.createElement('div');
+      radek.className = 'konzole-radek ' + (trida || '');
+      radek.textContent = '[' + new Date().toLocaleTimeString('cs-CZ') + '] ' + text;
+      konzole.prepend(radek);
+    }
+
+    console.log = function() {
+      originalLog.apply(console, arguments);
+      pridejDoKonzole(Array.from(arguments).join(' '), 'info');
+    };
+
+    console.error = function() {
+      originalError.apply(console, arguments);
+      pridejDoKonzole(Array.from(arguments).join(' '), 'chyba');
+    };
+
+    // ── Funkce rozhraní ──────────────────────────────────────────────────
+
+    function zobrazStavModulu() {
+      const el = document.getElementById('stavModulu');
+      if (!window.fruiTNacitac) { el.textContent = 'Nakladač není načten.'; return; }
+      const stav = window.fruiTNacitac.zkontrolujModuly();
+      el.innerHTML = stav.moduly.map(function(m) {
+        return '<div class="stav-modul">' + m.stav + ' <span>' + m.popis + '</span></div>';
+      }).join('') + '<div style="margin-top:0.5rem;color:' +
+        (stav.ok ? 'var(--barva-zelena)' : 'var(--barva-cervena)') + '">' +
+        stav.nactenych + '/' + stav.celkem + ' načteno' +
+        (stav.ok ? ' ✅' : ' ⚠️') + '</div>';
+    }
+
+    function testujAutenticitu() {
+      const el = document.getElementById('vysledekAutenticity');
+      if (!window.fruiTAutenticita) { el.textContent = 'Modul není načten.'; return; }
+      const vysledek = window.fruiTAutenticita.proverAutora({
+        text: document.getElementById('autorZprava').value,
+        jmeno: document.getElementById('autorJmeno').value
+      });
+      const barva = vysledek.jeDuveryhodny ? 'var(--barva-zelena)' : 'var(--barva-cervena)';
+      el.innerHTML = '<span style="color:' + barva + '">' + vysledek.stav + '</span>' +
+        ' (skóre: ' + vysledek.skore + ')\n' + vysledek.duvod;
+    }
+
+    function pridejSymbol() {
+      const el = document.getElementById('vysledekTrezoru');
+      if (!window.fruiTTrezor) { el.textContent = 'Modul není načten.'; return; }
+      const ok = window.fruiTTrezor.jadro.pridejSymbol(
+        document.getElementById('trezorKategorie').value,
+        document.getElementById('trezorSymbol').value
+      );
+      el.textContent = ok ? '✅ Symbol přidán!' : 'ℹ️ Symbol již existuje.';
+    }
+
+    function vytvorZalohu() {
+      const el = document.getElementById('vysledekTrezoru');
+      if (!window.fruiTTrezor) { el.textContent = 'Modul není načten.'; return; }
+      const zaloha = window.fruiTTrezor.zaloha.vytvorZalohu('fruit-klic-2025');
+      el.textContent = zaloha.ok ? '✅ Záloha vytvořena: ' + zaloha.cas : '❌ Záloha selhala.';
+    }
+
+    function zkontrolujTrezor() {
+      const el = document.getElementById('vysledekTrezoru');
+      if (!window.fruiTTrezor) { el.textContent = 'Modul není načten.'; return; }
+      const integrita = window.fruiTTrezor.integrita.overIntegrituTrezoru();
+      el.textContent = integrita.zprava;
+    }
+
+    function ucSeLekci() {
+      const el = document.getElementById('vysledekUceni');
+      if (!window.fruiTUceni) { el.textContent = 'Modul není načten.'; return; }
+      const vysledek = window.fruiTUceni.ucSe({
+        nazev: document.getElementById('lekceNazev').value,
+        kategorie: document.getElementById('lekceKategorie').value,
+        lekce: document.getElementById('lekceObsah').value,
+        ucitel: 'Michal'
+      });
+      if (vysledek.ok) {
+        el.textContent = '✅ Naučeno! Celkem: ' + vysledek.celkemZnalosti + ' lekcí. Generace: ' + vysledek.generace;
+      } else {
+        el.textContent = '❌ Odmítnuto: ' + vysledek.duvod;
+      }
+    }
+
+    function zobrazPrehledUceni() {
+      const el = document.getElementById('vysledekUceni');
+      if (!window.fruiTUceni) { el.textContent = 'Modul není načten.'; return; }
+      const p = window.fruiTUceni.ziskejPrehled();
+      el.textContent = 'Lekcí: ' + p.celkemLekcí + ' | Koncepty: ' + p.koncepty +
+        ' | Generace: ' + p.generace + '\nPovolené kategorie: ' + p.povoleneKategorie.join(', ');
+    }
+
+    var aktuHraId = null;
+
+    function vytvorHru() {
+      const el = document.getElementById('vysledekHry');
+      if (!window.fruiTStavecHer) { el.textContent = 'Modul není načten.'; return; }
+      const svet = window.fruiTStavecHer.svet.vytvorSvet({
+        nazev: document.getElementById('hraNazev').value,
+        typ: document.getElementById('hraSvetTyp').value
+      });
+      const hra = window.fruiTStavecHer.herniSmycka.spustHru({
+        nazev: document.getElementById('hraNazev').value,
+        svet: svet
+      });
+      aktuHraId = hra.id;
+      el.textContent = '✅ Hra postavena! ID: ' + hra.id + '\nSvět: ' + svet.nazev + ' (' + svet.typ + ')';
+    }
+
+    function testujHru() {
+      const el = document.getElementById('vysledekHry');
+      if (!window.fruiTStavecHer) { el.textContent = 'Modul není načten.'; return; }
+      if (!aktuHraId) { el.textContent = 'Nejdřív postav hru!'; return; }
+      const test = window.fruiTStavecHer.aiHrac.otestujHru(aktuHraId);
+      el.textContent = test.zprava + '\n\n' + test.zpravy.join('\n');
+    }
+
+    function registrujSestru() {
+      const el = document.getElementById('vysledekSesterstva');
+      if (!window.fruiTSesterstvo) { el.textContent = 'Modul není načten.'; return; }
+      const role = document.getElementById('sestraRole').value;
+      if (!window.fruiTSesterstvo.role[role]) {
+        el.textContent = '❌ Neplatná role: ' + role;
+        return;
+      }
+      const sestra = window.fruiTSesterstvo.registr.registrujSestru({
+        nazev: document.getElementById('sestraNazev').value,
+        role: window.fruiTSesterstvo.role[role]
+      });
+      el.textContent = '✅ Sestra registrována: ' + sestra.nazev + ' (role: ' + sestra.role + ')';
+    }
+
+    function zobrazHierarchii() {
+      const el = document.getElementById('vysledekSesterstva');
+      if (!window.fruiTSesterstvo) { el.textContent = 'Modul není načten.'; return; }
+      const hier = window.fruiTSesterstvo.hierarchie.ziskejHierarchii();
+      const radky = Object.keys(hier).map(function(role) {
+        const sestry = hier[role];
+        return role + ': ' + (sestry.length ? sestry.map(function(s) { return s.nazev; }).join(', ') : '—');
+      });
+      el.textContent = radky.join('\n');
+    }
+
+    function zobrazAuditLog() {
+      const el = document.getElementById('vysledekAuditLogu');
+      if (!window.fruiTAuditLog) { el.textContent = 'Modul není načten.'; return; }
+      const zaznamy = window.fruiTAuditLog.ziskejPosledni(5);
+      el.textContent = zaznamy.map(function(z) {
+        return z.cas.substr(11, 8) + ' [' + z.typ + '] ' + z.zprava;
+      }).join('\n');
+    }
+
+    function exportujAuditLog() {
+      const el = document.getElementById('vysledekAuditLogu');
+      if (!window.fruiTAuditLog) { el.textContent = 'Modul není načten.'; return; }
+      const export_ = window.fruiTAuditLog.exportuj();
+      el.textContent = 'Celkem záznamů: ' + export_.celkem + '\nPoslední: ' + (export_.posledniAktualizace || '—');
+    }
+
+    // Zobraz stav po načtení
+    window.addEventListener('load', function() {
+      setTimeout(zobrazStavModulu, 200);
+    });
+  </script>
+
+</body>
+</html>
