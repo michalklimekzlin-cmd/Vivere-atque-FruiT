@@ -42,7 +42,7 @@ Každá komunikace se prověřuje ze **čtyř stran**:
 │         (přímé identifikátory: glyph, jméno)        │
 │                   ↑                                 │
 │   LEVÁ             │             PRAVÁ              │
-│   VRÁTKA  ←────── FRUŽENÍ ──────→ VRÁTKA            │
+│   VRÁTKA  ←── FRU'I¡'T JÁDRO ──→ VRÁTKA            │
 │   (čeština)        │             (hodnoty)          │
 │                   ↓                                 │
 │         ZADNÍ VRÁTKA                                │

@@ -42,7 +42,7 @@
       'cestina',       // Jazyk — čeština, výrazy, gramatika
       'pravidla',      // Herní pravidla, logika
       'znalosti',      // Obecné znalosti
-      'matematiha',    // Matematika, logika
+      'matematika',    // Matematika, logika
       'charakter',     // Charakter, chování
       'vztahy',        // Vztahy mezi věcmi
       'otazky',        // Otázky a odpovědi

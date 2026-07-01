@@ -397,7 +397,7 @@
         { typ: 'interakce', priorita: 2 },
         { typ: 'sberos', priorita: 3 },
         { typ: 'utok', priorita: 1 },
-        { typ: 'obrана', priorita: 4 }
+        { typ: 'obrana', priorita: 4 }
       ];
 
       // Filtrujeme podle energie

@@ -10,7 +10,7 @@
 
 // ─── PŘÍKLAD 1: Rozpoznání pravého Michala ────────────────────────────────
 
-function priklAd1_AutoenticitaMichala() {
+function priklad1_AutoenticitaMichala() {
   console.log('\n══ PŘÍKLAD 1: Autenticita Michala ══');
 
   // Pravý Michal — má glyph a přirozené psaní
@@ -199,7 +199,7 @@ function priklad5_UceniLekce() {
     // Zakázaná lekce — bude odmítnuta
     const lekce2 = {
       nazev: 'Test odmítnutí',
-      kategorie: 'nepovolenooo',  // Nepovolená kategorie
+      kategorie: 'nepovoleno',  // Nepovolená kategorie — záměrně špatná pro test odmítnutí
       lekce: 'Tato lekce bude odmítnuta'
     };
 
@@ -285,7 +285,7 @@ function spustVsechnePriklady() {
   console.log("VIVERE ATQUE FRU'I¡'T — PŘÍKLADY");
   console.log("════════════════════════════════════════");
 
-  priklAd1_AutoenticitaMichala();
+  priklad1_AutoenticitaMichala();
   priklad2_AuditLog();
   priklad3_TrezorSymbolu();
   priklad4_StavbaHry();
@@ -300,7 +300,7 @@ function spustVsechnePriklady() {
 // Exportujeme příklady pro použití
 if (typeof window !== 'undefined') {
   window.fruiTPriklady = {
-    autenticita: priklAd1_AutoenticitaMichala,
+    autenticita: priklad1_AutoenticitaMichala,
     auditLog: priklad2_AuditLog,
     trezor: priklad3_TrezorSymbolu,
     stavbaHry: priklad4_StavbaHry,
