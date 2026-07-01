@@ -2,7 +2,11 @@ export const DARK_STORAGE_KEY = 'revia-master-history-dark';
 
 export function loadDarkHistory() {
   try {
-    return JSON.parse(localStorage.getItem(DARK_STORAGE_KEY) || '[]');
+    const raw = JSON.parse(localStorage.getItem(DARK_STORAGE_KEY) || '[]');
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter((item) => item && (item.role === 'user' || item.role === 'assistant') && typeof item.content === 'string')
+      .map((item) => ({ role: item.role, content: item.content }));
   } catch {
     return [];
   }

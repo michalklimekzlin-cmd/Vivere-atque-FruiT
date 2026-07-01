@@ -11,6 +11,8 @@ const ITEM_PATTERNS = [
   { name: 'VAFT-Center3D', tab: 'worlds', regex: /vaft[-\s]?center3d/i }
 ];
 
+const SHOW_PATTERNS = [/zobraz mi/, /co v[šs]echno d[ěe]l[aá]/, /p[řr]eje[ďd] si/];
+
 export function parseCzechCommand(rawInput) {
   const input = (rawInput || '').trim();
   const lower = input.toLowerCase();
@@ -19,9 +21,9 @@ export function parseCzechCommand(rawInput) {
   const entity = ENTITY_PATTERNS.find((entry) => entry.regex.test(input))?.key || null;
   const item = ITEM_PATTERNS.find((entry) => entry.regex.test(input)) || null;
 
-  const wantsGuard = /(hlídej kód|hlidej kod)/i.test(input);
-  const wantsAnalysis = /analyzuj strukturu/i.test(lower);
-  const wantsShow = /zobraz mi|co v[šs]echno d[ěe]l[aá]|p[řr]eje[ďd] si/i.test(lower) || Boolean(item);
+  const wantsGuard = lower.includes('hlídej kód') || lower.includes('hlidej kod');
+  const wantsAnalysis = lower.includes('analyzuj strukturu');
+  const wantsShow = SHOW_PATTERNS.some((pattern) => pattern.test(lower)) || Boolean(item);
 
   if (!entity && !item && !wantsGuard && !wantsAnalysis && !wantsShow) return null;
 
