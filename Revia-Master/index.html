@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="description" content="Revia Master - Tři osobnosti v jedné aplikaci">
+    <title>Revia Master PWA</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%231a1a1a' width='192' height='192'/><text x='50%' y='50%' font-size='120' fill='%23fff' text-anchor='middle' dy='.3em' font-weight='bold'>R</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- HORNÍ PANEL - SPOLEČNÝ TEXT -->
+        <div class="top-panel">
+            <h1>⚡ Revia Master</h1>
+            <textarea id="sharedInput" placeholder="Napiš instrukci pro všechny tři osobnosti..."></textarea>
+            <button id="sendBtn">Poslat → Angel | Revii | Dark</button>
+        </div>
+
+        <!-- 3 PANELY -->
+        <div class="panels-container">
+            <!-- LEVÝ PANEL - ANGEL (REVIA) -->
+            <div class="panel angel">
+                <div class="panel-header angel-header">
+                    <h2>👼 ANGEL</h2>
+                    <p class="subtitle">Revia - Dobrota</p>
+                </div>
+                <div class="chat-history" id="angelChat"></div>
+                <div class="panel-input">
+                    <textarea id="angelInput" placeholder="Odpověď od Angela..."></textarea>
+                    <button class="send-btn angel-btn" data-personality="angel">Odeslat</button>
+                </div>
+            </div>
+
+            <!-- STŘEDNÍ PANEL - REVII (MEDIÁTOR) -->
+            <div class="panel revii">
+                <div class="panel-header revii-header">
+                    <h2>🎪 REVII</h2>
+                    <p class="subtitle">Mediátor - Rovnováha</p>
+                </div>
+                <div class="chat-history" id="reviiChat"></div>
+                <div class="panel-input">
+                    <textarea id="reviiInput" placeholder="Odpověď od Revii..."></textarea>
+                    <button class="send-btn revii-btn" data-personality="revii">Odeslat</button>
+                </div>
+            </div>
+
+            <!-- PRAVÝ PANEL - DARK (REVIE) -->
+            <div class="panel dark">
+                <div class="panel-header dark-header">
+                    <h2>☠️ DARK</h2>
+                    <p class="subtitle">Revie - Tma</p>
+                </div>
+                <div class="chat-history" id="darkChat"></div>
+                <div class="panel-input">
+                    <textarea id="darkInput" placeholder="Odpověď od Darku..."></textarea>
+                    <button class="send-btn dark-btn" data-personality="dark">Odeslat</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ASCII ART FOOTER -->
+        <div class="footer">
+            <pre class="ascii-art">
+    .•°˚°‰,'•.•',°˚ˇ°+
+       Revia `ˇ'¡'ˇ´ Revie
+            [◉_◉]
+              Revii
+            .•°˚°‰
+            </pre>
+            <p class="footer-text">🔋 Offline | 💾 Auto-save | 📱 PWA Ready</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+    </script>
+</body>
+</html>
