@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>VIVERE Studio</title>
+
+<meta name="theme-color" content="#111827">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+
+background:#111827;
+color:white;
+padding:20px;
+
+}
+
+h1{
+
+margin-bottom:20px;
+
+}
+
+.card{
+
+background:#1f2937;
+padding:15px;
+border-radius:15px;
+margin-bottom:20px;
+
+}
+
+textarea{
+
+width:100%;
+height:180px;
+
+background:#0f172a;
+color:white;
+
+border:none;
+border-radius:10px;
+
+padding:15px;
+
+resize:vertical;
+
+}
+
+button{
+
+padding:12px 25px;
+
+margin-top:15px;
+
+border:none;
+
+border-radius:10px;
+
+background:#22c55e;
+
+color:white;
+
+font-size:18px;
+
+cursor:pointer;
+
+}
+
+button:hover{
+
+background:#16a34a;
+
+}
+
+.output{
+
+background:#0f172a;
+
+padding:15px;
+
+border-radius:10px;
+
+min-height:150px;
+
+white-space:pre-wrap;
+
+}
+
+.checks{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:10px;
+
+margin:15px 0;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>VIVERE Studio</h1>
+
+<div class="card">
+
+<h2>Učitel</h2>
+
+<textarea id="teacherInput" placeholder="Sem piš úplně normálně česky..."></textarea>
+
+<div class="checks">
+
+<label><input type="checkbox" checked> Paměť</label>
+
+<label><input type="checkbox"> Jazyk</label>
+
+<label><input type="checkbox"> Matematika</label>
+
+<label><input type="checkbox"> Charakter</label>
+
+<label><input type="checkbox"> Vztahy</label>
+
+<label><input type="checkbox"> Pravidla</label>
+
+</div>
+
+<button onclick="teach()">
+
+UČIT
+
+</button>
+
+</div>
+
+<div class="card">
+
+<h2>Význam</h2>
+
+<div id="meaning" class="output"></div>
+
+</div>
+
+<div class="card">
+
+<h2>JSON</h2>
+
+<div id="json" class="output"></div>
+
+</div>
+
+<div class="card">
+
+<h2>JavaScript</h2>
+
+<div id="code" class="output"></div>
+
+</div>
+
+<script>
+
+const Memory=[];
+
+function teach(){
+
+const text=document.getElementById("teacherInput").value;
+
+const lesson={
+
+time:new Date().toISOString(),
+
+text:text
+
+};
+
+Memory.push(lesson);
+
+document.getElementById("meaning").textContent=text;
+
+const json=JSON.stringify(lesson,null,2);
+
+document.getElementById("json").textContent=json;
+
+document.getElementById("code").textContent=
+
+`Viri.learn(${json});`;
+
+localStorage.setItem("viriMemory",JSON.stringify(Memory));
+
+}
+
+window.onload=()=>{
+
+const saved=localStorage.getItem("viriMemory");
+
+if(saved){
+
+Memory.push(...JSON.parse(saved));
+
+}
+
+};
+
+</script>
+
+</body>
+
+</html>
