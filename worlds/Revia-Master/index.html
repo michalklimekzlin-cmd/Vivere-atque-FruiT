@@ -97,9 +97,18 @@
 
       function renderChat() {
         const history = state.histories[state.entity];
-        chatLog.innerHTML = history
-          .map((msg) => `<div class="message ${msg.role}"><strong>${msg.role === 'user' ? 'Ty' : state.entity === 'angel' ? 'Angel' : 'Dark'}:</strong> ${msg.content}</div>`)
-          .join('');
+        chatLog.innerHTML = '';
+        history.forEach((msg) => {
+          const item = document.createElement('div');
+          item.className = `message ${msg.role}`;
+
+          const prefix = document.createElement('strong');
+          prefix.textContent = `${msg.role === 'user' ? 'Ty' : state.entity === 'angel' ? 'Angel' : 'Dark'}: `;
+
+          const text = document.createTextNode(msg.content);
+          item.append(prefix, text);
+          chatLog.appendChild(item);
+        });
         chatLog.scrollTop = chatLog.scrollHeight;
       }
 
@@ -183,7 +192,9 @@
 
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+          navigator.serviceWorker
+            .register('./service-worker.js')
+            .catch((error) => console.warn('[Revia-Master] Registrace SW selhala:', error));
         });
       }
     </script>

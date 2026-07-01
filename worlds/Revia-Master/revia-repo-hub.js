@@ -25,14 +25,22 @@ export const REPO_HUB = {
 
 export function renderHubTab(container, tab, activeName = '') {
   const items = REPO_HUB[tab] || [];
-  container.innerHTML = items
-    .map(
-      (item) => `
-      <a class="hub-item ${item.name === activeName ? 'active' : ''}" href="${item.href}" target="_blank" rel="noopener noreferrer">
-        <strong>${item.name}</strong>
-        <span>${item.description}</span>
-      </a>
-    `
-    )
-    .join('');
+  container.innerHTML = '';
+
+  items.forEach((item) => {
+    const link = document.createElement('a');
+    link.className = `hub-item ${item.name === activeName ? 'active' : ''}`;
+    link.href = item.href;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+
+    const strong = document.createElement('strong');
+    strong.textContent = item.name;
+
+    const span = document.createElement('span');
+    span.textContent = item.description;
+
+    link.append(strong, span);
+    container.appendChild(link);
+  });
 }

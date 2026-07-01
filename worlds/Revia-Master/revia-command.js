@@ -19,7 +19,7 @@ export function parseCzechCommand(rawInput) {
   const entity = ENTITY_PATTERNS.find((entry) => entry.regex.test(input))?.key || null;
   const item = ITEM_PATTERNS.find((entry) => entry.regex.test(input)) || null;
 
-  const wantsGuard = /hl[ií]dej k[oó]d/i.test(input);
+  const wantsGuard = /(hlídej kód|hlidej kod)/i.test(input);
   const wantsAnalysis = /analyzuj strukturu/i.test(lower);
   const wantsShow = /zobraz mi|co v[šs]echno d[ěe]l[aá]|p[řr]eje[ďd] si/i.test(lower) || Boolean(item);
 

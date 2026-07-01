@@ -49,12 +49,21 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
         })
-        .catch(() => caches.match(event.request).then((cached) => cached || caches.match(OFFLINE_URL)))
+        .catch((error) => {
+          console.warn('[Revia-Master SW] Síť nedostupná, vracím cache:', error);
+          return caches.match(event.request).then((cached) => cached || caches.match(OFFLINE_URL));
+        })
     );
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).catch((error) => {
+        console.warn('[Revia-Master SW] Načtení assetu selhalo:', event.request.url, error);
+        throw error;
+      });
+    })
   );
 });
