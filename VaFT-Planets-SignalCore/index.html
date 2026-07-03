@@ -88,13 +88,13 @@
         <canvas id="globe-canvas"></canvas>
 
         <div class="hud">
-          🌀 1 prst na kouli = otáčení koule • ťuk na slot = zoom na slot • 1 prst mimo koule = orbit • 2 prsty = náklon + posun + zoom (kotvený na prstech)
+          🌀 1 prst na kouli = otáčení koule • ťuk na slot = otevře appku (nebo zoom, pokud slot nemá url) • 1 prst mimo koule = orbit • 2 prsty = náklon + posun + zoom (kotvený na prstech)
         </div>
         <div class="hud-center" id="status">
           vybraný svět: Hra + pravidla
         </div>
         <div class="hud-right">
-          v1.3 • 4 koule světa + VaF'i'T Signal Tower (dvojitý kornout)
+          v1.4 • 4 koule světa + VaF'i'T Signal Tower (dvojitý kornout) + klikací sloty
         </div>
       </div>
     </div>
@@ -137,7 +137,7 @@
       let sphereDragActive = false;
 
       // ---------- SIGNAL CORE (spodní kužel pod motorem) ----------
-      const glyphs = ["{*(°.)}", "ً&’」", "¡(*)(%)¡", "{°. .}", "(•.°)"];
+      const glyphs = ["{*(°.)}", "ً&'」", "¡(*)(%)¡", "{°. .}", "(•.°)"];
       const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
       const signalCore = {
@@ -192,11 +192,9 @@
           let y = p.baseY;
           let z = p.baseZ;
 
-          // rotace kolem X
           let y1 = y * cosX - z * sinX;
           let z1 = y * sinX + z * cosX;
 
-          // rotace kolem Y
           let x2 = x * cosY + z1 * sinY;
           let z2 = -x * sinY + z1 * cosY;
 
@@ -249,7 +247,6 @@
         ctx.lineWidth = 0.7;
         ctx.strokeStyle = "rgba(255, 210, 150, 0.9)";
 
-        // horizontální kružnice
         for (let i = 0; i <= signalCore.rings; i++) {
           ctx.beginPath();
           let started = false;
@@ -266,7 +263,6 @@
           ctx.stroke();
         }
 
-        // vertikální linie
         for (let j = 0; j < signalCore.segments; j++) {
           ctx.beginPath();
           let started = false;
@@ -343,7 +339,6 @@
         }
       }
 
-      // průhledná čtvrtka kužele, která obíhá s orbitem (výřez z menšího kornoutu)
       function cutRotatingQuarter() {
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
@@ -394,15 +389,15 @@
       // ---------- VELKÝ KUŽEL / KOŠ KOLEM KOULE (BigCone) ----------
 
       const bigCone = {
-  points: [],
-  rings: 14,
-  segments: 24,
-  radiusTop: 300,     // reálné hodnoty přepíšeme v resize()
-  radiusBottom: 40,
-  height: 400,
-  offsetTopY: 0,
-  rotationFactor: 0.35
-};
+        points: [],
+        rings: 14,
+        segments: 24,
+        radiusTop: 300,
+        radiusBottom: 40,
+        height: 400,
+        offsetTopY: 0,
+        rotationFactor: 0.35
+      };
 
       function generateBigConePoints() {
         bigCone.points = [];
@@ -411,7 +406,7 @@
 
         for (let i = 0; i <= rings; i++) {
           const t = i / rings;
-          const y = offsetTopY - t * height; // nahoře velký kruh, dole špička
+          const y = offsetTopY - t * height;
           const r = radiusTop - (radiusTop - radiusBottom) * t;
           for (let j = 0; j < segments; j++) {
             const a = (j / segments) * Math.PI * 2;
@@ -439,7 +434,6 @@
         const sinY = Math.sin(globalTiltY);
         const cosY = Math.cos(globalTiltY);
 
-        // jemná rotace kolem Y svázaná s orbitem
         const extraRot = orbitRotation * bigCone.rotationFactor;
         const sinR = Math.sin(extraRot);
         const cosR = Math.cos(extraRot);
@@ -449,15 +443,12 @@
           let y = p.baseY;
           let z = p.baseZ;
 
-          // vlastní rotace kolem Y (otáčení "koše" podle orbity)
           let xR = x * cosR + z * sinR;
           let zR = -x * sinR + z * cosR;
 
-          // rotace kolem X
           let y1 = y * cosX - zR * sinX;
           let z1 = y * sinX + zR * cosX;
 
-          // rotace kolem Y (globální)
           let x2 = xR * cosY + z1 * sinY;
           let z2 = -xR * sinY + z1 * cosY;
 
@@ -476,7 +467,6 @@
       function drawBigCone() {
         updateBigConeProjection();
 
-        // jemný stín pod velkým košem
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
@@ -504,12 +494,10 @@
         ctx.fill();
         ctx.restore();
 
-        // mřížka velkého kuželu
         ctx.save();
-ctx.lineWidth = 1.1;  // trochu silnější čáry
-ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
+        ctx.lineWidth = 1.1;
+        ctx.strokeStyle = "rgba(255, 210, 150, 0.42)";
 
-        // horizontální kružnice
         for (let i = 0; i <= bigCone.rings; i++) {
           ctx.beginPath();
           let started = false;
@@ -526,7 +514,6 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
           ctx.stroke();
         }
 
-        // vertikální linie
         for (let j = 0; j < bigCone.segments; j++) {
           ctx.beginPath();
           let started = false;
@@ -564,6 +551,7 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
               lat,
               lon,
               label: "slot " + id,
+              url: "", // <-- SEM VLOŽ ODKAZ NA APLIKACI / PWA PRO TENTO SLOT
               screenX: 0,
               screenY: 0,
               sceneX: 0,
@@ -572,9 +560,19 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
             id++;
           }
         }
-        if (template[34]) template[34].label = "VaF'i'T";
-        if (template[35]) template[35].label = "Revia";
-        if (template[36]) template[36].label = "MK AI";
+        // příklad: pojmenované sloty s odkazy
+        if (template[34]) {
+          template[34].label = "VaF'i'T";
+          template[34].url = ""; // např. "https://tvoje-pwa-domena.cz/vafiti"
+        }
+        if (template[35]) {
+          template[35].label = "Revia";
+          template[35].url = ""; // např. "https://tvoje-pwa-domena.cz/revia"
+        }
+        if (template[36]) {
+          template[36].label = "MK AI";
+          template[36].url = ""; // např. "https://tvoje-pwa-domena.cz/mkai"
+        }
         return template;
       }
 
@@ -651,7 +649,6 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
           let y = 0;
           let z = orbitR * Math.sin(a);
 
-          // globální náklon
           let y1 = y * Math.cos(globalTiltX) - z * Math.sin(globalTiltX);
           let z1 = y * Math.sin(globalTiltX) + z * Math.cos(globalTiltX);
           let x2 = x * Math.cos(globalTiltY) + z1 * Math.sin(globalTiltY);
@@ -684,17 +681,18 @@ ctx.strokeStyle = "rgba(255, 210, 150, 0.42)"; // víc záře = bílá kresba
 
         baseRadius = Math.min(width, height) * 0.18;
 
-        // velikosti kuželů podle aktuální scény
         signalCore.baseRadius = Math.min(width, height) * 0.19;
         signalCore.coneHeight = signalCore.baseRadius * 1.6;
         signalCore.offsetY = baseRadius * 0.9;
 
-// horní okraj velkého koše = těsně pod koulemi,
-// špička hluboko dolů (jako na modelu)
-bigCone.radiusTop = baseRadius * 2.4;   // užší košík, blíž ke koulím
-bigCone.radiusBottom = baseRadius * 0.6;
-bigCone.height = baseRadius * 4.2;      // delší špička dolů
-bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
+        bigCone.radiusTop = baseRadius * 2.4;
+        bigCone.radiusBottom = baseRadius * 0.6;
+        bigCone.height = baseRadius * 4.2;
+
+        // OPRAVA: horní okraj velkého kuželu je teď zarovnaný přesně
+        // na střed scény (y=0), stejně jako hub a orbitová dráha koulí,
+        // takže kužel už neuhýbá dolů mimo osu koulí.
+        bigCone.offsetTopY = 0;
 
         generateSignalPoints();
         generateBigConePoints();
@@ -766,7 +764,6 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // mřížka
         ctx.lineWidth = 0.9;
         ctx.strokeStyle = "rgba(255, 210, 140, 0.9)";
 
@@ -830,7 +827,6 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
           ctx.stroke();
         }
 
-        // název
         ctx.save();
         ctx.font = "11px system-ui";
         ctx.fillStyle = "rgba(255,220,170,0.92)";
@@ -841,7 +837,6 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
         ctx.fillText(sphere.name, 0, radius + 10);
         ctx.restore();
 
-        // sloty
         const slotW = (radius * 0.35) / 3;
         const slotH = slotW * 0.65;
 
@@ -893,9 +888,12 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
           ctx.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
           ctx.closePath();
 
+          // sloty s odkazem mají jemně výraznější okraj, ať je vidět, že jsou klikací
           ctx.fillStyle = "rgba(6,6,10,0.92)";
-          ctx.strokeStyle = "rgba(255,210,150,0.9)";
-          ctx.lineWidth = 0.7;
+          ctx.strokeStyle = slot.url
+            ? "rgba(255,230,170,1)"
+            : "rgba(255,210,150,0.9)";
+          ctx.lineWidth = slot.url ? 1.1 : 0.7;
           ctx.fill();
           ctx.stroke();
 
@@ -916,13 +914,9 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
 
         layoutSpheres();
 
-        // velký koš/kužel kolem celé soustavy
         drawBigCone();
-
-        // spodní Signal Core
         drawSignalCore();
 
-        // středový motor + orbit
         ctx.save();
         ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
         ctx.scale(viewScale, viewScale);
@@ -1060,7 +1054,6 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
       let lastY = 0;
       let movedDistance = 0;
 
-      // pinch zoom
       let startScale = 1;
       let startDist = 0;
       let pinchSceneX = 0;
@@ -1209,6 +1202,12 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
         orbitVelocity *= 0.4;
       }
 
+      // NOVÉ: otevření appky/PWA po kliknutí na slot s vyplněnou url
+      function openSlotApp(slot) {
+        if (!slot.url) return;
+        window.open(slot.url, "_blank");
+      }
+
       function pointerUp(e) {
         if (!drag) return;
         drag = false;
@@ -1226,7 +1225,14 @@ bigCone.offsetTopY = baseRadius * 0.25; // celý koš trochu níž pod střed
                 activeSphere.name +
                 " • " +
                 slot.label;
-              focusOnSlot(slot);
+
+              if (slot.url) {
+                // pokud má slot přiřazenou aplikaci, otevři ji
+                openSlotApp(slot);
+              } else {
+                // jinak jen přiblížení jako doteď
+                focusOnSlot(slot);
+              }
               break;
             }
           }
