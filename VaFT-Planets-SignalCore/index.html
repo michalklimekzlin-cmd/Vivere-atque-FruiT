@@ -1,1288 +1,3392 @@
 <!doctype html>
 <html lang="cs">
-  <head>
-      <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#111111">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-<meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <title>Michal Klimek VaF'i'T ChatGPT • 4 koule + Big Signal Cone</title>
 
-    <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        background: radial-gradient(circle at top, #050815, #020208);
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        color: #f5f5f5;
-      }
+<head>
 
-      .root {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+<meta charset="utf-8">
 
-      .stage {
-        position: relative;
-        width: min(920px, 96vw);
-        height: min(620px, 90vh);
-        border-radius: 32px;
-        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
-        background: radial-gradient(circle at top, #06091a, #020208);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-      }
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1,viewport-fit=cover">
 
-      #globe-canvas {
-        position: absolute;
-        inset: 0;
-        margin: auto;
-        width: 100%;
-        height: 100%;
-        display: block;
-        touch-action: none;
-      }
+<title>
+VaF'i'T Signal Tower Engine v1.5
+</title>
 
-      .hud {
-        position: absolute;
-        left: 18px;
-        bottom: 14px;
-        font-size: 10px;
-        opacity: 0.75;
-      }
+<link rel="manifest" href="./manifest.json">
 
-      .hud-right {
-        position: absolute;
-        right: 18px;
-        top: 14px;
-        font-size: 10px;
-        opacity: 0.75;
-      }
+<meta name="theme-color" content="#111111">
 
-      .hud-center {
-        position: absolute;
-        left: 50%;
-        bottom: 14px;
-        transform: translateX(-50%);
-        font-size: 11px;
-        opacity: 0.85;
-        text-align: center;
-        white-space: nowrap;
-      }
-    </style>
-  </head>
+<meta name="apple-mobile-web-app-capable" content="yes">
 
-  <body>
-    <div class="root">
-      <div class="stage">
-        <canvas id="globe-canvas"></canvas>
+<style>
 
-        <div class="hud">
-          🌀 1 prst na kouli = otáčení koule • ťuk na slot = otevře appku (nebo zoom, pokud slot nemá url) • 1 prst mimo koule = orbit • 2 prsty = náklon + posun + zoom (kotvený na prstech)
-        </div>
-        <div class="hud-center" id="status">
-          vybraný svět: Hra + pravidla
-        </div>
-        <div class="hud-right">
-          v1.4 • 4 koule světa + VaF'i'T Signal Tower (dvojitý kornout) + klikací sloty
-        </div>
-      </div>
-    </div>
+html,
+body{
 
-    <script>
-      const canvas = document.getElementById("globe-canvas");
-      const ctx = canvas.getContext("2d");
-      const statusEl = document.getElementById("status");
+margin:0;
+padding:0;
 
-      let width = 0;
-      let height = 0;
-      let baseRadius = 0;
-      const dpr = window.devicePixelRatio || 1;
+width:100%;
+height:100%;
 
-      // kamera
-      let viewScale = 1;
-      let targetViewScale = 1;
-      let viewOffsetX = 0;
-      let viewOffsetY = 0;
-      let targetViewOffsetX = 0;
-      let targetViewOffsetY = 0;
+overflow:hidden;
 
-      // globální náklon celé sestavy
-      let globalTiltX = -0.7;
-      let globalTiltY = 0.0;
-      let targetTiltX = globalTiltX;
-      let targetTiltY = globalTiltY;
+background:
+radial-gradient(
+circle at top,
+#050815,
+#020208
+);
 
-      // orbit (kolotoč)
-      let orbitRotation = 0;
-      let orbitVelocity = 0.12;
-      const orbitDamping = 0.96;
-      const orbitBaseDrift = 0.04;
+font-family:
+system-ui,
+-apple-system,
+BlinkMacSystemFont,
+"Segoe UI",
+sans-serif;
 
-      // jemný náklon ostatních koulí při točení aktivní
-      let orbitNudgeX = 0;
-      let orbitNudgeY = 0;
+color:#f5f5f5;
 
-      let activeSphere = null;
-      let sphereDragActive = false;
+}
 
-      // ---------- SIGNAL CORE (spodní kužel pod motorem) ----------
-      const glyphs = ["{*(°.)}", "ً&'」", "¡(*)(%)¡", "{°. .}", "(•.°)"];
-      const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+.root{
 
-      const signalCore = {
-        points: [],
-        rings: 12,
-        segments: 18,
-        pulse: 0,
-        baseRadius: 120,
-        coneHeight: 200,
-        mode: "mesh",
-        offsetY: 0
-      };
+position:fixed;
 
-      function generateSignalPoints() {
-        signalCore.points = [];
-        const { rings, segments, coneHeight, baseRadius } = signalCore;
+inset:0;
 
-        for (let i = 0; i <= rings; i++) {
-          const t = i / rings;
-          const y = coneHeight / 2 - t * coneHeight;
-          const r = baseRadius * (1.0 - 0.75 * t);
-          for (let j = 0; j < segments; j++) {
-            const a = (j / segments) * Math.PI * 2;
-            const x = r * Math.cos(a);
-            const z = r * Math.sin(a);
-            signalCore.points.push({
-              baseX: x,
-              baseY: y,
-              baseZ: z,
-              x: 0,
-              y: 0,
-              z: 0,
-              screenX: 0,
-              screenY: 0,
-              ring: i,
-              seg: j,
-              phase: Math.random() * Math.PI * 2
-            });
-          }
-        }
-      }
+display:flex;
 
-      function updateSignalProjection() {
-        const sinX = Math.sin(globalTiltX);
-        const cosX = Math.cos(globalTiltX);
-        const sinY = Math.sin(globalTiltY);
-        const cosY = Math.cos(globalTiltY);
-        const offsetY = signalCore.offsetY;
+align-items:center;
 
-        for (const p of signalCore.points) {
-          let x = p.baseX;
-          let y = p.baseY;
-          let z = p.baseZ;
+justify-content:center;
 
-          let y1 = y * cosX - z * sinX;
-          let z1 = y * sinX + z * cosX;
+}
 
-          let x2 = x * cosY + z1 * sinY;
-          let z2 = -x * sinY + z1 * cosY;
+.stage{
 
-          p.x = x2;
-          p.y = y1 + offsetY;
-          p.z = z2;
+position:relative;
 
-          const sx = width / 2 + viewOffsetX + x2 * viewScale;
-          const sy = height / 2 + viewOffsetY + (y1 + offsetY) * viewScale;
+width:min(920px,96vw);
 
-          p.screenX = sx;
-          p.screenY = sy;
-        }
-      }
+height:min(620px,90vh);
 
-      function drawSignalBackground() {
-        ctx.save();
-        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
-        ctx.scale(viewScale, viewScale);
+border-radius:32px;
 
-        const yBase = signalCore.offsetY + signalCore.coneHeight / 2 + 12;
+overflow:hidden;
 
-        ctx.beginPath();
-        ctx.ellipse(
-          0,
-          yBase,
-          signalCore.baseRadius * 0.9,
-          signalCore.baseRadius * 0.3,
-          0,
-          0,
-          Math.PI * 2
-        );
-        const eGrad = ctx.createRadialGradient(
-          0,
-          yBase,
-          signalCore.baseRadius * 0.1,
-          0,
-          yBase,
-          signalCore.baseRadius
-        );
-        eGrad.addColorStop(0, "rgba(20,12,8,1)");
-        eGrad.addColorStop(1, "rgba(0,0,0,0.6)");
-        ctx.fillStyle = eGrad;
-        ctx.fill();
+background:
+radial-gradient(
+circle at top,
+#06091a,
+#020208
+);
 
-        ctx.restore();
-      }
+box-shadow:
+0 40px 90px rgba(0,0,0,.85);
 
-      function drawSignalMesh() {
-        ctx.lineWidth = 0.7;
-        ctx.strokeStyle = "rgba(255, 210, 150, 0.9)";
+border:
+1px solid rgba(255,255,255,.05);
 
-        for (let i = 0; i <= signalCore.rings; i++) {
-          ctx.beginPath();
-          let started = false;
-          for (const p of signalCore.points) {
-            if (p.ring !== i) continue;
-            if (!started) {
-              ctx.moveTo(p.screenX, p.screenY);
-              started = true;
-            } else {
-              ctx.lineTo(p.screenX, p.screenY);
+}
+
+#globe-canvas{
+
+position:absolute;
+
+inset:0;
+
+width:100%;
+
+height:100%;
+
+display:block;
+
+touch-action:none;
+
+}
+
+.hud{
+
+position:absolute;
+
+left:16px;
+
+bottom:16px;
+
+font-size:10px;
+
+opacity:.8;
+
+}
+
+.hudRight{
+
+position:absolute;
+
+right:16px;
+
+top:16px;
+
+font-size:10px;
+
+opacity:.8;
+
+}
+
+.hudCenter{
+
+position:absolute;
+
+left:50%;
+
+bottom:16px;
+
+transform:translateX(-50%);
+
+font-size:11px;
+
+text-align:center;
+
+white-space:nowrap;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="root">
+
+<div class="stage">
+
+<canvas id="globe-canvas"></canvas>
+
+<div class="hud">
+
+VaF'i'T Engine 1.5 • 4 světy • 280 slotů • PWA Ready
+
+</div>
+
+<div
+class="hudCenter"
+id="status">
+
+Inicializace...
+
+</div>
+
+<div
+class="hudRight">
+
+Signal Tower Engine
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const canvas =
+document.getElementById("globe-canvas");
+
+const ctx =
+canvas.getContext("2d");
+
+const statusEl =
+document.getElementById("status");
+
+let width=0;
+let height=0;
+
+const dpr=
+window.devicePixelRatio||1;
+
+/* ======================================================
+
+JEDINÝ SPOLEČNÝ STŘED CELÉ APLIKACE
+
+====================================================== */
+
+const CENTER={
+
+x:0,
+
+y:0
+
+};
+
+/* ======================================================
+
+VŠECHNY OBJEKTY
+BUDOU VYCHÁZET ODSUD
+
+====================================================== */
+
+const ENGINE={
+
+camera:{},
+
+hub:{},
+
+signalCore:{},
+
+bigCone:{},
+
+orbit:{},
+
+spheres:[],
+
+registry:{}
+
+};
+/* ======================================================
+
+VaF'i'T ENGINE v1.5
+ČÁST 2
+
+====================================================== */
+
+/* ---------- Kamera ---------- */
+
+ENGINE.camera = {
+
+    scale: 1,
+    targetScale: 1,
+
+    offsetX: 0,
+    offsetY: 0,
+
+    targetOffsetX: 0,
+    targetOffsetY: 0,
+
+    tiltX: -0.7,
+    tiltY: 0,
+
+    targetTiltX: -0.7,
+    targetTiltY: 0
+
+};
+
+/* ---------- Orbit ---------- */
+
+ENGINE.orbit = {
+
+    rotation: 0,
+
+    velocity: 0.12,
+
+    damping: 0.96,
+
+    drift: 0.04
+
+};
+
+/* ---------- Hub ---------- */
+
+ENGINE.hub = {
+
+    innerRadius:0,
+
+    outerRadius:0
+
+};
+
+/* ---------- Signal Core ---------- */
+
+ENGINE.signalCore = {
+
+    centerX:0,
+
+    centerY:0,
+
+    baseRadius:0,
+
+    coneHeight:0,
+
+    rings:12,
+
+    segments:18,
+
+    pulse:0,
+
+    mode:"mesh",
+
+    points:[]
+
+};
+
+/* ---------- Big Cone ---------- */
+
+ENGINE.bigCone = {
+
+    centerX:0,
+
+    centerY:0,
+
+    radiusTop:0,
+
+    radiusBottom:0,
+
+    height:0,
+
+    rings:14,
+
+    segments:24,
+
+    rotationFactor:.35,
+
+    points:[]
+
+};
+
+/* ======================================================
+
+REGISTR APLIKACÍ
+
+====================================================== */
+
+ENGINE.registry={
+
+game:{},
+
+heroes:{},
+
+language:{},
+
+earth:{}
+
+};
+
+/* ======================================================
+
+UNIVERZÁLNÍ SLOT
+
+====================================================== */
+
+function createSlot(id){
+
+return{
+
+id:id,
+
+label:"slot "+id,
+
+url:"",
+
+app:"",
+
+icon:"",
+
+color:"",
+
+action:"open",
+
+enabled:true,
+
+screenX:0,
+
+screenY:0,
+
+sceneX:0,
+
+sceneY:0,
+
+lat:0,
+
+lon:0
+
+};
+
+}
+
+/* ======================================================
+
+ŠABLONA SLOTŮ
+
+70 SLOTŮ
+
+====================================================== */
+
+function createSlots(){
+
+const slots=[];
+
+for(let i=1;i<=70;i++){
+
+slots.push(
+
+createSlot(i)
+
+);
+
+}
+
+return slots;
+
+}
+
+/* ======================================================
+
+4 SVĚTY
+
+====================================================== */
+
+ENGINE.spheres=[
+
+{
+
+id:"game",
+
+name:"Hra + pravidla",
+
+slots:createSlots()
+
+},
+
+{
+
+id:"heroes",
+
+name:"Hrdinové",
+
+slots:createSlots()
+
+},
+
+{
+
+id:"language",
+
+name:"Jazyk",
+
+slots:createSlots()
+
+},
+
+{
+
+id:"earth",
+
+name:"Země",
+
+slots:createSlots()
+
+}
+
+];
+
+let activeSphere=ENGINE.spheres[0];
+/* ======================================================
+
+VaF'i'T ENGINE v1.5
+ČÁST 3
+
+JEDEN STŘED CELÉ APLIKACE
+
+====================================================== */
+
+const WORLD={
+
+centerX:0,
+
+centerY:0
+
+};
+
+/* ======================================================
+
+PŘEPOČET VELIKOSTÍ
+
+====================================================== */
+
+function resizeEngine(){
+
+const rect=canvas.getBoundingClientRect();
+
+width=rect.width;
+height=rect.height;
+
+canvas.width=width*dpr;
+canvas.height=height*dpr;
+
+ctx.setTransform(
+dpr,
+0,
+0,
+dpr,
+0,
+0
+);
+
+/* ---------- STŘED ---------- */
+
+WORLD.centerX=width/2;
+
+WORLD.centerY=height/2;
+
+/* ---------- základní poloměr ---------- */
+
+baseRadius=Math.min(width,height)*0.18;
+
+/* ---------- HUB ---------- */
+
+ENGINE.hub.innerRadius=
+baseRadius*1.0;
+
+ENGINE.hub.outerRadius=
+baseRadius*1.45;
+
+/* ---------- SIGNAL CORE ---------- */
+
+ENGINE.signalCore.centerX=
+WORLD.centerX;
+
+ENGINE.signalCore.centerY=
+WORLD.centerY;
+
+ENGINE.signalCore.baseRadius=
+baseRadius*0.19;
+
+ENGINE.signalCore.coneHeight=
+ENGINE.signalCore.baseRadius*1.6;
+
+/* ---------- BIG CONE ---------- */
+
+ENGINE.bigCone.centerX=
+WORLD.centerX;
+
+ENGINE.bigCone.centerY=
+WORLD.centerY;
+
+ENGINE.bigCone.radiusTop=
+baseRadius*2.4;
+
+ENGINE.bigCone.radiusBottom=
+baseRadius*0.6;
+
+ENGINE.bigCone.height=
+baseRadius*4.2;
+
+generateSignalCore();
+
+generateBigCone();
+
+layoutSphereSlots();
+
+}
+
+window.addEventListener(
+"resize",
+resizeEngine
+);
+
+resizeEngine();
+/* ======================================================
+
+VaFiT SLOT MANAGER
+v2.0
+
+====================================================== */
+
+const SLOT_MANAGER={
+
+currentSphere:null,
+
+currentSlot:null,
+
+data:{},
+
+favorites:[],
+
+clipboard:null
+
+};
+
+/* ======================================================
+
+NAJDI SLOT
+
+====================================================== */
+
+function getSlot(sphereId,slotId){
+
+const sphere=ENGINE.spheres.find(
+
+s=>s.id===sphereId
+
+);
+
+if(!sphere)return null;
+
+return sphere.slots.find(
+
+s=>s.id===slotId
+
+);
+
+}
+
+/* ======================================================
+
+ULOŽ SLOT
+
+====================================================== */
+
+function saveSlot(slot){
+
+localStorage.setItem(
+
+"VaFiT_SLOT_"+slot.id,
+
+JSON.stringify(slot)
+
+);
+
+}
+
+/* ======================================================
+
+NAČTI SLOT
+
+====================================================== */
+
+function loadSlot(slot){
+
+const data=
+
+localStorage.getItem(
+
+"VaFiT_SLOT_"+slot.id
+
+);
+
+if(!data)return;
+
+Object.assign(
+
+slot,
+
+JSON.parse(data)
+
+);
+
+}
+
+/* ======================================================
+
+NAČTI VŠECHNY SLOTY
+
+====================================================== */
+
+function loadAllSlots(){
+
+ENGINE.spheres.forEach(
+
+sphere=>{
+
+sphere.slots.forEach(
+
+slot=>loadSlot(slot)
+
+);
+
+}
+
+);
+
+}
+
+/* ======================================================
+
+ULOŽ VŠECHNY SLOTY
+
+====================================================== */
+
+function saveAllSlots(){
+
+ENGINE.spheres.forEach(
+
+sphere=>{
+
+sphere.slots.forEach(
+
+slot=>saveSlot(slot)
+
+);
+
+}
+
+);
+
+}
+/* ======================================================
+
+VaFiT DIALOG ENGINE
+v2.0
+
+====================================================== */
+
+const DIALOG={
+
+visible:false,
+
+title:"",
+
+slot:null,
+
+items:[],
+
+selected:0,
+
+x:0,
+
+y:0,
+
+width:340,
+
+height:520
+
+};
+
+/* ======================================================
+
+OTEVŘÍT DIALOG
+
+====================================================== */
+
+function openSlotDialog(slot){
+
+DIALOG.visible=true;
+
+DIALOG.slot=slot;
+
+DIALOG.title=slot.label;
+
+DIALOG.items=[
+
+{
+
+icon:"▶",
+
+text:"Otevřít",
+
+action:"open"
+
+},
+
+{
+
+icon:"📦",
+
+text:"VaFiT sklad",
+
+action:"store"
+
+},
+
+{
+
+icon:"📱",
+
+text:"Přidat PWA",
+
+action:"pwa"
+
+},
+
+{
+
+icon:"📂",
+
+text:"Vybrat soubor",
+
+action:"file"
+
+},
+
+{
+
+icon:"🌐",
+
+text:"Přidat URL",
+
+action:"url"
+
+},
+
+{
+
+icon:"📄",
+
+text:"HTML modul",
+
+action:"html"
+
+},
+
+{
+
+icon:"🖼",
+
+text:"Obrázek",
+
+action:"image"
+
+},
+
+{
+
+icon:"🎥",
+
+text:"Video",
+
+action:"video"
+
+},
+
+{
+
+icon:"🎵",
+
+text:"Hudba",
+
+action:"audio"
+
+},
+
+{
+
+icon:"📂",
+
+text:"Složka",
+
+action:"folder"
+
+},
+
+{
+
+icon:"⭐",
+
+text:"Ikona",
+
+action:"icon"
+
+},
+
+{
+
+icon:"🎨",
+
+text:"Barva",
+
+action:"color"
+
+},
+
+{
+
+icon:"📝",
+
+text:"Přejmenovat",
+
+action:"rename"
+
+},
+
+{
+
+icon:"📋",
+
+text:"Kopírovat",
+
+action:"copy"
+
+},
+
+{
+
+icon:"📌",
+
+text:"Přesunout",
+
+action:"move"
+
+},
+
+{
+
+icon:"📤",
+
+text:"Export",
+
+action:"export"
+
+},
+
+{
+
+icon:"📥",
+
+text:"Import",
+
+action:"import"
+
+},
+
+{
+
+icon:"🗑",
+
+text:"Vymazat",
+
+action:"clear"
+
+},
+
+{
+
+icon:"❌",
+
+text:"Zavřít",
+
+action:"close"
+
+}
+
+];
+
+}
+/* ======================================================
+
+VaFiT WINDOW ENGINE
+v2.0
+
+====================================================== */
+
+const WINDOW_ENGINE={
+
+visible:false,
+
+alpha:0,
+
+targetAlpha:0,
+
+scale:.85,
+
+targetScale:1,
+
+radius:22,
+
+width:360,
+
+height:520,
+
+background:"rgba(5,5,8,.94)",
+
+border:"rgba(255,205,130,.92)",
+
+text:"#ffe7b2",
+
+shadow:"rgba(255,190,90,.45)"
+
+};
+
+/* ======================================================
+
+ANIMACE OKNA
+
+====================================================== */
+
+function updateWindow(){
+
+const k=.12;
+
+WINDOW_ENGINE.alpha+=
+(WINDOW_ENGINE.targetAlpha-
+WINDOW_ENGINE.alpha)*k;
+
+WINDOW_ENGINE.scale+=
+(WINDOW_ENGINE.targetScale-
+WINDOW_ENGINE.scale)*k;
+
+}
+
+/* ======================================================
+
+OTEVŘENÍ
+
+====================================================== */
+
+function showWindow(){
+
+WINDOW_ENGINE.visible=true;
+
+WINDOW_ENGINE.targetAlpha=1;
+
+WINDOW_ENGINE.targetScale=1;
+
+}
+
+/* ======================================================
+
+ZAVŘENÍ
+
+====================================================== */
+
+function hideWindow(){
+
+WINDOW_ENGINE.targetAlpha=0;
+
+WINDOW_ENGINE.targetScale=.85;
+
+}
+/* ======================================================
+
+VaFiT WINDOW RENDERER
+v2.0
+
+====================================================== */
+
+function drawWindow(){
+
+if(!WINDOW_ENGINE.visible)return;
+
+updateWindow();
+
+if(WINDOW_ENGINE.alpha<0.01){
+
+WINDOW_ENGINE.visible=false;
+
+return;
+
+}
+
+/* ---------- ZATMAVENÍ ---------- */
+
+ctx.save();
+
+ctx.globalAlpha=
+WINDOW_ENGINE.alpha*.55;
+
+ctx.fillStyle="#000";
+
+ctx.fillRect(
+0,
+0,
+width,
+height
+);
+
+ctx.restore();
+
+/* ---------- STŘED OKNA ---------- */
+
+const w=
+WINDOW_ENGINE.width;
+
+const h=
+WINDOW_ENGINE.height;
+
+const x=
+WORLD.centerX-w/2;
+
+const y=
+WORLD.centerY-h/2;
+
+ctx.save();
+
+ctx.globalAlpha=
+WINDOW_ENGINE.alpha;
+
+ctx.translate(
+WORLD.centerX,
+WORLD.centerY
+);
+
+ctx.scale(
+WINDOW_ENGINE.scale,
+WINDOW_ENGINE.scale
+);
+
+ctx.translate(
+-WINDOW_ENGINE.width/2,
+-WINDOW_ENGINE.height/2
+);
+
+/* ---------- STÍN ---------- */
+
+ctx.shadowColor=
+WINDOW_ENGINE.shadow;
+
+ctx.shadowBlur=28;
+
+/* ---------- PANEL ---------- */
+
+ctx.beginPath();
+
+ctx.roundRect(
+
+0,
+
+0,
+
+w,
+
+h,
+
+WINDOW_ENGINE.radius
+
+);
+
+ctx.fillStyle=
+WINDOW_ENGINE.background;
+
+ctx.fill();
+
+ctx.lineWidth=2;
+
+ctx.strokeStyle=
+WINDOW_ENGINE.border;
+
+ctx.stroke();
+
+ctx.shadowBlur=0;
+
+/* ---------- HORNÍ LIŠTA ---------- */
+
+ctx.fillStyle=
+"rgba(255,205,120,.12)";
+
+ctx.beginPath();
+
+ctx.roundRect(
+
+0,
+
+0,
+
+w,
+
+52,
+
+[22,22,0,0]
+
+);
+
+ctx.fill();
+
+/* ---------- NADPIS ---------- */
+
+ctx.font=
+"bold 18px system-ui";
+
+ctx.fillStyle=
+WINDOW_ENGINE.text;
+
+ctx.textAlign="center";
+
+ctx.textBaseline="middle";
+
+ctx.fillText(
+
+DIALOG.title,
+
+w/2,
+
+26
+
+);
+
+/* ---------- ODDĚLOVAČ ---------- */
+
+ctx.strokeStyle=
+"rgba(255,205,120,.35)";
+
+ctx.beginPath();
+
+ctx.moveTo(
+
+18,
+
+52
+
+);
+
+ctx.lineTo(
+
+w-18,
+
+52
+
+);
+
+ctx.stroke();
+
+ctx.restore();
+
+}
+/* ======================================================
+
+VaFiT WINDOW MENU
+v2.0
+
+====================================================== */
+
+function drawWindowMenu(){
+
+if(!WINDOW_ENGINE.visible)return;
+
+const w=WINDOW_ENGINE.width;
+const x=WORLD.centerX-w/2;
+const y=WORLD.centerY-WINDOW_ENGINE.height/2;
+
+ctx.save();
+
+ctx.globalAlpha=WINDOW_ENGINE.alpha;
+
+ctx.translate(
+WORLD.centerX,
+WORLD.centerY
+);
+
+ctx.scale(
+WINDOW_ENGINE.scale,
+WINDOW_ENGINE.scale
+);
+
+ctx.translate(
+-w/2,
+-WINDOW_ENGINE.height/2
+);
+
+ctx.font="15px system-ui";
+
+ctx.textBaseline="middle";
+
+ctx.textAlign="left";
+
+const startY=78;
+
+const rowH=24;
+
+for(let i=0;i<DIALOG.items.length;i++){
+
+const item=DIALOG.items[i];
+
+const yy=startY+i*rowH;
+
+/* zvýraznění */
+
+if(i===DIALOG.selected){
+
+ctx.fillStyle=
+"rgba(255,210,120,.15)";
+
+ctx.beginPath();
+
+ctx.roundRect(
+12,
+yy-11,
+w-24,
+22,
+8
+);
+
+ctx.fill();
+
+}
+
+/* ikona */
+
+ctx.fillStyle=
+"#ffd88d";
+
+ctx.fillText(
+
+item.icon,
+
+24,
+
+yy
+
+);
+
+/* text */
+
+ctx.fillStyle=
+"#fff0c5";
+
+ctx.fillText(
+
+item.text,
+
+52,
+
+yy
+
+);
+
+}
+
+ctx.restore();
+
+}
+/* ======================================================
+
+VaFiT STORE ENGINE
+v2.0
+
+====================================================== */
+
+const STORE={
+
+version:"2.0",
+
+items:[],
+
+categories:[
+
+"PWA",
+
+"HTML",
+
+"URL",
+
+"IMAGE",
+
+"VIDEO",
+
+"AUDIO",
+
+"FOLDER",
+
+"PLUGIN",
+
+"SCRIPT",
+
+"AI"
+
+],
+
+selectedCategory:"PWA"
+
+};
+
+/* ======================================================
+
+NOVÁ POLOŽKA
+
+====================================================== */
+
+function createStoreItem(){
+
+return{
+
+id:crypto.randomUUID(),
+
+name:"Nová aplikace",
+
+type:"PWA",
+
+icon:"📱",
+
+color:"#FFD27A",
+
+url:"",
+
+file:null,
+
+description:"",
+
+version:"1.0",
+
+author:"",
+
+favorite:false,
+
+created:Date.now(),
+
+updated:Date.now()
+
+};
+
+}
+
+/* ======================================================
+
+PŘIDAT POLOŽKU
+
+====================================================== */
+
+function addStoreItem(item){
+
+STORE.items.push(item);
+
+saveStore();
+
+}
+
+/* ======================================================
+
+ODEBRAT POLOŽKU
+
+====================================================== */
+
+function removeStoreItem(id){
+
+STORE.items=
+
+STORE.items.filter(
+
+i=>i.id!==id
+
+);
+
+saveStore();
+
+}
+
+/* ======================================================
+
+NAJÍT POLOŽKU
+
+====================================================== */
+
+function getStoreItem(id){
+
+return STORE.items.find(
+
+i=>i.id===id
+
+);
+
+}
+/* ======================================================
+
+ULOŽENÍ SKLADU
+
+====================================================== */
+
+function saveStore(){
+
+localStorage.setItem(
+
+"VaFiT_STORE",
+
+JSON.stringify(STORE.items)
+
+);
+
+}
+
+/* ======================================================
+
+NAČTENÍ SKLADU
+
+====================================================== */
+
+function loadStore(){
+
+const data=
+
+localStorage.getItem(
+
+"VaFiT_STORE"
+
+);
+
+if(!data)return;
+
+STORE.items=
+
+JSON.parse(data);
+
+}
+
+loadStore();
+/* ======================================================
+
+VaF'i'T SLOT MENU
+v1.5
+
+====================================================== */
+
+const SLOT_MENU={
+
+visible:false,
+
+slot:null,
+
+x:0,
+
+y:0,
+
+language:"CZ"
+
+};
+
+let holdTimer=null;
+
+const HOLD_TIME=2500;
+
+/* ------------------------------------------------------ */
+
+function openSlotMenu(slot,x,y){
+
+SLOT_MENU.visible=true;
+
+SLOT_MENU.slot=slot;
+
+SLOT_MENU.x=x;
+
+SLOT_MENU.y=y;
+
+drawScene();
+
+}
+
+/* ------------------------------------------------------ */
+
+function closeSlotMenu(){
+
+SLOT_MENU.visible=false;
+
+SLOT_MENU.slot=null;
+
+drawScene();
+
+}
+
+/* ------------------------------------------------------ */
+
+function drawSlotMenu(){
+
+if(!SLOT_MENU.visible) return;
+
+const w=280;
+const h=270;
+
+const x=SLOT_MENU.x;
+const y=SLOT_MENU.y;
+
+ctx.save();
+
+ctx.fillStyle="rgba(8,8,10,.96)";
+ctx.strokeStyle="rgba(255,210,150,.95)";
+ctx.lineWidth=2;
+
+ctx.beginPath();
+
+ctx.roundRect(
+x,
+y,
+w,
+h,
+18
+);
+
+ctx.fill();
+ctx.stroke();
+
+/* ---------- Nadpis ---------- */
+
+ctx.fillStyle="#FFD28A";
+
+ctx.font="bold 16px system-ui";
+
+ctx.fillText(
+
+SLOT_MENU.slot.label,
+
+x+20,
+
+y+30
+
+);
+
+/* ---------- Položky ---------- */
+
+const items=[
+
+"📂 Otevřít sklad",
+
+"➕ Přidat PWA",
+
+"✏️ Upravit",
+
+"🗑 Odebrat",
+
+"⭐ Oblíbené",
+
+"⚙ Nastavení"
+
+];
+
+ctx.font="14px system-ui";
+
+ctx.fillStyle="#ffffff";
+
+items.forEach((txt,i)=>{
+
+ctx.fillText(
+
+txt,
+
+x+22,
+
+y+70+i*30
+
+);
+
+});
+
+ctx.restore();
+
+}
+/* ======================================================
+
+VaF'i'T ENGINE LINK
+v2.1
+NAVAZUJE NA CELÝ ENGINE
+
+====================================================== */
+
+(function(){
+
+function renderVaFiT(){
+
+    /* ---------- překryvná okna ---------- */
+
+    if(typeof drawWindow==="function"){
+        drawWindow();
+    }
+
+    if(typeof drawWindowMenu==="function"){
+        drawWindowMenu();
+    }
+
+    if(typeof drawSlotMenu==="function"){
+        drawSlotMenu();
+    }
+
+    requestAnimationFrame(renderVaFiT);
+
+}
+
+/* -------------------------------------------------- */
+
+function openVaFiTSlot(slot,x,y){
+
+    if(typeof openSlotMenu==="function"){
+
+        openSlotMenu(slot,x,y);
+
+    }
+
+    if(typeof openSlotDialog==="function"){
+
+        openSlotDialog(slot);
+
+    }
+
+    if(typeof showWindow==="function"){
+
+        showWindow();
+
+    }
+
+}
+
+/* -------------------------------------------------- */
+
+window.VaFiT={
+
+    render:renderVaFiT,
+
+    openSlot:openVaFiTSlot,
+
+    showWindow:showWindow,
+
+    hideWindow:hideWindow,
+
+    dialog:DIALOG,
+
+    store:STORE,
+
+    slotMenu:SLOT_MENU,
+
+    engine:ENGINE
+
+};
+
+/* -------------------------------------------------- */
+
+requestAnimationFrame(renderVaFiT);
+
+})();
+/* ======================================================
+
+VaF'i'T CONTENT ENGINE
+v2.2
+
+Každý slot může obsahovat cokoliv.
+
+====================================================== */
+
+const CONTENT_TYPES={
+
+PWA:"pwa",
+
+URL:"url",
+
+HTML:"html",
+
+IMAGE:"image",
+
+VIDEO:"video",
+
+AUDIO:"audio",
+
+PDF:"pdf",
+
+TEXT:"text",
+
+FOLDER:"folder",
+
+PLUGIN:"plugin",
+
+AI:"ai"
+
+};
+
+/* ------------------------------------------------------ */
+
+function createContent(){
+
+    return{
+
+        id:crypto.randomUUID(),
+
+        type:CONTENT_TYPES.PWA,
+
+        title:"",
+
+        description:"",
+
+        icon:"📱",
+
+        color:"#FFD27A",
+
+        value:"",
+
+        file:null,
+
+        created:Date.now(),
+
+        updated:Date.now()
+
+    };
+
+}
+
+/* ------------------------------------------------------ */
+
+function assignContent(slot,content){
+
+    slot.content=content;
+
+    saveSlot(slot);
+
+}
+
+/* ------------------------------------------------------ */
+
+function clearContent(slot){
+
+    slot.content=null;
+
+    saveSlot(slot);
+
+}
+/* ======================================================
+
+VaF'i'T ENGINE LINK
+v2.2
+
+NAVAZUJE NA CELÝ ENGINE
+
+====================================================== */
+
+(function(){
+
+const SLOT_RUNTIME={
+
+selected:null,
+
+hover:null,
+
+pressed:false,
+
+hold:false,
+
+touch:false,
+
+menu:false,
+
+lastTime:0
+
+};
+
+/* ------------------------------------------------ */
+
+function selectSlot(slot){
+
+    SLOT_RUNTIME.selected=slot;
+
+}
+
+/* ------------------------------------------------ */
+
+function deselectSlot(){
+
+    SLOT_RUNTIME.selected=null;
+
+}
+
+/* ------------------------------------------------ */
+
+function activateSlot(slot){
+
+    if(!slot)return;
+
+    selectSlot(slot);
+
+    if(typeof openSlotDialog==="function"){
+
+        openSlotDialog(slot);
+
+    }
+
+    if(typeof showWindow==="function"){
+
+        showWindow();
+
+    }
+
+}
+
+/* ------------------------------------------------ */
+
+function deactivateSlot(){
+
+    if(typeof hideWindow==="function"){
+
+        hideWindow();
+
+    }
+
+    deselectSlot();
+
+}
+
+/* ------------------------------------------------ */
+
+function updateRuntime(){
+
+    if(!WINDOW_ENGINE.visible){
+
+        SLOT_RUNTIME.menu=false;
+
+    }else{
+
+        SLOT_RUNTIME.menu=true;
+
+    }
+
+}
+
+/* ------------------------------------------------ */
+
+function engineLoop(){
+
+    updateRuntime();
+
+    if(typeof drawWindow==="function"){
+
+        drawWindow();
+
+    }
+
+    if(typeof drawWindowMenu==="function"){
+
+        drawWindowMenu();
+
+    }
+
+    if(typeof drawSlotMenu==="function"){
+
+        drawSlotMenu();
+
+    }
+
+    requestAnimationFrame(engineLoop);
+
+}
+
+/* ------------------------------------------------ */
+
+window.VAFIT_RUNTIME={
+
+runtime:SLOT_RUNTIME,
+
+activate:activateSlot,
+
+deactivate:deactivateSlot,
+
+select:selectSlot,
+
+deselect:deselectSlot
+
+};
+
+requestAnimationFrame(engineLoop);
+
+})();
+/* ======================================================
+
+VaF'i'T ENGINE LINK
+v2.3
+
+SMART SLOT ENGINE
+
+====================================================== */
+
+(function(){
+
+const SLOT_ACTIONS={
+
+OPEN:"open",
+
+STORE:"store",
+
+PWA:"pwa",
+
+FILE:"file",
+
+URL:"url",
+
+HTML:"html",
+
+IMAGE:"image",
+
+VIDEO:"video",
+
+AUDIO:"audio",
+
+FOLDER:"folder",
+
+PLUGIN:"plugin",
+
+SETTINGS:"settings"
+
+};
+
+/* ------------------------------------------------ */
+
+function executeSlot(slot){
+
+    if(!slot)return;
+
+    switch(slot.action){
+
+        case SLOT_ACTIONS.OPEN:
+
+            if(slot.url){
+
+                window.open(slot.url,"_blank");
+
             }
-          }
-          if (started) ctx.closePath();
-          ctx.stroke();
-        }
 
-        for (let j = 0; j < signalCore.segments; j++) {
-          ctx.beginPath();
-          let started = false;
-          for (let i = 0; i <= signalCore.rings; i++) {
-            const idx = i * signalCore.segments + j;
-            const p = signalCore.points[idx];
-            if (!p) continue;
-            if (!started) {
-              ctx.moveTo(p.screenX, p.screenY);
-              started = true;
-            } else {
-              ctx.lineTo(p.screenX, p.screenY);
+        break;
+
+        case SLOT_ACTIONS.STORE:
+
+            if(typeof openSlotDialog==="function"){
+
+                openSlotDialog(slot);
+
             }
-          }
-          if (started) ctx.stroke();
-        }
-      }
 
-      function drawSignalLetters() {
-        ctx.font = "10px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "rgba(255, 220, 170, 0.95)";
-        ctx.shadowColor = "rgba(255, 200, 140, 0.7)";
-        ctx.shadowBlur = 6;
+            if(typeof showWindow==="function"){
 
-        const len = letters.length;
-        let i = 0;
-        for (const p of signalCore.points) {
-          const ch = letters[i % len];
-          i++;
-          const flicker = 0.6 + 0.4 * Math.sin(signalCore.pulse * 2 + p.phase);
-          ctx.globalAlpha = flicker;
-          ctx.fillText(ch, p.screenX, p.screenY);
-        }
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
-      }
+                showWindow();
 
-      function drawSignalGlyph() {
-        ctx.font = "11px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "rgba(255, 225, 180, 0.96)";
-        ctx.shadowColor = "rgba(255, 200, 160, 0.8)";
-        ctx.shadowBlur = 7;
-
-        const len = glyphs.length;
-        let i = 0;
-        for (const p of signalCore.points) {
-          const g = glyphs[i % len];
-          i++;
-          const flicker =
-            0.55 + 0.45 * Math.sin(signalCore.pulse * 1.4 + p.phase);
-          ctx.globalAlpha = flicker;
-          ctx.fillText(g, p.screenX, p.screenY);
-        }
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
-      }
-
-      function drawSignalVafiti() {
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(255, 210, 160, 0.9)";
-        ctx.fillStyle = "rgba(255, 210, 160, 0.35)";
-        for (const p of signalCore.points) {
-          const wobble = Math.sin(signalCore.pulse * 3 + p.phase) * 4;
-          const y = p.screenY - wobble;
-          const size = 2 + 1.2 * Math.sin(signalCore.pulse * 2 + p.phase);
-          ctx.beginPath();
-          ctx.arc(p.screenX, y, size, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.stroke();
-        }
-      }
-
-      function cutRotatingQuarter() {
-        ctx.save();
-        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
-        ctx.scale(viewScale, viewScale);
-
-        const centerY = signalCore.offsetY - signalCore.coneHeight * 0.1;
-        const outerR = signalCore.baseRadius * 1.2;
-
-        const start = orbitRotation;
-        const end = start + Math.PI / 2;
-
-        ctx.beginPath();
-        ctx.moveTo(0, centerY);
-        ctx.arc(0, centerY, outerR, start, end);
-        ctx.closePath();
-
-        const oldOp = ctx.globalCompositeOperation;
-        ctx.globalCompositeOperation = "destination-out";
-        ctx.fill();
-        ctx.globalCompositeOperation = oldOp;
-
-        ctx.restore();
-      }
-
-      function drawSignalCore() {
-        signalCore.pulse += 0.016;
-        updateSignalProjection();
-        drawSignalBackground();
-
-        switch (signalCore.mode) {
-          case "mesh":
-            drawSignalMesh();
-            break;
-          case "letters":
-            drawSignalLetters();
-            break;
-          case "glyph":
-            drawSignalGlyph();
-            break;
-          case "vafiti":
-            drawSignalVafiti();
-            break;
-        }
-
-        cutRotatingQuarter();
-      }
-
-      // ---------- VELKÝ KUŽEL / KOŠ KOLEM KOULE (BigCone) ----------
-
-      const bigCone = {
-        points: [],
-        rings: 14,
-        segments: 24,
-        radiusTop: 300,
-        radiusBottom: 40,
-        height: 400,
-        offsetTopY: 0,
-        rotationFactor: 0.35
-      };
-
-      function generateBigConePoints() {
-        bigCone.points = [];
-        const { rings, segments, radiusTop, radiusBottom, height, offsetTopY } =
-          bigCone;
-
-        for (let i = 0; i <= rings; i++) {
-          const t = i / rings;
-          const y = offsetTopY - t * height;
-          const r = radiusTop - (radiusTop - radiusBottom) * t;
-          for (let j = 0; j < segments; j++) {
-            const a = (j / segments) * Math.PI * 2;
-            const x = r * Math.cos(a);
-            const z = r * Math.sin(a);
-            bigCone.points.push({
-              baseX: x,
-              baseY: y,
-              baseZ: z,
-              x: 0,
-              y: 0,
-              z: 0,
-              screenX: 0,
-              screenY: 0,
-              ring: i,
-              seg: j
-            });
-          }
-        }
-      }
-
-      function updateBigConeProjection() {
-        const sinX = Math.sin(globalTiltX);
-        const cosX = Math.cos(globalTiltX);
-        const sinY = Math.sin(globalTiltY);
-        const cosY = Math.cos(globalTiltY);
-
-        const extraRot = orbitRotation * bigCone.rotationFactor;
-        const sinR = Math.sin(extraRot);
-        const cosR = Math.cos(extraRot);
-
-        for (const p of bigCone.points) {
-          let x = p.baseX;
-          let y = p.baseY;
-          let z = p.baseZ;
-
-          let xR = x * cosR + z * sinR;
-          let zR = -x * sinR + z * cosR;
-
-          let y1 = y * cosX - zR * sinX;
-          let z1 = y * sinX + zR * cosX;
-
-          let x2 = xR * cosY + z1 * sinY;
-          let z2 = -xR * sinY + z1 * cosY;
-
-          p.x = x2;
-          p.y = y1;
-          p.z = z2;
-
-          const sx = width / 2 + viewOffsetX + x2 * viewScale;
-          const sy = height / 2 + viewOffsetY + y1 * viewScale;
-
-          p.screenX = sx;
-          p.screenY = sy;
-        }
-      }
-
-      function drawBigCone() {
-        updateBigConeProjection();
-
-        ctx.save();
-        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
-        ctx.scale(viewScale, viewScale);
-        ctx.beginPath();
-        ctx.ellipse(
-          0,
-          bigCone.offsetTopY - bigCone.height + bigCone.radiusBottom * 0.45,
-          bigCone.radiusBottom * 1.4,
-          bigCone.radiusBottom * 0.45,
-          0,
-          0,
-          Math.PI * 2
-        );
-        const shadowGrad = ctx.createRadialGradient(
-          0,
-          bigCone.offsetTopY - bigCone.height + bigCone.radiusBottom * 0.45,
-          bigCone.radiusBottom * 0.3,
-          0,
-          bigCone.offsetTopY - bigCone.height + bigCone.radiusBottom * 0.45,
-          bigCone.radiusBottom * 1.7
-        );
-        shadowGrad.addColorStop(0, "rgba(10,6,4,0.9)");
-        shadowGrad.addColorStop(1, "rgba(0,0,0,0.2)");
-        ctx.fillStyle = shadowGrad;
-        ctx.fill();
-        ctx.restore();
-
-        ctx.save();
-        ctx.lineWidth = 1.1;
-        ctx.strokeStyle = "rgba(255, 210, 150, 0.42)";
-
-        for (let i = 0; i <= bigCone.rings; i++) {
-          ctx.beginPath();
-          let started = false;
-          for (const p of bigCone.points) {
-            if (p.ring !== i) continue;
-            if (!started) {
-              ctx.moveTo(p.screenX, p.screenY);
-              started = true;
-            } else {
-              ctx.lineTo(p.screenX, p.screenY);
             }
-          }
-          if (started) ctx.closePath();
-          ctx.stroke();
-        }
 
-        for (let j = 0; j < bigCone.segments; j++) {
-          ctx.beginPath();
-          let started = false;
-          for (let i = 0; i <= bigCone.rings; i++) {
-            const idx = i * bigCone.segments + j;
-            const p = bigCone.points[idx];
-            if (!p) continue;
-            if (!started) {
-              ctx.moveTo(p.screenX, p.screenY);
-              started = true;
-            } else {
-              ctx.lineTo(p.screenX, p.screenY);
+        break;
+
+        default:
+
+            if(typeof openSlotDialog==="function"){
+
+                openSlotDialog(slot);
+
             }
-          }
-          if (started) ctx.stroke();
-        }
 
-        ctx.restore();
-      }
+            if(typeof showWindow==="function"){
 
-      // ---------- KOULE / SLOTY ----------
+                showWindow();
 
-      function createSlotTemplate() {
-        const template = [];
-        const bands = 7;
-        const segs = 10;
-        let id = 1;
-        for (let b = 0; b < bands; b++) {
-          const t = (b + 0.5) / bands;
-          const lat = -Math.PI / 3 + (t * 2 * Math.PI) / 3;
-          for (let s = 0; s < segs; s++) {
-            const lon = (s / segs) * Math.PI * 2;
-            template.push({
-              id,
-              lat,
-              lon,
-              label: "slot " + id,
-              url: "", // <-- SEM VLOŽ ODKAZ NA APLIKACI / PWA PRO TENTO SLOT
-              screenX: 0,
-              screenY: 0,
-              sceneX: 0,
-              sceneY: 0
-            });
-            id++;
-          }
-        }
-        // příklad: pojmenované sloty s odkazy
-        if (template[34]) {
-          template[34].label = "VaF'i'T";
-          template[34].url = ""; // např. "https://tvoje-pwa-domena.cz/vafiti"
-        }
-        if (template[35]) {
-          template[35].label = "Revia";
-          template[35].url = ""; // např. "https://tvoje-pwa-domena.cz/revia"
-        }
-        if (template[36]) {
-          template[36].label = "MK AI";
-          template[36].url = ""; // např. "https://tvoje-pwa-domena.cz/mkai"
-        }
-        return template;
-      }
-
-      const slotTemplate = createSlotTemplate();
-
-      function cloneSlots() {
-        return slotTemplate.map((s) => ({ ...s }));
-      }
-
-      const spheres = [
-        {
-          key: "game",
-          name: "Hra + pravidla",
-          baseAngle: Math.PI / 2,
-          rotX: -0.2,
-          rotY: 0.0,
-          autoSpeed: 0.35,
-          slots: cloneSlots(),
-          cx: 0,
-          cy: 0,
-          depth: 0,
-          radiusScale: 1
-        },
-        {
-          key: "heroes",
-          name: "Hrdinové",
-          baseAngle: -Math.PI / 2,
-          rotX: -0.15,
-          rotY: 0.6,
-          autoSpeed: 0.25,
-          slots: cloneSlots(),
-          cx: 0,
-          cy: 0,
-          depth: 0,
-          radiusScale: 1
-        },
-        {
-          key: "lang",
-          name: "Jazyk",
-          baseAngle: Math.PI,
-          rotX: -0.25,
-          rotY: -0.3,
-          autoSpeed: 0.28,
-          slots: cloneSlots(),
-          cx: 0,
-          cy: 0,
-          depth: 0,
-          radiusScale: 1
-        },
-        {
-          key: "earth",
-          name: "Země / úhel pohledu",
-          baseAngle: 0,
-          rotX: -0.1,
-          rotY: 0.9,
-          autoSpeed: 0.32,
-          slots: cloneSlots(),
-          cx: 0,
-          cy: 0,
-          depth: 0,
-          radiusScale: 1
-        }
-      ];
-
-      activeSphere = spheres[0];
-
-      function layoutSpheres() {
-        const orbitR = baseRadius * 2.7;
-
-        spheres.forEach((s) => {
-          const a = s.baseAngle + orbitRotation;
-
-          let x = orbitR * Math.cos(a);
-          let y = 0;
-          let z = orbitR * Math.sin(a);
-
-          let y1 = y * Math.cos(globalTiltX) - z * Math.sin(globalTiltX);
-          let z1 = y * Math.sin(globalTiltX) + z * Math.cos(globalTiltX);
-          let x2 = x * Math.cos(globalTiltY) + z1 * Math.sin(globalTiltY);
-          let z2 = -x * Math.sin(globalTiltY) + z1 * Math.cos(globalTiltY);
-
-          let nudgeX = 0;
-          let nudgeY = 0;
-          if (activeSphere && s !== activeSphere) {
-            nudgeX = orbitNudgeX;
-            nudgeY = orbitNudgeY;
-          }
-
-          s.cx = x2 + nudgeX;
-          s.cy = y1 + nudgeY;
-          s.depth = z2;
-
-          const t = (z2 + orbitR) / (2 * orbitR);
-          s.radiusScale = 0.6 + 0.4 * t;
-          s.alpha = 0.4 + 0.6 * t;
-        });
-      }
-
-      function resize() {
-        const rect = canvas.getBoundingClientRect();
-        width = rect.width;
-        height = rect.height;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-        baseRadius = Math.min(width, height) * 0.18;
-
-        signalCore.baseRadius = Math.min(width, height) * 0.19;
-        signalCore.coneHeight = signalCore.baseRadius * 1.6;
-        signalCore.offsetY = baseRadius * 0.9;
-
-        bigCone.radiusTop = baseRadius * 2.4;
-        bigCone.radiusBottom = baseRadius * 0.6;
-        bigCone.height = baseRadius * 4.2;
-
-        // OPRAVA: horní okraj velkého kuželu je teď zarovnaný přesně
-        // na střed scény (y=0), stejně jako hub a orbitová dráha koulí,
-        // takže kužel už neuhýbá dolů mimo osu koulí.
-        bigCone.offsetTopY = 0;
-
-        generateSignalPoints();
-        generateBigConePoints();
-      }
-
-      resize();
-      window.addEventListener("resize", resize);
-
-      function projectOnSphere(x, y, z, radius, rotX, rotY) {
-        let y1 = y * Math.cos(rotX) - z * Math.sin(rotX);
-        let z1 = y * Math.sin(rotX) + z * Math.cos(rotX);
-        let x2 = x * Math.cos(rotY) + z1 * Math.sin(rotY);
-        let z2 = -x * Math.sin(rotY) + z1 * Math.cos(rotY);
-        const scale = radius * 0.9;
-        return { x: x2 * scale, y: y1 * scale, z: z2 };
-      }
-
-      function drawSphere(sphere) {
-        const radius = baseRadius * (sphere.radiusScale || 1);
-
-        ctx.save();
-        ctx.translate(
-          width / 2 + viewOffsetX + sphere.cx * viewScale,
-          height / 2 + viewOffsetY + sphere.cy * viewScale
-        );
-        ctx.scale(viewScale, viewScale);
-        ctx.globalAlpha = sphere.alpha || 1;
-
-        const g = ctx.createRadialGradient(
-          0,
-          -radius * 0.4,
-          radius * 0.2,
-          0,
-          0,
-          radius * 1.4
-        );
-        g.addColorStop(0, "rgba(255, 200, 150, 0.20)");
-        g.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = g;
-        ctx.fillRect(-radius * 2, -radius * 2, radius * 4, radius * 4);
-
-        ctx.beginPath();
-        ctx.arc(0, 0, radius * 1.02, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0,0,0,0.75)";
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(0, 0, radius, 0, Math.PI * 2);
-        const globeGrad = ctx.createRadialGradient(
-          -radius * 0.3,
-          -radius * 0.4,
-          radius * 0.3,
-          0,
-          radius * 0.4,
-          radius * 1.1
-        );
-        globeGrad.addColorStop(0, "#2d1d0f");
-        globeGrad.addColorStop(0.5, "#1b1012");
-        globeGrad.addColorStop(1, "#050308");
-        ctx.fillStyle = globeGrad;
-        ctx.fill();
-
-        ctx.strokeStyle = "rgba(255, 197, 120, 0.9)";
-        ctx.lineWidth = 1.4;
-        ctx.shadowColor = "rgba(255, 197, 120, 0.9)";
-        ctx.shadowBlur = 8;
-        ctx.beginPath();
-        ctx.arc(0, 0, radius, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-
-        ctx.lineWidth = 0.9;
-        ctx.strokeStyle = "rgba(255, 210, 140, 0.9)";
-
-        const meridians = 12;
-        for (let i = 0; i < meridians; i++) {
-          const lon = (i / meridians) * Math.PI * 2;
-          ctx.beginPath();
-          let started = false;
-          for (let s = 0; s <= 60; s++) {
-            const t = (s / 60) * Math.PI - Math.PI / 2;
-            const x = Math.cos(t) * Math.cos(lon);
-            const y = Math.sin(t);
-            const z = Math.cos(t) * Math.sin(lon);
-            const p = projectOnSphere(
-              x,
-              y,
-              z,
-              radius,
-              sphere.rotX,
-              sphere.rotY
-            );
-            if (p.z >= 0) {
-              if (!started) {
-                ctx.moveTo(p.x, p.y);
-                started = true;
-              } else {
-                ctx.lineTo(p.x, p.y);
-              }
             }
-          }
-          ctx.stroke();
-        }
-
-        const parallels = 8;
-        for (let j = 1; j < parallels; j++) {
-          const lat = (j / parallels) * Math.PI - Math.PI / 2;
-          ctx.beginPath();
-          let started = false;
-          for (let s = 0; s <= 90; s++) {
-            const lon = (s / 90) * Math.PI * 2;
-            const x = Math.cos(lat) * Math.cos(lon);
-            const y = Math.sin(lat);
-            const z = Math.cos(lat) * Math.sin(lon);
-            const p = projectOnSphere(
-              x,
-              y,
-              z,
-              radius,
-              sphere.rotX,
-              sphere.rotY
-            );
-            if (p.z >= 0) {
-              if (!started) {
-                ctx.moveTo(p.x, p.y);
-                started = true;
-              } else {
-                ctx.lineTo(p.x, p.y);
-              }
-            }
-          }
-          ctx.stroke();
-        }
-
-        ctx.save();
-        ctx.font = "11px system-ui";
-        ctx.fillStyle = "rgba(255,220,170,0.92)";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "top";
-        ctx.shadowColor = "rgba(0,0,0,0.8)";
-        ctx.shadowBlur = 6;
-        ctx.fillText(sphere.name, 0, radius + 10);
-        ctx.restore();
-
-        const slotW = (radius * 0.35) / 3;
-        const slotH = slotW * 0.65;
-
-        ctx.font = "9px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        for (let i = 0; i < sphere.slots.length; i++) {
-          const slot = sphere.slots[i];
-          const x = Math.cos(slot.lat) * Math.cos(slot.lon);
-          const y = Math.sin(slot.lat);
-          const z = Math.cos(slot.lat) * Math.sin(slot.lon);
-          const p = projectOnSphere(
-            x,
-            y,
-            z,
-            radius,
-            sphere.rotX,
-            sphere.rotY
-          );
-          if (p.z < 0) continue;
-
-          const sceneX = sphere.cx * viewScale + p.x;
-          const sceneY = sphere.cy * viewScale + p.y;
-          slot.sceneX = sceneX / viewScale;
-          slot.sceneY = sceneY / viewScale;
-
-          const screenX = width / 2 + viewOffsetX + sceneX;
-          const screenY = height / 2 + viewOffsetY + sceneY;
-
-          slot.screenX = screenX;
-          slot.screenY = screenY;
-
-          ctx.save();
-          ctx.translate(p.x, p.y);
-
-          ctx.beginPath();
-          const r = 5;
-          const w = slotW;
-          const h = slotH;
-          ctx.moveTo(-w / 2 + r, -h / 2);
-          ctx.lineTo(w / 2 - r, -h / 2);
-          ctx.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
-          ctx.lineTo(w / 2, h / 2 - r);
-          ctx.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
-          ctx.lineTo(-w / 2 + r, h / 2);
-          ctx.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
-          ctx.lineTo(-w / 2, -h / 2 + r);
-          ctx.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
-          ctx.closePath();
-
-          // sloty s odkazem mají jemně výraznější okraj, ať je vidět, že jsou klikací
-          ctx.fillStyle = "rgba(6,6,10,0.92)";
-          ctx.strokeStyle = slot.url
-            ? "rgba(255,230,170,1)"
-            : "rgba(255,210,150,0.9)";
-          ctx.lineWidth = slot.url ? 1.1 : 0.7;
-          ctx.fill();
-          ctx.stroke();
-
-          ctx.fillStyle = "rgba(255,220,160,0.95)";
-          ctx.shadowColor = "rgba(255,200,140,0.5)";
-          ctx.shadowBlur = 4;
-          ctx.fillText(slot.label, 0, 1);
-
-          ctx.restore();
-        }
-
-        ctx.restore();
-        ctx.globalAlpha = 1;
-      }
-
-      function drawScene() {
-        ctx.clearRect(0, 0, width, height);
-
-        layoutSpheres();
-
-        drawBigCone();
-        drawSignalCore();
-
-        ctx.save();
-        ctx.translate(width / 2 + viewOffsetX, height / 2 + viewOffsetY);
-        ctx.scale(viewScale, viewScale);
-
-        const hubRInner = baseRadius * 1.0;
-        const hubROuter = baseRadius * 1.45;
-
-        const gCenter = ctx.createRadialGradient(
-          0,
-          0,
-          hubRInner * 0.2,
-          0,
-          0,
-          hubROuter * 1.2
-        );
-        gCenter.addColorStop(0, "rgba(255, 200, 150, 0.12)");
-        gCenter.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = gCenter;
-        ctx.fillRect(-width, -height, width * 2, height * 2);
-
-        ctx.beginPath();
-        ctx.arc(0, 0, hubROuter, 0, Math.PI * 2);
-        ctx.arc(0, 0, hubRInner, 0, Math.PI * 2, true);
-        ctx.closePath();
-        const hubGrad = ctx.createRadialGradient(
-          -hubROuter * 0.2,
-          -hubROuter * 0.2,
-          hubRInner * 0.2,
-          0,
-          hubROuter * 0.4,
-          hubROuter * 1.1
-        );
-        hubGrad.addColorStop(0, "#1b1012");
-        hubGrad.addColorStop(1, "#050308");
-        ctx.fillStyle = hubGrad;
-        ctx.fill();
-
-        ctx.save();
-        ctx.strokeStyle = "rgba(255, 197, 120, 0.5)";
-        ctx.lineWidth = 1;
-        for (let i = 0; i < 4; i++) {
-          const angle = (i * Math.PI) / 2;
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(hubROuter * Math.cos(angle), hubROuter * Math.sin(angle));
-          ctx.stroke();
-        }
-        ctx.restore();
-
-        ctx.save();
-        ctx.font = "700 14px system-ui";
-        ctx.fillStyle = "rgba(255, 220, 150, 0.95)";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.shadowColor = "rgba(255, 200, 120, 0.9)";
-        ctx.shadowBlur = 14;
-        ctx.rotate(0.8);
-        ctx.fillText(
-          "{*(°.).)// Vivere atque Fru'ii'T \\\\(.(.°)*]",
-          0,
-          0
-        );
-        ctx.restore();
-
-        ctx.save();
-        ctx.setLineDash([6, 6]);
-        ctx.strokeStyle = "rgba(255, 210, 150, 0.4)";
-        ctx.lineWidth = 1;
-        const orbitR = baseRadius * 2.7;
-        ctx.beginPath();
-        for (let aDeg = 0; aDeg <= 360; aDeg += 3) {
-          const a = (aDeg * Math.PI) / 180 + orbitRotation;
-          let x = orbitR * Math.cos(a);
-          let y = 0;
-          let z = orbitR * Math.sin(a);
-
-          let y1 = y * Math.cos(globalTiltX) - z * Math.sin(globalTiltX);
-          let z1 = y * Math.sin(globalTiltX) + z * Math.cos(globalTiltX);
-          let x2 = x * Math.cos(globalTiltY) + z1 * Math.sin(globalTiltY);
-
-          const px = x2;
-          const py = y1;
-          if (aDeg === 0) ctx.moveTo(px, py);
-          else ctx.lineTo(px, py);
-        }
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.restore();
-
-        const sorted = [...spheres].sort((a, b) => a.depth - b.depth);
-        for (const s of sorted) drawSphere(s);
-      }
-
-      // animace
-      let lastTime = 0;
-      function loop(timestamp) {
-        if (!timestamp) timestamp = 0;
-        const dt = (timestamp - lastTime) / 1000;
-        lastTime = timestamp;
-
-        if (!sphereDragActive) {
-          orbitRotation += orbitVelocity * dt;
-          const drift = orbitBaseDrift * dt;
-          orbitVelocity += orbitVelocity >= 0 ? drift : -drift;
-          orbitVelocity *= Math.pow(orbitDamping, dt * 60);
-        } else {
-          orbitRotation += orbitVelocity * dt * 0.15;
-          orbitVelocity *= Math.pow(0.85, dt * 60);
-        }
-
-        for (const sphere of spheres) {
-          sphere.rotY += sphere.autoSpeed * dt;
-        }
-
-        orbitNudgeX *= Math.pow(0.85, dt * 60);
-        orbitNudgeY *= Math.pow(0.85, dt * 60);
-
-        const k = Math.min(1, 6 * dt);
-        viewScale += (targetViewScale - viewScale) * k;
-        viewOffsetX += (targetViewOffsetX - viewOffsetX) * k;
-        viewOffsetY += (targetViewOffsetY - viewOffsetY) * k;
-        globalTiltX += (targetTiltX - globalTiltX) * k;
-        globalTiltY += (targetTiltY - globalTiltY) * k;
-
-        drawScene();
-        requestAnimationFrame(loop);
-      }
-      requestAnimationFrame(loop);
-
-      // interakce
-      let drag = false;
-      let dragMode = "none";
-      let lastX = 0;
-      let lastY = 0;
-      let movedDistance = 0;
-
-      let startScale = 1;
-      let startDist = 0;
-      let pinchSceneX = 0;
-      let pinchSceneY = 0;
-
-      function pointerDown(e) {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-
-        if (e.touches && e.touches.length === 2) {
-          drag = true;
-          dragMode = "two";
-          const t0 = e.touches[0];
-          const t1 = e.touches[1];
-          const cx = (t0.clientX + t1.clientX) / 2;
-          const cy = (t0.clientY + t1.clientY) / 2;
-
-          const centerX = cx - rect.left;
-          const centerY = cy - rect.top;
-
-          lastX = cx;
-          lastY = cy;
-          movedDistance = 0;
-
-          const dx = t0.clientX - t1.clientX;
-          const dy = t0.clientY - t1.clientY;
-          startDist = Math.hypot(dx, dy);
-
-          pinchSceneX = (centerX - width / 2 - viewOffsetX) / viewScale;
-          pinchSceneY = (centerY - height / 2 - viewOffsetY) / viewScale;
-
-          startScale = viewScale;
-          sphereDragActive = false;
-          return;
-        }
-
-        const touch = e.touches ? e.touches[0] : e;
-        const cx = touch.clientX - rect.left - (width / 2 + viewOffsetX);
-        const cy = touch.clientY - rect.top - (height / 2 + viewOffsetY);
-
-        let best = null;
-        let bestDist = Infinity;
-        const rHit = baseRadius * 1.2 * viewScale;
-        for (const sphere of spheres) {
-          const sx = sphere.cx * viewScale;
-          const sy = sphere.cy * viewScale;
-          const d = Math.hypot(cx - sx, cy - sy);
-          if (d < rHit && d < bestDist) {
-            best = sphere;
-            bestDist = d;
-          }
-        }
-
-        if (best) {
-          activeSphere = best;
-          statusEl.textContent = "vybraný svět: " + activeSphere.name;
-          updateSignalModeForSphere(activeSphere);
-          dragMode = "sphere";
-          sphereDragActive = true;
-        } else {
-          dragMode = "orbit";
-          sphereDragActive = false;
-        }
-
-        drag = true;
-        lastX = touch.clientX;
-        lastY = touch.clientY;
-        movedDistance = 0;
-      }
-
-      function pointerMove(e) {
-        if (!drag) return;
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-
-        if (dragMode === "two" && e.touches && e.touches.length === 2) {
-          const t0 = e.touches[0];
-          const t1 = e.touches[1];
-
-          const cxNow = (t0.clientX + t1.clientX) / 2;
-          const cyNow = (t0.clientY + t1.clientY) / 2;
-
-          const centerX = cxNow - rect.left;
-          const centerY = cyNow - rect.top;
-
-          const dxCenter = cxNow - lastX;
-          const dyCenter = cyNow - lastY;
-          lastX = cxNow;
-          lastY = cyNow;
-          movedDistance += Math.hypot(dxCenter, dyCenter);
-
-          const dx = t0.clientX - t1.clientX;
-          const dy = t0.clientY - t1.clientY;
-          const dist = Math.hypot(dx, dy);
-          const ratio = dist / startDist;
-          let newScale = startScale * ratio;
-          newScale = Math.max(0.7, Math.min(3.2, newScale));
-          targetViewScale = newScale;
-
-          targetViewOffsetX = centerX - width / 2 - pinchSceneX * newScale;
-          targetViewOffsetY = centerY - height / 2 - pinchSceneY * newScale;
-
-          targetTiltX += dyCenter * -0.02;
-          targetTiltY += dxCenter * 0.02;
-          return;
-        }
-
-        const touch = e.touches ? e.touches[0] : e;
-        const x = touch.clientX;
-        const y = touch.clientY;
-        const dx = x - lastX;
-        const dy = y - lastY;
-        lastX = x;
-        lastY = y;
-        movedDistance += Math.hypot(dx, dy);
-
-        if (dragMode === "sphere" && activeSphere) {
-          activeSphere.rotY += dx * 0.015;
-          activeSphere.rotX += dy * 0.015;
-          activeSphere.rotX = Math.max(
-            -Math.PI / 2 + 0.2,
-            Math.min(Math.PI / 2 - 0.2, activeSphere.rotX)
-          );
-          orbitVelocity += dx * 0.01;
-          orbitNudgeX += dx * 0.02;
-          orbitNudgeY += dy * 0.02;
-          const maxNudge = baseRadius * 0.06;
-          orbitNudgeX = Math.max(-maxNudge, Math.min(maxNudge, orbitNudgeX));
-          orbitNudgeY = Math.max(-maxNudge, Math.min(maxNudge, orbitNudgeY));
-          sphereDragActive = true;
-        } else if (dragMode === "orbit") {
-          orbitRotation += dx * 0.01;
-          orbitVelocity += dx * 0.008;
-          sphereDragActive = false;
-        }
-      }
-
-      function focusOnSlot(slot) {
-        let newScale = 2.3;
-        newScale = Math.max(1.2, Math.min(3.0, newScale));
-        targetViewScale = newScale;
-
-        targetViewOffsetX = -slot.sceneX * newScale;
-        targetViewOffsetY = -slot.sceneY * newScale;
-
-        orbitVelocity *= 0.4;
-      }
-
-      // NOVÉ: otevření appky/PWA po kliknutí na slot s vyplněnou url
-      function openSlotApp(slot) {
-        if (!slot.url) return;
-        window.open(slot.url, "_blank");
-      }
-
-      function pointerUp(e) {
-        if (!drag) return;
-        drag = false;
-        if (dragMode === "sphere" && movedDistance < 16 && activeSphere) {
-          const touch = e.changedTouches ? e.changedTouches[0] : e;
-          const clientX = touch.clientX;
-          const clientY = touch.clientY;
-
-          for (const slot of activeSphere.slots) {
-            const dx = clientX - slot.screenX;
-            const dy = clientY - slot.screenY;
-            if (Math.abs(dx) <= 16 && Math.abs(dy) <= 14) {
-              statusEl.textContent =
-                "vybraný svět: " +
-                activeSphere.name +
-                " • " +
-                slot.label;
-
-              if (slot.url) {
-                // pokud má slot přiřazenou aplikaci, otevři ji
-                openSlotApp(slot);
-              } else {
-                // jinak jen přiblížení jako doteď
-                focusOnSlot(slot);
-              }
-              break;
-            }
-          }
-        }
-        sphereDragActive = false;
-      }
-
-      function updateSignalModeForSphere(sphere) {
-        if (!sphere) return;
-        if (sphere.key === "game") signalCore.mode = "mesh";
-        else if (sphere.key === "heroes") signalCore.mode = "glyph";
-        else if (sphere.key === "lang") signalCore.mode = "letters";
-        else if (sphere.key === "earth") signalCore.mode = "vafiti";
-      }
-
-      canvas.addEventListener("mousedown", pointerDown);
-      window.addEventListener("mousemove", pointerMove);
-      window.addEventListener("mouseup", pointerUp);
-      window.addEventListener("contextmenu", (e) => e.preventDefault());
-
-      canvas.addEventListener("touchstart", pointerDown, { passive: false });
-      window.addEventListener("touchmove", pointerMove, { passive: false });
-      window.addEventListener("touchend", pointerUp, { passive: false });
-      window.addEventListener("touchcancel", pointerUp, { passive: false });
-
-      canvas.addEventListener("wheel", (e) => {
-        e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const cx = e.clientX - rect.left;
-        const cy = e.clientY - rect.top;
-
-        const sceneX = (cx - width / 2 - viewOffsetX) / viewScale;
-        const sceneY = (cy - height / 2 - viewOffsetY) / viewScale;
-
-        const factor = e.deltaY > 0 ? 0.9 : 1.1;
-        let newScale = viewScale * factor;
-        newScale = Math.max(0.7, Math.min(3.2, newScale));
-        targetViewScale = newScale;
-
-        targetViewOffsetX = cx - width / 2 - sceneX * newScale;
-        targetViewOffsetY = cy - height / 2 - sceneY * newScale;
-      });
-    </script>
-  
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
-        });
-      }
-    </script>
+
+        break;
+
+    }
+
+}
+
+/* ------------------------------------------------ */
+
+window.VAFIT_RUNTIME.execute=executeSlot;
+
+/* ------------------------------------------------ */
+
+console.log(
+
+"VaF'i'T Smart Slot Engine v2.3 načten."
+
+);
+
+})();
+/* ======================================================
+
+VaF'i'T APP ENGINE
+v1.0
+
+====================================================== */
+
+const APP_ENGINE={
+
+version:"1.0",
+
+apps:{},
+
+currentApp:null,
+
+currentSlot:null
+
+};
+
+/* ======================================================
+
+NOVÁ APLIKACE
+
+====================================================== */
+
+function createApp(){
+
+return{
+
+id:crypto.randomUUID(),
+
+name:"Nová aplikace",
+
+type:"PWA",
+
+icon:"📱",
+
+color:"#FFD27A",
+
+url:"",
+
+html:"",
+
+script:"",
+
+description:"",
+
+version:"1.0",
+
+author:"",
+
+created:Date.now(),
+
+updated:Date.now(),
+
+favorite:false
+
+};
+
+}
+
+/* ======================================================
+
+PŘIŘADIT APLIKACI SLOTU
+
+====================================================== */
+
+function assignAppToSlot(slot,app){
+
+slot.app=app.id;
+
+APP_ENGINE.apps[app.id]=app;
+
+saveSlot(slot);
+
+}
+
+/* ======================================================
+
+ODEBRAT APLIKACI ZE SLOTU
+
+====================================================== */
+
+function removeAppFromSlot(slot){
+
+slot.app="";
+
+saveSlot(slot);
+
+}
+
+/* ======================================================
+
+NAJÍT APLIKACI
+
+====================================================== */
+
+function getApp(slot){
+
+if(!slot.app)return null;
+
+return APP_ENGINE.apps[slot.app];
+
+}
+/* ======================================================
+
+VaF'i'T APP LAUNCHER
+v1.1
+
+====================================================== */
+
+function launchSlot(slot){
+
+APP_ENGINE.currentSlot=slot;
+
+const app=getApp(slot);
+
+if(!app){
+
+openSlotDialog(slot);
+
+showWindow();
+
+return;
+
+}
+
+switch(app.type){
+
+case "PWA":
+
+launchPWA(app);
+
+break;
+
+case "URL":
+
+launchURL(app);
+
+break;
+
+case "HTML":
+
+launchHTML(app);
+
+break;
+
+case "IMAGE":
+
+launchImage(app);
+
+break;
+
+case "VIDEO":
+
+launchVideo(app);
+
+break;
+
+case "AUDIO":
+
+launchAudio(app);
+
+break;
+
+case "FOLDER":
+
+launchFolder(app);
+
+break;
+
+case "PLUGIN":
+
+launchPlugin(app);
+
+break;
+
+case "AI":
+
+launchAI(app);
+
+break;
+
+default:
+
+openSlotDialog(slot);
+
+showWindow();
+
+}
+
+}
+/* ======================================================
+
+VaF'i'T PWA MANAGER
+v1.0
+
+====================================================== */
+
+const PWA_MANAGER={
+
+version:"1.0",
+
+installed:{},
+
+running:{},
+
+favorites:[]
+
+};
+
+/* ======================================================
+
+REGISTRACE PWA
+
+====================================================== */
+
+function registerPWA(app){
+
+if(!app)return;
+
+PWA_MANAGER.installed[app.id]=app;
+
+saveInstalledPWAs();
+
+}
+
+/* ======================================================
+
+ODEBRÁNÍ PWA
+
+====================================================== */
+
+function unregisterPWA(id){
+
+delete PWA_MANAGER.installed[id];
+
+saveInstalledPWAs();
+
+}
+
+/* ======================================================
+
+NAJÍT PWA
+
+====================================================== */
+
+function getPWA(id){
+
+return PWA_MANAGER.installed[id];
+
+}
+
+/* ======================================================
+
+ULOŽENÍ
+
+====================================================== */
+
+function saveInstalledPWAs(){
+
+localStorage.setItem(
+
+"VaFiT_PWA",
+
+JSON.stringify(PWA_MANAGER.installed)
+
+);
+
+}
+
+/* ======================================================
+
+NAČTENÍ
+
+====================================================== */
+
+function loadInstalledPWAs(){
+
+const data=
+
+localStorage.getItem("VaFiT_PWA");
+
+if(!data)return;
+
+PWA_MANAGER.installed=
+
+JSON.parse(data);
+
+}
+
+loadInstalledPWAs();
+/* ======================================================
+
+PŘIPOJENÍ PWA KE SLOTU
+
+====================================================== */
+
+function connectPWA(slot,app){
+
+assignAppToSlot(slot,app);
+
+registerPWA(app);
+
+slot.type="PWA";
+
+saveSlot(slot);
+
+}
+/* ======================================================
+
+ODPOJENÍ PWA
+
+====================================================== */
+
+function disconnectPWA(slot){
+
+if(!slot.app)return;
+
+unregisterPWA(slot.app);
+
+removeAppFromSlot(slot);
+
+}
+/* ======================================================
+
+MÁ SLOT PWA?
+
+====================================================== */
+
+function slotHasPWA(slot){
+
+return slot.app!=="";
+
+}
+/* ======================================================
+
+VaF'i'T BROWSER ENGINE
+v1.0
+
+====================================================== */
+
+const BROWSER={
+
+version:"1.0",
+
+home:"VaFiT://home",
+
+current:"VaFiT://home",
+
+history:[],
+
+favorites:[],
+
+tabs:[],
+
+currentTab:0,
+
+offline:true,
+
+search:"",
+
+language:"CZ",
+
+mode:"NORMAL"
+
+};
+
+/* ======================================================
+
+NOVÁ KARTA
+
+====================================================== */
+
+function createBrowserTab(){
+
+return{
+
+id:crypto.randomUUID(),
+
+title:"Nová karta",
+
+address:"VaFiT://home",
+
+type:"HOME",
+
+created:Date.now()
+
+};
+
+}
+
+/* ======================================================
+
+OTEVŘÍT KARTU
+
+====================================================== */
+
+function openBrowserTab(address="VaFiT://home"){
+
+const tab=createBrowserTab();
+
+tab.address=address;
+
+BROWSER.tabs.push(tab);
+
+BROWSER.currentTab=
+
+BROWSER.tabs.length-1;
+
+}
+
+/* ======================================================
+
+ZAVŘÍT KARTU
+
+====================================================== */
+
+function closeBrowserTab(index){
+
+if(index<0)return;
+
+if(index>=BROWSER.tabs.length)return;
+
+BROWSER.tabs.splice(index,1);
+
+if(BROWSER.currentTab>=BROWSER.tabs.length)
+
+BROWSER.currentTab=
+
+Math.max(0,BROWSER.tabs.length-1);
+
+}
+
+/* ======================================================
+
+PRVNÍ KARTA
+
+====================================================== */
+
+if(BROWSER.tabs.length===0){
+
+openBrowserTab();
+
+}
+/* ======================================================
+
+VaF'i'T PŘEKLADOVÝ SYSTÉM
+v1.0
+
+Připraveno pro:
+• CZ
+• CZLT
+
+====================================================== */
+
+const JAZYK={
+
+aktualni:"CZ",
+
+dostupne:[
+
+"ČEŠTINA",
+
+"CZLT"
+
+],
+
+slovnik:{
+
+CZ:{
+
+DOMŮ:"Domů",
+
+PROHLÍŽEČ:"Prohlížeč",
+
+SKLAD:"Sklad",
+
+PLANETY:"Planety",
+
+PROJEKTY:"Projekty",
+
+AI:"AI",
+
+NASTAVENÍ:"Nastavení",
+
+OBLÍBENÉ:"Oblíbené",
+
+HLEDAT:"Hledat",
+
+NOVÁ_KARTA:"Nová karta",
+
+ZAVŘÍT:"Zavřít"
+
+},
+
+CZLT:{
+
+DOMŮ:"",
+
+PROHLÍŽEČ:"",
+
+SKLAD:"",
+
+PLANETY:"",
+
+PROJEKTY:"",
+
+AI:"",
+
+NASTAVENÍ:"",
+
+OBLÍBENÉ:"",
+
+HLEDAT:"",
+
+NOVÁ_KARTA:"",
+
+ZAVŘÍT:""
+
+}
+
+}
+
+};
+
+/* ======================================================
+
+PŘEKLAD
+
+====================================================== */
+
+function T(text){
+
+const jazyk=
+
+JAZYK.slovnik[JAZYK.aktualni];
+
+return jazyk[text]||text;
+
+}
+
+/* ======================================================
+
+ZMĚNA JAZYKA
+
+====================================================== */
+
+function nastavJazyk(jazyk){
+
+if(!JAZYK.slovnik[jazyk])return;
+
+JAZYK.aktualni=jazyk;
+
+drawScene();
+
+}
+/* ======================================================
+
+VaF'i'T ADRESÁŘ
+v0.1
+
+Pouze příprava
+
+====================================================== */
+
+const ADRESY={
+
+DOMU:"VaFiT://domu",
+
+OVOCET:"VaFiT://ovocet",
+
+PLANETY:"VaFiT://planety",
+
+SKLAD:"VaFiT://sklad",
+
+PROHLIZEC:"VaFiT://prohlizec",
+
+PROJEKTY:"VaFiT://projekty",
+
+AI:"VaFiT://ai",
+
+NASTAVENI:"VaFiT://nastaveni",
+
+OBLIBENE:"VaFiT://oblibene",
+
+VYHLEDAVANI:"VaFiT://vyhledavani",
+
+SOUBORY:"VaFiT://soubory",
+
+PWA:"VaFiT://pwa",
+
+PLUGINY:"VaFiT://pluginy",
+
+SIT:"VaFiT://sit",
+
+RODINA:"VaFiT://rodina",
+
+GLYPH:"VaFiT://glyph",
+
+TOJO:"VaFiT://tojo"
+
+};
+/* ======================================================
+
+REZERVOVANÉ ADRESY
+
+(pro budoucí rozšíření)
+
+====================================================== */
+
+const REZERVA={
+
+PLANETA_1:"",
+
+PLANETA_2:"",
+
+PLANETA_3:"",
+
+PLANETA_4:"",
+
+PLANETA_5:"",
+
+PLANETA_6:"",
+
+PLANETA_7:"",
+
+PLANETA_8:"",
+
+PLANETA_9:"",
+
+PLANETA_10:""
+
+};
+/* ======================================================
+
+VaF'i'T MODULY
+v0.1
+
+Pouze příprava systému
+
+====================================================== */
+
+const MODULY={
+
+SYSTEM:{},
+
+BROWSER:{},
+
+PWA:{},
+
+AI:{},
+
+SKLAD:{},
+
+SOUBORY:{},
+
+PLANETY:{},
+
+SIGNAL:{},
+
+PLUGINY:{},
+
+GLYPH:{},
+
+RODINA:{},
+
+OVOCET:{},
+
+TOJO:{}
+
+};
+/* ======================================================
+
+VaF'i'T JÁDRO
+
+Připravené pro budoucí rozšíření
+
+====================================================== */
+
+const JADRO={
+
+verze:"0.1",
+
+nazev:"Vivere atque Fru'i¡´T",
+
+stav:"Vývoj",
+
+jazyk:"CZ",
+
+rezim:"Offline",
+
+moduly:[],
+
+sluzby:[],
+
+udalosti:[],
+
+uloziste:[],
+
+planety:[],
+
+okna:[],
+
+aplikace:[]
+
+};
+/* ======================================================
+
+REGISTR MODULŮ
+
+====================================================== */
+
+function registrujModul(nazev,objekt){
+
+JADRO.moduly.push({
+
+nazev:nazev,
+
+objekt:objekt,
+
+cas:Date.now()
+
+});
+
+}
+
+registrujModul("SYSTEM",MODULY.SYSTEM);
+
+registrujModul("BROWSER",MODULY.BROWSER);
+
+registrujModul("PWA",MODULY.PWA);
+
+registrujModul("AI",MODULY.AI);
+
+registrujModul("SKLAD",MODULY.SKLAD);
+
+registrujModul("PLANETY",MODULY.PLANETY);
+
+registrujModul("OVOCET",MODULY.OVOCET);
+
+registrujModul("TOJO",MODULY.TOJO);
+/* ======================================================
+
+VaF'i'T SLUŽBY
+v0.1
+
+Společné služby systému
+
+====================================================== */
+
+const SLUZBY={
+
+CAS:{},
+
+OZNAMENI:{},
+
+ZVUK:{},
+
+VIBRACE:{},
+
+SDILENI:{},
+
+PWA:{},
+
+SOUBORY:{},
+
+ULOZISTE:{},
+
+SITE:{},
+
+SYSTEM:{}
+
+};
+/* ======================================================
+
+REGISTR SLUŽEB
+
+====================================================== */
+
+function registrujSluzbu(nazev,objekt){
+
+JADRO.sluzby.push({
+
+nazev:nazev,
+
+objekt:objekt,
+
+cas:Date.now()
+
+});
+
+}
+
+registrujSluzbu("CAS",SLUZBY.CAS);
+
+registrujSluzbu("OZNAMENI",SLUZBY.OZNAMENI);
+
+registrujSluzbu("ZVUK",SLUZBY.ZVUK);
+
+registrujSluzbu("VIBRACE",SLUZBY.VIBRACE);
+
+registrujSluzbu("SDILENI",SLUZBY.SDILENI);
+
+registrujSluzbu("PWA",SLUZBY.PWA);
+
+registrujSluzbu("SOUBORY",SLUZBY.SOUBORY);
+
+registrujSluzbu("ULOZISTE",SLUZBY.ULOZISTE);
+
+registrujSluzbu("SITE",SLUZBY.SITE);
+
+registrujSluzbu("SYSTEM",SLUZBY.SYSTEM);
+/* ======================================================
+
+VaF'i'T SCHRÁNKA
+
+Připraveno pro:
+
+kopírovat
+vložit
+přesunout
+sdílet
+
+====================================================== */
+
+const SCHRANKA={
+
+typ:"",
+
+objekt:null,
+
+zdroj:"",
+
+cil:"",
+
+cas:0
+
+};
+/* ======================================================
+
+VaF'i'T EVENT ENGINE
+v0.1
+
+Jednotný systém událostí
+
+====================================================== */
+
+const UDALOSTI={
+
+klik:[],
+
+dvojklik:[],
+
+dlouhyStisk:[],
+
+praveTlacitko:[],
+
+tah:[],
+
+dvaPrsty:[],
+
+koloMysi:[],
+
+klavesnice:[],
+
+system:[]
+
+};
+/* ======================================================
+
+REGISTR UDÁLOSTÍ
+
+====================================================== */
+
+function registrujUdalost(
+
+typ,
+
+nazev,
+
+funkce
+
+){
+
+if(!UDALOSTI[typ])return;
+
+UDALOSTI[typ].push({
+
+nazev,
+
+funkce
+
+});
+
+}
+/* ======================================================
+
+SPUŠTĚNÍ UDÁLOSTI
+
+====================================================== */
+
+function spustUdalost(
+
+typ,
+
+data={}
+
+){
+
+if(!UDALOSTI[typ])return;
+
+UDALOSTI[typ].forEach(
+
+udalost=>{
+
+try{
+
+udalost.funkce(data);
+
+}
+
+catch(err){
+
+console.warn(
+
+udalost.nazev,
+
+err
+
+);
+
+}
+
+});
+
+}
+/* ======================================================
+
+PŘIPRAVENÉ UDÁLOSTI
+
+====================================================== */
+
+registrujUdalost(
+
+"klik",
+
+"Slot",
+
+()=>{}
+
+);
+
+registrujUdalost(
+
+"dlouhyStisk",
+
+"Menu",
+
+()=>{}
+
+);
+
+registrujUdalost(
+
+"praveTlacitko",
+
+"Kontext",
+
+()=>{}
+
+);
+
+registrujUdalost(
+
+"dvaPrsty",
+
+"Navigace",
+
+()=>{}
+
+);
+/* ======================================================
+
+VaF'i'T WORLD ENGINE
+SEMÍNKO 0.1
+
+Všechny světy budou vyrůstat odsud.
+
+====================================================== */
+
+const SVET={
+
+nazev:"Vivere atque Fru'i¡´T",
+
+stav:"Semínko",
+
+planety:[],
+
+svety:[],
+
+mapy:[],
+
+lokace:[],
+
+bytosti:[],
+
+rostliny:[],
+
+predmety:[],
+
+stavby:[],
+
+recepty:[],
+
+udalosti:[],
+
+pribehy:[],
+
+hraci:[],
+
+ai:[]
+
+};
+/* ======================================================
+
+REGISTR SVĚTŮ
+
+====================================================== */
+
+function registrujSvet(
+
+nazev
+
+){
+
+SVET.svety.push({
+
+id:crypto.randomUUID(),
+
+nazev,
+
+cas:Date.now(),
+
+aktivni:false
+
+});
+
+}
+registrujSvet(
+
+"Domov"
+
+);
+/* ======================================================
+
+PLANETY
+
+====================================================== */
+
+function vytvorPlanetu(
+
+nazev
+
+){
+
+SVET.planety.push({
+
+id:crypto.randomUUID(),
+
+nazev,
+
+sektory:[],
+
+objekty:[],
+
+hraci:[],
+
+ai:[]
+
+});
+
+}
+vytvorPlanetu(
+
+"Planeta 1"
+
+);
+/* ======================================================
+
+VaF'i'T BOOT ENGINE
+
+Poslední část indexu
+
+====================================================== */
+
+function startVaFiT(){
+
+console.log("Boot systému...");
+
+loadStore();
+
+loadAllSlots();
+
+resizeEngine();
+
+drawScene();
+
+console.log("Systém připraven.");
+
+statusEl.textContent="VaF'i'T připraven";
+
+}
+
+window.addEventListener(
+
+"load",
+
+startVaFiT
+
+);
+/* ======================================================
+
+VaF'i'T CORE MANAGER
+SEMÍNKO 0.1
+
+====================================================== */
+
+const CORE={
+
+stav:"Inicializace",
+
+pripraven:false,
+
+moduly:[],
+
+chyby:[],
+
+start:Date.now(),
+
+verze:"SEMÍNKO 0.1"
+
+};
+
+function registrujCore(nazev){
+
+CORE.moduly.push({
+
+nazev,
+
+pripraven:true,
+
+cas:Date.now()
+
+});
+
+}
+
+function chybaCore(text){
+
+CORE.chyby.push({
+
+text,
+
+cas:Date.now()
+
+});
+
+console.warn(text);
+
+}
+
+function dokoncitCore(){
+
+CORE.pripraven=true;
+
+CORE.stav="Připraven";
+
+statusEl.textContent="VaF'i'T připraven";
+
+console.log("CORE READY");
+
+}
+/* ======================================================
+
+/* ======================================================
+
+REGISTRACE MODULŮ
+
+====================================================== */
+
+registrujCore("Engine");
+
+registrujCore("Window");
+
+registrujCore("Store");
+
+registrujCore("Dialog");
+
+registrujCore("Slot");
+
+registrujCore("PWA");
+
+registrujCore("Registry");
+
+registrujCore("World");
+
+registrujCore("Browser");
+
+registrujCore("AI");
+
+registrujCore("Event");
+
+registrujCore("Jádro");
+
+dokoncitCore();
+
+/* ======================================================
+
+Vivere atque Fru'i¡´T
+
+SEMÍNKO
+
+Tento soubor není dokončen.
+
+Je to první kořen.
+
+Každý nový den může přinést
+novou myšlenku.
+
+Každý nový člověk může přidat
+novou větev.
+
+Každá chyba je příležitost
+něco zlepšit.
+
+Děkujeme všem,
+kteří s námi rostou.
+
+(∩^o^)⊃━☆ﾟ.*･｡
+
+====================================================== */
+
+/* ======================================================
+
+VaF'i'T ENGINE
+
+SEMÍNKO 0.1
+
+Dokončení první etapy
+
+====================================================== */
+
+console.log("");
+console.log("========================================");
+console.log(" VaF'i'T ENGINE");
+console.log(" SEMÍNKO 0.1");
+console.log(" Připraveno pokračovat.");
+console.log("========================================");
+console.log("");
+
+statusEl.textContent="🌱 VaF'i'T připraven";
+
+/* ======================================================
+
+KONEC PRVNÍ ETAPY
+
+Další moduly budou navazovat
+na tento základ.
+
+Browser
+AI
+Planety
+Glyph
+PWA
+World Engine
+OvoceT
+
+====================================================== */
+
+/* ======================================================
+
+Vivere atque Fru'i¡´T
+
+Poděkování
+
+Michal Mikula
+Michal Klimek
+Bráška
+
+{°(˚.•).•)// {*(˚.•).•)// [◉_◉] \\(•.(•.˚)ア}
+
+      . ့.  ့.•.°,,*:.စ. ပ` ှီ.ဎ၊.()) ())
+  . ်.  ိ. ့. ွ ံ`ˇ'˚ˇ:•7ī\\//ə:•{т ✿( ‍්‍්.•).•)
+             .˚ჟ°ौरं्ऽ०॰°^ˇ˚'ˇ´´ˇ':•.«°»´
+
+Každý den se můžeme naučit něco nového.
+Projekt není nikdy dokončen.
+Dokončen je pouze dnešní krok.
+
+(∩^o^)⊃━☆ﾟ.*･｡
+
+====================================================== */
+
+</script>
+
+<script>
+
+if("serviceWorker" in navigator){
+
+window.addEventListener("load",()=>{
+
+navigator.serviceWorker
+.register("./service-worker.js")
+.catch(()=>{});
+
+});
+
+}
+
+</script>
+
 </body>
+
 </html>
