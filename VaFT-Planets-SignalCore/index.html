@@ -203,6 +203,7 @@ document.getElementById("status");
 
 let width=0;
 let height=0;
+let baseRadius = 0;
 
 const dpr=
 window.devicePixelRatio||1;
@@ -3163,20 +3164,18 @@ Poslední část indexu
 
 function startVaFiT(){
 
-console.log("Boot systému...");
+    console.log("Boot systému...");
 
-loadStore();
+    loadStore();
+    loadAllSlots();
 
-loadAllSlots();
+    resizeEngine();
 
-resizeEngine();
+    drawScene();
 
-drawScene();
+    console.log("Systém připraven.");
 
-console.log("Systém připraven.");
-
-statusEl.textContent="VaF'i'T připraven";
-
+    statusEl.textContent="VaF'i'T připraven";
 }
 
 window.addEventListener(
@@ -3383,6 +3382,24 @@ navigator.serviceWorker
 
 });
 
+}
+
+function drawScene(){
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.fillStyle = "rgba(2,2,8,1)";
+    ctx.fillRect(0, 0, width, height);
+}
+
+function generateSignalCore(){
+    ENGINE.signalCore.points = [];
+}
+
+function generateBigCone(){
+    ENGINE.bigCone.points = [];
+}
+
+function layoutSphereSlots(){
 }
 
 </script>
