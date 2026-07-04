@@ -1662,13 +1662,14 @@ NAVAZUJE NA CELÝ ENGINE
 (function(){
 
 function renderVaFiT(){
-function drawScene(){
+    drawScene();
+    requestAnimationFrame(renderVaFiT);
+}
     ctx.clearRect(0, 0, width, height);
 
     ctx.fillStyle = "rgba(2,2,8,1)";
     ctx.fillRect(0, 0, width, height);
 
-    // test koule
     ctx.beginPath();
     ctx.arc(width/2, height/2, 80, 0, Math.PI*2);
     ctx.fillStyle = "#FFD27A";
