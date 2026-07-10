@@ -1,0 +1,827 @@
+from pathlib import Path
+
+html = r'''<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07080d">
+
+<title>Vive Písmenková Paměť •ア</title>
+
+<style>
+:root{
+  --bg:#07080d;
+  --panel:rgba(255,255,255,.075);
+  --panel2:rgba(255,255,255,.12);
+  --line:rgba(255,255,255,.16);
+  --text:#f6f7ff;
+  --muted:#aab2cc;
+  --soft:#d9fff1;
+  --ok:#a8ffd8;
+  --warn:#ffdca8;
+  --danger:#ffb4b4;
+  --shadow:0 0 34px rgba(128,255,212,.22);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 15% 0%,rgba(119,255,210,.16),transparent 34%),
+    radial-gradient(circle at 95% 15%,rgba(175,112,255,.15),transparent 38%),
+    radial-gradient(circle at 50% 100%,rgba(255,220,140,.10),transparent 40%),
+    var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+button,
+textarea,
+input{
+  font:inherit;
+}
+
+.app{
+  min-height:100vh;
+  display:grid;
+  grid-template-rows:auto auto 1fr auto;
+  gap:12px;
+  padding:
+    max(14px,env(safe-area-inset-top))
+    12px
+    max(14px,env(safe-area-inset-bottom));
+}
+
+.header{
+  border:1px solid var(--line);
+  background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.04));
+  border-radius:26px;
+  padding:16px;
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(16px);
+}
+
+.title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+
+h1{
+  margin:0;
+  font-size:20px;
+  letter-spacing:.4px;
+}
+
+.badge{
+  flex:0 0 auto;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.22);
+  color:var(--ok);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.sub{
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.38;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.stat{
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:18px;
+  padding:10px;
+  min-height:62px;
+  backdrop-filter:blur(12px);
+}
+
+.stat strong{
+  display:block;
+  font-size:19px;
+  color:var(--soft);
+}
+
+.stat span{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.quick{
+  display:flex;
+  gap:8px;
+  overflow:auto;
+  padding-bottom:2px;
+}
+
+.quick button,
+.action{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.11);
+  color:var(--text);
+  border-radius:16px;
+  padding:9px 11px;
+  white-space:nowrap;
+}
+
+.main{
+  min-height:0;
+  display:grid;
+  grid-template-rows:1fr auto;
+  gap:10px;
+}
+
+.chat{
+  min-height:320px;
+  overflow:auto;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.18);
+  border-radius:24px;
+  padding:12px;
+  backdrop-filter:blur(14px);
+}
+
+.msg{
+  max-width:94%;
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:11px 12px;
+  line-height:1.42;
+  font-size:15px;
+  white-space:pre-wrap;
+}
+
+.bot{
+  align-self:flex-start;
+  background:var(--panel);
+}
+
+.me{
+  align-self:flex-end;
+  background:var(--panel2);
+}
+
+.meta{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:4px;
+}
+
+.composer{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  border-radius:24px;
+  padding:10px;
+  backdrop-filter:blur(14px);
+}
+
+textarea{
+  width:100%;
+  min-height:52px;
+  max-height:140px;
+  resize:none;
+  border:0;
+  outline:0;
+  border-radius:17px;
+  padding:12px;
+  color:var(--text);
+  background:rgba(0,0,0,.30);
+}
+
+.send{
+  border:0;
+  border-radius:17px;
+  padding:0 18px;
+  background:var(--ok);
+  color:#07120e;
+  font-weight:900;
+}
+
+.drawer{
+  display:none;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.28);
+  border-radius:24px;
+  padding:12px;
+}
+
+.drawer.open{
+  display:block;
+}
+
+.drawer h2{
+  margin:0 0 8px;
+  font-size:16px;
+}
+
+.memoryBox{
+  width:100%;
+  min-height:180px;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.32);
+  color:var(--text);
+  border-radius:18px;
+  padding:10px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12px;
+}
+
+.row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+
+.small{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.35;
+}
+
+@media(min-width:760px){
+  .app{
+    max-width:860px;
+    margin:0 auto;
+  }
+
+  .grid{
+    grid-template-columns:repeat(4,1fr);
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <header class="header">
+    <div class="title">
+      <h1>Vive Písmenková Paměť •ア</h1>
+      <div class="badge" id="offlineBadge">memory ready</div>
+    </div>
+    <div class="sub">
+      Čistý GitHub HTML bot. Učí se z písmen, symbolů, vazeb, vět a tvého úhlu pohledu.
+      Paměť je navržená tak, aby šla později napojit na offline režim, service worker a synchronizaci.
+    </div>
+  </header>
+
+  <section class="grid">
+    <div class="stat"><strong id="countLetters">0</strong><span>písmen / symbolů</span></div>
+    <div class="stat"><strong id="countLinks">0</strong><span>vazeb mezi znaky</span></div>
+    <div class="stat"><strong id="countRules">0</strong><span>pravidel chování</span></div>
+    <div class="stat"><strong id="countSentences">0</strong><span>důležitých vět</span></div>
+  </section>
+
+  <section class="quick">
+    <button onclick="put('písmeno: V = ')">písmeno</button>
+    <button onclick="put('vazba: V -> ア = ')">vazba</button>
+    <button onclick="put('úhel: ')">úhel</button>
+    <button onclick="put('dělej: ')">dělej</button>
+    <button onclick="put('pamatuj: ')">pamatuj</button>
+    <button onclick="sendText('/profil')">profil</button>
+    <button onclick="sendText('/mapa')">mapa</button>
+    <button onclick="toggleMemory()">paměť</button>
+  </section>
+
+  <main class="main">
+    <section class="chat" id="chat"></section>
+
+    <section class="drawer" id="drawer">
+      <h2>Export / import paměti</h2>
+      <div class="small">
+        Tohle je připravené pro pozdější offline režim. Teď se paměť ukládá do prohlížeče.
+        Později k tomu přidáme <b>manifest.json</b>, <b>sw.js</b> a offline cache.
+      </div>
+      <textarea class="memoryBox" id="memoryBox"></textarea>
+      <div class="row">
+        <button class="action" onclick="exportMemory()">exportovat</button>
+        <button class="action" onclick="importMemory()">importovat</button>
+        <button class="action" onclick="copyMemory()">kopírovat</button>
+        <button class="action" onclick="resetMemory()">vyčistit</button>
+      </div>
+    </section>
+
+    <section class="composer">
+      <textarea id="input" placeholder="Uč mě: písmeno: V = začátek / směr / živý signál"></textarea>
+      <button class="send" onclick="send()">➤</button>
+    </section>
+  </main>
+
+</div>
+
+<script>
+/*
+  Vive Písmenková Paměť •ア
+  ------------------------------------------------------------
+  Tenhle index je schválně napsaný jako jeden soubor pro GitHub Pages.
+
+  Paměť je už rozdělená na vrstvy:
+  - letters: písmena / symboly / znaky
+  - links: vztahy mezi znaky
+  - viewpoint: úhel pohledu učitele
+  - rules: co má bot dělat
+  - sentences: důležité věty
+  - learningLog: záznam učení
+  - offlineQueue: připravené místo pro pozdější offline synchronizaci
+
+  Později můžeme přidat:
+  - manifest.json
+  - sw.js
+  - cache pro offline spuštění
+  - IndexedDB místo localStorage
+  - export/import mezi zařízeními
+*/
+
+const MEMORY_KEY = "vive_pismenkova_pamet_v1";
+
+function time(){
+  return new Date().toISOString();
+}
+
+function newMemory(){
+  return {
+    schema: "vive-letter-memory",
+    version: 1,
+    createdAt: time(),
+    updatedAt: time(),
+    offlineReady: true,
+    futureOfflinePlan: {
+      storageNow: "localStorage",
+      storageLater: "IndexedDB",
+      serviceWorkerLater: "sw.js",
+      syncLater: "offlineQueue"
+    },
+    identity: {
+      name: "Vive Písmenkový Bot",
+      purpose: "Učit se písmena, symboly, vazby, věty a úhel pohledu.",
+      baseRule: "Když nevím, nepředstírám. Nabídnu způsob, jak mě to učitel může naučit."
+    },
+    letters: {},
+    links: [],
+    viewpoint: [],
+    rules: [
+      {
+        text: "Když nerozumíš, zeptej se a nepředstírej znalost.",
+        createdAt: time()
+      }
+    ],
+    sentences: [],
+    learningLog: [],
+    offlineQueue: []
+  };
+}
+
+function loadMemory(){
+  try{
+    const raw = localStorage.getItem(MEMORY_KEY);
+    if(!raw) return newMemory();
+
+    const loaded = JSON.parse(raw);
+    const base = newMemory();
+
+    return {
+      ...base,
+      ...loaded,
+      identity: {...base.identity, ...(loaded.identity || {})},
+      futureOfflinePlan: {...base.futureOfflinePlan, ...(loaded.futureOfflinePlan || {})},
+      letters: loaded.letters || {},
+      links: loaded.links || [],
+      viewpoint: loaded.viewpoint || [],
+      rules: loaded.rules || [],
+      sentences: loaded.sentences || [],
+      learningLog: loaded.learningLog || [],
+      offlineQueue: loaded.offlineQueue || []
+    };
+  }catch(e){
+    return newMemory();
+  }
+}
+
+let memory = loadMemory();
+
+function saveMemory(reason="save"){
+  memory.updatedAt = time();
+  memory.offlineQueue.push({
+    type: reason,
+    at: time()
+  });
+
+  if(memory.offlineQueue.length > 80){
+    memory.offlineQueue = memory.offlineQueue.slice(-80);
+  }
+
+  localStorage.setItem(MEMORY_KEY, JSON.stringify(memory, null, 2));
+  refreshStats();
+}
+
+function normalize(text){
+  return String(text || "").trim().toLowerCase().replace(/\s+/g," ");
+}
+
+function refreshStats(){
+  document.getElementById("countLetters").textContent = Object.keys(memory.letters).length;
+  document.getElementById("countLinks").textContent = memory.links.length;
+  document.getElementById("countRules").textContent = memory.rules.length;
+  document.getElementById("countSentences").textContent = memory.sentences.length;
+
+  const badge = document.getElementById("offlineBadge");
+  badge.textContent = navigator.onLine ? "memory ready" : "offline memory";
+}
+
+function addLog(kind, text){
+  memory.learningLog.push({
+    kind,
+    text,
+    at: time()
+  });
+
+  if(memory.learningLog.length > 200){
+    memory.learningLog = memory.learningLog.slice(-200);
+  }
+}
+
+function message(who, text){
+  const chat = document.getElementById("chat");
+  const div = document.createElement("div");
+  div.className = "msg " + (who === "Ty" ? "me" : "bot");
+
+  const meta = document.createElement("span");
+  meta.className = "meta";
+  meta.textContent = who;
+
+  const body = document.createElement("span");
+  body.textContent = text;
+
+  div.appendChild(meta);
+  div.appendChild(body);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function put(text){
+  const input = document.getElementById("input");
+  input.value = text;
+  input.focus();
+}
+
+function sendText(text){
+  document.getElementById("input").value = text;
+  send();
+}
+
+function send(){
+  const input = document.getElementById("input");
+  const text = input.value.trim();
+  if(!text) return;
+
+  input.value = "";
+  message("Ty", text);
+
+  const reply = handle(text);
+  message("Bot", reply);
+}
+
+function item(text){
+  return {
+    text: text.trim(),
+    createdAt: time()
+  };
+}
+
+function handle(text){
+  const low = normalize(text);
+
+  if(low === "/help"){
+    return help();
+  }
+
+  if(low === "/profil"){
+    return profile();
+  }
+
+  if(low === "/mapa"){
+    return mapLetters();
+  }
+
+  if(low === "/export"){
+    return JSON.stringify(memory, null, 2);
+  }
+
+  if(low.startsWith("písmeno:") || low.startsWith("pismeno:") || low.startsWith("znak:") || low.startsWith("symbol:")){
+    return learnLetter(text);
+  }
+
+  if(low.startsWith("vazba:") || low.startsWith("link:") || low.startsWith("spoj:")){
+    return learnLink(text);
+  }
+
+  if(low.startsWith("úhel:") || low.startsWith("uhel:")){
+    const value = afterColon(text);
+    memory.viewpoint.push(item(value));
+    addLog("viewpoint", value);
+    saveMemory("learn_viewpoint");
+    return "Uloženo jako úhel pohledu.";
+  }
+
+  if(low.startsWith("dělej:") || low.startsWith("delej:")){
+    const value = afterColon(text);
+    memory.rules.push(item(value));
+    addLog("rule", value);
+    saveMemory("learn_rule");
+    return "Uloženo jako pravidlo chování.";
+  }
+
+  if(low.startsWith("pamatuj:")){
+    const value = afterColon(text);
+    memory.sentences.push(item(value));
+    addLog("sentence", value);
+    saveMemory("learn_sentence");
+    return "Uloženo jako důležitá věta.";
+  }
+
+  return answerFromMemory(text);
+}
+
+function afterColon(text){
+  return text.split(":").slice(1).join(":").trim();
+}
+
+function learnLetter(text){
+  const raw = afterColon(text);
+  if(!raw.includes("=")){
+    return "Napiš to takhle:\npísmeno: V = začátek / směr / živý signál";
+  }
+
+  const parts = raw.split("=");
+  const symbol = parts.shift().trim();
+  const meaning = parts.join("=").trim();
+
+  if(!symbol || !meaning){
+    return "Chybí znak nebo význam. Příklad:\npísmeno: ア = brána / jiskra / podpis";
+  }
+
+  memory.letters[symbol] = {
+    symbol,
+    meaning,
+    aliases: [],
+    createdAt: memory.letters[symbol]?.createdAt || time(),
+    updatedAt: time()
+  };
+
+  addLog("letter", symbol + " = " + meaning);
+  saveMemory("learn_letter");
+
+  return "Uloženo.\n" + symbol + " = " + meaning;
+}
+
+function learnLink(text){
+  const raw = afterColon(text);
+
+  if(!raw.includes("->") || !raw.includes("=")){
+    return "Napiš to takhle:\nvazba: V -> ア = V se otevírá do znaku ア";
+  }
+
+  const leftAndRest = raw.split("->");
+  const from = leftAndRest.shift().trim();
+  const rest = leftAndRest.join("->");
+  const toAndMeaning = rest.split("=");
+  const to = toAndMeaning.shift().trim();
+  const meaning = toAndMeaning.join("=").trim();
+
+  if(!from || !to || !meaning){
+    return "Vazba není celá. Příklad:\nvazba: V -> ア = přechod ze směru do brány";
+  }
+
+  memory.links.push({
+    from,
+    to,
+    meaning,
+    createdAt: time()
+  });
+
+  addLog("link", from + " -> " + to + " = " + meaning);
+  saveMemory("learn_link");
+
+  return "Vazba uložena.\n" + from + " -> " + to + " = " + meaning;
+}
+
+function answerFromMemory(text){
+  const exact = memory.letters[text.trim()];
+  if(exact){
+    return describeSymbol(text.trim());
+  }
+
+  const found = [];
+
+  for(const symbol of Object.keys(memory.letters)){
+    if(symbol && text.includes(symbol)){
+      found.push(describeSymbol(symbol));
+    }
+  }
+
+  if(found.length){
+    return found.join("\n\n");
+  }
+
+  if(normalize(text).includes("co umíš") || normalize(text).includes("co umis")){
+    return help();
+  }
+
+  return "Tohle ještě neumím.\n\nNauč mě jedním z těchto tvarů:\n" +
+    "písmeno: V = začátek / směr / živý signál\n" +
+    "vazba: V -> ア = přechod ze směru do brány\n" +
+    "úhel: význam čtu přes vztahy mezi písmeny\n" +
+    "dělej: když nevíš, zeptej se\n" +
+    "pamatuj: písmenka nejsou jen text, jsou mapy významu";
+}
+
+function describeSymbol(symbol){
+  const data = memory.letters[symbol];
+  if(!data) return "";
+
+  const lines = [];
+  lines.push(symbol + " = " + data.meaning);
+
+  const outgoing = memory.links.filter(x => x.from === symbol);
+  const incoming = memory.links.filter(x => x.to === symbol);
+
+  if(outgoing.length){
+    lines.push("");
+    lines.push("Vazby ven:");
+    outgoing.forEach(x => lines.push(symbol + " -> " + x.to + " = " + x.meaning));
+  }
+
+  if(incoming.length){
+    lines.push("");
+    lines.push("Vazby dovnitř:");
+    incoming.forEach(x => lines.push(x.from + " -> " + symbol + " = " + x.meaning));
+  }
+
+  return lines.join("\n");
+}
+
+function profile(){
+  const lines = [];
+
+  lines.push("=== PROFIL ===");
+  lines.push("Jméno: " + memory.identity.name);
+  lines.push("Účel: " + memory.identity.purpose);
+  lines.push("Paměť: localStorage teď / IndexedDB později");
+  lines.push("Offline příprava: ano");
+  lines.push("");
+
+  lines.push("=== ÚHEL POHLEDU ===");
+  if(memory.viewpoint.length){
+    memory.viewpoint.forEach((x,i)=>lines.push((i+1)+". "+x.text));
+  }else{
+    lines.push("Zatím prázdné.");
+  }
+
+  lines.push("");
+  lines.push("=== PRAVIDLA ===");
+  if(memory.rules.length){
+    memory.rules.forEach((x,i)=>lines.push((i+1)+". "+x.text));
+  }else{
+    lines.push("Zatím prázdné.");
+  }
+
+  lines.push("");
+  lines.push("=== DŮLEŽITÉ VĚTY ===");
+  if(memory.sentences.length){
+    memory.sentences.forEach((x,i)=>lines.push((i+1)+". "+x.text));
+  }else{
+    lines.push("Zatím prázdné.");
+  }
+
+  return lines.join("\n");
+}
+
+function mapLetters(){
+  const symbols = Object.keys(memory.letters);
+  const lines = [];
+
+  lines.push("=== MAPA PÍSMEN ===");
+
+  if(!symbols.length){
+    lines.push("Zatím nemám žádná písmena.");
+    lines.push("Začni třeba: písmeno: V = začátek světa Vive");
+    return lines.join("\n");
+  }
+
+  symbols.forEach(symbol=>{
+    lines.push(describeSymbol(symbol));
+    lines.push("---");
+  });
+
+  return lines.join("\n");
+}
+
+function help(){
+  return "Příkazy:\n\n" +
+    "písmeno: V = začátek / směr / živý signál\n" +
+    "vazba: V -> ア = přechod ze směru do brány\n" +
+    "úhel: význam vzniká ze vztahu mezi písmeny\n" +
+    "dělej: když nerozumíš, nepředstírej\n" +
+    "pamatuj: tahle věta je důležitá pro projekt\n\n" +
+    "/profil = ukáže úhel, pravidla a věty\n" +
+    "/mapa = ukáže písmena a vazby\n" +
+    "/export = vypíše JSON paměť";
+}
+
+function toggleMemory(){
+  const drawer = document.getElementById("drawer");
+  drawer.classList.toggle("open");
+  exportMemory();
+}
+
+function exportMemory(){
+  document.getElementById("memoryBox").value = JSON.stringify(memory, null, 2);
+}
+
+function importMemory(){
+  const box = document.getElementById("memoryBox");
+  try{
+    const imported = JSON.parse(box.value);
+    memory = {
+      ...newMemory(),
+      ...imported,
+      importedAt: time()
+    };
+    saveMemory("import_memory");
+    message("Bot", "Paměť importována.");
+  }catch(e){
+    message("Bot", "Import se nepovedl. JSON není platný.");
+  }
+}
+
+function copyMemory(){
+  const box = document.getElementById("memoryBox");
+  box.select();
+  box.setSelectionRange(0, 999999);
+
+  try{
+    navigator.clipboard.writeText(box.value);
+    message("Bot", "Paměť zkopírována do schránky.");
+  }catch(e){
+    document.execCommand("copy");
+    message("Bot", "Paměť jsem se pokusil zkopírovat.");
+  }
+}
+
+function resetMemory(){
+  const ok = confirm("Opravdu vyčistit paměť v tomto prohlížeči?");
+  if(!ok) return;
+
+  memory = newMemory();
+  saveMemory("reset_memory");
+  exportMemory();
+  message("Bot", "Paměť je čistá.");
+}
+
+window.addEventListener("online", refreshStats);
+window.addEventListener("offline", refreshStats);
+
+refreshStats();
+
+message("Bot",
+  "Jsem připravený.\n\n" +
+  "Začni třeba:\n" +
+  "písmeno: V = začátek světa Vive / směr / živý signál\n\n" +
+  "Nebo:\n" +
+  "úhel: písmenka nejsou jen text, ale mapa významu."
+);
+</script>
+</body>
+</html>
+'''
+
+path = Path("/mnt/data/index.html")
+path.write_text(html, encoding="utf-8")
+
+print("Hotovo: /mnt/data/index.html")
