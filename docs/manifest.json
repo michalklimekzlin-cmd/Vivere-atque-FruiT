@@ -1,0 +1,11 @@
+{
+  "name": "VaFT Four Core Memory System",
+  "short_name": "Four Core",
+  "description": "Čtyři paměťové koule: Země, Jazyk, Hra a Řídící jednotka.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050815",
+  "theme_color": "#050815"
+}
