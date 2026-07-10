@@ -1,827 +1,881 @@
 from pathlib import Path
+import json, zipfile
 
-html = r'''<!doctype html>
+base = Path("/mnt/data/vaft-four-core-memory-system")
+docs = base / "docs"
+docs.mkdir(parents=True, exist_ok=True)
+
+earth_slots = [
+"earth_memory_core.json","viewpoint_main.json","viewpoint_layers.json","modeling_core.json","modeling_shapes.json",
+"modeling_planets.json","modeling_orbits.json","modeling_signal_tower.json","modeling_slots.json","modeling_modules.json",
+"module_connector.json","module_registry.json","module_routes.json","module_permissions.json","module_state.json",
+"world_memory.json","world_events.json","world_history.json","world_future.json","world_rebuild.json",
+"perspective_rules.json","perspective_angles.json","perspective_conflicts.json","perspective_corrections.json","perspective_notes.json",
+"offline_queue.json","offline_snapshots.json","offline_restore.json","indexeddb_schema.json","storage_limits.json",
+"export_backup.json","import_buffer.json","sync_plan.json","device_profile.json","iphone_profile.json",
+"pwa_install.json","pwa_cache.json","service_worker_plan.json","github_pages_plan.json","release_state.json",
+"unknown_inputs.json","learning_requests.json","teacher_notes.json","memory_tags.json","memory_index.json",
+"memory_search.json","memory_graph.json","memory_links.json","memory_weights.json","memory_priority.json",
+"symbol_to_world.json","world_to_symbol.json","planet_to_module.json","module_to_slot.json","slot_to_file.json",
+"future_ai_bridge.json","future_local_model.json","future_offline_ai.json","future_server_sync.json","future_backup_cloud.json",
+"seed_viewpoint.json","seed_worlds.json","seed_modeling.json","seed_modules.json","seed_memory.json",
+"archive_earth_01.json","archive_earth_02.json","archive_earth_03.json","repair_earth.json","final_earth_core.json"
+]
+
+lang_slots = [
+"language_core.json","alphabet_core.json","letters_alpha.json","letters_symbols.json","letters_custom.json",
+"glyph_core.json","glyph_map.json","glyph_meanings.json","glyph_relations.json","glyph_evolution.json",
+"symbol_roots.json","symbol_pairs.json","symbol_triads.json","symbol_combos.json","symbol_conflicts.json",
+"word_seed.json","word_memory.json","word_links.json","word_history.json","word_rebuild.json",
+"grammar_rules.json","grammar_patterns.json","syntax_memory.json","sentence_memory.json","phrase_memory.json",
+"meaning_layer.json","meaning_context.json","meaning_shift.json","meaning_weight.json","meaning_unknown.json",
+"translation_cs.json","translation_sk.json","translation_sl.json","translation_symbols.json","translation_future.json",
+"pronunciation_notes.json","visual_letters.json","ascii_dust.json","emoji_layer.json","katakana_layer.json",
+"V_symbol.json","A_symbol.json","T_symbol.json","fruit_symbol.json","pnft_terms.json",
+"vive_terms.json","glyph_terms.json","planet_terms.json","tower_terms.json","slot_terms.json",
+"question_patterns.json","answer_patterns.json","prompt_patterns.json","teaching_patterns.json","correction_patterns.json",
+"language_log.json","language_tests.json","language_errors.json","language_repair.json","language_backup.json",
+"seed_letters.json","seed_glyphs.json","seed_words.json","seed_phrases.json","seed_language.json",
+"archive_lang_01.json","archive_lang_02.json","archive_lang_03.json","repair_language.json","final_language_core.json"
+]
+
+game_slots = [
+"game_core.json","rules_core.json","rules_movement.json","rules_orbit.json","rules_touch.json",
+"rules_zoom.json","rules_slots.json","rules_signal_tower.json","rules_memory.json","rules_offline.json",
+"state_game.json","state_player.json","state_worlds.json","state_modules.json","state_slots.json",
+"actions_core.json","actions_tap.json","actions_hold.json","actions_drag.json","actions_pinch.json",
+"actions_save.json","actions_load.json","actions_export.json","actions_import.json","actions_repair.json",
+"logic_engine.json","logic_conditions.json","logic_events.json","logic_triggers.json","logic_responses.json",
+"quest_core.json","quest_memory.json","quest_language.json","quest_modeling.json","quest_control.json",
+"battle_style.json","battle_impulse.json","battle_defense.json","battle_signal.json","battle_finish.json",
+"progression_core.json","progression_levels.json","progression_unlocks.json","progression_rewards.json","progression_history.json",
+"testing_core.json","test_slots.json","test_memory.json","test_language.json","test_offline.json",
+"ui_rules.json","hud_rules.json","panel_rules.json","pwa_rules.json","github_rules.json",
+"error_log.json","repair_log.json","debug_state.json","debug_slots.json","debug_modules.json",
+"seed_rules.json","seed_game.json","seed_actions.json","seed_logic.json","seed_tests.json",
+"archive_game_01.json","archive_game_02.json","archive_game_03.json","repair_game.json","final_game_core.json"
+]
+
+control_slots = [
+"control_core.json","control_router.json","control_scheduler.json","control_permissions.json","control_state.json",
+"earth_controller.json","language_controller.json","game_controller.json","slot_controller.json","module_controller.json",
+"memory_bus.json","event_bus.json","signal_bus.json","sync_bus.json","offline_bus.json",
+"earth_to_language.json","language_to_game.json","game_to_earth.json","earth_to_game.json","language_to_earth.json",
+"controller_rules.json","controller_priorities.json","controller_locks.json","controller_conflicts.json","controller_repair.json",
+"unit_earth.json","unit_language.json","unit_game.json","unit_sync.json","unit_backup.json",
+"agent_core.json","agent_tasks.json","agent_watchers.json","agent_reports.json","agent_errors.json",
+"command_queue.json","command_history.json","command_undo.json","command_redo.json","command_future.json",
+"module_loader.json","module_unloader.json","module_health.json","module_tests.json","module_bridge.json",
+"ai_bridge_plan.json","local_ai_plan.json","offline_ai_plan.json","server_sync_plan.json","future_units_plan.json",
+"security_notes.json","truth_rules.json","ask_rules.json","no_fake_rules.json","teacher_priority.json",
+"system_map.json","system_graph.json","system_index.json","system_manifest.json","system_release.json",
+"seed_control.json","seed_routing.json","seed_units.json","seed_buses.json","seed_modules.json",
+"archive_control_01.json","archive_control_02.json","archive_control_03.json","repair_control.json","final_control_core.json"
+]
+
+# Use concise yet functional original-like canvas system.
+html_template = r'''<!doctype html>
 <html lang="cs">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07080d">
-
-<title>Vive Písmenková Paměť •ア</title>
-
+<meta name="theme-color" content="#050815">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.json">
+<title>VaF'i'T Four Core Memory System •ア</title>
 <style>
-:root{
-  --bg:#07080d;
-  --panel:rgba(255,255,255,.075);
-  --panel2:rgba(255,255,255,.12);
-  --line:rgba(255,255,255,.16);
-  --text:#f6f7ff;
-  --muted:#aab2cc;
-  --soft:#d9fff1;
-  --ok:#a8ffd8;
-  --warn:#ffdca8;
-  --danger:#ffb4b4;
-  --shadow:0 0 34px rgba(128,255,212,.22);
+html,body{
+  margin:0;padding:0;width:100%;height:100%;overflow:hidden;
+  background:radial-gradient(circle at top,#050815,#020208);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f5f5f5;
 }
-
-*{
-  box-sizing:border-box;
+.root{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:10px;}
+.stage{
+  position:relative;width:min(920px,96vw);height:min(680px,92vh);border-radius:32px;overflow:hidden;
+  box-shadow:0 40px 90px rgba(0,0,0,.85);
+  background:radial-gradient(circle at top,#06091a,#020208);
+  border:1px solid rgba(255,255,255,.07);
 }
-
-html,
-body{
-  margin:0;
-  width:100%;
-  min-height:100%;
-  background:
-    radial-gradient(circle at 15% 0%,rgba(119,255,210,.16),transparent 34%),
-    radial-gradient(circle at 95% 15%,rgba(175,112,255,.15),transparent 38%),
-    radial-gradient(circle at 50% 100%,rgba(255,220,140,.10),transparent 40%),
-    var(--bg);
-  color:var(--text);
-  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+#globe-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;}
+.hud{
+  position:absolute;left:18px;bottom:14px;right:18px;font-size:10px;opacity:.78;line-height:1.35;pointer-events:none;
 }
-
-button,
-textarea,
-input{
-  font:inherit;
+.hud-right{position:absolute;right:18px;top:14px;font-size:10px;opacity:.82;pointer-events:none;}
+.hud-center{
+  position:absolute;left:50%;bottom:44px;transform:translateX(-50%);
+  font-size:11px;opacity:.9;text-align:center;white-space:nowrap;pointer-events:none;
 }
-
-.app{
-  min-height:100vh;
-  display:grid;
-  grid-template-rows:auto auto 1fr auto;
-  gap:12px;
-  padding:
-    max(14px,env(safe-area-inset-top))
-    12px
-    max(14px,env(safe-area-inset-bottom));
+.memoryDock{position:absolute;top:12px;left:12px;z-index:8;display:flex;gap:6px;flex-wrap:wrap;}
+.pill{
+  border:1px solid rgba(255,220,160,.20);background:rgba(0,0,0,.28);color:#ffe2ad;
+  border-radius:999px;padding:6px 8px;font-size:10px;font-weight:800;
 }
-
-.header{
-  border:1px solid var(--line);
-  background:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.04));
-  border-radius:26px;
-  padding:16px;
-  box-shadow:var(--shadow);
-  backdrop-filter:blur(16px);
+.panel{
+  position:absolute;left:10px;right:10px;bottom:10px;z-index:10;display:none;
+  border:1px solid rgba(255,220,160,.26);background:rgba(4,5,10,.94);
+  border-radius:22px;padding:12px;box-shadow:0 0 34px rgba(255,190,110,.18);backdrop-filter:blur(14px);
 }
-
-.title{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:8px;
+.panel.open{display:block;}
+.panelTop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.panelTitle{font-weight:800;font-size:13px;color:#ffe2ad;}
+.panelSub{font-size:11px;color:rgba(255,255,255,.62);margin-top:2px;}
+.panel textarea{
+  width:100%;min-height:118px;max-height:230px;resize:vertical;
+  border:1px solid rgba(255,220,160,.18);outline:0;border-radius:14px;padding:10px;
+  color:#fff4dc;background:rgba(0,0,0,.35);
+  font:12px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
-
-h1{
-  margin:0;
-  font-size:20px;
-  letter-spacing:.4px;
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+button{
+  border:1px solid rgba(255,220,160,.22);background:rgba(255,220,160,.12);color:#ffe2ad;
+  border-radius:14px;padding:8px 10px;font:700 12px system-ui;
 }
-
-.badge{
-  flex:0 0 auto;
-  border:1px solid var(--line);
-  background:rgba(0,0,0,.22);
-  color:var(--ok);
-  border-radius:999px;
-  padding:6px 10px;
-  font-size:12px;
-  font-weight:700;
-}
-
-.sub{
-  color:var(--muted);
-  font-size:13px;
-  line-height:1.38;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-
-.stat{
-  border:1px solid var(--line);
-  background:var(--panel);
-  border-radius:18px;
-  padding:10px;
-  min-height:62px;
-  backdrop-filter:blur(12px);
-}
-
-.stat strong{
-  display:block;
-  font-size:19px;
-  color:var(--soft);
-}
-
-.stat span{
-  color:var(--muted);
-  font-size:12px;
-}
-
-.quick{
-  display:flex;
-  gap:8px;
-  overflow:auto;
-  padding-bottom:2px;
-}
-
-.quick button,
-.action{
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.11);
-  color:var(--text);
-  border-radius:16px;
-  padding:9px 11px;
-  white-space:nowrap;
-}
-
-.main{
-  min-height:0;
-  display:grid;
-  grid-template-rows:1fr auto;
-  gap:10px;
-}
-
-.chat{
-  min-height:320px;
-  overflow:auto;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  border:1px solid var(--line);
-  background:rgba(0,0,0,.18);
-  border-radius:24px;
-  padding:12px;
-  backdrop-filter:blur(14px);
-}
-
-.msg{
-  max-width:94%;
-  border:1px solid var(--line);
-  border-radius:20px;
-  padding:11px 12px;
-  line-height:1.42;
-  font-size:15px;
-  white-space:pre-wrap;
-}
-
-.bot{
-  align-self:flex-start;
-  background:var(--panel);
-}
-
-.me{
-  align-self:flex-end;
-  background:var(--panel2);
-}
-
-.meta{
-  display:block;
-  color:var(--muted);
-  font-size:11px;
-  margin-bottom:4px;
-}
-
-.composer{
-  display:grid;
-  grid-template-columns:1fr auto;
-  gap:8px;
-  border:1px solid var(--line);
-  background:var(--panel);
-  border-radius:24px;
-  padding:10px;
-  backdrop-filter:blur(14px);
-}
-
-textarea{
-  width:100%;
-  min-height:52px;
-  max-height:140px;
-  resize:none;
-  border:0;
-  outline:0;
-  border-radius:17px;
-  padding:12px;
-  color:var(--text);
-  background:rgba(0,0,0,.30);
-}
-
-.send{
-  border:0;
-  border-radius:17px;
-  padding:0 18px;
-  background:var(--ok);
-  color:#07120e;
-  font-weight:900;
-}
-
-.drawer{
-  display:none;
-  border:1px solid var(--line);
-  background:rgba(0,0,0,.28);
-  border-radius:24px;
-  padding:12px;
-}
-
-.drawer.open{
-  display:block;
-}
-
-.drawer h2{
-  margin:0 0 8px;
-  font-size:16px;
-}
-
-.memoryBox{
-  width:100%;
-  min-height:180px;
-  border:1px solid var(--line);
-  background:rgba(0,0,0,.32);
-  color:var(--text);
-  border-radius:18px;
-  padding:10px;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  font-size:12px;
-}
-
-.row{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:8px;
-}
-
-.small{
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.35;
-}
-
-@media(min-width:760px){
-  .app{
-    max-width:860px;
-    margin:0 auto;
-  }
-
-  .grid{
-    grid-template-columns:repeat(4,1fr);
-  }
+button.primary{background:#ffe2ad;color:#120b04;border:0;}
+@media(max-width:520px){
+  .stage{height:92vh;border-radius:24px;}
+  .hud-right{font-size:9px;right:12px;}
+  .hud{font-size:9px;left:12px;right:12px;}
+  .panel textarea{min-height:98px;}
 }
 </style>
 </head>
-
 <body>
-<div class="app">
-
-  <header class="header">
-    <div class="title">
-      <h1>Vive Písmenková Paměť •ア</h1>
-      <div class="badge" id="offlineBadge">memory ready</div>
+<div class="root">
+  <div class="stage">
+    <canvas id="globe-canvas"></canvas>
+    <div class="memoryDock">
+      <span class="pill">IndexedDB</span>
+      <span class="pill" id="slotPill">sloty: 280/280</span>
+      <span class="pill" id="onlinePill">online</span>
     </div>
-    <div class="sub">
-      Čistý GitHub HTML bot. Učí se z písmen, symbolů, vazeb, vět a tvého úhlu pohledu.
-      Paměť je navržená tak, aby šla později napojit na offline režim, service worker a synchronizaci.
+    <div class="hud-right">v1.5 • Four Core Memory System • VaF'i'T Signal Tower •ア</div>
+    <div class="hud-center" id="status">vybraný svět: Řídící jednotka</div>
+    <div class="hud">
+      🌀 1 prst na kouli = otáčení • ťuk na slot = otevřít modul/soubor • 1 prst mimo koule = orbit • 2 prsty = náklon + zoom • každá koule má vlastní paměťovou vrstvu
     </div>
-  </header>
 
-  <section class="grid">
-    <div class="stat"><strong id="countLetters">0</strong><span>písmen / symbolů</span></div>
-    <div class="stat"><strong id="countLinks">0</strong><span>vazeb mezi znaky</span></div>
-    <div class="stat"><strong id="countRules">0</strong><span>pravidel chování</span></div>
-    <div class="stat"><strong id="countSentences">0</strong><span>důležitých vět</span></div>
-  </section>
-
-  <section class="quick">
-    <button onclick="put('písmeno: V = ')">písmeno</button>
-    <button onclick="put('vazba: V -> ア = ')">vazba</button>
-    <button onclick="put('úhel: ')">úhel</button>
-    <button onclick="put('dělej: ')">dělej</button>
-    <button onclick="put('pamatuj: ')">pamatuj</button>
-    <button onclick="sendText('/profil')">profil</button>
-    <button onclick="sendText('/mapa')">mapa</button>
-    <button onclick="toggleMemory()">paměť</button>
-  </section>
-
-  <main class="main">
-    <section class="chat" id="chat"></section>
-
-    <section class="drawer" id="drawer">
-      <h2>Export / import paměti</h2>
-      <div class="small">
-        Tohle je připravené pro pozdější offline režim. Teď se paměť ukládá do prohlížeče.
-        Později k tomu přidáme <b>manifest.json</b>, <b>sw.js</b> a offline cache.
+    <div class="panel" id="slotPanel">
+      <div class="panelTop">
+        <div>
+          <div class="panelTitle" id="panelTitle">slot</div>
+          <div class="panelSub" id="panelSub">modul paměti</div>
+        </div>
+        <button onclick="closePanel()">zavřít</button>
       </div>
-      <textarea class="memoryBox" id="memoryBox"></textarea>
+      <textarea id="slotText" placeholder="Obsah slotu/modulu..."></textarea>
       <div class="row">
-        <button class="action" onclick="exportMemory()">exportovat</button>
-        <button class="action" onclick="importMemory()">importovat</button>
-        <button class="action" onclick="copyMemory()">kopírovat</button>
-        <button class="action" onclick="resetMemory()">vyčistit</button>
+        <button class="primary" onclick="saveSlot()">uložit slot</button>
+        <button onclick="seedSlot()">seed</button>
+        <button onclick="exportAll()">export vše</button>
+        <button onclick="importAll()">import vše</button>
+        <button onclick="clearSlot()">vyčistit slot</button>
       </div>
-    </section>
-
-    <section class="composer">
-      <textarea id="input" placeholder="Uč mě: písmeno: V = začátek / směr / živý signál"></textarea>
-      <button class="send" onclick="send()">➤</button>
-    </section>
-  </main>
-
+    </div>
+  </div>
 </div>
 
 <script>
-/*
-  Vive Písmenková Paměť •ア
-  ------------------------------------------------------------
-  Tenhle index je schválně napsaný jako jeden soubor pro GitHub Pages.
+const EARTH_SLOT_LABELS = __EARTH_SLOT_LABELS__;
+const LANG_SLOT_LABELS = __LANG_SLOT_LABELS__;
+const GAME_SLOT_LABELS = __GAME_SLOT_LABELS__;
+const CONTROL_SLOT_LABELS = __CONTROL_SLOT_LABELS__;
 
-  Paměť je už rozdělená na vrstvy:
-  - letters: písmena / symboly / znaky
-  - links: vztahy mezi znaky
-  - viewpoint: úhel pohledu učitele
-  - rules: co má bot dělat
-  - sentences: důležité věty
-  - learningLog: záznam učení
-  - offlineQueue: připravené místo pro pozdější offline synchronizaci
+const DB_NAME = "VaFTFourCoreMemorySystem";
+const DB_VERSION = 1;
+const STORE = "moduleSlots";
 
-  Později můžeme přidat:
-  - manifest.json
-  - sw.js
-  - cache pro offline spuštění
-  - IndexedDB místo localStorage
-  - export/import mezi zařízeními
-*/
+let db = null;
+let selectedSlotRef = null;
 
-const MEMORY_KEY = "vive_pismenkova_pamet_v1";
-
-function time(){
-  return new Date().toISOString();
-}
-
-function newMemory(){
-  return {
-    schema: "vive-letter-memory",
-    version: 1,
-    createdAt: time(),
-    updatedAt: time(),
-    offlineReady: true,
-    futureOfflinePlan: {
-      storageNow: "localStorage",
-      storageLater: "IndexedDB",
-      serviceWorkerLater: "sw.js",
-      syncLater: "offlineQueue"
-    },
-    identity: {
-      name: "Vive Písmenkový Bot",
-      purpose: "Učit se písmena, symboly, vazby, věty a úhel pohledu.",
-      baseRule: "Když nevím, nepředstírám. Nabídnu způsob, jak mě to učitel může naučit."
-    },
-    letters: {},
-    links: [],
-    viewpoint: [],
-    rules: [
-      {
-        text: "Když nerozumíš, zeptej se a nepředstírej znalost.",
-        createdAt: time()
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = e => {
+      const database = e.target.result;
+      if(!database.objectStoreNames.contains(STORE)){
+        database.createObjectStore(STORE, { keyPath:"id" });
       }
-    ],
-    sentences: [],
-    learningLog: [],
-    offlineQueue: []
-  };
-}
-
-function loadMemory(){
-  try{
-    const raw = localStorage.getItem(MEMORY_KEY);
-    if(!raw) return newMemory();
-
-    const loaded = JSON.parse(raw);
-    const base = newMemory();
-
-    return {
-      ...base,
-      ...loaded,
-      identity: {...base.identity, ...(loaded.identity || {})},
-      futureOfflinePlan: {...base.futureOfflinePlan, ...(loaded.futureOfflinePlan || {})},
-      letters: loaded.letters || {},
-      links: loaded.links || [],
-      viewpoint: loaded.viewpoint || [],
-      rules: loaded.rules || [],
-      sentences: loaded.sentences || [],
-      learningLog: loaded.learningLog || [],
-      offlineQueue: loaded.offlineQueue || []
     };
-  }catch(e){
-    return newMemory();
-  }
-}
-
-let memory = loadMemory();
-
-function saveMemory(reason="save"){
-  memory.updatedAt = time();
-  memory.offlineQueue.push({
-    type: reason,
-    at: time()
+    request.onsuccess = e => resolve(e.target.result);
+    request.onerror = e => reject(e.target.error);
   });
-
-  if(memory.offlineQueue.length > 80){
-    memory.offlineQueue = memory.offlineQueue.slice(-80);
-  }
-
-  localStorage.setItem(MEMORY_KEY, JSON.stringify(memory, null, 2));
-  refreshStats();
 }
-
-function normalize(text){
-  return String(text || "").trim().toLowerCase().replace(/\s+/g," ");
-}
-
-function refreshStats(){
-  document.getElementById("countLetters").textContent = Object.keys(memory.letters).length;
-  document.getElementById("countLinks").textContent = memory.links.length;
-  document.getElementById("countRules").textContent = memory.rules.length;
-  document.getElementById("countSentences").textContent = memory.sentences.length;
-
-  const badge = document.getElementById("offlineBadge");
-  badge.textContent = navigator.onLine ? "memory ready" : "offline memory";
-}
-
-function addLog(kind, text){
-  memory.learningLog.push({
-    kind,
-    text,
-    at: time()
+function dbGet(id){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,"readonly");
+    const req=tx.objectStore(STORE).get(id);
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
   });
-
-  if(memory.learningLog.length > 200){
-    memory.learningLog = memory.learningLog.slice(-200);
-  }
 }
-
-function message(who, text){
-  const chat = document.getElementById("chat");
-  const div = document.createElement("div");
-  div.className = "msg " + (who === "Ty" ? "me" : "bot");
-
-  const meta = document.createElement("span");
-  meta.className = "meta";
-  meta.textContent = who;
-
-  const body = document.createElement("span");
-  body.textContent = text;
-
-  div.appendChild(meta);
-  div.appendChild(body);
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function put(text){
-  const input = document.getElementById("input");
-  input.value = text;
-  input.focus();
-}
-
-function sendText(text){
-  document.getElementById("input").value = text;
-  send();
-}
-
-function send(){
-  const input = document.getElementById("input");
-  const text = input.value.trim();
-  if(!text) return;
-
-  input.value = "";
-  message("Ty", text);
-
-  const reply = handle(text);
-  message("Bot", reply);
-}
-
-function item(text){
-  return {
-    text: text.trim(),
-    createdAt: time()
-  };
-}
-
-function handle(text){
-  const low = normalize(text);
-
-  if(low === "/help"){
-    return help();
-  }
-
-  if(low === "/profil"){
-    return profile();
-  }
-
-  if(low === "/mapa"){
-    return mapLetters();
-  }
-
-  if(low === "/export"){
-    return JSON.stringify(memory, null, 2);
-  }
-
-  if(low.startsWith("písmeno:") || low.startsWith("pismeno:") || low.startsWith("znak:") || low.startsWith("symbol:")){
-    return learnLetter(text);
-  }
-
-  if(low.startsWith("vazba:") || low.startsWith("link:") || low.startsWith("spoj:")){
-    return learnLink(text);
-  }
-
-  if(low.startsWith("úhel:") || low.startsWith("uhel:")){
-    const value = afterColon(text);
-    memory.viewpoint.push(item(value));
-    addLog("viewpoint", value);
-    saveMemory("learn_viewpoint");
-    return "Uloženo jako úhel pohledu.";
-  }
-
-  if(low.startsWith("dělej:") || low.startsWith("delej:")){
-    const value = afterColon(text);
-    memory.rules.push(item(value));
-    addLog("rule", value);
-    saveMemory("learn_rule");
-    return "Uloženo jako pravidlo chování.";
-  }
-
-  if(low.startsWith("pamatuj:")){
-    const value = afterColon(text);
-    memory.sentences.push(item(value));
-    addLog("sentence", value);
-    saveMemory("learn_sentence");
-    return "Uloženo jako důležitá věta.";
-  }
-
-  return answerFromMemory(text);
-}
-
-function afterColon(text){
-  return text.split(":").slice(1).join(":").trim();
-}
-
-function learnLetter(text){
-  const raw = afterColon(text);
-  if(!raw.includes("=")){
-    return "Napiš to takhle:\npísmeno: V = začátek / směr / živý signál";
-  }
-
-  const parts = raw.split("=");
-  const symbol = parts.shift().trim();
-  const meaning = parts.join("=").trim();
-
-  if(!symbol || !meaning){
-    return "Chybí znak nebo význam. Příklad:\npísmeno: ア = brána / jiskra / podpis";
-  }
-
-  memory.letters[symbol] = {
-    symbol,
-    meaning,
-    aliases: [],
-    createdAt: memory.letters[symbol]?.createdAt || time(),
-    updatedAt: time()
-  };
-
-  addLog("letter", symbol + " = " + meaning);
-  saveMemory("learn_letter");
-
-  return "Uloženo.\n" + symbol + " = " + meaning;
-}
-
-function learnLink(text){
-  const raw = afterColon(text);
-
-  if(!raw.includes("->") || !raw.includes("=")){
-    return "Napiš to takhle:\nvazba: V -> ア = V se otevírá do znaku ア";
-  }
-
-  const leftAndRest = raw.split("->");
-  const from = leftAndRest.shift().trim();
-  const rest = leftAndRest.join("->");
-  const toAndMeaning = rest.split("=");
-  const to = toAndMeaning.shift().trim();
-  const meaning = toAndMeaning.join("=").trim();
-
-  if(!from || !to || !meaning){
-    return "Vazba není celá. Příklad:\nvazba: V -> ア = přechod ze směru do brány";
-  }
-
-  memory.links.push({
-    from,
-    to,
-    meaning,
-    createdAt: time()
+function dbPut(file){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,"readwrite");
+    const req=tx.objectStore(STORE).put(file);
+    req.onsuccess=()=>resolve();
+    req.onerror=()=>reject(req.error);
   });
-
-  addLog("link", from + " -> " + to + " = " + meaning);
-  saveMemory("learn_link");
-
-  return "Vazba uložena.\n" + from + " -> " + to + " = " + meaning;
 }
+function dbAll(){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(STORE,"readonly");
+    const req=tx.objectStore(STORE).getAll();
+    req.onsuccess=()=>resolve(req.result || []);
+    req.onerror=()=>reject(req.error);
+  });
+}
+function time(){return new Date().toISOString();}
 
-function answerFromMemory(text){
-  const exact = memory.letters[text.trim()];
-  if(exact){
-    return describeSymbol(text.trim());
-  }
+const canvas=document.getElementById("globe-canvas");
+const ctx=canvas.getContext("2d");
+const statusEl=document.getElementById("status");
 
-  const found = [];
+let width=0,height=0,baseRadius=0;
+let dpr=window.devicePixelRatio||1;
 
-  for(const symbol of Object.keys(memory.letters)){
-    if(symbol && text.includes(symbol)){
-      found.push(describeSymbol(symbol));
+let viewScale=1,targetViewScale=1;
+let viewOffsetX=0,viewOffsetY=0,targetViewOffsetX=0,targetViewOffsetY=0;
+let globalTiltX=-0.7,globalTiltY=0,targetTiltX=globalTiltX,targetTiltY=globalTiltY;
+let orbitRotation=0,orbitVelocity=0.12;
+const orbitDamping=.96,orbitBaseDrift=.04;
+let orbitNudgeX=0,orbitNudgeY=0,activeSphere=null,sphereDragActive=false;
+
+const glyphs=["{*(°.)}","ً&’」","¡(*)(%)¡","{°. .}","(•.°)","•ア","V","PNFT","◇","◉"];
+const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789ア•✧∞";
+
+const signalCore={points:[],rings:12,segments:18,pulse:0,baseRadius:120,coneHeight:200,mode:"controller",offsetY:0};
+const outerCone={points:[],rings:12,segments:18,baseRadius:140,coneHeight:220,offsetY:0};
+let signalSpin=0;
+
+function generateSignalPoints(){
+  signalCore.points=[];outerCone.points=[];
+  for(let i=0;i<=signalCore.rings;i++){
+    const t=i/signalCore.rings;
+    const y=-signalCore.coneHeight/2+t*signalCore.coneHeight;
+    const r=signalCore.baseRadius*(1-.75*t);
+    for(let j=0;j<signalCore.segments;j++){
+      const a=(j/signalCore.segments)*Math.PI*2;
+      signalCore.points.push({baseX:r*Math.cos(a),baseY:y,baseZ:r*Math.sin(a),x:0,y:0,z:0,screenX:0,screenY:0,ring:i,seg:j,phase:Math.random()*Math.PI*2});
     }
   }
-
-  if(found.length){
-    return found.join("\n\n");
+  for(let i=0;i<=outerCone.rings;i++){
+    const t=i/outerCone.rings;
+    const y=-outerCone.coneHeight/2+t*outerCone.coneHeight;
+    const r=outerCone.baseRadius*(1-.8*t);
+    for(let j=0;j<outerCone.segments;j++){
+      const a=(j/outerCone.segments)*Math.PI*2;
+      outerCone.points.push({baseX:r*Math.cos(a),baseY:y,baseZ:r*Math.sin(a),x:0,y:0,z:0,screenX:0,screenY:0,ring:i,seg:j});
+    }
   }
-
-  if(normalize(text).includes("co umíš") || normalize(text).includes("co umis")){
-    return help();
-  }
-
-  return "Tohle ještě neumím.\n\nNauč mě jedním z těchto tvarů:\n" +
-    "písmeno: V = začátek / směr / živý signál\n" +
-    "vazba: V -> ア = přechod ze směru do brány\n" +
-    "úhel: význam čtu přes vztahy mezi písmeny\n" +
-    "dělej: když nevíš, zeptej se\n" +
-    "pamatuj: písmenka nejsou jen text, jsou mapy významu";
 }
 
-function describeSymbol(symbol){
-  const data = memory.letters[symbol];
-  if(!data) return "";
-
-  const lines = [];
-  lines.push(symbol + " = " + data.meaning);
-
-  const outgoing = memory.links.filter(x => x.from === symbol);
-  const incoming = memory.links.filter(x => x.to === symbol);
-
-  if(outgoing.length){
-    lines.push("");
-    lines.push("Vazby ven:");
-    outgoing.forEach(x => lines.push(symbol + " -> " + x.to + " = " + x.meaning));
+function updateSignalProjection(){
+  const sinX=Math.sin(globalTiltX),cosX=Math.cos(globalTiltX);
+  const sinY=Math.sin(globalTiltY),cosY=Math.cos(globalTiltY);
+  const sinSpin=Math.sin(signalSpin),cosSpin=Math.cos(signalSpin);
+  for(const p of signalCore.points){
+    const xSpin=p.baseX*cosSpin+p.baseZ*sinSpin;
+    const zSpin=-p.baseX*sinSpin+p.baseZ*cosSpin;
+    const y1=p.baseY*cosX-zSpin*sinX;
+    const z1=p.baseY*sinX+zSpin*cosX;
+    const x2=xSpin*cosY+z1*sinY;
+    p.x=x2;p.y=y1+signalCore.offsetY;p.z=-xSpin*sinY+z1*cosY;
+    p.screenX=width/2+viewOffsetX+x2*viewScale;
+    p.screenY=height/2+viewOffsetY+(y1+signalCore.offsetY)*viewScale;
   }
-
-  if(incoming.length){
-    lines.push("");
-    lines.push("Vazby dovnitř:");
-    incoming.forEach(x => lines.push(x.from + " -> " + symbol + " = " + x.meaning));
+  for(const p of outerCone.points){
+    const y1=p.baseY*cosX-p.baseZ*sinX;
+    const z1=p.baseY*sinX+p.baseZ*cosX;
+    const x2=p.baseX*cosY+z1*sinY;
+    p.x=x2;p.y=y1+outerCone.offsetY;p.z=-p.baseX*sinY+z1*cosY;
+    p.screenX=width/2+viewOffsetX+x2*viewScale;
+    p.screenY=height/2+viewOffsetY+(y1+outerCone.offsetY)*viewScale;
   }
-
-  return lines.join("\n");
 }
 
-function profile(){
-  const lines = [];
-
-  lines.push("=== PROFIL ===");
-  lines.push("Jméno: " + memory.identity.name);
-  lines.push("Účel: " + memory.identity.purpose);
-  lines.push("Paměť: localStorage teď / IndexedDB později");
-  lines.push("Offline příprava: ano");
-  lines.push("");
-
-  lines.push("=== ÚHEL POHLEDU ===");
-  if(memory.viewpoint.length){
-    memory.viewpoint.forEach((x,i)=>lines.push((i+1)+". "+x.text));
-  }else{
-    lines.push("Zatím prázdné.");
+function drawConeMesh(points,rings,segs,color){
+  ctx.lineWidth=.7;ctx.strokeStyle=color;
+  for(let i=0;i<=rings;i++){
+    ctx.beginPath();let started=false;
+    for(const p of points){
+      if(p.ring!==i)continue;
+      if(!started){ctx.moveTo(p.screenX,p.screenY);started=true;}else ctx.lineTo(p.screenX,p.screenY);
+    }
+    if(started)ctx.closePath();ctx.stroke();
   }
-
-  lines.push("");
-  lines.push("=== PRAVIDLA ===");
-  if(memory.rules.length){
-    memory.rules.forEach((x,i)=>lines.push((i+1)+". "+x.text));
-  }else{
-    lines.push("Zatím prázdné.");
+  for(let j=0;j<segs;j++){
+    ctx.beginPath();let started=false;
+    for(let i=0;i<=rings;i++){
+      const p=points[i*segs+j];if(!p)continue;
+      if(!started){ctx.moveTo(p.screenX,p.screenY);started=true;}else ctx.lineTo(p.screenX,p.screenY);
+    }
+    if(started)ctx.stroke();
   }
-
-  lines.push("");
-  lines.push("=== DŮLEŽITÉ VĚTY ===");
-  if(memory.sentences.length){
-    memory.sentences.forEach((x,i)=>lines.push((i+1)+". "+x.text));
-  }else{
-    lines.push("Zatím prázdné.");
-  }
-
-  return lines.join("\n");
 }
 
-function mapLetters(){
-  const symbols = Object.keys(memory.letters);
-  const lines = [];
-
-  lines.push("=== MAPA PÍSMEN ===");
-
-  if(!symbols.length){
-    lines.push("Zatím nemám žádná písmena.");
-    lines.push("Začni třeba: písmeno: V = začátek světa Vive");
-    return lines.join("\n");
+function drawSignalGlyphs(){
+  ctx.font="10px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillStyle="rgba(255,225,180,.96)";
+  ctx.shadowColor="rgba(255,200,160,.8)";ctx.shadowBlur=7;
+  let i=0;
+  for(const p of signalCore.points){
+    const source=signalCore.mode==="letters"?letters:glyphs.join("");
+    const g=source[i%source.length];
+    i++;
+    ctx.globalAlpha=.55+.45*Math.sin(signalCore.pulse*1.4+p.phase);
+    ctx.fillText(g,p.screenX,p.screenY);
   }
+  ctx.shadowBlur=0;ctx.globalAlpha=1;
+}
 
-  symbols.forEach(symbol=>{
-    lines.push(describeSymbol(symbol));
-    lines.push("---");
+function drawSignalCore(){
+  signalCore.pulse+=.016;
+  updateSignalProjection();
+  ctx.save();
+  ctx.translate(width/2+viewOffsetX,height/2+viewOffsetY);
+  ctx.scale(viewScale,viewScale);
+  const yBase=signalCore.offsetY+signalCore.coneHeight/2+12;
+  ctx.beginPath();ctx.ellipse(0,yBase,signalCore.baseRadius*.9,signalCore.baseRadius*.3,0,0,Math.PI*2);
+  const g=ctx.createRadialGradient(0,yBase,signalCore.baseRadius*.1,0,yBase,signalCore.baseRadius);
+  g.addColorStop(0,"rgba(20,12,8,1)");g.addColorStop(1,"rgba(0,0,0,.6)");
+  ctx.fillStyle=g;ctx.fill();ctx.restore();
+
+  drawConeMesh(outerCone.points,outerCone.rings,outerCone.segments,"rgba(255,210,160,.42)");
+  drawConeMesh(signalCore.points,signalCore.rings,signalCore.segments,"rgba(255,210,150,.85)");
+  drawSignalGlyphs();
+}
+
+function createSlotTemplate(labels,worldKey){
+  const template=[];const bands=7,segs=10;let id=1;
+  for(let b=0;b<bands;b++){
+    const t=(b+.5)/bands;
+    const lat=-Math.PI/3+(t*2*Math.PI)/3;
+    for(let s=0;s<segs;s++){
+      const lon=(s/segs)*Math.PI*2;
+      const label=labels[(id-1)%labels.length] || (worldKey+"_"+id);
+      template.push({id,fileId:worldKey+":"+label,label,lat,lon,screenX:0,screenY:0,sceneX:0,sceneY:0});
+      id++;
+    }
+  }
+  return template;
+}
+
+const spheres=[
+  {key:"game",name:"Hra + pravidla",baseAngle:Math.PI/2,rotX:-.2,rotY:0,autoSpeed:.35,slots:createSlotTemplate(GAME_SLOT_LABELS,"game"),cx:0,cy:0,depth:0,radiusScale:1,color:"gold"},
+  {key:"control",name:"Řídící jednotka",baseAngle:-Math.PI/2,rotX:-.15,rotY:.6,autoSpeed:.25,slots:createSlotTemplate(CONTROL_SLOT_LABELS,"control"),cx:0,cy:0,depth:0,radiusScale:1,color:"violet"},
+  {key:"lang",name:"Jazyk",baseAngle:Math.PI,rotX:-.25,rotY:-.3,autoSpeed:.28,slots:createSlotTemplate(LANG_SLOT_LABELS,"lang"),cx:0,cy:0,depth:0,radiusScale:1,color:"blue"},
+  {key:"earth",name:"Země / úhel pohledu",baseAngle:0,rotX:-.1,rotY:.9,autoSpeed:.32,slots:createSlotTemplate(EARTH_SLOT_LABELS,"earth"),cx:0,cy:0,depth:0,radiusScale:1,color:"green"}
+];
+activeSphere=spheres[1];
+
+function layoutSpheres(){
+  const orbitR=baseRadius*2.7;
+  spheres.forEach(s=>{
+    const a=s.baseAngle+orbitRotation;
+    let x=orbitR*Math.cos(a),y=0,z=orbitR*Math.sin(a);
+    let y1=y*Math.cos(globalTiltX)-z*Math.sin(globalTiltX);
+    let z1=y*Math.sin(globalTiltX)+z*Math.cos(globalTiltX);
+    let x2=x*Math.cos(globalTiltY)+z1*Math.sin(globalTiltY);
+    let z2=-x*Math.sin(globalTiltY)+z1*Math.cos(globalTiltY);
+    let nudgeX=0,nudgeY=0;
+    if(activeSphere&&s!==activeSphere){nudgeX=orbitNudgeX;nudgeY=orbitNudgeY;}
+    s.cx=x2+nudgeX;s.cy=y1+nudgeY;s.depth=z2;
+    const t=(z2+orbitR)/(2*orbitR);
+    s.radiusScale=.6+.4*t;s.alpha=.4+.6*t;
   });
-
-  return lines.join("\n");
 }
 
-function help(){
-  return "Příkazy:\n\n" +
-    "písmeno: V = začátek / směr / živý signál\n" +
-    "vazba: V -> ア = přechod ze směru do brány\n" +
-    "úhel: význam vzniká ze vztahu mezi písmeny\n" +
-    "dělej: když nerozumíš, nepředstírej\n" +
-    "pamatuj: tahle věta je důležitá pro projekt\n\n" +
-    "/profil = ukáže úhel, pravidla a věty\n" +
-    "/mapa = ukáže písmena a vazby\n" +
-    "/export = vypíše JSON paměť";
+function resize(){
+  const rect=canvas.getBoundingClientRect();
+  width=rect.width;height=rect.height;
+  canvas.width=width*dpr;canvas.height=height*dpr;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  baseRadius=Math.min(width,height)*.18;
+  signalCore.baseRadius=Math.min(width,height)*.19;
+  signalCore.coneHeight=signalCore.baseRadius*1.6;
+  signalCore.offsetY=baseRadius*.9;
+  outerCone.baseRadius=signalCore.baseRadius*1.08;
+  outerCone.coneHeight=signalCore.coneHeight*1.05;
+  outerCone.offsetY=signalCore.offsetY;
+  generateSignalPoints();
+}
+resize();window.addEventListener("resize",resize);
+
+function projectOnSphere(x,y,z,radius,rotX,rotY){
+  let y1=y*Math.cos(rotX)-z*Math.sin(rotX);
+  let z1=y*Math.sin(rotX)+z*Math.cos(rotX);
+  let x2=x*Math.cos(rotY)+z1*Math.sin(rotY);
+  let z2=-x*Math.sin(rotY)+z1*Math.cos(rotY);
+  const scale=radius*.9;
+  return {x:x2*scale,y:y1*scale,z:z2};
 }
 
-function toggleMemory(){
-  const drawer = document.getElementById("drawer");
-  drawer.classList.toggle("open");
-  exportMemory();
+function sphereColors(sphere){
+  if(sphere.key==="control") return {edge:"rgba(215,185,255,.95)",fill:"#201430",slot:"rgba(24,8,38,.94)",text:"rgba(235,215,255,.96)"};
+  if(sphere.key==="earth") return {edge:"rgba(170,255,220,.95)",fill:"#123322",slot:"rgba(2,20,16,.94)",text:"rgba(190,255,225,.96)"};
+  if(sphere.key==="lang") return {edge:"rgba(160,210,255,.95)",fill:"#101f33",slot:"rgba(3,14,28,.94)",text:"rgba(200,230,255,.96)"};
+  return {edge:"rgba(255,197,120,.9)",fill:"#2d1d0f",slot:"rgba(6,6,10,.92)",text:"rgba(255,220,160,.95)"};
 }
 
-function exportMemory(){
-  document.getElementById("memoryBox").value = JSON.stringify(memory, null, 2);
+function drawSphere(sphere){
+  const radius=baseRadius*(sphere.radiusScale||1);
+  const colors=sphereColors(sphere);
+
+  ctx.save();
+  ctx.translate(width/2+viewOffsetX+sphere.cx*viewScale,height/2+viewOffsetY+sphere.cy*viewScale);
+  ctx.scale(viewScale,viewScale);
+  ctx.globalAlpha=sphere.alpha||1;
+
+  const g=ctx.createRadialGradient(-radius*.3,-radius*.4,radius*.3,0,radius*.4,radius*1.1);
+  g.addColorStop(0,colors.fill);g.addColorStop(.5,"#1b1012");g.addColorStop(1,"#050308");
+  ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+
+  ctx.strokeStyle=colors.edge;ctx.lineWidth=1.4;ctx.shadowColor=colors.edge;ctx.shadowBlur=8;
+  ctx.beginPath();ctx.arc(0,0,radius,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;
+
+  ctx.lineWidth=.9;ctx.strokeStyle="rgba(255,210,140,.78)";
+  for(let i=0;i<12;i++){
+    const lon=(i/12)*Math.PI*2;ctx.beginPath();let started=false;
+    for(let step=0;step<=60;step++){
+      const t=(step/60)*Math.PI-Math.PI/2;
+      const p=projectOnSphere(Math.cos(t)*Math.cos(lon),Math.sin(t),Math.cos(t)*Math.sin(lon),radius,sphere.rotX,sphere.rotY);
+      if(p.z>=0){if(!started){ctx.moveTo(p.x,p.y);started=true;}else ctx.lineTo(p.x,p.y);}
+    }
+    ctx.stroke();
+  }
+  for(let j=1;j<8;j++){
+    const lat=(j/8)*Math.PI-Math.PI/2;ctx.beginPath();let started=false;
+    for(let step=0;step<=90;step++){
+      const lon=(step/90)*Math.PI*2;
+      const p=projectOnSphere(Math.cos(lat)*Math.cos(lon),Math.sin(lat),Math.cos(lat)*Math.sin(lon),radius,sphere.rotX,sphere.rotY);
+      if(p.z>=0){if(!started){ctx.moveTo(p.x,p.y);started=true;}else ctx.lineTo(p.x,p.y);}
+    }
+    ctx.stroke();
+  }
+
+  ctx.save();
+  ctx.font="11px system-ui";ctx.fillStyle=colors.text;ctx.textAlign="center";ctx.textBaseline="top";
+  ctx.shadowColor="rgba(0,0,0,.8)";ctx.shadowBlur=6;ctx.fillText(sphere.name,0,radius+10);ctx.restore();
+
+  const slotW=(radius*.35)/3, slotH=slotW*.65;
+  ctx.font="8px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";
+
+  for(const slot of sphere.slots){
+    const x=Math.cos(slot.lat)*Math.cos(slot.lon),y=Math.sin(slot.lat),z=Math.cos(slot.lat)*Math.sin(slot.lon);
+    const p=projectOnSphere(x,y,z,radius,sphere.rotX,sphere.rotY);
+    if(p.z<0)continue;
+
+    const sceneX=sphere.cx*viewScale+p.x,sceneY=sphere.cy*viewScale+p.y;
+    slot.sceneX=sceneX/viewScale;slot.sceneY=sceneY/viewScale;
+    slot.screenX=width/2+viewOffsetX+sceneX;slot.screenY=height/2+viewOffsetY+sceneY;
+
+    ctx.save();ctx.translate(p.x,p.y);
+    const w=slotW,h=slotH,r=4;
+    ctx.beginPath();
+    ctx.moveTo(-w/2+r,-h/2);ctx.lineTo(w/2-r,-h/2);ctx.quadraticCurveTo(w/2,-h/2,w/2,-h/2+r);
+    ctx.lineTo(w/2,h/2-r);ctx.quadraticCurveTo(w/2,h/2,w/2-r,h/2);ctx.lineTo(-w/2+r,h/2);
+    ctx.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);ctx.lineTo(-w/2,-h/2+r);ctx.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);
+    ctx.closePath();
+    ctx.fillStyle=colors.slot;ctx.strokeStyle=colors.edge;ctx.lineWidth=.7;ctx.fill();ctx.stroke();
+    ctx.fillStyle=colors.text;ctx.shadowColor=colors.edge;ctx.shadowBlur=4;
+    const shortLabel=slot.label.length>8?slot.label.slice(0,8):slot.label;
+    ctx.fillText(shortLabel,0,1);
+    ctx.restore();
+  }
+
+  ctx.restore();ctx.globalAlpha=1;
 }
 
-function importMemory(){
-  const box = document.getElementById("memoryBox");
-  try{
-    const imported = JSON.parse(box.value);
-    memory = {
-      ...newMemory(),
-      ...imported,
-      importedAt: time()
-    };
-    saveMemory("import_memory");
-    message("Bot", "Paměť importována.");
-  }catch(e){
-    message("Bot", "Import se nepovedl. JSON není platný.");
+function drawScene(){
+  ctx.clearRect(0,0,width,height);
+  layoutSpheres();
+  drawSignalCore();
+
+  ctx.save();
+  ctx.translate(width/2+viewOffsetX,height/2+viewOffsetY);
+  ctx.scale(viewScale,viewScale);
+
+  const hubRInner=baseRadius*1.0,hubROuter=baseRadius*1.45;
+  const hubGrad=ctx.createRadialGradient(-hubROuter*.2,-hubROuter*.2,hubRInner*.2,0,hubROuter*.4,hubROuter*1.1);
+  hubGrad.addColorStop(0,"#1b1012");hubGrad.addColorStop(1,"#050308");
+  ctx.beginPath();ctx.arc(0,0,hubROuter,0,Math.PI*2);ctx.arc(0,0,hubRInner,0,Math.PI*2,true);ctx.closePath();
+  ctx.fillStyle=hubGrad;ctx.fill();
+
+  ctx.strokeStyle="rgba(255,197,120,.5)";ctx.lineWidth=1;
+  for(let i=0;i<4;i++){const a=(i*Math.PI)/2;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(hubROuter*Math.cos(a),hubROuter*Math.sin(a));ctx.stroke();}
+
+  ctx.font="700 14px system-ui";ctx.fillStyle="rgba(255,220,150,.95)";ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.shadowColor="rgba(255,200,120,.9)";ctx.shadowBlur=14;ctx.rotate(.8);
+  ctx.fillText("•ア Four Core Memory // Vivere atque Fru'ii'T",0,0);
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate(width/2+viewOffsetX,height/2+viewOffsetY);ctx.scale(viewScale,viewScale);
+  ctx.setLineDash([6,6]);ctx.strokeStyle="rgba(255,210,150,.38)";ctx.lineWidth=1;
+  const orbitR=baseRadius*2.7;ctx.beginPath();
+  for(let deg=0;deg<=360;deg+=3){
+    const a=(deg*Math.PI)/180+orbitRotation;
+    let x=orbitR*Math.cos(a),y=0,z=orbitR*Math.sin(a);
+    let y1=y*Math.cos(globalTiltX)-z*Math.sin(globalTiltX);
+    let z1=y*Math.sin(globalTiltX)+z*Math.cos(globalTiltX);
+    let x2=x*Math.cos(globalTiltY)+z1*Math.sin(globalTiltY);
+    if(deg===0)ctx.moveTo(x2,y1);else ctx.lineTo(x2,y1);
+  }
+  ctx.stroke();ctx.restore();
+
+  const sorted=[...spheres].sort((a,b)=>a.depth-b.depth);
+  for(const s of sorted)drawSphere(s);
+}
+
+let lastTime=0;
+function loop(timestamp){
+  if(!timestamp)timestamp=0;
+  const dt=(timestamp-lastTime)/1000;lastTime=timestamp;
+
+  if(!sphereDragActive){
+    orbitRotation+=orbitVelocity*dt;
+    const drift=orbitBaseDrift*dt;
+    orbitVelocity+=orbitVelocity>=0?drift:-drift;
+    orbitVelocity*=Math.pow(orbitDamping,dt*60);
+  }else{
+    orbitRotation+=orbitVelocity*dt*.15;
+    orbitVelocity*=Math.pow(.85,dt*60);
+  }
+
+  for(const sphere of spheres)sphere.rotY+=sphere.autoSpeed*dt;
+  orbitNudgeX*=Math.pow(.85,dt*60);orbitNudgeY*=Math.pow(.85,dt*60);
+
+  const k=Math.min(1,6*dt);
+  viewScale+=(targetViewScale-viewScale)*k;
+  viewOffsetX+=(targetViewOffsetX-viewOffsetX)*k;
+  viewOffsetY+=(targetViewOffsetY-viewOffsetY)*k;
+  globalTiltX+=(targetTiltX-globalTiltX)*k;
+  globalTiltY+=(targetTiltY-globalTiltY)*k;
+
+  signalSpin+=dt*.5;if(signalSpin>Math.PI*2)signalSpin-=Math.PI*2;
+  drawScene();requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+let drag=false,dragMode="none",lastX=0,lastY=0,movedDistance=0,startScale=1,startDist=0,pinchSceneX=0,pinchSceneY=0;
+
+function pointerDown(e){
+  e.preventDefault();
+  const rect=canvas.getBoundingClientRect();
+  if(e.touches&&e.touches.length===2){
+    drag=true;dragMode="two";
+    const t0=e.touches[0],t1=e.touches[1];
+    const cx=(t0.clientX+t1.clientX)/2,cy=(t0.clientY+t1.clientY)/2;
+    const centerX=cx-rect.left,centerY=cy-rect.top;
+    lastX=cx;lastY=cy;movedDistance=0;
+    startDist=Math.hypot(t0.clientX-t1.clientX,t0.clientY-t1.clientY);
+    pinchSceneX=(centerX-width/2-viewOffsetX)/viewScale;
+    pinchSceneY=(centerY-height/2-viewOffsetY)/viewScale;
+    startScale=viewScale;sphereDragActive=false;return;
+  }
+
+  const touch=e.touches?e.touches[0]:e;
+  const cx=touch.clientX-rect.left-(width/2+viewOffsetX);
+  const cy=touch.clientY-rect.top-(height/2+viewOffsetY);
+
+  let best=null,bestDist=Infinity;
+  const rHit=baseRadius*1.2*viewScale;
+  for(const sphere of spheres){
+    const sx=sphere.cx*viewScale,sy=sphere.cy*viewScale;
+    const d=Math.hypot(cx-sx,cy-sy);
+    if(d<rHit&&d<bestDist){best=sphere;bestDist=d;}
+  }
+  if(best){
+    activeSphere=best;statusEl.textContent="vybraný svět: "+activeSphere.name;
+    updateSignalModeForSphere(activeSphere);dragMode="sphere";sphereDragActive=true;
+  }else{dragMode="orbit";sphereDragActive=false;}
+
+  drag=true;lastX=touch.clientX;lastY=touch.clientY;movedDistance=0;
+}
+
+function pointerMove(e){
+  if(!drag)return;
+  e.preventDefault();
+  const rect=canvas.getBoundingClientRect();
+
+  if(dragMode==="two"&&e.touches&&e.touches.length===2){
+    const t0=e.touches[0],t1=e.touches[1];
+    const cxNow=(t0.clientX+t1.clientX)/2,cyNow=(t0.clientY+t1.clientY)/2;
+    const centerX=cxNow-rect.left,centerY=cyNow-rect.top;
+    const dxCenter=cxNow-lastX,dyCenter=cyNow-lastY;
+    lastX=cxNow;lastY=cyNow;movedDistance+=Math.hypot(dxCenter,dyCenter);
+    const dist=Math.hypot(t0.clientX-t1.clientX,t0.clientY-t1.clientY);
+    let newScale=startScale*(dist/startDist);
+    newScale=Math.max(.7,Math.min(3.2,newScale));targetViewScale=newScale;
+    targetViewOffsetX=centerX-width/2-pinchSceneX*newScale;
+    targetViewOffsetY=centerY-height/2-pinchSceneY*newScale;
+    targetTiltX+=dyCenter*-.02;targetTiltY+=dxCenter*.02;return;
+  }
+
+  const touch=e.touches?e.touches[0]:e;
+  const x=touch.clientX,y=touch.clientY,dx=x-lastX,dy=y-lastY;
+  lastX=x;lastY=y;movedDistance+=Math.hypot(dx,dy);
+
+  if(dragMode==="sphere"&&activeSphere){
+    activeSphere.rotY+=dx*.015;activeSphere.rotX+=dy*.015;
+    activeSphere.rotX=Math.max(-Math.PI/2+.2,Math.min(Math.PI/2-.2,activeSphere.rotX));
+    orbitVelocity+=dx*.01;orbitNudgeX+=dx*.02;orbitNudgeY+=dy*.02;
+    const maxNudge=baseRadius*.06;
+    orbitNudgeX=Math.max(-maxNudge,Math.min(maxNudge,orbitNudgeX));
+    orbitNudgeY=Math.max(-maxNudge,Math.min(maxNudge,orbitNudgeY));
+    sphereDragActive=true;
+  }else if(dragMode==="orbit"){
+    orbitRotation+=dx*.01;orbitVelocity+=dx*.008;sphereDragActive=false;
   }
 }
 
-function copyMemory(){
-  const box = document.getElementById("memoryBox");
-  box.select();
-  box.setSelectionRange(0, 999999);
+function focusOnSlot(slot){
+  targetViewScale=Math.max(1.2,Math.min(3,2.25));
+  targetViewOffsetX=-slot.sceneX*targetViewScale;
+  targetViewOffsetY=-slot.sceneY*targetViewScale;
+  orbitVelocity*=.4;
+}
 
-  try{
-    navigator.clipboard.writeText(box.value);
-    message("Bot", "Paměť zkopírována do schránky.");
-  }catch(e){
-    document.execCommand("copy");
-    message("Bot", "Paměť jsem se pokusil zkopírovat.");
+function pointerUp(e){
+  if(!drag)return;
+  drag=false;
+  if(dragMode==="sphere"&&movedDistance<16&&activeSphere){
+    const touch=e.changedTouches?e.changedTouches[0]:e;
+    const clientX=touch.clientX,clientY=touch.clientY;
+    for(const slot of activeSphere.slots){
+      const dx=clientX-slot.screenX,dy=clientY-slot.screenY;
+      if(Math.abs(dx)<=18&&Math.abs(dy)<=16){
+        statusEl.textContent=activeSphere.name+" • "+slot.label;
+        focusOnSlot(slot);openSlot(activeSphere,slot);break;
+      }
+    }
+  }else if(dragMode==="orbit"&&movedDistance<12){
+    signalCore.mode=signalCore.mode==="letters"?"glyph":"letters";
   }
+  sphereDragActive=false;
 }
 
-function resetMemory(){
-  const ok = confirm("Opravdu vyčistit paměť v tomto prohlížeči?");
-  if(!ok) return;
-
-  memory = newMemory();
-  saveMemory("reset_memory");
-  exportMemory();
-  message("Bot", "Paměť je čistá.");
+function updateSignalModeForSphere(sphere){
+  if(!sphere)return;
+  if(sphere.key==="control")signalCore.mode="controller";
+  else if(sphere.key==="lang")signalCore.mode="letters";
+  else signalCore.mode="glyph";
 }
 
-window.addEventListener("online", refreshStats);
-window.addEventListener("offline", refreshStats);
+async function openSlot(sphere,slot){
+  selectedSlotRef={sphereKey:sphere.key,sphereName:sphere.name,slotId:slot.id,fileId:slot.fileId,label:slot.label};
+  const saved=await dbGet(slot.fileId);
+  const panel=document.getElementById("slotPanel");
+  document.getElementById("panelTitle").textContent=slot.label;
+  document.getElementById("panelSub").textContent=sphere.name+" • slot "+slot.id+" • "+slot.fileId;
+  document.getElementById("slotText").value=saved?.content || defaultSlotContent(sphere,slot);
+  panel.classList.add("open");
+}
+function closePanel(){document.getElementById("slotPanel").classList.remove("open");}
 
-refreshStats();
+function defaultSlotContent(sphere,slot){
+  const connections = sphere.key==="control"
+    ? ["earth","lang","game"]
+    : ["control"];
+  return JSON.stringify({
+    file:slot.label,
+    sphere:sphere.name,
+    slot:slot.id,
+    module:sphere.key,
+    connectedTo:connections,
+    purpose:purposeForSphere(sphere.key),
+    content:"",
+    updatedAt:null
+  },null,2);
+}
+function purposeForSphere(key){
+  if(key==="earth")return "široká paměť, úhel pohledu, modelování, budoucí moduly";
+  if(key==="lang")return "jazyk, písmena, symboly, významy, vazby";
+  if(key==="game")return "hra, pravidla, stav, akce, logika, testy";
+  if(key==="control")return "řídící jednotka propojující Země/Jazyk/Hra";
+  return "slot paměti";
+}
+async function saveSlot(){
+  if(!selectedSlotRef)return;
+  const content=document.getElementById("slotText").value;
+  await dbPut({id:selectedSlotRef.fileId,...selectedSlotRef,content,updatedAt:time()});
+  statusEl.textContent="uloženo: "+selectedSlotRef.label;
+}
+function clearSlot(){
+  if(!selectedSlotRef)return;
+  const sphere=spheres.find(s=>s.key===selectedSlotRef.sphereKey);
+  const slot=sphere.slots.find(s=>s.fileId===selectedSlotRef.fileId);
+  document.getElementById("slotText").value=defaultSlotContent(sphere,slot);
+}
+function seedSlot(){
+  if(!selectedSlotRef)return;
+  const seed={
+    file:selectedSlotRef.label,
+    sphere:selectedSlotRef.sphereName,
+    module:selectedSlotRef.sphereKey,
+    connectedTo:selectedSlotRef.sphereKey==="control"?["earth","lang","game"]:["control"],
+    seed:[
+      "písmeno: V = začátek světa Vive / směr / živý signál",
+      "vazba: V -> ア = přechod ze směru do brány",
+      "úhel: význam vzniká ze vztahu mezi písmeny",
+      "dělej: když nerozumíš, nepředstírej a zeptej se",
+      "pamatuj: písmenka nejsou jen text, jsou mapy významu"
+    ],
+    updatedAt:time()
+  };
+  document.getElementById("slotText").value=JSON.stringify(seed,null,2);
+}
+async function exportAll(){
+  const all=await dbAll();
+  const payload={schema:"vaft-four-core-memory-system",version:"1.5",exportedAt:time(),files:all};
+  const text=JSON.stringify(payload,null,2);
+  document.getElementById("slotText").value=text;
+  try{await navigator.clipboard.writeText(text);}catch(e){}
+  statusEl.textContent="export připraven";
+}
+async function importAll(){
+  try{
+    const payload=JSON.parse(document.getElementById("slotText").value);
+    const files=payload.files||[];
+    for(const file of files){if(file.id)await dbPut(file);}
+    statusEl.textContent="import hotový: "+files.length+" souborů";
+  }catch(e){statusEl.textContent="import se nepovedl";}
+}
 
-message("Bot",
-  "Jsem připravený.\n\n" +
-  "Začni třeba:\n" +
-  "písmeno: V = začátek světa Vive / směr / živý signál\n\n" +
-  "Nebo:\n" +
-  "úhel: písmenka nejsou jen text, ale mapa významu."
-);
+canvas.addEventListener("mousedown",pointerDown);
+window.addEventListener("mousemove",pointerMove);
+window.addEventListener("mouseup",pointerUp);
+window.addEventListener("contextmenu",e=>e.preventDefault());
+canvas.addEventListener("touchstart",pointerDown,{passive:false});
+window.addEventListener("touchmove",pointerMove,{passive:false});
+window.addEventListener("touchend",pointerUp,{passive:false});
+window.addEventListener("touchcancel",pointerUp,{passive:false});
+canvas.addEventListener("wheel",e=>{
+  e.preventDefault();
+  const rect=canvas.getBoundingClientRect();
+  const cx=e.clientX-rect.left,cy=e.clientY-rect.top;
+  const sceneX=(cx-width/2-viewOffsetX)/viewScale;
+  const sceneY=(cy-height/2-viewOffsetY)/viewScale;
+  const factor=e.deltaY>0?.9:1.1;
+  let newScale=viewScale*factor;
+  newScale=Math.max(.7,Math.min(3.2,newScale));
+  targetViewScale=newScale;
+  targetViewOffsetX=cx-width/2-sceneX*newScale;
+  targetViewOffsetY=cy-height/2-sceneY*newScale;
+});
+
+function updateOnline(){document.getElementById("onlinePill").textContent=navigator.onLine?"online":"offline";}
+window.addEventListener("online",updateOnline);window.addEventListener("offline",updateOnline);updateOnline();
+
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{});});}
+
+(async()=>{db=await openDB();statusEl.textContent="vybraný svět: Řídící jednotka";})();
 </script>
 </body>
 </html>
 '''
 
-path = Path("/mnt/data/index.html")
-path.write_text(html, encoding="utf-8")
+index_html = (html_template
+    .replace("__EARTH_SLOT_LABELS__", json.dumps(earth_slots, ensure_ascii=False))
+    .replace("__LANG_SLOT_LABELS__", json.dumps(lang_slots, ensure_ascii=False))
+    .replace("__GAME_SLOT_LABELS__", json.dumps(game_slots, ensure_ascii=False))
+    .replace("__CONTROL_SLOT_LABELS__", json.dumps(control_slots, ensure_ascii=False))
+)
 
-print("Hotovo: /mnt/data/index.html")
+manifest = {
+    "name": "VaFT Four Core Memory System",
+    "short_name": "Four Core",
+    "description": "Čtyři paměťové koule: Země, Jazyk, Hra a Řídící jednotka.",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#050815",
+    "theme_color": "#050815"
+}
+
+sw_js = """const CACHE_NAME = "vaft-four-core-memory-system-v1";
+const ASSETS = ["./", "./index.html", "./manifest.json", "./sw.js"];
+
+self.addEventListener("install", event => {
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS)));
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", event => {
+  if (event.request.method !== "GET") return;
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request)
+        .then(response => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match("./index.html"));
+    })
+  );
+});
+"""
+
+readme = """# VaFT Four Core Memory System •ア
+
+Tahle verze používá všechny 4 koule jako rozdělenou paměť:
+
+```text
+Země / úhel pohledu  = široká paměť, modelování, moduly
+Jazyk                = písmena, symboly, významy, vazby
+Hra + pravidla       = pravidla, stav, akce, testy
+Řídící jednotka      = propojení a řízení tří ostatních koulí
+```
+
+Každá koule má 70 slotů. Celkem 280 slotů.
+Každý slot je uložitelný modul/soubor přes IndexedDB.
+
+## GitHub Pages
+
+Nahraj:
+
+```text
+docs/index.html
+docs/manifest.json
+docs/sw.js
+```
+
+Nastavení:
+
+```text
+Settings → Pages
+Branch: main
+Folder: /docs
+```
+"""
+
+(docs / "index.html").write_text(index_html, encoding="utf-8")
+(docs / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+(docs / "sw.js").write_text(sw_js, encoding="utf-8")
+(base / "README.md").write_text(readme, encoding="utf-8")
+
+zip_path = Path("/mnt/data/vaft-four-core-memory-system.zip")
+if zip_path.exists():
+    zip_path.unlink()
+
+with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+    for file in base.rglob("*"):
+        z.write(file, file.relative_to(base.parent))
+
+print("Hotovo:")
+print(zip_path)
+print(docs / "index.html")
+print(docs / "manifest.json")
+print(docs / "sw.js")
