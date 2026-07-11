@@ -108,3 +108,129 @@ button.danger{color:#ffd4d4;border-color:rgba(255,120,120,.28)}
   .slotsToolbar{grid-template-columns:1fr 1fr}
   .slotsToolbar input{grid-column:1/-1}
 }
+.lifePanel{
+  position:absolute;
+  left:14px;
+  right:14px;
+  bottom:72px;
+  z-index:20;
+  padding:12px;
+  border:1px solid rgba(255,220,160,.24);
+  border-radius:20px;
+  background:rgba(5,5,8,.88);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  box-shadow:0 18px 50px rgba(0,0,0,.35);
+}
+
+.lifePanelTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+
+.lifePanelTop strong,
+.lifePanelTop span{
+  display:block;
+}
+
+.lifePanelTop strong{
+  color:#ffe2ad;
+  font-size:.95rem;
+}
+
+.lifePanelTop span{
+  margin-top:2px;
+  color:rgba(255,255,255,.52);
+  font-size:.68rem;
+}
+
+.lifeMode{
+  padding:6px 9px;
+  border:1px solid rgba(255,220,160,.18);
+  border-radius:999px;
+  color:#ffe2ad;
+  font-size:.68rem;
+}
+
+.lifeGrid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:6px;
+}
+
+.lifeCard{
+  min-width:0;
+  padding:8px 5px;
+  border:1px solid rgba(255,220,160,.13);
+  border-radius:13px;
+  background:rgba(255,255,255,.035);
+  text-align:center;
+}
+
+.lifeCard span,
+.lifeCard strong,
+.lifeCard small{
+  display:block;
+}
+
+.lifeCard span{
+  color:rgba(255,255,255,.60);
+  font-size:.62rem;
+}
+
+.lifeCard strong{
+  margin:3px 0;
+  color:#fff0cf;
+  font-size:1rem;
+}
+
+.lifeCard small{
+  color:rgba(255,255,255,.38);
+  font-size:.55rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.lifeCardMain{
+  border-color:rgba(255,220,160,.42);
+  background:rgba(255,190,100,.08);
+}
+
+.energyLine{
+  display:flex;
+  justify-content:space-between;
+  margin-top:9px;
+  padding-top:8px;
+  border-top:1px solid rgba(255,220,160,.12);
+  color:rgba(255,255,255,.62);
+  font-size:.7rem;
+}
+
+.energyLine strong{
+  color:#ffe2ad;
+}
+
+@media (max-width:560px){
+  .lifePanel{
+    left:8px;
+    right:8px;
+    bottom:66px;
+    padding:9px;
+  }
+
+  .lifeGrid{
+    gap:4px;
+  }
+
+  .lifeCard{
+    padding:7px 3px;
+  }
+
+  .lifeCard small{
+    display:none;
+  }
+}
