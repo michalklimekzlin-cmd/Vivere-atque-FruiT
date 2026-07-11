@@ -1,119 +1,188 @@
-// vaft.brains.js
-// 4 hlavní mozky: Hlavoun, Viri, Pikoš, Vivere (puls)
-(function (window) {
-  window.VAFT = window.VAFT || {};
+// VIRI – společná paměť čtyř jader
+const Viri = {
+  name: "Viri",
 
-  // 1) bus – když není, založíme
-  const BUS = window.VAFT.bus || (function () {
-    const L = {};
-    const b = {
-      on(ch, fn) { (L[ch] ||= []).push(fn); },
-      emit(ch, data) { (L[ch] || []).forEach(f => { try { f(data); } catch (e) { console.warn(e); } }); },
-      _L: L
-    };
-    window.VAFT.bus = b;
-    return b;
-  })();
+  storageKeys: [
+    "cht360_pamet_v1",
+    "vaft_pamet_v1"
+  ],
 
-  // 2) místo pro agenty
-  window.VAFT.agents = window.VAFT.agents || {};
+  state: {
+    lastSavedAt: null
+  },
 
-  // pomocník na výpis do meziprostoru
-  function say(text) {
-    if (typeof window.appendHlavounMsg === 'function') {
-      window.appendHlavounMsg('ai', text);
-    } else {
-      console.log('[VAFT]', text);
+  loadMemory() {
+    for (const key of this.storageKeys) {
+      try {
+        const raw = localStorage.getItem(key);
+
+        if (raw) {
+          return JSON.parse(raw);
+        }
+      } catch (error) {
+        console.warn(`[Viri] Paměť ${key} nelze načíst.`, error);
+      }
     }
-  }
 
-  // HLAVOUN – řídí a diagnostikuje
-  const Hlavoun = {
-    name: 'Hlavoun',
-    state: { brain: 'ready', memory: [] },
-    think(msg) {
-      this.state.brain = msg.text || msg.type || 'signál';
-      this.state.memory.push({ ts: Date.now(), msg });
-      if (this.state.memory.length > 120) this.state.memory.shift();
-      BUS.emit('vaft.diagnostic', {
-        from: 'Hlavoun',
-        msg: 'přijal zprávu',
-        payload: msg,
-        ts: Date.now()
+    return null;
+  },
+
+  saveMemory(memory) {
+    try {
+      // Nový hlavní klíč
+      localStorage.setItem(
+        "cht360_pamet_v1",
+        JSON.stringify(memory)
+      );
+
+      this.state.lastSavedAt = Date.now();
+
+      // Důležité:
+      // neposíláme vaft.signal, takže nevznikne nekonečná smyčka
+      BUS.emit("cht.memory.saved", {
+        from: "Viri",
+        cores: ["earth", "language", "game", "control"],
+        savedAt: this.state.lastSavedAt
+      });
+
+      return true;
+    } catch (error) {
+      console.error("[Viri] Paměť nelze uložit.", error);
+
+      BUS.emit("cht.memory.error", {
+        from: "Viri",
+        error: String(error),
+        timestamp: Date.now()
+      });
+
+      return false;
+    }
+  },
+
+  getCore(coreId) {
+    const memory = this.loadMemory();
+
+    if (!memory?.cores) return null;
+
+    return memory.cores[coreId] || null;
+  },
+
+  getAllCores() {
+    const memory = this.loadMemory();
+
+    if (!memory?.cores) {
+      return {
+        earth: [],
+        language: [],
+        game: [],
+        control: []
+      };
+    }
+
+    return {
+      earth: memory.cores.earth || [],
+      language: memory.cores.language || [],
+      game: memory.cores.game || [],
+      control: memory.cores.control || []
+    };
+  },
+
+  remember(coreId, slotId, data) {
+    const allowedCores = [
+      "earth",
+      "language",
+      "game",
+      "control"
+    ];
+
+    if (!allowedCores.includes(coreId)) {
+      console.warn("[Viri] Neznámé jádro:", coreId);
+      return false;
+    }
+
+    const memory = this.loadMemory();
+
+    if (!memory?.cores?.[coreId]) {
+      console.warn("[Viri] Jádro není dostupné:", coreId);
+      return false;
+    }
+
+    const index = Number(slotId) - 1;
+    const slot = memory.cores[coreId][index];
+
+    if (!slot) {
+      console.warn("[Viri] Slot neexistuje:", slotId);
+      return false;
+    }
+
+    const previousContent = {
+      name: slot.name,
+      content: slot.content,
+      updatedAt: slot.updatedAt
+    };
+
+    slot.history = Array.isArray(slot.history)
+      ? slot.history
+      : [];
+
+    slot.history.unshift({
+      ...previousContent,
+      savedAt: new Date().toISOString()
+    });
+
+    slot.history = slot.history.slice(0, 10);
+
+    slot.name = data.name ?? slot.name;
+    slot.content = data.content ?? slot.content;
+    slot.type = data.type ?? slot.type ?? "myšlenka";
+    slot.tags = Array.isArray(data.tags)
+      ? data.tags
+      : slot.tags || [];
+
+    slot.source = data.source ?? slot.source ?? "Viri";
+    slot.updatedAt = new Date().toISOString();
+
+    memory.updatedAt = new Date().toISOString();
+
+    const saved = this.saveMemory(memory);
+
+    if (saved) {
+      BUS.emit("cht.memory.changed", {
+        from: "Viri",
+        coreId,
+        slotId: Number(slotId),
+        slot,
+        timestamp: Date.now()
       });
     }
-  };
 
-  // VIRI – paměť
-  const Viri = {
-    name: 'Viri',
-    state: { },
-    load(key) {
-      try { return JSON.parse(localStorage.getItem('VAFT_MEM_' + key) || 'null'); }
-      catch (e) { return null; }
-    },
-    save(key, val) {
-      try { localStorage.setItem('VAFT_MEM_' + key, JSON.stringify(val)); } catch (e) {}
-      BUS.emit('vaft.signal', { from: 'Viri', msg: { text: 'uloženo: '+key } });
-    },
-    think(msg) {
-      const tl = this.load('timeline') || [];
-      tl.push({ ts: Date.now(), msg });
-      if (tl.length > 200) tl.shift();
-      this.save('timeline', tl);
+    return saved;
+  },
+
+  think(signal) {
+    // Viri zprávu pouze zaznamená do zvláštní časové osy.
+    // Nevysílá znovu vaft.signal.
+    try {
+      const timelineKey = "cht360_viri_timeline";
+      const timeline = JSON.parse(
+        localStorage.getItem(timelineKey) || "[]"
+      );
+
+      timeline.push({
+        timestamp: Date.now(),
+        signal
+      });
+
+      if (timeline.length > 200) {
+        timeline.shift();
+      }
+
+      localStorage.setItem(
+        timelineKey,
+        JSON.stringify(timeline)
+      );
+    } catch (error) {
+      console.error("[Viri] Časovou osu nelze uložit.", error);
     }
-  };
-
-  // PIKOŠ – ventil ven
-  const Pikos = {
-    name: 'Pikos',
-    state: { outputs: [] },
-    output(payload) {
-      const entry = { ts: Date.now(), ...payload };
-      this.state.outputs.push(entry);
-      if (this.state.outputs.length > 100) this.state.outputs.shift();
-      BUS.emit('vaft.output', Object.assign({ from: 'Pikos' }, entry));
-    },
-    think(msg) {
-      this.output({ text: msg.text || 'Pikoš převzal zprávu', raw: msg });
-    }
-  };
-
-  // VIVERE – puls světa
-  const VivereCore = {
-    name: 'Vivere',
-    state: { beats: 0 },
-    start() {
-      setInterval(() => {
-        this.state.beats++;
-        BUS.emit('vaft.heartbeat', {
-          from: 'Vivere',
-          beat: this.state.beats,
-          ts: Date.now()
-        });
-      }, 5000);
-    },
-    think(msg) {
-      BUS.emit('vaft.signal', { from: 'Vivere', msg });
-    }
-  };
-
-  // zaregistrovat do VAFT
-  window.VAFT.agents.Hlavoun = Hlavoun;
-  window.VAFT.agents.Viri = Viri;
-  window.VAFT.agents.Pikos = Pikos;
-  window.VAFT.agents.Vivere = VivereCore;
-
-  // napojit na bus: všechno obecné jde přes Hlavouna a Viri
-  BUS.on('vaft.signal', (d) => {
-    if (!d) return;
-    Hlavoun.think(d);
-    Viri.think(d);
-  });
-
-  // spustit puls
-  VivereCore.start();
-
-  say('🧠 4 mozky VAFT spuštěny (Hlavoun, Viri, Pikoš, Vivere).');
-  console.log('[VAFT.brains] ready');
-})(window);
+  }
+};
