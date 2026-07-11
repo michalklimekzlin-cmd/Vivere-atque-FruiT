@@ -527,10 +527,11 @@ function drawScene(){
   for(const s of sorted)drawSphere(s);
 }
 
-let lastTime=0;
+let lastTime = performance.now();
+
 function loop(timestamp){
-  if(!timestamp)timestamp=0;
-  const dt=(timestamp-lastTime)/1000;lastTime=timestamp;
+  const dt = Math.min(0.05, Math.max(0, (timestamp - lastTime) / 1000));
+  lastTime = timestamp;
 
   if(!sphereDragActive){
     orbitRotation+=orbitVelocity*dt;
