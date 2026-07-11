@@ -1,0 +1,110 @@
+:root{
+  --zlata:#ffe2ad;
+  --zlata2:#c79b33;
+  --panel:rgba(4,5,10,.95);
+  --tmava:#020208;
+  --okraj:rgba(255,220,160,.24);
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;padding:0;width:100%;height:100%;overflow:hidden;
+  background:radial-gradient(circle at top,#080d1f,#020208 70%);
+  color:#f5f5f5;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+button,input,textarea{font:inherit}
+.root{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right))
+          max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));
+}
+.stage{
+  position:relative;width:min(920px,96vw);height:min(680px,92vh);overflow:hidden;
+  border-radius:32px;border:1px solid rgba(255,255,255,.08);
+  background:
+    radial-gradient(circle at 50% 42%,rgba(255,210,135,.07),transparent 34%),
+    radial-gradient(circle at top,#06091a,#020208);
+  box-shadow:0 40px 90px rgba(0,0,0,.85),inset 0 0 60px rgba(255,210,135,.025);
+}
+#globe-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.memoryDock{
+  position:absolute;top:12px;left:12px;right:12px;z-index:8;
+  display:flex;gap:6px;flex-wrap:wrap;pointer-events:none;
+}
+.pill{
+  border:1px solid rgba(255,220,160,.20);background:rgba(0,0,0,.34);
+  color:var(--zlata);border-radius:999px;padding:6px 9px;font-size:10px;
+  font-weight:800;letter-spacing:.03em;backdrop-filter:blur(8px);
+}
+.hud-right{
+  position:absolute;right:18px;top:54px;z-index:4;font-size:10px;
+  line-height:1.4;text-align:right;opacity:.82;pointer-events:none;
+}
+.hud-center{
+  position:absolute;left:50%;bottom:53px;z-index:4;transform:translateX(-50%);
+  font-size:11px;color:rgba(255,240,210,.88);text-align:center;
+  white-space:nowrap;pointer-events:none;
+}
+.hud{
+  position:absolute;left:18px;right:18px;bottom:15px;z-index:4;
+  display:flex;justify-content:space-between;gap:12px;font-size:10px;
+  line-height:1.35;opacity:.74;pointer-events:none;
+}
+.panel{
+  position:absolute;left:10px;right:10px;bottom:10px;z-index:15;display:none;
+  padding:12px;border:1px solid rgba(255,220,160,.26);border-radius:22px;
+  background:var(--panel);box-shadow:0 0 34px rgba(255,190,110,.18);
+  backdrop-filter:blur(14px);
+}
+.panel.open{display:block}
+.panelTop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.panelTitle{color:var(--zlata);font-size:14px;font-weight:850}
+.panelSub{margin-top:2px;color:rgba(255,255,255,.62);font-size:11px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+button{
+  border:1px solid rgba(255,220,160,.22);border-radius:14px;padding:8px 10px;
+  color:var(--zlata);background:rgba(255,220,160,.10);font-size:12px;
+  font-weight:750;cursor:pointer;
+}
+button:active{transform:scale(.97)}
+button.primary{border:0;color:#120b04;background:var(--zlata)}
+button.danger{color:#ffd4d4;border-color:rgba(255,120,120,.28)}
+.slotsToolbar{
+  display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:8px
+}
+.slotsToolbar input,.slotEditor input,.slotEditor textarea{
+  width:100%;border:1px solid rgba(255,220,160,.18);outline:0;
+  border-radius:14px;padding:10px;color:#fff4dc;background:rgba(0,0,0,.35);
+}
+.slotGrid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:7px;
+  max-height:300px;overflow:auto;padding-right:2px;
+}
+.slotBtn{
+  min-height:54px;padding:7px;border-radius:14px;text-align:left;
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+.slotBtn strong{font-size:11px;color:#fff0cf}
+.slotBtn span{font-size:9px;opacity:.62}
+.slotBtn.obsazeny{background:rgba(255,226,173,.18)}
+.slotBtn.aktivni{outline:2px solid rgba(255,226,173,.75)}
+.slotEditor{display:none;margin-top:10px}
+.slotEditor.open{display:block}
+.slotEditor textarea{
+  min-height:110px;max-height:180px;resize:vertical;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;
+}
+.statusBox{
+  margin-top:8px;padding:8px 10px;border:1px solid rgba(255,220,160,.15);
+  border-radius:14px;background:rgba(255,255,255,.025);font-size:11px;
+  color:rgba(255,255,255,.72)
+}
+.hiddenInput{display:none}
+@media(max-width:620px){
+  .stage{height:92vh;border-radius:24px}
+  .hud-right{right:12px;font-size:9px}
+  .hud{left:12px;right:12px;font-size:9px}
+  .slotGrid{grid-template-columns:repeat(4,1fr);max-height:270px}
+  .slotsToolbar{grid-template-columns:1fr 1fr}
+  .slotsToolbar input{grid-column:1/-1}
+}

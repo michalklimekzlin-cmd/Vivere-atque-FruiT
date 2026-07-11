@@ -1,0 +1,13 @@
+{
+  "nazev": "VaF'i'T Paměť",
+  "verze": 1,
+  "jazyk": "cs",
+  "jadra": [
+    "earth",
+    "language",
+    "game",
+    "control"
+  ],
+  "slotuNaJadro": 70,
+  "celkemSlotu": 280
+}
