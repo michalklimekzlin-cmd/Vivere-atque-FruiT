@@ -1,0 +1,662 @@
+"use strict";
+
+/*
+  CHT 360°‰. · životní a signální vrstva
+
+  Pět nepřetržitě se opakujících kruhů:
+  - Země
+  - Jazyk
+  - Hra
+  - Řízení
+  - centrální CHT 360°‰.
+
+  Když stránka běží, vznikají skutečné časované pulzy.
+  Když je stránka uspána, uloží se čas.
+  Po návratu se dopočítá počet zmeškaných cyklů.
+*/
+
+const SYSTEM_NAME = "CHT 360°‰.";
+
+const MEMORY_KEYS = [
+  "cht360_pamet_v1",
+  "vaft_pamet_v1"
+];
+
+const LIFE_STATE_KEY = "cht360_life_state_v1";
+const ENERGY_STATE_KEY = "cht360_energy_state_v1";
+
+const CORE_IDS = [
+  "earth",
+  "language",
+  "game",
+  "control"
+];
+
+const CORE_NAMES = {
+  earth: "Země",
+  language: "Jazyk",
+  game: "Hra",
+  control: "Řízení",
+  cht: SYSTEM_NAME
+};
+
+function safeParse(raw, fallback = null) {
+  try {
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (error) {
+    console.warn("[CHT] Poškozený JSON.", error);
+    return fallback;
+  }
+}
+
+function loadMemory() {
+  for (const key of MEMORY_KEYS) {
+    const raw = localStorage.getItem(key);
+
+    if (raw) {
+      return {
+        key,
+        data: safeParse(raw, null)
+      };
+    }
+  }
+
+  return {
+    key: null,
+    data: null
+  };
+}
+
+function countUsedSlots(coreId) {
+  const result = loadMemory();
+  const slots = result.data?.cores?.[coreId];
+
+  if (!Array.isArray(slots)) {
+    return 0;
+  }
+
+  return slots.filter((slot) => {
+    const content = String(slot?.content || "").trim();
+    const name = String(slot?.name || "").trim();
+
+    return Boolean(
+      content ||
+      (name && name !== `Slot ${slot?.id}`)
+    );
+  }).length;
+}
+
+const CHTEnergy = {
+  state: {
+    total: 0,
+
+    cores: {
+      earth: 0,
+      language: 0,
+      game: 0,
+      control: 0,
+      cht: 0
+    },
+
+    outputs: {
+      smell: 0,
+      vision: 0,
+      hearing: 0,
+      movement: 0,
+      balance: 0
+    },
+
+    updatedAt: null
+  },
+
+  load() {
+    const stored = safeParse(
+      localStorage.getItem(ENERGY_STATE_KEY),
+      null
+    );
+
+    if (!stored) {
+      return this.state;
+    }
+
+    this.state = {
+      ...this.state,
+      ...stored,
+
+      cores: {
+        ...this.state.cores,
+        ...(stored.cores || {})
+      },
+
+      outputs: {
+        ...this.state.outputs,
+        ...(stored.outputs || {})
+      }
+    };
+
+    return this.state;
+  },
+
+  save() {
+    this.state.updatedAt = Date.now();
+
+    try {
+      localStorage.setItem(
+        ENERGY_STATE_KEY,
+        JSON.stringify(this.state)
+      );
+    } catch (error) {
+      console.error(
+        "[CHT Energy] Stav nelze uložit.",
+        error
+      );
+    }
+  },
+
+  receivePulse(loopId, strength = 1) {
+    if (!(loopId in this.state.cores)) {
+      return;
+    }
+
+    const safeStrength = Math.max(
+      0,
+      Number(strength) || 0
+    );
+
+    this.state.cores[loopId] += safeStrength;
+    this.state.total += safeStrength;
+
+    /*
+      Zatím pouze model směrování signálu.
+      Později se sem připojí skutečné moduly robota.
+    */
+
+    if (loopId === "earth") {
+      this.state.outputs.balance +=
+        safeStrength * 0.30;
+    }
+
+    if (loopId === "language") {
+      this.state.outputs.hearing +=
+        safeStrength * 0.25;
+    }
+
+    if (loopId === "game") {
+      this.state.outputs.movement +=
+        safeStrength * 0.25;
+    }
+
+    if (loopId === "control") {
+      this.state.outputs.smell +=
+        safeStrength * 0.20;
+    }
+
+    if (loopId === "cht") {
+      this.state.outputs.vision +=
+        safeStrength * 0.10;
+    }
+
+    if (
+      Math.floor(this.state.total) % 10 === 0
+    ) {
+      this.save();
+    }
+
+    window.dispatchEvent(
+      new CustomEvent("cht.energy.changed", {
+        detail: this.getState()
+      })
+    );
+  },
+
+  draw(outputId, amount = 1) {
+    if (!(outputId in this.state.outputs)) {
+      return false;
+    }
+
+    const requested = Math.max(
+      0,
+      Number(amount) || 0
+    );
+
+    const available =
+      this.state.outputs[outputId];
+
+    const drawn = Math.min(
+      requested,
+      available
+    );
+
+    this.state.outputs[outputId] -= drawn;
+    this.state.total = Math.max(
+      0,
+      this.state.total - drawn
+    );
+
+    this.save();
+
+    window.dispatchEvent(
+      new CustomEvent("cht.energy.drawn", {
+        detail: {
+          outputId,
+          requested,
+          drawn,
+          remaining:
+            this.state.outputs[outputId],
+          timestamp: Date.now()
+        }
+      })
+    );
+
+    return drawn;
+  },
+
+  getState() {
+    return JSON.parse(
+      JSON.stringify(this.state)
+    );
+  }
+};
+
+const CHTLife = {
+  running: false,
+  timers: new Map(),
+
+  loops: {
+    earth: {
+      name: "Krevní kruh Země",
+      interval: 3200,
+      pulses: 0
+    },
+
+    language: {
+      name: "Nervový kruh Jazyka",
+      interval: 3400,
+      pulses: 0
+    },
+
+    game: {
+      name: "Pohybový kruh Hry",
+      interval: 3600,
+      pulses: 0
+    },
+
+    control: {
+      name: "Smyslový kruh Řízení",
+      interval: 3800,
+      pulses: 0
+    },
+
+    cht: {
+      name: "Srdeční kruh CHT 360°‰.",
+      interval: 5000,
+      pulses: 0
+    }
+  },
+
+  state: {
+    mode: "sleeping",
+    startedAt: null,
+    lastPulseAt: null,
+    lastSavedAt: null,
+    wakeCount: 0
+  },
+
+  loadState() {
+    return safeParse(
+      localStorage.getItem(LIFE_STATE_KEY),
+      null
+    );
+  },
+
+  saveState(mode = this.state.mode) {
+    this.state.mode = mode;
+    this.state.lastSavedAt = Date.now();
+
+    const data = {
+      system: SYSTEM_NAME,
+      state: this.state,
+
+      loops: Object.fromEntries(
+        Object.entries(this.loops).map(
+          ([id, loop]) => [
+            id,
+            {
+              name: loop.name,
+              interval: loop.interval,
+              pulses: loop.pulses
+            }
+          ]
+        )
+      )
+    };
+
+    try {
+      localStorage.setItem(
+        LIFE_STATE_KEY,
+        JSON.stringify(data)
+      );
+    } catch (error) {
+      console.error(
+        "[CHT Life] Stav nelze uložit.",
+        error
+      );
+    }
+  },
+
+  restoreState() {
+    const stored = this.loadState();
+
+    if (!stored) {
+      return null;
+    }
+
+    this.state = {
+      ...this.state,
+      ...(stored.state || {})
+    };
+
+    for (const loopId of Object.keys(this.loops)) {
+      const storedLoop =
+        stored.loops?.[loopId];
+
+      if (storedLoop) {
+        this.loops[loopId].pulses =
+          Number(storedLoop.pulses || 0);
+      }
+    }
+
+    return stored;
+  },
+
+  calculateStrength(loopId) {
+    if (loopId === "cht") {
+      return 1;
+    }
+
+    const usedSlots =
+      countUsedSlots(loopId);
+
+    /*
+      Každé jádro pulzuje i prázdné.
+      Obsazené paměti jeho signál mírně zesilují.
+    */
+
+    return 1 + usedSlots / 70;
+  },
+
+  pulse(loopId, options = {}) {
+    const loop = this.loops[loopId];
+
+    if (!loop) {
+      return;
+    }
+
+    loop.pulses += 1;
+    this.state.lastPulseAt = Date.now();
+
+    const strength =
+      this.calculateStrength(loopId);
+
+    CHTEnergy.receivePulse(
+      loopId,
+      strength
+    );
+
+    const detail = {
+      system: SYSTEM_NAME,
+      loopId,
+      coreName: CORE_NAMES[loopId],
+      loopName: loop.name,
+      pulse: loop.pulses,
+      strength,
+      synthetic:
+        Boolean(options.synthetic),
+      usedSlots:
+        loopId === "cht"
+          ? null
+          : countUsedSlots(loopId),
+      timestamp: Date.now()
+    };
+
+    window.dispatchEvent(
+      new CustomEvent("cht.life.pulse", {
+        detail
+      })
+    );
+
+    if (loopId === "cht") {
+      window.dispatchEvent(
+        new CustomEvent("cht.heartbeat", {
+          detail
+        })
+      );
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("cht.core.pulse", {
+          detail
+        })
+      );
+    }
+
+    if (loop.pulses % 5 === 0) {
+      this.saveState("active");
+    }
+  },
+
+  runLoop(loopId) {
+    const loop = this.loops[loopId];
+
+    if (!loop || this.timers.has(loopId)) {
+      return;
+    }
+
+    const repeat = () => {
+      if (!this.running) {
+        this.timers.delete(loopId);
+        return;
+      }
+
+      try {
+        this.pulse(loopId);
+      } catch (error) {
+        console.error(
+          `[CHT Life] Chyba v ${loop.name}.`,
+          error
+        );
+      }
+
+      const timer = window.setTimeout(
+        repeat,
+        loop.interval
+      );
+
+      this.timers.set(loopId, timer);
+    };
+
+    repeat();
+  },
+
+  catchUp(stored) {
+    const savedAt =
+      Number(stored?.state?.lastSavedAt || 0);
+
+    if (!savedAt) {
+      return;
+    }
+
+    const elapsed = Math.max(
+      0,
+      Date.now() - savedAt
+    );
+
+    for (const loopId of Object.keys(this.loops)) {
+      const loop = this.loops[loopId];
+
+      /*
+        Maximálně 50 dopočítaných pulzů
+        na jeden návrat, aby se mobil nezasekl.
+      */
+
+      const missed = Math.min(
+        Math.floor(elapsed / loop.interval),
+        50
+      );
+
+      if (missed <= 0) {
+        continue;
+      }
+
+      loop.pulses += missed;
+
+      const strength =
+        this.calculateStrength(loopId);
+
+      CHTEnergy.receivePulse(
+        loopId,
+        strength * missed
+      );
+
+      window.dispatchEvent(
+        new CustomEvent(
+          "cht.life.catch-up-core",
+          {
+            detail: {
+              loopId,
+              missed,
+              elapsed,
+              timestamp: Date.now()
+            }
+          }
+        )
+      );
+    }
+  },
+
+  start() {
+    if (this.running) {
+      return;
+    }
+
+    const stored = this.restoreState();
+
+    this.state.startedAt ||=
+      Date.now();
+
+    this.state.wakeCount += 1;
+    this.state.mode = "active";
+
+    CHTEnergy.load();
+    this.catchUp(stored);
+
+    this.running = true;
+
+    for (const loopId of Object.keys(this.loops)) {
+      this.runLoop(loopId);
+    }
+
+    this.saveState("active");
+
+    window.dispatchEvent(
+      new CustomEvent("cht.life.started", {
+        detail: this.getState()
+      })
+    );
+
+    console.log(
+      `[CHT Life] ${SYSTEM_NAME} aktivní.`,
+      this.getState()
+    );
+  },
+
+  sleep() {
+    this.state.mode = "sleeping";
+    this.saveState("sleeping");
+    CHTEnergy.save();
+  },
+
+  wake() {
+    const stored = this.loadState();
+
+    this.state.wakeCount += 1;
+    this.state.mode = "active";
+
+    this.catchUp(stored);
+    this.saveState("active");
+  },
+
+  getState() {
+    return {
+      system: SYSTEM_NAME,
+      running: this.running,
+      state: {
+        ...this.state
+      },
+
+      loops: Object.fromEntries(
+        Object.entries(this.loops).map(
+          ([id, loop]) => [
+            id,
+            {
+              ...loop,
+              active:
+                this.timers.has(id)
+            }
+          ]
+        )
+      ),
+
+      energy: CHTEnergy.getState()
+    };
+  }
+};
+
+/*
+  Paměťové změny posilují příslušný kruh.
+*/
+
+window.addEventListener(
+  "cht.memory.changed",
+  (event) => {
+    const coreId =
+      event.detail?.coreId;
+
+    if (!CORE_IDS.includes(coreId)) {
+      return;
+    }
+
+    CHTEnergy.receivePulse(
+      coreId,
+      2
+    );
+  }
+);
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (document.hidden) {
+      CHTLife.sleep();
+    } else {
+      CHTLife.wake();
+    }
+  }
+);
+
+window.addEventListener(
+  "pagehide",
+  () => CHTLife.sleep()
+);
+
+window.CHTLife = CHTLife;
+window.CHTEnergy = CHTEnergy;
+
+if (document.readyState === "loading") {
+  document.addEventListener(
+    "DOMContentLoaded",
+    () => CHTLife.start(),
+    { once: true }
+  );
+} else {
+  CHTLife.start();
+}
