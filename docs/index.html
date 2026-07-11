@@ -770,7 +770,15 @@ window.addEventListener("online",updateOnline);window.addEventListener("offline"
 
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{});});}
 
-(async()=>{db=await openDB();statusEl.textContent="vybraný svět: Řídící jednotka";})();
+(async () => {
+  try {
+    db = await openDB();
+    statusEl.textContent = "vybraný svět: Řídící jednotka";
+  } catch (error) {
+    console.error("IndexedDB chyba:", error);
+    statusEl.textContent = "paměť není dostupná – scéna ale pokračuje";
+  }
+})();
 </script>
 </body>
 </html>
