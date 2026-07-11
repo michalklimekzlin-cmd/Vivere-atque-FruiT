@@ -13,14 +13,15 @@
 
 <link rel="manifest" href="./manifest.json">
 
-<title>VaF'i'T Four Core Memory System •ア</title>
+<title>VaF'i'T Paměť •ア</title>
 
 <style>
 :root{
-  --gold:#ffe2ad;
-  --gold-soft:rgba(255,226,173,.18);
-  --panel:rgba(4,5,10,.94);
-  --background:#020208;
+  --zlata:#ffe2ad;
+  --zlata2:#c79b33;
+  --panel:rgba(4,5,10,.95);
+  --tmava:#020208;
+  --okraj:rgba(255,220,160,.24);
 }
 
 *{
@@ -34,14 +35,16 @@ body{
   width:100%;
   height:100%;
   overflow:hidden;
+
   background:
     radial-gradient(
       circle at top,
-      #090d20 0%,
-      #050815 40%,
-      #020208 100%
+      #080d1f,
+      #020208 70%
     );
+
   color:#f5f5f5;
+
   font-family:
     system-ui,
     -apple-system,
@@ -51,6 +54,7 @@ body{
 }
 
 button,
+input,
 textarea{
   font:inherit;
 }
@@ -58,9 +62,11 @@ textarea{
 .root{
   position:fixed;
   inset:0;
+
   display:flex;
   align-items:center;
   justify-content:center;
+
   padding:
     max(10px,env(safe-area-inset-top))
     max(10px,env(safe-area-inset-right))
@@ -70,11 +76,15 @@ textarea{
 
 .stage{
   position:relative;
+
   width:min(920px,96vw);
   height:min(680px,92vh);
+
   overflow:hidden;
+
   border-radius:32px;
   border:1px solid rgba(255,255,255,.08);
+
   background:
     radial-gradient(
       circle at 50% 42%,
@@ -86,6 +96,7 @@ textarea{
       #06091a,
       #020208
     );
+
   box-shadow:
     0 40px 90px rgba(0,0,0,.85),
     inset 0 0 60px rgba(255,210,135,.025);
@@ -94,8 +105,10 @@ textarea{
 #globe-canvas{
   position:absolute;
   inset:0;
+
   width:100%;
   height:100%;
+
   display:block;
   touch-action:none;
 }
@@ -105,22 +118,30 @@ textarea{
   top:12px;
   left:12px;
   right:12px;
+
   z-index:8;
+
   display:flex;
   gap:6px;
   flex-wrap:wrap;
+
   pointer-events:none;
 }
 
 .pill{
   border:1px solid rgba(255,220,160,.20);
+
   background:rgba(0,0,0,.34);
-  color:var(--gold);
+  color:var(--zlata);
+
   border-radius:999px;
+
   padding:6px 9px;
+
   font-size:10px;
   font-weight:800;
   letter-spacing:.03em;
+
   backdrop-filter:blur(8px);
 }
 
@@ -128,11 +149,15 @@ textarea{
   position:absolute;
   right:18px;
   top:54px;
+
   z-index:4;
+
   font-size:10px;
   line-height:1.4;
   text-align:right;
+
   opacity:.82;
+
   pointer-events:none;
 }
 
@@ -140,12 +165,17 @@ textarea{
   position:absolute;
   left:50%;
   bottom:53px;
+
   z-index:4;
+
   transform:translateX(-50%);
+
   font-size:11px;
   color:rgba(255,240,210,.88);
+
   text-align:center;
   white-space:nowrap;
+
   pointer-events:none;
 }
 
@@ -154,13 +184,18 @@ textarea{
   left:18px;
   right:18px;
   bottom:15px;
+
   z-index:4;
+
   display:flex;
   justify-content:space-between;
   gap:12px;
+
   font-size:10px;
   line-height:1.35;
+
   opacity:.74;
+
   pointer-events:none;
 }
 
@@ -169,13 +204,21 @@ textarea{
   left:10px;
   right:10px;
   bottom:10px;
-  z-index:10;
+
+  z-index:15;
+
   display:none;
+
   padding:12px;
+
   border:1px solid rgba(255,220,160,.26);
   border-radius:22px;
+
   background:var(--panel);
-  box-shadow:0 0 34px rgba(255,190,110,.18);
+
+  box-shadow:
+    0 0 34px rgba(255,190,110,.18);
+
   backdrop-filter:blur(14px);
 }
 
@@ -187,62 +230,48 @@ textarea{
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
+
   gap:8px;
+
   margin-bottom:8px;
 }
 
 .panelTitle{
-  color:var(--gold);
+  color:var(--zlata);
+
   font-size:14px;
   font-weight:850;
 }
 
 .panelSub{
   margin-top:2px;
+
   color:rgba(255,255,255,.62);
+
   font-size:11px;
-}
-
-.panel textarea{
-  width:100%;
-  min-height:118px;
-  max-height:230px;
-  resize:vertical;
-  padding:10px;
-  border:1px solid rgba(255,220,160,.18);
-  border-radius:14px;
-  outline:0;
-  color:#fff4dc;
-  background:rgba(0,0,0,.35);
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Consolas,
-    monospace;
-  font-size:12px;
-}
-
-.panel textarea:focus{
-  border-color:rgba(255,226,173,.52);
-  box-shadow:0 0 20px rgba(255,210,150,.08);
 }
 
 .row{
   display:flex;
   gap:8px;
   flex-wrap:wrap;
+
   margin-top:8px;
 }
 
 button{
   border:1px solid rgba(255,220,160,.22);
+
   border-radius:14px;
+
   padding:8px 10px;
-  color:var(--gold);
+
+  color:var(--zlata);
   background:rgba(255,220,160,.10);
+
   font-size:12px;
   font-weight:750;
+
   cursor:pointer;
 }
 
@@ -252,38 +281,135 @@ button:active{
 
 button.primary{
   border:0;
+
   color:#120b04;
-  background:var(--gold);
+  background:var(--zlata);
 }
 
-.coreLabel{
-  position:absolute;
-  z-index:5;
-  display:none;
-  min-width:148px;
-  padding:8px 10px;
-  border:1px solid rgba(255,220,160,.22);
+button.danger{
+  color:#ffd4d4;
+
+  border-color:rgba(255,120,120,.28);
+}
+
+.slotsToolbar{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+
+  gap:8px;
+
+  margin-bottom:8px;
+}
+
+.slotsToolbar input,
+.slotEditor input,
+.slotEditor textarea{
+  width:100%;
+
+  border:1px solid rgba(255,220,160,.18);
+
+  outline:0;
+
   border-radius:14px;
-  color:#fff0cf;
-  background:rgba(2,3,8,.80);
-  box-shadow:0 10px 30px rgba(0,0,0,.45);
-  pointer-events:none;
+
+  padding:10px;
+
+  color:#fff4dc;
+  background:rgba(0,0,0,.35);
 }
 
-.coreLabel strong{
+.slotGrid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+
+  gap:7px;
+
+  max-height:300px;
+
+  overflow:auto;
+
+  padding-right:2px;
+}
+
+.slotBtn{
+  min-height:54px;
+
+  padding:7px;
+
+  border-radius:14px;
+
+  text-align:left;
+
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.slotBtn strong{
+  font-size:11px;
+  color:#fff0cf;
+}
+
+.slotBtn span{
+  font-size:9px;
+  opacity:.62;
+}
+
+.slotBtn.obsazeny{
+  background:rgba(255,226,173,.18);
+}
+
+.slotBtn.aktivni{
+  outline:2px solid rgba(255,226,173,.75);
+}
+
+.slotEditor{
+  display:none;
+
+  margin-top:10px;
+}
+
+.slotEditor.open{
   display:block;
-  color:var(--gold);
+}
+
+.slotEditor textarea{
+  min-height:110px;
+  max-height:180px;
+
+  resize:vertical;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+
   font-size:12px;
 }
 
-.coreLabel span{
-  display:block;
-  margin-top:2px;
-  font-size:10px;
-  opacity:.68;
+.statusBox{
+  margin-top:8px;
+
+  padding:8px 10px;
+
+  border:1px solid rgba(255,220,160,.15);
+
+  border-radius:14px;
+
+  background:rgba(255,255,255,.025);
+
+  font-size:11px;
+  color:rgba(255,255,255,.72);
 }
 
-@media(max-width:520px){
+.hiddenInput{
+  display:none;
+}
+
+@media(max-width:620px){
+
   .stage{
     height:92vh;
     border-radius:24px;
@@ -300,8 +426,17 @@ button.primary{
     font-size:9px;
   }
 
-  .panel textarea{
-    min-height:98px;
+  .slotGrid{
+    grid-template-columns:repeat(4,1fr);
+    max-height:270px;
+  }
+
+  .slotsToolbar{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .slotsToolbar input{
+    grid-column:1/-1;
   }
 }
 </style>
@@ -310,21 +445,35 @@ button.primary{
 <body>
 
 <div class="root">
+
   <main class="stage">
 
     <canvas id="globe-canvas"></canvas>
 
     <div class="memoryDock">
-      <div class="pill">ZEMĚ · 70 SLOTŮ</div>
-      <div class="pill">JAZYK · 70 SLOTŮ</div>
-      <div class="pill">HRA · 70 SLOTŮ</div>
-      <div class="pill">ŘÍZENÍ · 70 SLOTŮ</div>
+
+      <div class="pill" id="pill-earth">
+        ZEMĚ · 0/70
+      </div>
+
+      <div class="pill" id="pill-language">
+        JAZYK · 0/70
+      </div>
+
+      <div class="pill" id="pill-game">
+        HRA · 0/70
+      </div>
+
+      <div class="pill" id="pill-control">
+        ŘÍZENÍ · 0/70
+      </div>
+
     </div>
 
     <div class="hud-right">
       VaF'i'T<br>
-      Four Core Memory System<br>
-      režim: propojená paměť
+      Paměť<br>
+      režim: lokální úložiště
     </div>
 
     <div class="hud-center">
@@ -332,131 +481,498 @@ button.primary{
     </div>
 
     <div class="hud">
-      <span>1 prst: otáčení</span>
-      <span>klepnutí: otevřít jádro</span>
-      <span>offline localStorage</span>
-    </div>
 
-    <div id="coreLabel" class="coreLabel">
-      <strong id="labelTitle"></strong>
-      <span id="labelText"></span>
-    </div>
+      <span>
+        1 prst: otáčení
+      </span>
 
-    <section id="memoryPanel" class="panel">
+      <span>
+        klepnutí: otevřít jádro
+      </span>
+
+      <span>
+        uložení: localStorage
+      </span>
+
+    </div>
+        <section id="memoryPanel" class="panel">
+
       <div class="panelTop">
+
         <div>
+
           <div id="panelTitle" class="panelTitle">
             Paměťové jádro
           </div>
 
           <div id="panelSub" class="panelSub">
-            Vyber jádro na mapě.
+            70 samostatných slotů
           </div>
+
         </div>
 
         <button id="closePanel" type="button">
           Zavřít
         </button>
+
       </div>
 
-      <textarea
-        id="memoryText"
-        spellcheck="false"
-        placeholder="Sem můžeš zapisovat paměť vybraného jádra..."
-      ></textarea>
+      <div class="slotsToolbar">
+
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Hledat ve slotech..."
+        >
+
+        <button id="exportCore" type="button">
+          Export jádra
+        </button>
+
+        <button id="importCore" type="button">
+          Import jádra
+        </button>
+
+      </div>
+
+      <div id="slotGrid" class="slotGrid"></div>
+
+      <div id="slotEditor" class="slotEditor">
+
+        <input
+          id="slotName"
+          type="text"
+          maxlength="80"
+          placeholder="Název slotu"
+        >
+
+        <textarea
+          id="slotContent"
+          placeholder="Obsah slotu..."
+        ></textarea>
+
+        <div class="row">
+
+          <button
+            id="saveSlot"
+            class="primary"
+            type="button"
+          >
+            Uložit slot
+          </button>
+
+          <button
+            id="clearSlot"
+            class="danger"
+            type="button"
+          >
+            Vymazat slot
+          </button>
+
+        </div>
+
+      </div>
+
+      <div id="statusBox" class="statusBox">
+        Vyber slot.
+      </div>
 
       <div class="row">
-        <button id="saveMemory" class="primary" type="button">
-          Uložit paměť
+
+        <button id="exportAll" type="button">
+          Export celé Paměti
         </button>
 
-        <button id="exportMemory" type="button">
-          Exportovat
+        <button id="importAll" type="button">
+          Import celé Paměti
         </button>
 
-        <button id="clearMemory" type="button">
-          Vymazat
-        </button>
       </div>
+
+      <input
+        id="fileInput"
+        class="hiddenInput"
+        type="file"
+        accept="application/json,.json"
+      >
+
     </section>
 
   </main>
+
 </div>
 
 <script>
 "use strict";
 
-const canvas = document.getElementById("globe-canvas");
-const context = canvas.getContext("2d");
+const canvas =
+  document.getElementById("globe-canvas");
 
-const panel = document.getElementById("memoryPanel");
-const panelTitle = document.getElementById("panelTitle");
-const panelSub = document.getElementById("panelSub");
-const memoryText = document.getElementById("memoryText");
+const context =
+  canvas.getContext("2d");
 
-const closePanel = document.getElementById("closePanel");
-const saveMemory = document.getElementById("saveMemory");
-const clearMemory = document.getElementById("clearMemory");
-const exportMemory = document.getElementById("exportMemory");
+const panel =
+  document.getElementById("memoryPanel");
 
-const coreLabel = document.getElementById("coreLabel");
-const labelTitle = document.getElementById("labelTitle");
-const labelText = document.getElementById("labelText");
+const panelTitle =
+  document.getElementById("panelTitle");
 
-const STORAGE_PREFIX = "vaft_four_core_";
+const panelSub =
+  document.getElementById("panelSub");
+
+const closePanel =
+  document.getElementById("closePanel");
+
+const slotGrid =
+  document.getElementById("slotGrid");
+
+const slotEditor =
+  document.getElementById("slotEditor");
+
+const slotName =
+  document.getElementById("slotName");
+
+const slotContent =
+  document.getElementById("slotContent");
+
+const saveSlot =
+  document.getElementById("saveSlot");
+
+const clearSlot =
+  document.getElementById("clearSlot");
+
+const searchInput =
+  document.getElementById("searchInput");
+
+const exportCore =
+  document.getElementById("exportCore");
+
+const importCore =
+  document.getElementById("importCore");
+
+const exportAll =
+  document.getElementById("exportAll");
+
+const importAll =
+  document.getElementById("importAll");
+
+const fileInput =
+  document.getElementById("fileInput");
+
+const statusBox =
+  document.getElementById("statusBox");
+
+const STORAGE_KEY =
+  "vaft_pamet_v1";
+
+const SLOT_COUNT =
+  70;
 
 const cores = [
+
   {
     id:"earth",
     title:"Země",
     subtitle:"Modeling, světy a úhel pohledu",
-    angle:-Math.PI * 0.72,
+    angle:-Math.PI * .72,
     radius:50
   },
+
   {
     id:"language",
     title:"Jazyk",
     subtitle:"Písmena, symboly, glyphy a význam",
-    angle:-Math.PI * 0.18,
+    angle:-Math.PI * .18,
     radius:50
   },
+
   {
     id:"game",
     title:"Hra",
     subtitle:"Pravidla, události a postup",
-    angle:Math.PI * 0.34,
+    angle:Math.PI * .34,
     radius:50
   },
+
   {
     id:"control",
     title:"Řízení",
     subtitle:"Směrování, jednotky a propojení",
-    angle:Math.PI * 0.86,
+    angle:Math.PI * .86,
     radius:50
   }
+
 ];
+
+let memory =
+  loadMemory();
 
 let width = 0;
 let height = 0;
 let pixelRatio = 1;
 
 let rotation = 0;
-let rotationVelocity = 0.0015;
+let rotationVelocity = .0015;
+
 let selectedCore = null;
+let selectedSlotIndex = null;
 
 let dragging = false;
 let movedDuringDrag = false;
 let previousPointerX = 0;
 
+let importMode =
+  "core";
+
+function createEmptySlot(index){
+
+  return {
+    id:index + 1,
+    name:`Slot ${index + 1}`,
+    content:"",
+    updatedAt:null
+  };
+
+}
+
+function createEmptyCore(){
+
+  return Array.from(
+    {
+      length:SLOT_COUNT
+    },
+    (_,index)=>createEmptySlot(index)
+  );
+
+}
+
+function createEmptyMemory(){
+
+  return {
+
+    version:1,
+
+    createdAt:
+      new Date().toISOString(),
+
+    updatedAt:
+      new Date().toISOString(),
+
+    cores:{
+
+      earth:
+        createEmptyCore(),
+
+      language:
+        createEmptyCore(),
+
+      game:
+        createEmptyCore(),
+
+      control:
+        createEmptyCore()
+
+    }
+
+  };
+
+}
+
+function loadMemory(){
+
+  try{
+
+    const raw =
+      localStorage.getItem(STORAGE_KEY);
+
+    if(!raw){
+
+      return createEmptyMemory();
+
+    }
+
+    const parsed =
+      JSON.parse(raw);
+
+    if(!parsed.cores){
+
+      throw new Error(
+        "Neplatná struktura Paměti."
+      );
+
+    }
+
+    for(
+      const core of [
+        "earth",
+        "language",
+        "game",
+        "control"
+      ]
+    ){
+
+      if(
+        !Array.isArray(
+          parsed.cores[core]
+        )
+      ){
+
+        parsed.cores[core] =
+          createEmptyCore();
+
+      }
+
+      while(
+        parsed.cores[core].length <
+        SLOT_COUNT
+      ){
+
+        parsed.cores[core].push(
+          createEmptySlot(
+            parsed.cores[core].length
+          )
+        );
+
+      }
+
+      parsed.cores[core] =
+        parsed.cores[core].slice(
+          0,
+          SLOT_COUNT
+        );
+
+    }
+
+    return parsed;
+
+  }catch(error){
+
+    console.warn(
+      "Paměť byla obnovena do výchozího stavu.",
+      error
+    );
+
+    return createEmptyMemory();
+
+  }
+
+}
+
+function saveMemory(){
+
+  memory.updatedAt =
+    new Date().toISOString();
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(memory)
+  );
+
+  updatePills();
+
+}
+
+function byteSize(text){
+
+  return new Blob([text]).size;
+
+}
+
+function formatBytes(bytes){
+
+  if(bytes < 1024){
+
+    return `${bytes} B`;
+
+  }
+
+  if(bytes < 1024 * 1024){
+
+    return `${(bytes / 1024).toFixed(1)} KB`;
+
+  }
+
+  return `${(
+    bytes /
+    1024 /
+    1024
+  ).toFixed(2)} MB`;
+
+}
+
+function getCoreStats(coreId){
+
+  const slots =
+    memory.cores[coreId];
+
+  const used =
+    slots.filter(slot=>{
+
+      return (
+        slot.content.trim() ||
+        slot.name.trim() !==
+        `Slot ${slot.id}`
+      );
+
+    }).length;
+
+  const size =
+    byteSize(
+      JSON.stringify(slots)
+    );
+
+  return {
+    used,
+    size
+  };
+
+}
+
+function updatePills(){
+
+  for(const core of cores){
+
+    const stats =
+      getCoreStats(core.id);
+
+    const pill =
+      document.getElementById(
+        `pill-${core.id}`
+      );
+
+    pill.textContent =
+      `${core.title.toUpperCase()} · ${stats.used}/70`;
+
+  }
+
+}
+
 function resizeCanvas(){
-  const rectangle = canvas.getBoundingClientRect();
 
-  pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-  width = rectangle.width;
-  height = rectangle.height;
+  const rectangle =
+    canvas.getBoundingClientRect();
 
-  canvas.width = Math.round(width * pixelRatio);
-  canvas.height = Math.round(height * pixelRatio);
+  pixelRatio =
+    Math.min(
+      window.devicePixelRatio || 1,
+      2
+    );
+
+  width =
+    rectangle.width;
+
+  height =
+    rectangle.height;
+
+  canvas.width =
+    Math.round(
+      width * pixelRatio
+    );
+
+  canvas.height =
+    Math.round(
+      height * pixelRatio
+    );
 
   context.setTransform(
     pixelRatio,
@@ -466,187 +982,396 @@ function resizeCanvas(){
     0,
     0
   );
+
 }
 
 function getCorePosition(core){
-  const orbitRadius = Math.min(width, height) * 0.28;
-  const centerX = width / 2;
-  const centerY = height / 2 + 8;
 
-  const angle = core.angle + rotation;
+  const orbitRadius =
+    Math.min(
+      width,
+      height
+    ) * .28;
+
+  const centerX =
+    width / 2;
+
+  const centerY =
+    height / 2 + 8;
+
+  const angle =
+    core.angle + rotation;
 
   return {
-    x:centerX + Math.cos(angle) * orbitRadius,
-    y:centerY + Math.sin(angle) * orbitRadius * 0.52,
-    depth:(Math.sin(angle) + 1) / 2
+
+    x:
+      centerX +
+      Math.cos(angle) *
+      orbitRadius,
+
+    y:
+      centerY +
+      Math.sin(angle) *
+      orbitRadius *
+      .52,
+
+    depth:
+      (
+        Math.sin(angle) + 1
+      ) / 2
+
   };
+
 }
 
 function drawBackground(){
-  const centerX = width / 2;
-  const centerY = height / 2;
 
-  const glow = context.createRadialGradient(
-    centerX,
-    centerY,
-    10,
-    centerX,
-    centerY,
-    Math.min(width, height) * 0.52
+  const centerX =
+    width / 2;
+
+  const centerY =
+    height / 2;
+
+  const glow =
+    context.createRadialGradient(
+      centerX,
+      centerY,
+      10,
+      centerX,
+      centerY,
+      Math.min(
+        width,
+        height
+      ) * .52
+    );
+
+  glow.addColorStop(
+    0,
+    "rgba(255,220,155,.08)"
   );
 
-  glow.addColorStop(0,"rgba(255,220,155,.08)");
-  glow.addColorStop(.42,"rgba(80,100,180,.025)");
-  glow.addColorStop(1,"rgba(0,0,0,0)");
+  glow.addColorStop(
+    .42,
+    "rgba(80,100,180,.025)"
+  );
 
-  context.fillStyle = glow;
-  context.fillRect(0,0,width,height);
+  glow.addColorStop(
+    1,
+    "rgba(0,0,0,0)"
+  );
+
+  context.fillStyle =
+    glow;
+
+  context.fillRect(
+    0,
+    0,
+    width,
+    height
+  );
 
   context.save();
-  context.globalAlpha = .22;
-  context.fillStyle = "#ffe2ad";
 
-  for(let index = 0; index < 70; index++){
-    const x = (index * 83.71) % width;
-    const y = (index * 47.29) % height;
-    const size = index % 7 === 0 ? 1.3 : .55;
+  context.globalAlpha =
+    .22;
+
+  context.fillStyle =
+    "#ffe2ad";
+
+  for(
+    let index = 0;
+    index < 70;
+    index++
+  ){
+
+    const x =
+      (
+        index * 83.71
+      ) % width;
+
+    const y =
+      (
+        index * 47.29
+      ) % height;
+
+    const size =
+      index % 7 === 0
+        ? 1.3
+        : .55;
 
     context.beginPath();
-    context.arc(x,y,size,0,Math.PI * 2);
+
+    context.arc(
+      x,
+      y,
+      size,
+      0,
+      Math.PI * 2
+    );
+
     context.fill();
+
   }
 
   context.restore();
+
 }
 
 function drawConnections(){
-  const positions = cores.map(getCorePosition);
+
+  const positions =
+    cores.map(
+      getCorePosition
+    );
 
   context.save();
-  context.lineWidth = 1;
 
-  for(let first = 0; first < positions.length; first++){
-    for(let second = first + 1; second < positions.length; second++){
-      const gradient = context.createLinearGradient(
-        positions[first].x,
-        positions[first].y,
-        positions[second].x,
-        positions[second].y
+  context.lineWidth =
+    1;
+
+  for(
+    let first = 0;
+    first < positions.length;
+    first++
+  ){
+
+    for(
+      let second = first + 1;
+      second < positions.length;
+      second++
+    ){
+
+      const gradient =
+        context.createLinearGradient(
+
+          positions[first].x,
+          positions[first].y,
+
+          positions[second].x,
+          positions[second].y
+
+        );
+
+      gradient.addColorStop(
+        0,
+        "rgba(255,226,173,.08)"
       );
 
-      gradient.addColorStop(0,"rgba(255,226,173,.08)");
-      gradient.addColorStop(.5,"rgba(255,226,173,.28)");
-      gradient.addColorStop(1,"rgba(255,226,173,.08)");
+      gradient.addColorStop(
+        .5,
+        "rgba(255,226,173,.28)"
+      );
 
-      context.strokeStyle = gradient;
+      gradient.addColorStop(
+        1,
+        "rgba(255,226,173,.08)"
+      );
+
+      context.strokeStyle =
+        gradient;
+
       context.beginPath();
+
       context.moveTo(
         positions[first].x,
         positions[first].y
       );
+
       context.lineTo(
         positions[second].x,
         positions[second].y
       );
+
       context.stroke();
+
     }
+
   }
 
   context.restore();
+
 }
 
 function drawCenterCore(time){
-  const centerX = width / 2;
-  const centerY = height / 2 + 8;
-  const pulse = 1 + Math.sin(time * 0.002) * 0.045;
+
+  const centerX =
+    width / 2;
+
+  const centerY =
+    height / 2 + 8;
+
+  const pulse =
+    1 +
+    Math.sin(
+      time * .002
+    ) * .045;
 
   context.save();
 
-  for(let ring = 0; ring < 5; ring++){
+  for(
+    let ring = 0;
+    ring < 5;
+    ring++
+  ){
+
     context.beginPath();
+
     context.arc(
       centerX,
       centerY,
-      (36 + ring * 13) * pulse,
+      (
+        36 +
+        ring * 13
+      ) * pulse,
       0,
       Math.PI * 2
     );
 
     context.strokeStyle =
-      `rgba(255,220,160,${0.20 - ring * 0.028})`;
+      `rgba(
+        255,
+        220,
+        160,
+        ${.20 - ring * .028}
+      )`;
 
-    context.lineWidth = 1;
+    context.lineWidth =
+      1;
+
     context.stroke();
+
   }
 
-  const coreGlow = context.createRadialGradient(
-    centerX,
-    centerY,
+  const gradient =
+    context.createRadialGradient(
+      centerX,
+      centerY,
+      0,
+      centerX,
+      centerY,
+      48
+    );
+
+  gradient.addColorStop(
     0,
-    centerX,
-    centerY,
-    48
+    "rgba(255,240,200,.88)"
   );
 
-  coreGlow.addColorStop(0,"rgba(255,240,200,.88)");
-  coreGlow.addColorStop(.18,"rgba(255,190,100,.48)");
-  coreGlow.addColorStop(1,"rgba(255,190,100,0)");
+  gradient.addColorStop(
+    .18,
+    "rgba(255,190,100,.48)"
+  );
 
-  context.fillStyle = coreGlow;
+  gradient.addColorStop(
+    1,
+    "rgba(255,190,100,0)"
+  );
+
+  context.fillStyle =
+    gradient;
+
   context.beginPath();
-  context.arc(centerX,centerY,48,0,Math.PI * 2);
+
+  context.arc(
+    centerX,
+    centerY,
+    48,
+    0,
+    Math.PI * 2
+  );
+
   context.fill();
 
-  context.fillStyle = "#fff0cf";
-  context.font = "800 12px system-ui";
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.fillText("VaF'i'T",centerX,centerY - 4);
+  context.fillStyle =
+    "#fff0cf";
 
-  context.fillStyle = "rgba(255,240,210,.65)";
-  context.font = "9px system-ui";
-  context.fillText("MEMORY BUS",centerX,centerY + 12);
+  context.font =
+    "800 12px system-ui";
+
+  context.textAlign =
+    "center";
+
+  context.textBaseline =
+    "middle";
+
+  context.fillText(
+    "VaF'i'T",
+    centerX,
+    centerY - 4
+  );
+
+  context.fillStyle =
+    "rgba(255,240,210,.65)";
+
+  context.font =
+    "9px system-ui";
+
+  context.fillText(
+    "PAMĚŤ",
+    centerX,
+    centerY + 12
+  );
 
   context.restore();
+
 }
 
 function drawCore(core,time){
-  const position = getCorePosition(core);
-  const scale = .72 + position.depth * .40;
-  const radius = core.radius * scale;
-  const active = selectedCore && selectedCore.id === core.id;
+
+  const position =
+    getCorePosition(core);
+
+  const scale =
+    .72 +
+    position.depth * .40;
+
+  const radius =
+    core.radius * scale;
+
+  const active =
+    selectedCore &&
+    selectedCore.id === core.id;
 
   context.save();
 
-  context.globalAlpha = .48 + position.depth * .52;
+  context.globalAlpha =
+    .48 +
+    position.depth * .52;
 
-  const glow = context.createRadialGradient(
-    position.x,
-    position.y,
-    2,
-    position.x,
-    position.y,
-    radius * 1.45
-  );
+  const gradient =
+    context.createRadialGradient(
+      position.x,
+      position.y,
+      2,
+      position.x,
+      position.y,
+      radius * 1.45
+    );
 
-  glow.addColorStop(
+  gradient.addColorStop(
     0,
     active
       ? "rgba(255,245,215,.95)"
       : "rgba(255,225,175,.74)"
   );
 
-  glow.addColorStop(
+  gradient.addColorStop(
     .24,
     active
       ? "rgba(255,185,95,.52)"
       : "rgba(255,185,95,.25)"
   );
 
-  glow.addColorStop(1,"rgba(255,185,95,0)");
+  gradient.addColorStop(
+    1,
+    "rgba(255,185,95,0)"
+  );
 
-  context.fillStyle = glow;
+  context.fillStyle =
+    gradient;
+
   context.beginPath();
+
   context.arc(
     position.x,
     position.y,
@@ -654,6 +1379,7 @@ function drawCore(core,time){
     0,
     Math.PI * 2
   );
+
   context.fill();
 
   context.strokeStyle =
@@ -661,9 +1387,11 @@ function drawCore(core,time){
       ? "rgba(255,240,205,.94)"
       : "rgba(255,220,160,.54)";
 
-  context.lineWidth = active ? 1.8 : 1;
+  context.lineWidth =
+    active ? 1.8 : 1;
 
   context.beginPath();
+
   context.arc(
     position.x,
     position.y,
@@ -671,9 +1399,15 @@ function drawCore(core,time){
     0,
     Math.PI * 2
   );
+
   context.stroke();
 
-  for(let ring = 1; ring < 5; ring++){
+  for(
+    let ring = 1;
+    ring < 5;
+    ring++
+  ){
+
     context.beginPath();
 
     context.ellipse(
@@ -687,21 +1421,37 @@ function drawCore(core,time){
     );
 
     context.strokeStyle =
-      `rgba(255,220,160,${active ? .30 : .17})`;
+      `rgba(
+        255,
+        220,
+        160,
+        ${active ? .30 : .17}
+      )`;
 
-    context.lineWidth = .7;
+    context.lineWidth =
+      .7;
+
     context.stroke();
+
   }
 
-  for(let line = 0; line < 8; line++){
-    const angle = line / 8 * Math.PI;
+  for(
+    let line = 0;
+    line < 8;
+    line++
+  ){
+
+    const angle =
+      line / 8 * Math.PI;
 
     context.beginPath();
 
     context.ellipse(
       position.x,
       position.y,
-      Math.abs(Math.cos(angle)) * radius,
+      Math.abs(
+        Math.cos(angle)
+      ) * radius,
       radius,
       0,
       0,
@@ -709,18 +1459,30 @@ function drawCore(core,time){
     );
 
     context.strokeStyle =
-      `rgba(255,220,160,${active ? .25 : .13})`;
+      `rgba(
+        255,
+        220,
+        160,
+        ${active ? .25 : .13}
+      )`;
 
-    context.lineWidth = .7;
+    context.lineWidth =
+      .7;
+
     context.stroke();
+
   }
 
   const pulse =
     radius +
     7 +
-    Math.sin(time * .003 + core.angle) * 3;
+    Math.sin(
+      time * .003 +
+      core.angle
+    ) * 3;
 
   context.beginPath();
+
   context.arc(
     position.x,
     position.y,
@@ -736,253 +1498,846 @@ function drawCore(core,time){
 
   context.stroke();
 
-  context.fillStyle = "#fff0cf";
-  context.font = `800 ${Math.round(11 * scale)}px system-ui`;
-  context.textAlign = "center";
-  context.textBaseline = "middle";
+  context.fillStyle =
+    "#fff0cf";
+
+  context.font =
+    `800 ${Math.round(
+      11 * scale
+    )}px system-ui`;
+
+  context.textAlign =
+    "center";
+
+  context.textBaseline =
+    "middle";
+
   context.fillText(
     core.title,
     position.x,
     position.y - 4
   );
 
-  context.fillStyle = "rgba(255,240,210,.65)";
-  context.font = `${Math.max(8,Math.round(9 * scale))}px system-ui`;
+  const stats =
+    getCoreStats(core.id);
+
+  context.fillStyle =
+    "rgba(255,240,210,.65)";
+
+  context.font =
+    `${Math.max(
+      8,
+      Math.round(
+        9 * scale
+      )
+    )}px system-ui`;
+
   context.fillText(
-    "70 SLOTŮ",
+    `${stats.used}/70`,
     position.x,
     position.y + 12
   );
 
   context.restore();
 
-  core.position = position;
-  core.drawRadius = radius;
+  core.position =
+    position;
+
+  core.drawRadius =
+    radius;
+
 }
 
 function render(time){
-  context.clearRect(0,0,width,height);
+
+  context.clearRect(
+    0,
+    0,
+    width,
+    height
+  );
 
   drawBackground();
   drawConnections();
   drawCenterCore(time);
 
-  const orderedCores = [...cores].sort((first,second)=>{
-    return getCorePosition(first).depth -
-      getCorePosition(second).depth;
-  });
+  const orderedCores =
+    [...cores].sort(
+      (first,second)=>{
 
-  for(const core of orderedCores){
-    drawCore(core,time);
+        return (
+          getCorePosition(first).depth -
+          getCorePosition(second).depth
+        );
+
+      }
+    );
+
+  for(
+    const core of orderedCores
+  ){
+
+    drawCore(
+      core,
+      time
+    );
+
   }
 
   if(!dragging){
-    rotation += rotationVelocity;
+
+    rotation +=
+      rotationVelocity;
+
   }
 
-  requestAnimationFrame(render);
+  requestAnimationFrame(
+    render
+  );
+
 }
 
 function findCoreAt(x,y){
-  const orderedCores = [...cores].sort((first,second)=>{
-    return getCorePosition(second).depth -
-      getCorePosition(first).depth;
-  });
 
-  return orderedCores.find(core=>{
-    if(!core.position){
-      return false;
-    }
+  return [...cores]
+    .sort(
+      (first,second)=>{
 
-    const differenceX = x - core.position.x;
-    const differenceY = y - core.position.y;
-    const distance = Math.hypot(
-      differenceX,
-      differenceY
-    );
+        return (
+          getCorePosition(second).depth -
+          getCorePosition(first).depth
+        );
 
-    return distance <= core.drawRadius + 16;
-  });
-}
+      }
+    )
+    .find(core=>{
 
-function showCoreLabel(core){
-  if(!core || !core.position){
-    coreLabel.style.display = "none";
-    return;
-  }
+      if(!core.position){
 
-  labelTitle.textContent = core.title;
-  labelText.textContent = core.subtitle;
+        return false;
 
-  coreLabel.style.left =
-    `${Math.min(width - 175,core.position.x + 18)}px`;
+      }
 
-  coreLabel.style.top =
-    `${Math.max(58,core.position.y - 24)}px`;
+      const differenceX =
+        x - core.position.x;
 
-  coreLabel.style.display = "block";
+      const differenceY =
+        y - core.position.y;
+
+      const distance =
+        Math.hypot(
+          differenceX,
+          differenceY
+        );
+
+      return (
+        distance <=
+        core.drawRadius + 16
+      );
+
+    });
+
 }
 
 function openCore(core){
-  selectedCore = core;
+
+  selectedCore =
+    core;
+
+  selectedSlotIndex =
+    null;
 
   panelTitle.textContent =
-    `${core.title} · paměťové jádro`;
+    `${core.title} · Paměť`;
 
   panelSub.textContent =
-    `${core.subtitle} · kapacita 70 slotů`;
+    "70 slotů · samostatné uložení";
 
-  memoryText.value =
-    localStorage.getItem(
-      STORAGE_PREFIX + core.id
-    ) || "";
+  panel.classList.add(
+    "open"
+  );
 
-  panel.classList.add("open");
-  coreLabel.style.display = "none";
+  slotEditor.classList.remove(
+    "open"
+  );
+
+  searchInput.value =
+    "";
+
+  renderSlots();
+  updateStatus();
+
 }
 
-canvas.addEventListener("pointerdown",event=>{
-  dragging = true;
-  movedDuringDrag = false;
-  previousPointerX = event.clientX;
+function renderSlots(){
 
-  canvas.setPointerCapture(event.pointerId);
-});
-
-canvas.addEventListener("pointermove",event=>{
-  const rectangle = canvas.getBoundingClientRect();
-  const x = event.clientX - rectangle.left;
-  const y = event.clientY - rectangle.top;
-
-  if(dragging){
-    const differenceX =
-      event.clientX - previousPointerX;
-
-    if(Math.abs(differenceX) > 2){
-      movedDuringDrag = true;
-    }
-
-    rotation += differenceX * .007;
-    previousPointerX = event.clientX;
-  }else{
-    showCoreLabel(findCoreAt(x,y));
-  }
-});
-
-canvas.addEventListener("pointerup",event=>{
-  const rectangle = canvas.getBoundingClientRect();
-  const x = event.clientX - rectangle.left;
-  const y = event.clientY - rectangle.top;
-
-  dragging = false;
-
-  if(!movedDuringDrag){
-    const core = findCoreAt(x,y);
-
-    if(core){
-      openCore(core);
-    }
-  }
-});
-
-canvas.addEventListener("pointerleave",()=>{
-  if(!dragging){
-    coreLabel.style.display = "none";
-  }
-});
-
-closePanel.addEventListener("click",()=>{
-  panel.classList.remove("open");
-});
-
-saveMemory.addEventListener("click",()=>{
   if(!selectedCore){
+
     return;
+
   }
 
-  localStorage.setItem(
-    STORAGE_PREFIX + selectedCore.id,
-    memoryText.value
-  );
+  const query =
+    searchInput.value
+      .trim()
+      .toLowerCase();
 
-  saveMemory.textContent = "Uloženo ✓";
+  const slots =
+    memory.cores[
+      selectedCore.id
+    ];
 
-  window.setTimeout(()=>{
-    saveMemory.textContent = "Uložit paměť";
-  },1200);
-});
+  slotGrid.innerHTML =
+    "";
 
-clearMemory.addEventListener("click",()=>{
-  if(!selectedCore){
-    return;
-  }
+  slots.forEach(
+    (slot,index)=>{
 
-  const confirmed = window.confirm(
-    `Vymazat uloženou paměť jádra ${selectedCore.title}?`
-  );
+      const searchable =
+        `${slot.name} ${slot.content}`
+          .toLowerCase();
 
-  if(!confirmed){
-    return;
-  }
+      if(
+        query &&
+        !searchable.includes(query)
+      ){
 
-  localStorage.removeItem(
-    STORAGE_PREFIX + selectedCore.id
-  );
+        return;
 
-  memoryText.value = "";
-});
+      }
 
-exportMemory.addEventListener("click",()=>{
-  if(!selectedCore){
-    return;
-  }
+      const button =
+        document.createElement(
+          "button"
+        );
 
-  const exportData = {
-    system:"VaF'i'T Four Core Memory System",
-    core:selectedCore.id,
-    title:selectedCore.title,
-    slots:70,
-    memory:memoryText.value,
-    exportedAt:new Date().toISOString()
-  };
+      button.type =
+        "button";
 
-  const file = new Blob(
-    [JSON.stringify(exportData,null,2)],
-    {
-      type:"application/json"
+      button.className =
+        "slotBtn";
+
+      const used =
+        (
+          slot.content.trim() ||
+          slot.name.trim() !==
+          `Slot ${slot.id}`
+        );
+
+      if(used){
+
+        button.classList.add(
+          "obsazeny"
+        );
+
+      }
+
+      if(
+        index ===
+        selectedSlotIndex
+      ){
+
+        button.classList.add(
+          "aktivni"
+        );
+
+      }
+
+      button.innerHTML =
+        `<strong>${
+          escapeHtml(
+            slot.name ||
+            `Slot ${slot.id}`
+          )
+        }</strong>
+        <span>${
+          slot.content.trim()
+            ? "obsazeno"
+            : "prázdné"
+        }</span>`;
+
+      button.addEventListener(
+        "click",
+        ()=>selectSlot(index)
+      );
+
+      slotGrid.appendChild(
+        button
+      );
+
     }
   );
 
-  const url = URL.createObjectURL(file);
-  const link = document.createElement("a");
+}
 
-  link.href = url;
+function selectSlot(index){
+
+  selectedSlotIndex =
+    index;
+
+  const slot =
+    memory.cores[
+      selectedCore.id
+    ][index];
+
+  slotName.value =
+    slot.name;
+
+  slotContent.value =
+    slot.content;
+
+  slotEditor.classList.add(
+    "open"
+  );
+
+  renderSlots();
+  updateStatus();
+
+}
+function updateStatus(message=""){
+
+  if(!selectedCore){
+
+    statusBox.textContent =
+      "Vyber jádro.";
+
+    return;
+
+  }
+
+  const stats =
+    getCoreStats(
+      selectedCore.id
+    );
+
+  let text =
+    `${selectedCore.title}: obsazeno ${stats.used}/70 · velikost ${formatBytes(stats.size)}`;
+
+  if(
+    selectedSlotIndex !== null
+  ){
+
+    text +=
+      ` · otevřen slot ${selectedSlotIndex + 1}`;
+
+  }
+
+  if(message){
+
+    text +=
+      ` · ${message}`;
+
+  }
+
+  statusBox.textContent =
+    text;
+
+}
+
+function escapeHtml(text){
+
+  return String(text).replace(
+    /[&<>"']/g,
+    character=>({
+
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+
+    })[character]
+  );
+
+}
+
+function downloadJson(
+  data,
+  filename
+){
+
+  const blob =
+    new Blob(
+      [
+        JSON.stringify(
+          data,
+          null,
+          2
+        )
+      ],
+      {
+        type:"application/json"
+      }
+    );
+
+  const url =
+    URL.createObjectURL(
+      blob
+    );
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+  link.href =
+    url;
+
   link.download =
-    `${selectedCore.id}_memory.json`;
+    filename;
 
-  document.body.appendChild(link);
+  document.body.appendChild(
+    link
+  );
+
   link.click();
   link.remove();
 
-  URL.revokeObjectURL(url);
-});
+  URL.revokeObjectURL(
+    url
+  );
 
-window.addEventListener("resize",resizeCanvas);
+}
+
+saveSlot.addEventListener(
+  "click",
+  ()=>{
+
+    if(
+      !selectedCore ||
+      selectedSlotIndex === null
+    ){
+
+      return;
+
+    }
+
+    const slot =
+      memory.cores[
+        selectedCore.id
+      ][selectedSlotIndex];
+
+    slot.name =
+      slotName.value.trim() ||
+      `Slot ${selectedSlotIndex + 1}`;
+
+    slot.content =
+      slotContent.value;
+
+    slot.updatedAt =
+      new Date().toISOString();
+
+    saveMemory();
+    renderSlots();
+    updateStatus("uloženo");
+
+  }
+);
+
+clearSlot.addEventListener(
+  "click",
+  ()=>{
+
+    if(
+      !selectedCore ||
+      selectedSlotIndex === null
+    ){
+
+      return;
+
+    }
+
+    const confirmed =
+      confirm(
+        `Vymazat slot ${selectedSlotIndex + 1}?`
+      );
+
+    if(!confirmed){
+
+      return;
+
+    }
+
+    memory.cores[
+      selectedCore.id
+    ][selectedSlotIndex] =
+      createEmptySlot(
+        selectedSlotIndex
+      );
+
+    saveMemory();
+
+    slotName.value =
+      `Slot ${selectedSlotIndex + 1}`;
+
+    slotContent.value =
+      "";
+
+    renderSlots();
+    updateStatus("vymazáno");
+
+  }
+);
+
+searchInput.addEventListener(
+  "input",
+  renderSlots
+);
+
+closePanel.addEventListener(
+  "click",
+  ()=>{
+
+    panel.classList.remove(
+      "open"
+    );
+
+  }
+);
+
+exportCore.addEventListener(
+  "click",
+  ()=>{
+
+    if(!selectedCore){
+
+      return;
+
+    }
+
+    downloadJson(
+      {
+
+        typ:
+          "jadro-pameti",
+
+        jadro:
+          selectedCore.id,
+
+        nazev:
+          selectedCore.title,
+
+        sloty:
+          memory.cores[
+            selectedCore.id
+          ],
+
+        exportovano:
+          new Date().toISOString()
+
+      },
+
+      `pamet_${selectedCore.id}.json`
+
+    );
+
+  }
+);
+
+importCore.addEventListener(
+  "click",
+  ()=>{
+
+    if(!selectedCore){
+
+      return;
+
+    }
+
+    importMode =
+      "core";
+
+    fileInput.value =
+      "";
+
+    fileInput.click();
+
+  }
+);
+
+exportAll.addEventListener(
+  "click",
+  ()=>{
+
+    downloadJson(
+      memory,
+      "vaft_pamet_cela.json"
+    );
+
+  }
+);
+
+importAll.addEventListener(
+  "click",
+  ()=>{
+
+    importMode =
+      "all";
+
+    fileInput.value =
+      "";
+
+    fileInput.click();
+
+  }
+);
+
+fileInput.addEventListener(
+  "change",
+  async()=>{
+
+    const file =
+      fileInput.files &&
+      fileInput.files[0];
+
+    if(!file){
+
+      return;
+
+    }
+
+    try{
+
+      const data =
+        JSON.parse(
+          await file.text()
+        );
+
+      if(
+        importMode === "core"
+      ){
+
+        if(!selectedCore){
+
+          throw new Error(
+            "Není vybrané jádro."
+          );
+
+        }
+
+        const slots =
+          Array.isArray(data.sloty)
+            ? data.sloty
+            : data;
+
+        if(
+          !Array.isArray(slots)
+        ){
+
+          throw new Error(
+            "Soubor neobsahuje sloty."
+          );
+
+        }
+
+        memory.cores[
+          selectedCore.id
+        ] =
+          Array.from(
+            {
+              length:SLOT_COUNT
+            },
+            (_,index)=>{
+
+              const source =
+                slots[index] || {};
+
+              return {
+
+                id:
+                  index + 1,
+
+                name:
+                  typeof source.name ===
+                  "string" &&
+                  source.name.trim()
+
+                    ? source.name
+
+                    : `Slot ${index + 1}`,
+
+                content:
+                  typeof source.content ===
+                  "string"
+
+                    ? source.content
+
+                    : "",
+
+                updatedAt:
+                  source.updatedAt || null
+
+              };
+
+            }
+          );
+
+        saveMemory();
+        renderSlots();
+
+        updateStatus(
+          "jádro importováno"
+        );
+
+      }else{
+
+        if(!data.cores){
+
+          throw new Error(
+            "Soubor neobsahuje celou Paměť."
+          );
+
+        }
+
+        localStorage.setItem(
+          STORAGE_KEY,
+          JSON.stringify(data)
+        );
+
+        memory =
+          loadMemory();
+
+        saveMemory();
+        renderSlots();
+
+        updateStatus(
+          "celá Paměť importována"
+        );
+
+      }
+
+    }catch(error){
+
+      alert(
+        `Import se nezdařil: ${error.message}`
+      );
+
+    }
+
+  }
+);
+
+canvas.addEventListener(
+  "pointerdown",
+  event=>{
+
+    dragging =
+      true;
+
+    movedDuringDrag =
+      false;
+
+    previousPointerX =
+      event.clientX;
+
+    canvas.setPointerCapture(
+      event.pointerId
+    );
+
+  }
+);
+
+canvas.addEventListener(
+  "pointermove",
+  event=>{
+
+    if(!dragging){
+
+      return;
+
+    }
+
+    const differenceX =
+      event.clientX -
+      previousPointerX;
+
+    if(
+      Math.abs(differenceX) > 2
+    ){
+
+      movedDuringDrag =
+        true;
+
+    }
+
+    rotation +=
+      differenceX * .007;
+
+    previousPointerX =
+      event.clientX;
+
+  }
+);
+
+canvas.addEventListener(
+  "pointerup",
+  event=>{
+
+    const rectangle =
+      canvas.getBoundingClientRect();
+
+    const x =
+      event.clientX -
+      rectangle.left;
+
+    const y =
+      event.clientY -
+      rectangle.top;
+
+    dragging =
+      false;
+
+    if(!movedDuringDrag){
+
+      const core =
+        findCoreAt(
+          x,
+          y
+        );
+
+      if(core){
+
+        openCore(core);
+
+      }
+
+    }
+
+  }
+);
+
+window.addEventListener(
+  "resize",
+  resizeCanvas
+);
 
 resizeCanvas();
-requestAnimationFrame(render);
+updatePills();
 
-if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>{
-    navigator.serviceWorker
-      .register("./service-worker.js")
-      .catch(error=>{
-        console.log(
-          "Service Worker zatím není aktivní:",
-          error
+requestAnimationFrame(
+  render
+);
+
+if(
+  "serviceWorker" in navigator
+){
+
+  window.addEventListener(
+    "load",
+    ()=>{
+
+      navigator.serviceWorker
+        .register(
+          "./service-worker.js"
+        )
+        .catch(
+          ()=>{
+          }
         );
-      });
-  });
+
+    }
+  );
+
 }
 </script>
 
