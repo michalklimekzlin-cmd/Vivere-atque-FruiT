@@ -78,10 +78,29 @@ function loadMemory(){
   }
 }
 
-function saveMemory(){
-  memory.updatedAt=new Date().toISOString();
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(memory));
+function saveMemory(reason = "save") {
+  memory.updatedAt = new Date().toISOString();
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(memory)
+  );
+
   updatePills();
+
+  window.dispatchEvent(
+    new CustomEvent("cht.memory.changed", {
+      detail: {
+        reason,
+        coreId: selectedCore?.id || null,
+        slotId:
+          selectedSlotIndex === null
+            ? null
+            : selectedSlotIndex + 1,
+        updatedAt: memory.updatedAt
+      }
+    })
+  );
 }
 
 function byteSize(text){
