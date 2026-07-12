@@ -170,23 +170,8 @@ function drawBackground(){
 }
 
 function drawConnections(){
-  // Spojnice vypnuté.
-}
-  const p=cores.map(getCorePosition);
-  context.save();context.lineWidth=1;
-  for(let a=0;a<p.length;a++){
-    for(let b=a+1;b<p.length;b++){
-      const g=context.createLinearGradient(p[a].x,p[a].y,p[b].x,p[b].y);
-      g.addColorStop(0,"rgba(255,226,173,.08)");
-      g.addColorStop(.5,"rgba(255,226,173,.28)");
-      g.addColorStop(1,"rgba(255,226,173,.08)");
-      context.strokeStyle=g;context.beginPath();context.moveTo(p[a].x,p[a].y);context.lineTo(p[b].x,p[b].y);context.stroke();
-    }
-  }
-  context.restore();
-}
-
-function drawCenterCore(time){
+  // Spojnice mezi jádry jsou vypnuté•ア
+}function drawCenterCore(time){
   // Centrální záře a nápis jsou vypnuté.
 }
   const cx = width * 0.62;
