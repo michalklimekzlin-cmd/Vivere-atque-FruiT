@@ -185,7 +185,7 @@ function drawConnections(){
 }
 
 function drawCenterCore(time) {
-  const cx = width * 0.69;
+  const cx = width * 0.62;
 const cy = height * 0.14;
   const pulse =
     1 + Math.sin(time * 0.002) * 0.045;
