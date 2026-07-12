@@ -118,21 +118,6 @@ function updatePills() {
   }
 }
 
-  window.dispatchEvent(
-    new CustomEvent("cht.memory.changed", {
-      detail: {
-        reason,
-        coreId: selectedCore?.id || null,
-        slotId:
-          selectedSlotIndex === null
-            ? null
-            : selectedSlotIndex + 1,
-        updatedAt: memory.updatedAt
-      }
-    })
-  );
-}
-
 function byteSize(text){
   return new Blob([text]).size;
 }
