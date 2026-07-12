@@ -191,7 +191,16 @@ function drawCenterCore(time){
   g.addColorStop(1,"rgba(255,190,100,0)");
   context.fillStyle=g;context.beginPath();context.arc(cx,cy,48,0,Math.PI*2);context.fill();
   context.fillStyle="#fff0cf";context.font="800 12px system-ui";context.textAlign="center";context.textBaseline="middle";
-  context.fillText("VaF'i'T",cx,cy-4);
+  context.fillText("context.fillStyle = "#fff0cf";
+context.font = "800 8px system-ui";
+context.textAlign = "center";
+context.textBaseline = "middle";
+
+context.fillText(
+  "{*(˚.•).•)//ˇ^360o°˚\\\\(•.(•.)ア)",
+  cx,
+  cy
+);",cx,cy-4);
   context.fillStyle="rgba(255,240,210,.65)";context.font="9px system-ui";context.fillText("PAMĚŤ",cx,cy+12);
   context.restore();
 }
