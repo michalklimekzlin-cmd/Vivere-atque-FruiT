@@ -488,8 +488,99 @@ canvas.addEventListener("pointerup",event=>{
 window.addEventListener("resize",resizeCanvas);
 resizeCanvas();updatePills();requestAnimationFrame(render);
 
-if("serviceWorker" in navigator){
-  window.addEventListener("load",()=>{
-    navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      const registration =
+        await navigator.serviceWorker.register(
+          "./service-worker.js",
+          {
+            updateViaCache: "none"
+          }
+        );
+
+      /*
+        Při každém otevření zkontroluje,
+        jestli na GitHub Pages není novější worker.
+      */
+      await registration.update();
+
+      /*
+        Pokud už nový worker čeká,
+        ihned ho aktivujeme.
+      */
+      if (registration.waiting) {
+        registration.waiting.postMessage({
+          type: "SKIP_WAITING"
+        });
+      }
+
+      registration.addEventListener(
+        "updatefound",
+        () => {
+          const newWorker =
+            registration.installing;
+
+          if (!newWorker) {
+            return;
+          }
+
+          newWorker.addEventListener(
+            "statechange",
+            () => {
+              if (
+                newWorker.state === "installed" &&
+                navigator.serviceWorker.controller
+              ) {
+                newWorker.postMessage({
+                  type: "SKIP_WAITING"
+                });
+              }
+            }
+          );
+        }
+      );
+
+      /*
+        Jakmile nový worker převezme řízení,
+        stránka se jednou bezpečně obnoví.
+      */
+      navigator.serviceWorker.addEventListener(
+        "controllerchange",
+        () => {
+          const reloadKey =
+            "cht360_worker_reloaded";
+
+          if (
+            sessionStorage.getItem(reloadKey)
+          ) {
+            return;
+          }
+
+          sessionStorage.setItem(
+            reloadKey,
+            "1"
+          );
+
+          window.location.reload();
+        }
+      );
+
+      /*
+        Po dokončení načtení lze příště
+        znovu provést jeden automatický reload.
+      */
+      window.setTimeout(() => {
+        sessionStorage.removeItem(
+          "cht360_worker_reloaded"
+        );
+      }, 5000);
+
+    } catch (error) {
+      console.warn(
+        "[360°‰.] Service worker se nepodařilo spustit.",
+        error
+      );
+    }
   });
 }
