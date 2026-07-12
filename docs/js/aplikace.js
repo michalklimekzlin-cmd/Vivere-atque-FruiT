@@ -145,7 +145,7 @@ function resizeCanvas(){
 function getCorePosition(core){
   const orbitRadius=Math.min(width,height)*.28;
   const centerX = width * 0.62;
-const centerY = height * 0.22;
+const centerY = height * 0.14;
   const angle=core.angle+rotation;
   return {
     x:centerX+Math.cos(angle)*orbitRadius,
@@ -186,7 +186,7 @@ function drawConnections(){
 
 function drawCenterCore(time) {
   const cx = width * 0.69;
-const cy = height * 0.22;
+const cy = height * 0.14;
   const pulse =
     1 + Math.sin(time * 0.002) * 0.045;
 
