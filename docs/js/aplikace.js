@@ -170,6 +170,8 @@ function drawBackground(){
 }
 
 function drawConnections(){
+  // Spojnice vypnuté.
+}
   const p=cores.map(getCorePosition);
   context.save();context.lineWidth=1;
   for(let a=0;a<p.length;a++){
@@ -184,7 +186,9 @@ function drawConnections(){
   context.restore();
 }
 
-function drawCenterCore(time) {
+function drawCenterCore(time){
+  // Centrální záře a nápis jsou vypnuté.
+}
   const cx = width * 0.62;
 const cy = height * 0.14;
   const pulse =
