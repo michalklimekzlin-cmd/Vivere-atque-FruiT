@@ -136,6 +136,12 @@ button.danger{color:#ffd4d4;border-color:rgba(255,120,120,.28)}
     opacity .22s ease;
 }
 
+.lifePanel{
+  transform:translateX(calc(100% + 24px));
+  opacity:0;
+  pointer-events:none;
+}
+
 .lifePanel.open{
   transform:translateX(0);
   opacity:1;
