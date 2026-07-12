@@ -80,10 +80,21 @@
       <span>živý oběh paměti</span>
     </div>
 
-    <div id="lifeMode" class="lifeMode">
-      inicializace
-    </div>
+<div class="lifePanelActions">
+  <div id="lifeMode" class="lifeMode">
+    inicializace
   </div>
+
+  <button
+    id="closeLifePanel"
+    class="closeLifePanel"
+    type="button"
+    aria-label="Zavřít živý oběh"
+  >
+    ×
+  </button>
+</div>
+</div>
 
   <div class="lifeGrid">
     <div class="lifeCard">
@@ -123,6 +134,15 @@
     <strong id="energyTotal">0</strong>
   </div>
 </section>
+<button
+  id="openLifePanel"
+  class="openLifePanel"
+  type="button"
+  aria-label="Otevřít živý oběh paměti"
+>
+  [◉_◉]
+  <span>Oběh</span>
+</button>
 
 <script type="module" src="./js/aplikace.js"></script>
 <script type="module" src="./js/cht-zivot.js"></script>
