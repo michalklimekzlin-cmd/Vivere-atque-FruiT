@@ -178,30 +178,80 @@ function drawConnections(){
   context.restore();
 }
 
-function drawCenterCore(time){
-  const cx=width/2,cy=height/2+8,pulse=1+Math.sin(time*.002)*.045;
-  context.save();
-  for(let ring=0;ring<5;ring++){
-    context.beginPath();context.arc(cx,cy,(36+ring*13)*pulse,0,Math.PI*2);
-    context.strokeStyle=`rgba(255,220,160,${.20-ring*.028})`;context.lineWidth=1;context.stroke();
-  }
-  const g=context.createRadialGradient(cx,cy,0,cx,cy,48);
-  g.addColorStop(0,"rgba(255,240,200,.88)");
-  g.addColorStop(.18,"rgba(255,190,100,.48)");
-  g.addColorStop(1,"rgba(255,190,100,0)");
-  context.fillStyle=g;context.beginPath();context.arc(cx,cy,48,0,Math.PI*2);context.fill();
-  context.fillStyle="#fff0cf";context.font="800 12px system-ui";context.textAlign="center";context.textBaseline="middle";
-  context.fillText("context.fillStyle = "#fff0cf";
-context.font = "800 8px system-ui";
-context.textAlign = "center";
-context.textBaseline = "middle";
+function drawCenterCore(time) {
+  const cx = width / 2;
+  const cy = height / 2 + 8;
+  const pulse =
+    1 + Math.sin(time * 0.002) * 0.045;
 
-context.fillText(
-  "{*(˚.•).•)//ˇ^360o°˚\\\\(•.(•.)ア)",
-  cx,
-  cy
-);",cx,cy-4);
-  context.fillStyle="rgba(255,240,210,.65)";context.font="9px system-ui";context.fillText("PAMĚŤ",cx,cy+12);
+  context.save();
+
+  for (let ring = 0; ring < 5; ring++) {
+    context.beginPath();
+
+    context.arc(
+      cx,
+      cy,
+      (36 + ring * 13) * pulse,
+      0,
+      Math.PI * 2
+    );
+
+    context.strokeStyle =
+      `rgba(255,220,160,${0.20 - ring * 0.028})`;
+
+    context.lineWidth = 1;
+    context.stroke();
+  }
+
+  const gradient =
+    context.createRadialGradient(
+      cx,
+      cy,
+      0,
+      cx,
+      cy,
+      58
+    );
+
+  gradient.addColorStop(
+    0,
+    "rgba(255,240,200,.92)"
+  );
+
+  gradient.addColorStop(
+    0.20,
+    "rgba(255,190,100,.52)"
+  );
+
+  gradient.addColorStop(
+    1,
+    "rgba(255,190,100,0)"
+  );
+
+  context.fillStyle = gradient;
+
+  context.beginPath();
+  context.arc(
+    cx,
+    cy,
+    58,
+    0,
+    Math.PI * 2
+  );
+  context.fill();
+
+  context.fillStyle = "#fff0cf";
+  context.font = "800 7px system-ui";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+
+  context.fillText(
+    "{*(˚.•).•)//ˇ^360o°˚\\\\(•.(•.)ア)",
+    cx,
+    cy
+  );
+
   context.restore();
 }
 
