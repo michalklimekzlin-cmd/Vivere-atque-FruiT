@@ -89,6 +89,7 @@ function saveMemory(reason = "save") {
   function updatePills() {
   for (const core of cores) {
     const stats = getCoreStats(core.id);
+
     const pill = document.getElementById(
       `pill-${core.id}`
     );
