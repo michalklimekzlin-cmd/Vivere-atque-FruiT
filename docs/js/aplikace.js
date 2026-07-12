@@ -180,8 +180,8 @@ function drawConnections(){
 }
 
 function drawCenterCore(time) {
-  const cx = width * 0.72;
-const cy = height * 0.28;
+  const cx = width * 0.69;
+const cy = height * 0.34;
   const pulse =
     1 + Math.sin(time * 0.002) * 0.045;
 
