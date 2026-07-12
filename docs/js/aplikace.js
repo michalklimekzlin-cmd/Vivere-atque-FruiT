@@ -152,8 +152,8 @@ function resizeCanvas(){
 
 function getCorePosition(core){
   const orbitRadius=Math.min(width,height)*.28;
-  const centerX = width * 0.72;
-const centerY = height * 0.28;
+  const centerX = width * 0.62;
+const centerY = height * 0.34;
   const angle=core.angle+rotation;
   return {
     x:centerX+Math.cos(angle)*orbitRadius,
