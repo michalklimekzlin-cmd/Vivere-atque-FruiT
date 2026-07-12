@@ -1,154 +1,288 @@
 <!doctype html>
 <html lang="cs">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#050815">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href="./manifest.json">
-<title>VaF'i'T Paměť •ア</title>
-<link rel="stylesheet" href="./css/pamet.css">
-</head>
-<body>
-<div class="root">
-  <main class="stage">
-    <canvas id="globe-canvas"></canvas>
+  <meta charset="utf-8">
 
-    <div class="memoryDock">
-      <div class="pill" id="pill-earth">ZEMĚ · 0/70</div>
-      <div class="pill" id="pill-language">JAZYK · 0/70</div>
-      <div class="pill" id="pill-game">HRA · 0/70</div>
-      <div class="pill" id="pill-control">ŘÍZENÍ · 0/70</div>
-    </div>
-
-    <div class="hud-right">
-      {*(˚.•).•)// 360o°˚ \\(•.(•.)ア)<br>
-      režim: lokální úložiště
-    </div>
-
-    <div class="hud-center">
-  {*(˚.•).•)// 360o°˚ \\(•.(•.)ア)
-</div>
-
-    <div class="hud">
-      <span>1 prst: otáčení</span>
-      <span>klepnutí: otevřít jádro</span>
-      <span>uložení: localStorage</span>
-    </div>
-
-    <section id="memoryPanel" class="panel">
-      <div class="panelTop">
-        <div>
-          <div id="panelTitle" class="panelTitle">Paměťové jádro</div>
-          <div id="panelSub" class="panelSub">70 samostatných slotů</div>
-        </div>
-        <button id="closePanel" type="button">Zavřít</button>
-      </div>
-
-      <div class="slotsToolbar">
-        <input id="searchInput" type="search" placeholder="Hledat ve slotech...">
-        <button id="exportCore" type="button">Export jádra</button>
-        <button id="importCore" type="button">Import jádra</button>
-      </div>
-
-      <div id="slotGrid" class="slotGrid"></div>
-
-      <div id="slotEditor" class="slotEditor">
-        <input id="slotName" type="text" maxlength="80" placeholder="Název slotu">
-        <textarea id="slotContent" placeholder="Obsah slotu..."></textarea>
-        <div class="row">
-          <button id="saveSlot" class="primary" type="button">Uložit slot</button>
-          <button id="clearSlot" class="danger" type="button">Vymazat slot</button>
-        </div>
-      </div>
-
-      <div id="statusBox" class="statusBox">Vyber slot.</div>
-
-      <div class="row">
-        <button id="exportAll" type="button">Export celé Paměti</button>
-        <button id="importAll" type="button">Import celé Paměti</button>
-      </div>
-
-      <input id="fileInput" class="hiddenInput" type="file" accept="application/json,.json">
-    </section>
-  </main>
-</div>
-
-<section id="lifePanel" class="lifePanel">
-  <div class="lifePanelTop">
-    <div>
-      <strong>CHT 360°‰.</strong>
-      <span>živý oběh paměti</span>
-    </div>
-
-<div class="lifePanelActions">
-  <div id="lifeMode" class="lifeMode">
-    inicializace
-  </div>
-
-  <button
-    id="closeLifePanel"
-    class="closeLifePanel"
-    type="button"
-    aria-label="Zavřít živý oběh"
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
   >
-    ×
+
+  <meta name="theme-color" content="#050815">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
+  <link rel="manifest" href="./manifest.json">
+
+  <title>{*(˚.•).•)//ˇ^360o°˚\\(•.(•.)ア)</title>
+
+  <link rel="stylesheet" href="./css/pamet.css">
+</head>
+
+<body>
+  <div class="root">
+    <main class="stage">
+      <canvas id="globe-canvas"></canvas>
+
+      <div class="memoryDock">
+        <div class="pill" id="pill-earth">
+          ZEMĚ · 0/70
+        </div>
+
+        <div class="pill" id="pill-language">
+          JAZYK · 0/70
+        </div>
+
+        <div class="pill" id="pill-game">
+          HRA · 0/70
+        </div>
+
+        <div class="pill" id="pill-control">
+          ŘÍZENÍ · 0/70
+        </div>
+      </div>
+
+      <div class="hud-right">
+        360o°˚<br>
+        režim: lokální úložiště
+      </div>
+
+      <div class="hud-center">
+        {*(˚.•).•)//ˇ^360o°˚\\(•.(•.)ア)
+      </div>
+
+      <div class="hud">
+        <span>1 prst: otáčení</span>
+        <span>klepnutí: otevřít jádro</span>
+        <span>uložení: localStorage</span>
+      </div>
+
+      <section
+        id="memoryPanel"
+        class="panel"
+      >
+        <div class="panelTop">
+          <div>
+            <div
+              id="panelTitle"
+              class="panelTitle"
+            >
+              Paměťové jádro
+            </div>
+
+            <div
+              id="panelSub"
+              class="panelSub"
+            >
+              70 samostatných slotů
+            </div>
+          </div>
+
+          <button
+            id="closePanel"
+            type="button"
+          >
+            Zavřít
+          </button>
+        </div>
+
+        <div class="slotsToolbar">
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Hledat ve slotech..."
+          >
+
+          <button
+            id="exportCore"
+            type="button"
+          >
+            Export jádra
+          </button>
+
+          <button
+            id="importCore"
+            type="button"
+          >
+            Import jádra
+          </button>
+        </div>
+
+        <div
+          id="slotGrid"
+          class="slotGrid"
+        ></div>
+
+        <div
+          id="slotEditor"
+          class="slotEditor"
+        >
+          <input
+            id="slotName"
+            type="text"
+            maxlength="80"
+            placeholder="Název slotu"
+          >
+
+          <textarea
+            id="slotContent"
+            placeholder="Obsah slotu..."
+          ></textarea>
+
+          <div class="row">
+            <button
+              id="saveSlot"
+              class="primary"
+              type="button"
+            >
+              Uložit slot
+            </button>
+
+            <button
+              id="clearSlot"
+              class="danger"
+              type="button"
+            >
+              Vymazat slot
+            </button>
+          </div>
+        </div>
+
+        <div
+          id="statusBox"
+          class="statusBox"
+        >
+          Vyber slot.
+        </div>
+
+        <div class="row">
+          <button
+            id="exportAll"
+            type="button"
+          >
+            Export celé Paměti
+          </button>
+
+          <button
+            id="importAll"
+            type="button"
+          >
+            Import celé Paměti
+          </button>
+        </div>
+
+        <input
+          id="fileInput"
+          class="hiddenInput"
+          type="file"
+          accept="application/json,.json"
+        >
+      </section>
+    </main>
+  </div>
+
+  <!-- Výsuvný panel živého oběhu -->
+  <section
+    id="lifePanel"
+    class="lifePanel"
+    aria-hidden="true"
+  >
+    <div class="lifePanelTop">
+      <div>
+        <strong>360o°˚</strong>
+        <span>živý oběh paměti</span>
+      </div>
+
+      <div class="lifePanelActions">
+        <div
+          id="lifeMode"
+          class="lifeMode"
+        >
+          inicializace
+        </div>
+
+        <button
+          id="closeLifePanel"
+          class="closeLifePanel"
+          type="button"
+          aria-label="Zavřít živý oběh"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+
+    <div class="lifeGrid">
+      <div class="lifeCard">
+        <span>Země</span>
+        <strong id="life-earth">0</strong>
+        <small>rovnováha</small>
+      </div>
+
+      <div class="lifeCard">
+        <span>Jazyk</span>
+        <strong id="life-language">0</strong>
+        <small>sluch</small>
+      </div>
+
+      <div class="lifeCard">
+        <span>Hra</span>
+        <strong id="life-game">0</strong>
+        <small>pohyb</small>
+      </div>
+
+      <div class="lifeCard">
+        <span>Řízení</span>
+        <strong id="life-control">0</strong>
+        <small>čich</small>
+      </div>
+
+      <div class="lifeCard lifeCardMain">
+        <span>360</span>
+        <strong id="life-cht">0</strong>
+        <small>centrální puls</small>
+      </div>
+    </div>
+
+    <div class="energyLine">
+      <span>Celkový signál</span>
+      <strong id="energyTotal">0</strong>
+    </div>
+  </section>
+
+  <!-- Tlačítko zůstane viditelné, když je panel schovaný -->
+  <button
+    id="openLifePanel"
+    class="openLifePanel"
+    type="button"
+    aria-label="Otevřít živý oběh paměti"
+  >
+    [◉_◉]
+    <span>Oběh</span>
   </button>
-</div>
-</div>
 
-  <div class="lifeGrid">
-    <div class="lifeCard">
-      <span>Země</span>
-      <strong id="life-earth">0</strong>
-      <small>rovnováha</small>
-    </div>
+  <script
+    type="module"
+    src="./js/aplikace.js"
+  ></script>
 
-    <div class="lifeCard">
-      <span>Jazyk</span>
-      <strong id="life-language">0</strong>
-      <small>sluch</small>
-    </div>
+  <script
+    type="module"
+    src="./js/cht-zivot.js"
+  ></script>
 
-    <div class="lifeCard">
-      <span>Hra</span>
-      <strong id="life-game">0</strong>
-      <small>pohyb</small>
-    </div>
+  <script
+    type="module"
+    src="./js/cht-panel.js"
+  ></script>
 
-    <div class="lifeCard">
-      <span>Řízení</span>
-      <strong id="life-control">0</strong>
-      <small>čich</small>
-    </div>
+  <script
+    type="module"
+    src="./js/cht-scany.js"
+  ></script>
 
-    <div class="lifeCard lifeCardMain">
-      <span>CHT</span>
-      <strong id="life-cht">0</strong>
-      <small>centrální puls</small>
-    </div>
-
-  </div>
-  
-  <div class="energyLine">
-    <span>Celkový signál</span>
-    <strong id="energyTotal">0</strong>
-  </div>
-</section>
-<button
-  id="openLifePanel"
-  class="openLifePanel"
-  type="button"
-  aria-label="Otevřít živý oběh paměti"
->
-  [◉_◉]
-  <span>Oběh</span>
-</button>
-
-<script type="module" src="./js/aplikace.js"></script>
-<script type="module" src="./js/cht-zivot.js"></script>
-<script type="module" src="./js/cht-panel.js"></script>
-<script type="module" src="./js/cht-scany.js"></script>
-<script type="module" src="./js/cht-chybozrout.js"></script>
+  <script
+    type="module"
+    src="./js/cht-chybozrout.js"
+  ></script>
 </body>
 </html>
