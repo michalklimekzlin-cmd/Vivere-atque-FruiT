@@ -103,21 +103,6 @@ function saveMemory(reason = "save") {
   );
 }
 
-function updatePills() {
-  for (const core of cores) {
-    const pill = document.getElementById(
-      `pill-${core.id}`
-    );
-
-    if (!pill) continue;
-
-    const stats = getCoreStats(core.id);
-
-    pill.textContent =
-      `${core.title.toUpperCase()} · ${stats.used}/70`;
-  }
-}
-
 function byteSize(text){
   return new Blob([text]).size;
 }
@@ -128,19 +113,24 @@ function formatBytes(bytes){
   return `${(bytes/1024/1024).toFixed(2)} MB`;
 }
 
+function updatePills(){
+  for(const core of cores){
+    const pill=document.getElementById(`pill-${core.id}`);
+
+    if(!pill)continue;
+
+    const stats=getCoreStats(core.id);
+
+    pill.textContent=
+      `${core.title.toUpperCase()} · ${stats.used}/70`;
+  }
+}
+
 function getCoreStats(coreId){
   const slots=memory.cores[coreId];
   const used=slots.filter(slot=>slot.content.trim()||slot.name.trim()!==`Slot ${slot.id}`).length;
   const size=byteSize(JSON.stringify(slots));
   return {used,size};
-}
-
-function updatePills(){
-  for(const core of cores){
-    const stats=getCoreStats(core.id);
-    const pill=document.getElementById(`pill-${core.id}`);
-    pill.textContent=`${core.title.toUpperCase()} · ${stats.used}/70`;
-  }
 }
 
 function resizeCanvas(){
