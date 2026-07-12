@@ -86,15 +86,32 @@ function saveMemory(reason = "save") {
     JSON.stringify(memory)
   );
 
-  function updatePills() {
-  for (const core of cores) {
-    const stats = getCoreStats(core.id);
+  updatePills();
 
+  window.dispatchEvent(
+    new CustomEvent("cht.memory.changed", {
+      detail: {
+        reason,
+        coreId: selectedCore?.id || null,
+        slotId:
+          selectedSlotIndex === null
+            ? null
+            : selectedSlotIndex + 1,
+        updatedAt: memory.updatedAt
+      }
+    })
+  );
+}
+
+function updatePills() {
+  for (const core of cores) {
     const pill = document.getElementById(
       `pill-${core.id}`
     );
 
     if (!pill) continue;
+
+    const stats = getCoreStats(core.id);
 
     pill.textContent =
       `${core.title.toUpperCase()} · ${stats.used}/70`;
