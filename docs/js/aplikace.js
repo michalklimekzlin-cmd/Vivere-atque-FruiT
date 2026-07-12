@@ -86,7 +86,19 @@ function saveMemory(reason = "save") {
     JSON.stringify(memory)
   );
 
-  updatePills();
+  function updatePills() {
+  for (const core of cores) {
+    const stats = getCoreStats(core.id);
+    const pill = document.getElementById(
+      `pill-${core.id}`
+    );
+
+    if (!pill) continue;
+
+    pill.textContent =
+      `${core.title.toUpperCase()} · ${stats.used}/70`;
+  }
+}
 
   window.dispatchEvent(
     new CustomEvent("cht.memory.changed", {
