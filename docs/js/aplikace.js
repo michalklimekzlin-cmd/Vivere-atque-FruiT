@@ -192,13 +192,31 @@ function getLandscapeLayout() {
 }
 
 function getCorePosition(core) {
-  const layout = getLandscapeLayout();
-  const angle = core.angle + rotation;
+  const rozlozeni = {
+    earth:    { sloupec: 0, radek: 0 },
+    language: { sloupec: 1, radek: 0 },
+    game:     { sloupec: 0, radek: 1 },
+    control:  { sloupec: 1, radek: 1 }
+  };
+
+  const misto = rozlozeni[core.id];
+  const vzdalenost = 126;
+
+  // Levý horní roh; pravý horní roh zůstává volný pro druhou skupinu.
+  const levyOkraj = Math.max(
+    86,
+    Math.min(width * .10, width - vzdalenost - 70)
+  );
+
+  const horniOkraj = Math.max(
+    92,
+    Math.min(height * .22, height - vzdalenost - 70)
+  );
 
   return {
-    x: layout.centerX + Math.cos(angle) * layout.orbitX,
-    y: layout.centerY + Math.sin(angle) * layout.orbitY,
-    depth: (Math.sin(angle) + 1) / 2
+    x: levyOkraj + misto.sloupec * vzdalenost,
+    y: horniOkraj + misto.radek * vzdalenost,
+    depth: .72
   };
 }
 
