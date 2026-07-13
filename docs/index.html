@@ -10,60 +10,264 @@
 
   <meta name="theme-color" content="#050815">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="screen-orientation" content="landscape">
 
   <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./css/pamet.css">
 
   <title>{*(˚.•).•)//ˇ^360o°˚\\(•.(•.)ア)</title>
 
-  <link rel="stylesheet" href="./css/pamet.css">
+  <style>
+    :root {
+      --safe-top: max(10px, env(safe-area-inset-top));
+      --safe-right: max(12px, env(safe-area-inset-right));
+      --safe-bottom: max(10px, env(safe-area-inset-bottom));
+      --safe-left: max(12px, env(safe-area-inset-left));
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #050815;
+    }
+
+    body {
+      min-height: 100dvh;
+    }
+
+    .rotateDevice {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      color: #fff0c5;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 36%, rgba(199, 155, 51, .22), transparent 36%),
+        #050815;
+    }
+
+    .rotateDeviceInner {
+      max-width: 300px;
+    }
+
+    .rotateDeviceIcon {
+      display: block;
+      margin-bottom: 16px;
+      font-size: 48px;
+      line-height: 1;
+      animation: rotateHint 1.9s ease-in-out infinite;
+    }
+
+    .rotateDevice strong,
+    .rotateDevice span {
+      display: block;
+    }
+
+    .rotateDevice strong {
+      font-size: 19px;
+      letter-spacing: .04em;
+    }
+
+    .rotateDevice span {
+      margin-top: 8px;
+      color: rgba(255, 240, 197, .72);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    @keyframes rotateHint {
+      0%,
+      100% { transform: rotate(0deg); }
+      50% { transform: rotate(90deg); }
+    }
+
+    .root {
+      position: fixed !important;
+      inset: 0 !important;
+      display: block !important;
+      width: 100% !important;
+      height: 100dvh !important;
+      padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+    }
+
+    .stage {
+      position: relative !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      border-radius: 22px !important;
+      background: radial-gradient(circle at 48% 44%, #11101a 0%, #060817 48%, #02030a 100%);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .55);
+      isolation: isolate;
+    }
+
+    #globe-canvas {
+      position: absolute !important;
+      inset: 0 !important;
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      touch-action: none;
+    }
+
+    .hud-right,
+    .hud-center,
+    .hud {
+      position: absolute !important;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .hud-right {
+      top: 14px !important;
+      right: 18px !important;
+      color: #ffe2ad;
+      font-size: clamp(10px, 1.6vw, 12px);
+      font-weight: 750;
+      letter-spacing: .08em;
+      text-shadow: 0 0 18px rgba(199, 155, 51, .65);
+    }
+
+    .hud-center {
+      top: 14px !important;
+      bottom: auto !important;
+      left: 50% !important;
+      width: min(56vw, 560px);
+      transform: translateX(-50%) !important;
+      color: rgba(255, 239, 197, .86);
+      font-size: clamp(10px, 1.45vw, 13px);
+      line-height: 1.2;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hud {
+      bottom: 13px !important;
+      left: 18px !important;
+      display: flex !important;
+      flex-wrap: wrap;
+      gap: 4px 22px;
+      max-width: calc(100% - 170px);
+      color: rgba(255, 240, 197, .72);
+      font-size: clamp(10px, 1.45vw, 13px);
+    }
+
+    .hud span {
+      white-space: nowrap;
+    }
+
+    #memoryPanel.panel {
+      top: 48px;
+      right: 18px;
+      bottom: 44px;
+      left: auto;
+      width: min(440px, calc(100vw - 42px));
+      max-width: 48vw;
+      max-height: none;
+    }
+
+    #lifePanel.lifePanel {
+      top: 58px;
+      right: 18px;
+      bottom: 52px;
+      left: auto;
+      width: min(400px, calc(100vw - 42px));
+      max-width: 44vw;
+      max-height: none;
+    }
+
+    #openLifePanel.openLifePanel {
+      position: fixed;
+      z-index: 30;
+      right: calc(var(--safe-right) + 14px);
+      bottom: calc(var(--safe-bottom) + 12px);
+    }
+
+    @media (max-height: 430px) {
+      .root {
+        padding-top: max(7px, env(safe-area-inset-top));
+        padding-bottom: max(7px, env(safe-area-inset-bottom));
+      }
+
+      .stage {
+        border-radius: 16px !important;
+      }
+
+      .hud-right,
+      .hud-center {
+        top: 9px !important;
+      }
+
+      .hud {
+        bottom: 8px !important;
+      }
+
+      #memoryPanel.panel,
+      #lifePanel.lifePanel {
+        top: 38px;
+        bottom: 36px;
+        right: 12px;
+      }
+    }
+
+    @media (orientation: portrait) {
+      .rotateDevice {
+        display: flex;
+      }
+
+      .root,
+      #lifePanel,
+      #openLifePanel {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <aside class="rotateDevice" aria-live="polite">
+    <div class="rotateDeviceInner">
+      <span class="rotateDeviceIcon" aria-hidden="true">▭</span>
+      <strong>Otoč telefon na šířku</strong>
+      <span>CHT 360° pracuje naležato. Po otočení se otevře celý oběh Paměti.</span>
+    </div>
+  </aside>
+
   <div class="root">
-    <main class="stage">
+    <main class="stage" aria-label="CHT 360 stupňů — Paměť">
       <canvas id="globe-canvas"></canvas>
 
-<div class="hud-right">
-  CHT 360°‰.
-</div>
+      <div class="hud-right">CHT 360°‰.</div>
 
       <div class="hud-center">
         {*(˚.•).•)//CHT 360°‰.\\(•.(•.)ア)
       </div>
 
-      <div class="hud">
+      <div class="hud" aria-label="Ovládání">
         <span>1 prst: otáčení</span>
         <span>klepnutí: otevřít jádro</span>
         <span>uložení: localStorage</span>
       </div>
 
-      <section
-        id="memoryPanel"
-        class="panel"
-      >
+      <section id="memoryPanel" class="panel">
         <div class="panelTop">
           <div>
-            <div
-              id="panelTitle"
-              class="panelTitle"
-            >
-              Paměťové jádro
-            </div>
-
-            <div
-              id="panelSub"
-              class="panelSub"
-            >
-              70 samostatných slotů
-            </div>
+            <div id="panelTitle" class="panelTitle">Paměťové jádro</div>
+            <div id="panelSub" class="panelSub">70 samostatných slotů</div>
           </div>
 
-          <button
-            id="closePanel"
-            type="button"
-          >
-            Zavřít
-          </button>
+          <button id="closePanel" type="button">Zavřít</button>
         </div>
 
         <div class="slotsToolbar">
@@ -73,30 +277,13 @@
             placeholder="Hledat ve slotech..."
           >
 
-          <button
-            id="exportCore"
-            type="button"
-          >
-            Export jádra
-          </button>
-
-          <button
-            id="importCore"
-            type="button"
-          >
-            Import jádra
-          </button>
+          <button id="exportCore" type="button">Export jádra</button>
+          <button id="importCore" type="button">Import jádra</button>
         </div>
 
-        <div
-          id="slotGrid"
-          class="slotGrid"
-        ></div>
+        <div id="slotGrid" class="slotGrid"></div>
 
-        <div
-          id="slotEditor"
-          class="slotEditor"
-        >
+        <div id="slotEditor" class="slotEditor">
           <input
             id="slotName"
             type="text"
@@ -110,45 +297,16 @@
           ></textarea>
 
           <div class="row">
-            <button
-              id="saveSlot"
-              class="primary"
-              type="button"
-            >
-              Uložit slot
-            </button>
-
-            <button
-              id="clearSlot"
-              class="danger"
-              type="button"
-            >
-              Vymazat slot
-            </button>
+            <button id="saveSlot" class="primary" type="button">Uložit slot</button>
+            <button id="clearSlot" class="danger" type="button">Vymazat slot</button>
           </div>
         </div>
 
-        <div
-          id="statusBox"
-          class="statusBox"
-        >
-          Vyber slot.
-        </div>
+        <div id="statusBox" class="statusBox">Vyber slot.</div>
 
         <div class="row">
-          <button
-            id="exportAll"
-            type="button"
-          >
-            Export celé Paměti
-          </button>
-
-          <button
-            id="importAll"
-            type="button"
-          >
-            Import celé Paměti
-          </button>
+          <button id="exportAll" type="button">Export celé Paměti</button>
+          <button id="importAll" type="button">Import celé Paměti</button>
         </div>
 
         <input
@@ -161,12 +319,7 @@
     </main>
   </div>
 
-  <!-- Výsuvný panel živého oběhu -->
-  <section
-    id="lifePanel"
-    class="lifePanel"
-    aria-hidden="true"
-  >
+  <section id="lifePanel" class="lifePanel" aria-hidden="true">
     <div class="lifePanelTop">
       <div>
         <strong>360o°˚</strong>
@@ -174,12 +327,7 @@
       </div>
 
       <div class="lifePanelActions">
-        <div
-          id="lifeMode"
-          class="lifeMode"
-        >
-          inicializace
-        </div>
+        <div id="lifeMode" class="lifeMode">inicializace</div>
 
         <button
           id="closeLifePanel"
@@ -230,7 +378,6 @@
     </div>
   </section>
 
-  <!-- Tlačítko zůstane viditelné, když je panel schovaný -->
   <button
     id="openLifePanel"
     class="openLifePanel"
@@ -241,29 +388,30 @@
     <span>Oběh</span>
   </button>
 
-  <script
-    type="module"
-    src="./js/aplikace.js"
-  ></script>
+  <script type="module" src="./js/aplikace.js"></script>
+  <script type="module" src="./js/cht-zivot.js"></script>
+  <script type="module" src="./js/cht-panel.js"></script>
+  <script type="module" src="./js/cht-scany.js"></script>
+  <script type="module" src="./js/cht-chybozrout.js"></script>
 
-  <script
-    type="module"
-    src="./js/cht-zivot.js"
-  ></script>
+  <script>
+    (() => {
+      let timers = [];
 
-  <script
-    type="module"
-    src="./js/cht-panel.js"
-  ></script>
+      const refreshCanvasSize = () => {
+        timers.forEach(clearTimeout);
 
-  <script
-    type="module"
-    src="./js/cht-scany.js"
-  ></script>
+        timers = [80, 260, 650].map((delay) => setTimeout(() => {
+          window.dispatchEvent(new Event("resize"));
+        }, delay));
+      };
 
-  <script
-    type="module"
-    src="./js/cht-chybozrout.js"
-  ></script>
+      window.addEventListener("orientationchange", refreshCanvasSize);
+      window.addEventListener("pageshow", refreshCanvasSize);
+      window.visualViewport?.addEventListener("resize", refreshCanvasSize);
+
+      refreshCanvasSize();
+    })();
+  </script>
 </body>
 </html>
