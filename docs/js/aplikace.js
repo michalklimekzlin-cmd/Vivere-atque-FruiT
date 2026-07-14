@@ -438,6 +438,18 @@ function drawBackground() {
     Math.max(width, height) * .54
   );
 
+ function drawBackground() {
+  const layout = getLandscapeLayout();
+
+  const glow = context.createRadialGradient(
+    layout.centerX,
+    layout.centerY,
+    10,
+    layout.centerX,
+    layout.centerY,
+    Math.max(width, height) * .54
+  );
+
   glow.addColorStop(0, "rgba(255,220,155,.10)");
   glow.addColorStop(.42, "rgba(199,155,51,.035)");
   glow.addColorStop(1, "rgba(0,0,0,0)");
