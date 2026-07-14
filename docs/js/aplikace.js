@@ -27,10 +27,42 @@ const MIN_SCENE_SPREAD = .96;
 const MAX_SCENE_SPREAD = 2.8;
 
 const cores = [
-  { id: "earth", title: "ZemÄ", subtitle: "Modeling, svÄty a Ãºhel pohledu", angle: -Math.PI * .72, radius: 50 },
-  { id: "language", title: "Jazyk", subtitle: "PÃ­smena, symboly, glyphy a vÃ½znam", angle: -Math.PI * .18, radius: 50 },
-  { id: "game", title: "Hra", subtitle: "Pravidla, udÃ¡losti a postup", angle: Math.PI * .34, radius: 50 },
-  { id: "control", title: "ÅÃ­zenÃ­", subtitle: "SmÄrovÃ¡nÃ­, jednotky a propojenÃ­", angle: Math.PI * .86, radius: 50 }
+  {
+    id: "earth",
+    title: "Země",
+    subtitle: "Modeling, světy a úhel pohledu",
+    angle: -Math.PI * .72,
+    radius: 50,
+    axisSpeed: .00018,
+    axisPhase: 0
+  },
+  {
+    id: "language",
+    title: "Jazyk",
+    subtitle: "Písmena, symboly, glyphy a význam",
+    angle: -Math.PI * .18,
+    radius: 50,
+    axisSpeed: .00015,
+    axisPhase: Math.PI * .52
+  },
+  {
+    id: "game",
+    title: "Hra",
+    subtitle: "Pravidla, události a postup",
+    angle: Math.PI * .34,
+    radius: 50,
+    axisSpeed: .00021,
+    axisPhase: Math.PI
+  },
+  {
+    id: "control",
+    title: "Řízení",
+    subtitle: "Směrování, jednotky a propojení",
+    angle: Math.PI * .86,
+    radius: 50,
+    axisSpeed: .00017,
+    axisPhase: Math.PI * 1.52
+  }
 ];
 
 let memory = loadMemory();
@@ -83,7 +115,7 @@ function loadMemory() {
     const parsed = JSON.parse(raw);
 
     if (!parsed.cores) {
-      throw new Error("NeplatnÃ¡ struktura");
+      throw new Error("Neplatná struktura");
     }
 
     for (const coreId of ["earth", "language", "game", "control"]) {
@@ -100,11 +132,10 @@ function loadMemory() {
 
     return parsed;
   } catch (error) {
-    console.warn("PamÄÅ¥ byla obnovena do vÃ½chozÃ­ho stavu.", error);
+    console.warn("Paměť byla obnovena do výchozího stavu.", error);
     return createEmptyMemory();
   }
 }
-
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -153,7 +184,7 @@ function loadScene() {
       panY: Number.isFinite(saved.panY) ? saved.panY : fallback.panY
     };
   } catch (error) {
-    console.warn("RozloÅ¾enÃ­ scÃ©ny bylo obnoveno.", error);
+    console.warn("Rozložení scény bylo obnoveno.", error);
     return fallback;
   }
 }
@@ -214,7 +245,7 @@ function updatePills() {
     }
 
     const stats = getCoreStats(core.id);
-    pill.textContent = `${core.title.toUpperCase()} Â· ${stats.used}/70`;
+    pill.textContent = `${core.title.toUpperCase()} · ${stats.used}/70`;
   }
 }
 
@@ -322,10 +353,10 @@ function constrainScene() {
 
 function getCorePosition(core) {
   const rozlozeni = {
-    earth:    { sloupec: 0, radek: 0 },
+    earth: { sloupec: 0, radek: 0 },
     language: { sloupec: 1, radek: 0 },
-    game:     { sloupec: 0, radek: 1 },
-    control:  { sloupec: 1, radek: 1 }
+    game: { sloupec: 0, radek: 1 },
+    control: { sloupec: 1, radek: 1 }
   };
 
   const misto = rozlozeni[core.id];
@@ -386,46 +417,125 @@ function drawBackground() {
 }
 
 function drawTerraAxis(time) {
-  const layout = getLandscapeLayout();
-  const left = width * .08;
-  const right = width * .92;
-  const wave = Math.sin(time * .0012) * 4;
+  /*
+    Půlkulatý prostor naležato:
+    velká levá polovina elipsy tvoří tvar "("
+    a zůstává otevřená směrem doprava.
+  */
+  const centerX = width * .88;
+  const centerY = height * .50;
+  const outerX = width * .78;
+  const outerY = height * .72;
+  const startAngle = Math.PI * .50;
+  const endAngle = Math.PI * 1.50;
+  const pulse = Math.sin(time * .0012) * 3;
 
-  const gradient = context.createLinearGradient(
-    left,
-    layout.centerY,
-    right,
-    layout.centerY
+  const interiorGlow = context.createRadialGradient(
+    width * .38,
+    height * .50,
+    12,
+    width * .48,
+    height * .50,
+    Math.max(width, height) * .72
   );
 
-  gradient.addColorStop(0, "rgba(255,220,160,0)");
-  gradient.addColorStop(.18, "rgba(255,220,160,.18)");
-  gradient.addColorStop(.5, "rgba(255,238,195,.48)");
-  gradient.addColorStop(.82, "rgba(255,220,160,.18)");
-  gradient.addColorStop(1, "rgba(255,220,160,0)");
+  interiorGlow.addColorStop(0, "rgba(255,220,155,.075)");
+  interiorGlow.addColorStop(.52, "rgba(199,155,51,.022)");
+  interiorGlow.addColorStop(1, "rgba(0,0,0,0)");
 
   context.save();
-  context.strokeStyle = gradient;
-  context.lineWidth = 1;
+  context.fillStyle = interiorGlow;
+  context.fillRect(0, 0, width, height);
+
+  const shell = context.createLinearGradient(
+    width * .06,
+    height * .50,
+    width,
+    height * .50
+  );
+
+  shell.addColorStop(0, "rgba(255,220,160,.06)");
+  shell.addColorStop(.38, "rgba(255,230,180,.38)");
+  shell.addColorStop(.72, "rgba(255,220,160,.13)");
+  shell.addColorStop(1, "rgba(255,220,160,0)");
+
+  context.strokeStyle = shell;
+  context.lineWidth = 1.35;
 
   context.beginPath();
-  context.moveTo(left, layout.centerY + wave);
-  context.bezierCurveTo(
-    width * .30,
-    layout.centerY - 12,
-    width * .70,
-    layout.centerY + 12,
-    right,
-    layout.centerY - wave
+  context.ellipse(
+    centerX,
+    centerY,
+    outerX,
+    outerY,
+    0,
+    startAngle,
+    endAngle
   );
   context.stroke();
 
-  context.setLineDash([3, 9]);
-  context.globalAlpha = .38;
+  for (let ring = 1; ring <= 5; ring += 1) {
+    const inset = ring * .105;
+    const breathing = ring === 1 ? pulse : 0;
+
+    context.beginPath();
+    context.ellipse(
+      centerX - ring * 7,
+      centerY,
+      outerX * (1 - inset),
+      outerY * (1 - inset) + breathing,
+      0,
+      startAngle,
+      endAngle
+    );
+
+    context.strokeStyle = "rgba(255,220,160," +
+      (.18 - ring * .022) +
+      ")";
+
+    context.lineWidth = ring === 1 ? 1 : .7;
+    context.stroke();
+  }
+
+  context.setLineDash([3, 10]);
+  context.globalAlpha = .42;
+
+  for (let meridian = 1; meridian <= 4; meridian += 1) {
+    const ratio = meridian / 5;
+    const bendX = centerX - outerX * ratio;
+    const bendY = outerY *
+      Math.sqrt(Math.max(0, 1 - ratio * ratio));
+
+    context.beginPath();
+    context.moveTo(centerX, centerY - outerY + 12);
+    context.quadraticCurveTo(
+      bendX - outerX * .16,
+      centerY,
+      centerX,
+      centerY + outerY - 12
+    );
+    context.strokeStyle = "rgba(255,220,160,.11)";
+    context.lineWidth = .65;
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(bendX, centerY - bendY);
+    context.lineTo(bendX, centerY + bendY);
+    context.strokeStyle = "rgba(255,220,160,.055)";
+    context.stroke();
+  }
+
+  context.setLineDash([]);
+
+  const sweep = time * .00012;
+  const signalX = centerX + Math.cos(sweep + Math.PI) * outerX;
+  const signalY = centerY + Math.sin(sweep + Math.PI) * outerY;
+
+  context.globalAlpha = .78;
+  context.fillStyle = "#ffe2ad";
   context.beginPath();
-  context.moveTo(left, layout.centerY);
-  context.lineTo(right, layout.centerY);
-  context.stroke();
+  context.arc(signalX, signalY, 1.8, 0, Math.PI * 2);
+  context.fill();
 
   context.restore();
 }
@@ -478,8 +588,14 @@ function drawCore(core, time) {
   context.arc(position.x, position.y, radius, 0, Math.PI * 2);
   context.stroke();
 
-  const surfaceSpin = scene.yaw + core.angle * .18;
-  const surfaceTilt = scene.pitch * .72;
+  const ownAxisTime =
+    time * core.axisSpeed +
+    core.axisPhase;
+
+  const ownAxisSpin = Math.sin(ownAxisTime) * .88;
+  const ownAxisTilt = Math.cos(ownAxisTime) * .10;
+  const surfaceSpin = scene.yaw + ownAxisSpin;
+  const surfaceTilt = scene.pitch * .72 + ownAxisTilt;
 
   context.save();
   context.translate(position.x, position.y);
@@ -620,8 +736,8 @@ function openCore(core) {
   selectedCore = core;
   selectedSlotIndex = null;
 
-  panelTitle.textContent = `${core.title} Â· PamÄÅ¥`;
-  panelSub.textContent = "70 slotÅ¯ Â· samostatnÃ© uloÅ¾enÃ­";
+  panelTitle.textContent = `${core.title} · Paměť`;
+  panelSub.textContent = "70 slotů · samostatné uložení";
 
   panel.classList.add("open");
   slotEditor.classList.remove("open");
@@ -665,7 +781,7 @@ function renderSlots() {
 
     button.innerHTML = `
       <strong>${escapeHtml(slot.name || `Slot ${slot.id}`)}</strong>
-      <span>${slot.content.trim() ? "obsazeno" : "prÃ¡zdnÃ©"}</span>
+      <span>${slot.content.trim() ? "obsazeno" : "prázdné"}</span>
     `;
 
     button.addEventListener("click", () => selectSlot(index));
@@ -689,22 +805,22 @@ function selectSlot(index) {
 
 function updateStatus(message = "") {
   if (!selectedCore) {
-    statusBox.textContent = "Vyber jÃ¡dro.";
+    statusBox.textContent = "Vyber jádro.";
     return;
   }
 
   const stats = getCoreStats(selectedCore.id);
 
   let text =
-    `${selectedCore.title}: obsazeno ${stats.used}/70 Â· ` +
+    `${selectedCore.title}: obsazeno ${stats.used}/70 · ` +
     `velikost ${formatBytes(stats.size)}`;
 
   if (selectedSlotIndex !== null) {
-    text += ` Â· otevÅen slot ${selectedSlotIndex + 1}`;
+    text += ` · otevřen slot ${selectedSlotIndex + 1}`;
   }
 
   if (message) {
-    text += ` Â· ${message}`;
+    text += ` · ${message}`;
   }
 
   statusBox.textContent = text;
@@ -757,7 +873,7 @@ saveSlot.addEventListener("click", () => {
 
   saveMemory();
   renderSlots();
-  updateStatus("uloÅ¾eno");
+  updateStatus("uloženo");
 });
 
 clearSlot.addEventListener("click", () => {
@@ -778,7 +894,7 @@ clearSlot.addEventListener("click", () => {
   slotContent.value = "";
 
   renderSlots();
-  updateStatus("vymazÃ¡no");
+  updateStatus("vymazáno");
 });
 
 searchInput.addEventListener("input", renderSlots);
@@ -833,7 +949,7 @@ fileInput.addEventListener("change", async () => {
 
     if (importMode === "core") {
       if (!selectedCore) {
-        throw new Error("NenÃ­ vybranÃ© jÃ¡dro");
+        throw new Error("Není vybrané jádro");
       }
 
       const slots = Array.isArray(data.sloty)
@@ -866,10 +982,10 @@ fileInput.addEventListener("change", async () => {
 
       saveMemory();
       renderSlots();
-      updateStatus("jÃ¡dro importovÃ¡no");
+      updateStatus("jádro importováno");
     } else {
       if (!data.cores) {
-        throw new Error("Soubor neobsahuje celou PamÄÅ¥");
+        throw new Error("Soubor neobsahuje celou Paměť");
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -878,10 +994,10 @@ fileInput.addEventListener("change", async () => {
 
       saveMemory();
       renderSlots();
-      updateStatus("celÃ¡ PamÄÅ¥ importovÃ¡na");
+      updateStatus("celá Paměť importována");
     }
   } catch (error) {
-    alert(`Import se nezdaÅil: ${error.message}`);
+    alert(`Import se nezdařil: ${error.message}`);
   }
 });
 
@@ -1122,7 +1238,7 @@ if ("serviceWorker" in navigator) {
       }, 5000);
     } catch (error) {
       console.warn(
-        "[360Â°â°.] Service worker se nepodaÅilo spustit.",
+        "[360°‰.] Service worker se nepodařilo spustit.",
         error
       );
     }
