@@ -159,10 +159,9 @@ function loadScene() {
 
     return {
       yaw: Number.isFinite(saved.yaw) ? saved.yaw : fallback.yaw,
-      pitch: clamp(
-        Number.isFinite(saved.pitch) ? saved.pitch : fallback.pitch,
-        -.45,
-        .45
+      pitch: normaliseAngle(
+  Number.isFinite(saved.pitch) ? saved.pitch : fallback.pitch
+),
       ),
       roll: Number.isFinite(saved.roll) ? saved.roll : fallback.roll,
       zoom: clamp(
@@ -190,15 +189,7 @@ function saveScene() {
     SCENE_KEY,
     JSON.stringify({
       yaw: normaliseAngle(scene.yaw),
-      pitch: scene.pitch,
-      roll: normaliseAngle(scene.roll),
-      zoom: scene.zoom,
-      spread: scene.zoom,
-      panX: scene.panX,
-      panY: scene.panY
-    })
-  );
-}
+      pitch: normaliseAngle(scene.pitch),
 
 function saveMemory(reason = "save") {
   memory.updatedAt = new Date().toISOString();
@@ -589,7 +580,7 @@ function drawCore(core, time) {
   context.stroke();
 
   const surfaceSpin = scene.yaw + scene.roll * .30;
-  const surfaceTilt = scene.pitch * .58;
+  const surfaceTilt = scene.pitch;
 
   context.save();
   context.translate(position.x, position.y);
@@ -1169,12 +1160,9 @@ canvas.addEventListener("pointermove", (event) => {
         scene.yaw + deltaX * .012
       );
 
-      scene.pitch = clamp(
-        scene.pitch + deltaY * .006,
-        -.45,
-        .45
-      );
-    }
+      scene.pitch = normaliseAngle(
+  scene.pitch + deltaY * .010
+);
 
     return;
   }
