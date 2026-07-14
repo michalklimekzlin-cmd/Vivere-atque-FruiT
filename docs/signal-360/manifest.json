@@ -1,0 +1,19 @@
+{
+  "name": "VaF'i'T Paměť · 360°‰",
+  "short_name": "VaF'i'T 360",
+  "lang": "cs",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050504",
+  "theme_color": "#070706",
+  "description": "Prostorové rozhraní VaF'i'T Paměti: čtyři jádra, 280 slotů a Signal Tower.",
+  "icons": [
+    {
+      "src": "./icons/vafit-360.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
