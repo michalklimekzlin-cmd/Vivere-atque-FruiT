@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#090708">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Batole">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/batole-192.png">
+  <title>Batole •ア | CHT 360°‰</title>
+  <style>
+    :root {
+      --bg: #090708;
+      --deep: #020203;
+      --panel: rgba(27, 20, 19, .88);
+      --line: rgba(255, 226, 173, .22);
+      --gold: #ffe2ad;
+      --gold2: #c79b33;
+      --ink: #fff3d5;
+      --muted: rgba(255, 239, 210, .64);
+      --safe-top: max(14px, env(safe-area-inset-top));
+      --safe-right: max(16px, env(safe-area-inset-right));
+      --safe-bottom: max(16px, env(safe-area-inset-bottom));
+      --safe-left: max(16px, env(safe-area-inset-left));
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-height: 100%; background: var(--deep); }
+
+    body {
+      min-width: 320px;
+      min-height: 100dvh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 50% -5%, rgba(199, 155, 51, .23), transparent 34rem),
+        radial-gradient(circle at 8% 28%, rgba(109, 62, 26, .15), transparent 24rem),
+        linear-gradient(155deg, #130f11, var(--bg) 55%, var(--deep));
+      font-family: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    .app {
+      width: min(100%, 760px);
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 38px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: .11em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      border: 1px solid rgba(255, 226, 173, .72);
+      border-radius: 50%;
+      color: #251806;
+      background: var(--gold);
+      box-shadow: 0 0 20px rgba(255, 226, 173, .28);
+      font-size: 12px;
+      letter-spacing: 0;
+    }
+
+    .connection {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+      max-width: 56%;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+      text-align: right;
+    }
+
+    .connection-dot {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: #88755c;
+    }
+
+    .connection.is-ready .connection-dot {
+      background: var(--gold);
+      box-shadow: 0 0 14px rgba(255, 226, 173, .78);
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      min-height: 315px;
+      margin-top: 14px;
+      padding: 30px 20px 24px;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at 50% 48%, rgba(255, 226, 173, .11), transparent 8rem),
+        linear-gradient(135deg, rgba(255, 255, 255, .045), transparent 52%),
+        var(--panel);
+      box-shadow: 0 25px 65px rgba(0, 0, 0, .31);
+      isolation: isolate;
+    }
+
+    .hero::before, .hero::after {
+      position: absolute;
+      top: 53%;
+      left: 50%;
+      width: 460px;
+      height: 150px;
+      border: 1px solid rgba(255, 226, 173, .13);
+      border-radius: 50%;
+      content: "";
+      pointer-events: none;
+    }
+
+    .hero::before { transform: translate(-50%, -50%) rotate(-19deg); }
+    .hero::after { transform: translate(-50%, -50%) rotate(49deg) scale(.76); }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      width: min(100%, 510px);
+      text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0;
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 8px 0;
+      color: #fff2d1;
+      font-size: clamp(35px, 9vw, 55px);
+      letter-spacing: -.06em;
+      line-height: .94;
+    }
+
+    .lead {
+      max-width: 500px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .seed-stage {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      width: 160px;
+      height: 160px;
+      margin: 14px 0 1px;
+      place-items: center;
+    }
+
+    .orbit {
+      position: absolute;
+      inset: 4px;
+      border: 1px solid rgba(255, 226, 173, .34);
+      border-radius: 50%;
+      animation: orbit 16s linear infinite;
+    }
+
+    .orbit::before, .orbit::after {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border-radius: 50%;
+      content: "";
+      background: var(--gold);
+      box-shadow: 0 0 17px rgba(255, 226, 173, .85);
+    }
+
+    .orbit::before {
+      width: 9px;
+      height: 9px;
+      transform: translate(-50%, -50%) translateX(73px);
+    }
+
+    .orbit::after {
+      width: 5px;
+      height: 5px;
+      transform: translate(-50%, -50%) translateX(-73px);
+    }
+
+    .orbit--inner {
+      inset: 26px;
+      border-style: dashed;
+      opacity: .74;
+      animation-duration: 10s;
+      animation-direction: reverse;
+    }
+
+    .seed {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      width: 92px;
+      height: 92px;
+      place-items: center;
+      border: 1px solid rgba(255, 246, 221, .9);
+      border-radius: 50%;
+      color: #2d1d06;
+      background:
+        radial-gradient(circle at 34% 26%, #fffaf0 0 3%, transparent 4%),
+        radial-gradient(circle at 39% 36%, #fff0ca, #e2b86a 49%, #76511d 100%);
+      box-shadow:
+        0 0 0 8px rgba(255, 226, 173, .07),
+        0 0 38px rgba(255, 203, 101, .34),
+        inset -8px -10px 20px rgba(75, 45, 13, .25);
+      transition: transform .22s ease, box-shadow .22s ease;
+    }
+
+    .seed:hover {
+      transform: scale(1.06);
+      box-shadow:
+        0 0 0 10px rgba(255, 226, 173, .08),
+        0 0 48px rgba(255, 203, 101, .44),
+        inset -8px -10px 20px rgba(75, 45, 13, .25);
+    }
+
+    .seed span {
+      font-size: 31px;
+      font-weight: 850;
+      letter-spacing: -.18em;
+      transform: translateX(-3px);
+    }
+
+    .seed-stage.is-awake .seed { animation: awake .72s cubic-bezier(.2, .9, .2, 1.2); }
+
+    .growth {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      width: min(100%, 340px);
+      gap: 8px;
+      text-align: center;
+    }
+
+    .growth-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .growth-labels strong { color: var(--gold); }
+
+    .growth-track {
+      height: 7px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 226, 173, .22);
+      border-radius: 999px;
+      background: rgba(0, 0, 0, .28);
+    }
+
+    .growth-bar {
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #9e7028, var(--gold), #c79b33);
+      box-shadow: 0 0 13px rgba(255, 226, 173, .58);
+      transition: width .45s ease;
+    }
+
+    .layout {
+      display: grid;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: var(--panel);
+      box-shadow: 0 13px 36px rgba(0, 0, 0, .16);
+    }
+
+    .composer, .history, .future { padding: 18px; }
+
+    h2 {
+      margin: 0;
+      color: #fff0ca;
+      font-size: 18px;
+      letter-spacing: -.03em;
+    }
+
+    .description {
+      margin: 5px 0 15px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 126px;
+      gap: 11px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field--wide { grid-column: 1 / -1; }
+
+    label {
+      color: rgba(255, 234, 194, .77);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid rgba(255, 226, 173, .2);
+      border-radius: 13px;
+      color: var(--ink);
+      background: rgba(0, 0, 0, .22);
+      caret-color: var(--gold);
+    }
+
+    input, select { min-height: 43px; padding: 0 12px; }
+    textarea { min-height: 88px; padding: 11px 12px; resize: vertical; }
+    input::placeholder, textarea::placeholder { color: rgba(255, 238, 207, .38); }
+
+    .form-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      grid-column: 1 / -1;
+      gap: 12px;
+    }
+
+    .save-note {
+      min-width: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .primary, .secondary, .install {
+      min-height: 42px;
+      border-radius: 13px;
+      font-size: 13px;
+      font-weight: 850;
+      transition: transform .18s ease, border-color .18s ease;
+    }
+
+    .primary {
+      flex: 0 0 auto;
+      padding: 0 16px;
+      border: 1px solid var(--gold);
+      color: #241706;
+      background: linear-gradient(135deg, #ffecc3, #d69f40);
+      box-shadow: 0 10px 24px rgba(214, 159, 64, .15);
+    }
+
+    .secondary, .install {
+      padding: 0 13px;
+      border: 1px solid rgba(255, 226, 173, .3);
+      color: var(--gold);
+      background: rgba(255, 226, 173, .06);
+    }
+
+    .primary:hover, .secondary:hover, .install:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 226, 173, .75);
+    }
+
+    .cores {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+      padding: 12px;
+    }
+
+    .core {
+      min-width: 0;
+      padding: 12px 10px;
+      border: 1px solid rgba(255, 226, 173, .15);
+      border-radius: 16px;
+      background: rgba(0, 0, 0, .16);
+    }
+
+    .core-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .core-glyph {
+      display: grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      border: 1px solid rgba(255, 226, 173, .32);
+      border-radius: 50%;
+      color: var(--gold);
+      font-size: 12px;
+    }
+
+    .core-count { color: var(--gold); font-size: 12px; font-weight: 850; }
+    .core h3 { margin: 9px 0 2px; color: #fff0ca; font-size: 13px; }
+    .core p { min-height: 31px; margin: 0; color: var(--muted); font-size: 10px; line-height: 1.35; }
+    .core-line { height: 3px; margin-top: 10px; overflow: hidden; border-radius: 99px; background: rgba(255, 226, 173, .13); }
+    .core-line span { display: block; width: 0%; height: 100%; border-radius: inherit; background: var(--gold); transition: width .45s ease; }
+
+    .history-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .history-list {
+      display: grid;
+      margin: 14px 0 0;
+      padding: 0;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr);
+      gap: 10px;
+      padding: 11px;
+      border: 1px solid rgba(255, 226, 173, .1);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, .13);
+    }
+
+    .history-glyph {
+      display: grid;
+      width: 30px;
+      height: 30px;
+      place-items: center;
+      border: 1px solid rgba(255, 226, 173, .2);
+      border-radius: 50%;
+      color: var(--gold);
+      font-size: 12px;
+    }
+
+    .history-title {
+      overflow: hidden;
+      color: #fff0ce;
+      font-size: 13px;
+      font-weight: 850;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-meta { margin-top: 2px; color: rgba(255, 238, 207, .54); font-size: 11px; }
+    .history-text {
+      display: -webkit-box;
+      margin: 5px 0 0;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.38;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .empty {
+      padding: 18px;
+      border: 1px dashed rgba(255, 226, 173, .2);
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    details { margin-top: 14px; border-top: 1px solid rgba(255, 226, 173, .13); }
+    summary { padding-top: 13px; color: var(--gold); cursor: pointer; font-size: 13px; font-weight: 850; }
+    code {
+      display: block;
+      margin-top: 10px;
+      padding: 10px;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 226, 173, .13);
+      border-radius: 12px;
+      color: rgba(255, 235, 194, .82);
+      background: rgba(0, 0, 0, .2);
+      font-size: 11px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 9px;
+      margin-top: 16px;
+      padding: 0 2px;
+    }
+
+    .footer {
+      padding: 18px 2px 2px;
+      color: rgba(255, 238, 207, .48);
+      font-size: 11px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    @keyframes orbit { to { transform: rotate(360deg); } }
+    @keyframes awake {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.17); }
+      100% { transform: scale(1); }
+    }
+
+    @media (max-width: 520px) {
+      .hero { min-height: 300px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-bottom { align-items: stretch; flex-direction: column; }
+      .primary { width: 100%; }
+      .cores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">•ア</span>
+        <span>CHT 360°‰ · Batole</span>
+      </div>
+      <div class="connection" id="connectionBadge">
+        <span class="connection-dot" aria-hidden="true"></span>
+        <span id="connectionText">samostatné · čeká na Paměť</span>
+      </div>
+    </header>
+
+    <section class="hero" aria-labelledby="pageTitle">
+      <div class="hero-copy">
+        <p class="eyebrow">První uzel zkušenosti</p>
+        <h1 id="pageTitle">Batole •ア</h1>
+        <p class="lead">
+          Neroste z hádání. Roste jen z kroků, které mu vědomě svěříš.
+          Každý krok patří do jednoho ze čtyř jader CHT.
+        </p>
+      </div>
+
+      <div class="seed-stage" id="seedStage">
+        <span class="orbit" aria-hidden="true"></span>
+        <span class="orbit orbit--inner" aria-hidden="true"></span>
+        <button class="seed" id="seedButton" type="button" aria-label="Rozsvítit Batole">
+          <span aria-hidden="true">•ア</span>
+        </button>
+      </div>
+
+      <div class="growth" aria-label="Růst Batoleti">
+        <div class="growth-labels">
+          <span id="growthLabel">úroveň 1</span>
+          <strong id="stepTotal">0 kroků</strong>
+        </div>
+        <div class="growth-track" aria-hidden="true"><div class="growth-bar" id="growthBar"></div></div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card composer" aria-labelledby="newStepHeading">
+        <h2 id="newStepHeading">Dát Batoleti krok</h2>
+        <p class="description">Krátký, pravdivý a uložený. Později jej CHT přečte přes svůj most.</p>
+        <form class="form-grid" id="stepForm">
+          <div class="field">
+            <label for="stepTitle">Název kroku</label>
+            <input id="stepTitle" maxlength="64" autocomplete="off" placeholder="Co se dnes opravdu stalo?">
+          </div>
+          <div class="field">
+            <label for="stepCore">Jádro</label>
+            <select id="stepCore">
+              <option value="earth">Země</option>
+              <option value="language">Jazyk</option>
+              <option value="game">Hra</option>
+              <option value="control">Řízení</option>
+            </select>
+          </div>
+          <div class="field field--wide">
+            <label for="stepText">Stopa</label>
+            <textarea id="stepText" maxlength="900" placeholder="Jedna věta, obraz, pravidlo nebo nápad…"></textarea>
+          </div>
+          <div class="form-bottom">
+            <span class="save-note" id="saveNote" aria-live="polite">Ukládá se pouze do tohoto Batoleti.</span>
+            <button class="primary" type="submit">Uložit krok</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card cores" id="coreGrid" aria-label="Čtyři jádra Batoleti"></section>
+
+      <section class="card history" aria-labelledby="historyHeading">
+        <div class="history-heading">
+          <div>
+            <h2 id="historyHeading">Poslední stopy</h2>
+            <p class="description">Batole si nic nevymýšlí. Ukazuje jen uložené kroky.</p>
+          </div>
+        </div>
+        <ul class="history-list" id="historyList"></ul>
+      </section>
+
+      <section class="card future" aria-labelledby="futureHeading">
+        <h2 id="futureHeading">Připravené napojení</h2>
+        <p class="description">
+          PWA je samostatné. Až přijde čas, CHT 360°‰ může číst jeho veřejný stav,
+          reagovat na změnu a nechat Batole pozorovat Paměť bez jejího přepisování.
+        </p>
+        <details>
+          <summary>Rozhraní pro budoucí most</summary>
+          <code>localStorage: cht360_batole_v1
+událost: cht.batole.changed
+okno: window.CHTBatole.getState()
+pozoruje: cht.memory.changed, cht.coreDeck.changed
+zpráva do rodiče: postMessage({ type: "cht.batole.changed" })</code>
+        </details>
+      </section>
+    </div>
+
+    <section class="actions" aria-label="Práce se semínkem">
+      <button class="secondary" id="exportButton" type="button">Exportovat semínko</button>
+      <label class="secondary" for="importInput">Načíst semínko</label>
+      <input id="importInput" type="file" accept="application/json,.json" hidden>
+      <button class="install" id="installButton" type="button" hidden>Nainstalovat PWA</button>
+    </section>
+
+    <footer class="footer" id="footerStatus">
+      Offline základ se připravuje. V Safari se aplikace ukládá přes Sdílet → Přidat na plochu.
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const STORAGE_KEY = "cht360_batole_v1";
+      const MAX_STEPS = 120;
+      const MEMORY_KEYS = ["cht360_pamet_v1", "vaft_pamet_v1"];
+      const ORDER = ["earth", "language", "game", "control"];
+      const META = {
+        earth: { title: "Země", glyph: "◌", text: "vnímání a úhel pohledu" },
+        language: { title: "Jazyk", glyph: "ア", text: "slovo, znak a význam" },
+        game: { title: "Hra", glyph: "✦", text: "zkouška a postup" },
+        control: { title: "Řízení", glyph: "⌁", text: "směr a pravdivý krok" }
+      };
+
+      const el = {
+        form: document.getElementById("stepForm"),
+        title: document.getElementById("stepTitle"),
+        core: document.getElementById("stepCore"),
+        text: document.getElementById("stepText"),
+        saveNote: document.getElementById("saveNote"),
+        coreGrid: document.getElementById("coreGrid"),
+        history: document.getElementById("historyList"),
+        growthLabel: document.getElementById("growthLabel"),
+        total: document.getElementById("stepTotal"),
+        bar: document.getElementById("growthBar"),
+        seed: document.getElementById("seedButton"),
+        seedStage: document.getElementById("seedStage"),
+        connection: document.getElementById("connectionBadge"),
+        connectionText: document.getElementById("connectionText"),
+        export: document.getElementById("exportButton"),
+        import: document.getElementById("importInput"),
+        install: document.getElementById("installButton"),
+        footer: document.getElementById("footerStatus")
+      };
+
+      let state = loadState();
+      let noticeTimer = null;
+      let deferredInstall = null;
+
+      function fallback() {
+        const now = new Date().toISOString();
+        return { version: 1, kind: "cht360-batole", bornAt: now, updatedAt: now, steps: [] };
+      }
+
+      function parse(raw, fallbackValue) {
+        try { return raw ? JSON.parse(raw) : fallbackValue; } catch { return fallbackValue; }
+      }
+
+      function date(value) {
+        const parsed = new Date(value);
+        return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+      }
+
+      function id() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") return window.crypto.randomUUID();
+        return "batole-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+      }
+
+      function step(input) {
+        if (!input || typeof input !== "object") return null;
+        const core = META[input.core] ? input.core : "earth";
+        const title = String(input.title || "").trim().slice(0, 64);
+        const text = String(input.text || "").trim().slice(0, 900);
+        if (!title && !text) return null;
+        return {
+          id: String(input.id || id()),
+          core,
+          title: title || "Bezejmenný krok",
+          text,
+          createdAt: date(input.createdAt) || new Date().toISOString()
+        };
+      }
+
+      function normalise(candidate) {
+        const base = fallback();
+        if (!candidate || typeof candidate !== "object") return base;
+        const steps = Array.isArray(candidate.steps)
+          ? candidate.steps.map(step).filter(Boolean).slice(-MAX_STEPS)
+          : [];
+        return {
+          ...base,
+          bornAt: date(candidate.bornAt) || base.bornAt,
+          updatedAt: date(candidate.updatedAt) || base.updatedAt,
+          steps
+        };
+      }
+
+      function loadState() {
+        return normalise(parse(localStorage.getItem(STORAGE_KEY), null));
+      }
+
+      function counts() {
+        const result = { earth: 0, language: 0, game: 0, control: 0 };
+        state.steps.forEach(item => { result[item.core] += 1; });
+        return result;
+      }
+
+      function level() {
+        return Math.floor(state.steps.length / 4) + 1;
+      }
+
+      function stateForBridge() {
+        return JSON.parse(JSON.stringify({
+          version: state.version,
+          kind: state.kind,
+          bornAt: state.bornAt,
+          updatedAt: state.updatedAt,
+          level: level(),
+          counts: counts(),
+          steps: state.steps
+        }));
+      }
+
+      function send(reason) {
+        const detail = { ...stateForBridge(), reason: String(reason || "save") };
+        window.dispatchEvent(new CustomEvent("cht.batole.changed", { detail }));
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: "cht.batole.changed", detail }, "*");
+        }
+      }
+
+      function save(reason) {
+        state.updatedAt = new Date().toISOString();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        send(reason);
+      }
+
+      function setNotice(message) {
+        el.saveNote.textContent = message;
+        window.clearTimeout(noticeTimer);
+        noticeTimer = window.setTimeout(() => {
+          el.saveNote.textContent = "Ukládá se pouze do tohoto Batoleti.";
+        }, 3000);
+      }
+
+      function format(value) {
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return "bez času";
+        return new Intl.DateTimeFormat("cs-CZ", {
+          day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
+        }).format(parsed);
+      }
+
+      function plural(total) {
+        if (total === 1) return "1 krok";
+        if (total >= 2 && total <= 4) return total + " kroky";
+        return total + " kroků";
+      }
+
+      function renderCores() {
+        const totals = counts();
+        el.coreGrid.textContent = "";
+        ORDER.forEach(key => {
+          const info = META[key];
+          const item = document.createElement("article");
+          item.className = "core";
+
+          const top = document.createElement("div");
+          top.className = "core-top";
+          const glyph = document.createElement("span");
+          glyph.className = "core-glyph";
+          glyph.textContent = info.glyph;
+          const count = document.createElement("span");
+          count.className = "core-count";
+          count.textContent = String(totals[key]);
+          top.append(glyph, count);
+
+          const title = document.createElement("h3");
+          title.textContent = info.title;
+          const text = document.createElement("p");
+          text.textContent = info.text;
+          const line = document.createElement("div");
+          line.className = "core-line";
+          const fill = document.createElement("span");
+          fill.style.width = Math.min(100, totals[key] / 12 * 100) + "%";
+          line.append(fill);
+          item.append(top, title, text, line);
+          el.coreGrid.append(item);
+        });
+      }
+
+      function renderHistory() {
+        el.history.textContent = "";
+        const list = state.steps.slice(-8).reverse();
+        if (!list.length) {
+          const empty = document.createElement("li");
+          empty.className = "empty";
+          empty.textContent = "Zatím žádná stopa. První malý krok stačí.";
+          el.history.append(empty);
+          return;
+        }
+
+        list.forEach(item => {
+          const info = META[item.core];
+          const row = document.createElement("li");
+          row.className = "history-item";
+          const glyph = document.createElement("span");
+          glyph.className = "history-glyph";
+          glyph.textContent = info.glyph;
+          const body = document.createElement("div");
+          const title = document.createElement("div");
+          title.className = "history-title";
+          title.textContent = item.title;
+          const meta = document.createElement("div");
+          meta.className = "history-meta";
+          meta.textContent = info.title + " · " + format(item.createdAt);
+          body.append(title, meta);
+          if (item.text) {
+            const text = document.createElement("p");
+            text.className = "history-text";
+            text.textContent = item.text;
+            body.append(text);
+          }
+          row.append(glyph, body);
+          el.history.append(row);
+        });
+      }
+
+      function detectMemory() {
+        for (const key of MEMORY_KEYS) {
+          const value = parse(localStorage.getItem(key), null);
+          if (value && typeof value === "object") return { found: true, key };
+        }
+        return { found: false };
+      }
+
+      function renderConnection() {
+        const memory = detectMemory();
+        if (memory.found) {
+          el.connection.classList.add("is-ready");
+          el.connectionText.textContent = "Paměť nalezena · připravené k napojení";
+          el.footer.textContent = "Batole Paměť pouze pozoruje. Zůstává samostatné a nic v ní nepřepisuje.";
+        } else {
+          el.connection.classList.remove("is-ready");
+          el.connectionText.textContent = navigator.onLine
+            ? "samostatné · čeká na Paměť"
+            : "offline · drží vlastní stopu";
+          el.footer.textContent = navigator.onLine
+            ? "Samostatná PWA. Budoucí most si najde cht360_pamet_v1 bez zásahu do něj."
+            : "Offline režim: kroky zůstávají uložené v tomto zařízení.";
+        }
+      }
+
+      function render() {
+        const total = state.steps.length;
+        el.growthLabel.textContent = "úroveň " + level();
+        el.total.textContent = plural(total);
+        el.bar.style.width = total % 4 / 4 * 100 + "%";
+        renderCores();
+        renderHistory();
+        renderConnection();
+      }
+
+      function wake() {
+        el.seedStage.classList.remove("is-awake");
+        void el.seedStage.offsetWidth;
+        el.seedStage.classList.add("is-awake");
+        setNotice("Batole svítí. Další krok můžeš uložit, až bude pravdivý.");
+      }
+
+      function addStep(input) {
+        const created = step({
+          id: id(),
+          core: input.core,
+          title: input.title,
+          text: input.text,
+          createdAt: new Date().toISOString()
+        });
+        if (!created) {
+          setNotice("Nejdřív dej kroku název nebo stopu.");
+          el.title.focus();
+          return false;
+        }
+        state.steps.push(created);
+        state.steps = state.steps.slice(-MAX_STEPS);
+        save("step_added");
+        render();
+        wake();
+        setNotice("Uloženo do jádra " + META[created.core].title + ".");
+        return true;
+      }
+
+      function exportSeed() {
+        const packet = {
+          kind: "cht360-batole-seed",
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          data: stateForBridge()
+        };
+        const blob = new Blob([JSON.stringify(packet, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "cht360-batole-seminko-" + new Date().toISOString().slice(0, 10) + ".json";
+        document.body.append(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        setNotice("Semínko bylo připraveno jako JSON.");
+      }
+
+      async function importSeed(file) {
+        if (!file) return;
+        try {
+          const packet = parse(await file.text(), null);
+          const raw = packet && packet.kind === "cht360-batole-seed" ? packet.data : packet;
+          if (!raw || typeof raw !== "object") throw new Error("bad seed");
+          state = normalise(raw);
+          save("seed_imported");
+          render();
+          setNotice("Semínko načteno: " + plural(state.steps.length) + ".");
+        } catch {
+          setNotice("Semínko se nepodařilo načíst. Soubor musí být platný JSON export.");
+        } finally {
+          el.import.value = "";
+        }
+      }
+
+      function install() {
+        if (!deferredInstall) {
+          setNotice("V Safari použij Sdílet → Přidat na plochu.");
+          return;
+        }
+        deferredInstall.prompt();
+        deferredInstall.userChoice.finally(() => {
+          deferredInstall = null;
+          el.install.hidden = true;
+        });
+      }
+
+      function registerPWA() {
+        if (!("serviceWorker" in navigator)) return;
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {
+            el.footer.textContent = "Aplikace běží, ale offline vrstvu se nepodařilo připravit.";
+          });
+        });
+      }
+
+      el.form.addEventListener("submit", event => {
+        event.preventDefault();
+        if (addStep({ title: el.title.value, core: el.core.value, text: el.text.value })) {
+          el.title.value = "";
+          el.text.value = "";
+          el.title.focus();
+        }
+      });
+
+      el.seed.addEventListener("click", wake);
+      el.export.addEventListener("click", exportSeed);
+      el.import.addEventListener("change", () => importSeed(el.import.files[0]));
+      el.install.addEventListener("click", install);
+      window.addEventListener("beforeinstallprompt", event => {
+        event.preventDefault();
+        deferredInstall = event;
+        el.install.hidden = false;
+      });
+      window.addEventListener("appinstalled", () => {
+        el.install.hidden = true;
+        setNotice("Batole je nainstalované.");
+      });
+      window.addEventListener("online", renderConnection);
+      window.addEventListener("offline", renderConnection);
+      window.addEventListener("storage", event => {
+        if (MEMORY_KEYS.includes(event.key)) renderConnection();
+      });
+      window.addEventListener("cht.memory.changed", renderConnection);
+      window.addEventListener("cht.coreDeck.changed", renderConnection);
+      window.addEventListener("cht.batole.request", () => send("requested"));
+
+      window.CHTBatole = Object.freeze({
+        version: 1,
+        getState: stateForBridge,
+        addStep,
+        exportSeed,
+        importSeed
+      });
+
+      render();
+      registerPWA();
+    })();
+  </script>
+</body>
+</html>
+
