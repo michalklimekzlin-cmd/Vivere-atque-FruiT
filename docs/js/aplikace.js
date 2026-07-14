@@ -26,29 +26,46 @@ const SCENE_KEY = "vaft_pamet_scene_v2";
 const MIN_SCENE_SPREAD = .96;
 const MAX_SCENE_SPREAD = 2.8;
 
+const TROJKA_MODEL_STORAGE_KEY = "cht360_trojka_models_v1";
+
+const TROJKA_PROFILE = [
+  { id: "leva-hrana", label: "LevÃ¡ hrana", x: -1.28, z: .76, depth: 1 },
+  { id: "levy-propad", label: "LevÃ½ propad", x: -.64, z: -.58, depth: .2 },
+  { id: "stred", label: "StÅed", x: 0, z: .76, depth: 1 },
+  { id: "pravy-propad", label: "PravÃ½ propad", x: .64, z: -.58, depth: .2 },
+  { id: "prava-hrana", label: "PravÃ¡ hrana", x: 1.28, z: .76, depth: 1 }
+];
+
+const TROJKA_RAILS = [
+  { id: "horni-kolej", label: "HornÃ­ kolej", y: -.47 },
+  { id: "dolni-kolej", label: "DolnÃ­ kolej", y: .47 }
+];
+
+let trojkaModels = loadTrojkaModels();
+
 const cores = [
   {
     id: "earth",
-    title: "Země",
-    subtitle: "Modeling, světy a úhel pohledu",
+    title: "ZemÄ",
+    subtitle: "Modeling, svÄty a Ãºhel pohledu",
     radius: 50
   },
   {
     id: "language",
     title: "Jazyk",
-    subtitle: "Písmena, symboly, glyphy a význam",
+    subtitle: "PÃ­smena, symboly, glyphy a vÃ½znam",
     radius: 50
   },
   {
     id: "game",
     title: "Hra",
-    subtitle: "Pravidla, události a postup",
+    subtitle: "Pravidla, udÃ¡losti a postup",
     radius: 50
   },
   {
     id: "control",
-    title: "Řízení",
-    subtitle: "Směrování, jednotky a propojení",
+    title: "ÅÃ­zenÃ­",
+    subtitle: "SmÄrovÃ¡nÃ­, jednotky a propojenÃ­",
     radius: 50
   }
 ];
@@ -103,7 +120,7 @@ function loadMemory() {
     const parsed = JSON.parse(raw);
 
     if (!parsed.cores) {
-      throw new Error("Neplatná struktura");
+      throw new Error("NeplatnÃ¡ struktura");
     }
 
     for (const coreId of ["earth", "language", "game", "control"]) {
@@ -120,7 +137,7 @@ function loadMemory() {
 
     return parsed;
   } catch (error) {
-    console.warn("Paměť byla obnovena do výchozího stavu.", error);
+    console.warn("PamÄÅ¥ byla obnovena do vÃ½chozÃ­ho stavu.", error);
     return createEmptyMemory();
   }
 }
@@ -178,7 +195,7 @@ function loadScene() {
       panY: Number.isFinite(saved.panY) ? saved.panY : fallback.panY
     };
   } catch (error) {
-    console.warn("Rozložení scény bylo obnoveno.", error);
+    console.warn("RozloÅ¾enÃ­ scÃ©ny bylo obnoveno.", error);
     return fallback;
   }
 }
@@ -241,7 +258,7 @@ function updatePills() {
     }
 
     const stats = getCoreStats(core.id);
-    pill.textContent = `${core.title.toUpperCase()} · ${stats.used}/70`;
+    pill.textContent = `${core.title.toUpperCase()} Â· ${stats.used}/70`;
   }
 }
 
@@ -443,6 +460,462 @@ function drawBackground() {
   }
 
   context.restore();
+}
+
+
+function createDefaultTrojkaModels() {
+  return [
+    {
+      id: "signal-leva",
+      label: "SignÃ¡l levÃ¡",
+      kind: "jezdec",
+      rail: "horni-kolej",
+      progress: .08,
+      speed: .000012,
+      color: "#ffe2ad",
+      moving: true
+    },
+    {
+      id: "signal-stred",
+      label: "SignÃ¡l stÅed",
+      kind: "jezdec",
+      rail: "dolni-kolej",
+      progress: .46,
+      speed: .000018,
+      color: "#c79b33",
+      moving: true
+    },
+    {
+      id: "signal-prava",
+      label: "SignÃ¡l pravÃ¡",
+      kind: "jezdec",
+      rail: "horni-kolej",
+      progress: .77,
+      speed: .000009,
+      color: "#fff0c5",
+      moving: true
+    }
+  ];
+}
+
+function normaliseTrojkaModel(model, index) {
+  const source = model && typeof model === "object" ? model : {};
+  const allowedRails = TROJKA_RAILS.map((rail) => rail.id);
+  const fallbackId = "model-" + Date.now() + "-" + index;
+  const rawProgress = Number(source.progress);
+  const rawSpeed = Number(source.speed);
+  const progress = Number.isFinite(rawProgress) ? rawProgress : 0;
+  const color = /^#[0-9a-f]{6}$/i.test(source.color || "")
+    ? source.color
+    : "#ffe2ad";
+
+  return {
+    id: String(source.id || fallbackId),
+    label: String(source.label || "ZÃ¡suvnÃ½ model").slice(0, 80),
+    kind: String(source.kind || "model").slice(0, 40),
+    rail: allowedRails.includes(source.rail)
+      ? source.rail
+      : TROJKA_RAILS[index % TROJKA_RAILS.length].id,
+    progress: positiveModulo(progress, 1),
+    speed: Number.isFinite(rawSpeed) ? rawSpeed : 0,
+    color,
+    moving: source.moving !== false
+  };
+}
+
+function loadTrojkaModels() {
+  try {
+    const raw = localStorage.getItem(TROJKA_MODEL_STORAGE_KEY);
+
+    if (!raw) {
+      return createDefaultTrojkaModels();
+    }
+
+    const parsed = JSON.parse(raw);
+
+    if (!Array.isArray(parsed)) {
+      return createDefaultTrojkaModels();
+    }
+
+    return parsed
+      .slice(0, 48)
+      .map((model, index) => normaliseTrojkaModel(model, index));
+  } catch (error) {
+    console.warn("Trojka byla obnovena do vÃ½chozÃ­ho stavu.", error);
+    return createDefaultTrojkaModels();
+  }
+}
+
+function saveTrojkaModels(reason) {
+  localStorage.setItem(
+    TROJKA_MODEL_STORAGE_KEY,
+    JSON.stringify(trojkaModels)
+  );
+
+  window.dispatchEvent(new CustomEvent("cht.track.changed", {
+    detail: {
+      reason,
+      models: trojkaModels.map((model) => ({ ...model }))
+    }
+  }));
+}
+
+function attachTrojkaModel(model) {
+  const candidate = normaliseTrojkaModel(model, trojkaModels.length);
+  const existingIndex = trojkaModels.findIndex(
+    (item) => item.id === candidate.id
+  );
+
+  if (existingIndex >= 0) {
+    trojkaModels[existingIndex] = candidate;
+  } else {
+    trojkaModels.push(candidate);
+  }
+
+  saveTrojkaModels("pÅipojenÃ­");
+  return { ...candidate };
+}
+
+function moveTrojkaModel(id, patch) {
+  const index = trojkaModels.findIndex((model) => model.id === id);
+
+  if (index < 0) {
+    return null;
+  }
+
+  trojkaModels[index] = normaliseTrojkaModel(
+    { ...trojkaModels[index], ...(patch || {}), id },
+    index
+  );
+
+  saveTrojkaModels("posun");
+  return { ...trojkaModels[index] };
+}
+
+function detachTrojkaModel(id) {
+  const before = trojkaModels.length;
+  trojkaModels = trojkaModels.filter((model) => model.id !== id);
+
+  if (trojkaModels.length === before) {
+    return false;
+  }
+
+  saveTrojkaModels("odpojenÃ­");
+  return true;
+}
+
+function installTrojkaBridge() {
+  window.CHT360Track = {
+    version: 1,
+    shape: "100-20-100-20-100",
+    get anchors() {
+      return TROJKA_PROFILE.map((point) => ({
+        id: point.id,
+        label: point.label,
+        depth: Math.round(point.depth * 100),
+        sockets: TROJKA_RAILS.map((rail) => ({
+          id: point.id + "-" + rail.id,
+          rail: rail.id
+        }))
+      }));
+    },
+    get rails() {
+      return TROJKA_RAILS.map((rail) => ({ ...rail }));
+    },
+    listModels() {
+      return trojkaModels.map((model) => ({ ...model }));
+    },
+    attach(model) {
+      return attachTrojkaModel(model);
+    },
+    move(id, patch) {
+      return moveTrojkaModel(id, patch);
+    },
+    detach(id) {
+      return detachTrojkaModel(id);
+    }
+  };
+
+  window.dispatchEvent(new CustomEvent("cht.track.ready", {
+    detail: window.CHT360Track
+  }));
+}
+
+function getTrojkaCamera() {
+  const sceneScale = clamp(.96 + (scene.zoom - 1) * .14, .84, 1.14);
+
+  return {
+    centerX: width * .53 + scene.panX * .08,
+    centerY: height * .51 + scene.panY * .08,
+    base: Math.max(width * 1.08, height * 1.44) * sceneScale,
+    yaw: scene.yaw * .58,
+    pitch: scene.pitch * .60,
+    roll: scene.roll * .42
+  };
+}
+
+function projectTrojkaPoint(point) {
+  const camera = getTrojkaCamera();
+  const yawCos = Math.cos(camera.yaw);
+  const yawSin = Math.sin(camera.yaw);
+  const pitchCos = Math.cos(camera.pitch);
+  const pitchSin = Math.sin(camera.pitch);
+  const rollCos = Math.cos(camera.roll);
+  const rollSin = Math.sin(camera.roll);
+
+  const yawX = point.x * yawCos - point.z * yawSin;
+  const yawZ = point.x * yawSin + point.z * yawCos;
+  const pitchY = point.y * pitchCos - yawZ * pitchSin;
+  const pitchZ = point.y * pitchSin + yawZ * pitchCos;
+  const perspective = 1 / Math.max(2.9, 3.78 - pitchZ);
+  const localX = yawX * camera.base * perspective;
+  const localY = pitchY * camera.base * perspective;
+
+  return {
+    x: camera.centerX + localX * rollCos - localY * rollSin,
+    y: camera.centerY + localX * rollSin + localY * rollCos,
+    scale: camera.base * perspective / Math.max(width, height),
+    depth: pitchZ
+  };
+}
+
+function sampleTrojkaProfile(progress) {
+  const bounded = clamp(Number(progress) || 0, 0, 1);
+  const scaled = bounded * (TROJKA_PROFILE.length - 1);
+  const index = Math.min(
+    TROJKA_PROFILE.length - 2,
+    Math.floor(scaled)
+  );
+  const local = scaled - index;
+  const eased = local * local * (3 - 2 * local);
+  const from = TROJKA_PROFILE[index];
+  const to = TROJKA_PROFILE[index + 1];
+
+  return {
+    x: from.x + (to.x - from.x) * local,
+    z: from.z + (to.z - from.z) * eased,
+    depth: from.depth + (to.depth - from.depth) * eased
+  };
+}
+
+function drawTrojkaTrack(time) {
+  const rows = [-.92, -.46, 0, .46, .92];
+
+  context.save();
+
+  for (let row = 0; row < rows.length - 1; row += 1) {
+    for (let segment = 0; segment < TROJKA_PROFILE.length - 1; segment += 1) {
+      const from = TROJKA_PROFILE[segment];
+      const to = TROJKA_PROFILE[segment + 1];
+      const depth = (from.depth + to.depth) / 2;
+      const points = [
+        projectTrojkaPoint({ x: from.x, y: rows[row], z: from.z }),
+        projectTrojkaPoint({ x: to.x, y: rows[row], z: to.z }),
+        projectTrojkaPoint({ x: to.x, y: rows[row + 1], z: to.z }),
+        projectTrojkaPoint({ x: from.x, y: rows[row + 1], z: from.z })
+      ];
+
+      const alpha = .032 + depth * .085 + (row % 2) * .012;
+
+      fillTrojkaPolygon(
+        points,
+        "rgba(199,155,51," + alpha + ")",
+        "rgba(255,226,173,.16)",
+        .65
+      );
+    }
+  }
+
+  rows.forEach((row, index) => {
+    drawTrojkaProfileLine(
+      row,
+      .012,
+      index === 2
+        ? "rgba(255,235,191,.48)"
+        : "rgba(199,155,51,.22)",
+      index === 2 ? 1.25 : .68
+    );
+  });
+
+  drawTrojkaRails(time);
+  drawTrojkaSockets(time);
+  drawTrojkaModels(time);
+
+  context.restore();
+}
+
+function drawTrojkaRails(time) {
+  TROJKA_RAILS.forEach((rail, index) => {
+    drawTrojkaProfileLine(
+      rail.y,
+      .11,
+      "rgba(255,226,173,.82)",
+      1.55
+    );
+
+    drawTrojkaProfileLine(
+      rail.y + (index === 0 ? .032 : -.032),
+      .075,
+      "rgba(199,155,51,.36)",
+      .72
+    );
+  });
+
+  const pulse = .34 + Math.sin(time * .0016) * .13;
+
+  drawTrojkaProfileLine(
+    0,
+    .13,
+    "rgba(255,240,197," + pulse + ")",
+    1.05
+  );
+}
+
+function drawTrojkaSockets(time) {
+  TROJKA_PROFILE.forEach((anchor, anchorIndex) => {
+    TROJKA_RAILS.forEach((rail, railIndex) => {
+      const point = projectTrojkaPoint({
+        x: anchor.x,
+        y: rail.y,
+        z: anchor.z + .13
+      });
+      const pulse = .88 + Math.sin(time * .0018 + anchorIndex + railIndex) * .13;
+      const radius = clamp(8 * point.scale * pulse, 3.4, 8.8);
+
+      context.save();
+      context.strokeStyle = "rgba(255,232,181,.90)";
+      context.lineWidth = 1.05;
+      context.beginPath();
+      context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+      context.stroke();
+
+      context.fillStyle = "rgba(199,155,51,.28)";
+      context.beginPath();
+      context.arc(point.x, point.y, radius * .43, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+    });
+  });
+}
+
+function drawTrojkaModels(time) {
+  trojkaModels.forEach((model) => {
+    const rail = TROJKA_RAILS.find((item) => item.id === model.rail)
+      || TROJKA_RAILS[0];
+    const progress = model.moving
+      ? positiveModulo(model.progress + time * model.speed, 1)
+      : model.progress;
+    const base = sampleTrojkaProfile(progress);
+    const point = projectTrojkaPoint({
+      x: base.x,
+      y: rail.y,
+      z: base.z + .18
+    });
+    const rgb = trojkaColorToRgb(model.color);
+    const radius = clamp(9 * point.scale, 3.5, 9.5);
+
+    context.save();
+
+    const glow = context.createRadialGradient(
+      point.x,
+      point.y,
+      0,
+      point.x,
+      point.y,
+      radius * 4
+    );
+
+    glow.addColorStop(0, "rgba(255,246,213,.96)");
+    glow.addColorStop(
+      .30,
+      "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.70)"
+    );
+    glow.addColorStop(
+      1,
+      "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0)"
+    );
+
+    context.fillStyle = glow;
+    context.beginPath();
+    context.arc(point.x, point.y, radius * 4, 0, Math.PI * 2);
+    context.fill();
+
+    context.translate(point.x, point.y);
+    context.rotate(time * .0008 + progress * Math.PI * 2);
+    context.fillStyle = model.color;
+    context.strokeStyle = "#fff0c5";
+    context.lineWidth = 1;
+
+    context.beginPath();
+    context.moveTo(0, -radius);
+    context.lineTo(radius * .72, 0);
+    context.lineTo(0, radius);
+    context.lineTo(-radius * .72, 0);
+    context.closePath();
+    context.fill();
+    context.stroke();
+
+    context.restore();
+  });
+}
+
+function drawTrojkaProfileLine(y, zOffset, strokeStyle, lineWidth) {
+  context.beginPath();
+
+  for (let step = 0; step <= 80; step += 1) {
+    const profilePoint = sampleTrojkaProfile(step / 80);
+    const point = projectTrojkaPoint({
+      x: profilePoint.x,
+      y,
+      z: profilePoint.z + zOffset
+    });
+
+    if (step === 0) {
+      context.moveTo(point.x, point.y);
+    } else {
+      context.lineTo(point.x, point.y);
+    }
+  }
+
+  context.lineCap = "round";
+  context.strokeStyle = strokeStyle;
+  context.lineWidth = lineWidth;
+  context.stroke();
+}
+
+function fillTrojkaPolygon(points, fillStyle, strokeStyle, lineWidth) {
+  context.beginPath();
+
+  points.forEach((point, index) => {
+    if (index === 0) {
+      context.moveTo(point.x, point.y);
+    } else {
+      context.lineTo(point.x, point.y);
+    }
+  });
+
+  context.closePath();
+  context.fillStyle = fillStyle;
+  context.fill();
+  context.strokeStyle = strokeStyle;
+  context.lineWidth = lineWidth;
+  context.stroke();
+}
+
+function trojkaColorToRgb(color) {
+  const value = (/^#[0-9a-f]{6}$/i.test(color || ""))
+    ? color.slice(1)
+    : "ffe2ad";
+
+  return {
+    r: Number.parseInt(value.slice(0, 2), 16),
+    g: Number.parseInt(value.slice(2, 4), 16),
+    b: Number.parseInt(value.slice(4, 6), 16)
+  };
+}
+
+function positiveModulo(value, divisor) {
+  return ((value % divisor) + divisor) % divisor;
 }
 
 function drawTerraAxis(time) {
@@ -725,6 +1198,7 @@ function render(time) {
 
   drawBackground();
   drawTerraAxis(time);
+  drawTrojkaTrack(time);
 
   const ordered = [...cores].sort((first, second) => {
     return getCorePosition(first).depth - getCorePosition(second).depth;
@@ -758,8 +1232,8 @@ function openCore(core) {
   selectedCore = core;
   selectedSlotIndex = null;
 
-  panelTitle.textContent = `${core.title} · Paměť`;
-  panelSub.textContent = "70 slotů · samostatné uložení";
+  panelTitle.textContent = `${core.title} Â· PamÄÅ¥`;
+  panelSub.textContent = "70 slotÅ¯ Â· samostatnÃ© uloÅ¾enÃ­";
 
   panel.classList.add("open");
   slotEditor.classList.remove("open");
@@ -803,7 +1277,7 @@ function renderSlots() {
 
     button.innerHTML = `
       <strong>${escapeHtml(slot.name || `Slot ${slot.id}`)}</strong>
-      <span>${slot.content.trim() ? "obsazeno" : "prázdné"}</span>
+      <span>${slot.content.trim() ? "obsazeno" : "prÃ¡zdnÃ©"}</span>
     `;
 
     button.addEventListener("click", () => selectSlot(index));
@@ -827,22 +1301,22 @@ function selectSlot(index) {
 
 function updateStatus(message = "") {
   if (!selectedCore) {
-    statusBox.textContent = "Vyber jádro.";
+    statusBox.textContent = "Vyber jÃ¡dro.";
     return;
   }
 
   const stats = getCoreStats(selectedCore.id);
 
   let text =
-    `${selectedCore.title}: obsazeno ${stats.used}/70 · ` +
+    `${selectedCore.title}: obsazeno ${stats.used}/70 Â· ` +
     `velikost ${formatBytes(stats.size)}`;
 
   if (selectedSlotIndex !== null) {
-    text += ` · otevřen slot ${selectedSlotIndex + 1}`;
+    text += ` Â· otevÅen slot ${selectedSlotIndex + 1}`;
   }
 
   if (message) {
-    text += ` · ${message}`;
+    text += ` Â· ${message}`;
   }
 
   statusBox.textContent = text;
@@ -895,7 +1369,7 @@ saveSlot.addEventListener("click", () => {
 
   saveMemory();
   renderSlots();
-  updateStatus("uloženo");
+  updateStatus("uloÅ¾eno");
 });
 
 clearSlot.addEventListener("click", () => {
@@ -916,7 +1390,7 @@ clearSlot.addEventListener("click", () => {
   slotContent.value = "";
 
   renderSlots();
-  updateStatus("vymazáno");
+  updateStatus("vymazÃ¡no");
 });
 
 searchInput.addEventListener("input", renderSlots);
@@ -971,7 +1445,7 @@ fileInput.addEventListener("change", async () => {
 
     if (importMode === "core") {
       if (!selectedCore) {
-        throw new Error("Není vybrané jádro");
+        throw new Error("NenÃ­ vybranÃ© jÃ¡dro");
       }
 
       const slots = Array.isArray(data.sloty)
@@ -1004,10 +1478,10 @@ fileInput.addEventListener("change", async () => {
 
       saveMemory();
       renderSlots();
-      updateStatus("jádro importováno");
+      updateStatus("jÃ¡dro importovÃ¡no");
     } else {
       if (!data.cores) {
-        throw new Error("Soubor neobsahuje celou Paměť");
+        throw new Error("Soubor neobsahuje celou PamÄÅ¥");
       }
 
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -1016,10 +1490,10 @@ fileInput.addEventListener("change", async () => {
 
       saveMemory();
       renderSlots();
-      updateStatus("celá Paměť importována");
+      updateStatus("celÃ¡ PamÄÅ¥ importovÃ¡na");
     }
   } catch (error) {
-    alert(`Import se nezdařil: ${error.message}`);
+    alert(`Import se nezdaÅil: ${error.message}`);
   }
 });
 
@@ -1052,9 +1526,9 @@ function updateGestureHint() {
   const hints = document.querySelectorAll(".hud span");
 
   if (hints.length >= 3) {
-    hints[0].textContent = "1 prst: 3D otočení";
-    hints[1].textContent = "2 prsty: posun · zoom · šejdr";
-    hints[2].textContent = "klepnutí: otevřít jádro";
+    hints[0].textContent = "1 prst: 3D otoÄenÃ­";
+    hints[1].textContent = "2 prsty: posun Â· zoom Â· Å¡ejdr";
+    hints[2].textContent = "klepnutÃ­: otevÅÃ­t jÃ¡dro";
   }
 }
 
@@ -1233,6 +1707,7 @@ window.addEventListener("resize", () => {
   constrainScene();
 });
 
+installTrojkaBridge();
 resizeCanvas();
 constrainScene();
 updatePills();
@@ -1290,7 +1765,7 @@ if ("serviceWorker" in navigator) {
       }, 5000);
     } catch (error) {
       console.warn(
-        "[360°‰.] Service worker se nepodařilo spustit.",
+        "[360Â°â°.] Service worker se nepodaÅilo spustit.",
         error
       );
     }
