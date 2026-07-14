@@ -656,7 +656,7 @@ function getTrojkaCamera() {
   };
 }
 
-function projectTrojkaPoint(point) {
+const perspective = 1 / Math.max(4.4, 5.35 - pitchZ);
   const camera = getTrojkaCamera();
   const yawCos = Math.cos(camera.yaw);
   const yawSin = Math.sin(camera.yaw);
