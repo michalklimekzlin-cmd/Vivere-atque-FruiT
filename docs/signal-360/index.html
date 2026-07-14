@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#070706">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VaF'i'T 360">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css">
+  <title>VaF'i'T • 360°‰</title>
+</head>
+
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark">◌</span>
+        <span>
+          <strong>VaF'i'T</strong>
+          <small>Paměť · 360°‰</small>
+        </span>
+      </a>
+
+      <div class="core-pills">
+        <button class="core-pill" type="button" data-world="earth">
+          <span>ZEMĚ</span><b id="count-earth">0/70</b>
+        </button>
+
+        <button class="core-pill" type="button" data-world="language">
+          <span>JAZYK</span><b id="count-language">0/70</b>
+        </button>
+
+        <button class="core-pill" type="button" data-world="game">
+          <span>HRA</span><b id="count-game">0/70</b>
+        </button>
+
+        <button class="core-pill" type="button" data-world="control">
+          <span>ŘÍZENÍ</span><b id="count-control">0/70</b>
+        </button>
+      </div>
+
+      <div class="top-actions">
+        <button id="exportButton" class="icon-button" type="button">⇩</button>
+        <button id="importButton" class="icon-button" type="button">⇧</button>
+        <input id="importInput" type="file" accept="application/json,.json" hidden>
+      </div>
+    </header>
+
+    <section class="tower-stage">
+      <canvas id="towerCanvas"></canvas>
+
+      <div class="stage-label">
+        <span id="activeWorldName">HRA</span>
+        <small id="activeWorldHint">Klepni na kouli nebo slot</small>
+      </div>
+
+      <div class="legend">
+        <span>● vyplněný slot</span>
+        <span>○ volný slot</span>
+      </div>
+    </section>
+
+    <footer class="bottom-bar">
+      <p id="status">Připojuji 360°‰ k Paměti…</p>
+      <p class="gesture-help">
+        1 prst: otáčení · ťuk: otevřít · 2 prsty: náklon a zoom
+      </p>
+    </footer>
+  </main>
+
+  <section id="slotModal" class="modal" hidden>
+    <div class="modal-backdrop" data-close-modal></div>
+
+    <form id="slotForm" class="modal-card">
+      <header class="modal-header">
+        <div>
+          <p class="eyebrow" id="slotWorld">JÁDRO</p>
+          <h1 id="slotTitle">Slot</h1>
+        </div>
+
+        <button class="close-button" type="button" data-close-modal>×</button>
+      </header>
+
+      <div class="modal-body">
+        <label>
+          Název slotu
+          <input id="slotLabel" name="label" maxlength="80">
+        </label>
+
+        <div class="form-row">
+          <label>
+            Typ
+            <select id="slotType">
+              <option value="TEXT">Text / poznámka</option>
+              <option value="URL">Odkaz</option>
+              <option value="PWA">PWA aplikace</option>
+              <option value="HTML">HTML modul</option>
+              <option value="IMAGE">Obrázek</option>
+              <option value="VIDEO">Video</option>
+              <option value="AUDIO">Zvuk</option>
+              <option value="FOLDER">Složka</option>
+              <option value="PLUGIN">Plugin</option>
+              <option value="AI">AI</option>
+            </select>
+          </label>
+
+          <label>
+            Ikona
+            <input id="slotIcon" maxlength="8">
+          </label>
+
+          <label>
+            Barva
+            <input id="slotColor" type="color" value="#c79b33">
+          </label>
+        </div>
+
+        <label>
+          Odkaz nebo cesta aplikace
+          <input id="slotUrl" type="text" placeholder="https://… nebo ../worlds/Revia/">
+        </label>
+
+        <label>
+          Obsah
+          <textarea id="slotContent" maxlength="240000"></textarea>
+        </label>
+
+        <p id="slotBudget" class="budget"></p>
+      </div>
+
+      <footer class="modal-actions">
+        <button id="clearSlotButton" class="button ghost danger" type="button">
+          Vyčistit slot
+        </button>
+
+        <span class="action-spacer"></span>
+
+        <button id="openSlotButton" class="button ghost" type="button">
+          Otevřít
+        </button>
+
+        <button class="button primary" type="submit">
+          Uložit slot
+        </button>
+      </footer>
+    </form>
+  </section>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
