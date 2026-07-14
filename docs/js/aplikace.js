@@ -31,37 +31,25 @@ const cores = [
     id: "earth",
     title: "Země",
     subtitle: "Modeling, světy a úhel pohledu",
-    angle: -Math.PI * .72,
-    radius: 50,
-    axisSpeed: .00018,
-    axisPhase: 0
+    radius: 50
   },
   {
     id: "language",
     title: "Jazyk",
     subtitle: "Písmena, symboly, glyphy a význam",
-    angle: -Math.PI * .18,
-    radius: 50,
-    axisSpeed: .00015,
-    axisPhase: Math.PI * .52
+    radius: 50
   },
   {
     id: "game",
     title: "Hra",
     subtitle: "Pravidla, události a postup",
-    angle: Math.PI * .34,
-    radius: 50,
-    axisSpeed: .00021,
-    axisPhase: Math.PI
+    radius: 50
   },
   {
     id: "control",
     title: "Řízení",
     subtitle: "Směrování, jednotky a propojení",
-    angle: Math.PI * .86,
-    radius: 50,
-    axisSpeed: .00017,
-    axisPhase: Math.PI * 1.52
+    radius: 50
   }
 ];
 
@@ -150,7 +138,8 @@ function createDefaultScene() {
   return {
     yaw: 0,
     pitch: 0,
-    spread: 1,
+    roll: 0,
+    zoom: 1,
     panX: 0,
     panY: 0
   };
@@ -172,13 +161,20 @@ function loadScene() {
       yaw: Number.isFinite(saved.yaw) ? saved.yaw : fallback.yaw,
       pitch: clamp(
         Number.isFinite(saved.pitch) ? saved.pitch : fallback.pitch,
-        -.86,
-        .86
+        -.45,
+        .45
       ),
-      spread: clamp(
-        Number.isFinite(saved.spread) ? saved.spread : fallback.spread,
-        MIN_SCENE_SPREAD,
-        MAX_SCENE_SPREAD
+      roll: Number.isFinite(saved.roll) ? saved.roll : fallback.roll,
+      zoom: clamp(
+        Number.isFinite(saved.zoom)
+          ? saved.zoom
+          : (
+            Number.isFinite(saved.spread)
+              ? saved.spread
+              : fallback.zoom
+          ),
+        .92,
+        2
       ),
       panX: Number.isFinite(saved.panX) ? saved.panX : fallback.panX,
       panY: Number.isFinite(saved.panY) ? saved.panY : fallback.panY
@@ -195,7 +191,9 @@ function saveScene() {
     JSON.stringify({
       yaw: normaliseAngle(scene.yaw),
       pitch: scene.pitch,
-      spread: scene.spread,
+      roll: normaliseAngle(scene.roll),
+      zoom: scene.zoom,
+      spread: scene.zoom,
       panX: scene.panX,
       panY: scene.panY
     })
@@ -291,34 +289,48 @@ function getLandscapeLayout() {
 }
 
 function getSceneAnchor() {
-  const baseDistance = 126;
+  const baseDistance = 124;
+  const baseRadius = baseDistance * Math.SQRT1_2 + 12;
 
   return {
     baseDistance,
-    left: Math.max(
-      86,
-      Math.min(width * .10, width - baseDistance - 70)
+    baseRadius,
+    centerX: Math.max(
+      baseRadius + 68,
+      Math.min(width * .18, width - baseRadius - 68)
     ),
-    top: Math.max(
-      92,
-      Math.min(height * .22, height - baseDistance - 70)
+    centerY: Math.max(
+      baseRadius + 78,
+      Math.min(height * .35, height - baseRadius - 68)
     )
   };
 }
 
-function getMaxSceneSpread() {
+function getMaxSceneZoom() {
   if (!width || !height) {
-    return MAX_SCENE_SPREAD;
+    return 2;
   }
 
   const anchor = getSceneAnchor();
+  const centerX = anchor.centerX + scene.panX;
+  const centerY = anchor.centerY + scene.panY;
+
+  const availableX = Math.min(
+    centerX - 68,
+    width - centerX - 68
+  );
+
+  const availableY = Math.min(
+    centerY - 68,
+    height - centerY - 68
+  );
 
   return Math.max(
-    MIN_SCENE_SPREAD,
+    .92,
     Math.min(
-      MAX_SCENE_SPREAD,
-      (width - anchor.left - 70) / anchor.baseDistance,
-      (height - anchor.top - 70) / anchor.baseDistance
+      2,
+      availableX / anchor.baseRadius,
+      availableY / anchor.baseRadius
     )
   );
 }
@@ -330,17 +342,20 @@ function constrainScene() {
 
   const anchor = getSceneAnchor();
 
-  scene.spread = clamp(
-    scene.spread,
-    MIN_SCENE_SPREAD,
-    getMaxSceneSpread()
+  scene.zoom = clamp(
+    scene.zoom,
+    .92,
+    getMaxSceneZoom()
   );
 
-  const distance = anchor.baseDistance * scene.spread;
-  const minPanX = 70 - anchor.left;
-  const maxPanX = width - 70 - (anchor.left + distance);
-  const minPanY = 70 - anchor.top;
-  const maxPanY = height - 70 - (anchor.top + distance);
+  const groupRadius =
+    anchor.baseRadius * scene.zoom * 1.16 +
+    64;
+
+  const minPanX = groupRadius - anchor.centerX;
+  const maxPanX = width - groupRadius - anchor.centerX;
+  const minPanY = groupRadius - anchor.centerY;
+  const maxPanY = height - groupRadius - anchor.centerY;
 
   scene.panX = minPanX <= maxPanX
     ? clamp(scene.panX, minPanX, maxPanX)
@@ -361,27 +376,38 @@ function getCorePosition(core) {
 
   const misto = rozlozeni[core.id];
   const anchor = getSceneAnchor();
-  const distance = anchor.baseDistance * scene.spread;
-
+  const distance = anchor.baseDistance * scene.zoom;
   const localX = (misto.sloupec - .5) * distance;
   const localY = (misto.radek - .5) * distance;
-  const cos = Math.cos(scene.yaw);
-  const sin = Math.sin(scene.yaw);
 
-  // Čtyři jádra se otáčejí jako jedna pevná formace.
-  const rotatedX = localX * cos - localY * sin;
-  const rotatedY = localX * sin + localY * cos;
+  const yawCos = Math.cos(scene.yaw);
+  const yawSin = Math.sin(scene.yaw);
+  const planeX = localX * yawCos - localY * yawSin;
+  const planeY = localX * yawSin + localY * yawCos;
 
-  const depth = clamp(
-    .68 + rotatedY / distance * .15 + Math.sin(scene.pitch) * .05,
-    .48,
-    .86
+  const tiltedY = planeY * Math.cos(scene.pitch);
+  const depthZ = planeY * Math.sin(scene.pitch);
+
+  const rollCos = Math.cos(scene.roll);
+  const rollSin = Math.sin(scene.roll);
+  const rotatedX = planeX * rollCos - tiltedY * rollSin;
+  const rotatedY = planeX * rollSin + tiltedY * rollCos;
+
+  const perspective = clamp(
+    1 + depthZ / 480,
+    .78,
+    1.24
   );
 
   return {
-    x: anchor.left + scene.panX + distance / 2 + rotatedX,
-    y: anchor.top + scene.panY + distance / 2 + rotatedY,
-    depth
+    x: anchor.centerX + scene.panX + rotatedX * perspective,
+    y: anchor.centerY + scene.panY + rotatedY * perspective,
+    depth: clamp(
+      .68 + depthZ / (distance || 1) * .18,
+      .48,
+      .86
+    ),
+    perspective
   };
 }
 
@@ -422,124 +448,90 @@ function drawBackground() {
 }
 
 function drawTerraAxis(time) {
-  /*
-    Půlkulatý prostor naležato:
-    velká levá polovina elipsy tvoří tvar "("
-    a zůstává otevřená směrem doprava.
-  */
-  const centerX = width * .88;
+  const centerX = width * .91;
   const centerY = height * .50;
   const outerX = width * .78;
-  const outerY = height * .72;
+  const outerY = height * .70;
   const startAngle = Math.PI * .50;
   const endAngle = Math.PI * 1.50;
-  const pulse = Math.sin(time * .0012) * 3;
-
-  const interiorGlow = context.createRadialGradient(
-    width * .38,
-    height * .50,
-    12,
-    width * .48,
-    height * .50,
-    Math.max(width, height) * .72
-  );
-
-  interiorGlow.addColorStop(0, "rgba(255,220,155,.075)");
-  interiorGlow.addColorStop(.52, "rgba(199,155,51,.022)");
-  interiorGlow.addColorStop(1, "rgba(0,0,0,0)");
 
   context.save();
-  context.fillStyle = interiorGlow;
+
+  const glow = context.createRadialGradient(
+    width * .42,
+    height * .50,
+    18,
+    width * .50,
+    height * .50,
+    Math.max(width, height) * .68
+  );
+
+  glow.addColorStop(0, "rgba(255,220,155,.055)");
+  glow.addColorStop(.55, "rgba(199,155,51,.018)");
+  glow.addColorStop(1, "rgba(0,0,0,0)");
+
+  context.fillStyle = glow;
   context.fillRect(0, 0, width, height);
 
-  const shell = context.createLinearGradient(
-    width * .06,
-    height * .50,
-    width,
-    height * .50
-  );
-
-  shell.addColorStop(0, "rgba(255,220,160,.06)");
-  shell.addColorStop(.38, "rgba(255,230,180,.38)");
-  shell.addColorStop(.72, "rgba(255,220,160,.13)");
-  shell.addColorStop(1, "rgba(255,220,160,0)");
-
-  context.strokeStyle = shell;
-  context.lineWidth = 1.35;
-
-  context.beginPath();
-  context.ellipse(
-    centerX,
-    centerY,
-    outerX,
-    outerY,
-    0,
-    startAngle,
-    endAngle
-  );
-  context.stroke();
-
-  for (let ring = 1; ring <= 5; ring += 1) {
+  for (let ring = 0; ring < 5; ring += 1) {
     const inset = ring * .105;
-    const breathing = ring === 1 ? pulse : 0;
 
     context.beginPath();
     context.ellipse(
-      centerX - ring * 7,
+      centerX - ring * 6,
       centerY,
       outerX * (1 - inset),
-      outerY * (1 - inset) + breathing,
+      outerY * (1 - inset),
       0,
       startAngle,
       endAngle
     );
 
     context.strokeStyle = "rgba(255,220,160," +
-      (.18 - ring * .022) +
+      (.16 - ring * .022) +
       ")";
 
-    context.lineWidth = ring === 1 ? 1 : .7;
+    context.lineWidth = ring === 0 ? 1.2 : .7;
     context.stroke();
   }
 
-  context.setLineDash([3, 10]);
-  context.globalAlpha = .42;
+  context.setLineDash([3, 11]);
+  context.globalAlpha = .28;
 
-  for (let meridian = 1; meridian <= 4; meridian += 1) {
-    const ratio = meridian / 5;
-    const bendX = centerX - outerX * ratio;
-    const bendY = outerY *
-      Math.sqrt(Math.max(0, 1 - ratio * ratio));
+  for (let curve = 1; curve <= 3; curve += 1) {
+    const amount = curve / 4;
+    const bendX = centerX - outerX * amount;
 
     context.beginPath();
-    context.moveTo(centerX, centerY - outerY + 12);
+    context.moveTo(centerX, centerY - outerY + 14);
     context.quadraticCurveTo(
-      bendX - outerX * .16,
+      bendX - outerX * .14,
       centerY,
       centerX,
-      centerY + outerY - 12
+      centerY + outerY - 14
     );
-    context.strokeStyle = "rgba(255,220,160,.11)";
-    context.lineWidth = .65;
-    context.stroke();
 
-    context.beginPath();
-    context.moveTo(bendX, centerY - bendY);
-    context.lineTo(bendX, centerY + bendY);
-    context.strokeStyle = "rgba(255,220,160,.055)";
+    context.strokeStyle = "rgba(255,220,160,.10)";
+    context.lineWidth = .65;
     context.stroke();
   }
 
   context.setLineDash([]);
 
-  const sweep = time * .00012;
-  const signalX = centerX + Math.cos(sweep + Math.PI) * outerX;
-  const signalY = centerY + Math.sin(sweep + Math.PI) * outerY;
+  const sweep =
+    startAngle +
+    (Math.sin(time * .00012) + 1) * Math.PI / 2;
 
-  context.globalAlpha = .78;
+  context.globalAlpha = .72;
   context.fillStyle = "#ffe2ad";
   context.beginPath();
-  context.arc(signalX, signalY, 1.8, 0, Math.PI * 2);
+  context.arc(
+    centerX + Math.cos(sweep) * outerX,
+    centerY + Math.sin(sweep) * outerY,
+    1.6,
+    0,
+    Math.PI * 2
+  );
   context.fill();
 
   context.restore();
@@ -547,12 +539,15 @@ function drawTerraAxis(time) {
 
 function drawCore(core, time) {
   const position = getCorePosition(core);
-  const scale = .72 + position.depth * .40;
+  const scale =
+    (.72 + position.depth * .40) *
+    position.perspective;
+
   const radius = core.radius * scale;
   const active = selectedCore && selectedCore.id === core.id;
 
   context.save();
-  context.globalAlpha = .48 + position.depth * .52;
+  context.globalAlpha = .58 + position.depth * .36;
 
   const glow = context.createRadialGradient(
     position.x,
@@ -560,66 +555,84 @@ function drawCore(core, time) {
     2,
     position.x,
     position.y,
-    radius * 1.45
+    radius * 1.52
   );
 
   glow.addColorStop(
     0,
     active
-      ? "rgba(255,245,215,.95)"
-      : "rgba(255,225,175,.74)"
+      ? "rgba(255,247,220,.98)"
+      : "rgba(255,226,176,.76)"
   );
 
   glow.addColorStop(
-    .24,
+    .26,
     active
-      ? "rgba(255,185,95,.52)"
-      : "rgba(255,185,95,.25)"
+      ? "rgba(255,185,95,.54)"
+      : "rgba(255,185,95,.28)"
   );
 
   glow.addColorStop(1, "rgba(255,185,95,0)");
 
   context.fillStyle = glow;
   context.beginPath();
-  context.arc(position.x, position.y, radius * 1.45, 0, Math.PI * 2);
+  context.arc(position.x, position.y, radius * 1.52, 0, Math.PI * 2);
   context.fill();
 
   context.strokeStyle = active
-    ? "rgba(255,240,205,.94)"
-    : "rgba(255,220,160,.54)";
+    ? "rgba(255,246,214,.98)"
+    : "rgba(255,224,170,.72)";
 
-  context.lineWidth = active ? 1.8 : 1;
+  context.lineWidth = active ? 2 : 1.3;
   context.beginPath();
   context.arc(position.x, position.y, radius, 0, Math.PI * 2);
   context.stroke();
 
-  const surfaceSpin = scene.yaw;
-const surfaceTilt = scene.pitch * .42;
+  const surfaceSpin = scene.yaw + scene.roll * .30;
+  const surfaceTilt = scene.pitch * .58;
 
-  for (let ring = 1; ring < 5; ring += 1) {
+  context.save();
+  context.translate(position.x, position.y);
+  context.rotate(surfaceTilt);
+
+  for (let latitude = -3; latitude <= 3; latitude += 1) {
+    const ratio = latitude / 4;
+    const y = ratio * radius;
+    const horizontalRadius =
+      Math.sqrt(Math.max(0, 1 - ratio * ratio)) *
+      radius;
+
+    const verticalRadius = Math.max(
+      2,
+      horizontalRadius * .15
+    );
+
     context.beginPath();
     context.ellipse(
       0,
-      0,
-      radius,
-      radius * ring / 5,
+      y,
+      horizontalRadius,
+      verticalRadius,
       0,
       0,
       Math.PI * 2
     );
 
-    context.strokeStyle = "rgba(255,220,160," +
-      (active ? .30 : .17) +
-      ")";
+    context.strokeStyle = active
+      ? "rgba(255,241,202,.56)"
+      : "rgba(255,222,164,.34)";
 
-    context.lineWidth = .7;
+    context.lineWidth = active ? 1 : .8;
     context.stroke();
   }
 
-  for (let line = 0; line < 8; line += 1) {
-    const phase = line / 8 * Math.PI + surfaceSpin;
+  for (let longitude = 0; longitude < 9; longitude += 1) {
+    const phase =
+      longitude / 9 * Math.PI +
+      surfaceSpin;
+
     const longitudeRadius = Math.max(
-      radius * .12,
+      radius * .075,
       Math.abs(Math.cos(phase)) * radius
     );
 
@@ -634,35 +647,49 @@ const surfaceTilt = scene.pitch * .42;
       Math.PI * 2
     );
 
-    context.strokeStyle = "rgba(255,220,160," +
-      (active ? .25 : .13) +
-      ")";
+    context.strokeStyle = active
+      ? "rgba(255,242,205,.54)"
+      : "rgba(255,222,164,.32)";
 
-    context.lineWidth = .7;
+    context.lineWidth = active ? 1 : .78;
     context.stroke();
   }
 
   context.restore();
 
-  const signalAngle = surfaceSpin;
-  const signalX = position.x + Math.cos(signalAngle) * radius * .78;
-  const signalY = position.y + Math.sin(signalAngle) * radius * .52;
+  const signalX =
+    position.x +
+    Math.cos(surfaceSpin) * radius * .78;
+
+  const signalY =
+    position.y +
+    Math.sin(surfaceSpin) * radius * .52;
 
   context.fillStyle = active
-    ? "rgba(255,248,220,.96)"
-    : "rgba(255,225,175,.72)";
+    ? "rgba(255,250,226,.98)"
+    : "rgba(255,231,182,.84)";
 
   context.beginPath();
-  context.arc(signalX, signalY, active ? 2 : 1.35, 0, Math.PI * 2);
+  context.arc(
+    signalX,
+    signalY,
+    active ? 2.2 : 1.55,
+    0,
+    Math.PI * 2
+  );
   context.fill();
 
-  const pulse = radius + 7 + Math.sin(time * .003) * 3;
+  const pulse =
+    radius +
+    7 +
+    Math.sin(time * .003) * 3;
 
   context.beginPath();
   context.arc(position.x, position.y, pulse, 0, Math.PI * 2);
   context.strokeStyle = active
-    ? "rgba(255,235,195,.34)"
-    : "rgba(255,220,160,.10)";
+    ? "rgba(255,235,195,.38)"
+    : "rgba(255,220,160,.14)";
+  context.lineWidth = 1;
   context.stroke();
 
   context.fillStyle = "#fff0cf";
@@ -673,7 +700,7 @@ const surfaceTilt = scene.pitch * .42;
 
   const stats = getCoreStats(core.id);
 
-  context.fillStyle = "rgba(255,240,210,.65)";
+  context.fillStyle = "rgba(255,240,210,.74)";
   context.font = Math.max(8, Math.round(9 * scale)) + "px system-ui";
   context.fillText(stats.used + "/70", position.x, position.y + 12);
 
@@ -691,7 +718,9 @@ function render(time) {
   lastFrameTime = time;
 
   if (activePointers.size === 0) {
-    scene.yaw = normaliseAngle(scene.yaw + elapsed * .000035);
+    scene.yaw = normaliseAngle(
+      scene.yaw + elapsed * .000042
+    );
   }
 
   context.clearRect(0, 0, width, height);
@@ -1014,6 +1043,23 @@ function getPointerCenter(first, second) {
   };
 }
 
+function getPointerAngle(first, second) {
+  return Math.atan2(
+    second.y - first.y,
+    second.x - first.x
+  );
+}
+
+function updateGestureHint() {
+  const hints = document.querySelectorAll(".hud span");
+
+  if (hints.length >= 3) {
+    hints[0].textContent = "1 prst: 3D otočení";
+    hints[1].textContent = "2 prsty: posun · zoom · šejdr";
+    hints[2].textContent = "klepnutí: otevřít jádro";
+  }
+}
+
 function beginRotationGesture(pointer) {
   gesture = {
     type: "rotate",
@@ -1033,7 +1079,8 @@ function beginTransformGesture() {
     type: "transform",
     moved: false,
     distance: getPointerDistance(first, second),
-    center: getPointerCenter(first, second)
+    center: getPointerCenter(first, second),
+    angle: getPointerAngle(first, second)
   };
 }
 
@@ -1117,8 +1164,16 @@ canvas.addEventListener("pointermove", (event) => {
   if (activePointers.size === 1 && gesture?.type === "rotate") {
     if (Math.abs(deltaX) > .5 || Math.abs(deltaY) > .5) {
       gesture.moved = true;
-      scene.yaw = normaliseAngle(scene.yaw + deltaX * .012);
-      scene.pitch = clamp(scene.pitch + deltaY * .010, -.86, .86);
+
+      scene.yaw = normaliseAngle(
+        scene.yaw + deltaX * .012
+      );
+
+      scene.pitch = clamp(
+        scene.pitch + deltaY * .006,
+        -.45,
+        .45
+      );
     }
 
     return;
@@ -1135,25 +1190,29 @@ canvas.addEventListener("pointermove", (event) => {
   const [first, second] = getActivePointerList();
   const distance = getPointerDistance(first, second);
   const center = getPointerCenter(first, second);
+  const angle = getPointerAngle(first, second);
 
   if (gesture.distance > 0 && distance > 0) {
-    scene.spread = clamp(
-      scene.spread * distance / gesture.distance,
-      MIN_SCENE_SPREAD,
-      getMaxSceneSpread()
+    scene.zoom = clamp(
+      scene.zoom * distance / gesture.distance,
+      .92,
+      getMaxSceneZoom()
     );
   }
 
   const moveX = center.x - gesture.center.x;
   const moveY = center.y - gesture.center.y;
+  const turn = normaliseAngle(angle - gesture.angle);
 
   scene.panX += moveX;
   scene.panY += moveY;
+  scene.roll = normaliseAngle(scene.roll + turn);
 
   if (
     Math.abs(moveX) > .5 ||
     Math.abs(moveY) > .5 ||
-    Math.abs(distance - gesture.distance) > .5
+    Math.abs(distance - gesture.distance) > .5 ||
+    Math.abs(turn) > .004
   ) {
     gesture.moved = true;
   }
@@ -1162,6 +1221,7 @@ canvas.addEventListener("pointermove", (event) => {
 
   gesture.distance = distance;
   gesture.center = center;
+  gesture.angle = angle;
 });
 
 canvas.addEventListener("pointerup", (event) => {
@@ -1180,6 +1240,7 @@ window.addEventListener("resize", () => {
 resizeCanvas();
 constrainScene();
 updatePills();
+updateGestureHint();
 requestAnimationFrame(render);
 
 if ("serviceWorker" in navigator) {
