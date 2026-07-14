@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#05050a">
+  <title>CHT 360°‰ • Jádra a pracovní deska</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="app" aria-label="CHT 360 stupňů promile">
+    <canvas id="coreCanvas" aria-label="Čtyři interaktivní světy Paměti"></canvas>
+
+    <header class="hud" aria-hidden="true">
+      <div class="hud__left">PNFT • Paměť</div>
+      <div class="hud__title">{*(˚.•).•)//CHT 360°‰.\(•.(•.)ア)</div>
+      <div class="hud__right">JÁDRA • DESKA</div>
+    </header>
+
+    <div class="hint" id="gestureHint" aria-hidden="true">
+      1 prst: otáčení • klepnutí: vybrat jádro • 2 prsty: náklon a zoom
+    </div>
+
+    <section class="workbench" id="workbench" aria-hidden="true">
+      <div class="workbench__glass"></div>
+
+      <div class="workbench__content">
+        <div class="workbench__heading">
+          <p class="eyebrow">PŘEDNÍ VRSTVA</p>
+          <h1>Pracovní deska</h1>
+          <p class="workbench__lead">
+            Jádra zůstávají živá pod deskou. Táhni po její volné ploše a stále je otáčíš.
+          </p>
+        </div>
+
+        <div class="core-tabs" role="tablist" aria-label="Výběr jádra">
+          <button class="core-tab" type="button" data-core="game" role="tab">Hra</button>
+          <button class="core-tab" type="button" data-core="control" role="tab">Řízení</button>
+          <button class="core-tab" type="button" data-core="earth" role="tab">Země</button>
+          <button class="core-tab" type="button" data-core="language" role="tab">Jazyk</button>
+        </div>
+
+        <div class="editor">
+          <div class="editor__topline">
+            <span id="selectedCoreLabel">Země</span>
+            <span id="selectedCoreCounter">0 / 70 slotů</span>
+          </div>
+
+          <label class="editor__label" for="coreNote">První poznámka tohoto jádra</label>
+
+          <textarea
+            id="coreNote"
+            rows="5"
+            placeholder="Sem se bude později programovat jen tento svět…"
+          ></textarea>
+
+          <div class="editor__bottomline">
+            <span id="saveStatus">Ukládá se odděleně</span>
+            <button class="quiet-button" id="clearNote" type="button">Vyčistit</button>
+          </div>
+        </div>
+
+        <div class="board-actions">
+          <button class="outline-button" id="restoreCores" type="button">
+            Rozvinout jádra
+          </button>
+
+          <span class="connection-state">
+            samostatný modul • připraven k napojení
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <button class="collapse-button" id="toggleCores" type="button" aria-pressed="false">
+      <span class="collapse-button__glyph">◉</span>
+      <span id="toggleLabel">Skrýt jádra</span>
+    </button>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
