@@ -1,753 +1,1773 @@
-const SLOT_LIMIT = 70;
-const STORAGE_PREFIX = "VaFiT_360_SLOT_";
-const EXPORT_VERSION = 1;
+"use strict";
 
-const WORLDS = {
-  earth: {
-    name: "ZEMĚ",
-    hint: "Paměť světa a úhlu pohledu",
-    color: "#9b9f7e",
-  },
-  language: {
-    name: "JAZYK",
-    hint: "Slova, symboly a jejich význam",
-    color: "#c79b33",
-  },
-  game: {
-    name: "HRA",
-    hint: "Pravidla, světy a pohyblivé modely",
-    color: "#f0c96d",
-  },
-  control: {
-    name: "ŘÍZENÍ",
-    hint: "Spojení, plán a systémové moduly",
-    color: "#b4aa92",
-  },
-};
+const canvas = document.getElementById("globe-canvas");
+const context = canvas.getContext("2d");
+const panel = document.getElementById("memoryPanel");
+const panelTitle = document.getElementById("panelTitle");
+const panelSub = document.getElementById("panelSub");
+const closePanel = document.getElementById("closePanel");
+const slotGrid = document.getElementById("slotGrid");
+const slotEditor = document.getElementById("slotEditor");
+const slotName = document.getElementById("slotName");
+const slotContent = document.getElementById("slotContent");
+const saveSlot = document.getElementById("saveSlot");
+const clearSlot = document.getElementById("clearSlot");
+const searchInput = document.getElementById("searchInput");
+const exportCore = document.getElementById("exportCore");
+const importCore = document.getElementById("importCore");
+const exportAll = document.getElementById("exportAll");
+const importAll = document.getElementById("importAll");
+const fileInput = document.getElementById("fileInput");
+const statusBox = document.getElementById("statusBox");
 
-const $ = (id) => document.getElementById(id);
-const canvas = $("towerCanvas");
-const stage = canvas?.closest(".tower-stage");
-const ctx = canvas?.getContext("2d");
+const STORAGE_KEY = "vaft_pamet_v1";
+const SLOT_COUNT = 70;
+const SCENE_KEY = "vaft_pamet_scene_v2";
+const MIN_SCENE_SPREAD = .96;
+const MAX_SCENE_SPREAD = 2.8;
 
-if (!canvas || !stage || !ctx) {
-  throw new Error("VaF'i'T 360°‰: chybí towerCanvas.");
-}
+const TROJKA_MODEL_STORAGE_KEY = "cht360_trojka_models_v1";
 
-const ui = {
-  activeWorldName: $("activeWorldName"),
-  activeWorldHint: $("activeWorldHint"),
-  status: $("status"),
-  slotModal: $("slotModal"),
-  slotForm: $("slotForm"),
-  slotWorld: $("slotWorld"),
-  slotTitle: $("slotTitle"),
-  slotLabel: $("slotLabel"),
-  slotType: $("slotType"),
-  slotIcon: $("slotIcon"),
-  slotColor: $("slotColor"),
-  slotUrl: $("slotUrl"),
-  slotContent: $("slotContent"),
-  slotBudget: $("slotBudget"),
-  clearSlotButton: $("clearSlotButton"),
-  openSlotButton: $("openSlotButton"),
-  exportButton: $("exportButton"),
-  importButton: $("importButton"),
-  importInput: $("importInput"),
-};
-
-const profile = [
-  { x: -1.22, z: 0.62, depth: 1 },
-  { x: -0.61, z: -0.56, depth: 0.2 },
-  { x: 0, z: 0.62, depth: 1 },
-  { x: 0.61, z: -0.56, depth: 0.2 },
-  { x: 1.22, z: 0.62, depth: 1 },
+const TROJKA_PROFILE = [
+  { id: "leva-hrana", label: "LevÃ¡ hrana", x: -1.28, z: .76, depth: 1 },
+  { id: "levy-propad", label: "LevÃ½ propad", x: -.64, z: -.58, depth: .2 },
+  { id: "stred", label: "StÅed", x: 0, z: .76, depth: 1 },
+  { id: "pravy-propad", label: "PravÃ½ propad", x: .64, z: -.58, depth: .2 },
+  { id: "prava-hrana", label: "PravÃ¡ hrana", x: 1.28, z: .76, depth: 1 }
 ];
 
-const scene = {
-  world: "game",
-  yaw: -0.12,
-  pitch: -0.08,
-  zoom: 1,
-  width: 0,
-  height: 0,
-  dpr: 1,
-  hitSlots: [],
-  editing: { world: "game", index: 0 },
-  pointers: new Map(),
-  drag: null,
-  multiGesture: null,
-  lastFrame: performance.now(),
-};
+const TROJKA_RAILS = [
+  { id: "horni-kolej", label: "HornÃ­ kolej", y: -.47 },
+  { id: "dolni-kolej", label: "DolnÃ­ kolej", y: .47 }
+];
 
-const slots = Object.fromEntries(
-  Object.keys(WORLDS).map((world) => [world, Array.from({ length: SLOT_LIMIT }, (_, index) => loadSlot(world, index))]),
-);
+let trojkaModels = loadTrojkaModels();
 
-installCanvasFallback();
-bindUi();
-resizeCanvas();
-selectWorld("game", false);
-setStatus("360°‰ je připraveno · ležatá trojka čeká na modely.");
-requestAnimationFrame(render);
-
-function installCanvasFallback() {
-  canvas.style.display = "block";
-  canvas.style.width = "100%";
-  canvas.style.height = "100%";
-  canvas.style.touchAction = "none";
-  canvas.style.cursor = "grab";
-
-  if (getComputedStyle(stage).position === "static") {
-    stage.style.position = "relative";
+const cores = [
+  {
+    id: "earth",
+    title: "ZemÄ",
+    subtitle: "Modeling, svÄty a Ãºhel pohledu",
+    radius: 50
+  },
+  {
+    id: "language",
+    title: "Jazyk",
+    subtitle: "PÃ­smena, symboly, glyphy a vÃ½znam",
+    radius: 50
+  },
+  {
+    id: "game",
+    title: "Hra",
+    subtitle: "Pravidla, udÃ¡losti a postup",
+    radius: 50
+  },
+  {
+    id: "control",
+    title: "ÅÃ­zenÃ­",
+    subtitle: "SmÄrovÃ¡nÃ­, jednotky a propojenÃ­",
+    radius: 50
   }
-}
+];
 
-function storageKey(world, index) {
-  return `${STORAGE_PREFIX}${world}_${index}`;
-}
+let memory = loadMemory();
+let scene = loadScene();
+let width = 0;
+let height = 0;
+let pixelRatio = 1;
+let lastFrameTime = 0;
+let selectedCore = null;
+let selectedSlotIndex = null;
+let activePointers = new Map();
+let gesture = null;
+let importMode = "core";
 
-function emptySlot(world, index) {
+function createEmptySlot(index) {
   return {
-    id: `${world}-${index + 1}`,
-    label: "",
-    type: "TEXT",
-    icon: "",
-    color: WORLDS[world].color,
-    url: "",
+    id: index + 1,
+    name: `Slot ${index + 1}`,
     content: "",
-    created: null,
-    updated: null,
+    updatedAt: null
   };
 }
 
-function normalizeSlot(value, world, index) {
-  const base = emptySlot(world, index);
+function createEmptyCore() {
+  return Array.from({ length: SLOT_COUNT }, (_, index) => createEmptySlot(index));
+}
 
-  if (!value || typeof value !== "object") return base;
-
+function createEmptyMemory() {
   return {
-    ...base,
-    ...value,
-    id: base.id,
-    label: String(value.label || "").slice(0, 80),
-    type: String(value.type || "TEXT").toUpperCase(),
-    icon: String(value.icon || "").slice(0, 8),
-    color: /^#[0-9a-f]{6}$/i.test(value.color || "") ? value.color : base.color,
-    url: String(value.url || ""),
-    content: String(value.content || "").slice(0, 240000),
+    version: 1,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    cores: {
+      earth: createEmptyCore(),
+      language: createEmptyCore(),
+      game: createEmptyCore(),
+      control: createEmptyCore()
+    }
   };
 }
 
-function loadSlot(world, index) {
+function loadMemory() {
   try {
-    const raw = localStorage.getItem(storageKey(world, index));
-    return raw ? normalizeSlot(JSON.parse(raw), world, index) : emptySlot(world, index);
-  } catch {
-    return emptySlot(world, index);
-  }
-}
+    const raw = localStorage.getItem(STORAGE_KEY);
 
-function saveSlot(world, index, value) {
-  const slot = normalizeSlot(value, world, index);
-  const existing = slots[world][index];
-  const now = new Date().toISOString();
-
-  slot.created = existing.created || now;
-  slot.updated = now;
-  slots[world][index] = slot;
-  localStorage.setItem(storageKey(world, index), JSON.stringify(slot));
-  updateCounts();
-  return slot;
-}
-
-function clearSlot(world, index) {
-  localStorage.removeItem(storageKey(world, index));
-  slots[world][index] = emptySlot(world, index);
-  updateCounts();
-}
-
-function isFilled(slot) {
-  return Boolean(
-    slot.label.trim() ||
-      slot.url.trim() ||
-      slot.content.trim() ||
-      slot.icon.trim() ||
-      slot.type !== "TEXT",
-  );
-}
-
-function countFilled(world) {
-  return slots[world].filter(isFilled).length;
-}
-
-function updateCounts() {
-  Object.keys(WORLDS).forEach((world) => {
-    const count = $("count-" + world);
-    if (count) count.textContent = `${countFilled(world)}/${SLOT_LIMIT}`;
-  });
-}
-
-function bindUi() {
-  document.querySelectorAll(".core-pill[data-world]").forEach((button) => {
-    button.addEventListener("click", () => selectWorld(button.dataset.world));
-  });
-
-  document.querySelectorAll("[data-close-modal]").forEach((button) => {
-    button.addEventListener("click", closeSlot);
-  });
-
-  ui.slotForm?.addEventListener("submit", (event) => {
-    event.preventDefault();
-    saveCurrentForm();
-    closeSlot();
-  });
-
-  ui.slotContent?.addEventListener("input", updateBudget);
-
-  ui.clearSlotButton?.addEventListener("click", () => {
-    const { world, index } = scene.editing;
-    clearSlot(world, index);
-    openSlot(world, index);
-    setStatus(`Slot ${index + 1} v jádru ${WORLDS[world].name} je vyčištěný.`);
-  });
-
-  ui.openSlotButton?.addEventListener("click", () => {
-    const slot = saveCurrentForm();
-    const target = slot.url.trim();
-
-    if (!target) {
-      setStatus("Tomuto slotu zatím chybí odkaz nebo cesta aplikace.");
-      return;
+    if (!raw) {
+      return createEmptyMemory();
     }
 
-    window.open(target, "_blank", "noopener");
-  });
+    const parsed = JSON.parse(raw);
 
-  ui.exportButton?.addEventListener("click", exportCore);
-  ui.importButton?.addEventListener("click", () => ui.importInput?.click());
-  ui.importInput?.addEventListener("change", importCore);
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeSlot();
-  });
-
-  canvas.addEventListener("pointerdown", onPointerDown);
-  canvas.addEventListener("pointermove", onPointerMove);
-  canvas.addEventListener("pointerup", onPointerUp);
-  canvas.addEventListener("pointercancel", onPointerUp);
-  canvas.addEventListener(
-    "wheel",
-    (event) => {
-      event.preventDefault();
-      scene.zoom = clamp(scene.zoom - event.deltaY * 0.001, 0.72, 1.62);
-    },
-    { passive: false },
-  );
-
-  window.addEventListener("resize", resizeCanvas);
-  new ResizeObserver(resizeCanvas).observe(stage);
-}
-
-function selectWorld(world, announce = true) {
-  if (!WORLDS[world]) return;
-
-  scene.world = world;
-  ui.activeWorldName.textContent = WORLDS[world].name;
-  ui.activeWorldHint.textContent = WORLDS[world].hint;
-
-  document.querySelectorAll(".core-pill[data-world]").forEach((button) => {
-    const active = button.dataset.world === world;
-    button.classList.toggle("is-active", active);
-    button.setAttribute("aria-pressed", String(active));
-  });
-
-  updateCounts();
-  if (announce) setStatus(`Aktivní jádro: ${WORLDS[world].name}.`);
-}
-
-function openSlot(world, index) {
-  const slot = slots[world][index];
-  scene.editing = { world, index };
-
-  ui.slotWorld.textContent = WORLDS[world].name;
-  ui.slotTitle.textContent = `Slot ${index + 1}`;
-  ui.slotLabel.value = slot.label;
-  ui.slotType.value = slot.type;
-  ui.slotIcon.value = slot.icon;
-  ui.slotColor.value = slot.color;
-  ui.slotUrl.value = slot.url;
-  ui.slotContent.value = slot.content;
-  updateBudget();
-
-  ui.slotModal.hidden = false;
-  requestAnimationFrame(() => ui.slotLabel.focus());
-}
-
-function closeSlot() {
-  if (ui.slotModal) ui.slotModal.hidden = true;
-}
-
-function currentFormValue() {
-  const { world, index } = scene.editing;
-  return normalizeSlot(
-    {
-      label: ui.slotLabel.value,
-      type: ui.slotType.value,
-      icon: ui.slotIcon.value,
-      color: ui.slotColor.value,
-      url: ui.slotUrl.value.trim(),
-      content: ui.slotContent.value,
-    },
-    world,
-    index,
-  );
-}
-
-function saveCurrentForm() {
-  const { world, index } = scene.editing;
-  const slot = saveSlot(world, index, currentFormValue());
-  setStatus(`Slot ${index + 1} je uložený v jádru ${WORLDS[world].name}.`);
-  return slot;
-}
-
-function updateBudget() {
-  if (!ui.slotBudget || !ui.slotContent) return;
-  ui.slotBudget.textContent = `Obsah: ${ui.slotContent.value.length.toLocaleString("cs-CZ")} / 240 000 znaků`;
-}
-
-function exportCore() {
-  const payload = {
-    app: "VaF'i'T 360°‰",
-    version: EXPORT_VERSION,
-    exportedAt: new Date().toISOString(),
-    slots,
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-
-  link.href = url;
-  link.download = `VaFiT-360-pamet-${dateStamp()}.json`;
-  link.click();
-  URL.revokeObjectURL(url);
-  setStatus("Export Paměti je hotový.");
-}
-
-async function importCore(event) {
-  const [file] = event.target.files || [];
-  event.target.value = "";
-  if (!file) return;
-
-  try {
-    const data = JSON.parse(await file.text());
-    if (!data || typeof data !== "object" || !data.slots || typeof data.slots !== "object") {
-      throw new Error("Soubor neobsahuje rozpoznatelnou Paměť.");
+    if (!parsed.cores) {
+      throw new Error("NeplatnÃ¡ struktura");
     }
 
-    let imported = 0;
-    Object.keys(WORLDS).forEach((world) => {
-      const source = Array.isArray(data.slots[world]) ? data.slots[world] : [];
-      source.slice(0, SLOT_LIMIT).forEach((item, index) => {
-        const slot = normalizeSlot(item, world, index);
-        if (!isFilled(slot)) return;
-        slots[world][index] = slot;
-        localStorage.setItem(storageKey(world, index), JSON.stringify(slot));
-        imported += 1;
-      });
-    });
+    for (const coreId of ["earth", "language", "game", "control"]) {
+      if (!Array.isArray(parsed.cores[coreId])) {
+        parsed.cores[coreId] = createEmptyCore();
+      }
 
-    updateCounts();
-    setStatus(`Import hotový: ${imported} ${plural(imported, "slot", "sloty", "slotů")}.`);
+      while (parsed.cores[coreId].length < SLOT_COUNT) {
+        parsed.cores[coreId].push(createEmptySlot(parsed.cores[coreId].length));
+      }
+
+      parsed.cores[coreId] = parsed.cores[coreId].slice(0, SLOT_COUNT);
+    }
+
+    return parsed;
   } catch (error) {
-    setStatus(`Import se nepovedl: ${error.message}`);
+    console.warn("PamÄÅ¥ byla obnovena do vÃ½chozÃ­ho stavu.", error);
+    return createEmptyMemory();
   }
 }
 
-function onPointerDown(event) {
-  canvas.setPointerCapture?.(event.pointerId);
-  scene.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-
-  if (scene.pointers.size === 1) {
-    scene.drag = {
-      x: event.clientX,
-      y: event.clientY,
-      started: performance.now(),
-      moved: false,
-      multi: false,
-    };
-  } else {
-    scene.drag.multi = true;
-    scene.multiGesture = null;
-  }
-
-  canvas.style.cursor = "grabbing";
+function clamp(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value));
 }
 
-function onPointerMove(event) {
-  if (!scene.pointers.has(event.pointerId)) return;
+function normaliseAngle(value) {
+  const circle = Math.PI * 2;
+  return ((value + Math.PI) % circle + circle) % circle - Math.PI;
+}
 
-  const previous = scene.pointers.get(event.pointerId);
-  scene.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+function createDefaultScene() {
+  return {
+    yaw: 0,
+    pitch: 0,
+    roll: 0,
+    zoom: 1,
+    panX: 0,
+    panY: 0
+  };
+}
 
-  if (scene.pointers.size === 1) {
-    const dx = event.clientX - previous.x;
-    const dy = event.clientY - previous.y;
-    scene.yaw += dx * 0.009;
-    scene.pitch = clamp(scene.pitch + dy * 0.007, -0.62, 0.48);
+function loadScene() {
+  const fallback = createDefaultScene();
 
-    if (scene.drag && Math.hypot(event.clientX - scene.drag.x, event.clientY - scene.drag.y) > 8) {
-      scene.drag.moved = true;
+  try {
+    const raw = localStorage.getItem(SCENE_KEY);
+
+    if (!raw) {
+      return fallback;
     }
-    return;
-  }
 
-  const points = [...scene.pointers.values()];
-  const distance = Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
-  const center = { x: (points[0].x + points[1].x) / 2, y: (points[0].y + points[1].y) / 2 };
+    const saved = JSON.parse(raw);
 
-  if (scene.multiGesture) {
-    scene.zoom = clamp(scene.zoom + (distance - scene.multiGesture.distance) * 0.003, 0.72, 1.62);
-    scene.yaw += (center.x - scene.multiGesture.center.x) * 0.004;
-    scene.pitch = clamp(scene.pitch + (center.y - scene.multiGesture.center.y) * 0.004, -0.62, 0.48);
-  }
-
-  scene.multiGesture = { distance, center };
-}
-
-function onPointerUp(event) {
-  if (!scene.pointers.has(event.pointerId)) return;
-
-  const wasTap =
-    scene.pointers.size === 1 &&
-    scene.drag &&
-    !scene.drag.moved &&
-    !scene.drag.multi &&
-    performance.now() - scene.drag.started < 360;
-
-  scene.pointers.delete(event.pointerId);
-  canvas.releasePointerCapture?.(event.pointerId);
-
-  if (scene.pointers.size < 2) scene.multiGesture = null;
-  if (scene.pointers.size === 0) {
-    canvas.style.cursor = "grab";
-    if (wasTap) pickSlot(event.clientX, event.clientY);
-    scene.drag = null;
+    return {
+      yaw: Number.isFinite(saved.yaw) ? saved.yaw : fallback.yaw,
+      pitch: normaliseAngle(
+        Number.isFinite(saved.pitch) ? saved.pitch : fallback.pitch
+      ),
+      roll: Number.isFinite(saved.roll) ? saved.roll : fallback.roll,
+      zoom: clamp(
+        Number.isFinite(saved.zoom)
+          ? saved.zoom
+          : (
+            Number.isFinite(saved.spread)
+              ? saved.spread
+              : fallback.zoom
+          ),
+        .92,
+        2
+      ),
+      panX: Number.isFinite(saved.panX) ? saved.panX : fallback.panX,
+      panY: Number.isFinite(saved.panY) ? saved.panY : fallback.panY
+    };
+  } catch (error) {
+    console.warn("RozloÅ¾enÃ­ scÃ©ny bylo obnoveno.", error);
+    return fallback;
   }
 }
 
-function pickSlot(clientX, clientY) {
-  const rect = canvas.getBoundingClientRect();
-  const x = clientX - rect.left;
-  const y = clientY - rect.top;
-  const match = scene.hitSlots
-    .map((hit) => ({ ...hit, distance: Math.hypot(hit.x - x, hit.y - y) }))
-    .filter((hit) => hit.distance <= hit.radius + 12)
-    .sort((a, b) => a.distance - b.distance)[0];
+function saveScene() {
+  localStorage.setItem(
+    SCENE_KEY,
+    JSON.stringify({
+      yaw: normaliseAngle(scene.yaw),
+      pitch: normaliseAngle(scene.pitch),
+      roll: normaliseAngle(scene.roll),
+      zoom: scene.zoom,
+      spread: scene.zoom,
+      panX: scene.panX,
+      panY: scene.panY
+    })
+  );
+}
 
-  if (match) {
-    openSlot(scene.world, match.index);
-  } else {
-    setStatus("Klepni na bod dráhy — otevře se k němu připojený slot.");
+function saveMemory(reason = "save") {
+  memory.updatedAt = new Date().toISOString();
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(memory));
+  updatePills();
+
+  window.dispatchEvent(
+    new CustomEvent("cht.memory.changed", {
+      detail: {
+        reason,
+        coreId: selectedCore?.id || null,
+        slotId: selectedSlotIndex === null ? null : selectedSlotIndex + 1,
+        updatedAt: memory.updatedAt
+      }
+    })
+  );
+}
+
+function byteSize(text) {
+  return new Blob([text]).size;
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) {
+    return `${bytes} B`;
   }
+
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+}
+
+function updatePills() {
+  for (const core of cores) {
+    const pill = document.getElementById(`pill-${core.id}`);
+
+    if (!pill) {
+      continue;
+    }
+
+    const stats = getCoreStats(core.id);
+    pill.textContent = `${core.title.toUpperCase()} Â· ${stats.used}/70`;
+  }
+}
+
+function getCoreStats(coreId) {
+  const slots = memory.cores[coreId];
+  const used = slots.filter((slot) => {
+    return slot.content.trim() || slot.name.trim() !== `Slot ${slot.id}`;
+  }).length;
+
+  const size = byteSize(JSON.stringify(slots));
+  return { used, size };
 }
 
 function resizeCanvas() {
-  const rect = canvas.getBoundingClientRect();
-  const width = Math.max(1, rect.width || stage.clientWidth || 320);
-  const height = Math.max(1, rect.height || stage.clientHeight || 460);
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const bounds = canvas.getBoundingClientRect();
 
-  scene.width = width;
-  scene.height = height;
-  scene.dpr = dpr;
-  canvas.width = Math.round(width * dpr);
-  canvas.height = Math.round(height * dpr);
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-}
-
-function render(now) {
-  const elapsed = Math.min((now - scene.lastFrame) / 1000, 0.05);
-  scene.lastFrame = now;
-  drawScene(now / 1000, elapsed);
-  requestAnimationFrame(render);
-}
-
-function drawScene(time) {
-  const { width, height } = scene;
-  if (!width || !height) return;
-
-  const color = hexToRgb(WORLDS[scene.world].color);
-  const background = ctx.createRadialGradient(width * 0.5, height * 0.44, 0, width * 0.5, height * 0.5, Math.max(width, height) * 0.8);
-  background.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, 0.16)`);
-  background.addColorStop(0.48, "#0d0d0a");
-  background.addColorStop(1, "#050504");
-  ctx.fillStyle = background;
-  ctx.fillRect(0, 0, width, height);
-
-  drawAmbientDust(time, color);
-  drawThreeSurface(color);
-  drawRails(time, color);
-  drawSockets(time, color);
-  drawSlotMarkers(color);
-  drawRunners(time, color);
-}
-
-function drawAmbientDust(time, color) {
-  ctx.save();
-  for (let index = 0; index < 28; index += 1) {
-    const phase = index * 17.31;
-    const x = ((Math.sin(time * 0.13 + phase) + 1) / 2) * scene.width;
-    const y = ((Math.cos(time * 0.18 + phase * 0.71) + 1) / 2) * scene.height;
-    const radius = 0.45 + (index % 4) * 0.23;
-    ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${0.07 + (index % 3) * 0.025})`;
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.restore();
-}
-
-function drawThreeSurface(color) {
-  const rows = [-0.92, -0.48, 0, 0.48, 0.92];
-
-  ctx.save();
-  for (let row = 0; row < rows.length - 1; row += 1) {
-    for (let segment = 0; segment < profile.length - 1; segment += 1) {
-      const a = profile[segment];
-      const b = profile[segment + 1];
-      const points = [
-        project({ x: a.x, y: rows[row], z: a.z }),
-        project({ x: b.x, y: rows[row], z: b.z }),
-        project({ x: b.x, y: rows[row + 1], z: b.z }),
-        project({ x: a.x, y: rows[row + 1], z: a.z }),
-      ];
-      const brightness = 0.055 + ((a.depth + b.depth) / 2) * 0.1 + (row % 2) * 0.015;
-
-      polygon(points, `rgba(${color.r}, ${color.g}, ${color.b}, ${brightness})`, `rgba(${color.r}, ${color.g}, ${color.b}, 0.19)`);
-    }
+  if (!bounds.width || !bounds.height) {
+    return;
   }
 
-  rows.forEach((row, index) => {
-    drawProfileLine(row, 0.012, `rgba(${color.r}, ${color.g}, ${color.b}, ${index === 2 ? 0.48 : 0.2})`, index === 2 ? 1.3 : 0.7);
-  });
+  pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  width = bounds.width;
+  height = bounds.height;
 
-  [-1.22, 1.22].forEach((x) => {
-    const anchor = profile.find((point) => point.x === x);
-    const from = project({ x, y: -0.92, z: anchor.z });
-    const to = project({ x, y: 0.92, z: anchor.z });
-    line(from, to, `rgba(${color.r}, ${color.g}, ${color.b}, 0.34)`, 1.1);
-  });
-  ctx.restore();
+  canvas.width = Math.round(width * pixelRatio);
+  canvas.height = Math.round(height * pixelRatio);
+  context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 }
 
-function drawRails(time, color) {
-  ctx.save();
-  [-0.47, 0.47].forEach((lane, laneIndex) => {
-    drawProfileLine(lane, 0.1, `rgba(${color.r}, ${color.g}, ${color.b}, 0.78)`, 1.6);
-    drawProfileLine(lane + (laneIndex ? -0.03 : 0.03), 0.07, `rgba(255, 238, 192, 0.22)`, 0.6);
-  });
+function getLandscapeLayout() {
+  const isLandscape = width >= height;
 
-  const pulse = 0.45 + Math.sin(time * 1.5) * 0.16;
-  drawProfileLine(0, 0.13, `rgba(255, 233, 179, ${pulse})`, 1.2);
-  ctx.restore();
-}
-
-function drawSockets(time, color) {
-  ctx.save();
-  profile.forEach((point, index) => {
-    [-0.47, 0.47].forEach((lane, laneIndex) => {
-      const position = project({ x: point.x, y: lane, z: point.z + 0.13 });
-      const pulse = 0.75 + Math.sin(time * 1.8 + index + laneIndex) * 0.12;
-      const radius = Math.max(3.4, 7 * position.scale * pulse);
-
-      ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.9)`;
-      ctx.lineWidth = 1.1;
-      ctx.beginPath();
-      ctx.arc(position.x, position.y, radius, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, 0.28)`;
-      ctx.beginPath();
-      ctx.arc(position.x, position.y, radius * 0.42, 0, Math.PI * 2);
-      ctx.fill();
-    });
-  });
-  ctx.restore();
-}
-
-function drawSlotMarkers(color) {
-  const activeSlots = slots[scene.world];
-  scene.hitSlots = [];
-
-  for (let index = 0; index < SLOT_LIMIT; index += 1) {
-    const position = slotPosition(index);
-    const point = project(position);
-    const slot = activeSlots[index];
-    const filled = isFilled(slot);
-    const selected = scene.editing.world === scene.world && scene.editing.index === index && !ui.slotModal.hidden;
-    const radius = clamp(2 + point.scale * 3.8, 2.5, 6.5);
-
-    if (point.x < -15 || point.x > scene.width + 15 || point.y < -15 || point.y > scene.height + 15) continue;
-
-    ctx.save();
-    if (filled) {
-      const glow = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius * 3.8);
-      glow.addColorStop(0, `rgba(${color.r}, ${color.g}, ${color.b}, 0.55)`);
-      glow.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(point.x, point.y, radius * 3.8, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    ctx.beginPath();
-    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
-    ctx.fillStyle = filled ? `rgba(${color.r}, ${color.g}, ${color.b}, 0.96)` : "rgba(255, 247, 224, 0.12)";
-    ctx.fill();
-    ctx.lineWidth = selected ? 2 : 0.85;
-    ctx.strokeStyle = selected ? "#fff0c5" : `rgba(${color.r}, ${color.g}, ${color.b}, 0.68)`;
-    ctx.stroke();
-    ctx.restore();
-
-    scene.hitSlots.push({ index, x: point.x, y: point.y, radius });
-  }
-}
-
-function drawRunners(time, color) {
-  const runners = [
-    { phase: 0.04, speed: 0.045, lane: -0.47, size: 1 },
-    { phase: 0.37, speed: 0.028, lane: 0.47, size: 0.86 },
-    { phase: 0.68, speed: 0.06, lane: 0, size: 0.72 },
-  ];
-
-  runners.forEach((runner) => {
-    const position = sampleProfile((runner.phase + time * runner.speed) % 1);
-    const point = project({ x: position.x, y: runner.lane, z: position.z + 0.16 });
-    const radius = Math.max(3, 6.5 * point.scale * runner.size);
-
-    const glow = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius * 4);
-    glow.addColorStop(0, "rgba(255, 246, 213, 0.95)");
-    glow.addColorStop(0.25, `rgba(${color.r}, ${color.g}, ${color.b}, 0.65)`);
-    glow.addColorStop(1, `rgba(${color.r}, ${color.g}, ${color.b}, 0)`);
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(point.x, point.y, radius * 4, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = "#fff0c5";
-    ctx.beginPath();
-    ctx.arc(point.x, point.y, radius * 0.52, 0, Math.PI * 2);
-    ctx.fill();
-  });
-}
-
-function drawProfileLine(y, zOffset, strokeStyle, width) {
-  ctx.beginPath();
-  for (let step = 0; step <= 80; step += 1) {
-    const point = sampleProfile(step / 80);
-    const screen = project({ x: point.x, y, z: point.z + zOffset });
-    if (step === 0) ctx.moveTo(screen.x, screen.y);
-    else ctx.lineTo(screen.x, screen.y);
-  }
-  ctx.strokeStyle = strokeStyle;
-  ctx.lineWidth = width;
-  ctx.stroke();
-}
-
-function slotPosition(index) {
-  const pair = Math.floor(index / 2);
-  const u = pair / 34;
-  const base = sampleProfile(u);
-  const lane = index % 2 ? 0.47 : -0.47;
-  return { x: base.x, y: lane, z: base.z + 0.12 };
-}
-
-function sampleProfile(u) {
-  const bounded = clamp(u, 0, 1);
-  const scaled = bounded * (profile.length - 1);
-  const index = Math.min(profile.length - 2, Math.floor(scaled));
-  const local = scaled - index;
-  const eased = local * local * (3 - 2 * local);
-  const from = profile[index];
-  const to = profile[index + 1];
   return {
-    x: lerp(from.x, to.x, local),
-    z: lerp(from.z, to.z, eased),
+    centerX: width * .5,
+    centerY: height * (isLandscape ? .53 : .5),
+    orbitX: isLandscape
+      ? Math.min(width * .30, height * .66)
+      : Math.min(width * .26, height * .40),
+    orbitY: isLandscape
+      ? Math.min(height * .18, width * .09)
+      : Math.min(height * .27, width * .16)
   };
 }
 
-function project(point) {
+function getSceneAnchor() {
+  const baseDistance = 124;
+  const baseRadius = baseDistance * Math.SQRT1_2 + 12;
+
+  return {
+    baseDistance,
+    baseRadius,
+    centerX: Math.max(
+      baseRadius + 68,
+      Math.min(width * .18, width - baseRadius - 68)
+    ),
+    centerY: Math.max(
+      baseRadius + 78,
+      Math.min(height * .35, height - baseRadius - 68)
+    )
+  };
+}
+
+function getMaxSceneZoom() {
+  if (!width || !height) {
+    return 2;
+  }
+
+  const anchor = getSceneAnchor();
+  const centerX = anchor.centerX + scene.panX;
+  const centerY = anchor.centerY + scene.panY;
+
+  const availableX = Math.min(
+    centerX - 68,
+    width - centerX - 68
+  );
+
+  const availableY = Math.min(
+    centerY - 68,
+    height - centerY - 68
+  );
+
+  return Math.max(
+    .92,
+    Math.min(
+      2,
+      availableX / anchor.baseRadius,
+      availableY / anchor.baseRadius
+    )
+  );
+}
+
+function constrainScene() {
+  if (!width || !height) {
+    return;
+  }
+
+  const anchor = getSceneAnchor();
+
+  scene.zoom = clamp(
+    scene.zoom,
+    .92,
+    getMaxSceneZoom()
+  );
+
+  const groupRadius =
+    anchor.baseRadius * scene.zoom * 1.16 +
+    64;
+
+  const minPanX = groupRadius - anchor.centerX;
+  const maxPanX = width - groupRadius - anchor.centerX;
+  const minPanY = groupRadius - anchor.centerY;
+  const maxPanY = height - groupRadius - anchor.centerY;
+
+  scene.panX = minPanX <= maxPanX
+    ? clamp(scene.panX, minPanX, maxPanX)
+    : (minPanX + maxPanX) / 2;
+
+  scene.panY = minPanY <= maxPanY
+    ? clamp(scene.panY, minPanY, maxPanY)
+    : (minPanY + maxPanY) / 2;
+}
+
+function getCorePosition(core) {
+  const rozlozeni = {
+    earth: { sloupec: 0, radek: 0 },
+    language: { sloupec: 1, radek: 0 },
+    game: { sloupec: 0, radek: 1 },
+    control: { sloupec: 1, radek: 1 }
+  };
+
+  const misto = rozlozeni[core.id];
+  const anchor = getSceneAnchor();
+  const distance = anchor.baseDistance * scene.zoom;
+  const localX = (misto.sloupec - .5) * distance;
+  const localY = (misto.radek - .5) * distance;
+
   const yawCos = Math.cos(scene.yaw);
   const yawSin = Math.sin(scene.yaw);
-  const pitchCos = Math.cos(scene.pitch);
-  const pitchSin = Math.sin(scene.pitch);
+  const planeX = localX * yawCos - localY * yawSin;
+  const planeY = localX * yawSin + localY * yawCos;
+
+  const tiltedY = planeY * Math.cos(scene.pitch);
+  const depthZ = planeY * Math.sin(scene.pitch);
+
+  const rollCos = Math.cos(scene.roll);
+  const rollSin = Math.sin(scene.roll);
+  const rotatedX = planeX * rollCos - tiltedY * rollSin;
+  const rotatedY = planeX * rollSin + tiltedY * rollCos;
+
+  const perspective = clamp(
+    1 + depthZ / 480,
+    .78,
+    1.24
+  );
+
+  return {
+    x: anchor.centerX + scene.panX + rotatedX * perspective,
+    y: anchor.centerY + scene.panY + rotatedY * perspective,
+    depth: clamp(
+      .68 + depthZ / (distance || 1) * .18,
+      .48,
+      .86
+    ),
+    perspective
+  };
+}
+
+function drawBackground() {
+  const layout = getLandscapeLayout();
+
+  const glow = context.createRadialGradient(
+    layout.centerX,
+    layout.centerY,
+    10,
+    layout.centerX,
+    layout.centerY,
+    Math.max(width, height) * .54
+  );
+
+  glow.addColorStop(0, "rgba(255,220,155,.10)");
+  glow.addColorStop(.42, "rgba(199,155,51,.035)");
+  glow.addColorStop(1, "rgba(0,0,0,0)");
+
+  context.fillStyle = glow;
+  context.fillRect(0, 0, width, height);
+
+  context.save();
+  context.globalAlpha = .22;
+  context.fillStyle = "#ffe2ad";
+
+  for (let index = 0; index < 70; index += 1) {
+    const x = (index * 83.71) % width;
+    const y = (index * 47.29) % height;
+    const size = index % 7 === 0 ? 1.3 : .55;
+
+    context.beginPath();
+    context.arc(x, y, size, 0, Math.PI * 2);
+    context.fill();
+  }
+
+  context.restore();
+}
+
+
+function createDefaultTrojkaModels() {
+  return [
+    {
+      id: "signal-leva",
+      label: "SignÃ¡l levÃ¡",
+      kind: "jezdec",
+      rail: "horni-kolej",
+      progress: .08,
+      speed: .000012,
+      color: "#ffe2ad",
+      moving: true
+    },
+    {
+      id: "signal-stred",
+      label: "SignÃ¡l stÅed",
+      kind: "jezdec",
+      rail: "dolni-kolej",
+      progress: .46,
+      speed: .000018,
+      color: "#c79b33",
+      moving: true
+    },
+    {
+      id: "signal-prava",
+      label: "SignÃ¡l pravÃ¡",
+      kind: "jezdec",
+      rail: "horni-kolej",
+      progress: .77,
+      speed: .000009,
+      color: "#fff0c5",
+      moving: true
+    }
+  ];
+}
+
+function normaliseTrojkaModel(model, index) {
+  const source = model && typeof model === "object" ? model : {};
+  const allowedRails = TROJKA_RAILS.map((rail) => rail.id);
+  const fallbackId = "model-" + Date.now() + "-" + index;
+  const rawProgress = Number(source.progress);
+  const rawSpeed = Number(source.speed);
+  const progress = Number.isFinite(rawProgress) ? rawProgress : 0;
+  const color = /^#[0-9a-f]{6}$/i.test(source.color || "")
+    ? source.color
+    : "#ffe2ad";
+
+  return {
+    id: String(source.id || fallbackId),
+    label: String(source.label || "ZÃ¡suvnÃ½ model").slice(0, 80),
+    kind: String(source.kind || "model").slice(0, 40),
+    rail: allowedRails.includes(source.rail)
+      ? source.rail
+      : TROJKA_RAILS[index % TROJKA_RAILS.length].id,
+    progress: positiveModulo(progress, 1),
+    speed: Number.isFinite(rawSpeed) ? rawSpeed : 0,
+    color,
+    moving: source.moving !== false
+  };
+}
+
+function loadTrojkaModels() {
+  try {
+    const raw = localStorage.getItem(TROJKA_MODEL_STORAGE_KEY);
+
+    if (!raw) {
+      return createDefaultTrojkaModels();
+    }
+
+    const parsed = JSON.parse(raw);
+
+    if (!Array.isArray(parsed)) {
+      return createDefaultTrojkaModels();
+    }
+
+    return parsed
+      .slice(0, 48)
+      .map((model, index) => normaliseTrojkaModel(model, index));
+  } catch (error) {
+    console.warn("Trojka byla obnovena do vÃ½chozÃ­ho stavu.", error);
+    return createDefaultTrojkaModels();
+  }
+}
+
+function saveTrojkaModels(reason) {
+  localStorage.setItem(
+    TROJKA_MODEL_STORAGE_KEY,
+    JSON.stringify(trojkaModels)
+  );
+
+  window.dispatchEvent(new CustomEvent("cht.track.changed", {
+    detail: {
+      reason,
+      models: trojkaModels.map((model) => ({ ...model }))
+    }
+  }));
+}
+
+function attachTrojkaModel(model) {
+  const candidate = normaliseTrojkaModel(model, trojkaModels.length);
+  const existingIndex = trojkaModels.findIndex(
+    (item) => item.id === candidate.id
+  );
+
+  if (existingIndex >= 0) {
+    trojkaModels[existingIndex] = candidate;
+  } else {
+    trojkaModels.push(candidate);
+  }
+
+  saveTrojkaModels("pÅipojenÃ­");
+  return { ...candidate };
+}
+
+function moveTrojkaModel(id, patch) {
+  const index = trojkaModels.findIndex((model) => model.id === id);
+
+  if (index < 0) {
+    return null;
+  }
+
+  trojkaModels[index] = normaliseTrojkaModel(
+    { ...trojkaModels[index], ...(patch || {}), id },
+    index
+  );
+
+  saveTrojkaModels("posun");
+  return { ...trojkaModels[index] };
+}
+
+function detachTrojkaModel(id) {
+  const before = trojkaModels.length;
+  trojkaModels = trojkaModels.filter((model) => model.id !== id);
+
+  if (trojkaModels.length === before) {
+    return false;
+  }
+
+  saveTrojkaModels("odpojenÃ­");
+  return true;
+}
+
+function installTrojkaBridge() {
+  window.CHT360Track = {
+    version: 1,
+    shape: "100-20-100-20-100",
+    get anchors() {
+      return TROJKA_PROFILE.map((point) => ({
+        id: point.id,
+        label: point.label,
+        depth: Math.round(point.depth * 100),
+        sockets: TROJKA_RAILS.map((rail) => ({
+          id: point.id + "-" + rail.id,
+          rail: rail.id
+        }))
+      }));
+    },
+    get rails() {
+      return TROJKA_RAILS.map((rail) => ({ ...rail }));
+    },
+    listModels() {
+      return trojkaModels.map((model) => ({ ...model }));
+    },
+    attach(model) {
+      return attachTrojkaModel(model);
+    },
+    move(id, patch) {
+      return moveTrojkaModel(id, patch);
+    },
+    detach(id) {
+      return detachTrojkaModel(id);
+    }
+  };
+
+  window.dispatchEvent(new CustomEvent("cht.track.ready", {
+    detail: window.CHT360Track
+  }));
+}
+
+function getTrojkaCamera() {
+  const sceneScale = clamp(.96 + (scene.zoom - 1) * .14, .84, 1.14);
+
+  return {
+    centerX: width * .53 + scene.panX * .08,
+    centerY: height * .51 + scene.panY * .08,
+    base: Math.max(width * 1.08, height * 1.44) * sceneScale,
+    yaw: scene.yaw * .58,
+    pitch: scene.pitch * .60,
+    roll: scene.roll * .42
+  };
+}
+
+function projectTrojkaPoint(point) {
+  const camera = getTrojkaCamera();
+  const yawCos = Math.cos(camera.yaw);
+  const yawSin = Math.sin(camera.yaw);
+  const pitchCos = Math.cos(camera.pitch);
+  const pitchSin = Math.sin(camera.pitch);
+  const rollCos = Math.cos(camera.roll);
+  const rollSin = Math.sin(camera.roll);
 
   const yawX = point.x * yawCos - point.z * yawSin;
   const yawZ = point.x * yawSin + point.z * yawCos;
   const pitchY = point.y * pitchCos - yawZ * pitchSin;
   const pitchZ = point.y * pitchSin + yawZ * pitchCos;
-  const perspective = Math.max(0.12, 4.55 - pitchZ);
-  const scale = (Math.min(scene.width, scene.height) * 0.79 * scene.zoom) / perspective;
+  const perspective = 1 / Math.max(2.9, 3.78 - pitchZ);
+  const localX = yawX * camera.base * perspective;
+  const localY = pitchY * camera.base * perspective;
 
   return {
-    x: scene.width / 2 + yawX * scale,
-    y: scene.height / 2 - pitchY * scale,
-    scale: scale / Math.min(scene.width, scene.height),
-    z: pitchZ,
+    x: camera.centerX + localX * rollCos - localY * rollSin,
+    y: camera.centerY + localX * rollSin + localY * rollCos,
+    scale: camera.base * perspective / Math.max(width, height),
+    depth: pitchZ
   };
 }
 
-function polygon(points, fillStyle, strokeStyle) {
-  ctx.beginPath();
-  points.forEach((point, index) => {
-    if (index === 0) ctx.moveTo(point.x, point.y);
-    else ctx.lineTo(point.x, point.y);
+function sampleTrojkaProfile(progress) {
+  const bounded = clamp(Number(progress) || 0, 0, 1);
+  const scaled = bounded * (TROJKA_PROFILE.length - 1);
+  const index = Math.min(
+    TROJKA_PROFILE.length - 2,
+    Math.floor(scaled)
+  );
+  const local = scaled - index;
+  const eased = local * local * (3 - 2 * local);
+  const from = TROJKA_PROFILE[index];
+  const to = TROJKA_PROFILE[index + 1];
+
+  return {
+    x: from.x + (to.x - from.x) * local,
+    z: from.z + (to.z - from.z) * eased,
+    depth: from.depth + (to.depth - from.depth) * eased
+  };
+}
+
+function drawTrojkaTrack(time) {
+  const rows = [-.92, -.46, 0, .46, .92];
+
+  context.save();
+
+  for (let row = 0; row < rows.length - 1; row += 1) {
+    for (let segment = 0; segment < TROJKA_PROFILE.length - 1; segment += 1) {
+      const from = TROJKA_PROFILE[segment];
+      const to = TROJKA_PROFILE[segment + 1];
+      const depth = (from.depth + to.depth) / 2;
+      const points = [
+        projectTrojkaPoint({ x: from.x, y: rows[row], z: from.z }),
+        projectTrojkaPoint({ x: to.x, y: rows[row], z: to.z }),
+        projectTrojkaPoint({ x: to.x, y: rows[row + 1], z: to.z }),
+        projectTrojkaPoint({ x: from.x, y: rows[row + 1], z: from.z })
+      ];
+
+      const alpha = .032 + depth * .085 + (row % 2) * .012;
+
+      fillTrojkaPolygon(
+        points,
+        "rgba(199,155,51," + alpha + ")",
+        "rgba(255,226,173,.16)",
+        .65
+      );
+    }
+  }
+
+  rows.forEach((row, index) => {
+    drawTrojkaProfileLine(
+      row,
+      .012,
+      index === 2
+        ? "rgba(255,235,191,.48)"
+        : "rgba(199,155,51,.22)",
+      index === 2 ? 1.25 : .68
+    );
   });
-  ctx.closePath();
-  ctx.fillStyle = fillStyle;
-  ctx.fill();
-  ctx.strokeStyle = strokeStyle;
-  ctx.lineWidth = 0.65;
-  ctx.stroke();
+
+  drawTrojkaRails(time);
+  drawTrojkaSockets(time);
+  drawTrojkaModels(time);
+
+  context.restore();
 }
 
-function line(from, to, strokeStyle, width) {
-  ctx.beginPath();
-  ctx.moveTo(from.x, from.y);
-  ctx.lineTo(to.x, to.y);
-  ctx.strokeStyle = strokeStyle;
-  ctx.lineWidth = width;
-  ctx.stroke();
+function drawTrojkaRails(time) {
+  TROJKA_RAILS.forEach((rail, index) => {
+    drawTrojkaProfileLine(
+      rail.y,
+      .11,
+      "rgba(255,226,173,.82)",
+      1.55
+    );
+
+    drawTrojkaProfileLine(
+      rail.y + (index === 0 ? .032 : -.032),
+      .075,
+      "rgba(199,155,51,.36)",
+      .72
+    );
+  });
+
+  const pulse = .34 + Math.sin(time * .0016) * .13;
+
+  drawTrojkaProfileLine(
+    0,
+    .13,
+    "rgba(255,240,197," + pulse + ")",
+    1.05
+  );
 }
 
-function setStatus(message) {
-  if (ui.status) ui.status.textContent = message;
+function drawTrojkaSockets(time) {
+  TROJKA_PROFILE.forEach((anchor, anchorIndex) => {
+    TROJKA_RAILS.forEach((rail, railIndex) => {
+      const point = projectTrojkaPoint({
+        x: anchor.x,
+        y: rail.y,
+        z: anchor.z + .13
+      });
+      const pulse = .88 + Math.sin(time * .0018 + anchorIndex + railIndex) * .13;
+      const radius = clamp(8 * point.scale * pulse, 3.4, 8.8);
+
+      context.save();
+      context.strokeStyle = "rgba(255,232,181,.90)";
+      context.lineWidth = 1.05;
+      context.beginPath();
+      context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+      context.stroke();
+
+      context.fillStyle = "rgba(199,155,51,.28)";
+      context.beginPath();
+      context.arc(point.x, point.y, radius * .43, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+    });
+  });
 }
 
-function dateStamp() {
-  return new Date().toISOString().slice(0, 10);
+function drawTrojkaModels(time) {
+  trojkaModels.forEach((model) => {
+    const rail = TROJKA_RAILS.find((item) => item.id === model.rail)
+      || TROJKA_RAILS[0];
+    const progress = model.moving
+      ? positiveModulo(model.progress + time * model.speed, 1)
+      : model.progress;
+    const base = sampleTrojkaProfile(progress);
+    const point = projectTrojkaPoint({
+      x: base.x,
+      y: rail.y,
+      z: base.z + .18
+    });
+    const rgb = trojkaColorToRgb(model.color);
+    const radius = clamp(9 * point.scale, 3.5, 9.5);
+
+    context.save();
+
+    const glow = context.createRadialGradient(
+      point.x,
+      point.y,
+      0,
+      point.x,
+      point.y,
+      radius * 4
+    );
+
+    glow.addColorStop(0, "rgba(255,246,213,.96)");
+    glow.addColorStop(
+      .30,
+      "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",.70)"
+    );
+    glow.addColorStop(
+      1,
+      "rgba(" + rgb.r + "," + rgb.g + "," + rgb.b + ",0)"
+    );
+
+    context.fillStyle = glow;
+    context.beginPath();
+    context.arc(point.x, point.y, radius * 4, 0, Math.PI * 2);
+    context.fill();
+
+    context.translate(point.x, point.y);
+    context.rotate(time * .0008 + progress * Math.PI * 2);
+    context.fillStyle = model.color;
+    context.strokeStyle = "#fff0c5";
+    context.lineWidth = 1;
+
+    context.beginPath();
+    context.moveTo(0, -radius);
+    context.lineTo(radius * .72, 0);
+    context.lineTo(0, radius);
+    context.lineTo(-radius * .72, 0);
+    context.closePath();
+    context.fill();
+    context.stroke();
+
+    context.restore();
+  });
 }
 
-function plural(value, one, few, many) {
-  if (value === 1) return one;
-  if (value >= 2 && value <= 4) return few;
-  return many;
+function drawTrojkaProfileLine(y, zOffset, strokeStyle, lineWidth) {
+  context.beginPath();
+
+  for (let step = 0; step <= 80; step += 1) {
+    const profilePoint = sampleTrojkaProfile(step / 80);
+    const point = projectTrojkaPoint({
+      x: profilePoint.x,
+      y,
+      z: profilePoint.z + zOffset
+    });
+
+    if (step === 0) {
+      context.moveTo(point.x, point.y);
+    } else {
+      context.lineTo(point.x, point.y);
+    }
+  }
+
+  context.lineCap = "round";
+  context.strokeStyle = strokeStyle;
+  context.lineWidth = lineWidth;
+  context.stroke();
 }
 
-function hexToRgb(hex) {
-  const value = hex.replace("#", "");
+function fillTrojkaPolygon(points, fillStyle, strokeStyle, lineWidth) {
+  context.beginPath();
+
+  points.forEach((point, index) => {
+    if (index === 0) {
+      context.moveTo(point.x, point.y);
+    } else {
+      context.lineTo(point.x, point.y);
+    }
+  });
+
+  context.closePath();
+  context.fillStyle = fillStyle;
+  context.fill();
+  context.strokeStyle = strokeStyle;
+  context.lineWidth = lineWidth;
+  context.stroke();
+}
+
+function trojkaColorToRgb(color) {
+  const value = (/^#[0-9a-f]{6}$/i.test(color || ""))
+    ? color.slice(1)
+    : "ffe2ad";
+
   return {
     r: Number.parseInt(value.slice(0, 2), 16),
     g: Number.parseInt(value.slice(2, 4), 16),
-    b: Number.parseInt(value.slice(4, 6), 16),
+    b: Number.parseInt(value.slice(4, 6), 16)
   };
 }
 
-function lerp(from, to, amount) {
-  return from + (to - from) * amount;
+function positiveModulo(value, divisor) {
+  return ((value % divisor) + divisor) % divisor;
 }
 
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
+function drawTerraAxis(time) {
+  const centerX = width * .91;
+  const centerY = height * .50;
+  const outerX = width * .78;
+  const outerY = height * .70;
+  const startAngle = Math.PI * .50;
+  const endAngle = Math.PI * 1.50;
+
+  context.save();
+
+  const glow = context.createRadialGradient(
+    width * .42,
+    height * .50,
+    18,
+    width * .50,
+    height * .50,
+    Math.max(width, height) * .68
+  );
+
+  glow.addColorStop(0, "rgba(255,220,155,.055)");
+  glow.addColorStop(.55, "rgba(199,155,51,.018)");
+  glow.addColorStop(1, "rgba(0,0,0,0)");
+
+  context.fillStyle = glow;
+  context.fillRect(0, 0, width, height);
+
+  for (let ring = 0; ring < 5; ring += 1) {
+    const inset = ring * .105;
+
+    context.beginPath();
+    context.ellipse(
+      centerX - ring * 6,
+      centerY,
+      outerX * (1 - inset),
+      outerY * (1 - inset),
+      0,
+      startAngle,
+      endAngle
+    );
+
+    context.strokeStyle = "rgba(255,220,160," +
+      (.16 - ring * .022) +
+      ")";
+
+    context.lineWidth = ring === 0 ? 1.2 : .7;
+    context.stroke();
+  }
+
+  context.setLineDash([3, 11]);
+  context.globalAlpha = .28;
+
+  for (let curve = 1; curve <= 3; curve += 1) {
+    const amount = curve / 4;
+    const bendX = centerX - outerX * amount;
+
+    context.beginPath();
+    context.moveTo(centerX, centerY - outerY + 14);
+    context.quadraticCurveTo(
+      bendX - outerX * .14,
+      centerY,
+      centerX,
+      centerY + outerY - 14
+    );
+
+    context.strokeStyle = "rgba(255,220,160,.10)";
+    context.lineWidth = .65;
+    context.stroke();
+  }
+
+  context.setLineDash([]);
+
+  const sweep =
+    startAngle +
+    (Math.sin(time * .00012) + 1) * Math.PI / 2;
+
+  context.globalAlpha = .72;
+  context.fillStyle = "#ffe2ad";
+  context.beginPath();
+  context.arc(
+    centerX + Math.cos(sweep) * outerX,
+    centerY + Math.sin(sweep) * outerY,
+    1.6,
+    0,
+    Math.PI * 2
+  );
+  context.fill();
+
+  context.restore();
+}
+
+function drawCore(core, time) {
+  const position = getCorePosition(core);
+  const scale =
+    (.72 + position.depth * .40) *
+    position.perspective;
+
+  const radius = core.radius * scale;
+  const active = selectedCore && selectedCore.id === core.id;
+
+  context.save();
+  context.globalAlpha = .58 + position.depth * .36;
+
+  const glow = context.createRadialGradient(
+    position.x,
+    position.y,
+    2,
+    position.x,
+    position.y,
+    radius * 1.52
+  );
+
+  glow.addColorStop(
+    0,
+    active
+      ? "rgba(255,247,220,.98)"
+      : "rgba(255,226,176,.76)"
+  );
+
+  glow.addColorStop(
+    .26,
+    active
+      ? "rgba(255,185,95,.54)"
+      : "rgba(255,185,95,.28)"
+  );
+
+  glow.addColorStop(1, "rgba(255,185,95,0)");
+
+  context.fillStyle = glow;
+  context.beginPath();
+  context.arc(position.x, position.y, radius * 1.52, 0, Math.PI * 2);
+  context.fill();
+
+  context.strokeStyle = active
+    ? "rgba(255,246,214,.98)"
+    : "rgba(255,224,170,.72)";
+
+  context.lineWidth = active ? 2 : 1.3;
+  context.beginPath();
+  context.arc(position.x, position.y, radius, 0, Math.PI * 2);
+  context.stroke();
+
+  const surfaceSpin = scene.yaw + scene.roll * .30;
+  const surfaceTilt = scene.pitch;
+
+  context.save();
+  context.translate(position.x, position.y);
+  context.rotate(surfaceTilt);
+
+  for (let latitude = -3; latitude <= 3; latitude += 1) {
+    const ratio = latitude / 4;
+    const y = ratio * radius;
+    const horizontalRadius =
+      Math.sqrt(Math.max(0, 1 - ratio * ratio)) *
+      radius;
+
+    const verticalRadius = Math.max(
+      2,
+      horizontalRadius * .15
+    );
+
+    context.beginPath();
+    context.ellipse(
+      0,
+      y,
+      horizontalRadius,
+      verticalRadius,
+      0,
+      0,
+      Math.PI * 2
+    );
+
+    context.strokeStyle = active
+      ? "rgba(255,241,202,.56)"
+      : "rgba(255,222,164,.34)";
+
+    context.lineWidth = active ? 1 : .8;
+    context.stroke();
+  }
+
+  for (let longitude = 0; longitude < 9; longitude += 1) {
+    const phase =
+      longitude / 9 * Math.PI +
+      surfaceSpin;
+
+    const longitudeRadius = Math.max(
+      radius * .075,
+      Math.abs(Math.cos(phase)) * radius
+    );
+
+    context.beginPath();
+    context.ellipse(
+      0,
+      0,
+      longitudeRadius,
+      radius,
+      0,
+      0,
+      Math.PI * 2
+    );
+
+    context.strokeStyle = active
+      ? "rgba(255,242,205,.54)"
+      : "rgba(255,222,164,.32)";
+
+    context.lineWidth = active ? 1 : .78;
+    context.stroke();
+  }
+
+  context.restore();
+
+  const signalX =
+    position.x +
+    Math.cos(surfaceSpin) * radius * .78;
+
+  const signalY =
+    position.y +
+    Math.sin(surfaceSpin) * radius * .52;
+
+  context.fillStyle = active
+    ? "rgba(255,250,226,.98)"
+    : "rgba(255,231,182,.84)";
+
+  context.beginPath();
+  context.arc(
+    signalX,
+    signalY,
+    active ? 2.2 : 1.55,
+    0,
+    Math.PI * 2
+  );
+  context.fill();
+
+  const pulse =
+    radius +
+    7 +
+    Math.sin(time * .003) * 3;
+
+  context.beginPath();
+  context.arc(position.x, position.y, pulse, 0, Math.PI * 2);
+  context.strokeStyle = active
+    ? "rgba(255,235,195,.38)"
+    : "rgba(255,220,160,.14)";
+  context.lineWidth = 1;
+  context.stroke();
+
+  context.fillStyle = "#fff0cf";
+  context.font = "800 " + Math.round(11 * scale) + "px system-ui";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(core.title, position.x, position.y - 4);
+
+  const stats = getCoreStats(core.id);
+
+  context.fillStyle = "rgba(255,240,210,.74)";
+  context.font = Math.max(8, Math.round(9 * scale)) + "px system-ui";
+  context.fillText(stats.used + "/70", position.x, position.y + 12);
+
+  context.restore();
+
+  core.position = position;
+  core.drawRadius = radius;
+}
+
+function render(time) {
+  const elapsed = lastFrameTime
+    ? Math.min(time - lastFrameTime, 48)
+    : 16;
+
+  lastFrameTime = time;
+
+  if (activePointers.size === 0) {
+    scene.yaw = normaliseAngle(
+      scene.yaw + elapsed * .000042
+    );
+  }
+
+  context.clearRect(0, 0, width, height);
+
+  drawBackground();
+  drawTerraAxis(time);
+  drawTrojkaTrack(time);
+
+  const ordered = [...cores].sort((first, second) => {
+    return getCorePosition(first).depth - getCorePosition(second).depth;
+  });
+
+  for (const core of ordered) {
+    drawCore(core, time);
+  }
+
+  requestAnimationFrame(render);
+}
+
+function findCoreAt(x, y) {
+  return [...cores]
+    .sort((first, second) => {
+      return getCorePosition(second).depth - getCorePosition(first).depth;
+    })
+    .find((core) => {
+      if (!core.position) {
+        return false;
+      }
+
+      return Math.hypot(
+        x - core.position.x,
+        y - core.position.y
+      ) <= core.drawRadius + 16;
+    });
+}
+
+function openCore(core) {
+  selectedCore = core;
+  selectedSlotIndex = null;
+
+  panelTitle.textContent = `${core.title} Â· PamÄÅ¥`;
+  panelSub.textContent = "70 slotÅ¯ Â· samostatnÃ© uloÅ¾enÃ­";
+
+  panel.classList.add("open");
+  slotEditor.classList.remove("open");
+  searchInput.value = "";
+
+  renderSlots();
+  updateStatus();
+}
+
+function renderSlots() {
+  if (!selectedCore) {
+    return;
+  }
+
+  const query = searchInput.value.trim().toLowerCase();
+  const slots = memory.cores[selectedCore.id];
+
+  slotGrid.innerHTML = "";
+
+  slots.forEach((slot, index) => {
+    const searchable = `${slot.name} ${slot.content}`.toLowerCase();
+
+    if (query && !searchable.includes(query)) {
+      return;
+    }
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "slotBtn";
+
+    const used = slot.content.trim() ||
+      slot.name.trim() !== `Slot ${slot.id}`;
+
+    if (used) {
+      button.classList.add("obsazeny");
+    }
+
+    if (index === selectedSlotIndex) {
+      button.classList.add("aktivni");
+    }
+
+    button.innerHTML = `
+      <strong>${escapeHtml(slot.name || `Slot ${slot.id}`)}</strong>
+      <span>${slot.content.trim() ? "obsazeno" : "prÃ¡zdnÃ©"}</span>
+    `;
+
+    button.addEventListener("click", () => selectSlot(index));
+    slotGrid.appendChild(button);
+  });
+}
+
+function selectSlot(index) {
+  selectedSlotIndex = index;
+
+  const slot = memory.cores[selectedCore.id][index];
+
+  slotName.value = slot.name;
+  slotContent.value = slot.content;
+
+  slotEditor.classList.add("open");
+
+  renderSlots();
+  updateStatus();
+}
+
+function updateStatus(message = "") {
+  if (!selectedCore) {
+    statusBox.textContent = "Vyber jÃ¡dro.";
+    return;
+  }
+
+  const stats = getCoreStats(selectedCore.id);
+
+  let text =
+    `${selectedCore.title}: obsazeno ${stats.used}/70 Â· ` +
+    `velikost ${formatBytes(stats.size)}`;
+
+  if (selectedSlotIndex !== null) {
+    text += ` Â· otevÅen slot ${selectedSlotIndex + 1}`;
+  }
+
+  if (message) {
+    text += ` Â· ${message}`;
+  }
+
+  statusBox.textContent = text;
+}
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, (character) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#039;"
+    }[character];
+  });
+}
+
+function downloadJson(data, filename) {
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    { type: "application/json" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = filename;
+
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+saveSlot.addEventListener("click", () => {
+  if (!selectedCore || selectedSlotIndex === null) {
+    return;
+  }
+
+  const slot = memory.cores[selectedCore.id][selectedSlotIndex];
+
+  slot.name =
+    slotName.value.trim() ||
+    `Slot ${selectedSlotIndex + 1}`;
+
+  slot.content = slotContent.value;
+  slot.updatedAt = new Date().toISOString();
+
+  saveMemory();
+  renderSlots();
+  updateStatus("uloÅ¾eno");
+});
+
+clearSlot.addEventListener("click", () => {
+  if (!selectedCore || selectedSlotIndex === null) {
+    return;
+  }
+
+  if (!confirm(`Vymazat slot ${selectedSlotIndex + 1}?`)) {
+    return;
+  }
+
+  memory.cores[selectedCore.id][selectedSlotIndex] =
+    createEmptySlot(selectedSlotIndex);
+
+  saveMemory();
+
+  slotName.value = `Slot ${selectedSlotIndex + 1}`;
+  slotContent.value = "";
+
+  renderSlots();
+  updateStatus("vymazÃ¡no");
+});
+
+searchInput.addEventListener("input", renderSlots);
+
+closePanel.addEventListener("click", () => {
+  panel.classList.remove("open");
+});
+
+exportCore.addEventListener("click", () => {
+  if (!selectedCore) {
+    return;
+  }
+
+  downloadJson({
+    typ: "jadro-pameti",
+    jadro: selectedCore.id,
+    nazev: selectedCore.title,
+    sloty: memory.cores[selectedCore.id],
+    exportovano: new Date().toISOString()
+  }, `pamet_${selectedCore.id}.json`);
+});
+
+importCore.addEventListener("click", () => {
+  if (!selectedCore) {
+    return;
+  }
+
+  importMode = "core";
+  fileInput.value = "";
+  fileInput.click();
+});
+
+exportAll.addEventListener("click", () => {
+  downloadJson(memory, "vaft_pamet_cela.json");
+});
+
+importAll.addEventListener("click", () => {
+  importMode = "all";
+  fileInput.value = "";
+  fileInput.click();
+});
+
+fileInput.addEventListener("change", async () => {
+  const file = fileInput.files && fileInput.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  try {
+    const data = JSON.parse(await file.text());
+
+    if (importMode === "core") {
+      if (!selectedCore) {
+        throw new Error("NenÃ­ vybranÃ© jÃ¡dro");
+      }
+
+      const slots = Array.isArray(data.sloty)
+        ? data.sloty
+        : data;
+
+      if (!Array.isArray(slots)) {
+        throw new Error("Soubor neobsahuje sloty");
+      }
+
+      memory.cores[selectedCore.id] = Array.from(
+        { length: SLOT_COUNT },
+        (_, index) => {
+          const source = slots[index] || {};
+
+          return {
+            id: index + 1,
+            name:
+              typeof source.name === "string" && source.name.trim()
+                ? source.name
+                : `Slot ${index + 1}`,
+            content:
+              typeof source.content === "string"
+                ? source.content
+                : "",
+            updatedAt: source.updatedAt || null
+          };
+        }
+      );
+
+      saveMemory();
+      renderSlots();
+      updateStatus("jÃ¡dro importovÃ¡no");
+    } else {
+      if (!data.cores) {
+        throw new Error("Soubor neobsahuje celou PamÄÅ¥");
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+      memory = loadMemory();
+
+      saveMemory();
+      renderSlots();
+      updateStatus("celÃ¡ PamÄÅ¥ importovÃ¡na");
+    }
+  } catch (error) {
+    alert(`Import se nezdaÅil: ${error.message}`);
+  }
+});
+
+function getActivePointerList() {
+  return Array.from(activePointers.values());
+}
+
+function getPointerDistance(first, second) {
+  return Math.hypot(
+    second.x - first.x,
+    second.y - first.y
+  );
+}
+
+function getPointerCenter(first, second) {
+  return {
+    x: (first.x + second.x) / 2,
+    y: (first.y + second.y) / 2
+  };
+}
+
+function getPointerAngle(first, second) {
+  return Math.atan2(
+    second.y - first.y,
+    second.x - first.x
+  );
+}
+
+function updateGestureHint() {
+  const hints = document.querySelectorAll(".hud span");
+
+  if (hints.length >= 3) {
+    hints[0].textContent = "1 prst: 3D otoÄenÃ­";
+    hints[1].textContent = "2 prsty: posun Â· zoom Â· Å¡ejdr";
+    hints[2].textContent = "klepnutÃ­: otevÅÃ­t jÃ¡dro";
+  }
+}
+
+function beginRotationGesture(pointer) {
+  gesture = {
+    type: "rotate",
+    moved: false,
+    pointerId: pointer.id
+  };
+}
+
+function beginTransformGesture() {
+  const [first, second] = getActivePointerList();
+
+  if (!first || !second) {
+    return;
+  }
+
+  gesture = {
+    type: "transform",
+    moved: false,
+    distance: getPointerDistance(first, second),
+    center: getPointerCenter(first, second),
+    angle: getPointerAngle(first, second)
+  };
+}
+
+function finishPointerGesture(event, cancelled) {
+  const isTap =
+    !cancelled &&
+    activePointers.size === 1 &&
+    gesture &&
+    gesture.type === "rotate" &&
+    !gesture.moved;
+
+  if (canvas.hasPointerCapture(event.pointerId)) {
+    canvas.releasePointerCapture(event.pointerId);
+  }
+
+  activePointers.delete(event.pointerId);
+
+  if (isTap) {
+    const bounds = canvas.getBoundingClientRect();
+    const core = findCoreAt(
+      event.clientX - bounds.left,
+      event.clientY - bounds.top
+    );
+
+    if (core) {
+      openCore(core);
+    }
+  }
+
+  if (activePointers.size === 0) {
+    saveScene();
+    gesture = null;
+    return;
+  }
+
+  if (activePointers.size === 1) {
+    beginRotationGesture(getActivePointerList()[0]);
+    return;
+  }
+
+  beginTransformGesture();
+}
+
+canvas.addEventListener("pointerdown", (event) => {
+  event.preventDefault();
+
+  const pointer = {
+    id: event.pointerId,
+    x: event.clientX,
+    y: event.clientY
+  };
+
+  activePointers.set(event.pointerId, pointer);
+  canvas.setPointerCapture(event.pointerId);
+
+  if (activePointers.size === 1) {
+    beginRotationGesture(pointer);
+  } else if (activePointers.size === 2) {
+    beginTransformGesture();
+  }
+});
+
+canvas.addEventListener("pointermove", (event) => {
+  const pointer = activePointers.get(event.pointerId);
+
+  if (!pointer) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const previousX = pointer.x;
+  const previousY = pointer.y;
+
+  pointer.x = event.clientX;
+  pointer.y = event.clientY;
+
+  const deltaX = pointer.x - previousX;
+  const deltaY = pointer.y - previousY;
+
+  if (activePointers.size === 1 && gesture?.type === "rotate") {
+  if (Math.abs(deltaX) > .5 || Math.abs(deltaY) > .5) {
+    gesture.moved = true;
+
+    scene.yaw = normaliseAngle(
+      scene.yaw + deltaX * .012
+    );
+
+    scene.pitch = normaliseAngle(
+      scene.pitch + deltaY * .010
+    );
+  }
+
+  return;
+}
+
+if (activePointers.size < 2) {
+  return;
+}
+
+  if (!gesture || gesture.type !== "transform") {
+    beginTransformGesture();
+  }
+
+  const [first, second] = getActivePointerList();
+  const distance = getPointerDistance(first, second);
+  const center = getPointerCenter(first, second);
+  const angle = getPointerAngle(first, second);
+
+  if (gesture.distance > 0 && distance > 0) {
+    scene.zoom = clamp(
+      scene.zoom * distance / gesture.distance,
+      .92,
+      getMaxSceneZoom()
+    );
+  }
+
+  const moveX = center.x - gesture.center.x;
+  const moveY = center.y - gesture.center.y;
+  const turn = normaliseAngle(angle - gesture.angle);
+
+  scene.panX += moveX;
+  scene.panY += moveY;
+  scene.roll = normaliseAngle(scene.roll + turn);
+
+  if (
+    Math.abs(moveX) > .5 ||
+    Math.abs(moveY) > .5 ||
+    Math.abs(distance - gesture.distance) > .5 ||
+    Math.abs(turn) > .004
+  ) {
+    gesture.moved = true;
+  }
+
+  constrainScene();
+
+  gesture.distance = distance;
+  gesture.center = center;
+  gesture.angle = angle;
+});
+
+canvas.addEventListener("pointerup", (event) => {
+  finishPointerGesture(event, false);
+});
+
+canvas.addEventListener("pointercancel", (event) => {
+  finishPointerGesture(event, true);
+});
+
+window.addEventListener("resize", () => {
+  resizeCanvas();
+  constrainScene();
+});
+
+installTrojkaBridge();
+resizeCanvas();
+constrainScene();
+updatePills();
+updateGestureHint();
+requestAnimationFrame(render);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      const registration = await navigator.serviceWorker.register(
+        "./service-worker.js",
+        { updateViaCache: "none" }
+      );
+
+      await registration.update();
+
+      if (registration.waiting) {
+        registration.waiting.postMessage({
+          type: "SKIP_WAITING"
+        });
+      }
+
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
+
+        if (!newWorker) {
+          return;
+        }
+
+        newWorker.addEventListener("statechange", () => {
+          if (
+            newWorker.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
+            newWorker.postMessage({
+              type: "SKIP_WAITING"
+            });
+          }
+        });
+      });
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        const reloadKey = "cht360_worker_reloaded";
+
+        if (sessionStorage.getItem(reloadKey)) {
+          return;
+        }
+
+        sessionStorage.setItem(reloadKey, "1");
+        window.location.reload();
+      });
+
+      window.setTimeout(() => {
+        sessionStorage.removeItem("cht360_worker_reloaded");
+      }, 5000);
+    } catch (error) {
+      console.warn(
+        "[360Â°â°.] Service worker se nepodaÅilo spustit.",
+        error
+      );
+    }
+  });
 }
