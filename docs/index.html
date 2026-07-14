@@ -177,7 +177,7 @@
       max-height: none;
     }
 
-    #lifePanel.lifePanel {
+    #repairPanel.repairPanel {
       top: 58px;
       right: 18px;
       bottom: 52px;
@@ -214,7 +214,7 @@
       }
 
       #memoryPanel.panel,
-      #lifePanel.lifePanel {
+      #repairPanel.repairPanel {
         top: 38px;
         bottom: 36px;
         right: 12px;
@@ -227,7 +227,7 @@
       }
 
       .root,
-      #lifePanel,
+      #repairPanel,
       #openLifePanel {
         display: none !important;
       }
@@ -319,79 +319,72 @@
     </main>
   </div>
 
-  <section id="lifePanel" class="lifePanel" aria-hidden="true">
-    <div class="lifePanelTop">
+  <section id="repairPanel" class="repairPanel" aria-hidden="true" aria-label="Chybožrout Samoopravovna">
+    <div class="repairPanelTop">
       <div>
-        <strong>360o°˚</strong>
-        <span>živý oběh paměti</span>
+        <strong>[◉_◉] Chybožrout</strong>
+        <span>Samoopravovna CHT 360°‰.</span>
       </div>
 
-      <div class="lifePanelActions">
-        <div id="lifeMode" class="lifeMode">inicializace</div>
+      <div class="repairPanelActions">
+        <div id="repairState" class="repairState">připraven</div>
 
         <button
-          id="closeLifePanel"
-          class="closeLifePanel"
+          id="closeRepairPanel"
+          class="closeRepairPanel"
           type="button"
-          aria-label="Zavřít živý oběh"
+          aria-label="Zavřít Samoopravovnu"
         >
           ×
         </button>
       </div>
     </div>
 
-    <div class="lifeGrid">
-      <div class="lifeCard">
-        <span>Země</span>
-        <strong id="life-earth">0</strong>
-        <small>rovnováha</small>
-      </div>
+    <p id="repairSummary" class="repairSummary">
+      Připravuji diagnostiku Paměti…
+    </p>
 
-      <div class="lifeCard">
-        <span>Jazyk</span>
-        <strong id="life-language">0</strong>
-        <small>sluch</small>
-      </div>
+    <div class="repairGrid">
+      <button id="repairScan" class="repairAction" type="button">
+        <strong>🔎 Skenovat</strong>
+        <span>zkontrolovat načtené soubory</span>
+      </button>
 
-      <div class="lifeCard">
-        <span>Hra</span>
-        <strong id="life-game">0</strong>
-        <small>pohyb</small>
-      </div>
+      <button id="repairFix" class="repairAction repairActionPrimary" type="button">
+        <strong>🧯 Samoopravit</strong>
+        <span>záloha, cache a bezpečný restart</span>
+      </button>
 
-      <div class="lifeCard">
-        <span>Řízení</span>
-        <strong id="life-control">0</strong>
-        <small>čich</small>
-      </div>
+      <button id="repairBackup" class="repairAction" type="button">
+        <strong>🛟 Záloha</strong>
+        <span>uložit současný stav Paměti</span>
+      </button>
 
-      <div class="lifeCard lifeCardMain">
-        <span>360</span>
-        <strong id="life-cht">0</strong>
-        <small>centrální puls</small>
-      </div>
+      <button id="repairRestore" class="repairAction" type="button">
+        <strong>↩︎ Obnovit</strong>
+        <span>vrátit poslední bezpečnou zálohu</span>
+      </button>
     </div>
 
-    <div class="energyLine">
-      <span>Celkový signál</span>
-      <strong id="energyTotal">0</strong>
+    <div class="repairMeta">
+      <span>Ve frontě <strong id="repairQueue">0</strong></span>
+      <span>Poslední běh <strong id="repairLast">—</strong></span>
     </div>
+
+    <div id="repairLog" class="repairLog" role="status" aria-live="polite"></div>
   </section>
 
   <button
     id="openLifePanel"
     class="openLifePanel"
     type="button"
-    aria-label="Otevřít živý oběh paměti"
+    aria-label="Otevřít Chybožrout Samoopravovnu"
   >
     [◉_◉]
     <span>Oběh</span>
   </button>
 
   <script type="module" src="./js/aplikace.js"></script>
-  <script type="module" src="./js/cht-zivot.js"></script>
-  <script type="module" src="./js/cht-panel.js"></script>
-  <script type="module" src="./js/cht-scany.js"></script>
   <script type="module" src="./js/cht-chybozrout.js"></script>
 
   <script>
