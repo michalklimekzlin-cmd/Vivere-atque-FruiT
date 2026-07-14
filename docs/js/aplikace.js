@@ -642,15 +642,17 @@ function installTrojkaBridge() {
 }
 
 function getTrojkaCamera() {
-  const sceneScale = clamp(.96 + (scene.zoom - 1) * .14, .84, 1.14);
+  const isLandscape = width >= height;
 
+  // Pevné pozadí: Paměť se otáčí a přibližuje sama,
+  // stěna trojky zůstává dál za ní na jednom místě.
   return {
-    centerX: width * .53 + scene.panX * .08,
-    centerY: height * .51 + scene.panY * .08,
-    base: Math.max(width * 1.08, height * 1.44) * sceneScale,
-    yaw: scene.yaw * .58,
-    pitch: scene.pitch * .60,
-    roll: scene.roll * .42
+    centerX: width * .56,
+    centerY: height * (isLandscape ? .52 : .50),
+    base: Math.max(width * .88, height * 1.16),
+    yaw: 0,
+    pitch: 0,
+    roll: 0
   };
 }
 
