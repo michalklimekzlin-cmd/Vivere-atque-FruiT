@@ -438,18 +438,6 @@ function drawBackground() {
     Math.max(width, height) * .54
   );
 
- function drawBackground() {
-  const layout = getLandscapeLayout();
-
-  const glow = context.createRadialGradient(
-    layout.centerX,
-    layout.centerY,
-    10,
-    layout.centerX,
-    layout.centerY,
-    Math.max(width, height) * .54
-  );
-
   glow.addColorStop(0, "rgba(255,220,155,.10)");
   glow.addColorStop(.42, "rgba(199,155,51,.035)");
   glow.addColorStop(1, "rgba(0,0,0,0)");
@@ -475,115 +463,43 @@ function drawBackground() {
 }
 
 
-function createDefaultTrojkaModels() {
-  return [
-    {
-      id: "signal-leva",
-      label: "SignÃ¡l levÃ¡",
-      kind: "jezdec",
-      rail: "horni-kolej",
-      progress: .08,
-      speed: .000012,
-      color: "#ffe2ad",
-      moving: true
-    },
-    {
-      id: "signal-stred",
-      label: "SignÃ¡l stÅed",
-      kind: "jezdec",
-      rail: "dolni-kolej",
-      progress: .46,
-      speed: .000018,
-      color: "#c79b33",
-      moving: true
-    },
-    {
-      id: "signal-prava",
-      label: "SignÃ¡l pravÃ¡",
-      kind: "jezdec",
-      rail: "horni-kolej",
-      progress: .77,
-      speed: .000009,
-      color: "#fff0c5",
-      moving: true
-    }
-  ];
-}
-
-function normaliseTrojkaModel(model, index) {
-  const source = model && typeof model === "object" ? model : {};
-  const allowedRails = TROJKA_RAILS.map((rail) => rail.id);
-  const fallbackId = "model-" + Date.now() + "-" + index;
-  const rawProgress = Number(source.progress);
-  const rawSpeed = Number(source.speed);
-  const progress = Number.isFinite(rawProgress) ? rawProgress : 0;
-  const color = /^#[0-9a-f]{6}$/i.test(source.color || "")
-    ? source.color
-    : "#ffe2ad";
+function getTrojkaCamera() {
+  const isLandscape = width >= height;
 
   return {
-    id: String(source.id || fallbackId),
-    label: String(source.label || "ZÃ¡suvnÃ½ model").slice(0, 80),
-    kind: String(source.kind || "model").slice(0, 40),
-    rail: allowedRails.includes(source.rail)
-      ? source.rail
-      : TROJKA_RAILS[index % TROJKA_RAILS.length].id,
-    progress: positiveModulo(progress, 1),
-    speed: Number.isFinite(rawSpeed) ? rawSpeed : 0,
-    color,
-    moving: source.moving !== false
+    centerX: width * .56,
+    centerY: height * (isLandscape ? .52 : .50),
+    base: Math.max(width * .88, height * 1.16),
+    yaw: 0,
+    pitch: 0,
+    roll: 0
   };
 }
 
-function loadTrojkaModels() {
-  try {
-    const raw = localStorage.getItem(TROJKA_MODEL_STORAGE_KEY);
+function projectTrojkaPoint(point) {
+  const camera = getTrojkaCamera();
+  const yawCos = Math.cos(camera.yaw);
+  const yawSin = Math.sin(camera.yaw);
+  const pitchCos = Math.cos(camera.pitch);
+  const pitchSin = Math.sin(camera.pitch);
+  const rollCos = Math.cos(camera.roll);
+  const rollSin = Math.sin(camera.roll);
 
-    if (!raw) {
-      return createDefaultTrojkaModels();
-    }
+  const yawX = point.x * yawCos - point.z * yawSin;
+  const yawZ = point.x * yawSin + point.z * yawCos;
+  const pitchY = point.y * pitchCos - yawZ * pitchSin;
+  const pitchZ = point.y * pitchSin + yawZ * pitchCos;
+  const perspective = 1 / Math.max(4.4, 5.35 - pitchZ);
+  const localX = yawX * camera.base * perspective;
+  const localY = pitchY * camera.base * perspective;
 
-    const parsed = JSON.parse(raw);
-
-    if (!Array.isArray(parsed)) {
-      return createDefaultTrojkaModels();
-    }
-
-    return parsed
-      .slice(0, 48)
-      .map((model, index) => normaliseTrojkaModel(model, index));
-  } catch (error) {
-    console.warn("Trojka byla obnovena do vÃ½chozÃ­ho stavu.", error);
-    return createDefaultTrojkaModels();
-  }
+  return {
+    x: camera.centerX + localX * rollCos - localY * rollSin,
+    y: camera.centerY + localX * rollSin + localY * rollCos,
+    scale: camera.base * perspective / Math.max(width, height),
+    depth: pitchZ
+  };
 }
-
-function saveTrojkaModels(reason) {
-  localStorage.setItem(
-    TROJKA_MODEL_STORAGE_KEY,
-    JSON.stringify(trojkaModels)
-  );
-
-  window.dispatchEvent(new CustomEvent("cht.track.changed", {
-    detail: {
-      reason,
-      models: trojkaModels.map((model) => ({ ...model }))
-    }
-  }));
-}
-
-function attachTrojkaModel(model) {
-  const candidate = normaliseTrojkaModel(model, trojkaModels.length);
-  const existingIndex = trojkaModels.findIndex(
-    (item) => item.id === candidate.id
-  );
-
-  if (existingIndex >= 0) {
-    trojkaModels[existingIndex] = candidate;
-  } else {
-    trojkaModels.push(candidate);
-  }
-
   saveTrojkaModels("pÅipojenÃ­");
   return { ...candidate };
 }
@@ -716,7 +632,7 @@ function drawTrojkaTrack(time) {
   const rows = [-.92, -.46, 0, .46, .92];
 
   context.save();
-
+context.globalAlpha = .72;
   for (let row = 0; row < rows.length - 1; row += 1) {
     for (let segment = 0; segment < TROJKA_PROFILE.length - 1; segment += 1) {
       const from = TROJKA_PROFILE[segment];
