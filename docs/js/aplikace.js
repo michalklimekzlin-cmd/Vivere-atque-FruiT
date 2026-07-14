@@ -160,8 +160,7 @@ function loadScene() {
     return {
       yaw: Number.isFinite(saved.yaw) ? saved.yaw : fallback.yaw,
       pitch: normaliseAngle(
-  Number.isFinite(saved.pitch) ? saved.pitch : fallback.pitch
-),
+        Number.isFinite(saved.pitch) ? saved.pitch : fallback.pitch
       ),
       roll: Number.isFinite(saved.roll) ? saved.roll : fallback.roll,
       zoom: clamp(
@@ -190,6 +189,14 @@ function saveScene() {
     JSON.stringify({
       yaw: normaliseAngle(scene.yaw),
       pitch: normaliseAngle(scene.pitch),
+      roll: normaliseAngle(scene.roll),
+      zoom: scene.zoom,
+      spread: scene.zoom,
+      panX: scene.panX,
+      panY: scene.panY
+    })
+  );
+}
 
 function saveMemory(reason = "save") {
   memory.updatedAt = new Date().toISOString();
@@ -1153,23 +1160,24 @@ canvas.addEventListener("pointermove", (event) => {
   const deltaY = pointer.y - previousY;
 
   if (activePointers.size === 1 && gesture?.type === "rotate") {
-    if (Math.abs(deltaX) > .5 || Math.abs(deltaY) > .5) {
-      gesture.moved = true;
+  if (Math.abs(deltaX) > .5 || Math.abs(deltaY) > .5) {
+    gesture.moved = true;
 
-      scene.yaw = normaliseAngle(
-        scene.yaw + deltaX * .012
-      );
+    scene.yaw = normaliseAngle(
+      scene.yaw + deltaX * .012
+    );
 
-      scene.pitch = normaliseAngle(
-  scene.pitch + deltaY * .010
-);
-
-    return;
+    scene.pitch = normaliseAngle(
+      scene.pitch + deltaY * .010
+    );
   }
 
-  if (activePointers.size < 2) {
-    return;
-  }
+  return;
+}
+
+if (activePointers.size < 2) {
+  return;
+}
 
   if (!gesture || gesture.type !== "transform") {
     beginTransformGesture();
