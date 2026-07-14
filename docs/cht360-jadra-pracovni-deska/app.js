@@ -3,6 +3,7 @@
 
   const STORAGE_KEY = "cht360_jadra_pracovni_deska_v1";
   const CORE_ORDER = ["game", "control", "earth", "language"];
+  const COMPACT_SCALES = [0.15, 0.18, 0.22, 0.25];
   const CORE_META = {
     game: { label: "Hra", color: "#ffe2ad", expanded: { x: -0.42, y: -0.31, z: 0.06 }, compact: { x: -0.12, y: -0.14, z: 0.18 } },
     control: { label: "Řízení", color: "#f3d091", expanded: { x: -0.05, y: -0.10, z: 0.36 }, compact: { x: 0.13, y: -0.10, z: 0.38 } },
@@ -152,21 +153,37 @@
     };
   }
 
+  function crescentTarget(id) {
+    const index = CORE_ORDER.indexOf(id);
+    const progress = [0.06, 0.34, 0.66, 0.94][index];
+    const angle = (220 + progress * 270) * Math.PI / 180;
+    return {
+      x: -0.13 + Math.cos(angle) * 0.55,
+      y: Math.sin(angle) * 0.46,
+      z: 0.23 + Math.sin(progress * Math.PI) * 0.18,
+      angle
+    };
+  }
+
   function compactPath(id, amount) {
     const core = CORE_META[id];
-    const side = core.expanded.x < -0.2 ? -1 : 1;
-    const lift = -0.24 - (CORE_ORDER.indexOf(id) % 2) * 0.035;
+    const index = CORE_ORDER.indexOf(id);
+    const target = crescentTarget(id);
+    const tangent = {
+      x: -Math.sin(target.angle),
+      y: Math.cos(target.angle)
+    };
     const controlA = {
-      x: core.expanded.x + side * 0.05,
-      y: core.expanded.y + lift,
-      z: core.expanded.z + 0.36
+      x: core.expanded.x + 0.17 + index * 0.028,
+      y: core.expanded.y - 0.22 - index * 0.025,
+      z: core.expanded.z + 0.37
     };
     const controlB = {
-      x: core.compact.x - side * 0.15,
-      y: core.compact.y - lift * 0.38,
-      z: core.compact.z + 0.22
+      x: target.x - tangent.x * 0.24,
+      y: target.y - tangent.y * 0.24,
+      z: target.z + 0.22
     };
-    return cubicPoint(core.expanded, controlA, controlB, core.compact, easeInOut(amount));
+    return cubicPoint(core.expanded, controlA, controlB, target, easeInOut(amount));
   }
 
   function rotatePoint(point) {
@@ -311,15 +328,16 @@
     ctx.clearRect(0, 0, width, height);
     drawBackground(time);
 
-    const collapsedScale = 1 - currentCollapse * .80;
     const baseRadius = Math.min(width, height) * .137;
     renderedCores = CORE_ORDER.map((id) => {
       const local = compactPath(id, currentCollapse);
       const screen = project(local);
+      const index = CORE_ORDER.indexOf(id);
+      const compactScale = COMPACT_SCALES[index];
       return {
         id,
         ...screen,
-        radius: baseRadius * collapsedScale,
+        radius: baseRadius * (1 + (compactScale - 1) * currentCollapse),
         local
       };
     }).sort((a, b) => a.z - b.z);
