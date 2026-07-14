@@ -1,0 +1,32 @@
+{
+  "name": "Batole •ア | CHT 360°‰",
+  "short_name": "Batole",
+  "description": "Samostatné PWA Batole pro vědomě uložené kroky čtyř jader CHT 360°‰.",
+  "lang": "cs",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#090708",
+  "theme_color": "#090708",
+  "icons": [
+    {
+      "src": "./icons/batole.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/batole-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/batole-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
