@@ -363,20 +363,25 @@ function getCorePosition(core) {
   const anchor = getSceneAnchor();
   const distance = anchor.baseDistance * scene.spread;
 
-  const horizontalDepth =
-    (misto.sloupec === 0 ? -1 : 1) *
-    Math.sin(scene.yaw) *
-    .12;
+  const localX = (misto.sloupec - .5) * distance;
+  const localY = (misto.radek - .5) * distance;
+  const cos = Math.cos(scene.yaw);
+  const sin = Math.sin(scene.yaw);
 
-  const verticalDepth =
-    (misto.radek === 0 ? -1 : 1) *
-    Math.sin(scene.pitch) *
-    .09;
+  // Čtyři jádra se otáčejí jako jedna pevná formace.
+  const rotatedX = localX * cos - localY * sin;
+  const rotatedY = localX * sin + localY * cos;
+
+  const depth = clamp(
+    .68 + rotatedY / distance * .15 + Math.sin(scene.pitch) * .05,
+    .48,
+    .86
+  );
 
   return {
-    x: anchor.left + scene.panX + misto.sloupec * distance,
-    y: anchor.top + scene.panY + misto.radek * distance,
-    depth: clamp(.68 + horizontalDepth + verticalDepth, .46, .88)
+    x: anchor.left + scene.panX + distance / 2 + rotatedX,
+    y: anchor.top + scene.panY + distance / 2 + rotatedY,
+    depth
   };
 }
 
@@ -588,18 +593,8 @@ function drawCore(core, time) {
   context.arc(position.x, position.y, radius, 0, Math.PI * 2);
   context.stroke();
 
-  const ownAxisTime =
-    time * core.axisSpeed +
-    core.axisPhase;
-
-  const ownAxisSpin = Math.sin(ownAxisTime) * .88;
-  const ownAxisTilt = Math.cos(ownAxisTime) * .10;
-  const surfaceSpin = scene.yaw + ownAxisSpin;
-  const surfaceTilt = scene.pitch * .72 + ownAxisTilt;
-
-  context.save();
-  context.translate(position.x, position.y);
-  context.rotate(surfaceTilt);
+  const surfaceSpin = scene.yaw;
+const surfaceTilt = scene.pitch * .42;
 
   for (let ring = 1; ring < 5; ring += 1) {
     context.beginPath();
@@ -661,7 +656,7 @@ function drawCore(core, time) {
   context.arc(signalX, signalY, active ? 2 : 1.35, 0, Math.PI * 2);
   context.fill();
 
-  const pulse = radius + 7 + Math.sin(time * .003 + core.angle) * 3;
+  const pulse = radius + 7 + Math.sin(time * .003) * 3;
 
   context.beginPath();
   context.arc(position.x, position.y, pulse, 0, Math.PI * 2);
