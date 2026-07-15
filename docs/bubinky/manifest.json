@@ -1,0 +1,19 @@
+{
+  "name": "CHT 360°‰. · Bubínky",
+  "short_name": "Bubínky",
+  "lang": "cs",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090907",
+  "theme_color": "#090907",
+  "description": "Samostatná PWA pro bubínky a zámky slotů CHT 360°‰.",
+  "icons": [
+    {
+      "src": "./icons/bubinky.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
