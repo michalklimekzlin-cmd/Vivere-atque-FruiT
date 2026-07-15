@@ -576,7 +576,7 @@
     })();
   </script>
 <style>
-  #cht-zivacek{
+  #cht360-stred{
     position:absolute;
     z-index:4;
     left:50%;
@@ -593,162 +593,160 @@
     -webkit-tap-highlight-color:transparent;
   }
 
-  #cht-zivacek::before,
-  #cht-zivacek::after{
+  #cht360-stred::before,
+  #cht360-stred::after{
     position:absolute;
-    inset:4%;
-    border:1px solid rgba(255,226,173,.48);
     border-radius:50%;
     content:"";
     pointer-events:none;
   }
 
-  #cht-zivacek::before{
+  #cht360-stred::before{
+    inset:4%;
+    border:1px solid rgba(255,226,173,.52);
     box-shadow:
-      0 0 18px rgba(255,206,120,.55),
+      0 0 20px rgba(255,206,120,.62),
       inset 0 0 18px rgba(255,226,173,.2);
-    animation:chtZivacekPulse 2.7s ease-in-out infinite;
+    animation:cht360Pulse 2.8s ease-in-out infinite;
   }
 
-  #cht-zivacek::after{
-    inset:-13%;
-    border-color:rgba(255,226,173,.2);
-    animation:chtZivacekOrbit 7s linear infinite;
+  #cht360-stred::after{
+    inset:-14%;
+    border:1px solid rgba(255,226,173,.19);
+    box-shadow:0 0 28px rgba(255,194,91,.18);
+    animation:cht360Orbit 8s linear infinite;
   }
 
-  .cht-zivacek-head{
+  .cht360-stred-core{
     position:absolute;
-    top:28%;
-    left:50%;
-    width:29%;
-    aspect-ratio:1;
-    border:1px solid rgba(255,248,225,.9);
-    border-radius:50%;
-    background:radial-gradient(circle at 34% 27%,#fff9e8 0 8%,#ffd98e 38%,#a96b2c 100%);
-    box-shadow:0 0 18px rgba(255,220,150,.75);
-    transform:translateX(-50%);
-  }
-
-  .cht-zivacek-eye{
-    position:absolute;
-    top:43%;
-    width:15%;
-    aspect-ratio:1;
-    border-radius:50%;
-    background:#2a190a;
-  }
-
-  .cht-zivacek-eye.left{left:25%}
-  .cht-zivacek-eye.right{right:25%}
-
-  .cht-zivacek-mouth{
-    position:absolute;
-    top:61%;
-    left:34%;
-    width:32%;
-    height:16%;
-    border-bottom:2px solid #2a190a;
-    border-radius:0 0 50% 50%;
-  }
-
-  .cht-zivacek-body{
-    position:absolute;
-    top:54%;
-    left:50%;
+    inset:22%;
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:1px;
-    color:#ffe8ba;
-    font-size:clamp(10px,1.6vw,16px);
-    line-height:.7;
-    text-shadow:0 0 10px rgba(255,214,138,.8);
-    transform:translateX(-50%);
-    animation:chtZivacekDust 2.2s ease-in-out infinite;
+    justify-content:center;
+    border:1px solid rgba(255,247,218,.88);
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 34% 28%,#fff9e8 0 7%,#ffd98e 35%,#b56f2c 100%);
+    box-shadow:
+      0 0 22px rgba(255,220,150,.8),
+      inset 0 0 14px rgba(255,249,225,.5);
   }
 
-  .cht-zivacek-glyph{
+  .cht360-stred-core strong{
+    color:#241508;
+    font-size:clamp(11px,1.8vw,19px);
+    font-weight:950;
+    letter-spacing:.08em;
+    line-height:1;
+  }
+
+  .cht360-stred-core small{
+    margin-top:3px;
+    color:rgba(42,25,10,.82);
+    font-size:clamp(7px,1.15vw,11px);
+    font-weight:900;
+    white-space:nowrap;
+  }
+
+  .cht360-stred-znak{
     position:absolute;
-    color:#ffe1a3;
-    font-size:clamp(9px,1.55vw,15px);
-    text-shadow:0 0 12px rgba(255,209,127,.85);
-    animation:chtZivacekGlyph 3s ease-in-out infinite;
+    color:#ffe2ad;
+    font-size:clamp(10px,1.7vw,17px);
+    font-weight:900;
+    text-shadow:0 0 13px rgba(255,211,132,.9);
+    animation:cht360Znak 3s ease-in-out infinite;
   }
 
-  .cht-zivacek-glyph.one{top:14%;left:15%}
-  .cht-zivacek-glyph.two{top:18%;right:12%;animation-delay:-1s}
-  .cht-zivacek-glyph.three{bottom:16%;left:13%;animation-delay:-2s}
-  .cht-zivacek-glyph.four{bottom:13%;right:13%;animation-delay:-.5s}
+  .cht360-stred-znak.c{top:8%;left:21%}
+  .cht360-stred-znak.h{top:18%;right:10%;animation-delay:-1s}
+  .cht360-stred-znak.t{bottom:12%;left:12%;animation-delay:-2s}
+  .cht360-stred-znak.a{bottom:9%;right:16%;animation-delay:-.5s}
 
-  @keyframes chtZivacekPulse{
-    50%{transform:scale(1.09);opacity:.72}
+  .cht360-stred-prach{
+    position:absolute;
+    inset:0;
+    animation:cht360Prach 2.3s ease-in-out infinite;
   }
 
-  @keyframes chtZivacekOrbit{
+  .cht360-stred-prach i{
+    position:absolute;
+    width:4px;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:#ffe8ba;
+    box-shadow:0 0 9px rgba(255,215,143,.9);
+  }
+
+  .cht360-stred-prach i:nth-child(1){top:26%;left:18%}
+  .cht360-stred-prach i:nth-child(2){top:67%;left:24%}
+  .cht360-stred-prach i:nth-child(3){top:74%;right:23%}
+  .cht360-stred-prach i:nth-child(4){top:35%;right:16%}
+
+  #cht360-stred.is-aktivni .cht360-stred-core{
+    animation:cht360Core .65s ease-in-out;
+  }
+
+  @keyframes cht360Pulse{
+    50%{transform:scale(1.1);opacity:.7}
+  }
+
+  @keyframes cht360Orbit{
     to{transform:rotate(360deg)}
   }
 
-  @keyframes chtZivacekDust{
-    50%{transform:translate(-50%,-5px);opacity:.72}
+  @keyframes cht360Znak{
+    50%{transform:translateY(-6px) scale(1.14);opacity:.5}
   }
 
-  @keyframes chtZivacekGlyph{
-    50%{transform:translateY(-6px) scale(1.15);opacity:.48}
+  @keyframes cht360Prach{
+    50%{transform:scale(1.06);opacity:.7}
+  }
+
+  @keyframes cht360Core{
+    50%{transform:scale(1.18);filter:brightness(1.3)}
   }
 </style>
 
 <script>
 (() => {
-  if (document.getElementById("cht-zivacek")) return;
+  if (document.getElementById("cht360-stred")) return;
 
   const host = document.querySelector(".app");
   if (!host) return;
 
-  const zivacek = document.createElement("button");
-  zivacek.id = "cht-zivacek";
-  zivacek.type = "button";
-  zivacek.setAttribute("aria-label", "Otevřít živáčka Viri");
-  zivacek.innerHTML = `
-    <span class="cht-zivacek-glyph one" aria-hidden="true">✧</span>
-    <span class="cht-zivacek-glyph two" aria-hidden="true">ア</span>
-    <span class="cht-zivacek-glyph three" aria-hidden="true">1</span>
-    <span class="cht-zivacek-glyph four" aria-hidden="true">0</span>
+  const cht = document.createElement("button");
+  cht.id = "cht360-stred";
+  cht.type = "button";
+  cht.setAttribute("aria-label", "CHT 360°‰. ve středu oběhu");
 
-    <span class="cht-zivacek-head" aria-hidden="true">
-      <i class="cht-zivacek-eye left"></i>
-      <i class="cht-zivacek-eye right"></i>
-      <i class="cht-zivacek-mouth"></i>
+  cht.innerHTML = `
+    <span class="cht360-stred-znak c" aria-hidden="true">C</span>
+    <span class="cht360-stred-znak h" aria-hidden="true">H</span>
+    <span class="cht360-stred-znak t" aria-hidden="true">T</span>
+    <span class="cht360-stred-znak a" aria-hidden="true">ア</span>
+
+    <span class="cht360-stred-prach" aria-hidden="true">
+      <i></i><i></i><i></i><i></i>
     </span>
 
-    <span class="cht-zivacek-body" aria-hidden="true">
-      <span>•</span>
-      <span>✧</span>
-      <span>1</span>
-      <span>0</span>
-      <span>ア</span>
-      <span>•</span>
+    <span class="cht360-stred-core" aria-hidden="true">
+      <strong>CHT</strong>
+      <small>360°‰.</small>
     </span>
   `;
 
-  zivacek.addEventListener("click", () => {
-    document.querySelector('[data-open-panel="viriPanel"]')?.click();
+  cht.addEventListener("click", () => {
+    cht.classList.remove("is-aktivni");
+    requestAnimationFrame(() => cht.classList.add("is-aktivni"));
 
     const zprava = document.getElementById("messageLine");
     if (zprava) {
       zprava.textContent =
-        "Živáček je uprostřed oběhu. Učí se jen z lekcí, které mu vědomě uložíš.";
+        "CHT 360°‰. je uprostřed oběhu a pracuje jen s tím, co mu dovolíš.";
     }
   });
 
-  host.append(zivacek);
+  host.append(cht);
 })();
 </script>
-</body>
-</html>
-
-
-
-
-
-
-
