@@ -19,6 +19,12 @@ const exportAll = document.getElementById("exportAll");
 const importAll = document.getElementById("importAll");
 const fileInput = document.getElementById("fileInput");
 const statusBox = document.getElementById("statusBox");
+const glyphDrumsElement = document.getElementById("glyphDrums");
+const glyphAddDrum = document.getElementById("glyphAddDrum");
+const glyphInsert = document.getElementById("glyphInsert");
+const glyphReset = document.getElementById("glyphReset");
+const glyphCustom = document.getElementById("glyphCustom");
+const glyphAddToken = document.getElementById("glyphAddToken");
 
 const STORAGE_KEY = "cht360_pamet_v1";
 const LEGACY_STORAGE_KEYS = ["vaft_pamet_v1"];
@@ -31,6 +37,26 @@ const MIN_SCENE_SPREAD = .96;
 const MAX_SCENE_SPREAD = 2.8;
 
 const TROJKA_MODEL_STORAGE_KEY = "cht360_trojka_models_v1";
+
+const GLYPH_DRUM_STORAGE_KEY = "cht360_glyph_drums_v1";
+const GLYPH_DRUM_CUSTOM_STORAGE_KEY = "cht360_glyph_drums_custom_v1";
+
+const GLYPH_DRUM_TOKENS = Object.freeze([
+  ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  ..."0123456789",
+  "Ã", "Ä", "Ä", "Ã", "Ä", "Ã", "Å", "Ã", "Å", "Å ", "Å¤", "Ã", "Å®", "Ã",
+  "ã¢", "Â°", "â°", "â¢", "_", "-", "/", "\`", "Â´", "Ë", "Ä«", "Ä±",
+  "Ã¯", "Ã¸", "Å", "Ã", "Â¯", "&", "(", ")", "*", "}", "{", "â¹",
+  "7i_", "Ä«Â´", "ËÂ°iÂ°Ë", "._;Â´/`", ",!", "Ã¯Ã¸", "Â°ÅÂ°", ".â¢cUâ¢.",
+  "-:x:-", "7/Â¯", "Ä±>o", "Â°&", "(\\*/)", "Ão", "}{", "â¢N", "7â¹"
+]);
+
+const CORE_CIPHER_TOKENS = Object.freeze([
+  ..."0123456789",
+  "7", "i", "_", "Ä«", "Â´", "Ë", "Â°", ".", ";", "/", "\`", ",", "!",
+  "Ã¯", "Ã¸", "Å", "â¢", "c", "U", "-", ":", "x", "Â¯", "Ä±", ">", "o",
+  "&", "(", ")", "*", "Ã", "}", "{", "N", "â¹", "ã¢"
+]);
 
 const TROJKA_PROFILE = [
   { id: "leva-hrana", label: "LevÃ¡ hrana", x: -1.28, z: .76, depth: 1 },
@@ -46,6 +72,9 @@ const TROJKA_RAILS = [
 ];
 
 let trojkaModels = loadTrojkaModels();
+let customGlyphTokens = loadCustomGlyphTokens();
+let glyphDrumValues = loadGlyphDrumValues();
+let slotAutosaveTimer = null;
 
 const cores = [
   {
@@ -1184,6 +1213,148 @@ function positiveModulo(value, divisor) {
   return ((value % divisor) + divisor) % divisor;
 }
 
+function getGlyphDrumTokens() {
+  return [...GLYPH_DRUM_TOKENS, ...customGlyphTokens];
+}
+
+function createDefaultGlyphDrumValues() {
+  const tokens = getGlyphDrumTokens();
+  const defaults = ["7i_", "Ä«Â´", "ËÂ°iÂ°Ë", ".â¢cUâ¢."];
+
+  return defaults.map(token => Math.max(0, tokens.indexOf(token)));
+}
+
+function loadCustomGlyphTokens() {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem(GLYPH_DRUM_CUSTOM_STORAGE_KEY) || "[]"
+    );
+
+    if (!Array.isArray(saved)) {
+      return [];
+    }
+
+    return saved
+      .map(token => String(token || "").trim().slice(0, 24))
+      .filter(Boolean)
+      .slice(-64);
+  } catch {
+    return [];
+  }
+}
+
+function saveCustomGlyphTokens() {
+  try {
+    localStorage.setItem(
+      GLYPH_DRUM_CUSTOM_STORAGE_KEY,
+      JSON.stringify(customGlyphTokens)
+    );
+  } catch {
+    /* VlastnÃ­ glyph nesmÃ­ zastavit PamÄÅ¥. */
+  }
+}
+
+function loadGlyphDrumValues() {
+  const tokens = getGlyphDrumTokens();
+
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem(GLYPH_DRUM_STORAGE_KEY) || "null"
+    );
+
+    if (!Array.isArray(saved) || !saved.length) {
+      return createDefaultGlyphDrumValues();
+    }
+
+    return saved
+      .slice(0, 14)
+      .map(value => positiveModulo(Number(value) || 0, tokens.length));
+  } catch {
+    return createDefaultGlyphDrumValues();
+  }
+}
+
+function saveGlyphDrumValues() {
+  try {
+    localStorage.setItem(
+      GLYPH_DRUM_STORAGE_KEY,
+      JSON.stringify(glyphDrumValues)
+    );
+  } catch {
+    /* VÃ½bÄr bubÃ­nkÅ¯ je vedlejÅ¡Ã­ pohodlÃ­, ne kritickÃ¡ data. */
+  }
+}
+
+function getCipherSeed(value) {
+  return Array.from(String(value)).reduce(
+    (total, character) => total + character.codePointAt(0),
+    0
+  );
+}
+
+function drawCipherCoreTitle(title, x, y, scale, time, active, coreId) {
+  const characters = Array.from(title);
+  const seed = getCipherSeed(coreId);
+  const phase = (time * .001 + seed * .031) % 8;
+  const locked = active || phase > 6.25;
+  const manualOffset = Math.round(scene.yaw * 9 + scene.pitch * 4);
+  const fontSize = Math.max(9, Math.round(11 * scale));
+  const cellWidth = Math.max(9, Math.round(fontSize * 1.03));
+  const cellHeight = Math.max(14, Math.round(fontSize * 1.45));
+  const startX = x - (characters.length - 1) * cellWidth * .5;
+
+  context.font = "800 " + fontSize + "px system-ui";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+
+  characters.forEach((target, index) => {
+    const centerX = startX + index * cellWidth;
+    const reelBase = Math.floor(
+      time * .020 + seed * 1.7 + index * 5 + manualOffset
+    );
+    const current = locked
+      ? target
+      : CORE_CIPHER_TOKENS[
+        positiveModulo(reelBase, CORE_CIPHER_TOKENS.length)
+      ];
+    const previous = locked
+      ? target
+      : CORE_CIPHER_TOKENS[
+        positiveModulo(reelBase - 1, CORE_CIPHER_TOKENS.length)
+      ];
+    const next = locked
+      ? target
+      : CORE_CIPHER_TOKENS[
+        positiveModulo(reelBase + 1, CORE_CIPHER_TOKENS.length)
+      ];
+    const shift = locked
+      ? 0
+      : positiveModulo(time * .09 + seed + index * 7, cellHeight) -
+        cellHeight * .5;
+
+    context.save();
+    context.beginPath();
+    context.rect(
+      centerX - cellWidth * .56,
+      y - cellHeight * .58,
+      cellWidth * 1.12,
+      cellHeight * 1.16
+    );
+    context.clip();
+
+    context.globalAlpha = locked ? .98 : .26;
+    context.fillText(previous, centerX, y - cellHeight + shift);
+
+    context.globalAlpha = .98;
+    context.fillText(current, centerX, y + shift);
+
+    context.globalAlpha = locked ? .98 : .28;
+    context.fillText(next, centerX, y + cellHeight + shift);
+
+    context.restore();
+  });
+}
+
 function drawTerraAxis(time) {
   const centerX = width * .91;
   const centerY = height * .50;
@@ -1430,10 +1601,15 @@ function drawCore(core, time) {
   context.stroke();
 
   context.fillStyle = "#fff0cf";
-  context.font = "800 " + Math.round(11 * scale) + "px system-ui";
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.fillText(core.title, position.x, position.y - 4);
+  drawCipherCoreTitle(
+    core.title,
+    position.x,
+    position.y - 4,
+    scale,
+    time,
+    active,
+    core.id
+  );
 
   const stats = getCoreStats(core.id);
 
@@ -1569,6 +1745,7 @@ function selectSlot(index) {
   slotName.value = slot.name;
   slotContent.value = slot.content;
 
+  renderGlyphDrums();
   slotEditor.classList.add("open");
 
   renderSlots();
@@ -1610,6 +1787,306 @@ function escapeHtml(text) {
   });
 }
 
+function getGlyphTokenAt(value) {
+  const tokens = getGlyphDrumTokens();
+
+  return tokens[positiveModulo(value, tokens.length)] || "â¢";
+}
+
+function updateGlyphDrumButton(button, index) {
+  const current = positiveModulo(
+    glyphDrumValues[index] || 0,
+    getGlyphDrumTokens().length
+  );
+  const previous = getGlyphTokenAt(current - 1);
+  const token = getGlyphTokenAt(current);
+  const next = getGlyphTokenAt(current + 1);
+
+  button.querySelector("[data-glyph-reel='previous']").textContent = previous;
+  button.querySelector("[data-glyph-reel='current']").textContent = token;
+  button.querySelector("[data-glyph-reel='next']").textContent = next;
+  button.setAttribute(
+    "aria-label",
+    "BubÃ­nek " + (index + 1) + ": " + token
+  );
+}
+
+function stepGlyphDrum(index, amount) {
+  const tokens = getGlyphDrumTokens();
+
+  glyphDrumValues[index] = positiveModulo(
+    (glyphDrumValues[index] || 0) + amount,
+    tokens.length
+  );
+
+  saveGlyphDrumValues();
+
+  const button = glyphDrumsElement?.querySelector(
+    "[data-glyph-drum='" + index + "']"
+  );
+
+  if (button) {
+    updateGlyphDrumButton(button, index);
+    button.classList.remove("is-stepping");
+    void button.offsetWidth;
+    button.classList.add("is-stepping");
+  }
+}
+
+function attachGlyphDrumPointer(button, index) {
+  let drag = null;
+
+  button.addEventListener("pointerdown", event => {
+    event.preventDefault();
+
+    drag = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      lastStep: 0,
+      moved: false
+    };
+
+    button.setPointerCapture(event.pointerId);
+    button.classList.add("is-dragging");
+  });
+
+  button.addEventListener("pointermove", event => {
+    if (!drag || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const step = Math.trunc((drag.startY - event.clientY) / 18);
+
+    if (step === drag.lastStep) {
+      return;
+    }
+
+    stepGlyphDrum(index, step - drag.lastStep);
+    drag.lastStep = step;
+    drag.moved = true;
+  });
+
+  const finish = (event, cancelled = false) => {
+    if (!drag || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    if (!cancelled && !drag.moved) {
+      stepGlyphDrum(index, 1);
+    }
+
+    if (button.hasPointerCapture(event.pointerId)) {
+      button.releasePointerCapture(event.pointerId);
+    }
+
+    drag = null;
+    button.classList.remove("is-dragging");
+  };
+
+  button.addEventListener("pointerup", event => finish(event));
+  button.addEventListener("pointercancel", event => finish(event, true));
+
+  button.addEventListener("keydown", event => {
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      stepGlyphDrum(index, 1);
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      stepGlyphDrum(index, -1);
+    }
+  });
+}
+
+function renderGlyphDrums() {
+  if (!glyphDrumsElement) {
+    return;
+  }
+
+  glyphDrumsElement.textContent = "";
+
+  glyphDrumValues.forEach((value, index) => {
+    const button = document.createElement("button");
+    const previous = document.createElement("span");
+    const current = document.createElement("strong");
+    const next = document.createElement("span");
+
+    button.type = "button";
+    button.className = "glyphDrum";
+    button.dataset.glyphDrum = String(index);
+
+    previous.className = "glyphDrumGhost";
+    previous.dataset.glyphReel = "previous";
+    current.className = "glyphDrumCurrent";
+    current.dataset.glyphReel = "current";
+    next.className = "glyphDrumGhost";
+    next.dataset.glyphReel = "next";
+
+    button.append(previous, current, next);
+    glyphDrumsElement.appendChild(button);
+
+    updateGlyphDrumButton(button, index);
+    attachGlyphDrumPointer(button, index);
+  });
+}
+
+function addGlyphDrum() {
+  if (glyphDrumValues.length >= 14) {
+    return;
+  }
+
+  glyphDrumValues.push(0);
+  saveGlyphDrumValues();
+  renderGlyphDrums();
+}
+
+function resetGlyphDrums() {
+  glyphDrumValues = createDefaultGlyphDrumValues();
+  saveGlyphDrumValues();
+  renderGlyphDrums();
+}
+
+function addCustomGlyphToken() {
+  const token = String(glyphCustom?.value || "").trim().slice(0, 24);
+
+  if (!token) {
+    return;
+  }
+
+  const tokens = getGlyphDrumTokens();
+
+  if (!tokens.includes(token)) {
+    customGlyphTokens.push(token);
+    customGlyphTokens = customGlyphTokens.slice(-64);
+    saveCustomGlyphTokens();
+  }
+
+  const nextTokens = getGlyphDrumTokens();
+  glyphDrumValues[glyphDrumValues.length - 1] = nextTokens.indexOf(token);
+  glyphCustom.value = "";
+  saveGlyphDrumValues();
+  renderGlyphDrums();
+}
+
+function writeSlotValues(coreId, index, name, content, message, reason) {
+  const slot = memory.cores?.[coreId]?.[index];
+
+  if (!slot) {
+    return;
+  }
+
+  const nextName = String(name || "").trim() || `Slot ${index + 1}`;
+  const nextContent = String(content || "");
+  const changed =
+    slot.name !== nextName ||
+    slot.content !== nextContent;
+
+  if (changed) {
+    slot.name = nextName;
+    slot.content = nextContent;
+    slot.updatedAt = new Date().toISOString();
+    saveMemory(reason);
+  }
+
+  if (selectedCore?.id === coreId) {
+    renderSlots();
+
+    if (selectedSlotIndex === index && message) {
+      updateStatus(message);
+    }
+  }
+}
+
+function saveSelectedSlot(message = "uloÅ¾eno", reason = "save") {
+  if (!selectedCore || selectedSlotIndex === null) {
+    return;
+  }
+
+  writeSlotValues(
+    selectedCore.id,
+    selectedSlotIndex,
+    slotName.value,
+    slotContent.value,
+    message,
+    reason
+  );
+}
+
+function scheduleSlotAutosave() {
+  if (!selectedCore || selectedSlotIndex === null) {
+    return;
+  }
+
+  const coreId = selectedCore.id;
+  const slotIndex = selectedSlotIndex;
+  const name = slotName.value;
+  const content = slotContent.value;
+
+  clearTimeout(slotAutosaveTimer);
+
+  slotAutosaveTimer = window.setTimeout(() => {
+    writeSlotValues(
+      coreId,
+      slotIndex,
+      name,
+      content,
+      "automaticky uloÅ¾eno",
+      "autosave"
+    );
+  }, 600);
+}
+
+function insertGlyphPhrase() {
+  if (!selectedCore || selectedSlotIndex === null) {
+    updateStatus("nejdÅÃ­v vyber slot");
+    return;
+  }
+
+  const phrase = glyphDrumValues
+    .map(getGlyphTokenAt)
+    .join("");
+
+  if (!phrase) {
+    return;
+  }
+
+  const start = Number.isFinite(slotContent.selectionStart)
+    ? slotContent.selectionStart
+    : slotContent.value.length;
+  const end = Number.isFinite(slotContent.selectionEnd)
+    ? slotContent.selectionEnd
+    : start;
+
+  slotContent.value =
+    slotContent.value.slice(0, start) +
+    phrase +
+    slotContent.value.slice(end);
+
+  const cursor = start + phrase.length;
+
+  slotContent.focus();
+  slotContent.setSelectionRange(cursor, cursor);
+  clearTimeout(slotAutosaveTimer);
+  saveSelectedSlot("glyph vloÅ¾en a uloÅ¾en", "glyph");
+}
+
+function initialiseGlyphDrums() {
+  renderGlyphDrums();
+
+  glyphAddDrum?.addEventListener("click", addGlyphDrum);
+  glyphInsert?.addEventListener("click", insertGlyphPhrase);
+  glyphReset?.addEventListener("click", resetGlyphDrums);
+  glyphAddToken?.addEventListener("click", addCustomGlyphToken);
+
+  glyphCustom?.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addCustomGlyphToken();
+    }
+  });
+}
+
 function downloadJson(data, filename) {
   const blob = new Blob(
     [JSON.stringify(data, null, 2)],
@@ -1630,25 +2107,16 @@ function downloadJson(data, filename) {
 }
 
 saveSlot.addEventListener("click", () => {
-  if (!selectedCore || selectedSlotIndex === null) {
-    return;
-  }
-
-  const slot = memory.cores[selectedCore.id][selectedSlotIndex];
-
-  slot.name =
-    slotName.value.trim() ||
-    `Slot ${selectedSlotIndex + 1}`;
-
-  slot.content = slotContent.value;
-  slot.updatedAt = new Date().toISOString();
-
-  saveMemory();
-  renderSlots();
-  updateStatus("uloÅ¾eno");
+  clearTimeout(slotAutosaveTimer);
+  saveSelectedSlot("uloÅ¾eno", "save");
 });
 
+slotName.addEventListener("input", scheduleSlotAutosave);
+slotContent.addEventListener("input", scheduleSlotAutosave);
+
 clearSlot.addEventListener("click", () => {
+  clearTimeout(slotAutosaveTimer);
+
   if (!selectedCore || selectedSlotIndex === null) {
     return;
   }
@@ -1807,7 +2275,7 @@ function updateGestureHint() {
   const hints = document.querySelectorAll(".hud span");
 
   if (hints.length >= 3) {
-    hints[0].textContent = "1 prst: 3D otoÄenÃ­";
+    hints[0].textContent = "1 prst: 3D otÃ¡ÄenÃ­";
     hints[1].textContent = "2 prsty: posun Â· zoom Â· Å¡ejdr";
     hints[2].textContent = "klepnutÃ­: otevÅÃ­t jÃ¡dro";
   }
@@ -1993,6 +2461,7 @@ resizeCanvas();
 constrainScene();
 updatePills();
 updateGestureHint();
+initialiseGlyphDrums();
 requestAnimationFrame(render);
 
 if ("serviceWorker" in navigator) {
@@ -2046,12 +2515,11 @@ if ("serviceWorker" in navigator) {
       }, 5000);
     } catch (error) {
       console.warn(
-        "[360Â°â°.] Service worker se nepodaÅilo spustit.",
+        "[CHT 360Â°â°.] Service worker se nepodaÅilo spustit.",
         error
       );
     }
   });
 }
-
 
 
