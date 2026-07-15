@@ -197,6 +197,145 @@
       bottom: calc(var(--safe-bottom) + 12px);
     }
 
+
+    .glyphComposer {
+      margin-top: 11px;
+      padding: 10px;
+      border: 1px solid rgba(255, 220, 160, .22);
+      border-radius: 16px;
+      background:
+        linear-gradient(180deg, rgba(255, 226, 173, .09), rgba(5, 5, 10, .34)),
+        rgba(0, 0, 0, .22);
+      box-shadow: inset 0 0 22px rgba(255, 211, 139, .06);
+    }
+
+    .glyphComposerTop {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .glyphComposerTop strong {
+      color: #ffe2ad;
+      font-size: 12px;
+      letter-spacing: .04em;
+    }
+
+    .glyphComposerTop span {
+      color: rgba(255, 240, 197, .66);
+      font-size: 10px;
+      text-align: right;
+    }
+
+    .glyphDrums {
+      display: flex;
+      gap: 7px;
+      min-height: 78px;
+      padding: 4px 2px 7px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+    }
+
+    .glyphDrum {
+      position: relative;
+      flex: 0 0 62px;
+      min-width: 62px;
+      min-height: 70px;
+      display: grid;
+      grid-template-rows: 18px 30px 18px;
+      place-items: center;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255, 226, 173, .32);
+      border-radius: 12px;
+      color: #fff0c5;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255, 224, 164, .18), transparent 54%),
+        rgba(4, 5, 10, .88);
+      box-shadow: inset 0 0 18px rgba(255, 226, 173, .08);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .glyphDrum::before,
+    .glyphDrum::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      height: 1px;
+      background: rgba(255, 226, 173, .18);
+      pointer-events: none;
+    }
+
+    .glyphDrum::before { top: 20px; }
+    .glyphDrum::after { bottom: 20px; }
+
+    .glyphDrumGhost,
+    .glyphDrumCurrent {
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .glyphDrumGhost {
+      color: rgba(255, 240, 197, .30);
+      font-size: 10px;
+    }
+
+    .glyphDrumCurrent {
+      color: #fff0c5;
+      font-size: 15px;
+      font-weight: 850;
+      letter-spacing: .02em;
+      text-shadow: 0 0 12px rgba(255, 218, 147, .66);
+    }
+
+    .glyphDrum.is-dragging {
+      border-color: #ffe2ad;
+      box-shadow: 0 0 20px rgba(255, 213, 139, .34), inset 0 0 18px rgba(255, 226, 173, .15);
+    }
+
+    .glyphDrum.is-stepping .glyphDrumCurrent {
+      animation: glyphDrumStep .18s ease-out;
+    }
+
+    @keyframes glyphDrumStep {
+      from { transform: translateY(9px); opacity: .25; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .glyphCustomRow,
+    .glyphActions {
+      display: flex;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .glyphCustomRow input {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .glyphActions {
+      flex-wrap: wrap;
+    }
+
+    .glyphActions button,
+    .glyphCustomRow button {
+      flex: 1 1 auto;
+      min-height: 34px;
+      padding: 7px 9px;
+      font-size: 11px;
+    }
+
     @media (max-height: 430px) {
       .root {
         padding-top: max(7px, env(safe-area-inset-top));
@@ -303,6 +442,32 @@
             <button id="saveSlot" class="primary" type="button">Uložit slot</button>
             <button id="clearSlot" class="danger" type="button">Vymazat slot</button>
           </div>
+
+          <section class="glyphComposer" aria-label="Šifra CHT – otočné bubínky">
+            <div class="glyphComposerTop">
+              <strong>Šifra CHT · bubínky</strong>
+              <span>prstem otoč · vloží se a uloží</span>
+            </div>
+
+            <div id="glyphDrums" class="glyphDrums" aria-label="Otočné glyph bubínky"></div>
+
+            <div class="glyphCustomRow">
+              <input
+                id="glyphCustom"
+                type="text"
+                maxlength="24"
+                placeholder="Vlastní glyph nebo znak"
+                aria-label="Vlastní glyph nebo znak"
+              >
+              <button id="glyphAddToken" type="button">Přidat znak</button>
+            </div>
+
+            <div class="glyphActions">
+              <button id="glyphAddDrum" type="button">+ bubínek</button>
+              <button id="glyphInsert" class="primary" type="button">Vložit a uložit</button>
+              <button id="glyphReset" type="button">Obnovit šifru</button>
+            </div>
+          </section>
         </div>
 
         <div id="statusBox" class="statusBox">Vyber slot. Před vyčištěním Safari vždy exportuj celou Paměť.</div>
@@ -325,7 +490,7 @@
   <section id="repairPanel" class="repairPanel" aria-hidden="true" aria-label="Chybožrout Samoopravovna">
     <div class="repairPanelTop">
       <div>
-        <strong>[◉_◉] ChybaŽrout</strong>
+        <strong>[◉_◉] Chybožrout</strong>
         <span>Samoopravovna CHT 360°‰.</span>
       </div>
 
@@ -384,7 +549,7 @@
     aria-label="Otevřít Chybožrout Samoopravovnu"
   >
     [◉_◉]
-    <span>ChybaŽrout</span>
+    <span>Oběh</span>
   </button>
 
   <script type="module" src="./js/app.js"></script>
@@ -412,4 +577,6 @@
   </script>
 </body>
 </html>
+
+
 
