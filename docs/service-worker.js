@@ -5,7 +5,7 @@
   Staré cache se při aktivaci automaticky odstraní.
 */
 const CACHE_VERSION = "v11";
-const CACHE_NAME = "cht360-pwa-v3";
+const const CACHE_NAME = "cht360-iphone14-v2";
 
 const OFFLINE_PAGE = "./index.html";
 
