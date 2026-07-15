@@ -892,14 +892,26 @@ function installTrojkaBridge() {
 }
 
 function getTrojkaCamera() {
-  const isLandscape = width >= height;
+  /*
+    StÄna je vÅ¾dy vÄtÅ¡Ã­ neÅ¾ displej o malÃ½ pÅesah.
+    Po otoÄenÃ­ nebo zmÄnÄ velikosti se propoÄÃ­tÃ¡ znovu,
+    takÅ¾e vede skuteÄnÄ od rohu k rohu.
+  */
+  const base = Math.max(width * .88, height * 1.16);
+  const projection = base / 3.78;
 
-  // PevnÃ© pozadÃ­: PamÄÅ¥ se otÃ¡ÄÃ­ a pÅibliÅ¾uje sama,
-  // stÄna trojky zÅ¯stÃ¡vÃ¡ dÃ¡l za nÃ­ na jednom mÃ­stÄ.
   return {
-    centerX: width * .56,
-    centerY: height * (isLandscape ? .52 : .50),
-    base: Math.max(width * .88, height * 1.16),
+    centerX: width * .50,
+    centerY: height * .50,
+    base,
+    wallScaleX: Math.max(
+      1,
+      width * .54 / (1.28 * projection)
+    ),
+    wallScaleY: Math.max(
+      1,
+      height * .56 / (.92 * projection)
+    ),
     yaw: 0,
     pitch: 0,
     roll: 0
@@ -920,8 +932,10 @@ function projectTrojkaPoint(point) {
   const pitchY = point.y * pitchCos - yawZ * pitchSin;
   const pitchZ = point.y * pitchSin + yawZ * pitchCos;
   const perspective = 1 / Math.max(2.9, 3.78 - pitchZ);
-  const localX = yawX * camera.base * perspective;
-  const localY = pitchY * camera.base * perspective;
+  const localX =
+    yawX * camera.base * camera.wallScaleX * perspective;
+  const localY =
+    pitchY * camera.base * camera.wallScaleY * perspective;
 
   return {
     x: camera.centerX + localX * rollCos - localY * rollSin,
@@ -2038,5 +2052,6 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
+
 
 
