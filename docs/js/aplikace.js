@@ -2521,5 +2521,856 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
+function drawCenterCore() {
+  /* Střed zůstává volný: čtyři paměťová jádra pracují naležato okolo osy Terra. */
+}
 
+function roundedRectPath(x, y, rectWidth, rectHeight, radius) {
+  const safeRadius = Math.min(radius, rectWidth / 2, rectHeight / 2);
 
+  context.beginPath();
+  context.moveTo(x + safeRadius, y);
+  context.lineTo(x + rectWidth - safeRadius, y);
+  context.quadraticCurveTo(x + rectWidth, y, x + rectWidth, y + safeRadius);
+  context.lineTo(x + rectWidth, y + rectHeight - safeRadius);
+  context.quadraticCurveTo(x + rectWidth, y + rectHeight, x + rectWidth - safeRadius, y + rectHeight);
+  context.lineTo(x + safeRadius, y + rectHeight);
+  context.quadraticCurveTo(x, y + rectHeight, x, y + rectHeight - safeRadius);
+  context.lineTo(x, y + safeRadius);
+  context.quadraticCurveTo(x, y, x + safeRadius, y);
+  context.closePath();
+}
+
+function drawAppleMark(x, y, size) {
+  context.save();
+  context.fillStyle = "rgba(255,255,255,.94)";
+  context.beginPath();
+  context.moveTo(x, y - size * .06);
+  context.bezierCurveTo(x - size * .28, y - size * .38, x - size * .64, y - size * .24, x - size * .62, y + size * .15);
+  context.bezierCurveTo(x - size * .60, y + size * .56, x - size * .26, y + size * .69, x, y + size * .43);
+  context.bezierCurveTo(x + size * .25, y + size * .69, x + size * .60, y + size * .55, x + size * .62, y + size * .15);
+  context.bezierCurveTo(x + size * .64, y - size * .24, x + size * .28, y - size * .38, x, y - size * .06);
+  context.fill();
+
+  context.beginPath();
+  context.ellipse(x + size * .16, y - size * .44, size * .20, size * .08, -.65, 0, Math.PI * 2);
+  context.fill();
+  context.restore();
+}
+
+function ensureIPhoneSettingsPanel() {
+  let panel = document.getElementById("iphoneSettingsPanel");
+
+  if (panel) {
+    return panel;
+  }
+
+  const style = document.createElement("style");
+  style.id = "iphoneSettingsPanelStyle";
+  style.textContent = [
+    "#iphoneSettingsPanel{position:fixed;inset:0;z-index:1005;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.66);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}",
+    "#iphoneSettingsPanel.is-open{display:flex}",
+    ".iphoneSettingsCard{width:min(430px,100%);max-height:min(720px,calc(100dvh - 36px));overflow:auto;border:1px solid rgba(255,255,255,.24);border-radius:26px;color:#fff;background:linear-gradient(145deg,#1c1d20,#050506 58%,#291014);box-shadow:0 26px 80px rgba(0,0,0,.66),0 0 42px rgba(222,35,45,.22)}",
+    ".iphoneSettingsHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 20px 14px;border-bottom:1px solid rgba(255,255,255,.12)}",
+    ".iphoneSettingsHead strong{display:block;font-size:20px;letter-spacing:.03em}.iphoneSettingsHead span{display:block;margin-top:4px;color:#c9c9ce;font-size:13px;line-height:1.35}",
+    ".iphoneSettingsClose,.iphoneSettingsButton{border:1px solid rgba(255,255,255,.18);border-radius:13px;color:#fff;background:#242529;font:inherit;font-weight:800;cursor:pointer}",
+    ".iphoneSettingsClose{width:36px;height:36px;font-size:22px;line-height:1}",
+    ".iphoneSettingsBody{padding:16px 20px 20px}",
+    ".iphoneSettingsState{margin-bottom:14px;padding:11px 12px;border:1px solid rgba(255,255,255,.15);border-radius:14px;color:#e2e2e5;background:rgba(255,255,255,.055);font-size:13px;line-height:1.4}",
+    ".iphoneSettingsRow{display:flex;gap:8px;flex-wrap:wrap}.iphoneSettingsButton{min-height:40px;padding:9px 11px}.iphoneSettingsButton.primary{border-color:#ed3741;color:#fff;background:linear-gradient(135deg,#e42530,#a20e16)}",
+    ".iphoneSettingsTitle{margin:20px 0 8px;color:#fff;font-size:14px;letter-spacing:.04em}.iphoneSettingsField{width:100%;min-height:42px;margin-top:8px;padding:10px 11px;border:1px solid rgba(255,255,255,.18);border-radius:12px;outline:none;color:#fff;background:#17181b;font:inherit}",
+    ".iphoneSettingsField:focus{border-color:#ec3d47;box-shadow:0 0 0 3px rgba(236,61,71,.15)}",
+    ".iphoneAppList{display:grid;gap:8px;margin-top:10px}.iphoneAppItem{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;align-items:center;padding:9px;border:1px solid rgba(255,255,255,.14);border-radius:14px;background:rgba(255,255,255,.045)}",
+    ".iphoneAppItem strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.iphoneAppItem span{display:block;margin-top:2px;overflow:hidden;color:#aeb0b5;font-size:11px;text-overflow:ellipsis;white-space:nowrap}.iphoneAppItem button{min-height:31px;padding:6px 8px;border:1px solid rgba(255,255,255,.16);border-radius:9px;color:#fff;background:#292a2e;font:inherit;font-size:11px;font-weight:800;cursor:pointer}.iphoneAppItem button:last-child{color:#ffb4b8}",
+    ".iphoneSettingsEmpty{padding:12px;border:1px dashed rgba(255,255,255,.18);border-radius:13px;color:#bfc0c5;font-size:13px;line-height:1.4}"
+  ].join("\n");
+
+  panel = document.createElement("section");
+  panel.id = "iphoneSettingsPanel";
+  panel.setAttribute("aria-label", "Nastavení iPhone 14 v CHT 360°‰.");
+  panel.innerHTML = [
+    "<div class=\"iphoneSettingsCard\">",
+    "  <div class=\"iphoneSettingsHead\">",
+    "    <div><strong>iPhone 14 · CHT 360°‰.</strong><span>Červený uzel v oběhu Paměti.</span></div>",
+    "    <button class=\"iphoneSettingsClose\" type=\"button\" aria-label=\"Zavřít nastavení\">×</button>",
+    "  </div>",
+    "  <div class=\"iphoneSettingsBody\">",
+    "    <div class=\"iphoneSettingsState\" id=\"iphoneSettingsState\"></div>",
+    "    <div class=\"iphoneSettingsRow\">",
+    "      <button class=\"iphoneSettingsButton primary\" id=\"iphoneRotate\" type=\"button\">Otočit iPhone</button>",
+    "      <button class=\"iphoneSettingsButton\" id=\"iphoneStraighten\" type=\"button\">Narovnat</button>",
+    "    </div>",
+    "    <h2 class=\"iphoneSettingsTitle\">Napojení AI aplikací</h2>",
+    "    <input class=\"iphoneSettingsField\" id=\"iphoneAppName\" maxlength=\"48\" placeholder=\"Název aplikace\">",
+    "    <input class=\"iphoneSettingsField\" id=\"iphoneAppUrl\" maxlength=\"500\" placeholder=\"https://... nebo odkaz aplikace\">",
+    "    <div class=\"iphoneSettingsRow\" style=\"margin-top:8px\"><button class=\"iphoneSettingsButton primary\" id=\"iphoneAppAdd\" type=\"button\">Přidat do iPhonu</button></div>",
+    "    <div id=\"iphoneAppList\" class=\"iphoneAppList\"></div>",
+    "  </div>",
+    "</div>"
+  ].join("");
+
+  document.head.appendChild(style);
+  document.body.appendChild(panel);
+
+  panel.querySelector(".iphoneSettingsClose").addEventListener("click", closeIPhoneSettings);
+  panel.addEventListener("click", (event) => {
+    if (event.target === panel) {
+      closeIPhoneSettings();
+    }
+  });
+
+  panel.querySelector("#iphoneRotate").addEventListener("click", () => {
+    phoneSettings.angle = normalizePhoneAngle(phoneSettings.angle + Math.PI / 2);
+    savePhoneSettings();
+    renderIPhoneSettings();
+  });
+
+  panel.querySelector("#iphoneStraighten").addEventListener("click", () => {
+    phoneSettings.angle = 0;
+    savePhoneSettings();
+    renderIPhoneSettings();
+  });
+
+  panel.querySelector("#iphoneAppAdd").addEventListener("click", addIPhoneApp);
+
+  return panel;
+}
+
+function renderIPhoneSettings() {
+  const panel = ensureIPhoneSettingsPanel();
+  const state = panel.querySelector("#iphoneSettingsState");
+  const list = panel.querySelector("#iphoneAppList");
+  const appCount = phoneSettings.apps.length;
+  const onlineText = navigator.onLine ? "PWA je online" : "PWA je offline";
+
+  state.textContent = onlineText + " · otočení je uložené · AI aplikace: " + appCount + "/12";
+  list.replaceChildren();
+
+  if (!appCount) {
+    const empty = document.createElement("div");
+    empty.className = "iphoneSettingsEmpty";
+    empty.textContent = "Zatím tu nejsou žádné AI aplikace. Přidej název a její odkaz; CHT si ho uloží pouze do tohoto iPhonu.";
+    list.appendChild(empty);
+    return;
+  }
+
+  phoneSettings.apps.forEach((app) => {
+    const item = document.createElement("div");
+    item.className = "iphoneAppItem";
+    const info = document.createElement("div");
+    const name = document.createElement("strong");
+    const url = document.createElement("span");
+    const open = document.createElement("button");
+    const remove = document.createElement("button");
+
+    name.textContent = app.name || "AI aplikace";
+    url.textContent = app.url || "Doplň odkaz";
+    open.type = "button";
+    open.textContent = "Otevřít";
+    open.disabled = !isAllowedPhoneUrl(app.url);
+    open.addEventListener("click", () => {
+      if (isAllowedPhoneUrl(app.url)) {
+        window.open(app.url, "_blank", "noopener");
+      }
+    });
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.setAttribute("aria-label", "Odebrat " + (app.name || "aplikaci"));
+    remove.addEventListener("click", () => {
+      phoneSettings.apps = phoneSettings.apps.filter((entry) => entry.id !== app.id);
+      savePhoneSettings();
+      renderIPhoneSettings();
+    });
+
+    info.append(name, url);
+    item.append(info, open, remove);
+    list.appendChild(item);
+  });
+}
+
+function addIPhoneApp() {
+  const panel = ensureIPhoneSettingsPanel();
+  const nameInput = panel.querySelector("#iphoneAppName");
+  const urlInput = panel.querySelector("#iphoneAppUrl");
+  const name = nameInput.value.trim();
+  const url = urlInput.value.trim();
+
+  if (!name || !isAllowedPhoneUrl(url)) {
+    const state = panel.querySelector("#iphoneSettingsState");
+    state.textContent = "Napiš název a platný odkaz aplikace.";
+    return;
+  }
+
+  phoneSettings.apps.unshift({
+    id: "app-" + Date.now(),
+    name,
+    url
+  });
+  phoneSettings.apps = phoneSettings.apps.slice(0, 12);
+  savePhoneSettings();
+  nameInput.value = "";
+  urlInput.value = "";
+  renderIPhoneSettings();
+}
+
+function openIPhoneSettings() {
+  const panel = ensureIPhoneSettingsPanel();
+  renderIPhoneSettings();
+  panel.classList.add("is-open");
+}
+
+function closeIPhoneSettings() {
+  document.getElementById("iphoneSettingsPanel")?.classList.remove("is-open");
+}
+
+function drawIPhoneCore(core, time) {
+  const position = getCorePosition(core);
+  const scale = .72 + position.depth * .40;
+  const radius = core.radius * scale;
+  const active = selectedCore && selectedCore.id === core.id;
+  const phoneWidth = radius * 1.02;
+  const phoneHeight = radius * 1.72;
+  const phoneX = position.x - phoneWidth / 2;
+  const phoneY = position.y - phoneHeight / 2;
+  const pulse = .5 + (Math.sin(time * .0032) + 1) * .25;
+  const online = navigator.onLine;
+  const deviceStatus = phoneSettings.apps.length
+    ? "AI · " + phoneSettings.apps.length
+    : online ? "PWA · ONLINE" : "PWA · OFFLINE";
+
+  context.save();
+  context.globalAlpha = .50 + position.depth * .50;
+
+  const link = context.createLinearGradient(position.x, position.y, width * .5, height * .53);
+  link.addColorStop(0, "rgba(244,50,58,.58)");
+  link.addColorStop(.45, "rgba(238,238,238,.26)");
+  link.addColorStop(1, "rgba(130,130,136,0)");
+  context.strokeStyle = link;
+  context.lineWidth = 1;
+  context.setLineDash([3, 8]);
+  context.beginPath();
+  context.moveTo(position.x, position.y);
+  context.lineTo(width * .5, height * .53);
+  context.stroke();
+  context.setLineDash([]);
+
+  context.beginPath();
+  context.arc(position.x, position.y, radius * 1.42 + Math.sin(time * .0024) * 2, 0, Math.PI * 2);
+  context.strokeStyle = `rgba(242,56,64,${.22 + pulse * .24})`;
+  context.lineWidth = active ? 1.8 : 1;
+  context.stroke();
+
+  const glow = context.createRadialGradient(position.x, position.y, 4, position.x, position.y, radius * 1.45);
+  glow.addColorStop(0, "rgba(255,255,255,.16)");
+  glow.addColorStop(.38, "rgba(237,43,53,.22)");
+  glow.addColorStop(1, "rgba(237,43,53,0)");
+  context.fillStyle = glow;
+  context.beginPath();
+  context.arc(position.x, position.y, radius * 1.45, 0, Math.PI * 2);
+  context.fill();
+
+  context.save();
+  context.translate(position.x, position.y);
+  context.rotate(phoneSettings.angle);
+  context.translate(-position.x, -position.y);
+
+  context.shadowColor = "rgba(0,0,0,.68)";
+  context.shadowBlur = radius * .34;
+  context.shadowOffsetY = radius * .14;
+  roundedRectPath(phoneX, phoneY, phoneWidth, phoneHeight, radius * .19);
+  context.fillStyle = "#d61f2b";
+  context.fill();
+  context.shadowColor = "transparent";
+
+  roundedRectPath(phoneX + radius * .045, phoneY + radius * .045, phoneWidth - radius * .09, phoneHeight - radius * .09, radius * .16);
+  const frame = context.createLinearGradient(phoneX, phoneY, phoneX + phoneWidth, phoneY + phoneHeight);
+  frame.addColorStop(0, "#f24952");
+  frame.addColorStop(.45, "#8e1018");
+  frame.addColorStop(1, "#e82f3a");
+  context.fillStyle = frame;
+  context.fill();
+
+  const screenInset = radius * .105;
+  const screenX = phoneX + screenInset;
+  const screenY = phoneY + screenInset;
+  const screenWidth = phoneWidth - screenInset * 2;
+  const screenHeight = phoneHeight - screenInset * 2;
+  roundedRectPath(screenX, screenY, screenWidth, screenHeight, radius * .125);
+  const screen = context.createLinearGradient(screenX, screenY, screenX, screenY + screenHeight);
+  screen.addColorStop(0, "#25262a");
+  screen.addColorStop(.48, "#070708");
+  screen.addColorStop(1, "#17181b");
+  context.fillStyle = screen;
+  context.fill();
+  context.strokeStyle = "rgba(255,255,255,.24)";
+  context.lineWidth = .8;
+  context.stroke();
+
+  const notchWidth = screenWidth * .42;
+  const notchHeight = radius * .095;
+  roundedRectPath(position.x - notchWidth / 2, screenY + radius * .045, notchWidth, notchHeight, notchHeight / 2);
+  context.fillStyle = "#050506";
+  context.fill();
+  context.fillStyle = "rgba(194,194,198,.72)";
+  context.fillRect(position.x - notchWidth * .12, screenY + radius * .082, notchWidth * .24, 1);
+
+  drawAppleMark(position.x, position.y - radius * .06, radius * .25);
+
+  context.fillStyle = "#ffffff";
+  context.font = `900 ${Math.max(7, Math.round(radius * .18))}px system-ui`;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText("CHT", position.x, position.y + radius * .29);
+  context.fillStyle = "rgba(214,214,218,.84)";
+  context.font = `700 ${Math.max(6, Math.round(radius * .11))}px system-ui`;
+  context.fillText("360°‰.", position.x, position.y + radius * .45);
+
+  context.fillStyle = online ? "#f4f4f5" : "#a3a3a8";
+  context.font = `700 ${Math.max(5, Math.round(radius * .085))}px system-ui`;
+  context.fillText(deviceStatus, position.x, phoneY + phoneHeight - radius * .20);
+
+  context.fillStyle = "rgba(255,255,255,.68)";
+  roundedRectPath(position.x - screenWidth * .16, phoneY + phoneHeight - radius * .12, screenWidth * .32, radius * .025, radius * .02);
+  context.fill();
+
+  context.fillStyle = "#ffffff";
+  context.font = `900 ${Math.max(8, Math.round(radius * .19))}px system-ui`;
+  context.fillText("iPhone 14", position.x, phoneY + phoneHeight + radius * .20);
+  context.restore();
+  context.restore();
+
+  core.position = position;
+  core.drawRadius = Math.max(phoneWidth, phoneHeight) * .56;
+}
+
+function drawCore(core, time) {
+  if (core.type === "iphone14") {
+    drawIPhoneCore(core, time);
+    return;
+  }
+
+  const position = getCorePosition(core);
+  const scale = .72 + position.depth * .40;
+  const radius = core.radius * scale;
+  const active = selectedCore && selectedCore.id === core.id;
+
+  context.save();
+  context.globalAlpha = .48 + position.depth * .52;
+
+  const glow = context.createRadialGradient(
+    position.x,
+    position.y,
+    2,
+    position.x,
+    position.y,
+    radius * 1.45
+  );
+
+  glow.addColorStop(0, active ? "rgba(255,245,215,.95)" : "rgba(255,225,175,.74)");
+  glow.addColorStop(.24, active ? "rgba(255,185,95,.52)" : "rgba(255,185,95,.25)");
+  glow.addColorStop(1, "rgba(255,185,95,0)");
+
+  context.fillStyle = glow;
+  context.beginPath();
+  context.arc(position.x, position.y, radius * 1.45, 0, Math.PI * 2);
+  context.fill();
+
+  context.strokeStyle = active ? "rgba(255,240,205,.94)" : "rgba(255,220,160,.54)";
+  context.lineWidth = active ? 1.8 : 1;
+  context.beginPath();
+  context.arc(position.x, position.y, radius, 0, Math.PI * 2);
+  context.stroke();
+
+  for (let ring = 1; ring < 5; ring += 1) {
+    context.beginPath();
+    context.ellipse(position.x, position.y, radius, radius * ring / 5, 0, 0, Math.PI * 2);
+    context.strokeStyle = `rgba(255,220,160,${active ? .30 : .17})`;
+    context.lineWidth = .7;
+    context.stroke();
+  }
+
+  for (let line = 0; line < 8; line += 1) {
+    const angle = line / 8 * Math.PI;
+
+    context.beginPath();
+    context.ellipse(
+      position.x,
+      position.y,
+      Math.abs(Math.cos(angle)) * radius,
+      radius,
+      0,
+      0,
+      Math.PI * 2
+    );
+    context.strokeStyle = `rgba(255,220,160,${active ? .25 : .13})`;
+    context.lineWidth = .7;
+    context.stroke();
+  }
+
+  const pulse = radius + 7 + Math.sin(time * .003 + core.angle) * 3;
+  context.beginPath();
+  context.arc(position.x, position.y, pulse, 0, Math.PI * 2);
+  context.strokeStyle = active ? "rgba(255,235,195,.34)" : "rgba(255,220,160,.10)";
+  context.stroke();
+
+  context.fillStyle = "#fff0cf";
+  context.font = `800 ${Math.round(11 * scale)}px system-ui`;
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(core.title, position.x, position.y - 4);
+
+  const stats = getCoreStats(core.id);
+  context.fillStyle = "rgba(255,240,210,.65)";
+  context.font = `${Math.max(8, Math.round(9 * scale))}px system-ui`;
+  context.fillText(`${stats.used}/70`, position.x, position.y + 12);
+
+  context.restore();
+  core.position = position;
+  core.drawRadius = radius;
+}
+
+function render(time) {
+  context.clearRect(0, 0, width, height);
+  drawBackground();
+  drawTerraAxis(time);
+  drawCenterCore(time);
+
+  const ordered = [...cores].sort((first, second) => {
+    return getCorePosition(first).depth - getCorePosition(second).depth;
+  });
+
+  for (const core of ordered) {
+    drawCore(core, time);
+  }
+
+  if (!dragging && memory.layout.mode !== "manual") {
+    rotation += rotationVelocity;
+  }
+
+  requestAnimationFrame(render);
+}
+
+function findCoreAt(x, y) {
+  return [...cores]
+    .sort((first, second) => getCorePosition(second).depth - getCorePosition(first).depth)
+    .find((core) => {
+      if (!core.position) {
+        return false;
+      }
+
+      return Math.hypot(x - core.position.x, y - core.position.y) <= core.drawRadius + 16;
+    });
+}
+
+function openCore(core) {
+  selectedCore = core;
+  selectedSlotIndex = null;
+  panelTitle.textContent = `${core.title} · Paměť`;
+  panelSub.textContent = "70 slotů · samostatné uložení";
+  panel.classList.add("open");
+  slotEditor.classList.remove("open");
+  searchInput.value = "";
+  renderSlots();
+  updateStatus();
+}
+
+function renderSlots() {
+  if (!selectedCore) {
+    return;
+  }
+
+  const query = searchInput.value.trim().toLowerCase();
+  const slots = memory.cores[selectedCore.id];
+  slotGrid.innerHTML = "";
+
+  slots.forEach((slot, index) => {
+    const searchable = `${slot.name} ${slot.content}`.toLowerCase();
+
+    if (query && !searchable.includes(query)) {
+      return;
+    }
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "slotBtn";
+
+    const used = slot.content.trim() || slot.name.trim() !== `Slot ${slot.id}`;
+
+    if (used) {
+      button.classList.add("obsazeny");
+    }
+
+    if (index === selectedSlotIndex) {
+      button.classList.add("aktivni");
+    }
+
+    button.innerHTML = `
+      <strong>${escapeHtml(slot.name || `Slot ${slot.id}`)}</strong>
+      <span>${slot.content.trim() ? "obsazeno" : "prázdné"}</span>
+    `;
+    button.addEventListener("click", () => selectSlot(index));
+    slotGrid.appendChild(button);
+  });
+}
+
+function selectSlot(index) {
+  selectedSlotIndex = index;
+
+  const slot = memory.cores[selectedCore.id][index];
+  slotName.value = slot.name;
+  slotContent.value = slot.content;
+  slotEditor.classList.add("open");
+  renderSlots();
+  updateStatus();
+}
+
+function updateStatus(message = "") {
+  if (!selectedCore) {
+    statusBox.textContent = "Vyber jádro.";
+    return;
+  }
+
+  const stats = getCoreStats(selectedCore.id);
+  let text = `${selectedCore.title}: obsazeno ${stats.used}/70 · velikost ${formatBytes(stats.size)}`;
+
+  if (selectedSlotIndex !== null) {
+    text += ` · otevřen slot ${selectedSlotIndex + 1}`;
+  }
+
+  if (message) {
+    text += ` · ${message}`;
+  }
+
+  statusBox.textContent = text;
+}
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, (character) => {
+    return {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#039;"
+    }[character];
+  });
+}
+
+function downloadJson(data, filename) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+saveSlot.addEventListener("click", () => {
+  if (!selectedCore || selectedSlotIndex === null) {
+    return;
+  }
+
+  const slot = memory.cores[selectedCore.id][selectedSlotIndex];
+  slot.name = slotName.value.trim() || `Slot ${selectedSlotIndex + 1}`;
+  slot.content = slotContent.value;
+  slot.updatedAt = new Date().toISOString();
+  saveMemory();
+  renderSlots();
+  updateStatus("uloženo");
+});
+
+clearSlot.addEventListener("click", () => {
+  if (!selectedCore || selectedSlotIndex === null) {
+    return;
+  }
+
+  if (!confirm(`Vymazat slot ${selectedSlotIndex + 1}?`)) {
+    return;
+  }
+
+  memory.cores[selectedCore.id][selectedSlotIndex] = createEmptySlot(selectedSlotIndex);
+  saveMemory();
+  slotName.value = `Slot ${selectedSlotIndex + 1}`;
+  slotContent.value = "";
+  renderSlots();
+  updateStatus("vymazáno");
+});
+
+searchInput.addEventListener("input", renderSlots);
+closePanel.addEventListener("click", () => panel.classList.remove("open"));
+
+exportCore.addEventListener("click", () => {
+  if (!selectedCore) {
+    return;
+  }
+
+  downloadJson({
+    typ: "jadro-pameti",
+    jadro: selectedCore.id,
+    nazev: selectedCore.title,
+    sloty: memory.cores[selectedCore.id],
+    exportovano: new Date().toISOString()
+  }, `pamet_${selectedCore.id}.json`);
+});
+
+importCore.addEventListener("click", () => {
+  if (!selectedCore) {
+    return;
+  }
+
+  importMode = "core";
+  fileInput.value = "";
+  fileInput.click();
+});
+
+exportAll.addEventListener("click", () => {
+  downloadJson(memory, "vaft_pamet_cela.json");
+});
+
+importAll.addEventListener("click", () => {
+  importMode = "all";
+  fileInput.value = "";
+  fileInput.click();
+});
+
+fileInput.addEventListener("change", async () => {
+  const file = fileInput.files && fileInput.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  try {
+    const data = JSON.parse(await file.text());
+
+    if (importMode === "core") {
+      if (!selectedCore) {
+        throw new Error("Není vybrané jádro");
+      }
+
+      const slots = Array.isArray(data.sloty) ? data.sloty : data;
+
+      if (!Array.isArray(slots)) {
+        throw new Error("Soubor neobsahuje sloty");
+      }
+
+      memory.cores[selectedCore.id] = Array.from({ length: SLOT_COUNT }, (_, index) => {
+        const source = slots[index] || {};
+
+        return {
+          id: index + 1,
+          name: typeof source.name === "string" && source.name.trim()
+            ? source.name
+            : `Slot ${index + 1}`,
+          content: typeof source.content === "string" ? source.content : "",
+          updatedAt: source.updatedAt || null
+        };
+      });
+
+      saveMemory();
+      renderSlots();
+      updateStatus("jádro importováno");
+    } else {
+      if (!data.cores) {
+        throw new Error("Soubor neobsahuje celou Paměť");
+      }
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      memory = loadMemory();
+      saveMemory();
+      renderSlots();
+      updateStatus("celá Paměť importována");
+    }
+  } catch (error) {
+    alert(`Import se nezdařil: ${error.message}`);
+  }
+});
+
+canvas.addEventListener("pointerdown", (event) => {
+  const bounds = canvas.getBoundingClientRect();
+  const x = event.clientX - bounds.left;
+  const y = event.clientY - bounds.top;
+  const core = findCoreAt(x, y);
+
+  if (layoutEditMode && core) {
+    movingCore = core;
+    dragging = false;
+    movedDuringDrag = true;
+    canvas.setPointerCapture(event.pointerId);
+    return;
+  }
+
+  if (core && core.type === "iphone14") {
+    phoneDragging = true;
+    phoneMoved = false;
+    phonePreviousX = event.clientX;
+    dragging = false;
+    canvas.setPointerCapture(event.pointerId);
+    return;
+  }
+
+  dragging = true;
+  movedDuringDrag = false;
+  previousPointerX = event.clientX;
+  canvas.setPointerCapture(event.pointerId);
+});
+
+canvas.addEventListener("pointermove", (event) => {
+  if (phoneDragging) {
+    const deltaX = event.clientX - phonePreviousX;
+
+    if (Math.abs(deltaX) > 1) {
+      phoneMoved = true;
+      phoneSettings.angle = normalizePhoneAngle(phoneSettings.angle + deltaX * .012);
+      phonePreviousX = event.clientX;
+    }
+
+    return;
+  }
+
+  if (movingCore) {
+    const bounds = canvas.getBoundingClientRect();
+
+    moveCoreTo(
+      movingCore,
+      event.clientX - bounds.left,
+      event.clientY - bounds.top
+    );
+    return;
+  }
+
+  if (!dragging) {
+    return;
+  }
+
+  const deltaX = event.clientX - previousPointerX;
+
+  if (Math.abs(deltaX) > 2) {
+    movedDuringDrag = true;
+  }
+
+  rotation += deltaX * .007;
+  previousPointerX = event.clientX;
+});
+
+canvas.addEventListener("pointerup", (event) => {
+  const bounds = canvas.getBoundingClientRect();
+  const x = event.clientX - bounds.left;
+  const y = event.clientY - bounds.top;
+
+  if (phoneDragging) {
+    const shouldOpenSettings = !phoneMoved;
+    phoneDragging = false;
+
+    if (canvas.hasPointerCapture(event.pointerId)) {
+      canvas.releasePointerCapture(event.pointerId);
+    }
+
+    if (shouldOpenSettings) {
+      openIPhoneSettings();
+    } else {
+      savePhoneSettings();
+    }
+
+    return;
+  }
+
+  if (movingCore) {
+    moveCoreTo(movingCore, x, y);
+    movingCore = null;
+
+    if (canvas.hasPointerCapture(event.pointerId)) {
+      canvas.releasePointerCapture(event.pointerId);
+    }
+
+    saveMemory("layout-move");
+    layoutHint.textContent = "Území uloženo. Můžeš přesunout další jádro nebo stisknout Hotovo.";
+    return;
+  }
+
+  dragging = false;
+
+  if (canvas.hasPointerCapture(event.pointerId)) {
+    canvas.releasePointerCapture(event.pointerId);
+  }
+
+  if (!movedDuringDrag) {
+    const core = findCoreAt(x, y);
+
+    if (core) {
+      openCore(core);
+    }
+  }
+});
+
+canvas.addEventListener("pointercancel", () => {
+  dragging = false;
+  movingCore = null;
+  phoneDragging = false;
+});
+
+if (toggleLayoutEdit) {
+  toggleLayoutEdit.addEventListener("click", () => {
+    setLayoutEditMode(!layoutEditMode);
+  });
+}
+
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+updatePills();
+requestAnimationFrame(render);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      const registration = await navigator.serviceWorker.register(
+        "./service-worker.js",
+        { updateViaCache: "none" }
+      );
+
+      await registration.update();
+
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: "SKIP_WAITING" });
+      }
+
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
+
+        if (!newWorker) {
+          return;
+        }
+
+        newWorker.addEventListener("statechange", () => {
+          if (
+            newWorker.state === "installed" &&
+            navigator.serviceWorker.controller
+          ) {
+            newWorker.postMessage({ type: "SKIP_WAITING" });
+          }
+        });
+      });
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        const reloadKey = "cht360_worker_reloaded";
+
+        if (sessionStorage.getItem(reloadKey)) {
+          return;
+        }
+
+        sessionStorage.setItem(reloadKey, "1");
+        window.location.reload();
+      });
+
+      window.setTimeout(() => {
+        sessionStorage.removeItem("cht360_worker_reloaded");
+      }, 5000);
+    } catch (error) {
+      console.warn("[360°‰.] Service worker se nepodařilo spustit.", error);
+    }
+  });
+}
