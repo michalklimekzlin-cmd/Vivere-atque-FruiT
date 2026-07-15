@@ -20,7 +20,11 @@ const importAll = document.getElementById("importAll");
 const fileInput = document.getElementById("fileInput");
 const statusBox = document.getElementById("statusBox");
 
-const STORAGE_KEY = "vaft_pamet_v1";
+const STORAGE_KEY = "cht360_pamet_v1";
+const LEGACY_STORAGE_KEYS = ["vaft_pamet_v1"];
+const MEMORY_SNAPSHOT_KEY = "cht360_pamet_snapshots_v1";
+const CHYBOZROUT_BACKUP_KEY = "cht360_samoopravovna_backup_v1";
+const LEGACY_SLOT_PREFIX = "VaFiT_SLOT_";
 const SLOT_COUNT = 70;
 const SCENE_KEY = "vaft_pamet_scene_v2";
 const MIN_SCENE_SPREAD = .96;
@@ -92,12 +96,15 @@ function createEmptySlot(index) {
 }
 
 function createEmptyCore() {
-  return Array.from({ length: SLOT_COUNT }, (_, index) => createEmptySlot(index));
+  return Array.from(
+    { length: SLOT_COUNT },
+    (_, index) => createEmptySlot(index)
+  );
 }
 
 function createEmptyMemory() {
   return {
-    version: 1,
+    version: 2,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     cores: {
@@ -109,37 +116,265 @@ function createEmptyMemory() {
   };
 }
 
-function loadMemory() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+function normaliseSlot(source, index) {
+  const fallback = createEmptySlot(index);
+  const value = source && typeof source === "object" ? source : {};
+  const customName = typeof value.name === "string" && value.name.trim()
+    ? value.name.trim()
+    : (
+      typeof value.label === "string" && value.label.trim()
+        ? value.label.trim()
+        : fallback.name
+    );
 
-    if (!raw) {
-      return createEmptyMemory();
-    }
+  let content = typeof value.content === "string" ? value.content : "";
 
-    const parsed = JSON.parse(raw);
-
-    if (!parsed.cores) {
-      throw new Error("NeplatnÃ¡ struktura");
-    }
-
-    for (const coreId of ["earth", "language", "game", "control"]) {
-      if (!Array.isArray(parsed.cores[coreId])) {
-        parsed.cores[coreId] = createEmptyCore();
-      }
-
-      while (parsed.cores[coreId].length < SLOT_COUNT) {
-        parsed.cores[coreId].push(createEmptySlot(parsed.cores[coreId].length));
-      }
-
-      parsed.cores[coreId] = parsed.cores[coreId].slice(0, SLOT_COUNT);
-    }
-
-    return parsed;
-  } catch (error) {
-    console.warn("PamÄÅ¥ byla obnovena do vÃ½chozÃ­ho stavu.", error);
-    return createEmptyMemory();
+  if (!content && typeof value.url === "string" && value.url.trim()) {
+    content = JSON.stringify({
+      url: value.url,
+      app: value.app || "",
+      icon: value.icon || "",
+      color: value.color || "",
+      action: value.action || "open"
+    }, null, 2);
   }
+
+  return {
+    ...value,
+    id: index + 1,
+    name: customName,
+    content,
+    updatedAt: typeof value.updatedAt === "string"
+      ? value.updatedAt
+      : null
+  };
+}
+
+function normaliseMemory(source) {
+  if (
+    !source ||
+    typeof source !== "object" ||
+    !source.cores ||
+    typeof source.cores !== "object"
+  ) {
+    return null;
+  }
+
+  const normalised = {
+    version: 2,
+    createdAt: typeof source.createdAt === "string"
+      ? source.createdAt
+      : new Date().toISOString(),
+    updatedAt: typeof source.updatedAt === "string"
+      ? source.updatedAt
+      : new Date().toISOString(),
+    cores: {}
+  };
+
+  for (const coreId of ["earth", "language", "game", "control"]) {
+    const savedSlots = Array.isArray(source.cores[coreId])
+      ? source.cores[coreId]
+      : [];
+
+    normalised.cores[coreId] = Array.from(
+      { length: SLOT_COUNT },
+      (_, index) => normaliseSlot(savedSlots[index], index)
+    );
+  }
+
+  return normalised;
+}
+
+function slotIsUsed(slot) {
+  const id = Number(slot?.id) || 0;
+  const name = String(slot?.name || "").trim();
+  const content = String(slot?.content || "").trim();
+
+  return Boolean(content || (name && name !== `Slot ${id}`));
+}
+
+function slotTimestamp(slot) {
+  const timestamp = Date.parse(slot?.updatedAt || "");
+
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function readStoredMemory(key) {
+  try {
+    const raw = localStorage.getItem(key);
+
+    return raw ? normaliseMemory(JSON.parse(raw)) : null;
+  } catch (error) {
+    console.warn(`PamÄÅ¥ v klÃ­Äi ${key} se nepodaÅilo naÄÃ­st.`, error);
+    return null;
+  }
+}
+
+function readSnapshotMemories() {
+  try {
+    const snapshots = JSON.parse(
+      localStorage.getItem(MEMORY_SNAPSHOT_KEY) || "[]"
+    );
+
+    if (!Array.isArray(snapshots)) {
+      return [];
+    }
+
+    return snapshots
+      .slice(-3)
+      .reverse()
+      .map(snapshot => {
+        if (!snapshot?.data) {
+          return null;
+        }
+
+        return normaliseMemory(JSON.parse(snapshot.data));
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function readChybozroutBackupMemories() {
+  try {
+    const backup = JSON.parse(
+      localStorage.getItem(CHYBOZROUT_BACKUP_KEY) || "null"
+    );
+
+    if (!backup?.values || typeof backup.values !== "object") {
+      return [];
+    }
+
+    return [STORAGE_KEY, ...LEGACY_STORAGE_KEYS]
+      .map(key => {
+        const raw = backup.values[key];
+
+        return raw ? normaliseMemory(JSON.parse(raw)) : null;
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function readLegacySlotMemory() {
+  const memory = createEmptyMemory();
+  let hasData = false;
+
+  for (let index = 0; index < SLOT_COUNT; index += 1) {
+    try {
+      const raw = localStorage.getItem(LEGACY_SLOT_PREFIX + (index + 1));
+
+      if (!raw) {
+        continue;
+      }
+
+      const slot = normaliseSlot(JSON.parse(raw), index);
+
+      if (slotIsUsed(slot)) {
+        memory.cores.earth[index] = slot;
+        hasData = true;
+      }
+    } catch {
+      /* JednotlivÃ½ starÃ½ slot nesmÃ­ zastavit naÄtenÃ­ celÃ© PamÄti. */
+    }
+  }
+
+  return hasData ? memory : null;
+}
+
+function mergeMemoryCandidates(candidates) {
+  const merged = createEmptyMemory();
+  let hasData = false;
+
+  for (const candidate of candidates.filter(Boolean)) {
+    for (const coreId of ["earth", "language", "game", "control"]) {
+      const incomingSlots = candidate.cores?.[coreId] || [];
+
+      incomingSlots.forEach((sourceSlot, index) => {
+        const incoming = normaliseSlot(sourceSlot, index);
+
+        if (!slotIsUsed(incoming)) {
+          return;
+        }
+
+        const current = merged.cores[coreId][index];
+
+        if (
+          !slotIsUsed(current) ||
+          slotTimestamp(incoming) > slotTimestamp(current)
+        ) {
+          merged.cores[coreId][index] = incoming;
+        }
+
+        hasData = true;
+      });
+    }
+  }
+
+  return { memory: merged, hasData };
+}
+
+function writeMemoryCopies(value, createSnapshot = true) {
+  const serialised = JSON.stringify(value);
+
+  try {
+    localStorage.setItem(STORAGE_KEY, serialised);
+
+    for (const key of LEGACY_STORAGE_KEYS) {
+      localStorage.setItem(key, serialised);
+    }
+
+    if (!createSnapshot) {
+      return;
+    }
+
+    let snapshots = [];
+
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem(MEMORY_SNAPSHOT_KEY) || "[]"
+      );
+
+      snapshots = Array.isArray(saved) ? saved : [];
+    } catch {
+      snapshots = [];
+    }
+
+    if (snapshots.at(-1)?.data !== serialised) {
+      snapshots.push({
+        savedAt: new Date().toISOString(),
+        data: serialised
+      });
+    }
+
+    localStorage.setItem(
+      MEMORY_SNAPSHOT_KEY,
+      JSON.stringify(snapshots.slice(-3))
+    );
+  } catch (error) {
+    console.warn("PamÄÅ¥ se nepodaÅilo bezpeÄnÄ zapsat.", error);
+  }
+}
+
+function loadMemory() {
+  const currentCandidates = [
+    readStoredMemory(STORAGE_KEY),
+    ...LEGACY_STORAGE_KEYS.map(readStoredMemory),
+    ...readSnapshotMemories(),
+    ...readChybozroutBackupMemories(),
+    readLegacySlotMemory()
+  ];
+
+  const merged = mergeMemoryCandidates(currentCandidates);
+
+  if (merged.hasData) {
+    writeMemoryCopies(merged.memory);
+    return merged.memory;
+  }
+
+  return createEmptyMemory();
 }
 
 function clamp(value, minimum, maximum) {
@@ -218,7 +453,7 @@ function saveScene() {
 function saveMemory(reason = "save") {
   memory.updatedAt = new Date().toISOString();
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(memory));
+  writeMemoryCopies(memory);
   updatePills();
 
   window.dispatchEvent(
@@ -265,7 +500,7 @@ function updatePills() {
 function getCoreStats(coreId) {
   const slots = memory.cores[coreId];
   const used = slots.filter((slot) => {
-    return slot.content.trim() || slot.name.trim() !== `Slot ${slot.id}`;
+    return String(slot.content || "").trim() || String(slot.name || "").trim() !== `Slot ${slot.id}`;
   }).length;
 
   const size = byteSize(JSON.stringify(slots));
@@ -659,8 +894,8 @@ function installTrojkaBridge() {
 function getTrojkaCamera() {
   const isLandscape = width >= height;
 
-  // Pevné pozadí: Paměť se otáčí a přibližuje sama,
-  // stěna trojky zůstává dál za ní na jednom místě.
+  // PevnÃ© pozadÃ­: PamÄÅ¥ se otÃ¡ÄÃ­ a pÅibliÅ¾uje sama,
+  // stÄna trojky zÅ¯stÃ¡vÃ¡ dÃ¡l za nÃ­ na jednom mÃ­stÄ.
   return {
     centerX: width * .56,
     centerY: height * (isLandscape ? .52 : .50),
@@ -1511,8 +1746,13 @@ fileInput.addEventListener("change", async () => {
         throw new Error("Soubor neobsahuje celou PamÄÅ¥");
       }
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      const importedMemory = normaliseMemory(data);
 
+      if (!importedMemory) {
+        throw new Error("Soubor neobsahuje platnou PamÄÅ¥");
+      }
+
+      writeMemoryCopies(importedMemory);
       memory = loadMemory();
 
       saveMemory();
@@ -1798,4 +2038,5 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
+
 
