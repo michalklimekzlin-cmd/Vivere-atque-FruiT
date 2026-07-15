@@ -4,7 +4,7 @@
   Při větší změně stačí zvýšit poslední číslo.
   Staré cache se při aktivaci automaticky odstraní.
 */
-const CACHE_VERSION = "v8";
+const CACHE_VERSION = "v9";
 const CACHE_NAME = `cht360-${CACHE_VERSION}`;
 
 const OFFLINE_PAGE = "./index.html";
@@ -171,4 +171,5 @@ self.addEventListener("message", event => {
     self.skipWaiting();
   }
 });
+
 
