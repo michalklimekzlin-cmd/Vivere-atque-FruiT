@@ -4,7 +4,7 @@
   Při větší změně stačí zvýšit poslední číslo.
   Staré cache se při aktivaci automaticky odstraní.
 */
-const CACHE_VERSION = "v7";
+const CACHE_VERSION = "v8";
 const CACHE_NAME = `cht360-${CACHE_VERSION}`;
 
 const OFFLINE_PAGE = "./index.html";
@@ -13,6 +13,7 @@ const CORE_FILES = [
   "./",
   "./index.html",
   "./css/pamet.css",
+  "./js/app.js",
   "./js/aplikace.js",
   "./js/cht-chybozrout.js",
   "./manifest.json"
@@ -170,3 +171,4 @@ self.addEventListener("message", event => {
     self.skipWaiting();
   }
 });
+
