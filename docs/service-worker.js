@@ -4,7 +4,7 @@
   Při větší změně stačí zvýšit poslední číslo.
   Staré cache se při aktivaci automaticky odstraní.
 */
-const CACHE_VERSION = "v10";
+const CACHE_VERSION = "v11";
 const CACHE_NAME = `cht360-${CACHE_VERSION}`;
 
 const OFFLINE_PAGE = "./index.html";
@@ -15,6 +15,7 @@ const CORE_FILES = [
   "./css/pamet.css",
   "./js/app.js",
   "./js/aplikace.js",
+  "./js/glyph-kostra.js",
   "./js/cht-chybozrout.js",
   "./manifest.json"
 ];
@@ -94,9 +95,7 @@ async function networkFirst(request) {
     }
 
     if (request.mode === "navigate") {
-      return (
-        await cache.match(OFFLINE_PAGE)
-      );
+      return await cache.match(OFFLINE_PAGE);
     }
 
     throw error;
@@ -120,10 +119,7 @@ async function staleWhileRevalidate(request) {
   })
     .then(async response => {
       if (response && response.ok) {
-        await cache.put(
-          request,
-          response.clone()
-        );
+        await cache.put(request, response.clone());
       }
 
       return response;
@@ -142,9 +138,7 @@ self.addEventListener("fetch", event => {
 
   const url = new URL(request.url);
 
-  /*
-    Cizí weby necháme prohlížeči.
-  */
+  /* Cizí weby necháme prohlížeči. */
   if (url.origin !== self.location.origin) {
     return;
   }
@@ -163,14 +157,9 @@ self.addEventListener("fetch", event => {
   );
 });
 
-/*
-  Umožní stránce nového workera okamžitě aktivovat.
-*/
+/* Umožní stránce nového workera okamžitě aktivovat. */
 self.addEventListener("message", event => {
   if (event.data?.type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
-
-
-
