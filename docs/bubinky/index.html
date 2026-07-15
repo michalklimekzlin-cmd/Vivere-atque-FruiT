@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090907">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bubínky">
+  <meta name="description" content="CHT 360°‰. Bubínky pro zámky slotů.">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Bubínky · CHT 360°‰.</title>
+</head>
+
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="../index.html" aria-label="Vrátit se do CHT 360">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+        <span>
+          <strong>CHT 360°‰.</strong>
+          <small>Bubínky a zámky</small>
+        </span>
+      </a>
+      <a class="back-link" href="../index.html">Paměť <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <section class="intro" aria-labelledby="title">
+      <p class="eyebrow"><span></span> SAMOSTATNÁ PWA</p>
+      <h1 id="title">Bubínky<br><em>pro zámky slotů.</em></h1>
+      <p>
+        Vyber jádro a slot, otoč čtyři až osm bubínků a nastav vlastní zámek.
+        CHT obsah zůstává mimo tuto aplikaci.
+      </p>
+    </section>
+
+    <section class="target-card" aria-labelledby="target-title">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow"><span></span> CÍL ZÁMKU</p>
+          <h2 id="target-title">Vybraný slot</h2>
+        </div>
+        <output id="targetState" class="state-pill">neuzamčený</output>
+      </div>
+
+      <div class="target-fields">
+        <label>
+          Jádro
+          <select id="coreSelect">
+            <option value="earth">Země</option>
+            <option value="language">Jazyk</option>
+            <option value="game">Hra</option>
+            <option value="control">Řízení</option>
+          </select>
+        </label>
+
+        <label>
+          Slot
+          <select id="slotSelect" aria-label="Číslo slotu"></select>
+        </label>
+      </div>
+
+      <p id="targetDescription" class="target-description">Země · slot 1</p>
+    </section>
+
+    <section class="drum-card" aria-labelledby="drum-title">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow"><span></span> KÓD ZÁMKU</p>
+          <h2 id="drum-title">Otoč bubínky</h2>
+        </div>
+        <output id="drumCount" class="drum-count">4 bubínky</output>
+      </div>
+
+      <p class="drum-help">
+        Táhni nahoru nebo dolů. Klepnutí otočí bubínek o jeden krok.
+      </p>
+
+      <div id="drumRack" class="drum-rack" aria-label="Bubínky kódu"></div>
+      <output id="codePreview" class="code-preview" aria-label="Zvolený kód"></output>
+
+      <div class="drum-actions">
+        <button id="addDrum" class="button button-quiet" type="button">+ bubínek</button>
+        <button id="removeDrum" class="button button-quiet" type="button">− bubínek</button>
+        <button id="resetDrums" class="button button-quiet" type="button">Obnovit</button>
+      </div>
+
+      <label class="hint-field">
+        Nápověda pro tebe <span>(nepovinné)</span>
+        <input id="hintInput" maxlength="80" placeholder="Například: čtyři světla">
+      </label>
+    </section>
+
+    <section class="control-card" aria-label="Ovládání zámku">
+      <button id="setLock" class="button button-primary" type="button">
+        Zamknout vybraný slot <span aria-hidden="true">⌁</span>
+      </button>
+      <button id="unlockSlot" class="button button-quiet" type="button">
+        Odemknout na 15 minut
+      </button>
+      <button id="removeLock" class="button button-danger" type="button">
+        Zrušit zámek
+      </button>
+
+      <p id="status" class="status" role="status" aria-live="polite">
+        Připraveno. Vyber slot a nastav vlastní kód.
+      </p>
+    </section>
+
+    <section class="locks-card" aria-labelledby="locks-title">
+      <div class="card-heading">
+        <div>
+          <p class="eyebrow"><span></span> PŘEHLED</p>
+          <h2 id="locks-title">Uzamčené sloty</h2>
+        </div>
+        <output id="locksCount" class="drum-count">0 zámků</output>
+      </div>
+
+      <div id="locksList" class="locks-list"></div>
+    </section>
+
+    <section class="backup-card">
+      <div>
+        <strong>Záloha zámků</strong>
+        <p>Export zachová zámky, ne jejich čitelné kódy.</p>
+      </div>
+
+      <div class="backup-actions">
+        <button id="exportLocks" class="button button-quiet" type="button">Export</button>
+        <button id="importLocks" class="button button-quiet" type="button">Import</button>
+        <input id="importInput" type="file" accept="application/json,.json" hidden>
+      </div>
+    </section>
+
+    <aside class="privacy-note">
+      <span aria-hidden="true">◌</span>
+      <p>
+        <strong>Poctivě:</strong> zámek schová otevření slotu v tomto prohlížeči.
+        Není náhradou za šifrovaný trezor proti člověku, který má přístup k datům zařízení.
+      </p>
+    </aside>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
