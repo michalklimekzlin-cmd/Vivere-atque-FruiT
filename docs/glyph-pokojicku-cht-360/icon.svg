@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Glyph pokojíčků CHT 360">
+  <defs>
+    <radialGradient id="b" cx="28%" cy="19%" r="90%">
+      <stop offset="0" stop-color="#3a2d16"/>
+      <stop offset="1" stop-color="#090907"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="120" fill="url(#b)"/>
+  <path d="M113 384V153c0-17 14-31 31-31h224c17 0 31 14 31 31v231" fill="none" stroke="#ffe2ad" stroke-linejoin="round" stroke-width="18"/>
+  <path d="M182 385V243c0-14 11-25 25-25h98c14 0 25 11 25 25v142" fill="#120f09" stroke="#c79b33" stroke-width="13"/>
+  <circle cx="282" cy="304" r="8" fill="#ffe2ad"/>
+  <path d="M154 183h58M300 183h58" stroke="#c79b33" stroke-linecap="round" stroke-width="14"/>
+  <circle cx="256" cy="91" r="12" fill="#ffe2ad"/>
+</svg>
