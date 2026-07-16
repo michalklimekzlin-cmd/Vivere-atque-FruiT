@@ -4,8 +4,8 @@
   Při větší změně stačí zvýšit poslední číslo.
   Staré cache se při aktivaci automaticky odstraní.
 */
-const CACHE_VERSION = "v11";
-const const CACHE_NAME = "cht360-iphone14-v2";
+const CACHE_VERSION = "v12-cestina";
+const CACHE_NAME = `cht360-${CACHE_VERSION}`;
 
 const OFFLINE_PAGE = "./index.html";
 
