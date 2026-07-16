@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070706">
+  <meta name="description" content="Glyph CHT 360°‰ — ChybaŽrout pro UTF-8, kód a návaznosti projektu.">
+  <title>Glyph CHT 360°‰ · Kontrola projektu</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ChybaŽrout · Strážce návazností</p>
+        <h1>Glyph CHT 360°‰</h1>
+        <p class="subtitle">Kontrola textů, UTF‑8, souborů a jejich propojení. Opravy jsou vždy jen návrh, nikdy tichý zásah.</p>
+      </div>
+
+      <nav class="top-actions" aria-label="Propojené části">
+        <a class="button button-quiet" href="../glyph-pokojicku-cht-360/">Glyph pokojíčků</a>
+        <button class="button button-quiet" id="exportReport" type="button">Záloha kontroly</button>
+        <button class="button button-quiet" id="clearProject" type="button">Vyčistit mapu</button>
+      </nav>
+    </header>
+
+    <section class="drum-row" aria-label="Stav kontroly">
+      <article class="drum"><span>Souborů</span><strong id="fileCount">0</strong><small>v projektu</small></article>
+      <article class="drum"><span>Návaznosti</span><strong id="dependencyCount">0</strong><small>rozpoznáno</small></article>
+      <article class="drum"><span>ChybaŽrout</span><strong id="errorCount">Čisté</strong><small id="errorNote">čeká na soubory</small></article>
+      <article class="drum"><span>Uložení</span><strong id="storageState">Načítám</strong><small id="storageNote">místní paměť</small></article>
+    </section>
+
+    <section class="layout">
+      <section class="panel upload-panel" aria-labelledby="uploadTitle">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Začátek kontroly</p>
+            <h2 id="uploadTitle">Přidej projektové soubory</h2>
+          </div>
+
+          <label class="button button-primary import-button" for="projectFiles">
+            Vybrat soubory
+            <input id="projectFiles" type="file" multiple accept=".html,.htm,.css,.js,.mjs,.json,.webmanifest,.svg,.txt,.md" hidden>
+          </label>
+        </div>
+
+        <p class="intro">Vyber soubory z projektu — třeba celý obsah složky <code>docs</code>. Zůstávají jen v prohlížeči tohoto zařízení. ChybaŽrout zkontroluje i odkazy mezi nimi.</p>
+
+        <label class="project-name">
+          <span>Název pracovní mapy</span>
+          <input id="projectName" type="text" maxlength="80" placeholder="např. CHT 360°‰" autocomplete="off">
+        </label>
+
+        <div class="paste-row">
+          <label>
+            <span>Nebo vlož jeden kus kódu</span>
+            <textarea id="pasteCode" rows="5" spellcheck="false" autocapitalize="off" placeholder="HTML, CSS, JavaScript nebo JSON…"></textarea>
+          </label>
+
+          <div class="paste-actions">
+            <input id="pasteFilename" type="text" maxlength="120" placeholder="např. aplikace.js" autocomplete="off">
+            <button class="button button-quiet" id="scanPaste" type="button">Prověřit vložený kód</button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel map-panel" aria-labelledby="mapTitle">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Mapa projektu</p>
+            <h2 id="mapTitle">Soubory a spojení</h2>
+          </div>
+          <button class="button button-quiet" id="scanAgain" type="button">Přepočítat</button>
+        </div>
+
+        <label class="search-field">
+          <span>Hledat soubor nebo problém</span>
+          <input id="fileSearch" type="search" placeholder="index, UTF, manifest…" autocomplete="off" autocapitalize="off">
+        </label>
+
+        <div class="file-list" id="fileList" aria-live="polite"></div>
+      </aside>
+
+      <section class="panel findings-panel" aria-labelledby="findingsTitle">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Nález po nálezu</p>
+            <h2 id="findingsTitle">Co ChybaŽrout našel</h2>
+          </div>
+          <button class="button button-quiet" id="downloadRepair" type="button" disabled>Stáhnout bezpečnou kopii</button>
+        </div>
+
+        <p class="intro" id="selectionText">Vyber soubor v mapě. Bezpečná kopie doplní jen jisté věci, například chybějící UTF‑8 nebo doctype; neznámé chyby pouze označí.</p>
+        <ul class="findings-list" id="findingsList" aria-live="polite"></ul>
+      </section>
+
+      <section class="panel dependency-panel" aria-labelledby="dependencyTitle">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Návaznost při každém kódu</p>
+            <h2 id="dependencyTitle">Spojení v projektu</h2>
+          </div>
+          <span class="locked-note">bez automatického přepsání</span>
+        </div>
+
+        <div class="dependency-list" id="dependencyList" aria-live="polite"></div>
+      </section>
+    </section>
+
+    <footer id="statusLine" class="footer-status" aria-live="polite">Glyph CHT 360°‰ je připravený.</footer>
+  </main>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
