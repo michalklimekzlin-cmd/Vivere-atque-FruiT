@@ -81,13 +81,13 @@ const cores = [
   {
     id: "earth",
     title: "ZemÄ",
-    subtitle: "Modeling, svÄty a Ãºhel pohledu",
+    subtitle: "ModelovÃ¡nÃ­, svÄty a Ãºhel pohledu",
     radius: 50
   },
   {
     id: "language",
     title: "Jazyk",
-    subtitle: "PÃ­smena, symboly, glyphy a vÃ½znam",
+    subtitle: "PÃ­smena, symboly, znaky a vÃ½znam",
     radius: 50
   },
   {
@@ -1639,7 +1639,7 @@ function renderIPhoneSettings() {
   const state = phonePanel.querySelector("#iphoneSettingsState");
   const list = phonePanel.querySelector("#iphoneAppList");
   const appCount = phoneSettings.apps.length;
-  const onlineText = navigator.onLine ? "PWA je online" : "PWA je offline";
+  const onlineText = navigator.onLine ? "PWA je online" : "PWA je bez pÅipojenÃ­";
 
   state.textContent = onlineText + " Â· otoÄenÃ­ je uloÅ¾enÃ© Â· AI aplikace: " + appCount + "/12";
   list.replaceChildren();
@@ -1732,7 +1732,7 @@ function drawIPhoneCore(core, time) {
   const online = navigator.onLine;
   const deviceStatus = phoneSettings.apps.length
     ? "AI Â· " + phoneSettings.apps.length
-    : online ? "PWA Â· ONLINE" : "PWA Â· OFFLINE";
+    : online ? "PWA Â· PÅIPOJENO" : "PWA Â· BEZ PÅIPOJENÃ";
   const anchor = getSceneAnchor();
   const hubX = anchor.centerX + scene.panX;
   const hubY = anchor.centerY + scene.panY;
