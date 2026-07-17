@@ -4,7 +4,7 @@ const CACHE_PREFIX = "glyph-cht-360-";
 const CORE_FILES = [
   "./",
   "./index.html",
-  "./style.css",
+  "./styles.css",
   "./app.js",
   "./manifest.webmanifest",
   "./icon.svg"
