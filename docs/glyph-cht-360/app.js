@@ -1,992 +1,1437 @@
 "use strict";
 
 const APP_NAME = "Glyph CHT 360°‰";
-const DB_NAME = "glyph-cht-360-project-guard";
-const DB_VERSION = 1;
-const STATE_STORE = "state";
-const STATE_KEY = "project";
-const FALLBACK_KEY = "glyph-cht-360-project-guard.v1";
-const MAX_FILE_SIZE = 900_000;
-const MAX_TOTAL_SIZE = 4_500_000;
-const CONTROL_CHARACTER = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/u;
-const POSSIBLE_MOJIBAKE = /(?:Ã.|Â.|â.{1,2}|ð.{1,2})/u;
+const STORAGE_KEY = "cht360_glyph_workshop_v1";
+const MAX_CUSTOM_TOKENS = 180;
+const MAX_SMALL_TOKEN_GRAPHEMES = 2;
+const MAX_WORD_GRAPHEMES = 80;
+const MODES = Object.freeze(["single", "double", "word"]);
+const STYLES = Object.freeze(["ring", "bracket", "rail", "capsule"]);
 
-const dom = {
-  projectFiles: document.getElementById("projectFiles"),
-  projectName: document.getElementById("projectName"),
-  pasteCode: document.getElementById("pasteCode"),
-  pasteFilename: document.getElementById("pasteFilename"),
-  scanPaste: document.getElementById("scanPaste"),
-  scanAgain: document.getElementById("scanAgain"),
-  fileSearch: document.getElementById("fileSearch"),
-  fileList: document.getElementById("fileList"),
-  findingsList: document.getElementById("findingsList"),
-  dependencyList: document.getElementById("dependencyList"),
-  selectionText: document.getElementById("selectionText"),
-  downloadRepair: document.getElementById("downloadRepair"),
-  exportReport: document.getElementById("exportReport"),
-  clearProject: document.getElementById("clearProject"),
-  fileCount: document.getElementById("fileCount"),
-  dependencyCount: document.getElementById("dependencyCount"),
-  errorCount: document.getElementById("errorCount"),
-  errorNote: document.getElementById("errorNote"),
+const BASE_TOKENS = Object.freeze(unique([
+  ...glyphsOf("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+  ...glyphsOf("abcdefghijklmnopqrstuvwxyz"),
+  ...glyphsOf("ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ"),
+  ...glyphsOf("áčďéěíňóřšťúůýž"),
+  ...glyphsOf("0123456789"),
+  ".", ",", ":", ";", "!", "?", "…",
+  "°", "‰", "•", "·", "_", "-", "+", "=",
+  "/", "\\", "(", ")", "[", "]", "{", "}",
+  "<", ">", "←", "→", "↑", "↓", "×", "÷",
+  "∞", "○", "□", "△", "◇", "☆", "★"
+]));
+
+const elements = {
+  titleGlyphs: document.getElementById("titleGlyphs"),
+  newLineForm: document.getElementById("newLineForm"),
+  newText: document.getElementById("newText"),
+  newModeChoices: document.getElementById("newModeChoices"),
+  newStyleChoices: document.getElementById("newStyleChoices"),
+  customToken: document.getElementById("customToken"),
+  addToken: document.getElementById("addToken"),
+  tokenShelf: document.getElementById("tokenShelf"),
+  workspace: document.getElementById("workspace"),
+  workspaceMessage: document.getElementById("workspaceMessage"),
+  blockCount: document.getElementById("blockCount"),
   storageState: document.getElementById("storageState"),
-  storageNote: document.getElementById("storageNote"),
-  statusLine: document.getElementById("statusLine")
+  emptySelection: document.getElementById("emptySelection"),
+  inspectorForm: document.getElementById("inspectorForm"),
+  selectedBadge: document.getElementById("selectedBadge"),
+  selectedName: document.getElementById("selectedName"),
+  selectedModeChoices: document.getElementById("selectedModeChoices"),
+  selectedStyleChoices: document.getElementById("selectedStyleChoices"),
+  selectedCellInfo: document.getElementById("selectedCellInfo"),
+  selectedCellValue: document.getElementById("selectedCellValue"),
+  applyCellValue: document.getElementById("applyCellValue"),
+  duplicateBlock: document.getElementById("duplicateBlock"),
+  deleteBlock: document.getElementById("deleteBlock"),
+  undoAction: document.getElementById("undoAction"),
+  exportAction: document.getElementById("exportAction"),
+  importInput: document.getElementById("importInput")
 };
 
-const state = {
-  projectName: "",
-  files: [],
-  selectedId: null,
-  db: null,
-  storageAvailable: true,
-  storageMode: "Načítám",
+let data = loadData();
+
+const ui = {
+  newMode: "single",
+  newStyle: "ring",
+  selectedCell: null,
+  history: [],
+  message: "Dotkni se bubínku a otoč ho nahoru nebo dolů. Za horní proužek přesuneš celý řádek.",
   storagePersistent: false,
-  savedAt: null
+  storageFailed: false
 };
 
-void initialize();
+initialize();
 
-async function initialize() {
+function initialize() {
+  ensureSelection();
   bindEvents();
-  await restoreProject();
-  await requestPersistentStorage();
-  rescanProject();
   renderAll();
+  requestPersistentStorage();
   registerServiceWorker();
 }
 
 function bindEvents() {
-  dom.projectFiles.addEventListener("change", addSelectedFiles);
-  dom.scanPaste.addEventListener("click", addPastedCode);
-  dom.scanAgain.addEventListener("click", async () => {
-    rescanProject();
-    await persistProject();
-    renderAll();
-    setStatus("ChybaŽrout přepočítal soubory i jejich návaznosti.");
+  elements.newLineForm.addEventListener("submit", createNewBlock);
+  elements.newModeChoices.addEventListener("click", chooseNewMode);
+  elements.newStyleChoices.addEventListener("click", chooseNewStyle);
+  elements.selectedModeChoices.addEventListener("click", chooseSelectedMode);
+  elements.selectedStyleChoices.addEventListener("click", chooseSelectedStyle);
+  elements.addToken.addEventListener("click", addCustomToken);
+
+  elements.customToken.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    addCustomToken();
   });
-  dom.fileSearch.addEventListener("input", renderFileList);
-  dom.fileList.addEventListener("click", selectFileFromList);
-  dom.downloadRepair.addEventListener("click", downloadSelectedRepair);
-  dom.exportReport.addEventListener("click", exportReport);
-  dom.clearProject.addEventListener("click", clearProject);
-  dom.projectName.addEventListener("change", async () => {
-    state.projectName = dom.projectName.value.trim();
-    await persistProject();
-    renderDrums();
-  });
+
+  elements.tokenShelf.addEventListener("click", applyShelfToken);
+  elements.selectedName.addEventListener("change", updateSelectedName);
+  elements.applyCellValue.addEventListener("click", applyCellValue);
+  elements.duplicateBlock.addEventListener("click", duplicateSelectedBlock);
+  elements.deleteBlock.addEventListener("click", deleteSelectedBlock);
+  elements.undoAction.addEventListener("click", undo);
+  elements.exportAction.addEventListener("click", exportGlyphs);
+  elements.importInput.addEventListener("change", importGlyphs);
 }
 
-async function restoreProject() {
-  const fallback = loadFallback();
-  hydrateProject(fallback);
+function createDefaultData() {
+  const title = createBlock("Glyph CHT 360°‰", "single", "ring", 7, 8, "Název Glyph CHT");
+  const earth = createBlock("Země Paměť", "double", "bracket", 11, 43, "Země Paměť");
+  const slot = createBlock("Slot 1", "single", "rail", 59, 27, "Slot 1");
+  const language = createBlock("Jazyk 4/70", "double", "capsule", 41, 68, "Jazyk 4/70");
 
+  return {
+    version: 1,
+    titleBlockId: title.id,
+    selectedBlockId: title.id,
+    customTokens: [],
+    blocks: [title, earth, slot, language],
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function createBlock(text, mode, style, x, y, name) {
+  const cleanMode = MODES.includes(mode) ? mode : "single";
+
+  return {
+    id: makeId("block"),
+    name: String(name || text || "Glyph").slice(0, 80),
+    mode: cleanMode,
+    style: STYLES.includes(style) ? style : "ring",
+    x: clampNumber(x, 4, 84, 8),
+    y: clampNumber(y, 4, 86, 8),
+    units: unitsFromText(text, cleanMode)
+  };
+}
+
+function loadData() {
   try {
-    state.db = await openDatabase();
-    const saved = await dbGet(STATE_STORE, STATE_KEY);
-
-    if (saved?.value) hydrateProject(saved.value);
-    else await persistProject(false);
-
-    state.storageMode = "Trvalé";
-    state.storageAvailable = true;
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    return hydrateData(raw);
   } catch (error) {
-    state.storageMode = "Lokální";
-    state.storageAvailable = true;
+    return createDefaultData();
   }
 }
 
-function hydrateProject(raw) {
-  if (!raw || typeof raw !== "object") return;
+function hydrateData(raw) {
+  if (!raw || typeof raw !== "object") return createDefaultData();
 
-  state.projectName = String(raw.projectName || "").trim();
-  state.files = Array.isArray(raw.files) ? raw.files.map(hydrateFile).filter(Boolean) : [];
-  state.selectedId = state.files.some((file) => file.id === raw.selectedId) ? raw.selectedId : null;
-  state.savedAt = validDate(raw.savedAt) ? raw.savedAt : null;
+  const blocks = Array.isArray(raw.blocks)
+    ? raw.blocks.map(normalizeBlock).filter(Boolean)
+    : [];
+
+  if (!blocks.length) return createDefaultData();
+
+  const customTokens = unique(
+    (Array.isArray(raw.customTokens) ? raw.customTokens : [])
+      .map((value) => normalizeSmallToken(value))
+      .filter(Boolean)
+  ).slice(-MAX_CUSTOM_TOKENS);
+
+  const titleBlockId = blocks.some((block) => block.id === raw.titleBlockId)
+    ? raw.titleBlockId
+    : blocks[0].id;
+
+  const selectedBlockId = blocks.some((block) => block.id === raw.selectedBlockId)
+    ? raw.selectedBlockId
+    : titleBlockId;
+
+  return {
+    version: 1,
+    titleBlockId,
+    selectedBlockId,
+    customTokens,
+    blocks,
+    updatedAt: validDate(raw.updatedAt) ? raw.updatedAt : new Date().toISOString()
+  };
 }
 
-function hydrateFile(raw) {
+function normalizeBlock(raw, index) {
   if (!raw || typeof raw !== "object") return null;
 
-  const name = String(raw.name || "").trim();
-  const source = typeof raw.source === "string" ? raw.source : "";
+  const mode = MODES.includes(raw.mode) ? raw.mode : "single";
+  const units = normalizeUnits(raw.units, mode);
+  const fallbackText = String(raw.text || raw.name || "Glyph").trim();
+  const resolvedUnits = units.length ? units : unitsFromText(fallbackText, mode);
 
-  if (!name) return null;
+  if (!resolvedUnits.length) return null;
 
   return {
-    id: String(raw.id || makeId("file")),
-    name,
-    path: String(raw.path || name).replace(/^\.\//, ""),
-    source,
-    type: detectType(name),
-    addedAt: validDate(raw.addedAt) ? raw.addedAt : new Date().toISOString(),
-    updatedAt: validDate(raw.updatedAt) ? raw.updatedAt : new Date().toISOString(),
-    findings: [],
-    dependencies: [],
-    repair: null
+    id: String(raw.id || makeId("block")),
+    name: String(raw.name || fallbackText || "Glyph " + (index + 1)).slice(0, 80),
+    mode,
+    style: STYLES.includes(raw.style) ? raw.style : "ring",
+    x: clampNumber(raw.x, 2, 88, 8 + (index * 13) % 65),
+    y: clampNumber(raw.y, 2, 88, 8 + (index * 17) % 66),
+    units: resolvedUnits
   };
 }
 
-async function addSelectedFiles(event) {
-  const files = Array.from(event.target.files || []);
-  event.target.value = "";
+function normalizeUnits(rawUnits, mode) {
+  if (!Array.isArray(rawUnits)) return [];
 
-  if (!files.length) return;
+  const units = [];
 
-  const tooLarge = files.filter((file) => file.size > MAX_FILE_SIZE);
-  const total = files.reduce((sum, file) => sum + file.size, 0);
+  rawUnits.forEach((raw) => {
+    if (!raw || typeof raw !== "object") return;
 
-  if (tooLarge.length || total > MAX_TOTAL_SIZE) {
-    setStatus(
-      `Vyber menší sadu: jeden soubor má mít do ${Math.round(MAX_FILE_SIZE / 1000)} kB a celek do ${Math.round(MAX_TOTAL_SIZE / 1_000_000)} MB.`,
-      "warning"
-    );
-    return;
-  }
+    if (raw.gap) {
+      if (!units.length || units[units.length - 1].gap) return;
+      units.push({ id: makeId("gap"), gap: true });
+      return;
+    }
 
-  const incoming = [];
+    const sourceCells = Array.isArray(raw.cells) ? raw.cells : [];
+    const maximum = mode === "word" ? MAX_WORD_GRAPHEMES : MAX_SMALL_TOKEN_GRAPHEMES;
 
-  for (const file of files) {
-    incoming.push(hydrateFile({
-      id: makeId("file"),
-      name: file.name,
-      path: file.webkitRelativePath || file.name,
-      source: await file.text(),
-      addedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }));
-  }
+    const cells = sourceCells
+      .map((value) => normalizeToken(value, maximum))
+      .slice(0, mode === "double" ? 2 : 1);
 
-  mergeFiles(incoming);
-  rescanProject();
-  await persistProject();
-  renderAll();
+    if (mode === "double") {
+      while (cells.length < 2) cells.push("");
+    }
 
-  setStatus(
-    `ChybaŽrout načetl ${incoming.length} soubor${czechEnding(incoming.length, "", "y", "ů")} a prověřil jejich spojení.`
-  );
-}
+    if (!cells.length) return;
 
-async function addPastedCode() {
-  const source = dom.pasteCode.value;
-  const name = dom.pasteFilename.value.trim() || "vlozeny-kod.txt";
-
-  if (!source.trim()) {
-    setStatus("Nejdřív vlož kód, který má ChybaŽrout prověřit.", "warning");
-    return;
-  }
-
-  if (new Blob([source]).size > MAX_FILE_SIZE) {
-    setStatus("Vložený kus je příliš velký. Rozděl ho na menší soubory.", "warning");
-    return;
-  }
-
-  mergeFiles([
-    hydrateFile({
-      id: makeId("file"),
-      name,
-      path: name,
-      source,
-      addedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    })
-  ]);
-
-  dom.pasteCode.value = "";
-  dom.pasteFilename.value = "";
-
-  rescanProject();
-  await persistProject();
-  renderAll();
-
-  setStatus(`ChybaŽrout přidal a prověřil „${name}“.`);
-}
-
-function mergeFiles(incoming) {
-  const byPath = new Map(
-    state.files.map((file) => [file.path.toLocaleLowerCase("cs"), file])
-  );
-
-  incoming.filter(Boolean).forEach((file) => {
-    const key = file.path.toLocaleLowerCase("cs");
-    const previous = byPath.get(key);
-
-    if (previous) file.id = previous.id;
-
-    byPath.set(key, file);
-  });
-
-  state.files = [...byPath.values()];
-
-  if (!state.selectedId && incoming[0]) {
-    state.selectedId = incoming[0].id;
-  }
-}
-
-function rescanProject() {
-  const paths = new Map();
-  const names = new Map();
-
-  state.files.forEach((file) => {
-    paths.set(normalizePath(file.path), file);
-
-    const basename = basenameOf(file.path);
-    if (!names.has(basename)) names.set(basename, file);
-  });
-
-  state.files.forEach((file) => {
-    const analysis = inspectSource(file);
-
-    const dependencies = analysis.references.map((reference) => {
-      const resolvedPath = resolveReference(file.path, reference.value);
-      const target = resolvedPath
-        ? paths.get(resolvedPath) || names.get(basenameOf(resolvedPath))
-        : null;
-
-      return {
-        ...reference,
-        resolvedPath,
-        targetId: target?.id || null,
-        targetName: target?.path || null
-      };
+    units.push({
+      id: String(raw.id || makeId("unit")),
+      cells
     });
+  });
 
-    dependencies
-      .filter((dependency) => dependency.local && !dependency.targetId)
-      .forEach((dependency) => {
-        analysis.findings.push(finding(
-          "warning",
-          "Nenalezená návaznost",
-          `„${dependency.value}“ nebyl mezi načtenými soubory nalezen. Může chybět, nebo jen nebyl vybraný.`
-        ));
+  return units;
+}
+
+function unitsFromText(value, mode) {
+  const text = String(value || "").trim();
+  if (!text) return [];
+
+  const units = [];
+  const pieces = text.split(/(\s+)/u);
+
+  pieces.forEach((piece) => {
+    if (!piece) return;
+
+    if (/^\s+$/u.test(piece)) {
+      if (units.length && !units[units.length - 1].gap) {
+        units.push({ id: makeId("gap"), gap: true });
+      }
+      return;
+    }
+
+    if (mode === "word") {
+      units.push({
+        id: makeId("unit"),
+        cells: [normalizeToken(piece, MAX_WORD_GRAPHEMES)]
       });
-
-    file.findings = analysis.findings;
-    file.dependencies = dependencies;
-    file.repair = analysis.repair;
-    file.type = detectType(file.name);
-  });
-}
-
-function inspectSource(file) {
-  const source = file.source;
-  const type = detectType(file.name);
-  const findings = [];
-  const references = extractReferences(source, type);
-  const repair = { source, changes: [] };
-
-  if (!source) {
-    findings.push(finding("warning", "Prázdný soubor", "Soubor neobsahuje žádný text."));
-  }
-
-  if (source.includes("\uFFFD")) {
-    findings.push(finding(
-      "error",
-      "Poškozený znak",
-      "Obsahuje náhradní znak �. Vrať se ke zdroji textu a vlož jej znovu v UTF‑8."
-    ));
-  }
-
-  if (CONTROL_CHARACTER.test(source)) {
-    findings.push(finding(
-      "warning",
-      "Skrytý řídicí znak",
-      "Obsahuje neviditelný řídicí znak. Může být úmyslný, proto jej ChybaŽrout nemaže."
-    ));
-  }
-
-  if (POSSIBLE_MOJIBAKE.test(source)) {
-    findings.push(finding(
-      "warning",
-      "Možné špatné UTF‑8",
-      "Našel se sled typický pro rozbité načtení jako Ã nebo Â. Neopravuje se automaticky, aby se nezměnil zamýšlený text."
-    ));
-  }
-
-  if (type === "html") {
-    if (!/^\s*<!doctype\s+html/i.test(source)) {
-      findings.push(finding(
-        "warning",
-        "Chybí doctype",
-        "HTML začíná bez <!doctype html>. Bezpečná kopie jej může doplnit."
-      ));
-
-      repair.source = `<!doctype html>\n${repair.source}`;
-      repair.changes.push("doplněn <!doctype html>");
+      return;
     }
 
-    if (!/<meta\s+charset\s*=\s*["']?utf-8["']?\s*\/?>/i.test(source)) {
-      const hasHead = /<head\b[^>]*>/i.test(repair.source);
+    const letters = glyphsOf(piece);
 
-      findings.push(finding(
-        "warning",
-        "Chybí UTF‑8 meta",
-        hasHead
-          ? "V HTML chybí <meta charset=\"utf-8\">. Bezpečná kopie ho vloží hned do <head>."
-          : "V HTML chybí <meta charset=\"utf-8\"> a není vidět <head>, do kterého by šel bezpečně vložit."
-      ));
-
-      if (hasHead) {
-        repair.source = repair.source.replace(
-          /<head\b[^>]*>/i,
-          (head) => `${head}\n  <meta charset="utf-8">`
-        );
-        repair.changes.push("doplněno <meta charset=\"utf-8\">");
-      }
-    }
-  }
-
-  if (type === "json" || type === "manifest") {
-    try {
-      const parsed = JSON.parse(source);
-
-      if (type === "manifest" && !parsed.name) {
-        findings.push(finding(
-          "warning",
-          "Manifest bez názvu",
-          "Manifest nemá vlastnost name."
-        ));
+    if (mode === "double") {
+      for (let index = 0; index < letters.length; index += 2) {
+        units.push({
+          id: makeId("unit"),
+          cells: [
+            normalizeSmallToken(letters[index]),
+            normalizeSmallToken(letters[index + 1] || "")
+          ]
+        });
       }
 
-      if (type === "manifest" && !parsed.start_url) {
-        findings.push(finding(
-          "warning",
-          "Manifest bez start_url",
-          "Manifest nemá start_url. PWA se může otevírat nečekaně."
-        ));
-      }
-
-      const formatted = `${JSON.stringify(parsed, null, 2)}\n`;
-
-      if (formatted !== source) {
-        repair.source = formatted;
-        repair.changes.push("JSON naformátován bez změny dat");
-      }
-    } catch (error) {
-      findings.push(finding(
-        "error",
-        "Neplatný JSON",
-        `JSON nelze přečíst: ${shortError(error)}.`
-      ));
-
-      repair.changes = [];
-      repair.source = source;
-    }
-  }
-
-  if (type === "js") {
-    if (/\b(?:NaN|Infinity)\b/u.test(source)) {
-      findings.push(finding(
-        "warning",
-        "Možná nečíselná hodnota",
-        "V kódu je NaN nebo Infinity. Zkontroluj výpočty a vstupy před použitím."
-      ));
+      return;
     }
 
-    if (/\.innerHTML\s*=/u.test(source)) {
-      findings.push(finding(
-        "warning",
-        "Přímé innerHTML",
-        "Přímé vkládání HTML zkontroluj, zejména pokud může obsahovat text od uživatele."
-      ));
-    }
-
-    if (/\.catch\s*\(/u.test(source) === false && /\bfetch\s*\(/u.test(source)) {
-      findings.push(finding(
-        "warning",
-        "Fetch bez viditelné catch",
-        "Našel se fetch bez zřejmého .catch(). Ověř zachycení síťové chyby."
-      ));
-    }
-  }
-
-  if (source.length > 200_000) {
-    findings.push(finding(
-      "warning",
-      "Velký soubor",
-      "Soubor je velmi dlouhý. Rozdělení může usnadnit hledání chyb."
-    ));
-  }
-
-  return {
-    findings,
-    references,
-    repair: repair.changes.length ? repair : null
-  };
-}
-
-function extractReferences(source, type) {
-  const values = [];
-
-  const add = (value, kind) => {
-    const cleaned = String(value || "").trim();
-    if (!cleaned) return;
-
-    values.push({
-      value: cleaned,
-      kind,
-      local: isLocalReference(cleaned)
+    letters.forEach((letter) => {
+      units.push({
+        id: makeId("unit"),
+        cells: [normalizeSmallToken(letter)]
+      });
     });
+  });
+
+  return units;
+}
+
+function glyphsOf(value) {
+  const text = String(value || "");
+
+  try {
+    if (typeof Intl !== "undefined" && typeof Intl.Segmenter === "function") {
+      const segmenter = new Intl.Segmenter("cs", { granularity: "grapheme" });
+      return Array.from(segmenter.segment(text), (entry) => entry.segment);
+    }
+  } catch (error) {
+    return Array.from(text);
+  }
+
+  return Array.from(text);
+}
+
+function normalizeToken(value, maximum) {
+  const text = String(value === undefined || value === null ? "" : value)
+    .replace(/[\r\n]+/gu, " ")
+    .trim();
+
+  return glyphsOf(text).slice(0, maximum).join("");
+}
+
+function normalizeSmallToken(value) {
+  return normalizeToken(value, MAX_SMALL_TOKEN_GRAPHEMES);
+}
+
+function unique(values) {
+  return Array.from(new Set(values));
+}
+
+function validDate(value) {
+  return typeof value === "string" && Number.isFinite(Date.parse(value));
+}
+
+function clampNumber(value, min, max, fallback) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.min(max, Math.max(min, number));
+}
+
+function positiveModulo(value, divisor) {
+  return ((value % divisor) + divisor) % divisor;
+}
+
+function makeId(prefix) {
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return prefix + "-" + window.crypto.randomUUID();
+  }
+
+  return prefix + "-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+}
+
+function ensureSelection() {
+  if (!data.blocks.length) {
+    data = createDefaultData();
+  }
+
+  if (!data.blocks.some((block) => block.id === data.titleBlockId)) {
+    data.titleBlockId = data.blocks[0].id;
+  }
+
+  if (!data.blocks.some((block) => block.id === data.selectedBlockId)) {
+    data.selectedBlockId = data.titleBlockId;
+  }
+
+  if (ui.selectedCell && !findCell(ui.selectedCell)) {
+    ui.selectedCell = null;
+  }
+}
+
+function saveData(updateTime) {
+  if (updateTime !== false) data.updatedAt = new Date().toISOString();
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(serializableData()));
+    ui.storageFailed = false;
+    return true;
+  } catch (error) {
+    ui.storageFailed = true;
+    return false;
+  }
+}
+
+function serializableData() {
+  return {
+    version: 1,
+    titleBlockId: data.titleBlockId,
+    selectedBlockId: data.selectedBlockId,
+    customTokens: data.customTokens,
+    blocks: data.blocks,
+    updatedAt: data.updatedAt
   };
+}
 
-  if (type === "html") {
-    for (const match of source.matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/gi)) {
-      add(match[1], "HTML");
-    }
+function rememberCurrentState() {
+  const snapshot = JSON.stringify(serializableData());
+
+  if (ui.history[ui.history.length - 1] === snapshot) return;
+
+  ui.history.push(snapshot);
+
+  if (ui.history.length > 40) {
+    ui.history.shift();
+  }
+}
+
+function rememberSnapshot(snapshot) {
+  if (!snapshot || ui.history[ui.history.length - 1] === snapshot) return;
+
+  ui.history.push(snapshot);
+
+  if (ui.history.length > 40) {
+    ui.history.shift();
+  }
+}
+
+function mutate(change, message) {
+  rememberCurrentState();
+  change();
+  ensureSelection();
+  saveData();
+
+  if (message) ui.message = message;
+
+  renderAll();
+}
+
+function getSelectedBlock() {
+  return data.blocks.find((block) => block.id === data.selectedBlockId) || null;
+}
+
+function getBlockById(id) {
+  return data.blocks.find((block) => block.id === id) || null;
+}
+
+function getBlockText(block) {
+  if (!block) return "";
+
+  return block.units.map((unit) => {
+    if (unit.gap) return " ";
+    return unit.cells.join("");
+  }).join("");
+}
+
+function findCell(reference) {
+  if (!reference) return null;
+
+  const block = getBlockById(reference.blockId);
+  if (!block) return null;
+
+  const unit = block.units.find((item) => {
+    return item.id === reference.unitId && !item.gap;
+  });
+
+  if (!unit) return null;
+
+  const cellIndex = Number(reference.cellIndex);
+
+  if (!Number.isInteger(cellIndex) || cellIndex < 0 || cellIndex >= unit.cells.length) {
+    return null;
   }
 
-  if (type === "css") {
-    for (const match of source.matchAll(/url\(\s*["']?([^"')]+)["']?\s*\)/gi)) {
-      add(match[1], "CSS");
-    }
+  return { block, unit, cellIndex };
+}
+
+function getCellChoices(block, unit, cellIndex) {
+  let choices = block.mode === "word" ? getWordTokens() : getTokenLibrary();
+  const current = unit.cells[cellIndex] || "";
+
+  if (current && !choices.includes(current)) {
+    choices = [current].concat(choices);
   }
 
-  if (type === "js") {
-    for (const match of source.matchAll(/(?:from\s*|import\s*|register\s*\(|new\s+Worker\s*\()["']([^"']+)["']/gi)) {
-      add(match[1], "JS");
-    }
-  }
+  return choices.length ? choices : [current || "·"];
+}
 
-  if (type === "manifest") {
-    try {
-      const parsed = JSON.parse(source);
+function getTokenLibrary() {
+  return unique(BASE_TOKENS.concat(data.customTokens)).filter(Boolean);
+}
 
-      if (parsed.start_url) add(parsed.start_url, "manifest");
-      (parsed.icons || []).forEach((icon) => add(icon?.src, "manifest"));
-    } catch (error) {
-      // JSON error is reported by inspectSource.
-    }
-  }
+function getWordTokens() {
+  const words = [];
 
-  return uniqueBy(values, (item) => `${item.kind}:${item.value}`);
+  data.blocks.forEach((block) => {
+    block.units.forEach((unit) => {
+      if (unit.gap || !unit.cells[0]) return;
+
+      if (block.mode === "word") {
+        words.push(unit.cells[0]);
+      } else {
+        const word = unit.cells.join("");
+        if (word) words.push(word);
+      }
+    });
+  });
+
+  return unique(words).filter(Boolean);
+}
+
+function displayToken(value) {
+  return value === "" ? "·" : String(value);
+}
+
+function formatRowCount(count) {
+  const ending = count === 1
+    ? "řádek"
+    : (count >= 2 && count <= 4 ? "řádky" : "řádků");
+
+  return String(count) + " " + ending;
 }
 
 function renderAll() {
-  dom.projectName.value = state.projectName;
-  renderFileList();
-  renderFindings();
-  renderDependencies();
-  renderDrums();
+  ensureSelection();
+  renderTitle();
+  renderTokenShelf();
+  renderWorkspace();
+  renderInspector();
+  renderState();
+  renderMessage();
 }
 
-function renderFileList() {
-  const query = normalizeSearch(dom.fileSearch.value);
+function renderTitle() {
+  elements.titleGlyphs.textContent = "";
 
-  const files = [...state.files]
-    .filter((file) => !query || searchableFile(file).includes(query))
-    .sort((a, b) => a.path.localeCompare(b.path, "cs"));
+  const titleBlock = getBlockById(data.titleBlockId);
+  const titleUnits = titleBlock
+    ? titleBlock.units
+    : unitsFromText(APP_NAME, "single");
 
-  if (!files.length) {
-    dom.fileList.innerHTML = `<p class="empty">${
-      escapeHtml(
-        state.files.length
-          ? "Tomu hledání nic neodpovídá."
-          : "Zatím není načtený žádný soubor."
-      )
-    }</p>`;
-    return;
-  }
+  titleUnits.forEach((unit) => {
+    if (unit.gap) {
+      const gap = document.createElement("span");
+      gap.className = "title-gap";
+      gap.setAttribute("aria-hidden", "true");
+      elements.titleGlyphs.append(gap);
+      return;
+    }
 
-  dom.fileList.innerHTML = files.map((file) => {
-    const severity = severityOf(file.findings);
-    const selected = file.id === state.selectedId ? " is-selected" : "";
+    unit.cells.forEach((cell) => {
+      const token = document.createElement("button");
+      token.type = "button";
+      token.className = "title-token";
+      token.textContent = displayToken(cell);
+      token.title = "Otevřít tento řádek na ploše";
 
-    return `<button type="button" class="file-button${selected}" data-file-id="${escapeAttribute(file.id)}">
-      <span class="file-icon">${escapeHtml(typeLabel(file.type))}</span>
-      <span>
-        <span class="file-name">${escapeHtml(file.path)}</span>
-        <span class="file-meta">${file.dependencies.length} návaznost${czechEnding(file.dependencies.length, "", "i", "í")} · ${file.findings.length} nález${czechEnding(file.findings.length, "", "y", "ů")}</span>
-      </span>
-      <span class="badge ${severity}">${escapeHtml(severityLabel(severity))}</span>
-    </button>`;
-  }).join("");
+      token.addEventListener("click", () => {
+        selectBlock(data.titleBlockId);
+      });
+
+      elements.titleGlyphs.append(token);
+    });
+  });
 }
 
-function renderFindings() {
-  const file = getSelectedFile();
-  dom.downloadRepair.disabled = !file?.repair;
+function renderTokenShelf() {
+  elements.tokenShelf.textContent = "";
 
-  if (!file) {
-    dom.selectionText.textContent = "Vyber soubor v mapě. Bezpečná kopie doplní jen jisté věci, například chybějící UTF‑8 nebo doctype; neznámé chyby pouze označí.";
+  const custom = new Set(data.customTokens);
 
-    dom.findingsList.innerHTML = `
-      <li class="finding-item">
-        <span class="finding-kind ok">ČEKÁ</span>
-        <div>
-          <strong>ChybaŽrout je připravený.</strong>
-          <p>Vyber soubory z projektu nebo vlož kus kódu.</p>
-        </div>
-      </li>`;
+  getTokenLibrary().forEach((token) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "token-button" + (custom.has(token) ? " is-custom" : "");
+    button.dataset.token = token;
+    button.textContent = displayToken(token);
+    button.setAttribute(
+      "aria-label",
+      "Nastavit " + displayToken(token) + " do vybraného okénka"
+    );
 
-    return;
-  }
-
-  dom.selectionText.textContent = `Soubor: ${file.path}. ${
-    file.repair
-      ? `Bezpečná kopie umí: ${file.repair.changes.join(", ")}.`
-      : "Pro tento soubor není jistá automatická oprava; nálezy jsou jen označené."
-  }`;
-
-  if (!file.findings.length) {
-    dom.findingsList.innerHTML = `
-      <li class="finding-item">
-        <span class="finding-kind ok">ČISTÉ</span>
-        <div>
-          <strong>Zatím bez známé chyby.</strong>
-          <p>ChybaŽrout nic automaticky nemění.</p>
-        </div>
-      </li>`;
-
-    return;
-  }
-
-  dom.findingsList.innerHTML = file.findings.map((item) => `
-    <li class="finding-item">
-      <span class="finding-kind ${escapeAttribute(item.kind)}">${escapeHtml(item.kind === "error" ? "CHYBA" : "POZOR")}</span>
-      <div>
-        <strong>${escapeHtml(item.title)}</strong>
-        <p>${escapeHtml(item.message)}</p>
-      </div>
-    </li>
-  `).join("");
+    elements.tokenShelf.append(button);
+  });
 }
+function renderWorkspace() {
+  elements.workspace.textContent = "";
 
-function renderDependencies() {
-  const dependencies = state.files.flatMap((file) =>
-    file.dependencies.map((dependency) => ({ from: file, dependency }))
-  );
+  data.blocks.forEach((block, index) => {
+    const card = document.createElement("article");
+    const grip = document.createElement("div");
+    const dots = document.createElement("span");
+    const number = document.createElement("span");
+    const run = document.createElement("div");
 
-  if (!dependencies.length) {
-    dom.dependencyList.innerHTML = `
-      <p class="empty">Návaznosti se objeví po načtení HTML, CSS, JavaScriptu nebo manifestu.</p>
-    `;
-    return;
-  }
+    card.className = "glyph-block style-" + block.style + (
+      block.id === data.selectedBlockId ? " is-selected" : ""
+    );
 
-  dom.dependencyList.innerHTML = dependencies.map(({ from, dependency }) => {
-    const target = dependency.targetName || "nenalezeno";
+    card.dataset.blockId = block.id;
+    card.style.left = block.x + "%";
+    card.style.top = block.y + "%";
 
-    return `
-      <div class="dependency-item">
-        <span class="dependency-kind">${escapeHtml(dependency.kind)}</span>
-        <div>
-          <strong>${escapeHtml(from.path)} → ${escapeHtml(target)}</strong>
-          <p>${escapeHtml(dependency.value)}${dependency.targetId ? "" : " · ověř, zda soubor nechybí nebo nebyl vybraný"}</p>
-        </div>
-      </div>`;
-  }).join("");
-}
+    grip.className = "glyph-block-grip";
+    grip.title = "Tažením přesuneš celý řádek";
 
-function renderDrums() {
-  const dependencies = state.files.reduce((sum, file) => sum + file.dependencies.length, 0);
-  const errors = state.files.flatMap((file) => file.findings).filter((item) => item.kind === "error").length;
-  const warnings = state.files.flatMap((file) => file.findings).filter((item) => item.kind === "warning").length;
+    dots.className = "grip-dots";
+    number.className = "glyph-block-index";
+    number.textContent = String(index + 1).padStart(2, "0");
 
-  dom.fileCount.textContent = String(state.files.length);
-  dom.dependencyCount.textContent = String(dependencies);
-  dom.errorCount.textContent = errors ? formatIssueCount(errors) : warnings ? `${warnings} pozor` : "Čisté";
-  dom.errorNote.textContent = errors
-    ? "je potřeba opravit"
-    : warnings
-      ? "ručně ověřit"
-      : state.files.length
-        ? "kontrola prošla"
-        : "čeká na soubory";
+    grip.append(dots, number);
 
-  dom.storageState.textContent = state.storageAvailable ? state.storageMode : "Pozor";
-  dom.storageNote.textContent = state.storageAvailable
-    ? state.savedAt
-      ? `uloženo ${formatShortDate(state.savedAt)}${state.storagePersistent ? " · chráněné" : ""}`
-      : "místní paměť"
-    : "uložení se nepodařilo";
-}
+    run.className = "drum-run";
 
-function selectFileFromList(event) {
-  const button = event.target.closest("[data-file-id]");
-  if (!button) return;
+    block.units.forEach((unit) => {
+      if (unit.gap) {
+        const gap = document.createElement("span");
+        gap.className = "glyph-space";
+        gap.setAttribute("aria-hidden", "true");
+        run.append(gap);
+        return;
+      }
 
-  state.selectedId = button.dataset.fileId;
-  renderFileList();
-  renderFindings();
-}
-
-function getSelectedFile() {
-  return state.files.find((file) => file.id === state.selectedId) || null;
-}
-
-function downloadSelectedRepair() {
-  const file = getSelectedFile();
-  if (!file?.repair) return;
-
-  downloadFile(
-    file.repair.source,
-    repairedName(file.name),
-    fileMimeType(file.type)
-  );
-
-  setStatus(
-    `Bezpečná kopie „${repairedName(file.name)}“ je připravená. Původní soubor zůstal beze změny.`
-  );
-}
-
-async function clearProject() {
-  if (!state.files.length) return;
-
-  if (!window.confirm("Opravdu vyčistit uloženou mapu projektu? Nejdřív můžeš stáhnout zálohu kontroly.")) {
-    return;
-  }
-
-  state.files = [];
-  state.selectedId = null;
-
-  await persistProject();
-  renderAll();
-
-  setStatus("Mapa projektu byla vyčištěná z tohoto zařízení.");
-}
-
-function exportReport() {
-  const payload = {
-    app: APP_NAME,
-    version: 1,
-    projectName: state.projectName,
-    exportedAt: new Date().toISOString(),
-    files: state.files.map((file) => ({
-      path: file.path,
-      type: file.type,
-      addedAt: file.addedAt,
-      findings: file.findings,
-      dependencies: file.dependencies.map((dependency) => ({
-        value: dependency.value,
-        kind: dependency.kind,
-        targetName: dependency.targetName
-      }))
-    })),
-    sourcesIncluded: false
-  };
-
-  downloadFile(
-    JSON.stringify(payload, null, 2),
-    `glyph-cht-360-kontrola-${new Date().toISOString().slice(0, 10)}.json`,
-    "application/json;charset=utf-8"
-  );
-
-  setStatus("Záloha kontroly je připravená. Zdrojové kódy do ní schválně nejsou zahrnuté.");
-}
-
-async function persistProject(updateTime = true) {
-  if (updateTime || !state.savedAt) {
-    state.savedAt = new Date().toISOString();
-  }
-
-  const payload = {
-    projectName: state.projectName,
-    files: state.files,
-    selectedId: state.selectedId,
-    savedAt: state.savedAt
-  };
-
-  try {
-    localStorage.setItem(FALLBACK_KEY, JSON.stringify(payload));
-  } catch (error) {
-    state.storageAvailable = false;
-  }
-
-  if (!state.db) return;
-
-  try {
-    await dbPut(STATE_STORE, {
-      key: STATE_KEY,
-      value: payload,
-      updatedAt: state.savedAt || new Date().toISOString()
+      run.append(createDrum(block, unit));
     });
 
-    state.storageAvailable = true;
-    state.storageMode = "Trvalé";
+    card.append(grip, run);
+
+    card.addEventListener("click", (event) => {
+      if (event.target.closest(".reel")) return;
+      selectBlock(block.id);
+    });
+
+    attachBlockDrag(grip, card, block);
+    elements.workspace.append(card);
+  });
+}
+
+function createDrum(block, unit) {
+  const drum = document.createElement("div");
+  const count = unit.cells.length;
+
+  drum.className =
+    "glyph-drum" +
+    (count === 2 ? " is-double" : "") +
+    (block.mode === "word" ? " is-word" : "");
+
+  drum.dataset.unitId = unit.id;
+
+  unit.cells.forEach((value, cellIndex) => {
+    if (cellIndex > 0 && count === 2) {
+      const divider = document.createElement("span");
+      divider.className = "double-divider";
+      divider.textContent = ":";
+      drum.append(divider);
+    }
+
+    const reel = document.createElement("button");
+    const previous = document.createElement("span");
+    const current = document.createElement("strong");
+    const next = document.createElement("span");
+
+    const reference = {
+      blockId: block.id,
+      unitId: unit.id,
+      cellIndex
+    };
+
+    reel.type = "button";
+    reel.className = "reel";
+    reel.dataset.blockId = block.id;
+    reel.dataset.unitId = unit.id;
+    reel.dataset.cellIndex = String(cellIndex);
+
+    previous.className = "reel-ghost";
+    previous.dataset.reel = "previous";
+
+    current.className = "reel-current";
+    current.dataset.reel = "current";
+
+    next.className = "reel-ghost";
+    next.dataset.reel = "next";
+
+    reel.append(previous, current, next);
+
+    renderReelContent(reel, block, unit, cellIndex);
+    attachReelInteraction(reel, reference);
+
+    drum.append(reel);
+  });
+
+  return drum;
+}
+
+function renderReelContent(reel, block, unit, cellIndex) {
+  const current = unit.cells[cellIndex] || "";
+  const choices = getCellChoices(block, unit, cellIndex);
+  const initialIndex = choices.indexOf(current);
+  const index = initialIndex >= 0 ? initialIndex : 0;
+
+  const previous = choices[positiveModulo(index - 1, choices.length)];
+  const next = choices[positiveModulo(index + 1, choices.length)];
+
+  reel.querySelector("[data-reel='previous']").textContent = displayToken(previous);
+  reel.querySelector("[data-reel='current']").textContent = displayToken(current);
+  reel.querySelector("[data-reel='next']").textContent = displayToken(next);
+  reel.setAttribute("aria-label", "Bubínek: " + displayToken(current));
+}
+
+function attachReelInteraction(reel, reference) {
+  let drag = null;
+
+  reel.addEventListener("pointerdown", (event) => {
+    if (event.button !== undefined && event.button !== 0) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    selectCell(reference);
+
+    drag = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      lastStep: 0,
+      moved: false,
+      historySaved: false,
+      snapshot: JSON.stringify(serializableData())
+    };
+
+    if (typeof reel.setPointerCapture === "function") {
+      reel.setPointerCapture(event.pointerId);
+    }
+  });
+
+  reel.addEventListener("pointermove", (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    const nextStep = Math.trunc((drag.startY - event.clientY) / 17);
+
+    if (nextStep === drag.lastStep) return;
+
+    if (!drag.historySaved) {
+      rememberSnapshot(drag.snapshot);
+      drag.historySaved = true;
+    }
+
+    rotateCell(reference, nextStep - drag.lastStep, reel);
+
+    drag.lastStep = nextStep;
+    drag.moved = true;
+  });
+
+  const finish = (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    if (!drag.moved) {
+      rememberSnapshot(drag.snapshot);
+      rotateCell(reference, 1, reel);
+    }
+
+    if (typeof reel.releasePointerCapture === "function") {
+      reel.releasePointerCapture(event.pointerId);
+    }
+
+    drag = null;
+  };
+
+  reel.addEventListener("pointerup", finish);
+  reel.addEventListener("pointercancel", finish);
+
+  reel.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+
+  reel.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+
+    event.preventDefault();
+    rememberCurrentState();
+
+    rotateCell(
+      reference,
+      event.key === "ArrowUp" ? 1 : -1,
+      reel
+    );
+  });
+}
+
+function attachBlockDrag(grip, card, block) {
+  let drag = null;
+
+  grip.addEventListener("pointerdown", (event) => {
+    if (event.button !== undefined && event.button !== 0) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    selectBlock(block.id);
+
+    const bounds = elements.workspace.getBoundingClientRect();
+
+    drag = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      blockX: block.x,
+      blockY: block.y,
+      width: bounds.width,
+      height: bounds.height,
+      cardWidth: card.offsetWidth,
+      cardHeight: card.offsetHeight,
+      snapshot: JSON.stringify(serializableData()),
+      moved: false
+    };
+
+    if (typeof grip.setPointerCapture === "function") {
+      grip.setPointerCapture(event.pointerId);
+    }
+
+    grip.classList.add("is-dragging");
+  });
+
+  grip.addEventListener("pointermove", (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    const width = Math.max(1, drag.width);
+    const height = Math.max(1, drag.height);
+    const maxX = Math.max(1, 100 - drag.cardWidth / width * 100);
+    const maxY = Math.max(1, 100 - drag.cardHeight / height * 100);
+
+    const nextX = clampNumber(
+      drag.blockX + (event.clientX - drag.startX) / width * 100,
+      1,
+      maxX,
+      block.x
+    );
+
+    const nextY = clampNumber(
+      drag.blockY + (event.clientY - drag.startY) / height * 100,
+      1,
+      maxY,
+      block.y
+    );
+
+    if (Math.abs(nextX - block.x) < .05 && Math.abs(nextY - block.y) < .05) {
+      return;
+    }
+
+    block.x = Math.round(nextX * 10) / 10;
+    block.y = Math.round(nextY * 10) / 10;
+
+    card.style.left = block.x + "%";
+    card.style.top = block.y + "%";
+
+    drag.moved = true;
+  });
+
+  const finish = (event) => {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+
+    if (typeof grip.releasePointerCapture === "function") {
+      grip.releasePointerCapture(event.pointerId);
+    }
+
+    grip.classList.remove("is-dragging");
+
+    if (drag.moved) {
+      rememberSnapshot(drag.snapshot);
+      saveData();
+
+      ui.message = "Řádek je přesunutý. Jeho bubínky zůstávají samostatné.";
+
+      renderState();
+      renderMessage();
+    }
+
+    drag = null;
+  };
+
+  grip.addEventListener("pointerup", finish);
+  grip.addEventListener("pointercancel", finish);
+}
+
+function rotateCell(reference, amount, reel) {
+  const found = findCell(reference);
+  if (!found || !amount) return;
+
+  const choices = getCellChoices(found.block, found.unit, found.cellIndex);
+  const current = found.unit.cells[found.cellIndex] || "";
+  const index = Math.max(0, choices.indexOf(current));
+
+  found.unit.cells[found.cellIndex] =
+    choices[positiveModulo(index + amount, choices.length)];
+
+  saveData();
+
+  if (reel && reel.isConnected) {
+    renderReelContent(reel, found.block, found.unit, found.cellIndex);
+
+    reel.dataset.direction = amount < 0 ? "-1" : "1";
+    reel.classList.remove("is-spinning");
+
+    void reel.offsetWidth;
+
+    reel.classList.add("is-spinning");
+
+    window.setTimeout(() => {
+      reel.classList.remove("is-spinning");
+    }, 260);
+  }
+
+  if (found.block.id === data.titleBlockId) {
+    renderTitle();
+  }
+
+  renderInspector();
+  renderState();
+
+  ui.message =
+    "Bubínek se otočil na " +
+    displayToken(found.unit.cells[found.cellIndex]) +
+    ".";
+
+  renderMessage();
+}
+
+function selectBlock(id) {
+  if (!getBlockById(id)) return;
+
+  data.selectedBlockId = id;
+  ui.selectedCell = null;
+
+  saveData(false);
+  updateWorkspaceSelection();
+  renderInspector();
+}
+
+function selectCell(reference) {
+  const found = findCell(reference);
+  if (!found) return;
+
+  data.selectedBlockId = reference.blockId;
+
+  ui.selectedCell = {
+    blockId: reference.blockId,
+    unitId: reference.unitId,
+    cellIndex: reference.cellIndex
+  };
+
+  saveData(false);
+  updateWorkspaceSelection();
+  renderInspector();
+}
+
+function updateWorkspaceSelection() {
+  elements.workspace.querySelectorAll(".glyph-block").forEach((card) => {
+    card.classList.toggle(
+      "is-selected",
+      card.dataset.blockId === data.selectedBlockId
+    );
+  });
+
+  elements.workspace.querySelectorAll(".reel").forEach((reel) => {
+    const selected =
+      ui.selectedCell &&
+      reel.dataset.blockId === ui.selectedCell.blockId &&
+      reel.dataset.unitId === ui.selectedCell.unitId &&
+      Number(reel.dataset.cellIndex) === ui.selectedCell.cellIndex;
+
+    reel.classList.toggle("is-selected", Boolean(selected));
+  });
+}
+
+function renderInspector() {
+  const block = getSelectedBlock();
+
+  if (!block) {
+    elements.emptySelection.hidden = false;
+    elements.inspectorForm.hidden = true;
+    elements.selectedBadge.textContent = "—";
+    return;
+  }
+
+  elements.emptySelection.hidden = true;
+  elements.inspectorForm.hidden = false;
+  elements.selectedBadge.textContent =
+    String(data.blocks.indexOf(block) + 1).padStart(2, "0");
+
+  elements.selectedName.value = block.name;
+
+  syncChoiceGroup(
+    elements.selectedModeChoices,
+    "data-selected-mode",
+    block.mode
+  );
+
+  syncChoiceGroup(
+    elements.selectedStyleChoices,
+    "data-selected-style",
+    block.style
+  );
+
+  const found = findCell(ui.selectedCell);
+
+  if (!found || found.block.id !== block.id) {
+    elements.selectedCellInfo.textContent =
+      "Vyber konkrétní okénko bubínku přímo na ploše.";
+
+    elements.selectedCellValue.value = "";
+    elements.selectedCellValue.disabled = true;
+    elements.applyCellValue.disabled = true;
+    return;
+  }
+
+  const index =
+    found.block.units
+      .filter((unit) => !unit.gap)
+      .findIndex((unit) => unit.id === found.unit.id) + 1;
+
+  const part = found.block.mode === "double"
+    ? (found.cellIndex === 0 ? "levé okénko" : "pravé okénko")
+    : "okénko";
+
+  const limit = found.block.mode === "word"
+    ? MAX_WORD_GRAPHEMES
+    : MAX_SMALL_TOKEN_GRAPHEMES;
+
+  elements.selectedCellInfo.textContent =
+    "Bubínek " +
+    index +
+    " · " +
+    part +
+    " · nejvýše " +
+    (found.block.mode === "word" ? "celé slovo" : "dva znaky") +
+    ".";
+
+  elements.selectedCellValue.value = found.unit.cells[found.cellIndex] || "";
+  elements.selectedCellValue.maxLength = limit * 8;
+  elements.selectedCellValue.disabled = false;
+  elements.applyCellValue.disabled = false;
+}
+
+function renderState() {
+  elements.blockCount.textContent = formatRowCount(data.blocks.length);
+
+  if (ui.storageFailed) {
+    elements.storageState.textContent = "nelze uložit";
+  } else if (ui.storagePersistent) {
+    elements.storageState.textContent = "trvale uloženo";
+  } else {
+    elements.storageState.textContent = "uloženo v zařízení";
+  }
+
+  elements.undoAction.disabled = ui.history.length === 0;
+}
+
+function renderMessage() {
+  elements.workspaceMessage.textContent = ui.message;
+}
+
+function syncChoiceGroup(container, attribute, selectedValue) {
+  container.querySelectorAll("button").forEach((button) => {
+    button.classList.toggle(
+      "is-selected",
+      button.getAttribute(attribute) === selectedValue
+    );
+  });
+}
+function chooseNewMode(event) {
+  const button = event.target.closest("button[data-new-mode]");
+  if (!button) return;
+
+  ui.newMode = button.dataset.newMode;
+
+  syncChoiceGroup(
+    elements.newModeChoices,
+    "data-new-mode",
+    ui.newMode
+  );
+}
+
+function chooseNewStyle(event) {
+  const button = event.target.closest("button[data-new-style]");
+  if (!button) return;
+
+  ui.newStyle = button.dataset.newStyle;
+
+  syncChoiceGroup(
+    elements.newStyleChoices,
+    "data-new-style",
+    ui.newStyle
+  );
+}
+
+function chooseSelectedMode(event) {
+  const button = event.target.closest("button[data-selected-mode]");
+  const block = getSelectedBlock();
+
+  if (!button || !block) return;
+
+  const mode = button.dataset.selectedMode;
+
+  if (mode === block.mode) return;
+
+  mutate(() => {
+    const text = getBlockText(block);
+
+    block.mode = mode;
+    block.units = unitsFromText(text, mode);
+
+    ui.selectedCell = null;
+  }, "Řádek má nový typ bubínků.");
+}
+
+function chooseSelectedStyle(event) {
+  const button = event.target.closest("button[data-selected-style]");
+  const block = getSelectedBlock();
+
+  if (!button || !block) return;
+
+  const style = button.dataset.selectedStyle;
+
+  if (style === block.style) return;
+
+  mutate(() => {
+    block.style = style;
+  }, "Tělo bubínků je změněné.");
+}
+
+function createNewBlock(event) {
+  event.preventDefault();
+
+  const text = String(elements.newText.value || "").trim();
+
+  if (!text) {
+    ui.message = "Nejdřív napiš text, který se má rozložit na bubínky.";
+    renderMessage();
+    elements.newText.focus();
+    return;
+  }
+
+  mutate(() => {
+    const position = findNewPosition();
+
+    const block = createBlock(
+      text,
+      ui.newMode,
+      ui.newStyle,
+      position.x,
+      position.y,
+      text
+    );
+
+    data.blocks.push(block);
+    data.selectedBlockId = block.id;
+    ui.selectedCell = null;
+  }, "Nový řádek je na ploše. Tažením mu určíš místo.");
+}
+
+function findNewPosition() {
+  const index = data.blocks.length;
+
+  return {
+    x: 8 + (index * 17) % 62,
+    y: 10 + (index * 19) % 66
+  };
+}
+
+function addCustomToken() {
+  const raw = String(elements.customToken.value || "").trim();
+  const glyphs = glyphsOf(raw);
+
+  if (!glyphs.length) {
+    ui.message = "Vlož svůj Glyph. Prázdné okénko nemá co přidat.";
+    renderMessage();
+    return;
+  }
+
+  if (glyphs.length > MAX_SMALL_TOKEN_GRAPHEMES) {
+    ui.message = "Malý bubínek unese nejvýše dva znaky. Pro celé slovo použij řádek typu „slovo“.";
+    renderMessage();
+    return;
+  }
+
+  const token = glyphs.join("");
+  const target = findCell(ui.selectedCell);
+  const canApply = target && target.block.mode !== "word";
+
+  mutate(() => {
+    if (!data.customTokens.includes(token)) {
+      data.customTokens.push(token);
+      data.customTokens = data.customTokens.slice(-MAX_CUSTOM_TOKENS);
+    }
+
+    if (canApply) {
+      target.unit.cells[target.cellIndex] = token;
+    }
+  }, canApply
+    ? "Vlastní Glyph je vložený jen do vybraného okénka."
+    : "Vlastní Glyph čeká v sadě bubínků."
+  );
+
+  elements.customToken.value = "";
+}
+
+function applyShelfToken(event) {
+  const button = event.target.closest("button[data-token]");
+  if (!button) return;
+
+  const token = button.dataset.token || "";
+  const found = findCell(ui.selectedCell);
+
+  if (!found) {
+    ui.message = "Nejdřív vyber konkrétní okénko bubínku, teprve potom ho lze nahradit.";
+    renderMessage();
+    return;
+  }
+
+  mutate(() => {
+    found.unit.cells[found.cellIndex] = token;
+  }, "Vybraný bubínek nyní nese " + displayToken(token) + ".");
+}
+
+function updateSelectedName() {
+  const block = getSelectedBlock();
+  if (!block) return;
+
+  const nextName = String(elements.selectedName.value || "")
+    .trim()
+    .slice(0, 80);
+
+  if (!nextName || nextName === block.name) return;
+
+  mutate(() => {
+    block.name = nextName;
+  }, "Jméno řádku je uložené.");
+}
+
+function applyCellValue() {
+  const found = findCell(ui.selectedCell);
+  if (!found) return;
+
+  const maximum = found.block.mode === "word"
+    ? MAX_WORD_GRAPHEMES
+    : MAX_SMALL_TOKEN_GRAPHEMES;
+
+  const raw = String(elements.selectedCellValue.value || "");
+  const glyphs = glyphsOf(raw.trim());
+
+  if (glyphs.length > maximum) {
+    ui.message = found.block.mode === "word"
+      ? "Tento velký bubínek unese jedno slovo do 80 znaků."
+      : "Toto okénko unese nejvýše dva znaky.";
+
+    renderMessage();
+    return;
+  }
+
+  const value = glyphs.join("");
+
+  mutate(() => {
+    found.unit.cells[found.cellIndex] = value;
+
+    if (
+      value &&
+      found.block.mode !== "word" &&
+      !BASE_TOKENS.includes(value) &&
+      !data.customTokens.includes(value)
+    ) {
+      data.customTokens.push(value);
+      data.customTokens = data.customTokens.slice(-MAX_CUSTOM_TOKENS);
+    }
+  }, "Hodnota je vyměněná pouze v tomto místě.");
+}
+
+function duplicateSelectedBlock() {
+  const block = getSelectedBlock();
+  if (!block) return;
+
+  mutate(() => {
+    const copy = cloneBlock(block);
+
+    copy.x = clampNumber(block.x + 4, 2, 84, block.x);
+    copy.y = clampNumber(block.y + 5, 2, 86, block.y);
+
+    data.blocks.push(copy);
+    data.selectedBlockId = copy.id;
+    ui.selectedCell = null;
+  }, "Řádek je zdvojený. Každý z nich se teď pohybuje zvlášť.");
+}
+
+function cloneBlock(block) {
+  return {
+    id: makeId("block"),
+    name: String(block.name || "Glyph") + " 2",
+    mode: block.mode,
+    style: block.style,
+    x: block.x,
+    y: block.y,
+    units: block.units.map((unit) => {
+      if (unit.gap) {
+        return {
+          id: makeId("gap"),
+          gap: true
+        };
+      }
+
+      return {
+        id: makeId("unit"),
+        cells: unit.cells.slice()
+      };
+    })
+  };
+}
+
+function deleteSelectedBlock() {
+  const block = getSelectedBlock();
+  if (!block) return;
+
+  const question = "Odebrat tento pohyblivý řádek? Zůstane možné vrátit ho šipkou zpět.";
+
+  if (!window.confirm(question)) return;
+
+  mutate(() => {
+    data.blocks = data.blocks.filter((item) => item.id !== block.id);
+
+    if (!data.blocks.length) {
+      data = createDefaultData();
+    }
+
+    if (data.titleBlockId === block.id) {
+      data.titleBlockId = data.blocks[0].id;
+    }
+
+    data.selectedBlockId = data.blocks[0].id;
+    ui.selectedCell = null;
+  }, "Řádek je odebraný. Poslední krok lze vrátit.");
+}
+
+function undo() {
+  const snapshot = ui.history.pop();
+
+  if (!snapshot) return;
+
+  try {
+    data = hydrateData(JSON.parse(snapshot));
+    ui.selectedCell = null;
+
+    saveData(false);
+
+    ui.message = "Poslední změna je vrácená.";
+
+    renderAll();
   } catch (error) {
-    state.storageAvailable = false;
-    setStatus("Projekt se nepodařilo uložit do trvalé paměti.", "error");
+    ui.message = "Poslední změnu se nepodařilo vrátit.";
+    renderMessage();
   }
 }
 
-function loadFallback() {
+function exportGlyphs() {
+  const backup = {
+    app: APP_NAME,
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data: serializableData()
+  };
+
+  downloadJson(
+    backup,
+    "glyph-cht-360-" + new Date().toISOString().slice(0, 10) + ".json"
+  );
+
+  ui.message = "Záloha pohyblivých Glyphů je připravená.";
+  renderMessage();
+}
+
+async function importGlyphs(event) {
+  const file = event.target.files && event.target.files[0];
+
+  event.target.value = "";
+
+  if (!file) return;
+
   try {
-    return JSON.parse(localStorage.getItem(FALLBACK_KEY)) || null;
+    const parsed = JSON.parse(await readTextFile(file));
+    const incoming = hydrateData(parsed && parsed.data ? parsed.data : parsed);
+
+    rememberCurrentState();
+
+    data = incoming;
+    ui.selectedCell = null;
+
+    saveData();
+
+    ui.message = "Glyphy jsou načtené a každý řádek zůstal samostatný.";
+
+    renderAll();
   } catch (error) {
-    return null;
+    ui.message = "Tento soubor neobsahuje čitelnou zálohu Glyphů.";
+    renderMessage();
   }
+}
+
+function readTextFile(file) {
+  if (file && typeof file.text === "function") {
+    return file.text();
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      resolve(String(reader.result || ""));
+    };
+
+    reader.onerror = () => {
+      reject(reader.error || new Error("Soubor nelze přečíst."));
+    };
+
+    reader.readAsText(file, "UTF-8");
+  });
+}
+
+function downloadJson(value, filename) {
+  const blob = new Blob(
+    [JSON.stringify(value, null, 2)],
+    { type: "application/json;charset=utf-8" }
+  );
+
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = filename;
+
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+
+  window.setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 
 async function requestPersistentStorage() {
   try {
-    if (!navigator.storage?.persisted) return;
-
-    state.storagePersistent = await navigator.storage.persisted();
-
-    if (!state.storagePersistent && navigator.storage.persist) {
-      state.storagePersistent = await navigator.storage.persist();
-    }
-  } catch (error) {
-    state.storagePersistent = false;
-  }
-}
-
-function openDatabase() {
-  return new Promise((resolve, reject) => {
-    if (!("indexedDB" in window)) {
-      reject(new Error("IndexedDB není dostupná."));
+    if (!navigator.storage || typeof navigator.storage.persist !== "function") {
       return;
     }
 
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    ui.storagePersistent = await navigator.storage.persist();
 
-    request.onupgradeneeded = () => {
-      const db = request.result;
-
-      if (!db.objectStoreNames.contains(STATE_STORE)) {
-        db.createObjectStore(STATE_STORE, { keyPath: "key" });
-      }
-    };
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error || new Error("Databázi nelze otevřít."));
-  });
-}
-
-function dbGet(storeName, key) {
-  return new Promise((resolve, reject) => {
-    const request = state.db
-      .transaction(storeName, "readonly")
-      .objectStore(storeName)
-      .get(key);
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-function dbPut(storeName, value) {
-  return new Promise((resolve, reject) => {
-    const request = state.db
-      .transaction(storeName, "readwrite")
-      .objectStore(storeName)
-      .put(value);
-
-    request.onsuccess = () => resolve();
-    request.onerror = () => reject(request.error);
-  });
-}
-
-function setStatus(message, kind = "") {
-  dom.statusLine.textContent = message;
-  dom.statusLine.dataset.kind = kind;
-}
-
-function detectType(name) {
-  const lower = String(name).toLocaleLowerCase("cs");
-
-  if (/\.html?$/u.test(lower)) return "html";
-  if (/\.css$/u.test(lower)) return "css";
-  if (/\.(?:js|mjs)$/u.test(lower)) return "js";
-  if (/\.webmanifest$/u.test(lower) || /manifest\.json$/u.test(lower)) return "manifest";
-  if (/\.json$/u.test(lower)) return "json";
-  if (/\.svg$/u.test(lower)) return "svg";
-
-  return "text";
-}
-
-function typeLabel(type) {
-  return {
-    html: "HTML",
-    css: "CSS",
-    js: "JS",
-    json: "JSON",
-    manifest: "PWA",
-    svg: "SVG",
-    text: "TXT"
-  }[type] || "TXT";
-}
-
-function severityOf(findings) {
-  if (findings.some((item) => item.kind === "error")) return "error";
-  if (findings.some((item) => item.kind === "warning")) return "warning";
-  return "ok";
-}
-
-function severityLabel(severity) {
-  return {
-    error: "CHYBA",
-    warning: "POZOR",
-    ok: "ČISTÉ"
-  }[severity];
-}
-
-function finding(kind, title, message) {
-  return { kind, title, message };
-}
-
-function resolveReference(fromPath, reference) {
-  if (!isLocalReference(reference)) return null;
-
-  const clean = reference.split(/[?#]/u)[0].trim();
-
-  if (!clean || clean === "." || clean === "./") {
-    return normalizePath(fromPath);
-  }
-
-  const base = clean.startsWith("/")
-    ? []
-    : normalizePath(fromPath).split("/").slice(0, -1);
-
-  clean.split("/").forEach((part) => {
-    if (!part || part === ".") return;
-
-    if (part === "..") base.pop();
-    else base.push(part);
-  });
-
-  return base.join("/");
-}
-
-function isLocalReference(value) {
-  return !/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/iu.test(String(value).trim());
-}
-
-function normalizePath(value) {
-  return String(value || "")
-    .replace(/\\/g, "/")
-    .replace(/^\.\//, "")
-    .split("/")
-    .filter(Boolean)
-    .join("/");
-}
-
-function basenameOf(value) {
-  const pieces = normalizePath(value).split("/");
-  return pieces[pieces.length - 1] || "";
-}
-
-function searchableFile(file) {
-  return normalizeSearch([
-    file.path,
-    file.type,
-    ...file.findings.flatMap((item) => [item.title, item.message]),
-    ...file.dependencies.map((item) => item.value)
-  ].join(" "));
-}
-
-function normalizeSearch(value) {
-  return String(value || "").normalize("NFC").toLocaleLowerCase("cs");
-}
-
-function uniqueBy(items, key) {
-  const seen = new Set();
-
-  return items.filter((item) => {
-    const id = key(item);
-
-    if (seen.has(id)) return false;
-
-    seen.add(id);
-    return true;
-  });
-}
-
-function repairedName(name) {
-  const dot = name.lastIndexOf(".");
-  return dot > 0
-    ? `${name.slice(0, dot)}.opraveno${name.slice(dot)}`
-    : `${name}.opraveno`;
-}
-
-function fileMimeType(type) {
-  return {
-    html: "text/html;charset=utf-8",
-    css: "text/css;charset=utf-8",
-    js: "text/javascript;charset=utf-8",
-    json: "application/json;charset=utf-8",
-    manifest: "application/manifest+json;charset=utf-8",
-    svg: "image/svg+xml;charset=utf-8"
-  }[type] || "text/plain;charset=utf-8";
-}
-
-function downloadFile(contents, filename, type) {
-  const blob = new Blob([contents], { type });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = filename;
-
-  document.body.append(link);
-  link.click();
-  link.remove();
-
-  window.setTimeout(() => URL.revokeObjectURL(url), 0);
-}
-
-function formatIssueCount(count) {
-  if (count === 1) return "1 chyba";
-  if (count >= 2 && count <= 4) return `${count} chyby`;
-  return `${count} chyb`;
-}
-
-function czechEnding(count, one, few, many) {
-  if (count === 1) return one;
-  if (count >= 2 && count <= 4) return few;
-  return many;
-}
-
-function formatShortDate(value) {
-  try {
-    return new Intl.DateTimeFormat("cs-CZ", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit"
-    }).format(new Date(value));
+    renderState();
   } catch (error) {
-    return "teď";
+    ui.storagePersistent = false;
+    renderState();
   }
-}
-
-function validDate(value) {
-  return Boolean(value) && !Number.isNaN(new Date(value).getTime());
-}
-
-function shortError(error) {
-  return String(error?.message || error || "neznámá chyba")
-    .replace(/\s+/g, " ")
-    .slice(0, 160);
-}
-
-function makeId(prefix) {
-  if (globalThis.crypto?.randomUUID) {
-    return `${prefix}-${globalThis.crypto.randomUUID()}`;
-  }
-
-  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>'"]/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "'": "&#39;",
-    "\"": "&quot;"
-  })[character]);
-}
-
-function escapeAttribute(value) {
-  return escapeHtml(value);
 }
 
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
+    navigator.serviceWorker.register("./sw.js").catch(() => {
+      ui.message = "Dílna běží, ale offline vrstva se zatím nepodařila zapnout.";
+      renderMessage();
+    });
   });
 }
