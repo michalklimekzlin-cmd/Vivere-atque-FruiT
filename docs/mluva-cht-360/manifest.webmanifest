@@ -1,0 +1,19 @@
+{
+  "name": "Mluva CHT 360°‰.",
+  "short_name": "Mluva CHT",
+  "description": "Offline průvodce nad Pamětí, Glyphy a Bubínky CHT 360°‰.",
+  "lang": "cs",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090806",
+  "theme_color": "#090806",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
