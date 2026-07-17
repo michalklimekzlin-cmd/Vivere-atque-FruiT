@@ -2,24 +2,111 @@
 
 const APP_NAME = "Glyph CHT 360°‰";
 const STORAGE_KEY = "cht360_glyph_workshop_v1";
+const BRIDGE_CONTEXT_KEY = "cht360_glyph_context_v1";
+const BRIDGE_TRANSFER_KEY = "cht360_glyph_transfer_v1";
 const MAX_CUSTOM_TOKENS = 180;
 const MAX_SMALL_TOKEN_GRAPHEMES = 2;
 const MAX_WORD_GRAPHEMES = 80;
+const MAX_BLOCKS = 60;
+const MAX_VISIBLE_BLOCKS = 24;
 const MODES = Object.freeze(["single", "double", "word"]);
 const STYLES = Object.freeze(["ring", "bracket", "rail", "capsule"]);
+const DEFAULT_KEYBOARD_LAYOUT = "cs-at";
 
-const BASE_TOKENS = Object.freeze(unique([
-  ...glyphsOf("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-  ...glyphsOf("abcdefghijklmnopqrstuvwxyz"),
-  ...glyphsOf("ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ"),
-  ...glyphsOf("áčďéěíňóřšťúůýž"),
-  ...glyphsOf("0123456789"),
+const COMMON_TOKENS = Object.freeze([
   ".", ",", ":", ";", "!", "?", "…",
   "°", "‰", "•", "·", "_", "-", "+", "=",
   "/", "\\", "(", ")", "[", "]", "{", "}",
   "<", ">", "←", "→", "↑", "↓", "×", "÷",
   "∞", "○", "□", "△", "◇", "☆", "★"
-]));
+]);
+
+const KEYBOARD_LAYOUTS = Object.freeze({
+  "cs-at": Object.freeze({
+    label: "Česko/Rakouská · alfanumerická",
+    description: "Česká abeceda, rakouská němčina, čísla a základní znaky. Je to sada této PWA; nemění nastavení klávesnice iPhonu.",
+    tokens: Object.freeze(unique([
+      ...glyphsOf("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+      ...glyphsOf("abcdefghijklmnopqrstuvwxyz"),
+      ...glyphsOf("ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ"),
+      ...glyphsOf("áčďéěíňóřšťúůýž"),
+      ...glyphsOf("ÄÖÜẞäöüß"),
+      ...glyphsOf("0123456789"),
+      ...COMMON_TOKENS
+    ]))
+  }),
+  cs: Object.freeze({
+    label: "Čeština",
+    description: "Česká alfanumerická sada včetně všech běžných háčků a čárek.",
+    tokens: Object.freeze(unique([
+      ...glyphsOf("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+      ...glyphsOf("abcdefghijklmnopqrstuvwxyz"),
+      ...glyphsOf("ÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ"),
+      ...glyphsOf("áčďéěíňóřšťúůýž"),
+      ...glyphsOf("0123456789"),
+      ...COMMON_TOKENS
+    ]))
+  }),
+  "de-at": Object.freeze({
+    label: "Deutsch (Österreich)",
+    description: "Německá sada pro Rakousko: Ä, Ö, Ü, ß a čísla.",
+    tokens: Object.freeze(unique([
+      ...glyphsOf("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+      ...glyphsOf("abcdefghijklmnopqrstuvwxyz"),
+      ...glyphsOf("ÄÖÜẞäöüß"),
+      ...glyphsOf("0123456789"),
+      ...COMMON_TOKENS
+    ]))
+  }),
+  latin: Object.freeze({
+    label: "Latin / English",
+    description: "Čistá latinka, čísla a společné znaky pro rychlé skládání.",
+    tokens: Object.freeze(unique([
+      ...glyphsOf("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+      ...glyphsOf("abcdefghijklmnopqrstuvwxyz"),
+      ...glyphsOf("0123456789"),
+      ...COMMON_TOKENS
+    ]))
+  }),
+  cyrillic: Object.freeze({
+    label: "Cyrilice",
+    description: "Ruská a ukrajinská cyrilice spolu s čísly a společnými znaky.",
+    tokens: Object.freeze(unique([
+      ...glyphsOf("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"),
+      ...glyphsOf("абвгдеёжзийклмнопрстуфхцчшщъыьэюя"),
+      ...glyphsOf("ҐЄІЇґєії"),
+      ...glyphsOf("0123456789"),
+      ...COMMON_TOKENS
+    ]))
+  }),
+  greek: Object.freeze({
+    label: "Řecká abeceda",
+    description: "Řecké znaky pro vlastní Glyphy, matematiku a názvy.",
+    tokens: Object.freeze(unique([
+      ...glyphsOf("ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ"),
+      ...glyphsOf("αβγδεζηθικλμνξοπρστυφχψω"),
+      ...glyphsOf("0123456789"),
+      ...COMMON_TOKENS
+    ]))
+  }),
+  symbols: Object.freeze({
+    label: "Čísla a symboly",
+    description: "Čísla, šipky, závorky a znaky CHT pro práci bez písmen.",
+    tokens: Object.freeze(unique([
+      ...glyphsOf("0123456789"),
+      ...COMMON_TOKENS,
+      "ア", "☉", "⌁", "⌘", "⌂", "⌫", "✓", "✦"
+    ]))
+  })
+});
+
+const BASE_TOKENS = KEYBOARD_LAYOUTS[DEFAULT_KEYBOARD_LAYOUT].tokens;
+const CORE_NAMES = Object.freeze({
+  earth: "Země",
+  language: "Jazyk",
+  game: "Hra",
+  control: "Řízení"
+});
 
 const elements = {
   titleGlyphs: document.getElementById("titleGlyphs"),
@@ -29,11 +116,18 @@ const elements = {
   newStyleChoices: document.getElementById("newStyleChoices"),
   customToken: document.getElementById("customToken"),
   addToken: document.getElementById("addToken"),
+  keyboardLayout: document.getElementById("keyboardLayout"),
+  keyboardDescription: document.getElementById("keyboardDescription"),
   tokenShelf: document.getElementById("tokenShelf"),
   workspace: document.getElementById("workspace"),
   workspaceMessage: document.getElementById("workspaceMessage"),
   blockCount: document.getElementById("blockCount"),
   storageState: document.getElementById("storageState"),
+  arrangeBlocks: document.getElementById("arrangeBlocks"),
+  hideAllBlocks: document.getElementById("hideAllBlocks"),
+  archivePanel: document.getElementById("archivePanel"),
+  archiveCount: document.getElementById("archiveCount"),
+  archiveList: document.getElementById("archiveList"),
   emptySelection: document.getElementById("emptySelection"),
   inspectorForm: document.getElementById("inspectorForm"),
   selectedBadge: document.getElementById("selectedBadge"),
@@ -43,11 +137,18 @@ const elements = {
   selectedCellInfo: document.getElementById("selectedCellInfo"),
   selectedCellValue: document.getElementById("selectedCellValue"),
   applyCellValue: document.getElementById("applyCellValue"),
+  removeSelectedDrum: document.getElementById("removeSelectedDrum"),
+  toggleBlock: document.getElementById("toggleBlock"),
   duplicateBlock: document.getElementById("duplicateBlock"),
   deleteBlock: document.getElementById("deleteBlock"),
   undoAction: document.getElementById("undoAction"),
   exportAction: document.getElementById("exportAction"),
-  importInput: document.getElementById("importInput")
+  importInput: document.getElementById("importInput"),
+  transferCard: document.getElementById("transferCard"),
+  transferTarget: document.getElementById("transferTarget"),
+  transferMode: document.getElementById("transferMode"),
+  sendToCht: document.getElementById("sendToCht"),
+  returnToCht: document.getElementById("returnToCht")
 };
 
 let data = loadData();
@@ -59,7 +160,8 @@ const ui = {
   history: [],
   message: "Dotkni se bubínku a otoč ho nahoru nebo dolů. Za horní proužek přesuneš celý řádek.",
   storagePersistent: false,
-  storageFailed: false
+  storageFailed: false,
+  bridgeTarget: readBridgeTarget()
 };
 
 initialize();
@@ -79,6 +181,7 @@ function bindEvents() {
   elements.selectedModeChoices.addEventListener("click", chooseSelectedMode);
   elements.selectedStyleChoices.addEventListener("click", chooseSelectedStyle);
   elements.addToken.addEventListener("click", addCustomToken);
+  elements.keyboardLayout.addEventListener("change", changeKeyboardLayout);
 
   elements.customToken.addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
@@ -89,11 +192,22 @@ function bindEvents() {
   elements.tokenShelf.addEventListener("click", applyShelfToken);
   elements.selectedName.addEventListener("change", updateSelectedName);
   elements.applyCellValue.addEventListener("click", applyCellValue);
+  elements.removeSelectedDrum.addEventListener("click", removeSelectedDrum);
+  elements.toggleBlock.addEventListener("click", toggleSelectedBlock);
   elements.duplicateBlock.addEventListener("click", duplicateSelectedBlock);
   elements.deleteBlock.addEventListener("click", deleteSelectedBlock);
+  elements.arrangeBlocks.addEventListener("click", arrangeVisibleBlocks);
+  elements.hideAllBlocks.addEventListener("click", hideAllBlocks);
   elements.undoAction.addEventListener("click", undo);
   elements.exportAction.addEventListener("click", exportGlyphs);
   elements.importInput.addEventListener("change", importGlyphs);
+  elements.sendToCht.addEventListener("click", sendSelectedBlockToCht);
+
+  window.addEventListener("storage", (event) => {
+    if (event.key !== BRIDGE_CONTEXT_KEY) return;
+    ui.bridgeTarget = readBridgeTarget();
+    renderBridge();
+  });
 }
 
 function createDefaultData() {
@@ -103,9 +217,10 @@ function createDefaultData() {
   const language = createBlock("Jazyk 4/70", "double", "capsule", 41, 68, "Jazyk 4/70");
 
   return {
-    version: 1,
+    version: 2,
     titleBlockId: title.id,
     selectedBlockId: title.id,
+    keyboardLayout: DEFAULT_KEYBOARD_LAYOUT,
     customTokens: [],
     blocks: [title, earth, slot, language],
     updatedAt: new Date().toISOString()
@@ -120,6 +235,7 @@ function createBlock(text, mode, style, x, y, name) {
     name: String(name || text || "Glyph").slice(0, 80),
     mode: cleanMode,
     style: STYLES.includes(style) ? style : "ring",
+    active: true,
     x: clampNumber(x, 4, 84, 8),
     y: clampNumber(y, 4, 86, 8),
     units: unitsFromText(text, cleanMode)
@@ -159,9 +275,12 @@ function hydrateData(raw) {
     : titleBlockId;
 
   return {
-    version: 1,
+    version: 2,
     titleBlockId,
     selectedBlockId,
+    keyboardLayout: KEYBOARD_LAYOUTS[raw.keyboardLayout]
+      ? raw.keyboardLayout
+      : DEFAULT_KEYBOARD_LAYOUT,
     customTokens,
     blocks,
     updatedAt: validDate(raw.updatedAt) ? raw.updatedAt : new Date().toISOString()
@@ -183,6 +302,7 @@ function normalizeBlock(raw, index) {
     name: String(raw.name || fallbackText || "Glyph " + (index + 1)).slice(0, 80),
     mode,
     style: STYLES.includes(raw.style) ? raw.style : "ring",
+    active: raw.active !== false,
     x: clampNumber(raw.x, 2, 88, 8 + (index * 13) % 65),
     y: clampNumber(raw.y, 2, 88, 8 + (index * 17) % 66),
     units: resolvedUnits
@@ -363,9 +483,10 @@ function saveData(updateTime) {
 
 function serializableData() {
   return {
-    version: 1,
+    version: 2,
     titleBlockId: data.titleBlockId,
     selectedBlockId: data.selectedBlockId,
+    keyboardLayout: data.keyboardLayout,
     customTokens: data.customTokens,
     blocks: data.blocks,
     updatedAt: data.updatedAt
@@ -454,8 +575,17 @@ function getCellChoices(block, unit, cellIndex) {
   return choices.length ? choices : [current || "·"];
 }
 
+function getKeyboardLayout() {
+  return KEYBOARD_LAYOUTS[data.keyboardLayout] ||
+    KEYBOARD_LAYOUTS[DEFAULT_KEYBOARD_LAYOUT];
+}
+
+function getKeyboardTokens() {
+  return getKeyboardLayout().tokens;
+}
+
 function getTokenLibrary() {
-  return unique(BASE_TOKENS.concat(data.customTokens)).filter(Boolean);
+  return unique(getKeyboardTokens().concat(data.customTokens)).filter(Boolean);
 }
 
 function getWordTokens() {
@@ -492,11 +622,30 @@ function formatRowCount(count) {
 function renderAll() {
   ensureSelection();
   renderTitle();
+  renderKeyboardLayout();
   renderTokenShelf();
   renderWorkspace();
   renderInspector();
+  renderArchive();
+  renderBridge();
   renderState();
   renderMessage();
+}
+
+function renderKeyboardLayout() {
+  if (!elements.keyboardLayout) return;
+
+  if (!elements.keyboardLayout.options.length) {
+    Object.entries(KEYBOARD_LAYOUTS).forEach(([id, layout]) => {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = layout.label;
+      elements.keyboardLayout.append(option);
+    });
+  }
+
+  elements.keyboardLayout.value = data.keyboardLayout;
+  elements.keyboardDescription.textContent = getKeyboardLayout().description;
 }
 
 function renderTitle() {
@@ -551,15 +700,37 @@ function renderTokenShelf() {
     elements.tokenShelf.append(button);
   });
 }
+function getVisibleBlocks() {
+  return data.blocks.filter((block) => block.active !== false);
+}
+
+function getArchivedBlocks() {
+  return data.blocks.filter((block) => block.active === false);
+}
+
 function renderWorkspace() {
   elements.workspace.textContent = "";
 
-  data.blocks.forEach((block, index) => {
+  const visibleBlocks = getVisibleBlocks();
+
+  if (!visibleBlocks.length) {
+    const empty = document.createElement("p");
+    empty.className = "workspace-message workspace-empty";
+    empty.textContent = "Plocha je čistá. Odložené bubínky můžeš kdykoli vrátit níže.";
+    elements.workspace.append(empty);
+    return;
+  }
+
+  visibleBlocks.forEach((block) => {
     const card = document.createElement("article");
     const grip = document.createElement("div");
     const dots = document.createElement("span");
     const number = document.createElement("span");
+    const tools = document.createElement("div");
+    const hideButton = document.createElement("button");
+    const deleteButton = document.createElement("button");
     const run = document.createElement("div");
+    const index = data.blocks.indexOf(block);
 
     card.className = "glyph-block style-" + block.style + (
       block.id === data.selectedBlockId ? " is-selected" : ""
@@ -576,7 +747,41 @@ function renderWorkspace() {
     number.className = "glyph-block-index";
     number.textContent = String(index + 1).padStart(2, "0");
 
-    grip.append(dots, number);
+    tools.className = "glyph-block-tools";
+
+    hideButton.type = "button";
+    hideButton.className = "block-tool";
+    hideButton.textContent = "×";
+    hideButton.title = "Odložit řádek z plochy";
+    hideButton.setAttribute("aria-label", "Odložit tento řádek z plochy");
+
+    deleteButton.type = "button";
+    deleteButton.className = "block-tool is-danger";
+    deleteButton.textContent = "⌫";
+    deleteButton.title = "Odstranit řádek";
+    deleteButton.setAttribute("aria-label", "Odstranit tento řádek");
+
+    [hideButton, deleteButton].forEach((button) => {
+      button.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+    });
+
+    hideButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      setBlockActive(block.id, false, "Řádek je odložený. Zůstává zachovaný níže.");
+    });
+
+    deleteButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      deleteBlockById(block.id, true);
+    });
+
+    tools.append(hideButton, deleteButton);
+    grip.append(dots, number, tools);
 
     run.className = "drum-run";
 
@@ -595,7 +800,7 @@ function renderWorkspace() {
     card.append(grip, run);
 
     card.addEventListener("click", (event) => {
-      if (event.target.closest(".reel")) return;
+      if (event.target.closest(".reel, .glyph-block-tools")) return;
       selectBlock(block.id);
     });
 
@@ -946,6 +1151,8 @@ function renderInspector() {
     elements.emptySelection.hidden = false;
     elements.inspectorForm.hidden = true;
     elements.selectedBadge.textContent = "—";
+    elements.toggleBlock.disabled = true;
+    elements.removeSelectedDrum.disabled = true;
     return;
   }
 
@@ -955,6 +1162,10 @@ function renderInspector() {
     String(data.blocks.indexOf(block) + 1).padStart(2, "0");
 
   elements.selectedName.value = block.name;
+  elements.toggleBlock.disabled = false;
+  elements.toggleBlock.textContent = block.active === false
+    ? "Vrátit na plochu"
+    : "Vypnout na ploše";
 
   syncChoiceGroup(
     elements.selectedModeChoices,
@@ -977,6 +1188,7 @@ function renderInspector() {
     elements.selectedCellValue.value = "";
     elements.selectedCellValue.disabled = true;
     elements.applyCellValue.disabled = true;
+    elements.removeSelectedDrum.disabled = true;
     return;
   }
 
@@ -1006,10 +1218,16 @@ function renderInspector() {
   elements.selectedCellValue.maxLength = limit * 8;
   elements.selectedCellValue.disabled = false;
   elements.applyCellValue.disabled = false;
+  elements.removeSelectedDrum.disabled = false;
 }
 
 function renderState() {
-  elements.blockCount.textContent = formatRowCount(data.blocks.length);
+  const visible = getVisibleBlocks().length;
+  const archived = getArchivedBlocks().length;
+
+  elements.blockCount.textContent =
+    formatRowCount(visible) +
+    (archived ? " · " + archived + " odloženo" : "");
 
   if (ui.storageFailed) {
     elements.storageState.textContent = "nelze uložit";
@@ -1060,6 +1278,18 @@ function chooseNewStyle(event) {
   );
 }
 
+function changeKeyboardLayout() {
+  const next = elements.keyboardLayout.value;
+
+  if (!KEYBOARD_LAYOUTS[next] || next === data.keyboardLayout) {
+    return;
+  }
+
+  mutate(() => {
+    data.keyboardLayout = next;
+  }, "Sada bubínků je přepnutá na „" + KEYBOARD_LAYOUTS[next].label + "“.");
+}
+
 function chooseSelectedMode(event) {
   const button = event.target.closest("button[data-selected-mode]");
   const block = getSelectedBlock();
@@ -1107,6 +1337,17 @@ function createNewBlock(event) {
     return;
   }
 
+  if (data.blocks.length >= MAX_BLOCKS) {
+    ui.message =
+      "Dílna má bezpečný strop " +
+      MAX_BLOCKS +
+      " řádků. Některý zbytečný řádek nejdřív odeber nebo vyexportuj.";
+    renderMessage();
+    return;
+  }
+
+  const willBeVisible = getVisibleBlocks().length < MAX_VISIBLE_BLOCKS;
+
   mutate(() => {
     const position = findNewPosition();
 
@@ -1119,10 +1360,14 @@ function createNewBlock(event) {
       text
     );
 
+    block.active = willBeVisible;
     data.blocks.push(block);
     data.selectedBlockId = block.id;
     ui.selectedCell = null;
-  }, "Nový řádek je na ploše. Tažením mu určíš místo.");
+  }, willBeVisible
+    ? "Nový řádek je na ploše. Tažením mu určíš místo."
+    : "Plocha už má mnoho řádků. Nový je bezpečně odložený níže; jedním klepnutím ho vrátíš."
+  );
 }
 
 function findNewPosition() {
@@ -1232,7 +1477,7 @@ function applyCellValue() {
     if (
       value &&
       found.block.mode !== "word" &&
-      !BASE_TOKENS.includes(value) &&
+      !getKeyboardTokens().includes(value) &&
       !data.customTokens.includes(value)
     ) {
       data.customTokens.push(value);
@@ -1245,16 +1490,28 @@ function duplicateSelectedBlock() {
   const block = getSelectedBlock();
   if (!block) return;
 
+  if (data.blocks.length >= MAX_BLOCKS) {
+    ui.message = "Dílna má už bezpečný strop " + MAX_BLOCKS + " řádků.";
+    renderMessage();
+    return;
+  }
+
+  const willBeVisible =
+    block.active !== false && getVisibleBlocks().length < MAX_VISIBLE_BLOCKS;
+
   mutate(() => {
     const copy = cloneBlock(block);
 
     copy.x = clampNumber(block.x + 4, 2, 84, block.x);
     copy.y = clampNumber(block.y + 5, 2, 86, block.y);
+    copy.active = willBeVisible;
 
     data.blocks.push(copy);
     data.selectedBlockId = copy.id;
     ui.selectedCell = null;
-  }, "Řádek je zdvojený. Každý z nich se teď pohybuje zvlášť.");
+  }, willBeVisible
+    ? "Řádek je zdvojený. Každý z nich se teď pohybuje zvlášť."
+    : "Řádek je zdvojený a uložený mezi odloženými bubínky.");
 }
 
 function cloneBlock(block) {
@@ -1263,6 +1520,7 @@ function cloneBlock(block) {
     name: String(block.name || "Glyph") + " 2",
     mode: block.mode,
     style: block.style,
+    active: block.active !== false,
     x: block.x,
     y: block.y,
     units: block.units.map((unit) => {
@@ -1281,13 +1539,156 @@ function cloneBlock(block) {
   };
 }
 
-function deleteSelectedBlock() {
+function setBlockActive(id, active, message) {
+  const block = getBlockById(id);
+
+  if (!block || block.active === active) return false;
+
+  if (active && getVisibleBlocks().length >= MAX_VISIBLE_BLOCKS) {
+    ui.message =
+      "Na ploše už je " +
+      MAX_VISIBLE_BLOCKS +
+      " řádků. Nejdřív některý odlož, aby zůstala přehledná.";
+    renderMessage();
+    return false;
+  }
+
+  mutate(() => {
+    block.active = active;
+    data.selectedBlockId = block.id;
+    ui.selectedCell = null;
+  }, message || (active
+    ? "Řádek je zpět na ploše."
+    : "Řádek je odložený. Jeho data zůstávají zachovaná."));
+
+  return true;
+}
+
+function toggleSelectedBlock() {
   const block = getSelectedBlock();
   if (!block) return;
 
-  const question = "Odebrat tento pohyblivý řádek? Zůstane možné vrátit ho šipkou zpět.";
+  setBlockActive(
+    block.id,
+    block.active === false,
+    block.active === false
+      ? "Řádek je zpět na ploše."
+      : "Řádek je odložený. Kdykoli ho vrátíš z přehledu pod plochou."
+  );
+}
+
+function hideAllBlocks() {
+  const visible = getVisibleBlocks();
+
+  if (!visible.length) {
+    ui.message = "Na ploše už není žádný řádek.";
+    renderMessage();
+    return;
+  }
+
+  if (!window.confirm("Odložit z plochy všech " + visible.length + " řádků? Nic se nemaže.")) {
+    return;
+  }
+
+  mutate(() => {
+    visible.forEach((block) => {
+      block.active = false;
+    });
+    ui.selectedCell = null;
+  }, "Plocha je čistá. Všechny řádky čekají bezpečně v odložených bubíncích.");
+}
+
+function arrangeVisibleBlocks() {
+  const blocks = getVisibleBlocks();
+
+  if (!blocks.length) {
+    ui.message = "Není co uspořádat. Vrať nejdřív řádek z odložených bubínků.";
+    renderMessage();
+    return;
+  }
+
+  const columns = blocks.length > 12 ? 4 : (blocks.length > 5 ? 3 : 2);
+  const rows = Math.ceil(blocks.length / columns);
+
+  mutate(() => {
+    blocks.forEach((block, index) => {
+      const column = index % columns;
+      const row = Math.floor(index / columns);
+      const horizontal = columns === 1 ? 8 : 5 + column * (82 / (columns - 1));
+      const vertical = rows === 1 ? 9 : 8 + row * (72 / (rows - 1));
+
+      block.x = Math.round(horizontal * 10) / 10;
+      block.y = Math.round(vertical * 10) / 10;
+    });
+  }, "Řádky jsou uspořádané. Každý můžeš dál přetáhnout kamkoli.");
+}
+
+function trimBlockGaps(units) {
+  const result = (units || []).filter((unit) => {
+    return unit && (unit.gap || (Array.isArray(unit.cells) && unit.cells.length));
+  });
+
+  while (result[0]?.gap) result.shift();
+  while (result[result.length - 1]?.gap) result.pop();
+
+  return result.filter((unit, index) => {
+    return !unit.gap || !result[index - 1]?.gap;
+  });
+}
+
+function removeSelectedDrum() {
+  const found = findCell(ui.selectedCell);
+
+  if (!found) {
+    ui.message = "Nejdřív vyber konkrétní bubínek, který chceš odebrat.";
+    renderMessage();
+    return;
+  }
+
+  const block = found.block;
+  const unitIndex = block.units.findIndex((unit) => unit.id === found.unit.id);
+
+  if (unitIndex < 0) return;
+
+  const isLastDrum = block.units.filter((unit) => !unit.gap).length === 1;
+  const question = isLastDrum
+    ? "Je to poslední bubínek řádku. Odebrat celý řádek?"
+    : "Odebrat vybraný bubínek z tohoto řádku?";
 
   if (!window.confirm(question)) return;
+
+  mutate(() => {
+    if (isLastDrum) {
+      data.blocks = data.blocks.filter((item) => item.id !== block.id);
+    } else {
+      block.units.splice(unitIndex, 1);
+      block.units = trimBlockGaps(block.units);
+    }
+
+    if (!data.blocks.length) {
+      data = createDefaultData();
+    }
+
+    if (data.titleBlockId === block.id) {
+      data.titleBlockId = data.blocks[0].id;
+    }
+
+    data.selectedBlockId = data.blocks[0].id;
+    ui.selectedCell = null;
+  }, isLastDrum
+    ? "Poslední bubínek zmizel spolu s prázdným řádkem. Poslední krok lze vrátit."
+    : "Vybraný bubínek je odebraný. Ostatní zůstaly na místě.");
+}
+
+function deleteBlockById(id, askForConfirmation) {
+  const block = getBlockById(id);
+  if (!block) return false;
+
+  if (askForConfirmation) {
+    const question =
+      "Odebrat tento pohyblivý řádek? Zůstane možné vrátit ho šipkou zpět.";
+    if (!window.confirm(question)) return false;
+  }
 
   mutate(() => {
     data.blocks = data.blocks.filter((item) => item.id !== block.id);
@@ -1303,6 +1704,163 @@ function deleteSelectedBlock() {
     data.selectedBlockId = data.blocks[0].id;
     ui.selectedCell = null;
   }, "Řádek je odebraný. Poslední krok lze vrátit.");
+
+  return true;
+}
+
+function deleteSelectedBlock() {
+  const block = getSelectedBlock();
+  if (!block) return;
+  deleteBlockById(block.id, true);
+}
+
+function renderArchive() {
+  const archived = getArchivedBlocks();
+
+  elements.archivePanel.hidden = !archived.length;
+  elements.archiveCount.textContent = String(archived.length);
+  elements.archiveList.textContent = "";
+
+  archived.forEach((block) => {
+    const row = document.createElement("article");
+    const copy = document.createElement("div");
+    const title = document.createElement("strong");
+    const detail = document.createElement("small");
+    const restore = document.createElement("button");
+    const remove = document.createElement("button");
+
+    row.className = "archive-row";
+    title.textContent = block.name || "Glyph";
+    detail.textContent = getBlockText(block) || "prázdný řádek";
+    copy.append(title, detail);
+
+    restore.type = "button";
+    restore.className = "quiet-button";
+    restore.textContent = "Vrátit";
+    restore.addEventListener("click", () => {
+      setBlockActive(block.id, true, "Řádek je zpět na ploše.");
+    });
+
+    remove.type = "button";
+    remove.className = "danger-button";
+    remove.textContent = "Smazat";
+    remove.addEventListener("click", () => deleteBlockById(block.id, true));
+
+    row.append(copy, restore, remove);
+    elements.archiveList.append(row);
+  });
+}
+
+function readBridgeTarget() {
+  const query = new URLSearchParams(window.location.search);
+  let stored = null;
+
+  try {
+    stored = JSON.parse(localStorage.getItem(BRIDGE_CONTEXT_KEY) || "null");
+  } catch (error) {
+    stored = null;
+  }
+
+  const coreId = String(query.get("core") || stored?.coreId || "");
+  const slotId = Number(query.get("slot") || stored?.slotId);
+
+  if (!CORE_NAMES[coreId] || !Number.isInteger(slotId) || slotId < 1 || slotId > 70) {
+    return null;
+  }
+
+  const requestedReturn = String(query.get("returnTo") || stored?.returnTo || "../index.html");
+  const returnTo = requestedReturn.startsWith("../") && !requestedReturn.includes("://")
+    ? requestedReturn
+    : "../index.html";
+
+  return {
+    coreId,
+    slotId,
+    returnTo
+  };
+}
+
+function renderBridge() {
+  const target = ui.bridgeTarget;
+
+  elements.transferCard.hidden = !target;
+
+  if (!target) return;
+
+  elements.transferTarget.textContent =
+    CORE_NAMES[target.coreId] +
+    " · slot " +
+    target.slotId +
+    " — vybraný řádek se vloží podle zvoleného způsobu.";
+
+  elements.returnToCht.href = target.returnTo;
+}
+
+function sendSelectedBlockToCht() {
+  const target = ui.bridgeTarget;
+  const block = getSelectedBlock();
+
+  if (!target) {
+    ui.message = "Nejdřív otevři dílnu přímo z vybraného slotu CHT 360°‰.";
+    renderMessage();
+    return;
+  }
+
+  if (!block) {
+    ui.message = "Nejdřív vyber řádek, který chceš poslat do Paměti.";
+    renderMessage();
+    return;
+  }
+
+  const text = getBlockText(block).trim();
+
+  if (!text) {
+    ui.message = "Prázdný řádek do Paměti neposílám.";
+    renderMessage();
+    return;
+  }
+
+  const transfer = {
+    schema: "cht360-glyph-transfer-v1",
+    id: "glyph-transfer-" + Date.now() + "-" + Math.random().toString(16).slice(2),
+    createdAt: new Date().toISOString(),
+    coreId: target.coreId,
+    slotId: target.slotId,
+    mode: elements.transferMode.value === "replace" ? "replace" : "append",
+    name: block.name,
+    text,
+    block: {
+      id: block.id,
+      name: block.name,
+      mode: block.mode,
+      style: block.style,
+      units: block.units
+    }
+  };
+
+  try {
+    localStorage.setItem(BRIDGE_TRANSFER_KEY, JSON.stringify(transfer));
+    localStorage.setItem(BRIDGE_CONTEXT_KEY, JSON.stringify({
+      ...target,
+      lastSentId: transfer.id,
+      updatedAt: transfer.createdAt
+    }));
+
+    window.dispatchEvent(new CustomEvent("cht.glyph.transfer.ready", {
+      detail: transfer
+    }));
+
+    ui.message =
+      "Řádek je připravený pro " +
+      CORE_NAMES[target.coreId] +
+      " · slot " +
+      target.slotId +
+      ". Vrať se do CHT a vloží se bezpečně.";
+  } catch (error) {
+    ui.message = "Přenos do Paměti se nepodařilo připravit v tomto prohlížeči.";
+  }
+
+  renderMessage();
 }
 
 function undo() {
