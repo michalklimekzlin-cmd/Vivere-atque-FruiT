@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="a" cx="30%" cy="24%" r="78%">
+      <stop offset="0" stop-color="#fff5d6"/>
+      <stop offset=".28" stop-color="#f6c969"/>
+      <stop offset=".72" stop-color="#89541d"/>
+      <stop offset="1" stop-color="#1b1006"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#090806"/>
+  <circle cx="256" cy="256" r="170" fill="url(#a)" stroke="#ffe2ad" stroke-width="12"/>
+  <circle cx="256" cy="256" r="125" fill="none" stroke="#fff0c5" stroke-opacity=".44" stroke-width="7"/>
+  <path d="M153 262c35-56 78-84 103-84 25 0 68 28 103 84-35 56-78 84-103 84-25 0-68-28-103-84Z" fill="#1c1106" fill-opacity=".9"/>
+  <circle cx="256" cy="262" r="36" fill="#ffe9b6"/>
+  <circle cx="256" cy="262" r="14" fill="#281705"/>
+  <path d="M174 364h164" stroke="#fff0c5" stroke-linecap="round" stroke-width="12"/>
+  <text x="256" y="115" fill="#241608" font-family="system-ui,sans-serif" font-size="52" font-weight="900" text-anchor="middle">CHT</text>
+</svg>
