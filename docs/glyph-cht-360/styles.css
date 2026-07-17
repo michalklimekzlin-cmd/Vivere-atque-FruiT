@@ -38,6 +38,7 @@ body {
 
 button,
 input,
+select,
 a {
   font: inherit;
 }
@@ -53,6 +54,7 @@ a {
 
 button:focus-visible,
 input:focus-visible,
+select:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 3px;
@@ -279,8 +281,7 @@ h2 {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 24px;
-  background:
-    linear-gradient(145deg, var(--panel), var(--panel-deep));
+  background: linear-gradient(145deg, var(--panel), var(--panel-deep));
   box-shadow: 0 20px 60px rgba(0, 0, 0, .26);
 }
 
@@ -364,6 +365,23 @@ input:disabled {
 
 input::placeholder {
   color: #807565;
+}
+
+select {
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 34px 9px 10px;
+  border: 1px solid rgba(255, 226, 173, .17);
+  border-radius: 12px;
+  outline: none;
+  color: var(--text);
+  background: rgba(3, 3, 2, .5);
+}
+
+select:focus {
+  border-color: rgba(255, 226, 173, .65);
+  box-shadow: 0 0 0 3px rgba(199, 155, 51, .12);
 }
 
 .choice-fieldset {
@@ -484,9 +502,9 @@ input::placeholder {
   min-height: 41px;
   align-items: center;
   justify-content: center;
+  padding: 8px 11px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 8px 11px;
   font-size: .79rem;
   font-weight: 820;
   transition: transform .16s ease, border-color .16s ease, background .16s ease;
@@ -553,6 +571,15 @@ input::placeholder {
   scrollbar-color: rgba(255, 226, 173, .42) transparent;
 }
 
+.keyboard-layout-field {
+  margin-bottom: 9px;
+}
+
+.keyboard-description {
+  min-height: 31px;
+  margin: 0 0 10px;
+}
+
 .token-button {
   display: grid;
   min-width: 32px;
@@ -591,6 +618,42 @@ input::placeholder {
 
 .workspace-state output:first-child {
   color: var(--gold);
+}
+
+.workspace-tools {
+  display: grid;
+  justify-items: end;
+  gap: 7px;
+}
+
+.workspace-tool-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.tiny-button,
+.block-tool {
+  display: inline-grid;
+  min-height: 28px;
+  place-items: center;
+  border: 1px solid rgba(255, 226, 173, .2);
+  border-radius: 9px;
+  color: var(--gold);
+  background: rgba(0, 0, 0, .18);
+  font-size: .67rem;
+  font-weight: 820;
+}
+
+.tiny-button {
+  padding: 4px 7px;
+}
+
+.tiny-button:hover,
+.block-tool:hover {
+  border-color: rgba(255, 226, 173, .62);
+  background: rgba(255, 226, 173, .11);
 }
 
 .glyph-workspace {
@@ -634,6 +697,18 @@ input::placeholder {
   bottom: -112px;
   box-shadow: 0 0 0 31px rgba(255, 226, 173, .02);
 }
+
+.workspace-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  max-width: 310px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
+
 .glyph-block {
   position: absolute;
   min-width: 92px;
@@ -641,8 +716,7 @@ input::placeholder {
   padding: 5px 6px 7px;
   border: 1px solid rgba(255, 226, 173, .23);
   border-radius: 17px;
-  background:
-    linear-gradient(145deg, rgba(31, 26, 18, .95), rgba(9, 8, 6, .93));
+  background: linear-gradient(145deg, rgba(31, 26, 18, .95), rgba(9, 8, 6, .93));
   box-shadow: 0 14px 33px rgba(0, 0, 0, .34), inset 0 0 20px rgba(255, 226, 173, .04);
   touch-action: none;
   user-select: none;
@@ -667,6 +741,30 @@ input::placeholder {
   touch-action: none;
 }
 
+.glyph-block-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.block-tool {
+  width: 25px;
+  padding: 0;
+  font-size: .86rem;
+  line-height: 1;
+}
+
+.block-tool.is-danger {
+  border-color: rgba(255, 172, 157, .35);
+  color: var(--danger);
+}
+
+.block-tool.is-danger:hover {
+  border-color: rgba(255, 172, 157, .75);
+  background: rgba(255, 132, 117, .11);
+}
+
 .glyph-block-grip:active {
   cursor: grabbing;
 }
@@ -675,8 +773,7 @@ input::placeholder {
   display: block;
   width: 27px;
   height: 8px;
-  background:
-    radial-gradient(circle, currentColor 1.1px, transparent 1.8px) 0 0 / 7px 4px;
+  background: radial-gradient(circle, currentColor 1.1px, transparent 1.8px) 0 0 / 7px 4px;
 }
 
 .glyph-block-index {
@@ -897,8 +994,111 @@ input::placeholder {
 
 .inspector-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 7px;
+}
+
+.archive-panel,
+.transfer-card {
+  margin-top: 15px;
+  padding: 14px;
+  border: 1px solid rgba(255, 226, 173, .18);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, .18);
+}
+
+.archive-panel h3,
+.transfer-card h2 {
+  margin: 0;
+  color: var(--gold-soft);
+  font-size: .92rem;
+  line-height: 1.3;
+}
+
+.archive-list {
+  display: grid;
+  gap: 7px;
+}
+
+.archive-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border: 1px solid rgba(255, 226, 173, .11);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .17);
+}
+
+.archive-row strong,
+.archive-row small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archive-row strong {
+  color: var(--gold-soft);
+  font-size: .76rem;
+}
+
+.archive-row small {
+  margin-top: 3px;
+  color: var(--quiet);
+  font-size: .67rem;
+}
+
+.archive-row .quiet-button,
+.archive-row .danger-button {
+  min-height: 31px;
+  padding: 5px 7px;
+  font-size: .68rem;
+}
+
+.transfer-card {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.transfer-target {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.transfer-actions {
+  display: grid;
+  min-width: min(100%, 340px);
+  gap: 8px;
+}
+
+.transfer-actions label {
+  font-size: .7rem;
+}
+
+.quiet-link {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  color: var(--gold);
+  background: rgba(255, 255, 255, .025);
+  font-size: .76rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.quiet-link:hover {
+  border-color: var(--line-strong);
+  background: rgba(255, 226, 173, .11);
 }
 
 .empty-selection {
@@ -1038,6 +1238,11 @@ input::placeholder {
     grid-template-columns: 1fr;
   }
 
+  .transfer-card {
+    display: grid;
+    align-items: stretch;
+  }
+
   .cell-editor {
     margin-top: 19px;
     padding-top: 17px;
@@ -1073,5 +1278,25 @@ input::placeholder {
 
   .glyph-block {
     max-width: 94%;
+  }
+
+  .workspace-tools {
+    justify-items: start;
+  }
+
+  .workspace-tool-actions {
+    justify-content: flex-start;
+  }
+
+  .inspector-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .archive-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .archive-row .danger-button {
+    grid-column: 2;
   }
 }
