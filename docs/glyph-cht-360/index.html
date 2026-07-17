@@ -3,124 +3,285 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#070706">
-  <meta name="description" content="Glyph CHT 360°‰ — ChybaŽrout pro UTF-8, kód a návaznosti projektu.">
-  <title>Glyph CHT 360°‰ · Kontrola projektu</title>
+  <meta name="theme-color" content="#090806">
+  <meta name="description" content="Glyph CHT 360°‰ — živá dílna otočných znaků, bubínků a vlastních Glyphů.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Glyph CHT">
+  <title>Glyph CHT 360°‰ · Dílna bubínků</title>
+
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
+
 <body>
-  <main class="app-shell">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">ChybaŽrout · Strážce návazností</p>
-        <h1>Glyph CHT 360°‰</h1>
-        <p class="subtitle">Kontrola textů, UTF‑8, souborů a jejich propojení. Opravy jsou vždy jen návrh, nikdy tichý zásah.</p>
+  <main class="glyph-app">
+    <header class="app-header">
+      <a class="back-link" href="../index.html" aria-label="Zpět do CHT 360°‰.">
+        <span aria-hidden="true">←</span>
+        <span>CHT</span>
+      </a>
+
+      <div class="title-stack">
+        <p class="eyebrow">DÍLNA ŽIVÝCH ZNAKŮ</p>
+        <div id="titleGlyphs" class="title-glyphs" aria-label="Glyph CHT 360°‰"></div>
       </div>
 
-      <nav class="top-actions" aria-label="Propojené části">
-        <a class="button button-quiet" href="../glyph-pokojicku-cht-360/">Glyph pokojíčků</a>
-        <button class="button button-quiet" id="exportReport" type="button">Záloha kontroly</button>
-        <button class="button button-quiet" id="clearProject" type="button">Vyčistit mapu</button>
+      <nav class="header-actions" aria-label="Práce s Glyphy">
+        <button id="undoAction" class="icon-button" type="button" title="Vrátit poslední změnu" aria-label="Vrátit poslední změnu">↶</button>
+        <button id="exportAction" class="icon-button" type="button" title="Exportovat Glyphy" aria-label="Exportovat Glyphy">↓</button>
+
+        <label class="icon-button import-label" title="Načíst Glyphy" aria-label="Načíst Glyphy">
+          ↑
+          <input id="importInput" type="file" accept="application/json,.json" hidden>
+        </label>
       </nav>
     </header>
 
-    <section class="drum-row" aria-label="Stav kontroly">
-      <article class="drum"><span>Souborů</span><strong id="fileCount">0</strong><small>v projektu</small></article>
-      <article class="drum"><span>Návaznosti</span><strong id="dependencyCount">0</strong><small>rozpoznáno</small></article>
-      <article class="drum"><span>ChybaŽrout</span><strong id="errorCount">Čisté</strong><small id="errorNote">čeká na soubory</small></article>
-      <article class="drum"><span>Uložení</span><strong id="storageState">Načítám</strong><small id="storageNote">místní paměť</small></article>
+    <section class="intro-card" aria-labelledby="introTitle">
+      <div>
+        <p class="eyebrow">NE STATICKÝ NÁPIS</p>
+        <h1 id="introTitle">Každé místo může nést jiný Glyph.</h1>
+
+        <p>
+          Řádek se skládá z otočných bubínků. Můžeš ho psát po jednom znaku,
+          po dvojicích jako <span class="sample">(Z:e)</span>, nebo nechat celé
+          slovo v jednom těle jako <span class="sample">(Země)</span>.
+        </p>
+      </div>
+
+      <div class="rule-card" aria-label="Pravidlo bubínků">
+        <strong>1–2</strong>
+        <span>místa v malém bubínku</span>
+        <small>slovo je samostatný velký bubínek</small>
+      </div>
     </section>
 
-    <section class="layout">
-      <section class="panel upload-panel" aria-labelledby="uploadTitle">
+    <section class="workbench">
+      <aside class="side-panel creator-panel" aria-labelledby="creatorTitle">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Začátek kontroly</p>
-            <h2 id="uploadTitle">Přidej projektové soubory</h2>
+            <p class="eyebrow">NOVÝ ŘÁDEK</p>
+            <h2 id="creatorTitle">Rozložit text na bubínky</h2>
           </div>
 
-          <label class="button button-primary import-button" for="projectFiles">
-            Vybrat soubory
-            <input id="projectFiles" type="file" multiple accept=".html,.htm,.css,.js,.mjs,.json,.webmanifest,.svg,.txt,.md" hidden>
-          </label>
+          <span class="panel-mark" aria-hidden="true">＋</span>
         </div>
 
-        <p class="intro">Vyber soubory z projektu — třeba celý obsah složky <code>docs</code>. Zůstávají jen v prohlížeči tohoto zařízení. ChybaŽrout zkontroluje i odkazy mezi nimi.</p>
-
-        <label class="project-name">
-          <span>Název pracovní mapy</span>
-          <input id="projectName" type="text" maxlength="80" placeholder="např. CHT 360°‰" autocomplete="off">
-        </label>
-
-        <div class="paste-row">
+        <form id="newLineForm" class="creator-form" novalidate>
           <label>
-            <span>Nebo vlož jeden kus kódu</span>
-            <textarea id="pasteCode" rows="5" spellcheck="false" autocapitalize="off" placeholder="HTML, CSS, JavaScript nebo JSON…"></textarea>
+            <span>Text, který se má rozložit</span>
+            <input
+              id="newText"
+              type="text"
+              maxlength="80"
+              value="Nový Glyph"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+            >
           </label>
 
-          <div class="paste-actions">
-            <input id="pasteFilename" type="text" maxlength="120" placeholder="např. aplikace.js" autocomplete="off">
-            <button class="button button-quiet" id="scanPaste" type="button">Prověřit vložený kód</button>
+          <fieldset class="choice-fieldset">
+            <legend>Velikost bubínku</legend>
+
+            <div id="newModeChoices" class="choice-row">
+              <button class="choice is-selected" type="button" data-new-mode="single">1 znak</button>
+              <button class="choice" type="button" data-new-mode="double">2 znaky</button>
+              <button class="choice" type="button" data-new-mode="word">slovo</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="choice-fieldset">
+            <legend>Tělo bubínku</legend>
+
+            <div id="newStyleChoices" class="style-choice-row">
+              <button class="style-choice is-selected" type="button" data-new-style="ring" aria-label="Kruhový styl">
+                <i class="style-ring-icon"></i>
+              </button>
+
+              <button class="style-choice" type="button" data-new-style="bracket" aria-label="Závorkový styl">
+                <i class="style-bracket-icon"></i>
+              </button>
+
+              <button class="style-choice" type="button" data-new-style="rail" aria-label="Kolejnicový styl">
+                <i class="style-rail-icon"></i>
+              </button>
+
+              <button class="style-choice" type="button" data-new-style="capsule" aria-label="Kapslový styl">
+                <i class="style-capsule-icon"></i>
+              </button>
+            </div>
+          </fieldset>
+
+          <button class="primary-button" type="submit">Vytvořit pohyblivý řádek</button>
+        </form>
+
+        <section class="token-maker" aria-labelledby="tokenTitle">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">VLASTNÍ GLYPH</p>
+              <h2 id="tokenTitle">Přidat do bubínků</h2>
+            </div>
           </div>
-        </div>
-      </section>
 
-      <aside class="panel map-panel" aria-labelledby="mapTitle">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Mapa projektu</p>
-            <h2 id="mapTitle">Soubory a spojení</h2>
+          <label>
+            <span>Jeden nebo dva znaky</span>
+            <input
+              id="customToken"
+              type="text"
+              maxlength="16"
+              placeholder="Tvůj Glyph"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+            >
+          </label>
+
+          <button id="addToken" class="quiet-button full-width" type="button">Přidat vlastní Glyph</button>
+
+          <p class="helper-text">
+            Vyber nejdřív konkrétní okénko bubínku. Vlastní Glyph se vloží jen tam;
+            nikde jinde se sám nepřepíše.
+          </p>
+        </section>
+
+        <section class="token-shelf-section" aria-labelledby="shelfTitle">
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">SADA BUBÍNKŮ</p>
+              <h2 id="shelfTitle">Otočit na</h2>
+            </div>
           </div>
-          <button class="button button-quiet" id="scanAgain" type="button">Přepočítat</button>
-        </div>
 
-        <label class="search-field">
-          <span>Hledat soubor nebo problém</span>
-          <input id="fileSearch" type="search" placeholder="index, UTF, manifest…" autocomplete="off" autocapitalize="off">
-        </label>
-
-        <div class="file-list" id="fileList" aria-live="polite"></div>
+          <div id="tokenShelf" class="token-shelf" aria-live="polite"></div>
+        </section>
       </aside>
 
-      <section class="panel findings-panel" aria-labelledby="findingsTitle">
-        <div class="panel-heading">
+      <section class="workspace-panel" aria-labelledby="workspaceTitle">
+        <header class="workspace-header">
           <div>
-            <p class="eyebrow">Nález po nálezu</p>
-            <h2 id="findingsTitle">Co ChybaŽrout našel</h2>
+            <p class="eyebrow">PLOCHA GLYPHŮ</p>
+            <h2 id="workspaceTitle">Tahej řádek za horní proužek</h2>
           </div>
-          <button class="button button-quiet" id="downloadRepair" type="button" disabled>Stáhnout bezpečnou kopii</button>
-        </div>
 
-        <p class="intro" id="selectionText">Vyber soubor v mapě. Bezpečná kopie doplní jen jisté věci, například chybějící UTF‑8 nebo doctype; neznámé chyby pouze označí.</p>
-        <ul class="findings-list" id="findingsList" aria-live="polite"></ul>
+          <div class="workspace-state">
+            <output id="blockCount">0 řádků</output>
+            <span aria-hidden="true">·</span>
+            <output id="storageState">ukládám</output>
+          </div>
+        </header>
+
+        <div id="workspace" class="glyph-workspace" aria-label="Pohyblivá plocha Glyphů"></div>
+
+        <p id="workspaceMessage" class="workspace-message" aria-live="polite">
+          Dotkni se bubínku a otoč ho nahoru nebo dolů. Za horní proužek přesuneš celý řádek.
+        </p>
       </section>
 
-      <section class="panel dependency-panel" aria-labelledby="dependencyTitle">
+      <aside class="side-panel inspector-panel" aria-labelledby="inspectorTitle">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Návaznost při každém kódu</p>
-            <h2 id="dependencyTitle">Spojení v projektu</h2>
+            <p class="eyebrow">VYBRANÝ ŘÁDEK</p>
+            <h2 id="inspectorTitle">Tvar a pohyb</h2>
           </div>
-          <span class="locked-note">bez automatického přepsání</span>
+
+          <span id="selectedBadge" class="selected-badge">—</span>
         </div>
 
-        <div class="dependency-list" id="dependencyList" aria-live="polite"></div>
-      </section>
+        <div id="emptySelection" class="empty-selection">
+          Vyber řádek nebo konkrétní okénko bubínku na ploše.
+        </div>
+
+        <form id="inspectorForm" class="inspector-form" novalidate hidden>
+          <label>
+            <span>Jméno řádku</span>
+            <input
+              id="selectedName"
+              type="text"
+              maxlength="80"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+            >
+          </label>
+
+          <fieldset class="choice-fieldset">
+            <legend>Velikost bubínku</legend>
+
+            <div id="selectedModeChoices" class="choice-row">
+              <button class="choice" type="button" data-selected-mode="single">1 znak</button>
+              <button class="choice" type="button" data-selected-mode="double">2 znaky</button>
+              <button class="choice" type="button" data-selected-mode="word">slovo</button>
+            </div>
+          </fieldset>
+
+          <fieldset class="choice-fieldset">
+            <legend>Tělo řádku</legend>
+
+            <div id="selectedStyleChoices" class="style-choice-row">
+              <button class="style-choice" type="button" data-selected-style="ring" aria-label="Kruhový styl">
+                <i class="style-ring-icon"></i>
+              </button>
+
+              <button class="style-choice" type="button" data-selected-style="bracket" aria-label="Závorkový styl">
+                <i class="style-bracket-icon"></i>
+              </button>
+
+              <button class="style-choice" type="button" data-selected-style="rail" aria-label="Kolejnicový styl">
+                <i class="style-rail-icon"></i>
+              </button>
+
+              <button class="style-choice" type="button" data-selected-style="capsule" aria-label="Kapslový styl">
+                <i class="style-capsule-icon"></i>
+              </button>
+            </div>
+          </fieldset>
+
+          <section class="cell-editor" aria-labelledby="cellTitle">
+            <div class="panel-heading compact">
+              <div>
+                <p class="eyebrow">OKÉNKO BUBÍNKU</p>
+                <h2 id="cellTitle">Přímá výměna</h2>
+              </div>
+            </div>
+
+            <p id="selectedCellInfo" class="cell-info">Vyber konkrétní okénko.</p>
+
+            <label>
+              <span>Hodnota</span>
+              <input
+                id="selectedCellValue"
+                type="text"
+                maxlength="80"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                disabled
+              >
+            </label>
+
+            <button id="applyCellValue" class="quiet-button full-width" type="button" disabled>
+              Nahradit v tomto místě
+            </button>
+          </section>
+
+          <div class="inspector-actions">
+            <button id="duplicateBlock" class="quiet-button" type="button">Zdvojit</button>
+            <button id="deleteBlock" class="danger-button" type="button">Odebrat</button>
+          </div>
+        </form>
+      </aside>
     </section>
 
-    <footer id="statusLine" class="footer-status" aria-live="polite">Glyph CHT 360°‰ je připravený.</footer>
+    <footer class="app-footer">
+      <span>Každý bubínek je samostatný.</span>
+      <span>Řádek se nehýbe sám — přesuneš ho ty.</span>
+      <a href="../bubinky/">Zámkové Bubínky ↗</a>
+    </footer>
   </main>
-<script
-  src="../js/cht-360-network.js"
-  data-cht-module="glyph-cht-360"
-  data-cht-label="Glyph CHT 360°‰."
-  data-cht-entry="./"
-  data-cht-kind="pwa"
-  data-cht-capture-mode="summary"
-  data-cht-storage-keys="glyph-cht-360-project-guard.v1"
-></script>
+
   <script src="./app.js" defer></script>
 </body>
 </html>
