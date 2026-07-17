@@ -4,7 +4,7 @@
   Při větší změně stačí zvýšit poslední číslo.
   Staré cache se při aktivaci automaticky odstraní.
 */
-const CACHE_VERSION = "v12-cestina";
+const CACHE_VERSION = "v14-glyph-mluva";
 const CACHE_NAME = `cht360-${CACHE_VERSION}`;
 
 const OFFLINE_PAGE = "./index.html";
@@ -17,6 +17,13 @@ const CORE_FILES = [
   "./js/aplikace.js",
   "./js/glyph-kostra.js",
   "./js/cht-chybozrout.js",
+  "./js/cht-glyph-bridge.js",
+  "./mluva-cht-360/",
+  "./mluva-cht-360/index.html",
+  "./mluva-cht-360/styles.css",
+  "./mluva-cht-360/app.js",
+  "./mluva-cht-360/manifest.webmanifest",
+  "./mluva-cht-360/icon.svg",
   "./manifest.json"
 ];
 
