@@ -1,10 +1,10 @@
 "use strict";
 
 /*
- * CHT 360°‰. · Rotující prstenec pokojíčků
+ * CHT 360°‰. · 3D rotující prstenec pokojíčků
  *
- * Šest bran pro vlastní Glyphy. Klepnutí otevře přímo klávesnici ve vybraném
- * pokojíčku; smazání z klávesnice vymaže Glyph. Žádné tlačítko „Přidat“.
+ * Šest pokojíčků je možné táhnout po celém prstenci. Krátké klepnutí otevře
+ * přímo klávesnici iPhonu pro Glyph; smazání z klávesnice Glyph vymaže.
  */
 
 const CHTRoomOrbit = (() => {
@@ -13,19 +13,19 @@ const CHTRoomOrbit = (() => {
   const GLOW_TIME = 5000;
   const MAX_GLYPH_GRAPHEMES = 12;
   const ORBIT_ID = "chtRoomOrbit";
+  const DRAG_THRESHOLD = 7;
+  const SPIN_DEGREES_PER_SECOND = 18;
+  const RING_RADIUS_PERCENT = 42;
 
-  const ROOM_POSITIONS = Object.freeze([
-    [50, 8],
-    [83, 27],
-    [83, 73],
-    [50, 92],
-    [17, 73],
-    [17, 27]
-  ]);
+  const DEFAULT_ANGLES = Object.freeze([-90, -30, 30, 90, 150, 210]);
+  const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
 
   const state = loadState();
   const glowTimers = new Map();
   let selectedId = state.selectedId || state.rooms[0].id;
+  let ringSpin = 0;
+  let lastFrameTime = 0;
+  let drag = null;
   let dom = null;
 
   function graphemes(value) {
@@ -47,6 +47,12 @@ const CHTRoomOrbit = (() => {
       .join("");
   }
 
+  function normaliseAngle(value, fallback = 0) {
+    const numeric = Number(value);
+    const safe = Number.isFinite(numeric) ? numeric : fallback;
+    return ((safe % 360) + 360) % 360;
+  }
+
   function roomId(index) {
     return "room-" + String(index).padStart(2, "0");
   }
@@ -57,6 +63,7 @@ const CHTRoomOrbit = (() => {
       index,
       label: "Pokojíček " + String(index).padStart(2, "0"),
       glyph: "",
+      angle: normaliseAngle(DEFAULT_ANGLES[index - 1]),
       route: null,
       updatedAt: null
     };
@@ -81,6 +88,7 @@ const CHTRoomOrbit = (() => {
       id: base.id,
       index,
       glyph: normaliseGlyph(source.glyph),
+      angle: normaliseAngle(source.angle, base.angle),
       route: normaliseRoute(source.route),
       updatedAt: typeof source.updatedAt === "string" ? source.updatedAt : null
     };
@@ -88,7 +96,7 @@ const CHTRoomOrbit = (() => {
 
   function loadState() {
     const fallback = {
-      version: 1,
+      version: 2,
       selectedId: roomId(1),
       updatedAt: null,
       rooms: Array.from({ length: ROOM_COUNT }, (_, offset) => createRoom(offset + 1))
@@ -110,7 +118,7 @@ const CHTRoomOrbit = (() => {
       const requested = String(source.selectedId || "");
 
       return {
-        version: 1,
+        version: 2,
         selectedId: rooms.some(room => room.id === requested) ? requested : roomId(1),
         updatedAt: typeof source.updatedAt === "string" ? source.updatedAt : null,
         rooms
@@ -140,6 +148,7 @@ const CHTRoomOrbit = (() => {
       index: room.index,
       label: room.label,
       glyph: room.glyph,
+      angle: room.angle,
       route: room.route ? { ...room.route } : null,
       updatedAt: room.updatedAt
     };
@@ -147,10 +156,6 @@ const CHTRoomOrbit = (() => {
 
   function getRoom(id) {
     return state.rooms.find(room => room.id === String(id)) || null;
-  }
-
-  function selectedRoom() {
-    return getRoom(selectedId) || state.rooms[0];
   }
 
   function eventDetail(room, action) {
@@ -161,6 +166,7 @@ const CHTRoomOrbit = (() => {
       index: room.index,
       label: room.label,
       glyph: room.glyph,
+      angle: room.angle,
       route: room.route ? { ...room.route } : null,
       updatedAt: room.updatedAt
     });
@@ -170,6 +176,15 @@ const CHTRoomOrbit = (() => {
     window.dispatchEvent(
       new CustomEvent(type, { detail: eventDetail(room, action) })
     );
+  }
+
+  function positionForAngle(angle) {
+    const radians = normaliseAngle(angle) * Math.PI / 180;
+
+    return {
+      x: 50 + Math.cos(radians) * RING_RADIUS_PERCENT,
+      y: 50 + Math.sin(radians) * RING_RADIUS_PERCENT
+    };
   }
 
   function roomElement(id) {
@@ -193,42 +208,42 @@ const CHTRoomOrbit = (() => {
 
     const root = document.createElement("aside");
     root.id = ORBIT_ID;
-    root.setAttribute("aria-label", "Rotující prstenec šesti pokojíčků");
+    root.setAttribute("aria-label", "3D rotující prstenec šesti pokojíčků");
     root.innerHTML = `
       <div class="cht-room-orbit__shell">
-        <p class="cht-room-orbit__label">Rotující prstenec · pokojíčky 1–6</p>
+        <p class="cht-room-orbit__label">3D prstenec · pokojíčky 1–6</p>
 
-        <div class="cht-room-orbit__rotor">
+        <div class="cht-room-orbit__rotor" data-room-rotor>
           <svg class="cht-room-orbit__wire" viewBox="0 0 520 520" aria-hidden="true" focusable="false">
             <defs>
-              <linearGradient id="cht-room-ring-v2-line" x1="70" y1="74" x2="450" y2="446" gradientUnits="userSpaceOnUse">
-                <stop stop-color="#8d6a2d" stop-opacity=".72" />
-                <stop offset=".28" stop-color="#fff0c5" stop-opacity=".93" />
-                <stop offset=".59" stop-color="#c89735" stop-opacity=".75" />
-                <stop offset="1" stop-color="#fff0c5" stop-opacity=".62" />
+              <linearGradient id="cht-room-ring-v3-line" x1="70" y1="74" x2="450" y2="446" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#8d6a2d" stop-opacity=".74" />
+                <stop offset=".28" stop-color="#fff0c5" stop-opacity=".96" />
+                <stop offset=".59" stop-color="#c89735" stop-opacity=".78" />
+                <stop offset="1" stop-color="#fff0c5" stop-opacity=".64" />
               </linearGradient>
-              <radialGradient id="cht-room-ring-v2-aura" cx="50%" cy="50%" r="50%">
-                <stop stop-color="#ffd781" stop-opacity=".16" />
-                <stop offset=".64" stop-color="#b67e26" stop-opacity=".035" />
+              <radialGradient id="cht-room-ring-v3-aura" cx="50%" cy="50%" r="50%">
+                <stop stop-color="#ffd781" stop-opacity=".18" />
+                <stop offset=".64" stop-color="#b67e26" stop-opacity=".04" />
                 <stop offset="1" stop-color="#000" stop-opacity="0" />
               </radialGradient>
             </defs>
 
-            <circle class="ring-v2__aura" cx="260" cy="260" r="244" />
-            <circle class="ring-v2__outer" cx="260" cy="260" r="204" />
-            <circle class="ring-v2__middle" cx="260" cy="260" r="189" />
-            <circle class="ring-v2__inner" cx="260" cy="260" r="166" />
-            <ellipse class="ring-v2__latitude" cx="260" cy="260" rx="204" ry="76" />
-            <ellipse class="ring-v2__latitude" cx="260" cy="260" rx="189" ry="57" />
-            <ellipse class="ring-v2__latitude" cx="260" cy="260" rx="166" ry="36" />
-            <ellipse class="ring-v2__longitude" cx="260" cy="260" rx="76" ry="204" />
-            <ellipse class="ring-v2__longitude" cx="260" cy="260" rx="48" ry="189" />
-            <path class="ring-v2__longitude" d="M56 260 C132 172 388 172 464 260 M56 260 C132 348 388 348 464 260" />
-            <path class="ring-v2__dash" d="M260 56 A204 204 0 0 1 464 260 A204 204 0 0 1 260 464 A204 204 0 0 1 56 260 A204 204 0 0 1 260 56" />
-            <circle class="ring-v2__star" cx="260" cy="56" r="2.2" />
-            <circle class="ring-v2__star" cx="464" cy="260" r="2.2" />
-            <circle class="ring-v2__star" cx="260" cy="464" r="2.2" />
-            <circle class="ring-v2__star" cx="56" cy="260" r="2.2" />
+            <circle class="ring-v3__aura" cx="260" cy="260" r="244" />
+            <circle class="ring-v3__outer" cx="260" cy="260" r="205" />
+            <circle class="ring-v3__middle" cx="260" cy="260" r="190" />
+            <circle class="ring-v3__inner" cx="260" cy="260" r="165" />
+            <ellipse class="ring-v3__latitude" cx="260" cy="260" rx="205" ry="78" />
+            <ellipse class="ring-v3__latitude" cx="260" cy="260" rx="190" ry="58" />
+            <ellipse class="ring-v3__latitude" cx="260" cy="260" rx="165" ry="36" />
+            <ellipse class="ring-v3__longitude" cx="260" cy="260" rx="78" ry="205" />
+            <ellipse class="ring-v3__longitude" cx="260" cy="260" rx="48" ry="190" />
+            <path class="ring-v3__longitude" d="M55 260 C132 170 388 170 465 260 M55 260 C132 350 388 350 465 260" />
+            <path class="ring-v3__dash" d="M260 55 A205 205 0 0 1 465 260 A205 205 0 0 1 260 465 A205 205 0 0 1 55 260 A205 205 0 0 1 260 55" />
+            <circle class="ring-v3__star" cx="260" cy="55" r="2.4" />
+            <circle class="ring-v3__star" cx="465" cy="260" r="2.4" />
+            <circle class="ring-v3__star" cx="260" cy="465" r="2.4" />
+            <circle class="ring-v3__star" cx="55" cy="260" r="2.4" />
           </svg>
 
           <div class="cht-room-orbit__rooms" data-room-buttons></div>
@@ -240,11 +255,11 @@ const CHTRoomOrbit = (() => {
 
     dom = {
       root,
+      rotor: root.querySelector("[data-room-rotor]"),
       rooms: root.querySelector("[data-room-buttons]")
     };
 
     state.rooms.forEach(room => {
-      const [x, y] = ROOM_POSITIONS[room.index - 1];
       const slot = document.createElement("div");
       const number = document.createElement("span");
       const glyph = document.createElement("span");
@@ -252,8 +267,6 @@ const CHTRoomOrbit = (() => {
 
       slot.className = "cht-room";
       slot.dataset.roomId = room.id;
-      slot.style.setProperty("--room-x", x + "%");
-      slot.style.setProperty("--room-y", y + "%");
       slot.tabIndex = 0;
       slot.setAttribute("role", "button");
 
@@ -272,13 +285,10 @@ const CHTRoomOrbit = (() => {
 
       slot.append(number, glyph, editor);
 
-      slot.addEventListener("click", event => {
-        if (event.target === editor) {
-          return;
-        }
-
-        select(room.id, { focusInput: true });
-      });
+      slot.addEventListener("pointerdown", event => startPointer(room.id, slot, editor, event));
+      slot.addEventListener("pointermove", event => movePointer(room.id, event));
+      slot.addEventListener("pointerup", event => endPointer(room.id, slot, event));
+      slot.addEventListener("pointercancel", event => cancelPointer(slot, event));
 
       slot.addEventListener("keydown", event => {
         if (event.target === editor) {
@@ -336,7 +346,109 @@ const CHTRoomOrbit = (() => {
     }, true);
 
     renderAll();
+    requestAnimationFrame(animate);
     return true;
+  }
+
+  function startPointer(id, slot, editor, event) {
+    if (event.target === editor || event.button > 0) {
+      return;
+    }
+
+    const room = getRoom(id);
+
+    if (!room) {
+      return;
+    }
+
+    event.preventDefault();
+    finishEditing();
+    selectedId = room.id;
+    saveState();
+
+    drag = {
+      id: room.id,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false
+    };
+
+    dom.root.classList.add("is-dragging");
+    slot.classList.add("is-dragging");
+    slot.setPointerCapture?.(event.pointerId);
+    renderAll();
+  }
+
+  function movePointer(id, event) {
+    if (!drag || drag.id !== id || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
+
+    if (distance < DRAG_THRESHOLD && !drag.moved) {
+      return;
+    }
+
+    drag.moved = true;
+    event.preventDefault();
+    moveRoomToPointer(id, event.clientX, event.clientY);
+  }
+
+  function endPointer(id, slot, event) {
+    if (!drag || drag.id !== id || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    const wasMoved = drag.moved;
+    drag = null;
+    slot.releasePointerCapture?.(event.pointerId);
+    slot.classList.remove("is-dragging");
+    dom.root.classList.remove("is-dragging");
+
+    if (wasMoved) {
+      const room = getRoom(id);
+      renderAll();
+      lightRoom(id);
+      publish("cht.room.changed", room, "move-room");
+      return;
+    }
+
+    select(id, { focusInput: true });
+  }
+
+  function cancelPointer(slot, event) {
+    if (!drag || drag.pointerId !== event.pointerId) {
+      return;
+    }
+
+    drag = null;
+    slot.releasePointerCapture?.(event.pointerId);
+    slot.classList.remove("is-dragging");
+    dom?.root?.classList.remove("is-dragging");
+    renderAll();
+  }
+
+  function moveRoomToPointer(id, clientX, clientY) {
+    const room = getRoom(id);
+    const rect = dom?.rotor?.getBoundingClientRect();
+
+    if (!room || !rect || !rect.width || !rect.height) {
+      return null;
+    }
+
+    const centreX = rect.left + rect.width / 2;
+    const centreY = rect.top + rect.height / 2;
+    const relativeX = (clientX - centreX) / (rect.width * RING_RADIUS_PERCENT / 100);
+    const relativeY = (clientY - centreY) / (rect.height * RING_RADIUS_PERCENT / 100);
+    const screenAngle = Math.atan2(relativeY, relativeX) * 180 / Math.PI;
+
+    room.angle = normaliseAngle(screenAngle - ringSpin);
+    room.updatedAt = new Date().toISOString();
+    saveState();
+    renderRoom(room);
+    return cloneRoom(room);
   }
 
   function renderRoom(room) {
@@ -350,14 +462,17 @@ const CHTRoomOrbit = (() => {
     const editor = slot.querySelector(".cht-room__editor");
     const filled = Boolean(room.glyph);
     const editing = dom.root.classList.contains("is-editing") && room.id === selectedId;
+    const point = positionForAngle(room.angle);
 
+    slot.style.setProperty("--room-x", point.x + "%");
+    slot.style.setProperty("--room-y", point.y + "%");
     glyph.textContent = filled ? room.glyph : "·";
     slot.classList.toggle("is-empty", !filled);
     slot.classList.toggle("is-selected", room.id === selectedId);
     slot.classList.toggle("is-editing", editing);
     slot.setAttribute(
       "aria-label",
-      room.label + ": " + (filled ? room.glyph : "klepni a napiš Glyph")
+      room.label + ": " + (filled ? room.glyph : "klepni a napiš Glyph, podrž a táhni po prstenci")
     );
     slot.setAttribute("aria-pressed", String(room.id === selectedId));
 
@@ -372,6 +487,24 @@ const CHTRoomOrbit = (() => {
     }
 
     state.rooms.forEach(renderRoom);
+  }
+
+  function animate(time) {
+    const elapsed = lastFrameTime ? Math.min(time - lastFrameTime, 48) : 16;
+    lastFrameTime = time;
+
+    if (
+      dom &&
+      !prefersReducedMotion &&
+      !dom.root.classList.contains("is-editing") &&
+      !dom.root.classList.contains("is-dragging")
+    ) {
+      ringSpin = normaliseAngle(ringSpin + elapsed * SPIN_DEGREES_PER_SECOND / 1000);
+      dom.rotor.style.setProperty("--ring-spin", ringSpin + "deg");
+      dom.rotor.style.setProperty("--ring-counter", -ringSpin + "deg");
+    }
+
+    requestAnimationFrame(animate);
   }
 
   function lightRoom(id) {
@@ -488,6 +621,21 @@ const CHTRoomOrbit = (() => {
     return cloneRoom(room);
   }
 
+  function setAngle(id, angle) {
+    const room = getRoom(id);
+
+    if (!room) {
+      return null;
+    }
+
+    room.angle = normaliseAngle(angle, room.angle);
+    room.updatedAt = new Date().toISOString();
+    saveState();
+    renderRoom(room);
+    publish("cht.room.changed", room, "move-room");
+    return cloneRoom(room);
+  }
+
   function getRooms() {
     return state.rooms.map(cloneRoom);
   }
@@ -506,7 +654,7 @@ const CHTRoomOrbit = (() => {
   }
 
   const api = Object.freeze({
-    version: "2.0.0",
+    version: "3.0.0",
     getRooms,
     getRoom: id => {
       const room = getRoom(id);
@@ -516,7 +664,8 @@ const CHTRoomOrbit = (() => {
     assignGlyph,
     clearGlyph,
     open: openRoom,
-    setRoute
+    setRoute,
+    setAngle
   });
 
   if (document.readyState === "loading") {
