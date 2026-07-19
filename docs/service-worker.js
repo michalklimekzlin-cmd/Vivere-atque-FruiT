@@ -1,14 +1,13 @@
 "use strict";
 
-/* Hlavní Paměť nesmí sdílet ani mazat cache vedlejších PWA. */
+/* Hlavní Paměť má vlastní cache a nemaže cache vedlejších PWA. */
 const ROOT_CACHE_PREFIX = "cht360-root-";
 const LEGACY_ROOT_CACHE_PREFIX = "cht360-v";
-const CACHE_VERSION = "v15-isolated-pwa";
-const CACHE_NAME = `${ROOT_CACHE_PREFIX}${CACHE_VERSION}`;
-
+const CACHE_VERSION = "v17-unified-glyph-utf8";
+const CACHE_NAME = ROOT_CACHE_PREFIX + CACHE_VERSION;
 const OFFLINE_PAGE = "./index.html";
 
-/* Každá z těchto aplikací má vlastní service worker a vlastní cache. */
+/* Tyto aplikace zůstávají izolované ve vlastních service workerech. */
 const SIDE_APP_SCOPES = [
   new URL("./bubinky/", self.registration.scope).pathname,
   new URL("./cht360-jadra-pracovni-deska/", self.registration.scope).pathname,
@@ -22,30 +21,31 @@ const CORE_FILES = [
   "./",
   "./index.html",
   "./css/pamet.css",
+  "./css/glyph-engine.css",
   "./js/app.js",
   "./js/aplikace.js",
-  "./js/glyph-kostra.js",
+  "./js/glyph-engine.js",
   "./js/cht-chybozrout.js",
-  "./js/cht-glyph-bridge.js",
   "./js/cht-360-network.js",
-  "./manifest.json"
+  "./manifest.json",
+  "./icon.svg"
 ];
 
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      await Promise.allSettled(
-        CORE_FILES.map(async file => {
-          const response = await fetch(file, { cache: "no-store" });
-
-          if (!response.ok) {
-            throw new Error(`Soubor ${file} vrátil stav ${response.status}`);
-          }
-
-          await cache.put(file, response);
-        })
-      );
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME)
+      .then(async cache => {
+        await Promise.allSettled(
+          CORE_FILES.map(async file => {
+            const response = await fetch(file, { cache: "no-store" });
+            if (!response.ok) {
+              throw new Error("Soubor " + file + " vrátil stav " + response.status);
+            }
+            await cache.put(file, response);
+          })
+        );
+      })
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -72,24 +72,13 @@ async function networkFirst(request) {
 
   try {
     const response = await fetch(request, { cache: "no-store" });
-
-    if (response && response.ok) {
-      await cache.put(request, response.clone());
-    }
-
+    if (response?.ok) await cache.put(request, response.clone());
     return response;
-  } catch (error) {
+  } catch (_) {
     const cached = await cache.match(request, { ignoreSearch: true });
-
-    if (cached) {
-      return cached;
-    }
-
-    if (request.mode === "navigate") {
-      return await cache.match(OFFLINE_PAGE);
-    }
-
-    throw error;
+    if (cached) return cached;
+    if (request.mode === "navigate") return cache.match(OFFLINE_PAGE);
+    throw _;
   }
 }
 
@@ -97,53 +86,34 @@ async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request, { ignoreSearch: true });
 
-  const networkPromise = fetch(request, { cache: "no-store" })
+  const network = fetch(request, { cache: "no-store" })
     .then(async response => {
-      if (response && response.ok) {
-        await cache.put(request, response.clone());
-      }
-
+      if (response?.ok) await cache.put(request, response.clone());
       return response;
     })
     .catch(() => null);
 
-  return cached || networkPromise;
+  return cached || network;
 }
 
 self.addEventListener("fetch", event => {
   const request = event.request;
-
-  if (request.method !== "GET") {
-    return;
-  }
+  if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-
-  if (url.origin !== self.location.origin) {
-    return;
-  }
+  if (url.origin !== self.location.origin) return;
 
   /* Vedlejší PWA obsluhuje vlastní worker, případně přímo síť. */
-  if (SIDE_APP_SCOPES.some(scope => url.pathname.startsWith(scope))) {
-    return;
-  }
+  if (SIDE_APP_SCOPES.some(scope => url.pathname.startsWith(scope))) return;
 
-  const isFreshCode =
+  const freshCode =
     request.mode === "navigate" ||
-    url.pathname.endsWith(".html") ||
-    url.pathname.endsWith(".css") ||
-    url.pathname.endsWith(".js") ||
-    url.pathname.endsWith(".json");
+    /\.(?:html|css|js|json|svg)$/u.test(url.pathname);
 
-  event.respondWith(
-    isFreshCode
-      ? networkFirst(request)
-      : staleWhileRevalidate(request)
-  );
+  event.respondWith(freshCode ? networkFirst(request) : staleWhileRevalidate(request));
 });
 
 self.addEventListener("message", event => {
-  if (event.data?.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
+
