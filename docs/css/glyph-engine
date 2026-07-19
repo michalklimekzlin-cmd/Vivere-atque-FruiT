@@ -1,833 +1,377 @@
-"use strict";
+/* Glyph CHT 360°‰. Samostatný vzhled dílny – bez zásahu do hlavní Paměti. */
+body.glyph-engine-open {
+  overflow: hidden;
+}
 
-/*
- * Glyph CHT 360°‰.
- * Vlastní dílna nad hlavní Pamětí. Ukládá skutečný Unicode text v NFC;
- * Glyph je samostatná reprezentace, nikdy náhrada poškozeného UTF-8.
- */
-const CHTGlyphEngine = (() => {
-  const STORAGE_KEY = "cht360_glyph_engine_v2";
-  const LEGACY_WORKSHOP_KEY = "cht360_glyph_workshop_v1";
-  const LEGACY_CUSTOM_KEY = "cht360_glyph_drums_custom_v1";
-  const TRANSFER_KEY = "cht360_glyph_engine_transfer_v1";
-  const MAX_ROWS = 50;
-  const MAX_CUSTOM_TOKENS = 160;
-  const MAX_INPUT_GRAPHEMES = 120;
-  const MAX_CUSTOM_GRAPHEMES = 2;
-  const MOJIBAKE_SEQUENCE = /(?:[\u00c2-\u00f4][\u0080-\u00bf]+)(?:[\u00c2-\u00f4][\u0080-\u00bf]+)*/g;
+.glyph-engine[hidden] {
+  display: none;
+}
 
-  const COMMON_TOKENS = Object.freeze([
-    ".", ",", ":", ";", "!", "?", "…",
-    "°", "‰", "•", "·", "_", "-", "+", "=",
-    "/", "\\", "(", ")", "[", "]", "{", "}",
-    "<", ">", "←", "→", "↑", "↓", "×", "÷",
-    "○", "□", "△", "◇", "☆", "★", "ア"
-  ]);
+.glyph-engine {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(14px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(14px, env(safe-area-inset-left));
+  color: #fff0c5;
+  font-family: ui-rounded, "Avenir Next", Avenir, system-ui, sans-serif;
+}
 
-  const ALPHABETS = Object.freeze({
-    cs: Object.freeze({
-      label: "Čeština",
-      tokens: Object.freeze(unique([
-        ...graphemes("AÁBCČDĎEÉĚFGHIÍJKLMNŇOÓPQRŘSŠTŤUÚŮVWXYÝZŽ"),
-        ...graphemes("aábcčdďeéěfghiíjklmnňoópqrřsštťuúůvwxyýzž"),
-        ...graphemes("0123456789"),
-        ...COMMON_TOKENS
-      ]))
-    }),
-    symbols: Object.freeze({
-      label: "Čísla a znaky",
-      tokens: Object.freeze(unique([
-        ...graphemes("0123456789"),
-        ...COMMON_TOKENS
-      ]))
-    })
-  });
+.glyph-engine__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 4, 12, .82);
+  backdrop-filter: blur(10px);
+}
 
-  const dom = {
-    shell: document.getElementById("glyphEngine"),
-    close: document.getElementById("closeGlyphEngine"),
-    open: document.getElementById("openGlyphEngine"),
-    form: document.getElementById("glyphEngineCreateForm"),
-    input: document.getElementById("glyphEngineText"),
-    modes: document.getElementById("glyphEngineModes"),
-    alphabet: document.getElementById("glyphEngineAlphabet"),
-    custom: document.getElementById("glyphEngineCustom"),
-    addCustom: document.getElementById("glyphEngineAddCustom"),
-    shelf: document.getElementById("glyphEngineShelf"),
-    rows: document.getElementById("glyphEngineRows"),
-    status: document.getElementById("glyphEngineStatus"),
-    export: document.getElementById("glyphEngineExport"),
-    import: document.getElementById("glyphEngineImport"),
-    send: document.getElementById("glyphEngineSend"),
-    closeTargets: Array.from(document.querySelectorAll("[data-glyph-engine-close]"))
-  };
+.glyph-engine__sheet {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(1080px, 100%);
+  max-height: min(760px, calc(100dvh - 24px));
+  overflow: hidden;
+  border: 1px solid rgba(255, 217, 147, .46);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 84% 0%, rgba(216, 157, 62, .18), transparent 30%),
+    radial-gradient(circle at 8% 100%, rgba(94, 66, 25, .27), transparent 35%),
+    #08090f;
+  box-shadow:
+    0 26px 86px rgba(0, 0, 0, .62),
+    inset 0 1px rgba(255, 237, 194, .12);
+}
 
-  if (!dom.shell) {
-    return Object.freeze({
-      open: () => false,
-      close: () => false,
-      getState: () => null
-    });
+.glyph-engine__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid rgba(255, 225, 166, .18);
+}
+
+.glyph-engine__eyebrow,
+.glyph-engine__label {
+  margin: 0;
+  color: rgba(255, 229, 177, .62);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+
+.glyph-engine__title {
+  margin: 5px 0 0;
+  font-size: clamp(22px, 3.2vw, 34px);
+  letter-spacing: .025em;
+}
+
+.glyph-engine__close {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 226, 170, .28);
+  border-radius: 50%;
+  color: #fff2d1;
+  background: rgba(255, 255, 255, .045);
+  font-size: 27px;
+  line-height: 1;
+}
+
+.glyph-engine__body {
+  display: grid;
+  grid-template-columns: minmax(250px, .78fr) minmax(0, 1.5fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.glyph-engine__tools,
+.glyph-engine__workspace {
+  min-width: 0;
+  overflow: auto;
+  padding: 18px;
+}
+
+.glyph-engine__tools {
+  border-right: 1px solid rgba(255, 225, 166, .14);
+  background: rgba(255, 255, 255, .018);
+}
+
+.glyph-engine__workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.glyph-engine__card {
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid rgba(255, 225, 166, .16);
+  border-radius: 18px;
+  background: rgba(9, 8, 8, .56);
+}
+
+.glyph-engine__copy {
+  margin: 8px 0 0;
+  color: rgba(255, 239, 208, .68);
+  font-size: 13px;
+  line-height: 1.42;
+}
+
+.glyph-engine__form-line,
+.glyph-engine__custom-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.glyph-engine__input,
+.glyph-engine__select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 226, 170, .22);
+  border-radius: 12px;
+  padding: 11px 12px;
+  color: #fff2d2;
+  background: rgba(0, 0, 0, .38);
+  font: inherit;
+}
+
+.glyph-engine__select {
+  appearance: auto;
+}
+
+.glyph-engine__input:focus,
+.glyph-engine__select:focus {
+  outline: 2px solid rgba(255, 216, 132, .66);
+  outline-offset: 1px;
+}
+
+.glyph-engine__mode-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.glyph-engine__mode,
+.glyph-engine__action,
+.glyph-engine__token,
+.glyph-engine__row-remove {
+  border: 1px solid rgba(255, 223, 158, .25);
+  border-radius: 12px;
+  color: #ffefcc;
+  background: rgba(255, 255, 255, .045);
+  font: inherit;
+  cursor: pointer;
+}
+
+.glyph-engine__mode {
+  padding: 9px 7px;
+  font-size: 12px;
+}
+
+.glyph-engine__mode.is-active,
+.glyph-engine__action--primary {
+  color: #1b1307;
+  border-color: #ffe0a0;
+  background: linear-gradient(135deg, #fff0c7, #e6ae59);
+  font-weight: 800;
+}
+
+.glyph-engine__action {
+  padding: 10px 12px;
+}
+
+.glyph-engine__action--wide {
+  width: 100%;
+}
+
+.glyph-engine__custom-row .glyph-engine__input {
+  flex: 1;
+}
+
+.glyph-engine__shelf {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 180px;
+  margin-top: 11px;
+  overflow: auto;
+}
+
+.glyph-engine__token {
+  min-width: 34px;
+  min-height: 34px;
+  padding: 4px 7px;
+  font-weight: 700;
+}
+
+.glyph-engine__token:hover,
+.glyph-engine__mode:hover,
+.glyph-engine__action:hover,
+.glyph-engine__close:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.glyph-engine__topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.glyph-engine__status {
+  min-height: 20px;
+  margin: 0;
+  color: #ffe1a1;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.glyph-engine__rows {
+  display: grid;
+  gap: 11px;
+}
+
+.glyph-engine__empty {
+  margin: 18px 0;
+  color: rgba(255, 239, 208, .65);
+  text-align: center;
+}
+
+.glyph-engine__row {
+  padding: 12px;
+  border: 1px solid rgba(255, 225, 166, .2);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, .23);
+}
+
+.glyph-engine__row-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.glyph-engine__row-head strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glyph-engine__row-head span {
+  color: rgba(255, 232, 186, .58);
+  font-size: 11px;
+}
+
+.glyph-engine__row-remove {
+  padding: 6px 8px;
+  color: #ffd6d0;
+  border-color: rgba(255, 167, 157, .3);
+  font-size: 11px;
+}
+
+.glyph-engine__drums {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.glyph-engine__space {
+  width: 11px;
+  min-height: 62px;
+}
+
+.glyph-engine__drum {
+  display: grid;
+  grid-template-rows: 1fr 1.35fr 1fr;
+  align-items: center;
+  width: clamp(48px, 8vw, 70px);
+  min-width: 0;
+  min-height: 66px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 225, 166, .26);
+  border-radius: 14px;
+  color: #fff0cb;
+  background: linear-gradient(145deg, rgba(255, 255, 255, .07), rgba(0, 0, 0, .32));
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.glyph-engine__drum.is-selected {
+  border-color: #fff0c7;
+  box-shadow:
+    0 0 0 2px rgba(255, 220, 148, .35),
+    0 0 22px rgba(255, 203, 101, .55);
+}
+
+.glyph-engine__ghost {
+  overflow: hidden;
+  color: rgba(255, 235, 195, .38);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glyph-engine__current {
+  overflow: hidden;
+  color: #fff3d3;
+  font-size: clamp(14px, 2.3vw, 19px);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 0 13px rgba(255, 224, 163, .6);
+}
+
+.glyph-engine__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: auto;
+  padding-top: 5px;
+}
+
+@media (max-width: 720px) {
+  .glyph-engine__sheet {
+    border-radius: 21px;
   }
 
-  let state = loadState();
-  let selectedUnit = null;
-  let selectedMode = "single";
-  let pointerStart = null;
-
-  initialise();
-
-  function initialise() {
-    bindEvents();
-    renderAll();
-    publish("načtení");
+  .glyph-engine__head {
+    padding: 15px 16px 12px;
   }
 
-  function bindEvents() {
-    dom.open?.addEventListener("click", open);
-    dom.close?.addEventListener("click", close);
-    dom.closeTargets.forEach(element => element.addEventListener("click", close));
-
-    dom.form?.addEventListener("submit", event => {
-      event.preventDefault();
-      createRowFromInput();
-    });
-
-    dom.modes?.addEventListener("click", event => {
-      const button = event.target.closest("[data-glyph-mode]");
-      if (!button) return;
-      const mode = button.dataset.glyphMode;
-      if (mode !== "single" && mode !== "double") return;
-      selectedMode = mode;
-      renderModes();
-    });
-
-    dom.alphabet?.addEventListener("change", () => {
-      state.alphabet = ALPHABETS[dom.alphabet.value] ? dom.alphabet.value : "cs";
-      save("změna abecedy");
-      renderShelf();
-    });
-
-    dom.addCustom?.addEventListener("click", addCustomToken);
-    dom.custom?.addEventListener("keydown", event => {
-      if (event.key !== "Enter") return;
-      event.preventDefault();
-      addCustomToken();
-    });
-
-    dom.shelf?.addEventListener("click", event => {
-      const button = event.target.closest("[data-glyph-token]");
-      if (!button) return;
-      applyToken(button.dataset.glyphToken || "");
-    });
-
-    dom.rows?.addEventListener("click", event => {
-      const remove = event.target.closest("[data-glyph-remove-row]");
-      if (remove) {
-        removeRow(remove.dataset.glyphRemoveRow);
-        return;
-      }
-
-      const unit = event.target.closest("[data-glyph-unit]");
-      if (!unit || unit.disabled) return;
-
-      if (unit.dataset.skipGlyphClick === "true") {
-        delete unit.dataset.skipGlyphClick;
-        return;
-      }
-
-      selectUnit(unit.dataset.glyphRow, unit.dataset.glyphUnit);
-      rotateUnit(unit.dataset.glyphRow, unit.dataset.glyphUnit, 1);
-    });
-
-    dom.rows?.addEventListener("pointerdown", event => {
-      const unit = event.target.closest("[data-glyph-unit]");
-      if (!unit || unit.disabled || event.button > 0) return;
-      pointerStart = {
-        rowId: unit.dataset.glyphRow,
-        unitId: unit.dataset.glyphUnit,
-        button: unit,
-        y: event.clientY
-      };
-      unit.setPointerCapture?.(event.pointerId);
-    });
-
-    dom.rows?.addEventListener("pointerup", event => {
-      if (!pointerStart) return;
-      const gesture = pointerStart;
-      pointerStart = null;
-      const delta = event.clientY - gesture.y;
-      if (Math.abs(delta) < 14) return;
-      gesture.button.dataset.skipGlyphClick = "true";
-      selectUnit(gesture.rowId, gesture.unitId);
-      rotateUnit(gesture.rowId, gesture.unitId, delta < 0 ? 1 : -1);
-    });
-
-    dom.rows?.addEventListener("pointercancel", () => {
-      pointerStart = null;
-    });
-
-    dom.export?.addEventListener("click", exportState);
-    dom.import?.addEventListener("change", importState);
-    dom.send?.addEventListener("click", sendToMemory);
-
-    document.addEventListener("keydown", event => {
-      if (event.key === "Escape" && !dom.shell.hidden) {
-        close();
-      }
-    });
+  .glyph-engine__body {
+    grid-template-columns: 1fr;
+    overflow: auto;
   }
 
-  function open() {
-    dom.shell.hidden = false;
-    dom.shell.setAttribute("aria-hidden", "false");
-    document.body.classList.add("glyph-engine-open");
-    window.requestAnimationFrame(() => dom.input?.focus());
-    return true;
+  .glyph-engine__tools {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 225, 166, .14);
   }
 
-  function close() {
-    dom.shell.hidden = true;
-    dom.shell.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("glyph-engine-open");
-    dom.open?.focus();
-    return true;
+  .glyph-engine__tools,
+  .glyph-engine__workspace {
+    overflow: visible;
+    padding: 13px;
   }
 
-  function createRowFromInput() {
-    const text = normaliseText(dom.input?.value || "");
-
-    if (!text) {
-      setStatus("Nejdřív napiš text, který chceš rozložit na bubínky.");
-      dom.input?.focus();
-      return;
-    }
-
-    if (state.rows.length >= MAX_ROWS) {
-      setStatus("Dílna už má " + MAX_ROWS + " řádků. Nejdřív některý odeber.");
-      return;
-    }
-
-    const row = createRow(text, selectedMode);
-    state.rows.push(row);
-    selectedUnit = firstUnit(row);
-    dom.input.value = "";
-    save("nový Glyph řádek");
-    renderAll();
-    setStatus("Řádek je hotový. Klepnutí otočí bubínek, tažení nahoru nebo dolů mění směr.");
+  .glyph-engine__row-head {
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  function addCustomToken() {
-    const token = normaliseToken(dom.custom?.value || "");
-
-    if (!token) {
-      setStatus("Vlastní Glyph musí obsahovat jeden nebo dva znaky.");
-      dom.custom?.focus();
-      return;
-    }
-
-    if (state.customTokens.includes(token)) {
-      setStatus("Tento vlastní Glyph už v sadě je.");
-      dom.custom?.select();
-      return;
-    }
-
-    if (state.customTokens.length >= MAX_CUSTOM_TOKENS) {
-      setStatus("Sada už má maximální počet vlastních Glyphů.");
-      return;
-    }
-
-    state.customTokens.push(token);
-    dom.custom.value = "";
-    save("vlastní Glyph");
-    renderShelf();
-    setStatus("Vlastní Glyph je přidaný. Není automaticky pojmenovaný ani přepsaný.");
+  .glyph-engine__row-head span {
+    grid-column: 1 / 2;
   }
-
-  function applyToken(token) {
-    if (!selectedUnit) {
-      setStatus("Nejdřív klepni na konkrétní bubínek, kam se má Glyph vložit.");
-      return;
-    }
-
-    const row = findRow(selectedUnit.rowId);
-    const unit = findUnit(row, selectedUnit.unitId);
-    const cleanToken = normaliseToken(token);
-
-    if (!row || !unit || unit.space || !cleanToken) {
-      setStatus("Tento bubínek už není dostupný.");
-      return;
-    }
-
-    unit.value = cleanToken;
-    save("vložení Glyphu");
-    renderRows();
-    setStatus("Glyph je vložený jen do vybraného bubínku.");
-  }
-
-  function rotateUnit(rowId, unitId, direction) {
-    const row = findRow(rowId);
-    const unit = findUnit(row, unitId);
-    if (!row || !unit || unit.space) return;
-
-    const pool = tokenPool();
-    const current = pool.indexOf(unit.value);
-    const nextIndex = modulo((current < 0 ? 0 : current) + direction, pool.length);
-    unit.value = pool[nextIndex];
-    save("otočení bubínku");
-    renderRows();
-  }
-
-  function selectUnit(rowId, unitId) {
-    const row = findRow(rowId);
-    const unit = findUnit(row, unitId);
-    if (!row || !unit || unit.space) return;
-    selectedUnit = { rowId, unitId };
-    renderRows();
-  }
-
-  function removeRow(rowId) {
-    const row = findRow(rowId);
-    if (!row) return;
-
-    state.rows = state.rows.filter(item => item.id !== row.id);
-    if (selectedUnit?.rowId === row.id) {
-      selectedUnit = null;
-    }
-
-    save("odebrání řádku");
-    renderAll();
-    setStatus("Řádek je odebraný z dílny. Ostatní Glyphy zůstaly beze změny.");
-  }
-
-  function sendToMemory() {
-    const text = state.rows.map(textFromRow).filter(Boolean).join("\n").trim();
-
-    if (!text) {
-      setStatus("Dílna je prázdná. Nejdřív vytvoř alespoň jeden Glyph řádek.");
-      return;
-    }
-
-    const slotContent = document.getElementById("slotContent");
-    const saveSlot = document.getElementById("saveSlot");
-    const transfer = {
-      schema: "cht360-glyph-engine-transfer-v1",
-      text,
-      createdAt: new Date().toISOString()
-    };
-
-    try {
-      localStorage.setItem(TRANSFER_KEY, JSON.stringify(transfer));
-    } catch (_) {
-      // Lokální záloha není podmínkou vložení do právě otevřeného slotu.
-    }
-
-    window.dispatchEvent(new CustomEvent("cht.glyph.engine.transfer", {
-      detail: transfer
-    }));
-
-    if (!slotContent || !saveSlot) {
-      setStatus("Glyph je bezpečně uložený v dílně. Pro vložení do Paměti nejdřív otevři konkrétní slot.");
-      return;
-    }
-
-    const original = normaliseText(slotContent.value || "").trim();
-    slotContent.value = original ? original + "\n" + text : text;
-    slotContent.dispatchEvent(new Event("input", { bubbles: true }));
-    saveSlot.click();
-
-    setStatus("Glyph je vložený do právě otevřeného slotu a uložený.");
-  }
-
-  function renderAll() {
-    renderModes();
-    renderAlphabet();
-    renderShelf();
-    renderRows();
-  }
-
-  function renderModes() {
-    if (!dom.modes) return;
-    dom.modes.querySelectorAll("[data-glyph-mode]").forEach(button => {
-      button.classList.toggle("is-active", button.dataset.glyphMode === selectedMode);
-    });
-  }
-
-  function renderAlphabet() {
-    if (!dom.alphabet) return;
-    dom.alphabet.value = ALPHABETS[state.alphabet] ? state.alphabet : "cs";
-  }
-
-  function renderShelf() {
-    if (!dom.shelf) return;
-    dom.shelf.textContent = "";
-
-    tokenPool().forEach(token => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "glyph-engine__token";
-      button.dataset.glyphToken = token;
-      button.textContent = token;
-      button.setAttribute("aria-label", "Vložit " + token + " do vybraného bubínku");
-      dom.shelf.append(button);
-    });
-  }
-
-  function renderRows() {
-    if (!dom.rows) return;
-    dom.rows.textContent = "";
-
-    if (!state.rows.length) {
-      const empty = document.createElement("p");
-      empty.className = "glyph-engine__empty";
-      empty.textContent = "Ještě tu není žádný řádek. První Glyph určíš ty.";
-      dom.rows.append(empty);
-      return;
-    }
-
-    state.rows.forEach(row => {
-      const card = document.createElement("article");
-      card.className = "glyph-engine__row";
-      card.dataset.mode = row.mode;
-
-      const header = document.createElement("header");
-      header.className = "glyph-engine__row-head";
-
-      const name = document.createElement("strong");
-      name.textContent = row.name || "Glyph řádek";
-
-      const meta = document.createElement("span");
-      meta.textContent = row.mode === "double" ? "2 znaky / bubínek" : "1 znak / bubínek";
-
-      const remove = document.createElement("button");
-      remove.type = "button";
-      remove.className = "glyph-engine__row-remove";
-      remove.dataset.glyphRemoveRow = row.id;
-      remove.textContent = "Odebrat";
-      remove.setAttribute("aria-label", "Odebrat řádek " + (row.name || ""));
-
-      header.append(name, meta, remove);
-
-      const rail = document.createElement("div");
-      rail.className = "glyph-engine__drums";
-      rail.setAttribute("aria-label", row.name || "Glyph řádek");
-
-      row.units.forEach(unit => {
-        if (unit.space) {
-          const space = document.createElement("span");
-          space.className = "glyph-engine__space";
-          space.setAttribute("aria-hidden", "true");
-          rail.append(space);
-          return;
-        }
-
-        const drum = document.createElement("button");
-        drum.type = "button";
-        drum.className = "glyph-engine__drum";
-        drum.dataset.glyphRow = row.id;
-        drum.dataset.glyphUnit = unit.id;
-        drum.classList.toggle(
-          "is-selected",
-          selectedUnit?.rowId === row.id && selectedUnit?.unitId === unit.id
-        );
-
-        const pool = tokenPool();
-        const index = pool.indexOf(unit.value);
-        const current = index < 0 ? 0 : index;
-
-        const previous = document.createElement("span");
-        previous.className = "glyph-engine__ghost";
-        previous.textContent = pool[modulo(current - 1, pool.length)];
-
-        const center = document.createElement("span");
-        center.className = "glyph-engine__current";
-        center.textContent = unit.value;
-
-        const next = document.createElement("span");
-        next.className = "glyph-engine__ghost";
-        next.textContent = pool[modulo(current + 1, pool.length)];
-
-        drum.append(previous, center, next);
-        drum.setAttribute("aria-label", "Bubínek " + unit.value + ". Klepni pro další znak.");
-        rail.append(drum);
-      });
-
-      card.append(header, rail);
-      dom.rows.append(card);
-    });
-  }
-
-  function exportState() {
-    const payload = {
-      format: "cht360-glyph-engine",
-      version: 2,
-      exportedAt: new Date().toISOString(),
-      data: serialisableState()
-    };
-
-    const blob = new Blob(
-      [JSON.stringify(payload, null, 2)],
-      { type: "application/json;charset=utf-8" }
-    );
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = "glyph-cht-360-" + dateStamp() + ".json";
-    document.body.append(anchor);
-    anchor.click();
-    anchor.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 500);
-    setStatus("Glyphy jsou exportované v čistém UTF-8.");
-  }
-
-  async function importState(event) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      const text = typeof file.text === "function"
-        ? await file.text()
-        : await readFile(file);
-      const raw = JSON.parse(text);
-      state = normaliseState(raw?.data || raw);
-      selectedUnit = null;
-      save("import Glyphů");
-      renderAll();
-      setStatus("Glyphy jsou načtené. Každý řádek zůstal samostatný.");
-    } catch (_) {
-      setStatus("Soubor Glyphů se nepodařilo načíst. Nic původního jsem nepřepsal.");
-    } finally {
-      event.target.value = "";
-    }
-  }
-
-  function readFile(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ""));
-      reader.onerror = () => reject(reader.error);
-      reader.readAsText(file, "utf-8");
-    });
-  }
-
-  function loadState() {
-    const existing = readJson(STORAGE_KEY);
-    if (existing) return normaliseState(existing);
-
-    const custom = [];
-    const legacyCustom = readJson(LEGACY_CUSTOM_KEY);
-    if (Array.isArray(legacyCustom)) custom.push(...legacyCustom);
-
-    const legacyWorkshop = readJson(LEGACY_WORKSHOP_KEY);
-    if (Array.isArray(legacyWorkshop?.customTokens)) {
-      custom.push(...legacyWorkshop.customTokens);
-    }
-
-    const rows = Array.isArray(legacyWorkshop?.blocks)
-      ? legacyWorkshop.blocks
-          .map(block => legacyText(block))
-          .filter(Boolean)
-          .slice(0, MAX_ROWS)
-          .map(text => createRow(text, "single"))
-      : [];
-
-    return normaliseState({
-      version: 2,
-      alphabet: "cs",
-      customTokens: custom,
-      rows,
-      updatedAt: new Date().toISOString()
-    });
-  }
-
-  function normaliseState(candidate) {
-    const raw = candidate && typeof candidate === "object" ? candidate : {};
-    const customTokens = unique(
-      (Array.isArray(raw.customTokens) ? raw.customTokens : [])
-        .map(normaliseToken)
-        .filter(Boolean)
-    ).slice(0, MAX_CUSTOM_TOKENS);
-
-    const rows = (Array.isArray(raw.rows) ? raw.rows : [])
-      .map(normaliseRow)
-      .filter(Boolean)
-      .slice(0, MAX_ROWS);
-
-    return {
-      version: 2,
-      alphabet: ALPHABETS[raw.alphabet] ? raw.alphabet : "cs",
-      customTokens,
-      rows,
-      updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : new Date().toISOString()
-    };
-  }
-
-  function normaliseRow(raw) {
-    if (!raw || typeof raw !== "object") return null;
-
-    const mode = raw.mode === "double" ? "double" : "single";
-    const units = Array.isArray(raw.units)
-      ? raw.units.map(normaliseUnit).filter(Boolean)
-      : unitsFromText(raw.text || raw.name || "", mode);
-
-    if (!units.some(unit => !unit.space && unit.value)) return null;
-
-    const text = units.map(unit => unit.space ? " " : unit.value).join("");
-    return {
-      id: String(raw.id || makeId("row")),
-      name: normaliseText(raw.name || text).slice(0, 80) || "Glyph řádek",
-      mode,
-      units,
-      createdAt: typeof raw.createdAt === "string" ? raw.createdAt : new Date().toISOString(),
-      updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : new Date().toISOString()
-    };
-  }
-
-  function normaliseUnit(raw) {
-    if (!raw || typeof raw !== "object") return null;
-    if (raw.space) return { id: String(raw.id || makeId("space")), space: true };
-
-    const value = normaliseToken(raw.value || raw.text || "");
-    if (!value) return null;
-    return { id: String(raw.id || makeId("unit")), value };
-  }
-
-  function createRow(text, mode) {
-    const clean = graphemes(normaliseText(text)).slice(0, MAX_INPUT_GRAPHEMES).join("");
-    const units = unitsFromText(clean, mode);
-    return {
-      id: makeId("row"),
-      name: clean.slice(0, 80) || "Glyph řádek",
-      mode: mode === "double" ? "double" : "single",
-      units,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-  }
-
-  function unitsFromText(text, mode) {
-    const cleanMode = mode === "double" ? "double" : "single";
-    const units = [];
-    let buffer = [];
-
-    const flush = () => {
-      while (buffer.length) {
-        const size = cleanMode === "double" ? 2 : 1;
-        const value = buffer.splice(0, size).join("");
-        units.push({ id: makeId("unit"), value });
-      }
-    };
-
-    graphemes(text).forEach(part => {
-      if (/\\s/u.test(part)) {
-        flush();
-        if (!units.length || !units[units.length - 1].space) {
-          units.push({ id: makeId("space"), space: true });
-        }
-        return;
-      }
-      buffer.push(part);
-    });
-
-    flush();
-    while (units[units.length - 1]?.space) units.pop();
-    return units;
-  }
-
-  function legacyText(block) {
-    if (!block || typeof block !== "object") return "";
-    if (Array.isArray(block.units)) {
-      return block.units.map(unit => {
-        if (unit?.gap) return " ";
-        return Array.isArray(unit?.cells) ? unit.cells.join("") : "";
-      }).join("");
-    }
-    return normaliseText(block.text || block.name || "");
-  }
-
-  function serialisableState() {
-    return {
-      version: 2,
-      alphabet: state.alphabet,
-      customTokens: [...state.customTokens],
-      rows: state.rows.map(row => ({
-        id: row.id,
-        name: row.name,
-        mode: row.mode,
-        units: row.units.map(unit => unit.space
-          ? { id: unit.id, space: true }
-          : { id: unit.id, value: unit.value }),
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt
-      })),
-      updatedAt: state.updatedAt
-    };
-  }
-
-  function save(reason) {
-    state.updatedAt = new Date().toISOString();
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(serialisableState()));
-      publish(reason);
-    } catch (_) {
-      setStatus("Glyphy zůstaly otevřené, ale tento prohlížeč je teď nemůže uložit.");
-    }
-  }
-
-  function publish(reason) {
-    window.dispatchEvent(new CustomEvent("cht.glyph.engine.changed", {
-      detail: {
-        reason,
-        updatedAt: state.updatedAt,
-        rows: state.rows.length,
-        customTokens: state.customTokens.length
-      }
-    }));
-  }
-
-  function tokenPool() {
-    const base = ALPHABETS[state.alphabet]?.tokens || ALPHABETS.cs.tokens;
-    return unique([...base, ...state.customTokens]);
-  }
-
-  function findRow(id) {
-    return state.rows.find(row => row.id === id) || null;
-  }
-
-  function findUnit(row, id) {
-    return row?.units.find(unit => unit.id === id) || null;
-  }
-
-  function firstUnit(row) {
-    const unit = row?.units.find(item => !item.space);
-    return unit ? { rowId: row.id, unitId: unit.id } : null;
-  }
-
-  function textFromRow(row) {
-    return row?.units.map(unit => unit.space ? " " : unit.value).join("").trim() || "";
-  }
-
-  function normaliseToken(value) {
-    const parts = graphemes(normaliseText(value).trim());
-    if (!parts.length || parts.length > MAX_CUSTOM_GRAPHEMES) return "";
-    return parts.join("");
-  }
-
-  function normaliseText(value) {
-    return repairMojibake(String(value ?? ""))
-      .replace(/\\u0000/g, "")
-      .replace(/\\r\\n?/g, "\\n")
-      .normalize("NFC");
-  }
-
-  function repairMojibake(value) {
-    let result = String(value || "");
-    for (let pass = 0; pass < 3; pass += 1) {
-      const repaired = result.replace(MOJIBAKE_SEQUENCE, decodeLatin1AsUtf8);
-      if (repaired === result) break;
-      result = repaired;
-    }
-    return result;
-  }
-
-  function decodeLatin1AsUtf8(fragment) {
-    const bytes = Array.from(fragment, character => character.charCodeAt(0) & 0xff);
-    let output = "";
-
-    for (let index = 0; index < bytes.length;) {
-      const first = bytes[index];
-      let codePoint = first;
-      let width = 1;
-
-      if (
-        first >= 0xc2 && first <= 0xdf &&
-        index + 1 < bytes.length &&
-        (bytes[index + 1] & 0xc0) === 0x80
-      ) {
-        codePoint = ((first & 0x1f) << 6) | (bytes[index + 1] & 0x3f);
-        width = 2;
-      } else if (
-        first >= 0xe0 && first <= 0xef &&
-        index + 2 < bytes.length &&
-        (bytes[index + 1] & 0xc0) === 0x80 &&
-        (bytes[index + 2] & 0xc0) === 0x80
-      ) {
-        codePoint =
-          ((first & 0x0f) << 12) |
-          ((bytes[index + 1] & 0x3f) << 6) |
-          (bytes[index + 2] & 0x3f);
-        width = 3;
-      } else if (
-        first >= 0xf0 && first <= 0xf4 &&
-        index + 3 < bytes.length &&
-        (bytes[index + 1] & 0xc0) === 0x80 &&
-        (bytes[index + 2] & 0xc0) === 0x80 &&
-        (bytes[index + 3] & 0xc0) === 0x80
-      ) {
-        codePoint =
-          ((first & 0x07) << 18) |
-          ((bytes[index + 1] & 0x3f) << 12) |
-          ((bytes[index + 2] & 0x3f) << 6) |
-          (bytes[index + 3] & 0x3f);
-        width = 4;
-      }
-
-      output += String.fromCodePoint(codePoint);
-      index += width;
-    }
-
-    return output;
-  }
-
-  function graphemes(value) {
-    const source = String(value || "");
-    if (typeof Intl !== "undefined" && typeof Intl.Segmenter === "function") {
-      return Array.from(
-        new Intl.Segmenter("cs", { granularity: "grapheme" }).segment(source),
-        item => item.segment
-      );
-    }
-    return Array.from(source);
-  }
-
-  function unique(values) {
-    return Array.from(new Set(values.filter(Boolean)));
-  }
-
-  function readJson(key) {
-    try {
-      const value = localStorage.getItem(key);
-      return value ? JSON.parse(value) : null;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function makeId(prefix) {
-    if (window.crypto?.randomUUID) return prefix + "-" + window.crypto.randomUUID();
-    return prefix + "-" + Date.now() + "-" + Math.random().toString(16).slice(2);
-  }
-
-  function modulo(value, divisor) {
-    return ((value % divisor) + divisor) % divisor;
-  }
-
-  function dateStamp() {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  function setStatus(message) {
-    if (dom.status) dom.status.textContent = message;
-  }
-
-  return Object.freeze({
-    open,
-    close,
-    getState: () => serialisableState(),
-    getText: () => state.rows.map(textFromRow).filter(Boolean).join("\n"),
-    repairText: normaliseText
-  });
-})();
-
-window.CHTGlyphEngine = CHTGlyphEngine;
-
+}
