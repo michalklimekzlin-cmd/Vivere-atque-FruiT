@@ -31,6 +31,8 @@ const CORE_FILES = [
   "./js/cht-360-network.js",
   "./manifest.json",
   "./icon.svg"
+  "./css/prstenec-pokojicku.css",
+"./js/prstenec-pokojicku.js",
 ];
 
 self.addEventListener("install", event => {
