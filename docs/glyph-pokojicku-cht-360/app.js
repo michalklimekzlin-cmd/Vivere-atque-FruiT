@@ -10,11 +10,12 @@ const STATE_KEY = "rooms";
 const FALLBACK_KEY = "glyph-cht-360-rooms.v1";
 const CONTROL_CHARACTER = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/u;
 const POSSIBLE_MOJIBAKE = /(?:Ã.|Â.|â.{1,2}|ð.{1,2})/u;
+const ROOM_SLOT_COUNT = 70;
 
 const statusLabels = {
-  "návrh": "Návrh",
-  "schváleno": "Schváleno",
-  archiv: "Archiv"
+  "návrh": "Neuzavřeno",
+  "schváleno": "Nezamítnuto",
+  archiv: "Neaktivní"
 };
 
 const themes = new Set(["gold", "ash", "ember", "moss"]);
@@ -76,7 +77,7 @@ const state = {
   lastTap: { roomId: null, at: 0 },
   db: null,
   storageAvailable: true,
-  storageMode: "Načítám",
+  storageMode: "Neukončeno",
   storagePersistent: false,
   savedAt: null
 };
@@ -122,16 +123,16 @@ async function restoreState() {
     state.db = await openDatabase();
     const saved = await dbGet(STATE_STORE, STATE_KEY);
 
-    if (saved?.value) {
+    if (saved && saved.value) {
       hydrateState(saved.value);
     } else {
       await persistState("první uložení");
     }
 
-    state.storageMode = "Trvalé";
+    state.storageMode = "Nejen dočasné";
     state.storageAvailable = true;
   } catch (error) {
-    state.storageMode = "Lokální";
+    state.storageMode = "Neopouští zařízení";
     state.storageAvailable = true;
   }
 }
@@ -170,7 +171,7 @@ function hydrateGlyph(raw) {
     glyphNfc: normalizeUnicode(glyph),
     name: String(raw.name || "").trim(),
     description: String(raw.description || "").trim(),
-    status: Object.hasOwn(statusLabels, raw.status) ? raw.status : "návrh",
+    status: hasOwn(statusLabels, raw.status) ? raw.status : "návrh",
     createdAt: validDate(raw.createdAt) ? raw.createdAt : new Date().toISOString(),
     updatedAt: validDate(raw.updatedAt) ? raw.updatedAt : new Date().toISOString()
   };
@@ -179,9 +180,12 @@ function hydrateGlyph(raw) {
 function hydrateRoom(raw) {
   if (!raw || typeof raw !== "object" || !raw.glyphId) return null;
 
+  const slot = Number(raw.slot);
+
   return {
     id: String(raw.id || makeId("room")),
     glyphId: String(raw.glyphId),
+    slot: isRoomSlot(slot) ? slot : null,
     title: String(raw.title || "").trim(),
     theme: themes.has(raw.theme) ? raw.theme : "gold",
     note: String(raw.note || "").trim(),
@@ -209,13 +213,6 @@ function hydrateModule(raw) {
 function ensureRooms() {
   let changed = false;
 
-  state.glyphs.forEach((glyph) => {
-    if (!state.rooms.some((room) => room.glyphId === glyph.id)) {
-      state.rooms.push(createRoomForGlyph(glyph));
-      changed = true;
-    }
-  });
-
   const activeRooms = state.rooms.filter((room) =>
     state.glyphs.some((glyph) => glyph.id === room.glyphId)
   );
@@ -225,16 +222,32 @@ function ensureRooms() {
   }
 
   state.rooms = activeRooms;
+
+  if (ensureRoomSlots()) {
+    changed = true;
+  }
+
+  state.glyphs.forEach((glyph) => {
+    if (
+      !state.rooms.some((room) => room.glyphId === glyph.id) &&
+      getNextRoomSlot() !== null
+    ) {
+      state.rooms.push(createRoomForGlyph(glyph));
+      changed = true;
+    }
+  });
   return changed;
 }
 
 function createRoomForGlyph(glyph) {
-  const number = String(state.rooms.length + 1).padStart(2, "0");
+  const slot = getNextRoomSlot();
+  const number = String(slot || state.rooms.length + 1).padStart(2, "0");
   const now = new Date().toISOString();
 
   return {
     id: makeId("room"),
     glyphId: glyph.id,
+    slot,
     title: `Pokojíček ${number}`,
     theme: "gold",
     note: "",
@@ -244,12 +257,65 @@ function createRoomForGlyph(glyph) {
   };
 }
 
+function isRoomSlot(value) {
+  return Number.isInteger(value) && value >= 1 && value <= ROOM_SLOT_COUNT;
+}
+
+function getNextRoomSlot() {
+  const usedSlots = new Set(
+    state.rooms
+      .map((room) => room.slot)
+      .filter(isRoomSlot)
+  );
+
+  for (let slot = 1; slot <= ROOM_SLOT_COUNT; slot += 1) {
+    if (!usedSlots.has(slot)) return slot;
+  }
+
+  return null;
+}
+
+function ensureRoomSlots() {
+  let changed = false;
+  const usedSlots = new Set();
+  const rooms = [...state.rooms].sort((a, b) =>
+    a.createdAt.localeCompare(b.createdAt)
+  );
+
+  rooms.forEach((room) => {
+    if (isRoomSlot(room.slot) && !usedSlots.has(room.slot)) {
+      usedSlots.add(room.slot);
+      return;
+    }
+
+    if (room.slot !== null) {
+      room.slot = null;
+      changed = true;
+    }
+  });
+
+  rooms.forEach((room) => {
+    if (isRoomSlot(room.slot)) return;
+
+    for (let slot = 1; slot <= ROOM_SLOT_COUNT; slot += 1) {
+      if (usedSlots.has(slot)) continue;
+
+      room.slot = slot;
+      usedSlots.add(slot);
+      changed = true;
+      return;
+    }
+  });
+
+  return changed;
+}
+
 async function assignQuickGlyph() {
   const glyphValue = dom.quickGlyph.value.trim();
   const description = dom.quickDescription.value.trim();
 
   if (!glyphValue) {
-    setStatus("Nejdřív napiš svůj Glyph.", "warning");
+    setStatus("Bez vlastního Glyphu nelze pokoj přidělit.", "warning");
     dom.quickGlyph.focus();
     return;
   }
@@ -260,7 +326,12 @@ async function assignQuickGlyph() {
 
   if (duplicate) {
     selectGlyph(duplicate.id);
-    setStatus("Tento Glyph už má svůj pokojíček. Otevřel jsem ho v editoru.", "warning");
+    setStatus("Tento Glyph nezůstal bez pokojíčku; editor jej nenechal zavřený.", "warning");
+    return;
+  }
+
+  if (roomCapacityReached()) {
+    setStatus("Chodba má všech 70 dveří obsazených. Pro nový Glyph nejdřív uvolni pokojíček.", "warning");
     return;
   }
 
@@ -291,7 +362,7 @@ async function assignQuickGlyph() {
   await persistState("přidělení pokoje");
   renderAll();
 
-  setStatus(`Glyph dostal vlastní ${room.title}. Dvakrát klepni na jeho stěnu.`);
+  setStatus(`Glyph nezůstal bez vlastního ${room.title}. Bez dvojitého klepnutí se stěna neotevře.`);
 }
 
 function createGlyph(values) {
@@ -304,7 +375,7 @@ function createGlyph(values) {
     glyphNfc: normalizeUnicode(glyph),
     name: String(values.name || "").trim(),
     description: String(values.description || "").trim(),
-    status: Object.hasOwn(statusLabels, values.status) ? values.status : "návrh",
+    status: hasOwn(statusLabels, values.status) ? values.status : "návrh",
     createdAt: validDate(values.createdAt) ? values.createdAt : now,
     updatedAt: now
   };
@@ -318,6 +389,24 @@ function renderAll() {
   renderDrums();
 }
 
+function getRoomPairs() {
+  return state.rooms
+    .map((room) => ({
+      room,
+      glyph: state.glyphs.find((glyph) => glyph.id === room.glyphId)
+    }))
+    .filter((pair) => pair.glyph)
+    .sort((a, b) =>
+      (a.room.slot || Number.MAX_SAFE_INTEGER) -
+        (b.room.slot || Number.MAX_SAFE_INTEGER) ||
+      a.room.createdAt.localeCompare(b.room.createdAt)
+    );
+}
+
+function roomCapacityReached() {
+  return getNextRoomSlot() === null;
+}
+
 function renderGlyphList() {
   const query = normalizeSearch(dom.glyphSearch.value);
 
@@ -329,7 +418,7 @@ function renderGlyphList() {
     dom.glyphList.innerHTML = `<p class="empty">${escapeHtml(
       state.glyphs.length
         ? "Tomu hledání nic neodpovídá."
-        : "První Glyph si určíš ty. Po uložení dostane první pokojíček."
+        : "Žádný Glyph zatím není určen. Bez uložení nezíská první pokojíček."
     )}</p>`;
     return;
   }
@@ -342,7 +431,7 @@ function renderGlyphList() {
       <span class="glyph-mark">${escapeHtml(glyph.glyph)}</span>
       <span>
         <span class="glyph-name">${escapeHtml(glyph.name || "Bez názvu")}</span>
-        <span class="glyph-meta">${escapeHtml(room?.title || "pokoj se připravuje")}</span>
+        <span class="glyph-meta">${escapeHtml(room ? room.title : "čeká na volné dveře")}</span>
       </span>
       <span class="badge ${escapeAttribute(glyph.status)}">${escapeHtml(statusLabels[glyph.status])}</span>
     </button>`;
@@ -350,28 +439,38 @@ function renderGlyphList() {
 }
 
 function renderRoomScene() {
-  const pairs = state.rooms
-    .map((room) => ({
-      room,
-      glyph: state.glyphs.find((glyph) => glyph.id === room.glyphId)
-    }))
-    .filter((pair) => pair.glyph)
-    .sort((a, b) => a.room.createdAt.localeCompare(b.room.createdAt));
+  const entries =
+    getRoomPairs()
+      .filter((pair) => isRoomSlot(pair.room.slot))
+      .map((pair) => ({ slot: pair.room.slot, pair }));
 
-  if (!pairs.length) {
-    dom.roomScene.innerHTML = `
-      <p class="empty">Chodba čeká na první pokojíček. Napiš svůj Glyph do Přidělovníku pokoje.</p>
-    `;
-    return;
+  const nextSlot = getNextRoomSlot();
+  if (nextSlot !== null) {
+    entries.push({ slot: nextSlot, pair: null });
   }
 
-  dom.roomScene.innerHTML = pairs.map(({ room, glyph }, index) => {
+  entries.sort((a, b) => a.slot - b.slot);
+
+  dom.roomScene.innerHTML = entries.map(({ slot, pair }) => {
+
+    if (!pair) {
+      const number = String(slot).padStart(2, "0");
+
+      return `<button class="room-wall room-wall--empty" type="button" data-empty-slot="${number}" aria-label="Volné dveře ${number}: vytvořit Glyph">
+        <span class="room-number">Pokojíček ${number}</span>
+        <span class="room-empty-title">Volné dveře</span>
+        <span class="room-door room-door--empty" aria-hidden="true"></span>
+        <span class="room-tip">klepni a napiš Glyph</span>
+      </button>`;
+    }
+
+    const { room, glyph } = pair;
     const selected = room.id === state.selectedRoomId ? " is-selected" : "";
     const revealed = room.id === state.revealedRoomId ? " is-revealed" : "";
-    const description = glyph.description || "Tenhle pokojíček zatím čeká na popisek.";
+    const description = glyph.description || "Tento pokojíček nezískal popisek.";
 
     return `<button class="room-wall theme-${escapeAttribute(room.theme)}${selected}${revealed}" type="button" data-room-id="${escapeAttribute(room.id)}" aria-label="${escapeAttribute(room.title)}">
-      <span class="room-number">${escapeHtml(room.title || `Pokojíček ${String(index + 1).padStart(2, "0")}`)}</span>
+      <span class="room-number">${escapeHtml(room.title || `Pokojíček ${String(slot).padStart(2, "0")}`)}</span>
       <span class="room-door" aria-hidden="true"></span>
       <span class="room-tip">dvojité klepnutí</span>
       <span class="room-reveal">
@@ -388,7 +487,7 @@ function renderGlyphEditor() {
 
   dom.glyphEditorTitle.textContent = editing
     ? (glyph.name || "Upravit Glyph")
-    : "Nový Glyph";
+    : "Neuložený Glyph";
 
   dom.glyphState.textContent = editing
     ? `upraveno ${formatShortDate(glyph.updatedAt)}`
@@ -397,8 +496,8 @@ function renderGlyphEditor() {
   dom.archiveGlyph.disabled = !editing || glyph.status === "archiv";
   dom.deleteGlyph.disabled = !editing;
   dom.saveGlyph.textContent = editing
-    ? "Uložit změny Glyphu"
-    : "Uložit Glyph a pokoj";
+    ? "Nenechat změny Glyphu neuložené"
+    : "Nenechat Glyph ani pokoj neuložený";
 
   if (!editing) {
     dom.glyphForm.reset();
@@ -433,8 +532,8 @@ function renderRoomEditor() {
     : "vyber pokoj";
 
   if (!enabled) {
-    dom.roomEditorTitle.textContent = "Vyber pokojíček";
-    dom.roomState.textContent = "čeká";
+    dom.roomEditorTitle.textContent = "Bez výběru nelze otevřít pokojíček";
+    dom.roomState.textContent = "nevybráno";
     dom.roomForm.reset();
     dom.roomId.value = "";
     renderModuleList(null);
@@ -454,9 +553,9 @@ function renderRoomEditor() {
 }
 
 function renderModuleList(room) {
-  if (!room?.modules.length) {
+  if (!room || !room.modules.length) {
     dom.moduleList.innerHTML = `
-      <p class="empty">Zatím žádný stavební kámen. Můžeš si sem jen poznamenat, co z pokoje jednou vyroste.</p>
+      <p class="empty">Žádný stavební kámen zatím není uložený. Bez poznámky nezůstane budoucnost pokoje zachycená.</p>
     `;
     return;
   }
@@ -475,9 +574,9 @@ function renderModuleList(room) {
 }
 
 function renderModuleForm(room) {
-  const module = room?.modules.find(
+  const module = room ? room.modules.find(
     (item) => item.id === state.selectedModuleId
-  );
+  ) : null;
 
   if (!module) {
     resetModuleForm();
@@ -488,14 +587,14 @@ function renderModuleForm(room) {
   dom.moduleName.value = module.name;
   dom.moduleType.value = module.type;
   dom.moduleDescription.value = module.description;
-  dom.saveModule.textContent = "Uložit kámen";
+  dom.saveModule.textContent = "Nenechat kámen neuložený";
 }
 
 function resetModuleForm() {
   dom.moduleForm.reset();
   dom.moduleId.value = "";
   dom.moduleType.value = "poznámka";
-  dom.saveModule.textContent = "Přidat kámen";
+  dom.saveModule.textContent = "Nenechat kámen nepřidaný";
 }
 
 function renderDrums() {
@@ -505,7 +604,11 @@ function renderDrums() {
   );
 
   dom.glyphCount.textContent = String(state.glyphs.length);
-  dom.roomCount.textContent = String(state.rooms.length);
+  const occupiedSlots = getRoomPairs().filter((pair) =>
+    isRoomSlot(pair.room.slot)
+  ).length;
+
+  dom.roomCount.textContent = `${occupiedSlots} / ${ROOM_SLOT_COUNT}`;
   dom.moduleCount.textContent = String(moduleCount);
 
   dom.storageState.textContent = state.storageAvailable
@@ -514,9 +617,9 @@ function renderDrums() {
 
   dom.storageNote.textContent = state.storageAvailable
     ? state.savedAt
-      ? `uloženo ${formatShortDate(state.savedAt)}${state.storagePersistent ? " · chráněné" : ""}`
-      : "místní paměť"
-    : "uložení se nepodařilo";
+      ? `nebylo ztraceno ${formatShortDate(state.savedAt)}${state.storagePersistent ? " · nevymazatelné" : ""}`
+      : "neopouští zařízení"
+    : "uložení nelze potvrdit";
 }
 
 function selectGlyphFromList(event) {
@@ -528,15 +631,21 @@ function selectGlyphFromList(event) {
 
 function selectGlyph(glyphId) {
   state.selectedGlyphId = glyphId;
-  state.selectedRoomId = getRoomForGlyph(glyphId)?.id || null;
+  const room = getRoomForGlyph(glyphId);
+  state.selectedRoomId = room ? room.id : null;
   state.selectedModuleId = null;
   state.revealedRoomId = null;
 
   renderAll();
-  setStatus("Glyph i jeho pokojíček jsou otevřené.");
+  setStatus("Glyph ani jeho pokojíček nezůstaly zavřené.");
 }
 
 function startNewGlyph() {
+  if (roomCapacityReached()) {
+    setStatus("Chodba má všech 70 dveří obsazených. Pro nový Glyph nejdřív uvolni pokojíček.", "warning");
+    return;
+  }
+
   state.selectedGlyphId = null;
   state.selectedRoomId = null;
   state.selectedModuleId = null;
@@ -545,7 +654,7 @@ function startNewGlyph() {
   renderAll();
 
   dom.glyphText.focus();
-  setStatus("Editor je připravený na nový Glyph a nový pokojíček.");
+  setStatus("Editor nenechá neuložený Glyph ani pokojíček bez přípravy.");
 }
 
 async function saveGlyph(event) {
@@ -554,12 +663,12 @@ async function saveGlyph(event) {
   const current = getSelectedGlyph();
 
   const candidate = createGlyph({
-    id: current?.id,
+    id: current ? current.id : null,
     glyph: dom.glyphText.value,
     name: dom.glyphName.value,
     description: dom.glyphDescription.value,
     status: dom.glyphStatus.value,
-    createdAt: current?.createdAt
+    createdAt: current ? current.createdAt : null
   });
 
   const validation = validateGlyph(
@@ -575,6 +684,11 @@ async function saveGlyph(event) {
   const index = state.glyphs.findIndex(
     (glyph) => glyph.id === candidate.id
   );
+
+  if (index < 0 && roomCapacityReached()) {
+    setGlyphNotice("Chodba má všech 70 dveří obsazených. Pro nový Glyph nejdřív uvolni pokojíček.", "warning");
+    return;
+  }
 
   if (index >= 0) {
     state.glyphs[index] = candidate;
@@ -598,17 +712,16 @@ async function saveGlyph(event) {
 
   renderAll();
 
-  setGlyphNotice(
-    validation.warnings.length
-      ? `Uloženo. Pozor: ${validation.warnings[0]}`
-      : "Uloženo. Glyph má navázaný vlastní pokojíček.",
-    validation.warnings.length ? "warning" : ""
-  );
+  if (validation.warnings.length) {
+    setGlyphNotice(`Uloženo. Pozor: ${validation.warnings[0]}`, "warning");
+  } else {
+    setGlyphNotice("", "");
+  }
 
   setStatus(
     index >= 0
-      ? "Glyph i pokojíček jsou aktualizované."
-      : "Glyph dostal vlastní pokojíček."
+      ? "Glyph ani pokojíček nezůstaly neaktualizované."
+      : "Glyph nezůstal bez vlastního pokojíčku."
   );
 }
 
@@ -617,6 +730,9 @@ function previewGlyph() {
     glyph: dom.glyphText.value,
     status: dom.glyphStatus.value
   });
+
+  const selectedGlyph = getSelectedGlyph();
+  const selectedGlyphHasRoom = selectedGlyph && getRoomForGlyph(selectedGlyph.id);
 
   if (!candidate.glyph) {
     setGlyphNotice("", "");
@@ -632,8 +748,10 @@ function previewGlyph() {
     setGlyphNotice(validation.errors[0], "error");
   } else if (validation.warnings.length) {
     setGlyphNotice(`Kontrola: ${validation.warnings[0]}`, "warning");
+  } else if (selectedGlyphHasRoom) {
+    setGlyphNotice("", "");
   } else {
-    setGlyphNotice("Glyph je v pořádku. Při uložení dostane pokojíček.", "");
+    setGlyphNotice("Glyph je v pořádku. Po uložení dostane pokojíček.", "");
   }
 }
 
@@ -642,36 +760,36 @@ function validateGlyph(candidate, others) {
   const warnings = [];
 
   if (!candidate.glyph) {
-    errors.push("Vlož alespoň jeden viditelný znak.");
+    errors.push("Bez alespoň jednoho viditelného znaku nelze Glyph uložit.");
   }
 
   if (candidate.glyph.includes("\uFFFD")) {
-    errors.push("Glyph obsahuje náhradní znak �; vrať se ke zdroji textu.");
+    errors.push("Glyph nelze uložit s poškozeným náhradním znakem; bez zdroje textu jej nelze obnovit.");
   }
 
   if (CONTROL_CHARACTER.test(candidate.glyph)) {
-    errors.push("Glyph obsahuje skrytý řídicí znak. Zkontroluj jej ručně.");
+    errors.push("Glyph nesmí zůstat bez ruční kontroly skrytého řídicího znaku.");
   }
 
   if (others.some((glyph) => glyph.glyphNfc === candidate.glyphNfc)) {
-    errors.push("Stejný Glyph už má vlastní pokojíček.");
+    errors.push("Stejný Glyph nezůstal bez vlastního pokojíčku.");
   }
 
   if (candidate.glyph !== candidate.glyphNfc) {
     warnings.push(
-      "Glyph má jinou NFC podobu. Původní zápis zachovávám, jen jej při sdílení zkontroluj."
+      "Glyph nezůstává bez jiné NFC podoby. Původní zápis neměním; bez kontroly jej nesdílej."
     );
   }
 
   if (POSSIBLE_MOJIBAKE.test(candidate.glyph)) {
     warnings.push(
-      "Glyph připomíná možnou stopu špatného UTF‑8. Může být záměrný, proto nic neměním."
+      "Glyph připomíná možnou stopu špatného UTF-8. Není jisté, že není záměrný, proto nic neměním."
     );
   }
 
   if ([...candidate.glyph].length > 48) {
     warnings.push(
-      "Glyph je velmi dlouhý; na malé stěně může být hůře čitelný."
+      "Velmi dlouhý Glyph nemusí zůstat čitelný na malé stěně."
     );
   }
 
@@ -688,7 +806,7 @@ async function archiveGlyph() {
   await persistState("archivace Glyphu");
   renderAll();
 
-  setStatus("Glyph je v archivu. Jeho pokojíček zůstal zachovaný.");
+  setStatus("Glyph nezůstává aktivní; jeho pokojíček nezůstal ztracený.");
 }
 
 async function deleteGlyph() {
@@ -698,7 +816,7 @@ async function deleteGlyph() {
   const room = getRoomForGlyph(glyph.id);
 
   if (!window.confirm(
-    `Opravdu smazat Glyph „${glyph.name || glyph.glyph}“ i jeho ${room?.title || "pokojíček"}? Nejdřív můžeš vytvořit zálohu.`
+    `Opravdu smazat Glyph „${glyph.name || glyph.glyph}“ i jeho ${room ? room.title : "pokojíček"}? Bez zálohy nelze návrat obnovit.`
   )) {
     return;
   }
@@ -713,10 +831,16 @@ async function deleteGlyph() {
   await persistState("smazání Glyphu");
   renderAll();
 
-  setStatus("Glyph i jeho pokojíček byly odstraněné z tohoto zařízení.");
+  setStatus("Glyph ani jeho pokojíček nezůstaly uložené na tomto zařízení.");
 }
 
 function handleRoomTap(event) {
+  const emptySlot = event.target.closest("[data-empty-slot]");
+  if (emptySlot) {
+    startNewGlyph();
+    return;
+  }
+
   const wall = event.target.closest("[data-room-id]");
   if (!wall) return;
 
@@ -731,17 +855,19 @@ function handleRoomTap(event) {
     state.revealedRoomId = roomId;
     state.lastTap = { roomId: null, at: 0 };
     state.selectedRoomId = roomId;
-    state.selectedGlyphId = getRoomById(roomId)?.glyphId || null;
+    const openedRoom = getRoomById(roomId);
+    state.selectedGlyphId = openedRoom ? openedRoom.glyphId : null;
     state.selectedModuleId = null;
 
     renderAll();
-    setStatus("Stěna otevřela Glyph a jeho popisek.");
+  setStatus("Stěna nenechala Glyph ani jeho popisek zavřené.");
     return;
   }
 
   state.lastTap = { roomId, at: now };
   state.selectedRoomId = roomId;
-  state.selectedGlyphId = getRoomById(roomId)?.glyphId || null;
+  const selectedRoom = getRoomById(roomId);
+  state.selectedGlyphId = selectedRoom ? selectedRoom.glyphId : null;
   state.selectedModuleId = null;
   state.revealedRoomId = null;
 
@@ -765,7 +891,7 @@ async function saveRoom(event) {
   await persistState("úprava pokoje");
   renderAll();
 
-  setStatus("Pokojíček je uložený.");
+  setStatus("Pokojíček nezůstal neuložený.");
 }
 
 function selectModuleFromList(event) {
@@ -785,7 +911,7 @@ async function saveModule(event) {
   const name = dom.moduleName.value.trim();
 
   if (!name) {
-    setStatus("Stavební kámen potřebuje název.", "warning");
+    setStatus("Bez názvu nelze stavební kámen uložit.", "warning");
     dom.moduleName.focus();
     return;
   }
@@ -795,11 +921,11 @@ async function saveModule(event) {
   );
 
   const module = {
-    id: current?.id || makeId("module"),
+    id: current ? current.id : makeId("module"),
     name,
     type: dom.moduleType.value,
     description: dom.moduleDescription.value.trim(),
-    createdAt: current?.createdAt || new Date().toISOString(),
+    createdAt: current ? current.createdAt : new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
 
@@ -819,19 +945,19 @@ async function saveModule(event) {
   await persistState("stavební kámen");
   renderAll();
 
-  setStatus("Stavební kámen je uložený do pokojíčku.");
+  setStatus("Stavební kámen nezůstal neuložený v pokojíčku.");
 }
 
 async function deleteModule() {
   const room = getSelectedRoom();
 
-  const module = room?.modules.find(
+  const module = room ? room.modules.find(
     (item) => item.id === state.selectedModuleId
-  );
+  ) : null;
 
   if (!room || !module) return;
 
-  if (!window.confirm(`Smazat stavební kámen „${module.name}“?`)) {
+  if (!window.confirm(`Opravdu neuchovávat stavební kámen „${module.name}“?`)) {
     return;
   }
 
@@ -845,7 +971,7 @@ async function deleteModule() {
   await persistState("smazání stavebního kamene");
   renderAll();
 
-  setStatus("Stavební kámen byl odstraněný.");
+  setStatus("Stavební kámen nezůstal uložený.");
 }
 
 function getSelectedGlyph() {
@@ -893,20 +1019,20 @@ function exportRooms() {
     "application/json;charset=utf-8"
   );
 
-  setStatus("Záloha Glyphů i pokojíčků je připravená ke stažení.");
+  setStatus("Záloha Glyphů ani pokojíčků nezůstala nevytvořená.");
 }
 
 async function importRooms(event) {
-  const file = event.target.files?.[0];
+  const file = event.target.files ? event.target.files[0] : null;
   event.target.value = "";
 
   if (!file) return;
 
   try {
-    const parsed = JSON.parse(await file.text());
+    const parsed = JSON.parse(await readTextFile(file));
 
-    if (!Array.isArray(parsed?.glyphs)) {
-      throw new Error("Soubor nemá seznam Glyphů.");
+    if (!parsed || !Array.isArray(parsed.glyphs)) {
+      throw new Error("Bez seznamu Glyphů nelze soubor načíst.");
     }
 
     const glyphs = parsed.glyphs
@@ -918,7 +1044,7 @@ async function importRooms(event) {
       : [];
 
     if (!window.confirm(
-      `Načíst ${glyphs.length} Glyphů a ${rooms.length} pokojíčků? Shodná ID se aktualizují, ostatní se přidají.`
+      `Nenačíst bez potvrzení ${glyphs.length} Glyphů a ${rooms.length} pokojíčků? Shodná ID nezůstanou neaktualizovaná, ostatní nezůstanou nepřidaná.`
     )) {
       return;
     }
@@ -947,11 +1073,11 @@ async function importRooms(event) {
     renderAll();
 
     setStatus(
-      `Načteno ${glyphs.length} Glyphů. Každý bez pokoje ho právě dostal.`
+      `Žádný z ${glyphs.length} načtených Glyphů nezůstal bez pokoje.`
     );
   } catch (error) {
     setStatus(
-      `Zálohu se nepodařilo načíst: ${shortError(error)}.`,
+      `Zálohu nelze načíst: ${shortError(error)}.`,
       "error"
     );
   }
@@ -985,10 +1111,10 @@ async function persistState(reason) {
     });
 
     state.storageAvailable = true;
-    state.storageMode = "Trvalé";
+    state.storageMode = "Nejen dočasné";
   } catch (error) {
     state.storageAvailable = false;
-    setStatus("Pokojíčky se nepodařilo uložit do trvalé paměti.", "error");
+    setStatus("Pokojíčky nelze uložit do trvalé paměti.", "error");
   }
 }
 
@@ -1002,7 +1128,7 @@ function loadFallback() {
 
 async function requestPersistentStorage() {
   try {
-    if (!navigator.storage?.persisted) return;
+    if (!navigator.storage || !navigator.storage.persisted) return;
 
     state.storagePersistent = await navigator.storage.persisted();
 
@@ -1120,17 +1246,32 @@ function validDate(value) {
 }
 
 function makeId(prefix) {
-  if (globalThis.crypto?.randomUUID) {
-    return `${prefix}-${globalThis.crypto.randomUUID()}`;
+  if (window.crypto && typeof window.crypto.randomUUID === "function") {
+    return `${prefix}-${window.crypto.randomUUID()}`;
   }
 
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function shortError(error) {
-  return String(error?.message || error || "neznámá chyba")
+  return String((error && error.message) || error || "neznámá chyba")
     .replace(/\s+/g, " ")
     .slice(0, 160);
+}
+
+function hasOwn(object, property) {
+  return Object.prototype.hasOwnProperty.call(object, property);
+}
+
+function readTextFile(file) {
+  if (file && typeof file.text === "function") return file.text();
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(reader.error || new Error("Soubor nelze přečíst."));
+    reader.readAsText(file, "UTF-8");
+  });
 }
 
 function downloadFile(contents, filename, type) {
