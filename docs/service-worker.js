@@ -25,12 +25,12 @@ const CORE_FILES = [
   "./js/app.js",
   "./js/aplikace.js",
   "./js/bubinky-pevne.js",
+  "./js/bubinky-petka.js",
   "./js/glyph-engine.js",
   "./js/cht-chybozrout.js",
   "./js/cht-360-network.js",
   "./manifest.json",
   "./icon.svg"
-  "./js/bubinky-pevne.js",
 ];
 
 self.addEventListener("install", event => {
