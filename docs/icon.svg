@@ -1,1 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">CHT 360°‰.</title>
+  <desc id="desc">Zlaté jádro CHT na tmavém pozadí</desc>
 
+  <defs>
+    <radialGradient id="core" cx="32%" cy="28%" r="70%">
+      <stop offset="0" stop-color="#fff9e8"/>
+      <stop offset=".38" stop-color="#ffd98e"/>
+      <stop offset="1" stop-color="#9f5e22"/>
+    </radialGradient>
+
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="108" fill="#050815"/>
+
+  <circle
+    cx="256"
+    cy="256"
+    r="178"
+    fill="none"
+    stroke="#ffe2ad"
+    stroke-opacity=".24"
+    stroke-width="8"
+  />
+
+  <circle
+    cx="256"
+    cy="256"
+    r="138"
+    fill="url(#core)"
+    stroke="#fff0c5"
+    stroke-width="7"
+    filter="url(#glow)"
+  />
+
+  <path
+    d="M100 256h312M256 100v312"
+    stroke="#ffe2ad"
+    stroke-opacity=".34"
+    stroke-width="5"
+  />
+
+  <text
+    x="256"
+    y="246"
+    fill="#211205"
+    font-family="system-ui, sans-serif"
+    font-size="84"
+    font-weight="900"
+    text-anchor="middle"
+  >CHT</text>
+
+  <text
+    x="256"
+    y="300"
+    fill="#3a200a"
+    font-family="system-ui, sans-serif"
+    font-size="38"
+    font-weight="800"
+    text-anchor="middle"
+  >360°‰.</text>
+</svg>
