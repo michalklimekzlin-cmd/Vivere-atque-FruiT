@@ -9,14 +9,17 @@
   >
 
   <meta name="theme-color" content="#050815">
+  <meta name="description" content="CHT 360°‰. — Paměť a vlastní Glyph dílna v čistém UTF‑8.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="screen-orientation" content="landscape">
 
   <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./css/pamet.css">
+  <link rel="stylesheet" href="./css/glyph-engine.css">
 
-  <title>{*(˚.•).•)//ˇ^360o°˚\\(•.(•.)ア)</title>
+  <title>CHT 360°‰. · Paměť a Glyph</title>
 
   <style>
     :root {
@@ -196,7 +199,6 @@
       right: calc(var(--safe-right) + 14px);
       bottom: calc(var(--safe-bottom) + 12px);
     }
-
 
     .glyphComposer {
       margin-top: 11px;
@@ -413,12 +415,7 @@
         </div>
 
         <div class="slotsToolbar">
-          <input
-            id="searchInput"
-            type="search"
-            placeholder="Hledat ve slotech..."
-          >
-
+          <input id="searchInput" type="search" placeholder="Hledat ve slotech...">
           <button id="exportCore" type="button">Export jádra</button>
           <button id="importCore" type="button">Import jádra</button>
         </div>
@@ -426,17 +423,8 @@
         <div id="slotGrid" class="slotGrid"></div>
 
         <div id="slotEditor" class="slotEditor">
-          <input
-            id="slotName"
-            type="text"
-            maxlength="80"
-            placeholder="Název slotu"
-          >
-
-          <textarea
-            id="slotContent"
-            placeholder="Obsah slotu..."
-          ></textarea>
+          <input id="slotName" type="text" maxlength="80" placeholder="Název slotu">
+          <textarea id="slotContent" placeholder="Obsah slotu..."></textarea>
 
           <div class="row">
             <button id="saveSlot" class="primary" type="button">Uložit slot</button>
@@ -466,6 +454,7 @@
               <button id="glyphAddDrum" type="button">+ bubínek</button>
               <button id="glyphInsert" class="primary" type="button">Vložit a uložit</button>
               <button id="glyphReset" type="button">Obnovit šifru</button>
+              <button id="openGlyphEngine" type="button">Otevřít Glyph</button>
             </div>
           </section>
         </div>
@@ -486,6 +475,84 @@
       </section>
     </main>
   </div>
+
+  <section id="glyphEngine" class="glyph-engine" aria-hidden="true" aria-labelledby="glyphEngineTitle" hidden>
+    <div class="glyph-engine__backdrop" data-glyph-engine-close aria-hidden="true"></div>
+
+    <section class="glyph-engine__sheet" role="dialog" aria-modal="true" aria-labelledby="glyphEngineTitle">
+      <header class="glyph-engine__head">
+        <div>
+          <p class="glyph-engine__eyebrow">ČISTÉ UTF‑8 · VLASTNÍ GLYPHY</p>
+          <h2 id="glyphEngineTitle" class="glyph-engine__title">Glyph CHT 360°‰.</h2>
+        </div>
+
+        <button id="closeGlyphEngine" class="glyph-engine__close" type="button" aria-label="Zavřít Glyph dílnu">×</button>
+      </header>
+
+      <div class="glyph-engine__body">
+        <aside class="glyph-engine__tools" aria-label="Nástroje Glyph dílny">
+          <section class="glyph-engine__card">
+            <p class="glyph-engine__label">NOVÝ ŘÁDEK</p>
+            <p class="glyph-engine__copy">Česká písmena jsou skutečné UTF‑8 znaky. Glyph je samostatný bubínek, ne rozbitý text.</p>
+
+            <form id="glyphEngineCreateForm">
+              <div class="glyph-engine__form-line">
+                <input id="glyphEngineText" class="glyph-engine__input" type="text" maxlength="240" placeholder="Napiš text pro Glyph" autocomplete="off" spellcheck="false">
+              </div>
+
+              <div id="glyphEngineModes" class="glyph-engine__mode-row" aria-label="Velikost bubínku">
+                <button class="glyph-engine__mode is-active" type="button" data-glyph-mode="single">1 znak</button>
+                <button class="glyph-engine__mode" type="button" data-glyph-mode="double">2 znaky</button>
+              </div>
+
+              <div class="glyph-engine__form-line">
+                <button class="glyph-engine__action glyph-engine__action--primary glyph-engine__action--wide" type="submit">Vytvořit řádek bubínků</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="glyph-engine__card">
+            <label class="glyph-engine__label" for="glyphEngineAlphabet">SADA BUBÍNKŮ</label>
+
+            <div class="glyph-engine__form-line">
+              <select id="glyphEngineAlphabet" class="glyph-engine__select">
+                <option value="cs">Čeština</option>
+                <option value="symbols">Čísla a znaky</option>
+              </select>
+            </div>
+
+            <div class="glyph-engine__custom-row">
+              <input id="glyphEngineCustom" class="glyph-engine__input" type="text" maxlength="16" placeholder="Tvůj Glyph" autocomplete="off" spellcheck="false">
+              <button id="glyphEngineAddCustom" class="glyph-engine__action" type="button">Přidat</button>
+            </div>
+
+            <p class="glyph-engine__copy">Vlastní Glyph nepřidávám sám. Tady vznikne jen ten, který napíšeš ty.</p>
+            <div id="glyphEngineShelf" class="glyph-engine__shelf" aria-label="Znaky pro vybraný bubínek"></div>
+          </section>
+        </aside>
+
+        <section class="glyph-engine__workspace" aria-label="Plocha Glyphů">
+          <div class="glyph-engine__topline">
+            <div>
+              <p class="glyph-engine__label">PLOCHA GLYPHŮ</p>
+              <p class="glyph-engine__copy">Klepnutí otočí bubínek. Tažení nahoru nebo dolů mění směr.</p>
+            </div>
+          </div>
+
+          <p id="glyphEngineStatus" class="glyph-engine__status" aria-live="polite">Vyber bubínek a vlož do něj české písmeno, číslo, znak nebo vlastní Glyph.</p>
+          <div id="glyphEngineRows" class="glyph-engine__rows"></div>
+
+          <div class="glyph-engine__actions">
+            <button id="glyphEngineSend" class="glyph-engine__action glyph-engine__action--primary" type="button">Vložit do otevřeného slotu</button>
+            <button id="glyphEngineExport" class="glyph-engine__action" type="button">Exportovat Glyphy</button>
+            <label class="glyph-engine__action" for="glyphEngineImport">Načíst Glyphy
+              <input id="glyphEngineImport" type="file" accept="application/json,.json" hidden>
+            </label>
+          </div>
+        </section>
+      </div>
+    </section>
+  </section>
 
   <section id="repairPanel" class="repairPanel" aria-hidden="true" aria-label="Chybožrout Samoopravovna">
     <div class="repairPanelTop">
@@ -554,6 +621,7 @@
 
   <script type="module" src="./js/app.js"></script>
   <script type="module" src="./js/aplikace.js"></script>
+  <script type="module" src="./js/glyph-engine.js"></script>
   <script type="module" src="./js/cht-chybozrout.js"></script>
 
   <script>
@@ -575,185 +643,189 @@
       refreshCanvasSize();
     })();
   </script>
-<style>
-  #cht360-stred{
-    position:absolute;
-    z-index:4;
-    left:50%;
-    top:51%;
-    width:clamp(76px,11vw,116px);
-    aspect-ratio:1;
-    padding:0;
-    border:0;
-    border-radius:50%;
-    background:transparent;
-    color:#ffe2ad;
-    cursor:pointer;
-    transform:translate(-50%,-50%);
-    -webkit-tap-highlight-color:transparent;
-  }
 
-  #cht360-stred::before,
-  #cht360-stred::after{
-    position:absolute;
-    border-radius:50%;
-    content:"";
-    pointer-events:none;
-  }
-
-  #cht360-stred::before{
-    inset:4%;
-    border:1px solid rgba(255,226,173,.52);
-    box-shadow:
-      0 0 20px rgba(255,206,120,.62),
-      inset 0 0 18px rgba(255,226,173,.2);
-    animation:cht360Pulse 2.8s ease-in-out infinite;
-  }
-
-  #cht360-stred::after{
-    inset:-14%;
-    border:1px solid rgba(255,226,173,.19);
-    box-shadow:0 0 28px rgba(255,194,91,.18);
-    animation:cht360Orbit 8s linear infinite;
-  }
-
-  .cht360-stred-core{
-    position:absolute;
-    inset:22%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    border:1px solid rgba(255,247,218,.88);
-    border-radius:50%;
-    background:
-      radial-gradient(circle at 34% 28%,#fff9e8 0 7%,#ffd98e 35%,#b56f2c 100%);
-    box-shadow:
-      0 0 22px rgba(255,220,150,.8),
-      inset 0 0 14px rgba(255,249,225,.5);
-  }
-
-  .cht360-stred-core strong{
-    color:#241508;
-    font-size:clamp(11px,1.8vw,19px);
-    font-weight:950;
-    letter-spacing:.08em;
-    line-height:1;
-  }
-
-  .cht360-stred-core small{
-    margin-top:3px;
-    color:rgba(42,25,10,.82);
-    font-size:clamp(7px,1.15vw,11px);
-    font-weight:900;
-    white-space:nowrap;
-  }
-
-  .cht360-stred-znak{
-    position:absolute;
-    color:#ffe2ad;
-    font-size:clamp(10px,1.7vw,17px);
-    font-weight:900;
-    text-shadow:0 0 13px rgba(255,211,132,.9);
-    animation:cht360Znak 3s ease-in-out infinite;
-  }
-
-  .cht360-stred-znak.c{top:8%;left:21%}
-  .cht360-stred-znak.h{top:18%;right:10%;animation-delay:-1s}
-  .cht360-stred-znak.t{bottom:12%;left:12%;animation-delay:-2s}
-  .cht360-stred-znak.a{bottom:9%;right:16%;animation-delay:-.5s}
-
-  .cht360-stred-prach{
-    position:absolute;
-    inset:0;
-    animation:cht360Prach 2.3s ease-in-out infinite;
-  }
-
-  .cht360-stred-prach i{
-    position:absolute;
-    width:4px;
-    aspect-ratio:1;
-    border-radius:50%;
-    background:#ffe8ba;
-    box-shadow:0 0 9px rgba(255,215,143,.9);
-  }
-
-  .cht360-stred-prach i:nth-child(1){top:26%;left:18%}
-  .cht360-stred-prach i:nth-child(2){top:67%;left:24%}
-  .cht360-stred-prach i:nth-child(3){top:74%;right:23%}
-  .cht360-stred-prach i:nth-child(4){top:35%;right:16%}
-
-  #cht360-stred.is-aktivni .cht360-stred-core{
-    animation:cht360Core .65s ease-in-out;
-  }
-
-  @keyframes cht360Pulse{
-    50%{transform:scale(1.1);opacity:.7}
-  }
-
-  @keyframes cht360Orbit{
-    to{transform:rotate(360deg)}
-  }
-
-  @keyframes cht360Znak{
-    50%{transform:translateY(-6px) scale(1.14);opacity:.5}
-  }
-
-  @keyframes cht360Prach{
-    50%{transform:scale(1.06);opacity:.7}
-  }
-
-  @keyframes cht360Core{
-    50%{transform:scale(1.18);filter:brightness(1.3)}
-  }
-</style>
-<script
-  src="./js/cht-360-network.js"
-  data-cht-module="cht-360-core"
-  data-cht-label="CHT 360°‰."
-  data-cht-entry="./index.html"
-  data-cht-kind="pwa"
-  data-cht-storage-keys="cht360_pamet_v1,vaft_pamet_v1,vaft_pamet_scene_v2,cht360_pamet_snapshots_v1,cht360_trojka_models_v1,cht360_glyph_drums_v1,cht360_glyph_drums_custom_v1,cht360_iphone14_settings_v1"
-></script>
-<script>
-(() => {
-  if (document.getElementById("cht360-stred")) return;
-
-  const host = document.querySelector(".app");
-  if (!host) return;
-
-  const cht = document.createElement("button");
-  cht.id = "cht360-stred";
-  cht.type = "button";
-  cht.setAttribute("aria-label", "CHT 360°‰. ve středu oběhu");
-
-  cht.innerHTML = `
-    <span class="cht360-stred-znak c" aria-hidden="true">C</span>
-    <span class="cht360-stred-znak h" aria-hidden="true">H</span>
-    <span class="cht360-stred-znak t" aria-hidden="true">T</span>
-    <span class="cht360-stred-znak a" aria-hidden="true">ア</span>
-
-    <span class="cht360-stred-prach" aria-hidden="true">
-      <i></i><i></i><i></i><i></i>
-    </span>
-
-    <span class="cht360-stred-core" aria-hidden="true">
-      <strong>CHT</strong>
-      <small>360°‰.</small>
-    </span>
-  `;
-
-  cht.addEventListener("click", () => {
-    cht.classList.remove("is-aktivni");
-    requestAnimationFrame(() => cht.classList.add("is-aktivni"));
-
-    const zprava = document.getElementById("messageLine");
-    if (zprava) {
-      zprava.textContent =
-        "CHT 360°‰. je uprostřed oběhu a pracuje jen s tím, co mu dovolíš.";
+  <style>
+    #cht360-stred {
+      position: absolute;
+      z-index: 4;
+      left: 50%;
+      top: 51%;
+      width: clamp(76px, 11vw, 116px);
+      aspect-ratio: 1;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: #ffe2ad;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      -webkit-tap-highlight-color: transparent;
     }
-  });
 
-  host.append(cht);
-})();
-</script>
+    #cht360-stred::before,
+    #cht360-stred::after {
+      position: absolute;
+      border-radius: 50%;
+      content: "";
+      pointer-events: none;
+    }
+
+    #cht360-stred::before {
+      inset: 4%;
+      border: 1px solid rgba(255, 226, 173, .52);
+      box-shadow:
+        0 0 20px rgba(255, 206, 120, .62),
+        inset 0 0 18px rgba(255, 226, 173, .2);
+      animation: cht360Pulse 2.8s ease-in-out infinite;
+    }
+
+    #cht360-stred::after {
+      inset: -14%;
+      border: 1px solid rgba(255, 226, 173, .19);
+      box-shadow: 0 0 28px rgba(255, 194, 91, .18);
+      animation: cht360Orbit 8s linear infinite;
+    }
+
+    .cht360-stred-core {
+      position: absolute;
+      inset: 22%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 247, 218, .88);
+      border-radius: 50%;
+      background: radial-gradient(circle at 34% 28%, #fff9e8 0 7%, #ffd98e 35%, #b56f2c 100%);
+      box-shadow:
+        0 0 22px rgba(255, 220, 150, .8),
+        inset 0 0 14px rgba(255, 249, 225, .5);
+    }
+
+    .cht360-stred-core strong {
+      color: #241508;
+      font-size: clamp(11px, 1.8vw, 19px);
+      font-weight: 950;
+      letter-spacing: .08em;
+      line-height: 1;
+    }
+
+    .cht360-stred-core small {
+      margin-top: 3px;
+      color: rgba(42, 25, 10, .82);
+      font-size: clamp(7px, 1.15vw, 11px);
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .cht360-stred-znak {
+      position: absolute;
+      color: #ffe2ad;
+      font-size: clamp(10px, 1.7vw, 17px);
+      font-weight: 900;
+      text-shadow: 0 0 13px rgba(255, 211, 132, .9);
+      animation: cht360Znak 3s ease-in-out infinite;
+    }
+
+    .cht360-stred-znak.c { top: 8%; left: 21%; }
+    .cht360-stred-znak.h { top: 18%; right: 10%; animation-delay: -1s; }
+    .cht360-stred-znak.t { bottom: 12%; left: 12%; animation-delay: -2s; }
+    .cht360-stred-znak.a { bottom: 9%; right: 16%; animation-delay: -.5s; }
+
+    .cht360-stred-prach {
+      position: absolute;
+      inset: 0;
+      animation: cht360Prach 2.3s ease-in-out infinite;
+    }
+
+    .cht360-stred-prach i {
+      position: absolute;
+      width: 4px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: #ffe8ba;
+      box-shadow: 0 0 9px rgba(255, 215, 143, .9);
+    }
+
+    .cht360-stred-prach i:nth-child(1) { top: 26%; left: 18%; }
+    .cht360-stred-prach i:nth-child(2) { top: 67%; left: 24%; }
+    .cht360-stred-prach i:nth-child(3) { top: 74%; right: 23%; }
+    .cht360-stred-prach i:nth-child(4) { top: 35%; right: 16%; }
+
+    #cht360-stred.is-aktivni .cht360-stred-core {
+      animation: cht360Core .65s ease-in-out;
+    }
+
+    @keyframes cht360Pulse {
+      50% { transform: scale(1.1); opacity: .7; }
+    }
+
+    @keyframes cht360Orbit {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes cht360Znak {
+      50% { transform: translateY(-6px) scale(1.14); opacity: .5; }
+    }
+
+    @keyframes cht360Prach {
+      50% { transform: scale(1.06); opacity: .7; }
+    }
+
+    @keyframes cht360Core {
+      50% { transform: scale(1.18); filter: brightness(1.3); }
+    }
+  </style>
+
+  <script
+    src="./js/cht-360-network.js"
+    data-cht-module="cht-360-core"
+    data-cht-label="CHT 360°‰."
+    data-cht-entry="./index.html"
+    data-cht-kind="pwa"
+    data-cht-storage-keys="cht360_pamet_v1,vaft_pamet_v1,vaft_pamet_scene_v2,cht360_pamet_snapshots_v1,cht360_trojka_models_v1,cht360_glyph_drums_v1,cht360_glyph_drums_custom_v1,cht360_iphone14_settings_v1"
+  ></script>
+
+  <script>
+    (() => {
+      if (document.getElementById("cht360-stred")) return;
+
+      const host = document.querySelector(".stage");
+      if (!host) return;
+
+      const cht = document.createElement("button");
+      cht.id = "cht360-stred";
+      cht.type = "button";
+      cht.setAttribute("aria-label", "CHT 360°‰. ve středu oběhu");
+
+      cht.innerHTML = `
+        <span class="cht360-stred-znak c" aria-hidden="true">C</span>
+        <span class="cht360-stred-znak h" aria-hidden="true">H</span>
+        <span class="cht360-stred-znak t" aria-hidden="true">T</span>
+        <span class="cht360-stred-znak a" aria-hidden="true">ア</span>
+
+        <span class="cht360-stred-prach" aria-hidden="true">
+          <i></i><i></i><i></i><i></i>
+        </span>
+
+        <span class="cht360-stred-core" aria-hidden="true">
+          <strong>CHT</strong>
+          <small>360°‰.</small>
+        </span>
+      `;
+
+      cht.addEventListener("click", () => {
+        cht.classList.remove("is-aktivni");
+        requestAnimationFrame(() => cht.classList.add("is-aktivni"));
+
+        const zprava = document.getElementById("messageLine");
+        if (zprava) {
+          zprava.textContent =
+            "CHT 360°‰. je uprostřed oběhu a pracuje jen s tím, co mu dovolíš.";
+        }
+      });
+
+      host.append(cht);
+    })();
+  </script>
+</body>
+</html>
