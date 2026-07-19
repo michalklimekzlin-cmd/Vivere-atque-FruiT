@@ -626,6 +626,22 @@
 <script src="./js/bubinky-pevne.js" defer></script>
 <script src="./js/bubinky-petka.js" defer></script>
   
+  <style id="glyph-five-grid-fix">
+  #glyphDrums.glyphFiveGuard {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: clamp(5px, .9vw, 9px) !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  #glyphDrums.glyphFiveGuard .glyphFiveGuardDrum {
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+  }
+</style>
+  
   <script>
     (() => {
       let timers = [];
