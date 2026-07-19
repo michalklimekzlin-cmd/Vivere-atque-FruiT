@@ -1,0 +1,377 @@
+/* Glyph CHT 360°‰. Samostatný vzhled dílny – bez zásahu do hlavní Paměti. */
+body.glyph-engine-open {
+  overflow: hidden;
+}
+
+.glyph-engine[hidden] {
+  display: none;
+}
+
+.glyph-engine {
+  position: fixed;
+  z-index: 1200;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(14px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(14px, env(safe-area-inset-left));
+  color: #fff0c5;
+  font-family: ui-rounded, "Avenir Next", Avenir, system-ui, sans-serif;
+}
+
+.glyph-engine__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(2, 4, 12, .82);
+  backdrop-filter: blur(10px);
+}
+
+.glyph-engine__sheet {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: min(1080px, 100%);
+  max-height: min(760px, calc(100dvh - 24px));
+  overflow: hidden;
+  border: 1px solid rgba(255, 217, 147, .46);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 84% 0%, rgba(216, 157, 62, .18), transparent 30%),
+    radial-gradient(circle at 8% 100%, rgba(94, 66, 25, .27), transparent 35%),
+    #08090f;
+  box-shadow:
+    0 26px 86px rgba(0, 0, 0, .62),
+    inset 0 1px rgba(255, 237, 194, .12);
+}
+
+.glyph-engine__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid rgba(255, 225, 166, .18);
+}
+
+.glyph-engine__eyebrow,
+.glyph-engine__label {
+  margin: 0;
+  color: rgba(255, 229, 177, .62);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .13em;
+}
+
+.glyph-engine__title {
+  margin: 5px 0 0;
+  font-size: clamp(22px, 3.2vw, 34px);
+  letter-spacing: .025em;
+}
+
+.glyph-engine__close {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 226, 170, .28);
+  border-radius: 50%;
+  color: #fff2d1;
+  background: rgba(255, 255, 255, .045);
+  font-size: 27px;
+  line-height: 1;
+}
+
+.glyph-engine__body {
+  display: grid;
+  grid-template-columns: minmax(250px, .78fr) minmax(0, 1.5fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.glyph-engine__tools,
+.glyph-engine__workspace {
+  min-width: 0;
+  overflow: auto;
+  padding: 18px;
+}
+
+.glyph-engine__tools {
+  border-right: 1px solid rgba(255, 225, 166, .14);
+  background: rgba(255, 255, 255, .018);
+}
+
+.glyph-engine__workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.glyph-engine__card {
+  margin-bottom: 14px;
+  padding: 14px;
+  border: 1px solid rgba(255, 225, 166, .16);
+  border-radius: 18px;
+  background: rgba(9, 8, 8, .56);
+}
+
+.glyph-engine__copy {
+  margin: 8px 0 0;
+  color: rgba(255, 239, 208, .68);
+  font-size: 13px;
+  line-height: 1.42;
+}
+
+.glyph-engine__form-line,
+.glyph-engine__custom-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.glyph-engine__input,
+.glyph-engine__select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 226, 170, .22);
+  border-radius: 12px;
+  padding: 11px 12px;
+  color: #fff2d2;
+  background: rgba(0, 0, 0, .38);
+  font: inherit;
+}
+
+.glyph-engine__select {
+  appearance: auto;
+}
+
+.glyph-engine__input:focus,
+.glyph-engine__select:focus {
+  outline: 2px solid rgba(255, 216, 132, .66);
+  outline-offset: 1px;
+}
+
+.glyph-engine__mode-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.glyph-engine__mode,
+.glyph-engine__action,
+.glyph-engine__token,
+.glyph-engine__row-remove {
+  border: 1px solid rgba(255, 223, 158, .25);
+  border-radius: 12px;
+  color: #ffefcc;
+  background: rgba(255, 255, 255, .045);
+  font: inherit;
+  cursor: pointer;
+}
+
+.glyph-engine__mode {
+  padding: 9px 7px;
+  font-size: 12px;
+}
+
+.glyph-engine__mode.is-active,
+.glyph-engine__action--primary {
+  color: #1b1307;
+  border-color: #ffe0a0;
+  background: linear-gradient(135deg, #fff0c7, #e6ae59);
+  font-weight: 800;
+}
+
+.glyph-engine__action {
+  padding: 10px 12px;
+}
+
+.glyph-engine__action--wide {
+  width: 100%;
+}
+
+.glyph-engine__custom-row .glyph-engine__input {
+  flex: 1;
+}
+
+.glyph-engine__shelf {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 180px;
+  margin-top: 11px;
+  overflow: auto;
+}
+
+.glyph-engine__token {
+  min-width: 34px;
+  min-height: 34px;
+  padding: 4px 7px;
+  font-weight: 700;
+}
+
+.glyph-engine__token:hover,
+.glyph-engine__mode:hover,
+.glyph-engine__action:hover,
+.glyph-engine__close:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.glyph-engine__topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.glyph-engine__status {
+  min-height: 20px;
+  margin: 0;
+  color: #ffe1a1;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.glyph-engine__rows {
+  display: grid;
+  gap: 11px;
+}
+
+.glyph-engine__empty {
+  margin: 18px 0;
+  color: rgba(255, 239, 208, .65);
+  text-align: center;
+}
+
+.glyph-engine__row {
+  padding: 12px;
+  border: 1px solid rgba(255, 225, 166, .2);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, .23);
+}
+
+.glyph-engine__row-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.glyph-engine__row-head strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glyph-engine__row-head span {
+  color: rgba(255, 232, 186, .58);
+  font-size: 11px;
+}
+
+.glyph-engine__row-remove {
+  padding: 6px 8px;
+  color: #ffd6d0;
+  border-color: rgba(255, 167, 157, .3);
+  font-size: 11px;
+}
+
+.glyph-engine__drums {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.glyph-engine__space {
+  width: 11px;
+  min-height: 62px;
+}
+
+.glyph-engine__drum {
+  display: grid;
+  grid-template-rows: 1fr 1.35fr 1fr;
+  align-items: center;
+  width: clamp(48px, 8vw, 70px);
+  min-width: 0;
+  min-height: 66px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 225, 166, .26);
+  border-radius: 14px;
+  color: #fff0cb;
+  background: linear-gradient(145deg, rgba(255, 255, 255, .07), rgba(0, 0, 0, .32));
+  touch-action: none;
+  cursor: ns-resize;
+}
+
+.glyph-engine__drum.is-selected {
+  border-color: #fff0c7;
+  box-shadow:
+    0 0 0 2px rgba(255, 220, 148, .35),
+    0 0 22px rgba(255, 203, 101, .55);
+}
+
+.glyph-engine__ghost {
+  overflow: hidden;
+  color: rgba(255, 235, 195, .38);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.glyph-engine__current {
+  overflow: hidden;
+  color: #fff3d3;
+  font-size: clamp(14px, 2.3vw, 19px);
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 0 13px rgba(255, 224, 163, .6);
+}
+
+.glyph-engine__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: auto;
+  padding-top: 5px;
+}
+
+@media (max-width: 720px) {
+  .glyph-engine__sheet {
+    border-radius: 21px;
+  }
+
+  .glyph-engine__head {
+    padding: 15px 16px 12px;
+  }
+
+  .glyph-engine__body {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+
+  .glyph-engine__tools {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 225, 166, .14);
+  }
+
+  .glyph-engine__tools,
+  .glyph-engine__workspace {
+    overflow: visible;
+    padding: 13px;
+  }
+
+  .glyph-engine__row-head {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .glyph-engine__row-head span {
+    grid-column: 1 / 2;
+  }
+}
