@@ -24,6 +24,7 @@ const CORE_FILES = [
   "./css/glyph-engine.css",
   "./js/app.js",
   "./js/aplikace.js",
+  "./js/bubinky-pevne.js",
   "./js/glyph-engine.js",
   "./js/cht-chybozrout.js",
   "./js/cht-360-network.js",
