@@ -1,11 +1,10 @@
 "use strict";
 
 /*
- * CHT 360°‰. · Prstenec pokojíčků
+ * CHT 360°‰. · Rotující prstenec pokojíčků
  *
- * Šest samostatných bran pro vlastní Glyphy. Prstenec pouze ukládá výběr a
- * vysílá události; žádnou hru ani AI si nevymýšlí. Budoucí modul se může
- * připojit přes window.addEventListener("cht.room.open", handler).
+ * Šest bran pro vlastní Glyphy. Klepnutí otevře přímo klávesnici ve vybraném
+ * pokojíčku; smazání z klávesnice vymaže Glyph. Žádné tlačítko „Přidat“.
  */
 
 const CHTRoomOrbit = (() => {
@@ -16,16 +15,16 @@ const CHTRoomOrbit = (() => {
   const ORBIT_ID = "chtRoomOrbit";
 
   const ROOM_POSITIONS = Object.freeze([
-    [17, 20],
-    [15, 46],
-    [29, 76],
-    [71, 76],
-    [85, 46],
-    [83, 20]
+    [50, 8],
+    [83, 27],
+    [83, 73],
+    [50, 92],
+    [17, 73],
+    [17, 27]
   ]);
 
   const state = loadState();
-  const timers = new Map();
+  const glowTimers = new Map();
   let selectedId = state.selectedId || state.rooms[0].id;
   let dom = null;
 
@@ -63,6 +62,16 @@ const CHTRoomOrbit = (() => {
     };
   }
 
+  function normaliseRoute(value) {
+    if (!value || typeof value !== "object") {
+      return null;
+    }
+
+    const kind = String(value.kind || "").trim().slice(0, 40);
+    const target = String(value.target || "").trim().slice(0, 240);
+    return kind && target ? { kind, target } : null;
+  }
+
   function normaliseRoom(value, index) {
     const base = createRoom(index);
     const source = value && typeof value === "object" ? value : {};
@@ -75,17 +84,6 @@ const CHTRoomOrbit = (() => {
       route: normaliseRoute(source.route),
       updatedAt: typeof source.updatedAt === "string" ? source.updatedAt : null
     };
-  }
-
-  function normaliseRoute(value) {
-    if (!value || typeof value !== "object") {
-      return null;
-    }
-
-    const kind = String(value.kind || "").trim().slice(0, 40);
-    const target = String(value.target || "").trim().slice(0, 240);
-
-    return kind && target ? { kind, target } : null;
   }
 
   function loadState() {
@@ -109,7 +107,6 @@ const CHTRoomOrbit = (() => {
         { length: ROOM_COUNT },
         (_, offset) => normaliseRoom(savedRooms[offset], offset + 1)
       );
-
       const requested = String(source.selectedId || "");
 
       return {
@@ -175,10 +172,12 @@ const CHTRoomOrbit = (() => {
     );
   }
 
-  function status(message) {
-    if (dom?.status) {
-      dom.status.textContent = message;
-    }
+  function roomElement(id) {
+    return dom?.rooms?.querySelector("[data-room-id='" + id + "']") || null;
+  }
+
+  function editorFor(id) {
+    return roomElement(id)?.querySelector(".cht-room__editor") || null;
   }
 
   function build() {
@@ -194,60 +193,46 @@ const CHTRoomOrbit = (() => {
 
     const root = document.createElement("aside");
     root.id = ORBIT_ID;
-    root.setAttribute("aria-label", "Prstenec šesti pokojíčků");
+    root.setAttribute("aria-label", "Rotující prstenec šesti pokojíčků");
     root.innerHTML = `
       <div class="cht-room-orbit__shell">
-        <p class="cht-room-orbit__label">Prstenec pokojíčků · 1–6</p>
+        <p class="cht-room-orbit__label">Rotující prstenec · pokojíčky 1–6</p>
 
-        <svg class="cht-room-orbit__wire" viewBox="0 0 300 500" aria-hidden="true" focusable="false">
-          <defs>
-            <linearGradient id="cht-room-orbit-line" x1="20" y1="20" x2="280" y2="480" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#8a682c" stop-opacity=".62" />
-              <stop offset=".33" stop-color="#fff0c5" stop-opacity=".9" />
-              <stop offset=".68" stop-color="#c79736" stop-opacity=".7" />
-              <stop offset="1" stop-color="#fff0c5" stop-opacity=".56" />
-            </linearGradient>
-            <radialGradient id="cht-room-orbit-aura" cx="50%" cy="50%" r="50%">
-              <stop stop-color="#e8bb61" stop-opacity=".14" />
-              <stop offset=".64" stop-color="#7f5e25" stop-opacity=".035" />
-              <stop offset="1" stop-color="#000" stop-opacity="0" />
-            </radialGradient>
-          </defs>
+        <div class="cht-room-orbit__rotor">
+          <svg class="cht-room-orbit__wire" viewBox="0 0 520 520" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="cht-room-ring-v2-line" x1="70" y1="74" x2="450" y2="446" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#8d6a2d" stop-opacity=".72" />
+                <stop offset=".28" stop-color="#fff0c5" stop-opacity=".93" />
+                <stop offset=".59" stop-color="#c89735" stop-opacity=".75" />
+                <stop offset="1" stop-color="#fff0c5" stop-opacity=".62" />
+              </linearGradient>
+              <radialGradient id="cht-room-ring-v2-aura" cx="50%" cy="50%" r="50%">
+                <stop stop-color="#ffd781" stop-opacity=".16" />
+                <stop offset=".64" stop-color="#b67e26" stop-opacity=".035" />
+                <stop offset="1" stop-color="#000" stop-opacity="0" />
+              </radialGradient>
+            </defs>
 
-          <ellipse class="orbit-aura" cx="150" cy="250" rx="134" ry="235" />
-          <path class="orbit-outer" d="M150 18 C76 18 41 97 72 171 C103 244 111 261 71 329 C31 397 77 482 150 482 C223 482 269 397 229 329 C189 261 197 244 228 171 C259 97 224 18 150 18 Z" />
-          <path class="orbit-inner" d="M150 37 C93 37 69 102 94 160 C124 231 128 266 93 334 C63 393 101 458 150 458 C199 458 237 393 207 334 C172 266 176 231 206 160 C231 102 207 37 150 37 Z" />
-          <path class="orbit-cross" d="M74 171 C117 203 183 203 226 171 M72 329 C116 296 184 296 228 329 M150 19 C150 130 150 370 150 481" />
-          <path class="orbit-dash" d="M150 18 C76 18 41 97 72 171 C103 244 111 261 71 329 C31 397 77 482 150 482 C223 482 269 397 229 329 C189 261 197 244 228 171 C259 97 224 18 150 18" />
-          <circle class="orbit-star" cx="150" cy="18" r="2.1" />
-          <circle class="orbit-star" cx="150" cy="482" r="2.1" />
-          <circle class="orbit-star" cx="72" cy="171" r="1.7" />
-          <circle class="orbit-star" cx="228" cy="171" r="1.7" />
-          <circle class="orbit-star" cx="71" cy="329" r="1.7" />
-          <circle class="orbit-star" cx="229" cy="329" r="1.7" />
-        </svg>
+            <circle class="ring-v2__aura" cx="260" cy="260" r="244" />
+            <circle class="ring-v2__outer" cx="260" cy="260" r="204" />
+            <circle class="ring-v2__middle" cx="260" cy="260" r="189" />
+            <circle class="ring-v2__inner" cx="260" cy="260" r="166" />
+            <ellipse class="ring-v2__latitude" cx="260" cy="260" rx="204" ry="76" />
+            <ellipse class="ring-v2__latitude" cx="260" cy="260" rx="189" ry="57" />
+            <ellipse class="ring-v2__latitude" cx="260" cy="260" rx="166" ry="36" />
+            <ellipse class="ring-v2__longitude" cx="260" cy="260" rx="76" ry="204" />
+            <ellipse class="ring-v2__longitude" cx="260" cy="260" rx="48" ry="189" />
+            <path class="ring-v2__longitude" d="M56 260 C132 172 388 172 464 260 M56 260 C132 348 388 348 464 260" />
+            <path class="ring-v2__dash" d="M260 56 A204 204 0 0 1 464 260 A204 204 0 0 1 260 464 A204 204 0 0 1 56 260 A204 204 0 0 1 260 56" />
+            <circle class="ring-v2__star" cx="260" cy="56" r="2.2" />
+            <circle class="ring-v2__star" cx="464" cy="260" r="2.2" />
+            <circle class="ring-v2__star" cx="260" cy="464" r="2.2" />
+            <circle class="ring-v2__star" cx="56" cy="260" r="2.2" />
+          </svg>
 
-        <div class="cht-room-orbit__rooms" data-room-buttons></div>
-
-        <form class="cht-room-orbit__console" data-room-form>
-          <input
-            class="cht-room-orbit__input"
-            data-room-glyph
-            type="text"
-            maxlength="24"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            placeholder="Vyber pokojíček"
-            aria-label="Glyph pro vybraný pokojíček"
-          >
-          <button class="cht-room-orbit__action" data-room-assign type="submit">Přiřadit</button>
-          <div class="cht-room-orbit__foot">
-            <span class="cht-room-orbit__status" data-room-status aria-live="polite"></span>
-            <button class="cht-room-orbit__secondary" data-room-clear type="button">Odebrat</button>
-            <button class="cht-room-orbit__secondary cht-room-orbit__secondary--open" data-room-open type="button">Vstoupit</button>
-          </div>
-        </form>
+          <div class="cht-room-orbit__rooms" data-room-buttons></div>
+        </div>
       </div>
     `;
 
@@ -255,102 +240,165 @@ const CHTRoomOrbit = (() => {
 
     dom = {
       root,
-      buttons: root.querySelector("[data-room-buttons]"),
-      form: root.querySelector("[data-room-form]"),
-      glyph: root.querySelector("[data-room-glyph]"),
-      assign: root.querySelector("[data-room-assign]"),
-      clear: root.querySelector("[data-room-clear]"),
-      open: root.querySelector("[data-room-open]"),
-      status: root.querySelector("[data-room-status]")
+      rooms: root.querySelector("[data-room-buttons]")
     };
 
     state.rooms.forEach(room => {
       const [x, y] = ROOM_POSITIONS[room.index - 1];
-      const button = document.createElement("button");
+      const slot = document.createElement("div");
       const number = document.createElement("span");
       const glyph = document.createElement("span");
+      const editor = document.createElement("input");
 
-      button.type = "button";
-      button.className = "cht-room";
-      button.dataset.roomId = room.id;
-      button.style.setProperty("--room-x", x + "%");
-      button.style.setProperty("--room-y", y + "%");
-      button.setAttribute("aria-label", room.label + ": prázdný");
+      slot.className = "cht-room";
+      slot.dataset.roomId = room.id;
+      slot.style.setProperty("--room-x", x + "%");
+      slot.style.setProperty("--room-y", y + "%");
+      slot.tabIndex = 0;
+      slot.setAttribute("role", "button");
 
       number.className = "cht-room__number";
       number.textContent = String(room.index);
+
       glyph.className = "cht-room__glyph";
 
-      button.append(number, glyph);
-      button.addEventListener("click", () => select(room.id));
-      dom.buttons.append(button);
+      editor.className = "cht-room__editor";
+      editor.type = "text";
+      editor.maxLength = 24;
+      editor.autocomplete = "off";
+      editor.autocapitalize = "off";
+      editor.spellcheck = false;
+      editor.setAttribute("aria-label", "Glyph pro " + room.label);
+
+      slot.append(number, glyph, editor);
+
+      slot.addEventListener("click", event => {
+        if (event.target === editor) {
+          return;
+        }
+
+        select(room.id, { focusInput: true });
+      });
+
+      slot.addEventListener("keydown", event => {
+        if (event.target === editor) {
+          return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          select(room.id, { focusInput: true });
+        }
+      });
+
+      editor.addEventListener("focus", () => {
+        if (selectedId !== room.id) {
+          selectedId = room.id;
+          saveState();
+        }
+
+        dom.root.classList.add("is-editing");
+        renderAll();
+      });
+
+      editor.addEventListener("input", () => {
+        updateGlyph(room.id, editor.value, "type-glyph");
+      });
+
+      editor.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          editor.blur();
+        }
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          editor.value = getRoom(room.id)?.glyph || "";
+          editor.blur();
+        }
+      });
+
+      editor.addEventListener("blur", () => {
+        requestAnimationFrame(() => {
+          if (!dom?.root?.querySelector(".cht-room__editor:focus")) {
+            finishEditing();
+          }
+        });
+      });
+
+      dom.rooms.append(slot);
     });
 
-    dom.form.addEventListener("submit", event => {
-      event.preventDefault();
-      assignGlyph(dom.glyph.value);
-    });
+    document.addEventListener("pointerdown", event => {
+      if (dom && !dom.root.contains(event.target)) {
+        finishEditing();
+      }
+    }, true);
 
-    dom.clear.addEventListener("click", () => clearGlyph());
-    dom.open.addEventListener("click", () => openRoom());
-
-    render();
-    status("Vyber pokojíček. Po 5 s světlo jemně zhasne.");
+    renderAll();
     return true;
   }
 
-  function render() {
+  function renderRoom(room) {
+    const slot = roomElement(room.id);
+
+    if (!slot || !dom) {
+      return;
+    }
+
+    const glyph = slot.querySelector(".cht-room__glyph");
+    const editor = slot.querySelector(".cht-room__editor");
+    const filled = Boolean(room.glyph);
+    const editing = dom.root.classList.contains("is-editing") && room.id === selectedId;
+
+    glyph.textContent = filled ? room.glyph : "·";
+    slot.classList.toggle("is-empty", !filled);
+    slot.classList.toggle("is-selected", room.id === selectedId);
+    slot.classList.toggle("is-editing", editing);
+    slot.setAttribute(
+      "aria-label",
+      room.label + ": " + (filled ? room.glyph : "klepni a napiš Glyph")
+    );
+    slot.setAttribute("aria-pressed", String(room.id === selectedId));
+
+    if (document.activeElement !== editor) {
+      editor.value = room.glyph;
+    }
+  }
+
+  function renderAll() {
     if (!dom) {
       return;
     }
 
-    const room = selectedRoom();
-
-    state.rooms.forEach(item => {
-      const button = dom.buttons.querySelector("[data-room-id='" + item.id + "']");
-
-      if (!button) {
-        return;
-      }
-
-      const filled = Boolean(item.glyph);
-      const glyph = button.querySelector(".cht-room__glyph");
-
-      glyph.textContent = filled ? item.glyph : "·";
-      button.classList.toggle("is-empty", !filled);
-      button.classList.toggle("is-selected", item.id === room.id);
-      button.setAttribute(
-        "aria-label",
-        item.label + ": " + (filled ? item.glyph : "zatím bez Glyphu")
-      );
-      button.setAttribute("aria-pressed", String(item.id === room.id));
-    });
-
-    dom.glyph.value = room.glyph;
-    dom.glyph.placeholder = "Glyph pro " + room.label;
-    dom.clear.disabled = !room.glyph;
-    dom.open.disabled = !room.glyph;
-    dom.open.title = room.glyph
-      ? "Vyslat událost pro " + room.label
-      : "Nejprve přiřaď Glyph";
+    state.rooms.forEach(renderRoom);
   }
 
   function lightRoom(id) {
-    const button = dom?.buttons?.querySelector("[data-room-id='" + id + "']");
+    const slot = roomElement(id);
 
-    if (!button) {
+    if (!slot) {
       return;
     }
 
-    clearTimeout(timers.get(id));
-    button.classList.remove("is-lit");
-    void button.offsetWidth;
-    button.classList.add("is-lit");
+    clearTimeout(glowTimers.get(id));
+    slot.classList.remove("is-lit");
+    void slot.offsetWidth;
+    slot.classList.add("is-lit");
 
-    timers.set(id, setTimeout(() => {
-      button.classList.remove("is-lit");
-      timers.delete(id);
+    glowTimers.set(id, setTimeout(() => {
+      slot.classList.remove("is-lit");
+      glowTimers.delete(id);
     }, GLOW_TIME));
+  }
+
+  function finishEditing() {
+    if (!dom || !dom.root.classList.contains("is-editing")) {
+      return;
+    }
+
+    dom.root.classList.remove("is-editing");
+    renderAll();
   }
 
   function select(id, options = {}) {
@@ -361,73 +409,68 @@ const CHTRoomOrbit = (() => {
     }
 
     selectedId = room.id;
+    dom?.root?.classList.add("is-editing");
     saveState();
-    render();
+    renderAll();
     lightRoom(room.id);
 
-    if (options.focusInput && dom?.glyph) {
-      dom.glyph.focus({ preventScroll: true });
-      dom.glyph.select();
+    if (options.focusInput !== false) {
+      const editor = editorFor(room.id);
+
+      if (editor) {
+        /* Volá se přímo po klepnutí, proto iPhone otevře klávesnici. */
+        editor.focus({ preventScroll: true });
+        editor.select();
+      }
     }
 
-    status(room.label + " je vybraný — sem patří jeho Glyph.");
     publish("cht.room.selected", room, "select");
     return cloneRoom(room);
   }
 
-  function assignGlyph(value) {
-    const room = selectedRoom();
-    const glyph = normaliseGlyph(value);
-
-    if (!glyph) {
-      status("Napiš nejdřív svůj Glyph — prstenec nic nevymýšlí sám.");
-      dom?.glyph?.focus({ preventScroll: true });
-      return null;
-    }
-
-    room.glyph = glyph;
-    room.updatedAt = new Date().toISOString();
-    saveState();
-    render();
-    lightRoom(room.id);
-    status(room.label + " nese Glyph „" + glyph + "“.");
-    publish("cht.room.changed", room, "assign-glyph");
-    return cloneRoom(room);
-  }
-
-  function clearGlyph() {
-    const room = selectedRoom();
-
-    if (!room.glyph) {
-      status(room.label + " je už prázdný.");
-      return cloneRoom(room);
-    }
-
-    room.glyph = "";
-    room.updatedAt = new Date().toISOString();
-    saveState();
-    render();
-    lightRoom(room.id);
-    status("Glyph z " + room.label + " byl odebrán.");
-    publish("cht.room.changed", room, "clear-glyph");
-    return cloneRoom(room);
-  }
-
-  function openRoom(id = selectedId) {
+  function updateGlyph(id, value, action = "assign-glyph") {
     const room = getRoom(id);
 
     if (!room) {
       return null;
     }
 
-    if (!room.glyph) {
-      status("" + room.label + " čeká na svůj Glyph.");
+    const glyph = normaliseGlyph(value);
+    const editor = editorFor(room.id);
+
+    if (editor && editor.value !== glyph) {
+      editor.value = glyph;
+    }
+
+    if (room.glyph === glyph) {
+      return cloneRoom(room);
+    }
+
+    room.glyph = glyph;
+    room.updatedAt = new Date().toISOString();
+    saveState();
+    renderRoom(room);
+    publish("cht.room.changed", room, glyph ? action : "clear-glyph");
+    return cloneRoom(room);
+  }
+
+  function assignGlyph(value) {
+    return updateGlyph(selectedId, value, "assign-glyph");
+  }
+
+  function clearGlyph() {
+    return updateGlyph(selectedId, "", "clear-glyph");
+  }
+
+  function openRoom(id = selectedId) {
+    const room = getRoom(id);
+
+    if (!room || !room.glyph) {
       return null;
     }
 
     lightRoom(room.id);
     publish("cht.room.open", room, "open");
-    status(room.label + " vyslal svou bránu. Až ho napojíme, otevře se jeho svět.");
     return cloneRoom(room);
   }
 
@@ -463,7 +506,7 @@ const CHTRoomOrbit = (() => {
   }
 
   const api = Object.freeze({
-    version: "1.0.0",
+    version: "2.0.0",
     getRooms,
     getRoom: id => {
       const room = getRoom(id);
