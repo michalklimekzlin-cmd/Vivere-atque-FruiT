@@ -45,31 +45,31 @@ const PHONE_SETTINGS_KEY = "cht360_iphone14_settings_v1";
 const GLYPH_DRUM_TOKENS = Object.freeze([
   ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
   ..."0123456789",
-  "ÃÂ", "ÃÂ", "ÃÂ", "ÃÂ", "ÃÂ", "ÃÂ", "ÃÂ", "ÃÂ", "ÃÂ", "ÃÂ ", "ÃÂ¤", "ÃÂ", "ÃÂ®", "ÃÂ",
-  "Ã£ÂÂ¢", "ÃÂ°", "Ã¢ÂÂ°", "Ã¢ÂÂ¢", "_", "-", "/", "\`", "ÃÂ´", "ÃÂ", "ÃÂ«", "ÃÂ±",
-  "ÃÂ¯", "ÃÂ¸", "ÃÂ", "ÃÂ", "ÃÂ¯", "&", "(", ")", "*", "}", "{", "Ã¢ÂÂ¹",
-  "7i_", "ÃÂ«ÃÂ´", "ÃÂÃÂ°iÃÂ°ÃÂ", "._;ÃÂ´/`", ",!", "ÃÂ¯ÃÂ¸", "ÃÂ°ÃÂÃÂ°", ".Ã¢ÂÂ¢cUÃ¢ÂÂ¢.",
-  "-:x:-", "7/ÃÂ¯", "ÃÂ±>o", "ÃÂ°&", "(\\*/)", "ÃÂo", "}{", "Ã¢ÂÂ¢N", "7Ã¢ÂÂ¹"
+  "Á", "Č", "Ď", "É", "Ě", "Í", "Ň", "Ó", "Ř", "Š", "Ť", "Ú", "Ů", "Ý",
+  "ア", "°", "‰", "•", "_", "-", "/", "\`", "´", "ˇ", "ī", "ı",
+  "ï", "ø", "Ō", "Ï", "¯", "&", "(", ")", "*", "}", "{", "₹",
+  "7i_", "ī´", "ˇ°i°ˇ", "._;´/`", ",!", "ïø", "°Ō°", ".•cU•.",
+  "-:x:-", "7/¯", "ı>o", "°&", "(\\*/)", "Ïo", "}{", "•N", "7₹"
 ]);
 
 const CORE_CIPHER_TOKENS = Object.freeze([
   ..."0123456789",
-  "7", "i", "_", "ÃÂ«", "ÃÂ´", "ÃÂ", "ÃÂ°", ".", ";", "/", "\`", ",", "!",
-  "ÃÂ¯", "ÃÂ¸", "ÃÂ", "Ã¢ÂÂ¢", "c", "U", "-", ":", "x", "ÃÂ¯", "ÃÂ±", ">", "o",
-  "&", "(", ")", "*", "ÃÂ", "}", "{", "N", "Ã¢ÂÂ¹", "Ã£ÂÂ¢"
+  "7", "i", "_", "ī", "´", "ˇ", "°", ".", ";", "/", "\`", ",", "!",
+  "ï", "ø", "Ō", "•", "c", "U", "-", ":", "x", "¯", "ı", ">", "o",
+  "&", "(", ")", "*", "Ï", "}", "{", "N", "₹", "ア"
 ]);
 
 const TROJKA_PROFILE = [
-  { id: "leva-hrana", label: "LevÃÂ¡ hrana", x: -1.28, z: .76, depth: 1 },
-  { id: "levy-propad", label: "LevÃÂ½ propad", x: -.64, z: -.58, depth: .2 },
-  { id: "stred", label: "StÃÂed", x: 0, z: .76, depth: 1 },
-  { id: "pravy-propad", label: "PravÃÂ½ propad", x: .64, z: -.58, depth: .2 },
-  { id: "prava-hrana", label: "PravÃÂ¡ hrana", x: 1.28, z: .76, depth: 1 }
+  { id: "leva-hrana", label: "Levá hrana", x: -1.28, z: .76, depth: 1 },
+  { id: "levy-propad", label: "Levý propad", x: -.64, z: -.58, depth: .2 },
+  { id: "stred", label: "Střed", x: 0, z: .76, depth: 1 },
+  { id: "pravy-propad", label: "Pravý propad", x: .64, z: -.58, depth: .2 },
+  { id: "prava-hrana", label: "Pravá hrana", x: 1.28, z: .76, depth: 1 }
 ];
 
 const TROJKA_RAILS = [
-  { id: "horni-kolej", label: "HornÃÂ­ kolej", y: -.47 },
-  { id: "dolni-kolej", label: "DolnÃÂ­ kolej", y: .47 }
+  { id: "horni-kolej", label: "Horní kolej", y: -.47 },
+  { id: "dolni-kolej", label: "Dolní kolej", y: .47 }
 ];
 
 let trojkaModels = loadTrojkaModels();
@@ -80,26 +80,26 @@ let slotAutosaveTimer = null;
 const cores = [
   {
     id: "earth",
-    title: "ZemÃÂ",
-    subtitle: "ModelovÃÂ¡nÃÂ­, svÃÂty a ÃÂºhel pohledu",
+    title: "Země",
+    subtitle: "Modelování, světy a úhel pohledu",
     radius: 50
   },
   {
     id: "language",
     title: "Jazyk",
-    subtitle: "PÃÂ­smena, symboly, znaky a vÃÂ½znam",
+    subtitle: "Písmena, symboly, znaky a význam",
     radius: 50
   },
   {
     id: "game",
     title: "Hra",
-    subtitle: "Pravidla, udÃÂ¡losti a postup",
+    subtitle: "Pravidla, události a postup",
     radius: 50
   },
   {
     id: "control",
     title: "iPhone 14",
-    subtitle: "ÃÂervenÃÂ½ uzel CHT ÃÂ· lokÃÂ¡lnÃÂ­ PWA",
+    subtitle: "Červený uzel CHT · lokální PWA",
     radius: 54,
     type: "iphone14"
   }
@@ -237,7 +237,7 @@ function readStoredMemory(key) {
 
     return raw ? normaliseMemory(JSON.parse(raw)) : null;
   } catch (error) {
-    console.warn(`PamÃÂÃÂ¥ v klÃÂ­ÃÂi ${key} se nepodaÃÂilo naÃÂÃÂ­st.`, error);
+    console.warn(`Paměť v klíči ${key} se nepodařilo načíst.`, error);
     return null;
   }
 }
@@ -309,7 +309,7 @@ function readLegacySlotMemory() {
         hasData = true;
       }
     } catch {
-      /* JednotlivÃÂ½ starÃÂ½ slot nesmÃÂ­ zastavit naÃÂtenÃÂ­ celÃÂ© PamÃÂti. */
+      /* Jednotlivý starý slot nesmí zastavit načtení celé Paměti. */
     }
   }
 
@@ -386,7 +386,7 @@ function writeMemoryCopies(value, createSnapshot = true) {
       JSON.stringify(snapshots.slice(-3))
     );
   } catch (error) {
-    console.warn("PamÃÂÃÂ¥ se nepodaÃÂilo bezpeÃÂnÃÂ zapsat.", error);
+    console.warn("Paměť se nepodařilo bezpečně zapsat.", error);
   }
 }
 
@@ -464,7 +464,7 @@ function loadPhoneSettings() {
         : []
     };
   } catch (error) {
-    console.warn("iPhone 14: nastavenÃÂ­ se nepodaÃÂilo naÃÂÃÂ­st.", error);
+    console.warn("iPhone 14: nastavení se nepodařilo načíst.", error);
     return fallback;
   }
 }
@@ -474,7 +474,7 @@ function savePhoneSettings() {
     phoneSettings.angle = normaliseAngle(phoneSettings.angle);
     localStorage.setItem(PHONE_SETTINGS_KEY, JSON.stringify(phoneSettings));
   } catch (error) {
-    console.warn("iPhone 14: nastavenÃÂ­ se nepodaÃÂilo uloÃÂ¾it.", error);
+    console.warn("iPhone 14: nastavení se nepodařilo uložit.", error);
   }
 }
 
@@ -537,7 +537,7 @@ function loadScene() {
       panY: Number.isFinite(saved.panY) ? saved.panY : fallback.panY
     };
   } catch (error) {
-    console.warn("RozloÃÂ¾enÃÂ­ scÃÂ©ny bylo obnoveno.", error);
+    console.warn("Rozložení scény bylo obnoveno.", error);
     return fallback;
   }
 }
@@ -600,7 +600,7 @@ function updatePills() {
     }
 
     const stats = getCoreStats(core.id);
-    pill.textContent = `${core.title.toUpperCase()} ÃÂ· ${stats.used}/70`;
+    pill.textContent = `${core.title.toUpperCase()} · ${stats.used}/70`;
   }
 }
 
@@ -824,7 +824,7 @@ function createDefaultTrojkaModels() {
   return [
     {
       id: "signal-leva",
-      label: "SignÃÂ¡l levÃÂ¡",
+      label: "Signál levá",
       kind: "jezdec",
       rail: "horni-kolej",
       progress: .08,
@@ -834,7 +834,7 @@ function createDefaultTrojkaModels() {
     },
     {
       id: "signal-stred",
-      label: "SignÃÂ¡l stÃÂed",
+      label: "Signál střed",
       kind: "jezdec",
       rail: "dolni-kolej",
       progress: .46,
@@ -844,7 +844,7 @@ function createDefaultTrojkaModels() {
     },
     {
       id: "signal-prava",
-      label: "SignÃÂ¡l pravÃÂ¡",
+      label: "Signál pravá",
       kind: "jezdec",
       rail: "horni-kolej",
       progress: .77,
@@ -868,7 +868,7 @@ function normaliseTrojkaModel(model, index) {
 
   return {
     id: String(source.id || fallbackId),
-    label: String(source.label || "ZÃÂ¡suvnÃÂ½ model").slice(0, 80),
+    label: String(source.label || "Zásuvný model").slice(0, 80),
     kind: String(source.kind || "model").slice(0, 40),
     rail: allowedRails.includes(source.rail)
       ? source.rail
@@ -898,7 +898,7 @@ function loadTrojkaModels() {
       .slice(0, 48)
       .map((model, index) => normaliseTrojkaModel(model, index));
   } catch (error) {
-    console.warn("Trojka byla obnovena do vÃÂ½chozÃÂ­ho stavu.", error);
+    console.warn("Trojka byla obnovena do výchozího stavu.", error);
     return createDefaultTrojkaModels();
   }
 }
@@ -929,7 +929,7 @@ function attachTrojkaModel(model) {
     trojkaModels.push(candidate);
   }
 
-  saveTrojkaModels("pÃÂipojenÃÂ­");
+  saveTrojkaModels("připojení");
   return { ...candidate };
 }
 
@@ -957,7 +957,7 @@ function detachTrojkaModel(id) {
     return false;
   }
 
-  saveTrojkaModels("odpojenÃÂ­");
+  saveTrojkaModels("odpojení");
   return true;
 }
 
@@ -1000,9 +1000,9 @@ function installTrojkaBridge() {
 
 function getTrojkaCamera() {
   /*
-    StÃÂna je vÃÂ¾dy vÃÂtÃÂ¡ÃÂ­ neÃÂ¾ displej o malÃÂ½ pÃÂesah.
-    Po otoÃÂenÃÂ­ nebo zmÃÂnÃÂ velikosti se propoÃÂÃÂ­tÃÂ¡ znovu,
-    takÃÂ¾e vede skuteÃÂnÃÂ od rohu k rohu.
+    Stěna je vždy větší než displej o malý přesah.
+    Po otočení nebo změně velikosti se propočítá znovu,
+    takže vede skutečně od rohu k rohu.
   */
   const base = Math.max(width * .88, height * 1.16);
   const projection = base / 3.78;
@@ -1297,7 +1297,7 @@ function getGlyphDrumTokens() {
 
 function createDefaultGlyphDrumValues() {
   const tokens = getGlyphDrumTokens();
-  const defaults = ["7i_", "ÃÂ«ÃÂ´", "ÃÂÃÂ°iÃÂ°ÃÂ", ".Ã¢ÂÂ¢cUÃ¢ÂÂ¢."];
+  const defaults = ["7i_", "ī´", "ˇ°i°ˇ", ".•cU•."];
 
   return defaults.map(token => Math.max(0, tokens.indexOf(token)));
 }
@@ -1328,7 +1328,7 @@ function saveCustomGlyphTokens() {
       JSON.stringify(customGlyphTokens)
     );
   } catch {
-    /* VlastnÃÂ­ glyph nesmÃÂ­ zastavit PamÃÂÃÂ¥. */
+    /* Vlastní glyph nesmí zastavit Paměť. */
   }
 }
 
@@ -1359,7 +1359,7 @@ function saveGlyphDrumValues() {
       JSON.stringify(glyphDrumValues)
     );
   } catch {
-    /* VÃÂ½bÃÂr bubÃÂ­nkÃÂ¯ je vedlejÃÂ¡ÃÂ­ pohodlÃÂ­, ne kritickÃÂ¡ data. */
+    /* Výběr bubínků je vedlejší pohodlí, ne kritická data. */
   }
 }
 
@@ -1586,23 +1586,23 @@ function ensureIPhoneSettingsPanel() {
   phonePanel.id = "iphoneSettingsPanel";
   phonePanel.setAttribute("role", "dialog");
   phonePanel.setAttribute("aria-modal", "true");
-  phonePanel.setAttribute("aria-label", "NastavenÃÂ­ iPhone 14 v CHT 360ÃÂ°Ã¢ÂÂ°.");
+  phonePanel.setAttribute("aria-label", "Nastavení iPhone 14 v CHT 360°‰.");
   phonePanel.innerHTML = [
     "<div class=\"iphoneSettingsCard\">",
     "  <div class=\"iphoneSettingsHead\">",
-    "    <div><strong>iPhone 14 ÃÂ· CHT 360ÃÂ°Ã¢ÂÂ°.</strong><span>ÃÂervenÃÂ½ uzel v obÃÂhu PamÃÂti.</span></div>",
-    "    <button class=\"iphoneSettingsClose\" type=\"button\" aria-label=\"ZavÃÂÃÂ­t nastavenÃÂ­\">ÃÂ</button>",
+    "    <div><strong>iPhone 14 · CHT 360°‰.</strong><span>Červený uzel v oběhu Paměti.</span></div>",
+    "    <button class=\"iphoneSettingsClose\" type=\"button\" aria-label=\"Zavřít nastavení\">×</button>",
     "  </div>",
     "  <div class=\"iphoneSettingsBody\">",
     "    <div class=\"iphoneSettingsState\" id=\"iphoneSettingsState\"></div>",
     "    <div class=\"iphoneSettingsRow\">",
-    "      <button class=\"iphoneSettingsButton primary\" id=\"iphoneRotate\" type=\"button\">OtoÃÂit iPhone</button>",
+    "      <button class=\"iphoneSettingsButton primary\" id=\"iphoneRotate\" type=\"button\">Otočit iPhone</button>",
     "      <button class=\"iphoneSettingsButton\" id=\"iphoneStraighten\" type=\"button\">Narovnat</button>",
     "    </div>",
-    "    <h2 class=\"iphoneSettingsTitle\">NapojenÃÂ­ AI aplikacÃÂ­</h2>",
-    "    <input class=\"iphoneSettingsField\" id=\"iphoneAppName\" maxlength=\"48\" placeholder=\"NÃÂ¡zev aplikace\">",
+    "    <h2 class=\"iphoneSettingsTitle\">Napojení AI aplikací</h2>",
+    "    <input class=\"iphoneSettingsField\" id=\"iphoneAppName\" maxlength=\"48\" placeholder=\"Název aplikace\">",
     "    <input class=\"iphoneSettingsField\" id=\"iphoneAppUrl\" maxlength=\"500\" placeholder=\"https://... nebo odkaz aplikace\">",
-    "    <div class=\"iphoneSettingsRow\" style=\"margin-top:8px\"><button class=\"iphoneSettingsButton primary\" id=\"iphoneAppAdd\" type=\"button\">PÃÂidat do iPhonu</button></div>",
+    "    <div class=\"iphoneSettingsRow\" style=\"margin-top:8px\"><button class=\"iphoneSettingsButton primary\" id=\"iphoneAppAdd\" type=\"button\">Přidat do iPhonu</button></div>",
     "    <div id=\"iphoneAppList\" class=\"iphoneAppList\"></div>",
     "  </div>",
     "</div>"
@@ -1639,15 +1639,15 @@ function renderIPhoneSettings() {
   const state = phonePanel.querySelector("#iphoneSettingsState");
   const list = phonePanel.querySelector("#iphoneAppList");
   const appCount = phoneSettings.apps.length;
-  const onlineText = navigator.onLine ? "PWA je online" : "PWA je bez pÃÂipojenÃÂ­";
+  const onlineText = navigator.onLine ? "PWA je online" : "PWA je bez připojení";
 
-  state.textContent = onlineText + " ÃÂ· otoÃÂenÃÂ­ je uloÃÂ¾enÃÂ© ÃÂ· AI aplikace: " + appCount + "/12";
+  state.textContent = onlineText + " · otočení je uložené · AI aplikace: " + appCount + "/12";
   list.replaceChildren();
 
   if (!appCount) {
     const empty = document.createElement("div");
     empty.className = "iphoneSettingsEmpty";
-    empty.textContent = "ZatÃÂ­m tu nejsou ÃÂ¾ÃÂ¡dnÃÂ© AI aplikace. PÃÂidej nÃÂ¡zev a jejÃÂ­ odkaz; CHT jej uloÃÂ¾ÃÂ­ pouze do tohoto iPhonu.";
+    empty.textContent = "Zatím tu nejsou žádné AI aplikace. Přidej název a její odkaz; CHT jej uloží pouze do tohoto iPhonu.";
     list.appendChild(empty);
     return;
   }
@@ -1662,9 +1662,9 @@ function renderIPhoneSettings() {
 
     item.className = "iphoneAppItem";
     name.textContent = app.name || "AI aplikace";
-    url.textContent = app.url || "DoplÃÂ odkaz";
+    url.textContent = app.url || "Doplň odkaz";
     open.type = "button";
-    open.textContent = "OtevÃÂÃÂ­t";
+    open.textContent = "Otevřít";
     open.disabled = !isAllowedPhoneUrl(app.url);
     open.addEventListener("click", () => {
       if (isAllowedPhoneUrl(app.url)) {
@@ -1672,7 +1672,7 @@ function renderIPhoneSettings() {
       }
     });
     remove.type = "button";
-    remove.textContent = "ÃÂ";
+    remove.textContent = "×";
     remove.setAttribute("aria-label", "Odebrat " + (app.name || "aplikaci"));
     remove.addEventListener("click", () => {
       phoneSettings.apps = phoneSettings.apps.filter(entry => entry.id !== app.id);
@@ -1694,7 +1694,7 @@ function addIPhoneApp() {
   const url = urlInput.value.trim();
 
   if (!name || !isAllowedPhoneUrl(url)) {
-    phonePanel.querySelector("#iphoneSettingsState").textContent = "NapiÃÂ¡ nÃÂ¡zev a platnÃÂ½ odkaz aplikace.";
+    phonePanel.querySelector("#iphoneSettingsState").textContent = "Napiš název a platný odkaz aplikace.";
     return;
   }
 
@@ -1731,8 +1731,8 @@ function drawIPhoneCore(core, time) {
   const pulse = .5 + (Math.sin(time * .0032) + 1) * .25;
   const online = navigator.onLine;
   const deviceStatus = phoneSettings.apps.length
-    ? "AI ÃÂ· " + phoneSettings.apps.length
-    : online ? "PWA ÃÂ· PÃÂIPOJENO" : "PWA ÃÂ· BEZ PÃÂIPOJENÃÂ";
+    ? "AI · " + phoneSettings.apps.length
+    : online ? "PWA · PŘIPOJENO" : "PWA · BEZ PŘIPOJENÍ";
   const anchor = getSceneAnchor();
   const hubX = anchor.centerX + scene.panX;
   const hubY = anchor.centerY + scene.panY;
@@ -1821,7 +1821,7 @@ function drawIPhoneCore(core, time) {
   context.fillText("CHT", position.x, position.y + radius * .29);
   context.fillStyle = "rgba(214,214,218,.84)";
   context.font = "700 " + Math.max(6, Math.round(radius * .11)) + "px system-ui";
-  context.fillText("360ÃÂ°Ã¢ÂÂ°.", position.x, position.y + radius * .45);
+  context.fillText("360°‰.", position.x, position.y + radius * .45);
   context.fillStyle = online ? "#f4f4f5" : "#a3a3a8";
   context.font = "700 " + Math.max(5, Math.round(radius * .085)) + "px system-ui";
   context.fillText(deviceStatus, position.x, phoneY + phoneHeight - radius * .20);
@@ -2088,8 +2088,8 @@ function openCore(core) {
   slotEditor.dataset.chtCore = core.id;
   delete slotEditor.dataset.chtSlot;
 
-  panelTitle.textContent = `${core.title} ÃÂ· PamÃÂÃÂ¥`;
-  panelSub.textContent = "70 slotÃÂ¯ ÃÂ· samostatnÃÂ© uloÃÂ¾enÃÂ­";
+  panelTitle.textContent = `${core.title} · Paměť`;
+  panelSub.textContent = "70 slotů · samostatné uložení";
 
   panel.classList.add("open");
   slotEditor.classList.remove("open");
@@ -2133,7 +2133,7 @@ function renderSlots() {
 
     button.innerHTML = `
       <strong>${escapeHtml(slot.name || `Slot ${slot.id}`)}</strong>
-      <span>${slot.content.trim() ? "obsazeno" : "prÃÂ¡zdnÃÂ©"}</span>
+      <span>${slot.content.trim() ? "obsazeno" : "prázdné"}</span>
     `;
 
     button.addEventListener("click", () => selectSlot(index));
@@ -2161,22 +2161,22 @@ function selectSlot(index) {
 
 function updateStatus(message = "") {
   if (!selectedCore) {
-    statusBox.textContent = "Vyber jÃÂ¡dro.";
+    statusBox.textContent = "Vyber jádro.";
     return;
   }
 
   const stats = getCoreStats(selectedCore.id);
 
   let text =
-    `${selectedCore.title}: obsazeno ${stats.used}/70 ÃÂ· ` +
+    `${selectedCore.title}: obsazeno ${stats.used}/70 · ` +
     `velikost ${formatBytes(stats.size)}`;
 
   if (selectedSlotIndex !== null) {
-    text += ` ÃÂ· otevÃÂen slot ${selectedSlotIndex + 1}`;
+    text += ` · otevřen slot ${selectedSlotIndex + 1}`;
   }
 
   if (message) {
-    text += ` ÃÂ· ${message}`;
+    text += ` · ${message}`;
   }
 
   statusBox.textContent = text;
@@ -2197,7 +2197,7 @@ function escapeHtml(text) {
 function getGlyphTokenAt(value) {
   const tokens = getGlyphDrumTokens();
 
-  return tokens[positiveModulo(value, tokens.length)] || "Ã¢ÂÂ¢";
+  return tokens[positiveModulo(value, tokens.length)] || "•";
 }
 
 function updateGlyphDrumButton(button, index) {
@@ -2214,7 +2214,7 @@ function updateGlyphDrumButton(button, index) {
   button.querySelector("[data-glyph-reel='next']").textContent = next;
   button.setAttribute(
     "aria-label",
-    "BubÃÂ­nek " + (index + 1) + ": " + token
+    "Bubínek " + (index + 1) + ": " + token
   );
 }
 
@@ -2405,7 +2405,7 @@ function writeSlotValues(coreId, index, name, content, message, reason) {
   }
 }
 
-function saveSelectedSlot(message = "uloÃÂ¾eno", reason = "save") {
+function saveSelectedSlot(message = "uloženo", reason = "save") {
   if (!selectedCore || selectedSlotIndex === null) {
     return;
   }
@@ -2438,7 +2438,7 @@ function scheduleSlotAutosave() {
       slotIndex,
       name,
       content,
-      "automaticky uloÃÂ¾eno",
+      "automaticky uloženo",
       "autosave"
     );
   }, 600);
@@ -2446,7 +2446,7 @@ function scheduleSlotAutosave() {
 
 function insertGlyphPhrase() {
   if (!selectedCore || selectedSlotIndex === null) {
-    updateStatus("nejdÃÂÃÂ­v vyber slot");
+    updateStatus("nejdřív vyber slot");
     return;
   }
 
@@ -2475,7 +2475,7 @@ function insertGlyphPhrase() {
   slotContent.focus();
   slotContent.setSelectionRange(cursor, cursor);
   clearTimeout(slotAutosaveTimer);
-  saveSelectedSlot("glyph vloÃÂ¾en a uloÃÂ¾en", "glyph");
+  saveSelectedSlot("glyph vložen a uložen", "glyph");
 }
 
 function initialiseGlyphDrums() {
@@ -2515,7 +2515,7 @@ function downloadJson(data, filename) {
 
 saveSlot.addEventListener("click", () => {
   clearTimeout(slotAutosaveTimer);
-  saveSelectedSlot("uloÃÂ¾eno", "save");
+  saveSelectedSlot("uloženo", "save");
 });
 
 slotName.addEventListener("input", scheduleSlotAutosave);
@@ -2541,7 +2541,7 @@ clearSlot.addEventListener("click", () => {
   slotContent.value = "";
 
   renderSlots();
-  updateStatus("vymazÃÂ¡no");
+  updateStatus("vymazáno");
 });
 
 searchInput.addEventListener("input", renderSlots);
@@ -2596,7 +2596,7 @@ fileInput.addEventListener("change", async () => {
 
     if (importMode === "core") {
       if (!selectedCore) {
-        throw new Error("NenÃÂ­ vybranÃÂ© jÃÂ¡dro");
+        throw new Error("Není vybrané jádro");
       }
 
       const slots = Array.isArray(data.sloty)
@@ -2618,16 +2618,16 @@ fileInput.addEventListener("change", async () => {
 
       saveMemory();
       renderSlots();
-      updateStatus("jÃÂ¡dro importovÃÂ¡no");
+      updateStatus("jádro importováno");
     } else {
       if (!data.cores) {
-        throw new Error("Soubor neobsahuje celou PamÃÂÃÂ¥");
+        throw new Error("Soubor neobsahuje celou Paměť");
       }
 
       const importedMemory = normaliseMemory(data);
 
       if (!importedMemory) {
-        throw new Error("Soubor neobsahuje platnou PamÃÂÃÂ¥");
+        throw new Error("Soubor neobsahuje platnou Paměť");
       }
 
       writeMemoryCopies(importedMemory);
@@ -2635,10 +2635,10 @@ fileInput.addEventListener("change", async () => {
 
       saveMemory();
       renderSlots();
-      updateStatus("celÃÂ¡ PamÃÂÃÂ¥ importovÃÂ¡na");
+      updateStatus("celá Paměť importována");
     }
   } catch (error) {
-    alert(`Import se nezdaÃÂil: ${error.message}`);
+    alert(`Import se nezdařil: ${error.message}`);
   }
 });
 
@@ -2671,9 +2671,9 @@ function updateGestureHint() {
   const hints = document.querySelectorAll(".hud span");
 
   if (hints.length >= 3) {
-    hints[0].textContent = "1 prst: 3D otÃÂ¡ÃÂenÃÂ­";
-    hints[1].textContent = "2 prsty: posun ÃÂ· zoom ÃÂ· ÃÂ¡ejdr";
-    hints[2].textContent = "klepnutÃÂ­: otevÃÂÃÂ­t jÃÂ¡dro";
+    hints[0].textContent = "1 prst: 3D otáčení";
+    hints[1].textContent = "2 prsty: posun · zoom · šejdr";
+    hints[2].textContent = "klepnutí: otevřít jádro";
   }
 }
 
@@ -2913,9 +2913,10 @@ if ("serviceWorker" in navigator) {
       }, 5000);
     } catch (error) {
       console.warn(
-        "[CHT 360ÃÂ°Ã¢ÂÂ°.] Service worker se nepodaÃÂilo spustit.",
+        "[CHT 360°‰.] Service worker se nepodařilo spustit.",
         error
       );
     }
   });
 }
+
