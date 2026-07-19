@@ -1,12 +1,11 @@
 /*
- * CHT 360°‰. · Rotující prstenec pokojíčků
- * Samostatná vrstva nad světem. Nezasahuje do hotových bubínků ani Paměti.
+ * CHT 360°‰. · 3D rotující prstenec pokojíčků
+ * Prstenec i pokojíčky mají hloubku. Pokojíček lze prstem přetáhnout po kruhu.
  */
 
 #chtRoomOrbit {
   --cht-room-ivory: #fff0c5;
   --cht-room-gold: #ffe2ad;
-  --cht-room-muted: rgba(255, 240, 197, .66);
   position: absolute;
   z-index: 14;
   top: 42%;
@@ -38,7 +37,7 @@
 
 .cht-room-orbit__label {
   position: absolute;
-  z-index: 6;
+  z-index: 8;
   top: 1%;
   left: 50%;
   width: max-content;
@@ -56,17 +55,19 @@
   white-space: nowrap;
 }
 
-/* Tohle je celý rotující prsten včetně šesti pokojíčků. */
+/* Vlastní prsten. --ring-spin nastavuje JavaScript, aby šly sloty přesně táhnout. */
 .cht-room-orbit__rotor {
+  --ring-spin: 0deg;
+  --ring-counter: 0deg;
   position: absolute;
   z-index: 1;
   top: 5%;
   left: 50%;
   width: min(100%, 410px);
   aspect-ratio: 1;
+  transform: translateX(-50%) rotateX(60deg) rotateZ(var(--ring-spin));
   transform-style: preserve-3d;
   transform-origin: 50% 50%;
-  animation: cht-room-ring-rotation 18s linear infinite;
   will-change: transform;
 }
 
@@ -77,57 +78,57 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-  filter: drop-shadow(0 0 12px rgba(255, 207, 114, .25));
+  filter: drop-shadow(0 0 13px rgba(255, 207, 114, .31));
   pointer-events: none;
 }
 
-.ring-v2__aura {
-  fill: url(#cht-room-ring-v2-aura);
+.ring-v3__aura {
+  fill: url(#cht-room-ring-v3-aura);
 }
 
-.ring-v2__outer,
-.ring-v2__middle,
-.ring-v2__inner,
-.ring-v2__latitude,
-.ring-v2__longitude,
-.ring-v2__dash {
+.ring-v3__outer,
+.ring-v3__middle,
+.ring-v3__inner,
+.ring-v3__latitude,
+.ring-v3__longitude,
+.ring-v3__dash {
   fill: none;
   vector-effect: non-scaling-stroke;
 }
 
-.ring-v2__outer {
-  stroke: url(#cht-room-ring-v2-line);
-  stroke-width: 1.35;
-  opacity: .95;
+.ring-v3__outer {
+  stroke: url(#cht-room-ring-v3-line);
+  stroke-width: 1.55;
+  opacity: .96;
 }
 
-.ring-v2__middle {
-  stroke: rgba(255, 239, 198, .53);
-  stroke-width: .8;
-}
-
-.ring-v2__inner {
-  stroke: rgba(199, 155, 51, .68);
+.ring-v3__middle {
+  stroke: rgba(255, 239, 198, .58);
   stroke-width: .9;
 }
 
-.ring-v2__latitude {
-  stroke: rgba(255, 232, 177, .23);
-  stroke-width: .66;
+.ring-v3__inner {
+  stroke: rgba(199, 155, 51, .72);
+  stroke-width: 1.05;
 }
 
-.ring-v2__longitude {
-  stroke: rgba(255, 232, 177, .18);
-  stroke-width: .62;
+.ring-v3__latitude {
+  stroke: rgba(255, 232, 177, .25);
+  stroke-width: .7;
 }
 
-.ring-v2__dash {
-  stroke: rgba(255, 239, 197, .33);
-  stroke-width: .9;
-  stroke-dasharray: 2.7 8.6;
+.ring-v3__longitude {
+  stroke: rgba(255, 232, 177, .2);
+  stroke-width: .68;
 }
 
-.ring-v2__star {
+.ring-v3__dash {
+  stroke: rgba(255, 239, 197, .38);
+  stroke-width: 1;
+  stroke-dasharray: 2.8 8.4;
+}
+
+.ring-v3__star {
   fill: #fff0c5;
   filter: drop-shadow(0 0 5px rgba(255, 211, 139, .95));
 }
@@ -136,8 +137,10 @@
   position: absolute;
   z-index: 2;
   inset: 0;
+  transform-style: preserve-3d;
 }
 
+/* Každý pokojíček je vystouplý 3D blok nad prstencem. */
 .cht-room {
   --room-x: 50%;
   --room-y: 50%;
@@ -153,22 +156,24 @@
   margin: 0;
   padding: 3px 4px 4px;
   overflow: visible;
-  transform: translate(-50%, -50%);
-  border: 1px solid rgba(255, 226, 173, .46);
+  transform: translate(-50%, -50%) translateZ(18px);
+  transform-style: preserve-3d;
+  border: 1px solid rgba(255, 226, 173, .5);
   border-radius: 12px;
   outline: 0;
   color: var(--cht-room-ivory);
   background:
-    linear-gradient(90deg, transparent 47%, rgba(255, 236, 190, .2) 50%, transparent 53%),
-    radial-gradient(circle at 50% 46%, rgba(255, 225, 165, .16), transparent 58%),
-    rgba(3, 5, 12, .84);
+    linear-gradient(90deg, transparent 46%, rgba(255, 239, 205, .22) 50%, transparent 54%),
+    radial-gradient(circle at 45% 35%, rgba(255, 236, 190, .22), transparent 45%),
+    linear-gradient(145deg, rgba(53, 39, 18, .98), rgba(5, 7, 15, .95) 58%, rgba(145, 100, 28, .5));
   box-shadow:
-    0 0 0 1px rgba(255, 226, 173, .1),
-    0 8px 19px rgba(0, 0, 0, .42),
-    inset 0 0 16px rgba(255, 226, 173, .075);
-  cursor: pointer;
-  touch-action: manipulation;
-  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, background .18s ease;
+    0 15px 16px rgba(0, 0, 0, .55),
+    0 0 0 1px rgba(255, 226, 173, .11),
+    inset 0 1px rgba(255, 246, 217, .22),
+    inset 0 -9px 11px rgba(0, 0, 0, .34);
+  cursor: grab;
+  touch-action: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
 
 .cht-room::before,
@@ -180,40 +185,43 @@
 }
 
 .cht-room::before {
-  inset: -7px;
-  border: 1px solid rgba(255, 225, 166, .16);
-  border-radius: 15px;
-  opacity: .82;
+  inset: 5px -4px -8px 4px;
+  border: 1px solid rgba(124, 83, 24, .55);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(58, 37, 11, .95), rgba(2, 3, 8, .94));
+  box-shadow: 0 12px 15px rgba(0, 0, 0, .4);
+  transform: translateZ(-10px);
 }
 
 .cht-room::after {
   top: 50%;
-  left: -12px;
-  width: calc(100% + 24px);
+  left: -13px;
+  width: calc(100% + 26px);
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 230, 176, .26), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 230, 176, .29), transparent);
+  transform: translateZ(8px);
 }
 
 .cht-room:hover,
-.cht-room:focus-visible {
-  transform: translate(-50%, -50%) scale(1.07);
-  border-color: rgba(255, 241, 207, .96);
-  box-shadow:
-    0 0 0 3px rgba(255, 226, 173, .08),
-    0 0 24px rgba(255, 202, 104, .38),
-    inset 0 0 17px rgba(255, 239, 203, .15);
-}
-
-.cht-room:active {
-  transform: translate(-50%, -50%) scale(.98);
-}
-
+.cht-room:focus-visible,
 .cht-room.is-selected {
-  border-color: rgba(255, 241, 207, .96);
-  background:
-    linear-gradient(90deg, transparent 47%, rgba(255, 239, 205, .29) 50%, transparent 53%),
-    radial-gradient(circle at 50% 45%, rgba(255, 224, 163, .27), transparent 60%),
-    rgba(7, 8, 13, .88);
+  border-color: rgba(255, 241, 207, .98);
+  box-shadow:
+    0 0 0 3px rgba(255, 226, 173, .09),
+    0 0 27px rgba(255, 202, 104, .42),
+    0 15px 17px rgba(0, 0, 0, .56),
+    inset 0 1px rgba(255, 246, 217, .3),
+    inset 0 -9px 11px rgba(0, 0, 0, .3);
+}
+
+.cht-room.is-dragging {
+  cursor: grabbing;
+  border-color: #fff5d5;
+  box-shadow:
+    0 0 0 4px rgba(255, 229, 172, .13),
+    0 0 35px rgba(255, 203, 104, .78),
+    0 17px 18px rgba(0, 0, 0, .56),
+    inset 0 1px rgba(255, 246, 217, .36);
 }
 
 .cht-room.is-lit {
@@ -222,7 +230,7 @@
 
 .cht-room__number {
   align-self: start;
-  color: rgba(255, 240, 197, .66);
+  color: rgba(255, 240, 197, .7);
   font-size: clamp(8px, .85vw, 11px);
   font-weight: 850;
   line-height: 1;
@@ -241,24 +249,24 @@
   line-height: 1;
   text-align: center;
   text-overflow: ellipsis;
-  text-shadow: 0 0 10px rgba(255, 219, 146, .68);
+  text-shadow: 0 0 10px rgba(255, 219, 146, .74);
   white-space: nowrap;
 }
 
-/* Číslo i Glyph zůstávají při oběhu čitelné. */
+/* Text se otáčí opačně než prsten, aby zůstal čitelný. */
 .cht-room__number,
 .cht-room__glyph,
 .cht-room__editor {
-  animation: cht-room-ring-counter 18s linear infinite;
+  transform: rotateZ(var(--ring-counter));
 }
 
 .cht-room.is-empty .cht-room__glyph {
-  color: rgba(255, 240, 197, .32);
+  color: rgba(255, 240, 197, .34);
   font-size: clamp(12px, 1.35vw, 17px);
   text-shadow: none;
 }
 
-/* Glyph se píše přímo do zvoleného pokojíčku z klávesnice iPhonu. */
+/* Přímé psaní Glyphu do pokojíčku z klávesnice iPhonu. */
 .cht-room__editor {
   position: absolute;
   inset: 18px 3px 3px;
@@ -277,18 +285,20 @@
   letter-spacing: .02em;
   line-height: 1;
   text-align: center;
-  text-shadow: 0 0 10px rgba(255, 219, 146, .78);
+  text-shadow: 0 0 10px rgba(255, 219, 146, .82);
   touch-action: manipulation;
   user-select: text;
   -webkit-user-select: text;
 }
 
 .cht-room.is-editing {
+  cursor: text;
   border-color: rgba(255, 248, 224, 1);
   box-shadow:
-    0 0 0 4px rgba(255, 229, 172, .1),
-    0 0 31px rgba(255, 203, 104, .72),
-    inset 0 0 19px rgba(255, 244, 211, .24);
+    0 0 0 4px rgba(255, 229, 172, .12),
+    0 0 32px rgba(255, 203, 104, .76),
+    0 15px 17px rgba(0, 0, 0, .56),
+    inset 0 1px rgba(255, 246, 217, .32);
 }
 
 .cht-room.is-editing .cht-room__glyph {
@@ -299,156 +309,21 @@
   display: block;
 }
 
-/* Při psaní se prsten na chvíli zastaví, aby Glyph neutíkal pod prstem. */
-#chtRoomOrbit.is-editing .cht-room-orbit__rotor,
-#chtRoomOrbit.is-editing .cht-room__number,
-#chtRoomOrbit.is-editing .cht-room__glyph,
-#chtRoomOrbit.is-editing .cht-room__editor {
-  animation-play-state: paused;
-}
-
-.cht-room-orbit__console {
-  position: absolute;
-  z-index: 7;
-  right: 50%;
-  bottom: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 6px;
-  width: min(100%, 315px);
-  padding: 7px;
-  transform: translateX(50%);
-  border: 1px solid rgba(255, 226, 173, .24);
-  border-radius: 15px;
-  background:
-    linear-gradient(180deg, rgba(255, 225, 165, .08), rgba(1, 3, 8, .85)),
-    rgba(3, 4, 10, .78);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, .34), inset 0 1px rgba(255, 238, 201, .08);
-  backdrop-filter: blur(9px);
-  -webkit-backdrop-filter: blur(9px);
-}
-
-.cht-room-orbit__input {
-  min-width: 0;
-  height: 32px;
-  padding: 0 8px;
-  border: 1px solid rgba(255, 226, 173, .22);
-  border-radius: 9px;
-  outline: 0;
-  color: #fff2d1;
-  background: rgba(0, 0, 0, .36);
-  font-size: clamp(11px, 1.1vw, 13px);
-  text-align: center;
-  touch-action: manipulation;
-  user-select: text;
-  -webkit-user-select: text;
-}
-
-.cht-room-orbit__input::placeholder {
-  color: rgba(255, 240, 197, .42);
-}
-
-.cht-room-orbit__input:focus {
-  border-color: rgba(255, 232, 183, .74);
-  box-shadow: 0 0 0 2px rgba(255, 225, 163, .1);
-}
-
-.cht-room-orbit__action {
-  min-height: 32px;
-  margin: 0;
-  padding: 0 9px;
-  border: 1px solid rgba(255, 226, 173, .33);
-  border-radius: 9px;
-  color: #241508;
-  background: #ffe2ad;
-  font-size: clamp(10px, .97vw, 12px);
-  font-weight: 900;
-  line-height: 1;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-.cht-room-orbit__action:disabled,
-.cht-room-orbit__secondary:disabled {
-  cursor: default;
-  opacity: .38;
-}
-
-.cht-room-orbit__action:not(:disabled):active,
-.cht-room-orbit__secondary:not(:disabled):active {
-  transform: scale(.97);
-}
-
-.cht-room-orbit__foot {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 6px;
-}
-
-.cht-room-orbit__status {
-  min-width: 0;
-  color: var(--cht-room-muted);
-  font-size: clamp(8px, .8vw, 10px);
-  line-height: 1.25;
-}
-
-.cht-room-orbit__secondary {
-  min-height: 24px;
-  margin: 0;
-  padding: 0 7px;
-  border: 1px solid rgba(255, 226, 173, .22);
-  border-radius: 8px;
-  color: rgba(255, 239, 204, .83);
-  background: rgba(255, 226, 173, .08);
-  font-size: clamp(8px, .75vw, 10px);
-  font-weight: 800;
-  white-space: nowrap;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-
-.cht-room-orbit__secondary--open {
-  border-color: rgba(255, 226, 173, .42);
-  color: #ffe2ad;
-}
-
-@keyframes cht-room-ring-rotation {
-  from {
-    transform: translateX(-50%) rotateX(60deg) rotateZ(0deg);
-  }
-  to {
-    transform: translateX(-50%) rotateX(60deg) rotateZ(360deg);
-  }
-}
-
-@keyframes cht-room-ring-counter {
-  from {
-    transform: rotateZ(0deg);
-  }
-  to {
-    transform: rotateZ(-360deg);
-  }
-}
-
 @keyframes cht-room-target {
   0%,
   100% {
-    border-color: rgba(255, 239, 201, .48);
+    border-color: rgba(255, 239, 201, .5);
     box-shadow: 0 0 0 0 rgba(255, 219, 145, 0), inset 0 0 16px rgba(255, 239, 203, .08);
   }
   50% {
     border-color: rgba(255, 248, 224, 1);
-    box-shadow: 0 0 0 4px rgba(255, 229, 172, .1), 0 0 31px rgba(255, 203, 104, .78), inset 0 0 19px rgba(255, 244, 211, .34);
+    box-shadow: 0 0 0 4px rgba(255, 229, 172, .11), 0 0 34px rgba(255, 203, 104, .8), inset 0 0 19px rgba(255, 244, 211, .31);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cht-room-orbit__rotor,
-  .cht-room__number,
-  .cht-room__glyph {
-    animation: none;
+  .cht-room {
+    transition: none;
   }
 }
 
@@ -467,19 +342,5 @@
 
   .cht-room {
     width: clamp(35px, 4.1vw, 48px);
-  }
-
-  .cht-room-orbit__console {
-    padding: 5px;
-  }
-
-  .cht-room-orbit__input,
-  .cht-room-orbit__action {
-    height: 27px;
-    min-height: 27px;
-  }
-
-  .cht-room-orbit__secondary {
-    min-height: 21px;
   }
 }
