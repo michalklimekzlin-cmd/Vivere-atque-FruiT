@@ -30,6 +30,7 @@ const CORE_FILES = [
   "./js/cht-360-network.js",
   "./manifest.json",
   "./icon.svg"
+  "./js/bubinky-pevne.js",
 ];
 
 self.addEventListener("install", event => {
