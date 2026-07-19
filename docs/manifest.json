@@ -1,11 +1,21 @@
 {
-  "name": "VaF'i'T Paměť",
-  "short_name": "Paměť",
-  "lang": "cs",
+  "name": "CHT 360°‰. · Paměť a Glyph",
+  "short_name": "CHT 360°‰.",
+  "description": "Česká offline Paměť se čtyřmi jádry a vlastní UTF‑8 Glyph dílnou.",
+  "lang": "cs-CZ",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#020208",
   "theme_color": "#050815",
-  "orientation": "portrait"
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
 }
+
