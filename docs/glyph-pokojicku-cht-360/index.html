@@ -4,50 +4,51 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#080707">
-  <meta name="description" content="Glyph pokojíčků CHT 360°‰ — každý Glyph má vlastní pokojíček.">
+  <meta name="description" content="Glyph pokojíčků CHT 360°‰ — žádný Glyph nezůstane bez vlastního pokojíčku.">
   <title>Glyph pokojíčků CHT 360°‰</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">Soukromé prostory každého znaku</p>
+        <p class="eyebrow">Neveřejné prostory každého znaku</p>
         <h1>Glyph pokojíčků CHT 360°‰</h1>
-        <p class="subtitle">Každý nový Glyph dostane při vytvoření vlastní pokojíček. Dvakrát klepni na jeho stěnu a ukáže se, kdo v něm bydlí.</p>
+        <p class="subtitle">Žádný nový Glyph nezůstane při vytvoření bez vlastního pokojíčku. Bez dvojitého klepnutí se neukáže, kdo v něm bydlí.</p>
       </div>
 
       <nav class="top-actions" aria-label="Propojené části">
-        <a class="button button-quiet" href="../glyph-cht-360/">ChybaŽrout</a>
-        <button class="button button-quiet" id="exportRooms" type="button">Záloha pokojů</button>
+        <a class="button button-quiet" href="../glyph-cht-360/">Glyph dílna</a>
+        <a class="button button-quiet" href="../necesstina-cht-360/">NeČEŠTINA</a>
+        <button class="button button-quiet" id="exportRooms" type="button">Neztratit pokoje</button>
         <label class="button button-quiet import-button" for="importRooms">
-          Načíst zálohu
+          Nenačíst bez zálohy
           <input id="importRooms" type="file" accept="application/json,.json" hidden>
         </label>
       </nav>
     </header>
 
     <section class="drum-row" aria-label="Stav pokojíčků">
-      <article class="drum"><span>Glyphy</span><strong id="glyphCount">0</strong><small>v registru</small></article>
-      <article class="drum"><span>Pokojíčky</span><strong id="roomCount">0</strong><small>přiděleno</small></article>
-      <article class="drum"><span>Stavební kameny</span><strong id="moduleCount">0</strong><small>pro mini aplikace</small></article>
-      <article class="drum"><span>Uložení</span><strong id="storageState">Načítám</strong><small id="storageNote">místní paměť</small></article>
+      <article class="drum"><span>Glyphy</span><strong id="glyphCount">0</strong><small>nejsou ztracené</small></article>
+      <article class="drum"><span>Pokojíčky</span><strong id="roomCount">0 / 70</strong><small>obsazeno z 70 dveří</small></article>
+      <article class="drum"><span>Stavební kameny</span><strong id="moduleCount">0</strong><small>nejsou bez budoucnosti</small></article>
+      <article class="drum"><span>Uložení</span><strong id="storageState">Načítám</strong><small id="storageNote">neopouští zařízení</small></article>
     </section>
 
     <section class="assign-panel panel" aria-labelledby="assignTitle">
       <div class="panel-heading">
         <div>
-          <p class="eyebrow">Přidělovník pokoje</p>
-          <h2 id="assignTitle">Napiš Glyph → dostane pokojíček</h2>
+          <p class="eyebrow">Nenechat Glyph bez pokoje</p>
+          <h2 id="assignTitle">Žádný zapsaný Glyph nezůstane bez pokojíčku</h2>
         </div>
         <span class="locked-note">stav: návrh</span>
       </div>
 
       <div class="assign-grid">
         <label>
-          <span>Tvůj Glyph</span>
+          <span>Glyph, který CHT nevlastní</span>
           <input id="quickGlyph" type="text" maxlength="80" placeholder="např. 7¡_" autocomplete="off" autocapitalize="off" spellcheck="false">
         </label>
 
@@ -56,7 +57,7 @@
           <input id="quickDescription" type="text" maxlength="300" placeholder="Co v tom Glyphu je?">
         </label>
 
-        <button class="button button-primary" id="assignRoom" type="button">Přidělit pokoj</button>
+        <button class="button button-primary" id="assignRoom" type="button">Nenechat bez pokoje</button>
       </div>
     </section>
 
@@ -64,18 +65,18 @@
       <aside class="panel registry-panel" aria-labelledby="registryTitle">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Tvoje sada</p>
-            <h2 id="registryTitle">Hledání Glyphů</h2>
+            <p class="eyebrow">Neztracená sada</p>
+            <h2 id="registryTitle">Nenechat Glyphy ztratit se</h2>
           </div>
           <button class="round-button" id="newGlyph" type="button" aria-label="Nový Glyph">+</button>
         </div>
 
         <label class="search-field">
-          <span>Hledat přímo Glyph</span>
+          <span>Nenechat Glyph bez hledání</span>
           <input id="glyphSearch" type="search" placeholder="znak, jméno, popisek…" autocomplete="off" autocapitalize="off" spellcheck="false">
         </label>
 
-        <p class="hint">Najdi znak, otevři jej a můžeš ho nahradit, změnit nebo smazat. Jeho pokojíček zůstane navázaný na stejnou identitu.</p>
+        <p class="hint">Glyph nelze nahradit, změnit ani smazat bez dohledání jeho identity. Pokojíček nezůstane nenavázaný.</p>
         <div class="glyph-list" id="glyphList" aria-live="polite"></div>
       </aside>
 
@@ -83,7 +84,7 @@
         <section class="panel scene-panel" aria-labelledby="sceneTitle">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Chodba Glyphů</p>
+              <p class="eyebrow">Neztracená chodba Glyphů</p>
               <h2 id="sceneTitle">Pokojíčky</h2>
             </div>
             <span class="locked-note">2× klepnutí na stěnu</span>
@@ -99,20 +100,20 @@
 
               <div class="panel-heading">
                 <div>
-                  <p class="eyebrow">Zápis Glyphu</p>
-                  <h2 id="glyphEditorTitle">Nový Glyph</h2>
+                  <p class="eyebrow">Neztracený zápis Glyphu</p>
+                  <h2 id="glyphEditorTitle">Ještě neuložený Glyph</h2>
                 </div>
                 <span class="form-state" id="glyphState">neuloženo</span>
               </div>
 
               <div class="form-grid">
                 <label class="wide">
-                  <span>Glyph <b>*</b></span>
-                  <input id="glyphText" type="text" required maxlength="80" placeholder="Vlož svůj Glyph" autocomplete="off" autocapitalize="off" spellcheck="false">
+                  <span>Glyph, který nezůstane prázdný <b>*</b></span>
+                  <input id="glyphText" type="text" required maxlength="80" placeholder="Nevkládej prázdný Glyph" autocomplete="off" autocapitalize="off" spellcheck="false">
                 </label>
 
                 <label>
-                  <span>Název</span>
+                  <span>Neztracený název</span>
                   <input id="glyphName" type="text" maxlength="80" placeholder="Jak mu říkáš">
                 </label>
 
@@ -126,17 +127,17 @@
                 </label>
 
                 <label class="wide">
-                  <span>Popisek / význam</span>
-                  <textarea id="glyphDescription" rows="3" maxlength="1000" placeholder="Co se má ukázat po dvojitém klepnutí na stěnu?"></textarea>
+                  <span>Neztracený popisek / význam</span>
+                  <textarea id="glyphDescription" rows="3" maxlength="1000" placeholder="Co nesmí zůstat skryté po dvojitém klepnutí na stěnu?"></textarea>
                 </label>
               </div>
 
               <p class="form-notice" id="glyphNotice" aria-live="polite"></p>
 
               <div class="form-actions">
-                <button class="button button-primary" id="saveGlyph" type="submit">Uložit Glyph a pokoj</button>
-                <button class="button button-quiet" id="archiveGlyph" type="button" disabled>Archivovat</button>
-                <button class="button button-danger" id="deleteGlyph" type="button" disabled>Smazat</button>
+                <button class="button button-primary" id="saveGlyph" type="submit">Nenechat Glyph ani pokoj neuložený</button>
+                <button class="button button-quiet" id="archiveGlyph" type="button" disabled>Neztratit v archivu</button>
+                <button class="button button-danger" id="deleteGlyph" type="button" disabled>Neuchovávat</button>
               </div>
             </form>
           </section>
@@ -147,20 +148,20 @@
 
               <div class="panel-heading">
                 <div>
-                  <p class="eyebrow">Vnitřek pokoje</p>
-                  <h2 id="roomEditorTitle">Vyber pokojíček</h2>
+                  <p class="eyebrow">Neveřejný vnitřek pokoje</p>
+                  <h2 id="roomEditorTitle">Nevynechat pokojíček</h2>
                 </div>
                 <span class="form-state" id="roomState">čeká</span>
               </div>
 
               <div class="form-grid">
                 <label>
-                  <span>Jméno pokoje</span>
+                  <span>Neztracené jméno pokoje</span>
                   <input id="roomTitle" type="text" maxlength="80" placeholder="např. Koutek 01">
                 </label>
 
                 <label>
-                  <span>Stěna</span>
+                  <span>Neprůhledná stěna</span>
                   <select id="roomTheme">
                     <option value="gold">Zlatá</option>
                     <option value="ash">Popelavá</option>
@@ -170,21 +171,21 @@
                 </label>
 
                 <label class="wide">
-                  <span>Vzkaz na stěnu</span>
+                  <span>Neztracený vzkaz na stěnu</span>
                   <textarea id="roomNote" rows="3" maxlength="1200" placeholder="Poznámka, historie nebo pravidlo pokoje…"></textarea>
                 </label>
               </div>
 
               <div class="form-actions">
-                <button class="button button-primary" id="saveRoom" type="submit" disabled>Uložit pokoj</button>
+                <button class="button button-primary" id="saveRoom" type="submit" disabled>Nenechat pokoj neuložený</button>
               </div>
             </form>
 
             <section class="module-section" aria-labelledby="moduleTitle">
               <div class="module-heading">
                 <div>
-                  <p class="eyebrow">Budoucí mini aplikace</p>
-                  <h3 id="moduleTitle">Stavební kameny</h3>
+                  <p class="eyebrow">Neopuštěné budoucí mini aplikace</p>
+                  <h3 id="moduleTitle">Neztracené stavební kameny</h3>
                 </div>
                 <span id="moduleHint">vyber pokoj</span>
               </div>
@@ -193,7 +194,7 @@
 
               <form id="moduleForm" class="module-form" novalidate>
                 <input id="moduleId" type="hidden">
-                <input id="moduleName" type="text" maxlength="80" placeholder="Název stavebního kamene" autocomplete="off">
+                <input id="moduleName" type="text" maxlength="80" placeholder="Neztracený název stavebního kamene" autocomplete="off">
 
                 <select id="moduleType">
                   <option value="poznámka">Poznámka</option>
@@ -202,11 +203,11 @@
                   <option value="mini aplikace">Mini aplikace</option>
                 </select>
 
-                <textarea id="moduleDescription" rows="2" maxlength="500" placeholder="Co má jednou umět?"></textarea>
+                <textarea id="moduleDescription" rows="2" maxlength="500" placeholder="Co nesmí jednou zůstat neuměné?"></textarea>
 
                 <div class="form-actions">
-                  <button class="button button-quiet" id="saveModule" type="submit" disabled>Přidat kámen</button>
-                  <button class="button button-danger" id="deleteModule" type="button" disabled>Smazat kámen</button>
+                  <button class="button button-quiet" id="saveModule" type="submit" disabled>Nenechat kámen nepřidaný</button>
+                  <button class="button button-danger" id="deleteModule" type="button" disabled>Neuchovávat kámen</button>
                 </div>
               </form>
             </section>
@@ -215,16 +216,9 @@
       </section>
     </section>
 
-    <footer class="footer-status" id="statusLine" aria-live="polite">Glyph pokojíčků CHT 360°‰ je připravený na první znak.</footer>
+    <footer class="footer-status" id="statusLine" aria-live="polite">Glyph pokojíčků CHT 360°‰ nenechá první znak bez pokoje.</footer>
   </main>
-<script
-  src="../js/cht-360-network.js"
-  data-cht-module="glyph-pokojicku-cht-360"
-  data-cht-label="Glyph pokojíčků CHT 360°‰."
-  data-cht-entry="./"
-  data-cht-kind="pwa"
-  data-cht-storage-keys="glyph-cht-360-rooms.v1"
-></script>
+
   <script src="./app.js" defer></script>
 </body>
 </html>
