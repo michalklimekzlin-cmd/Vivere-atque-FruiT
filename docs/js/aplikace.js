@@ -41,6 +41,7 @@ const TROJKA_MODEL_STORAGE_KEY = "cht360_trojka_models_v1";
 const GLYPH_DRUM_STORAGE_KEY = "cht360_glyph_drums_v1";
 const GLYPH_DRUM_CUSTOM_STORAGE_KEY = "cht360_glyph_drums_custom_v1";
 const PHONE_SETTINGS_KEY = "cht360_iphone14_settings_v1";
+const PHONE_APP_LIMIT = 70;
 
 const GLYPH_DRUM_TOKENS = Object.freeze([
   ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -460,7 +461,7 @@ function loadPhoneSettings() {
         ? saved.apps
           .map(normalisePhoneApp)
           .filter(app => app.name || app.url)
-          .slice(0, 12)
+          .slice(0, PHONE_APP_LIMIT)
         : []
     };
   } catch (error) {
@@ -1641,7 +1642,7 @@ function renderIPhoneSettings() {
   const appCount = phoneSettings.apps.length;
   const onlineText = navigator.onLine ? "PWA je online" : "PWA je bez připojení";
 
-  state.textContent = onlineText + " · otočení je uložené · AI aplikace: " + appCount + "/12";
+  state.textContent = onlineText + " · otočení je uložené · AI aplikace: " + appCount + "/" + PHONE_APP_LIMIT;
   list.replaceChildren();
 
   if (!appCount) {
@@ -1703,7 +1704,7 @@ function addIPhoneApp() {
     name,
     url
   });
-  phoneSettings.apps = phoneSettings.apps.slice(0, 12);
+  phoneSettings.apps = phoneSettings.apps.slice(0, PHONE_APP_LIMIT);
   savePhoneSettings();
   nameInput.value = "";
   urlInput.value = "";
@@ -2919,4 +2920,5 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
+
 
