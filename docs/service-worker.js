@@ -3,7 +3,7 @@
 /* Hlavní Paměť má vlastní cache a nemaže cache vedlejších PWA. */
 const ROOT_CACHE_PREFIX = "cht360-root-";
 const LEGACY_ROOT_CACHE_PREFIX = "cht360-v";
-const CACHE_VERSION = "v17-unified-glyph-utf8";
+const CACHE_VERSION = "v18-cht-network-stable";
 const CACHE_NAME = ROOT_CACHE_PREFIX + CACHE_VERSION;
 const OFFLINE_PAGE = "./index.html";
 
@@ -30,9 +30,9 @@ const CORE_FILES = [
   "./js/cht-chybozrout.js",
   "./js/cht-360-network.js",
   "./manifest.json",
-  "./icon.svg"
+  "./icon.svg",
   "./css/prstenec-pokojicku.css",
-"./js/prstenec-pokojicku.js",
+  "./js/prstenec-pokojicku.js",
 ];
 
 self.addEventListener("install", event => {
@@ -120,4 +120,5 @@ self.addEventListener("fetch", event => {
 self.addEventListener("message", event => {
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
 });
+
 
