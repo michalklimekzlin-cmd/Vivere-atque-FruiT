@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090806">
+  <meta name="description" content="Mluva CHT 360°‰. — místní průvodce s učením z vlastních lekcí a vybraných napojení CHT.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mluva CHT">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Mluva · CHT 360°‰.</title>
+</head>
+
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="back-link" href="../index.html" aria-label="Zpět do CHT 360°‰.">← <span>CHT 360°‰.</span></a>
+      <div class="brand">
+        <p>MLUVA CHT</p>
+        <strong>místní učící vrstva</strong>
+      </div>
+      <output id="connectionState" class="state-pill">ověřuji</output>
+    </header>
+
+    <section class="hero-card" aria-labelledby="title">
+      <div>
+        <p class="eyebrow">PAMĚŤ → SOUVISLOST → LEKCE</p>
+        <h1 id="title">Mluva CHT<br><em>pamatuje si jen to, co jí svěříš.</em></h1>
+        <p>
+          Umí číst místní stav CHT, vytvořit pracovní souvislost a učit se z vlastních lekcí.
+          Vybrané AI z CHT používá jako viditelné cesty — nikdy je sama neotevírá ani jim neposílá konverzaci.
+        </p>
+      </div>
+
+      <aside class="honesty-card">
+        <strong>Poctivě</strong>
+        <p>
+          Toto není tajně trénovaný jazykový model. Učení znamená: uložená pravidla, příklady a souvislosti,
+          které můžeš kdykoli zkontrolovat nebo smazat přímo v Mluvě.
+        </p>
+      </aside>
+    </section>
+
+    <section class="overview-card" aria-labelledby="overviewTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">CO VIDÍ OFFLINE</p>
+          <h2 id="overviewTitle">Stav společné Paměti</h2>
+        </div>
+        <button id="refreshContext" class="quiet-button" type="button">Obnovit stav</button>
+      </div>
+      <div id="memoryOverview" class="memory-overview" aria-live="polite"></div>
+    </section>
+
+    <section class="model-card" aria-labelledby="modelsTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">MOST K VYBRANÝM AI</p>
+          <h2 id="modelsTitle">Modely z CHT</h2>
+        </div>
+        <button id="scanModels" class="quiet-button" type="button">Vybrat z CHT</button>
+      </div>
+      <p class="section-lead">
+        Mluva může mít po ruce jen malý výběr napojení. Otevření konkrétního modelu je vždy ruční a konverzace zůstává tady.
+      </p>
+      <div class="model-summary">
+        <strong id="modelCount">0 / 24</strong>
+        <span>vybraných cest</span>
+      </div>
+      <div id="modelList" class="model-list" aria-live="polite"></div>
+    </section>
+
+    <section class="learning-card" aria-labelledby="learningTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">MÍSTNÍ UČENÍ</p>
+          <h2 id="learningTitle">Lekce Mluvy</h2>
+        </div>
+        <div class="heading-actions">
+          <button id="exportLearning" class="quiet-button" type="button">Záloha</button>
+          <button id="openLesson" class="quiet-button" type="button">Nová lekce</button>
+        </div>
+      </div>
+      <p class="section-lead">
+        Každá lekce propojí větu nebo téma s odpovědí, kterou Mluva příště použije. Nic se nevytváří samo.
+      </p>
+      <div id="lessonList" class="lesson-list" aria-live="polite"></div>
+    </section>
+
+    <section class="talk-card" aria-labelledby="talkTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">ROZHOVOR</p>
+          <h2 id="talkTitle">Napiš, na čem chceš pracovat</h2>
+        </div>
+        <button id="speakLast" class="quiet-button" type="button">Přečíst odpověď</button>
+      </div>
+
+      <div id="conversation" class="conversation" role="log" aria-live="polite"></div>
+
+      <div class="quick-actions" aria-label="Rychlé otázky">
+        <button type="button" data-prompt="Jaký je stav CHT?">Stav</button>
+        <button type="button" data-prompt="Jaké modely mám vybrané?">Modely</button>
+        <button id="teachFromQuick" type="button">Naučit Mluvu</button>
+        <button type="button" data-prompt="Co umíš offline?">Pomoc</button>
+      </div>
+
+      <form id="talkForm" class="talk-form">
+        <label class="sr-only" for="talkInput">Zpráva pro Mluvu CHT</label>
+        <textarea
+          id="talkInput"
+          rows="3"
+          maxlength="700"
+          placeholder="Například: Jaký je stav Paměti? nebo Jaké modely mám vybrané?"
+          enterkeyhint="send"
+        ></textarea>
+        <button class="primary-button" type="submit">Poslat</button>
+      </form>
+    </section>
+
+    <section class="route-card" aria-labelledby="routeTitle">
+      <div>
+        <p class="eyebrow">PŘÍMÉ CESTY</p>
+        <h2 id="routeTitle">Kde pokračovat</h2>
+      </div>
+      <div class="route-actions">
+        <a href="../glyph-cht-360/">Dílna Glyphů</a>
+        <a href="../bubinky/">Zámkové Bubínky</a>
+        <a href="../index.html">Paměť CHT</a>
+      </div>
+    </section>
+
+    <footer>
+      Mluva ukládá historii, lekce i výběr modelů pouze v tomto prohlížeči. Žádné napojení neotevře bez tvého kliknutí.
+    </footer>
+  </main>
+
+  <dialog id="modelDialog" class="dialog" aria-labelledby="modelDialogTitle">
+    <div class="dialog-head">
+      <div>
+        <p class="eyebrow">VÝBĚR Z CHT</p>
+        <h2 id="modelDialogTitle">Napojení uložená v Paměti</h2>
+      </div>
+      <button class="icon-button" type="button" data-action="close-models" aria-label="Zavřít výběr">×</button>
+    </div>
+    <p class="dialog-copy">Mluva našla odkazy ve slotech CHT. Označ jen ty, které chceš mít po ruce; maximálně 24.</p>
+    <label class="sr-only" for="modelSearch">Hledat mezi nalezenými napojeními</label>
+    <input id="modelSearch" class="dialog-search" type="search" placeholder="Hledat model nebo jádro…" autocomplete="off">
+    <p id="modelCandidateInfo" class="candidate-info"></p>
+    <div id="candidateList" class="candidate-list"></div>
+    <div class="dialog-foot">
+      <button class="quiet-button" type="button" data-action="close-models">Zrušit</button>
+      <button id="saveModels" class="primary-button" type="button">Uložit výběr</button>
+    </div>
+  </dialog>
+
+  <dialog id="lessonDialog" class="dialog" aria-labelledby="lessonDialogTitle">
+    <div class="dialog-head">
+      <div>
+        <p class="eyebrow">NOVÁ LEKCE</p>
+        <h2 id="lessonDialogTitle">Co si má Mluva pamatovat?</h2>
+      </div>
+      <button class="icon-button" type="button" data-action="close-lesson" aria-label="Zavřít novou lekci">×</button>
+    </div>
+    <label for="lessonTrigger">Kdy má lekci použít</label>
+    <input id="lessonTrigger" type="text" maxlength="120" placeholder="Např. když napíšu: ranní plán" autocomplete="off">
+    <label for="lessonReply">Co má odpovědět nebo připomenout</label>
+    <textarea id="lessonReply" rows="7" maxlength="1800" placeholder="Např. Otevři Země, zkontroluj tři sloty a udělej zálohu."></textarea>
+    <div class="dialog-foot">
+      <button class="quiet-button" type="button" data-action="close-lesson">Zrušit</button>
+      <button id="saveLesson" class="primary-button" type="button">Uložit lekci</button>
+    </div>
+  </dialog>
+
+  <script
+    src="../js/cht-360-network.js"
+    data-cht-module="cht-mluva"
+    data-cht-label="Mluva CHT 360°‰."
+    data-cht-entry="./"
+    data-cht-kind="pwa"
+    data-cht-storage-keys="cht360_mluva_history_v1,cht360_mluva_lessons_v1,cht360_mluva_models_v1,cht360_pamet_v1,vaft_pamet_v1,cht360_glyph_workshop_v1,cht360_slot_locks_v1"
+    data-cht-capture-mode="full"
+  ></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>
