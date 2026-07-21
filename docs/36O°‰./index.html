@@ -1,62 +1,327 @@
-<!doctype html>
+
+html_content = '''<!DOCTYPE html>
 <html lang="cs">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#090806">
   <meta name="description" content="Mluva CHT 360°‰. — místní průvodce s učením z vlastních lekcí a vybraných napojení CHT.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Mluva CHT">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css">
-  <title>Mluva · CHT 360°‰.</title>
-</head>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧠%3C/text%3E%3C/svg%3E">
+  <title>Mluva · CHT 360°‰. (Offline)</title>
+  <style>
+    :root {
+      --bg: #090806;
+      --bg-elev: #12100d;
+      --bg-card: #1a1714;
+      --border: #2a2520;
+      --text: #e8e0d8;
+      --text-dim: #9a9088;
+      --accent: #c4a882;
+      --accent-dim: #8a7a68;
+      --success: #6b9e75;
+      --warning: #c9a04e;
+      --error: #b85c5c;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+      --font-mono: "SF Mono", "Consolas", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .app-shell { max-width: 720px; margin: 0 auto; padding: 16px; }
+    
+    /* Topbar */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; background: var(--bg-elev);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 16px; position: sticky; top: 16px; z-index: 100;
+      backdrop-filter: blur(12px);
+    }
+    .topbar .back-link { color: var(--accent); text-decoration: none; font-size: 14px; }
+    .topbar .brand p { font-size: 11px; letter-spacing: 2px; color: var(--accent); margin-bottom: 2px; }
+    .topbar .brand strong { font-size: 13px; font-weight: 500; color: var(--text); }
+    .state-pill {
+      font-size: 11px; padding: 4px 12px; border-radius: 20px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text-dim); font-family: var(--font-mono);
+      transition: all 0.3s ease;
+    }
+    .state-pill.online { color: var(--success); border-color: var(--success); }
+    .state-pill.offline { color: var(--warning); border-color: var(--warning); }
+    .state-pill.learning { color: var(--accent); border-color: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
 
+    /* Cards */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .card-header h2 { font-size: 18px; font-weight: 600; }
+    .card-header .eyebrow {
+      font-size: 10px; letter-spacing: 2px; color: var(--accent);
+      margin-bottom: 4px; font-family: var(--font-mono);
+    }
+    .section-lead { color: var(--text-dim); font-size: 14px; margin-bottom: 12px; }
+
+    /* Hero */
+    .hero-card { position: relative; overflow: hidden; }
+    .hero-card h1 { font-size: 28px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+    .hero-card h1 em { color: var(--accent); font-style: normal; }
+    .hero-card > div > p { color: var(--text-dim); font-size: 14px; margin-bottom: 16px; }
+    .honesty-card {
+      background: var(--bg-elev); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px; margin-top: 12px;
+    }
+    .honesty-card strong { color: var(--success); font-size: 13px; display: block; margin-bottom: 6px; }
+    .honesty-card p { font-size: 13px; color: var(--text-dim); }
+
+    /* Buttons */
+    .quiet-button {
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-dim); padding: 6px 14px; border-radius: var(--radius-sm);
+      font-size: 12px; cursor: pointer; transition: all 0.2s;
+      font-family: var(--font);
+    }
+    .quiet-button:hover { border-color: var(--accent); color: var(--accent); }
+    .primary-button {
+      background: var(--accent); border: none; color: var(--bg);
+      padding: 10px 20px; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; font-family: var(--font);
+    }
+    .primary-button:hover { background: var(--text); transform: translateY(-1px); }
+    .primary-button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .icon-button {
+      background: transparent; border: none; color: var(--text-dim);
+      font-size: 20px; cursor: pointer; padding: 4px 8px;
+    }
+    .icon-button:hover { color: var(--text); }
+    .heading-actions { display: flex; gap: 8px; }
+
+    /* Memory Overview */
+    .memory-overview { display: grid; gap: 8px; }
+    .memory-stat {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg-elev); padding: 10px 14px; border-radius: var(--radius-sm);
+      font-size: 13px;
+    }
+    .memory-stat .label { color: var(--text-dim); }
+    .memory-stat .value { font-family: var(--font-mono); color: var(--accent); }
+
+    /* Model List */
+    .model-summary { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+    .model-summary strong { font-size: 24px; color: var(--accent); font-family: var(--font-mono); }
+    .model-summary span { font-size: 13px; color: var(--text-dim); }
+    .model-list { display: grid; gap: 8px; }
+    .model-item {
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg-elev); padding: 10px 14px; border-radius: var(--radius-sm);
+      font-size: 13px; border-left: 3px solid var(--accent);
+    }
+    .model-item .name { font-weight: 500; }
+    .model-item .kind { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
+    .model-item.empty {
+      border-left-color: var(--border); color: var(--text-dim);
+      justify-content: center; font-style: italic;
+    }
+
+    /* Lesson List */
+    .lesson-list { display: grid; gap: 8px; max-height: 300px; overflow-y: auto; }
+    .lesson-item {
+      background: var(--bg-elev); padding: 12px 14px; border-radius: var(--radius-sm);
+      font-size: 13px; border-left: 3px solid var(--success);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .lesson-item:hover { background: var(--border); }
+    .lesson-item .trigger { font-weight: 500; color: var(--accent); margin-bottom: 4px; }
+    .lesson-item .reply { color: var(--text-dim); font-size: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .lesson-item .meta { font-size: 10px; color: var(--text-dim); margin-top: 6px; font-family: var(--font-mono); }
+    .lesson-list.empty { text-align: center; color: var(--text-dim); padding: 24px; font-style: italic; }
+
+    /* Conversation */
+    .conversation {
+      background: var(--bg-elev); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 16px;
+      min-height: 200px; max-height: 400px; overflow-y: auto;
+      margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .msg { max-width: 85%; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 14px; line-height: 1.5; word-break: break-word; }
+    .msg.user { align-self: flex-end; background: var(--accent); color: var(--bg); }
+    .msg.bot { align-self: flex-start; background: var(--border); color: var(--text); border-left: 3px solid var(--success); }
+    .msg.bot.learning { border-left-color: var(--warning); }
+    .msg.bot.system { border-left-color: var(--accent); font-style: italic; }
+    .msg-time { font-size: 10px; opacity: 0.6; margin-top: 4px; font-family: var(--font-mono); }
+
+    /* Quick Actions */
+    .quick-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .quick-actions button {
+      background: var(--bg-elev); border: 1px solid var(--border);
+      color: var(--text-dim); padding: 6px 14px; border-radius: 20px;
+      font-size: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .quick-actions button:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Talk Form */
+    .talk-form { display: flex; gap: 10px; }
+    .talk-form textarea {
+      flex: 1; background: var(--bg-elev); border: 1px solid var(--border);
+      color: var(--text); padding: 12px; border-radius: var(--radius-sm);
+      font-family: var(--font); font-size: 14px; resize: vertical; min-height: 60px;
+    }
+    .talk-form textarea:focus { outline: none; border-color: var(--accent); }
+    .talk-form textarea::placeholder { color: var(--text-dim); }
+
+    /* Routes */
+    .route-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .route-actions a {
+      display: block; background: var(--bg-elev); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 18px; border-radius: var(--radius-sm);
+      text-decoration: none; font-size: 14px; transition: all 0.2s;
+    }
+    .route-actions a:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Dialog */
+    .dialog-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; padding: 16px;
+    }
+    .dialog-overlay.active { display: flex; }
+    .dialog {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); width: 100%; max-width: 560px;
+      max-height: 85vh; overflow-y: auto; box-shadow: var(--shadow);
+    }
+    .dialog-head {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 20px 20px 0; margin-bottom: 16px;
+    }
+    .dialog-head h2 { font-size: 18px; }
+    .dialog-copy { padding: 0 20px; color: var(--text-dim); font-size: 14px; margin-bottom: 16px; }
+    .dialog-search {
+      margin: 0 20px 16px; width: calc(100% - 40px);
+      background: var(--bg-elev); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 14px; border-radius: var(--radius-sm);
+      font-size: 14px;
+    }
+    .dialog-search:focus { outline: none; border-color: var(--accent); }
+    .candidate-list { padding: 0 20px; display: grid; gap: 8px; max-height: 300px; overflow-y: auto; margin-bottom: 16px; }
+    .candidate-item {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg-elev); padding: 10px 14px; border-radius: var(--radius-sm);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .candidate-item:hover { background: var(--border); }
+    .candidate-item input[type="checkbox"] { accent-color: var(--accent); }
+    .candidate-item label { flex: 1; cursor: pointer; font-size: 13px; }
+    .candidate-item .candidate-kind { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
+    .candidate-info { padding: 0 20px; font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+    .dialog-foot {
+      display: flex; justify-content: flex-end; gap: 10px;
+      padding: 16px 20px; border-top: 1px solid var(--border);
+    }
+
+    /* Lesson Dialog */
+    .dialog label { display: block; padding: 0 20px; font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+    .dialog input[type="text"], .dialog textarea {
+      width: calc(100% - 40px); margin: 0 20px 16px;
+      background: var(--bg-elev); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 14px; border-radius: var(--radius-sm);
+      font-size: 14px; font-family: var(--font);
+    }
+    .dialog input:focus, .dialog textarea:focus { outline: none; border-color: var(--accent); }
+
+    /* Footer */
+    footer {
+      text-align: center; padding: 24px 16px;
+      font-size: 12px; color: var(--text-dim); border-top: 1px solid var(--border);
+      margin-top: 16px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-dim); }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .card { animation: fadeIn 0.4s ease-out; }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .app-shell { padding: 12px; }
+      .topbar { flex-wrap: wrap; gap: 8px; }
+      .hero-card h1 { font-size: 22px; }
+      .talk-form { flex-direction: column; }
+      .quick-actions { justify-content: center; }
+    }
+
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+  </style>
+</head>
 <body>
-  <main class="app-shell">
+  <div class="app-shell">
     <header class="topbar">
-      <a class="back-link" href="../index.html" aria-label="Zpět do CHT 360°‰.">← <span>CHT 360°‰.</span></a>
+      <a class="back-link" href="#" onclick="alert('Toto je offline verze. Zpět do CHT 360°‰. vyžaduje původní síť.'); return false;" aria-label="Zpět do CHT 360°‰.">← <span>CHT 360°‰.</span></a>
       <div class="brand">
         <p>MLUVA CHT</p>
         <strong>místní učící vrstva</strong>
       </div>
-      <output id="connectionState" class="state-pill">ověřuji</output>
+      <output id="connectionState" class="state-pill">offline</output>
     </header>
 
-    <section class="hero-card" aria-labelledby="title">
+    <section class="card hero-card" aria-labelledby="title">
       <div>
         <p class="eyebrow">PAMĚŤ → SOUVISLOST → LEKCE</p>
         <h1 id="title">Mluva CHT<br><em>pamatuje si jen to, co jí svěříš.</em></h1>
         <p>
-          Umí číst místní stav CHT, vytvořit pracovní souvislost a učit se z vlastních lekcí.
-          Vybrané AI z CHT používá jako viditelné cesty — nikdy je sama neotevírá ani jim neposílá konverzaci.
+          Tato offline verice učí se z každé interakce. Čím více lekcí jí dáš, tím chytřejší je.
+          Všechna data zůstávají v tvém prohlížeči — žádné API, žádné servery, žádná čínština.
         </p>
       </div>
-
       <aside class="honesty-card">
         <strong>Poctivě</strong>
         <p>
           Toto není tajně trénovaný jazykový model. Učení znamená: uložená pravidla, příklady a souvislosti,
-          které můžeš kdykoli zkontrolovat nebo smazat přímo v Mluvě.
+          které můžeš kdykoli zkontrolovat nebo smazat přímo v Mluvě. Exportuj zálohu a pošli ji Kimi pro analýzu.
         </p>
       </aside>
     </section>
 
-    <section class="overview-card" aria-labelledby="overviewTitle">
-      <div class="section-heading">
+    <section class="card" aria-labelledby="overviewTitle">
+      <div class="card-header">
         <div>
           <p class="eyebrow">CO VIDÍ OFFLINE</p>
           <h2 id="overviewTitle">Stav společné Paměti</h2>
         </div>
         <button id="refreshContext" class="quiet-button" type="button">Obnovit stav</button>
       </div>
-      <div id="memoryOverview" class="memory-overview" aria-live="polite"></div>
+      <div id="memoryOverview" class="memory-overview" aria-live="polite">
+        <div class="memory-stat"><span class="label">Lekce</span><span class="value" id="statLessons">0</span></div>
+        <div class="memory-stat"><span class="label">Interakce</span><span class="value" id="statInteractions">0</span></div>
+        <div class="memory-stat"><span class="label">Vybrané cesty</span><span class="value" id="statModels">0 / 24</span></div>
+        <div class="memory-stat"><span class="label">Velikost dat</span><span class="value" id="statSize">0 KB</span></div>
+      </div>
     </section>
 
-    <section class="model-card" aria-labelledby="modelsTitle">
-      <div class="section-heading">
+    <section class="card" aria-labelledby="modelsTitle">
+      <div class="card-header">
         <div>
           <p class="eyebrow">MOST K VYBRANÝM AI</p>
           <h2 id="modelsTitle">Modely z CHT</h2>
@@ -64,17 +329,20 @@
         <button id="scanModels" class="quiet-button" type="button">Vybrat z CHT</button>
       </div>
       <p class="section-lead">
-        Mluva může mít po ruce jen malý výběr napojení. Otevření konkrétního modelu je vždy ruční a konverzace zůstává tady.
+        Mluva může mít po ruce jen malý výběr napojení. V této offline verzi si můžeš přidávat vlastní "cesty"
+        jako textové poznámky. Otevření konkrétního modelu je vždy ruční a konverzace zůstává tady.
       </p>
       <div class="model-summary">
         <strong id="modelCount">0 / 24</strong>
         <span>vybraných cest</span>
       </div>
-      <div id="modelList" class="model-list" aria-live="polite"></div>
+      <div id="modelList" class="model-list" aria-live="polite">
+        <div class="model-item empty">Žádné cesty vybrány. Klikni "Vybrat z CHT" pro přidání.</div>
+      </div>
     </section>
 
-    <section class="learning-card" aria-labelledby="learningTitle">
-      <div class="section-heading">
+    <section class="card" aria-labelledby="learningTitle">
+      <div class="card-header">
         <div>
           <p class="eyebrow">MÍSTNÍ UČENÍ</p>
           <h2 id="learningTitle">Lekce Mluvy</h2>
@@ -85,13 +353,16 @@
         </div>
       </div>
       <p class="section-lead">
-        Každá lekce propojí větu nebo téma s odpovědí, kterou Mluva příště použije. Nic se nevytváří samo.
+        Každá lekce propojí větu nebo téma s odpovědí, kterou Mluva příště použije. 
+        Klikni na lekci pro úpravu, nebo ji smaž pravým kliknutím. Nic se nevytváří samo.
       </p>
-      <div id="lessonList" class="lesson-list" aria-live="polite"></div>
+      <div id="lessonList" class="lesson-list" aria-live="polite">
+        <div class="lesson-list empty">Zatím žádné lekce. Klikni "Nová lekce" pro začátek.</div>
+      </div>
     </section>
 
-    <section class="talk-card" aria-labelledby="talkTitle">
-      <div class="section-heading">
+    <section class="card" aria-labelledby="talkTitle">
+      <div class="card-header">
         <div>
           <p class="eyebrow">ROZHOVOR</p>
           <h2 id="talkTitle">Napiš, na čem chceš pracovat</h2>
@@ -99,7 +370,12 @@
         <button id="speakLast" class="quiet-button" type="button">Přečíst odpověď</button>
       </div>
 
-      <div id="conversation" class="conversation" role="log" aria-live="polite"></div>
+      <div id="conversation" class="conversation" role="log" aria-live="polite">
+        <div class="msg bot system">
+          <div>Vítej v Mluvě CHT (Offline). Jsem připravena se učit. Napiš mi cokoli — pokud to odpovídá nějaké lekci, použiji ji. Pokud ne, zeptám se, co mám naučit.</div>
+          <div class="msg-time">nyní</div>
+        </div>
+      </div>
 
       <div class="quick-actions" aria-label="Rychlé otázky">
         <button type="button" data-prompt="Jaký je stav CHT?">Stav</button>
@@ -114,76 +390,590 @@
           id="talkInput"
           rows="3"
           maxlength="700"
-          placeholder="Například: Jaký je stav Paměti? nebo Jaké modely mám vybrané?"
+          placeholder="Například: Jaký je stav Paměti? nebo Nauč mě novou lekci..."
           enterkeyhint="send"
         ></textarea>
         <button class="primary-button" type="submit">Poslat</button>
       </form>
     </section>
 
-    <section class="route-card" aria-labelledby="routeTitle">
-      <div>
-        <p class="eyebrow">PŘÍMÉ CESTY</p>
-        <h2 id="routeTitle">Kde pokračovat</h2>
+    <section class="card" aria-labelledby="routeTitle">
+      <div class="card-header">
+        <div>
+          <p class="eyebrow">PŘÍMÉ CESTY</p>
+          <h2 id="routeTitle">Kde pokračovat</h2>
+        </div>
       </div>
       <div class="route-actions">
-        <a href="../glyph-cht-360/">Dílna Glyphů</a>
-        <a href="../bubinky/">Zámkové Bubínky</a>
-        <a href="../index.html">Paměť CHT</a>
+        <a href="#" onclick="alert('Dílna Glyphů vyžaduje původní CHT síť.'); return false;">Dílna Glyphů</a>
+        <a href="#" onclick="alert('Zámkové Bubínky vyžadují původní CHT síť.'); return false;">Zámkové Bubínky</a>
+        <a href="#" onclick="alert('Paměť CHT vyžaduje původní síť.'); return false;">Paměť CHT</a>
       </div>
     </section>
 
     <footer>
-      Mluva ukládá historii, lekce i výběr modelů pouze v tomto prohlížeči. Žádné napojení neotevře bez tvého kliknutí.
+      Mluva ukládá historii, lekce i výběr modelů pouze v tomto prohlížeči. Žádné napojení neotevře bez tvého kliknutí.<br>
+      <strong style="color:var(--accent)">Offline verze — učí se z každé interakce.</strong>
     </footer>
-  </main>
+  </div>
 
-  <dialog id="modelDialog" class="dialog" aria-labelledby="modelDialogTitle">
-    <div class="dialog-head">
-      <div>
-        <p class="eyebrow">VÝBĚR Z CHT</p>
-        <h2 id="modelDialogTitle">Napojení uložená v Paměti</h2>
+  <!-- Model Dialog -->
+  <div id="modelDialog" class="dialog-overlay" role="dialog" aria-labelledby="modelDialogTitle" aria-modal="true">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">VÝBĚR Z CHT</p>
+          <h2 id="modelDialogTitle">Napojení uložená v Paměti</h2>
+        </div>
+        <button class="icon-button" type="button" data-action="close-models" aria-label="Zavřít výběr">×</button>
       </div>
-      <button class="icon-button" type="button" data-action="close-models" aria-label="Zavřít výběr">×</button>
-    </div>
-    <p class="dialog-copy">Mluva našla odkazy ve slotech CHT. Označ jen ty, které chceš mít po ruce; maximálně 24.</p>
-    <label class="sr-only" for="modelSearch">Hledat mezi nalezenými napojeními</label>
-    <input id="modelSearch" class="dialog-search" type="search" placeholder="Hledat model nebo jádro…" autocomplete="off">
-    <p id="modelCandidateInfo" class="candidate-info"></p>
-    <div id="candidateList" class="candidate-list"></div>
-    <div class="dialog-foot">
-      <button class="quiet-button" type="button" data-action="close-models">Zrušit</button>
-      <button id="saveModels" class="primary-button" type="button">Uložit výběr</button>
-    </div>
-  </dialog>
-
-  <dialog id="lessonDialog" class="dialog" aria-labelledby="lessonDialogTitle">
-    <div class="dialog-head">
-      <div>
-        <p class="eyebrow">NOVÁ LEKCE</p>
-        <h2 id="lessonDialogTitle">Co si má Mluva pamatovat?</h2>
+      <p class="dialog-copy">V této offline verzi si můžeš přidávat vlastní "cesty" jako textové poznámky. Označ jen ty, které chceš mít po ruce; maximálně 24.</p>
+      <label class="sr-only" for="modelSearch">Hledat mezi nalezenými napojeními</label>
+      <input id="modelSearch" class="dialog-search" type="search" placeholder="Hledat cestu nebo jádro…" autocomplete="off">
+      <p id="modelCandidateInfo" class="candidate-info"></p>
+      <div id="candidateList" class="candidate-list"></div>
+      <div class="dialog-foot">
+        <button class="quiet-button" type="button" data-action="close-models">Zrušit</button>
+        <button id="saveModels" class="primary-button" type="button">Uložit výběr</button>
       </div>
-      <button class="icon-button" type="button" data-action="close-lesson" aria-label="Zavřít novou lekci">×</button>
     </div>
-    <label for="lessonTrigger">Kdy má lekci použít</label>
-    <input id="lessonTrigger" type="text" maxlength="120" placeholder="Např. když napíšu: ranní plán" autocomplete="off">
-    <label for="lessonReply">Co má odpovědět nebo připomenout</label>
-    <textarea id="lessonReply" rows="7" maxlength="1800" placeholder="Např. Otevři Země, zkontroluj tři sloty a udělej zálohu."></textarea>
-    <div class="dialog-foot">
-      <button class="quiet-button" type="button" data-action="close-lesson">Zrušit</button>
-      <button id="saveLesson" class="primary-button" type="button">Uložit lekci</button>
-    </div>
-  </dialog>
+  </div>
 
-  <script
-    src="../js/cht-360-network.js"
-    data-cht-module="cht-mluva"
-    data-cht-label="Mluva CHT 360°‰."
-    data-cht-entry="./"
-    data-cht-kind="pwa"
-    data-cht-storage-keys="cht360_mluva_history_v1,cht360_mluva_lessons_v1,cht360_mluva_models_v1,cht360_pamet_v1,vaft_pamet_v1,cht360_glyph_workshop_v1,cht360_slot_locks_v1"
-    data-cht-capture-mode="full"
-  ></script>
-  <script src="./app.js" defer></script>
+  <!-- Lesson Dialog -->
+  <div id="lessonDialog" class="dialog-overlay" role="dialog" aria-labelledby="lessonDialogTitle" aria-modal="true">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">NOVÁ LEKCE</p>
+          <h2 id="lessonDialogTitle">Co si má Mluva pamatovat?</h2>
+        </div>
+        <button class="icon-button" type="button" data-action="close-lesson" aria-label="Zavřít novou lekci">×</button>
+      </div>
+      <label for="lessonTrigger">Kdy má lekci použít (klíčová slova)</label>
+      <input id="lessonTrigger" type="text" maxlength="120" placeholder="Např. když napíšu: ranní plán" autocomplete="off">
+      <label for="lessonReply">Co má odpovědět nebo připomenout</label>
+      <textarea id="lessonReply" rows="7" maxlength="1800" placeholder="Např. Otevři Země, zkontroluj tři sloty a udělej zálohu."></textarea>
+      <div class="dialog-foot">
+        <button class="quiet-button" type="button" data-action="close-lesson">Zrušit</button>
+        <button id="saveLesson" class="primary-button" type="button">Uložit lekci</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Lesson Dialog -->
+  <div id="editLessonDialog" class="dialog-overlay" role="dialog" aria-labelledby="editLessonDialogTitle" aria-modal="true">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div>
+          <p class="eyebrow">UPRAVIT LEKCI</p>
+          <h2 id="editLessonDialogTitle">Upravit uloženou lekci</h2>
+        </div>
+        <button class="icon-button" type="button" data-action="close-edit" aria-label="Zavřít úpravu">×</button>
+      </div>
+      <input type="hidden" id="editLessonId">
+      <label for="editLessonTrigger">Kdy má lekci použít</label>
+      <input id="editLessonTrigger" type="text" maxlength="120" autocomplete="off">
+      <label for="editLessonReply">Co má odpovědět</label>
+      <textarea id="editLessonReply" rows="7" maxlength="1800"></textarea>
+      <div class="dialog-foot">
+        <button class="quiet-button" type="button" id="deleteLessonBtn" style="margin-right:auto; color:var(--error);">Smazat</button>
+        <button class="quiet-button" type="button" data-action="close-edit">Zrušit</button>
+        <button id="updateLesson" class="primary-button" type="button">Uložit změny</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // Mluva CHT — Offline verice s učením z interakcí
+    // ============================================
+
+    const STORAGE_KEYS = {
+      lessons: 'mluva_offline_lessons_v1',
+      history: 'mluva_offline_history_v1',
+      models: 'mluva_offline_models_v1',
+      interactions: 'mluva_offline_interactions_v1'
+    };
+
+    const DEFAULT_MODELS = [
+      { id: 'kimi', name: 'Kimi Chat', kind: 'AI asistent', url: 'https://kimi.moonshot.cn', selected: false },
+      { id: 'gpt4', name: 'ChatGPT GPT-4', kind: 'OpenAI', url: 'https://chat.openai.com', selected: false },
+      { id: 'claude', name: 'Claude', kind: 'Anthropic', url: 'https://claude.ai', selected: false },
+      { id: 'gemini', name: 'Gemini', kind: 'Google', url: 'https://gemini.google.com', selected: false },
+      { id: 'perplexity', name: 'Perplexity', kind: 'Vyhledávání', url: 'https://perplexity.ai', selected: false },
+      { id: 'copilot', name: 'GitHub Copilot', kind: 'Kód', url: 'https://github.com/copilot', selected: false },
+      { id: 'deepseek', name: 'DeepSeek', kind: 'AI asistent', url: 'https://chat.deepseek.com', selected: false },
+      { id: 'llama', name: 'Llama (Meta)', kind: 'Open source', url: 'https://llama.meta.com', selected: false },
+      { id: 'mistral', name: 'Mistral', kind: 'Evropský AI', url: 'https://chat.mistral.ai', selected: false },
+      { id: 'groq', name: 'Groq', kind: 'Rychlý inference', url: 'https://groq.com', selected: false },
+      { id: 'huggingface', name: 'Hugging Face', kind: 'Komunita', url: 'https://huggingface.co/chat', selected: false },
+      { id: 'poe', name: 'Poe', kind: 'Agregátor', url: 'https://poe.com', selected: false },
+    ];
+
+    let lessons = [];
+    let history = [];
+    let models = [];
+    let interactionCount = 0;
+    let currentEditId = null;
+
+    // --- Persistence ---
+    function loadData() {
+      try {
+        const l = localStorage.getItem(STORAGE_KEYS.lessons);
+        const h = localStorage.getItem(STORAGE_KEYS.history);
+        const m = localStorage.getItem(STORAGE_KEYS.models);
+        const i = localStorage.getItem(STORAGE_KEYS.interactions);
+        
+        lessons = l ? JSON.parse(l) : [];
+        history = h ? JSON.parse(h) : [];
+        models = m ? JSON.parse(m) : JSON.parse(JSON.stringify(DEFAULT_MODELS));
+        interactionCount = i ? parseInt(i, 10) : 0;
+      } catch (e) {
+        console.error('Chyba při načítání:', e);
+        lessons = []; history = []; models = JSON.parse(JSON.stringify(DEFAULT_MODELS)); interactionCount = 0;
+      }
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEYS.lessons, JSON.stringify(lessons));
+      localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(history));
+      localStorage.setItem(STORAGE_KEYS.models, JSON.stringify(models));
+      localStorage.setItem(STORAGE_KEYS.interactions, String(interactionCount));
+      updateStats();
+    }
+
+    function clearAllData() {
+      if (!confirm('Opravdu smazat VŠECHNA data? Toto je nevratné.')) return;
+      Object.values(STORAGE_KEYS).forEach(k => localStorage.removeItem(k));
+      lessons = []; history = []; models = JSON.parse(JSON.stringify(DEFAULT_MODELS)); interactionCount = 0;
+      renderLessons(); renderModels(); renderHistory(); updateStats();
+      addSystemMessage('Všechna data byla smazána. Začínáme znovu.');
+    }
+
+    // --- Stats ---
+    function updateStats() {
+      const selected = models.filter(m => m.selected).length;
+      document.getElementById('statLessons').textContent = lessons.length;
+      document.getElementById('statInteractions').textContent = interactionCount;
+      document.getElementById('statModels').textContent = selected + ' / 24';
+      document.getElementById('modelCount').textContent = selected + ' / 24';
+      
+      const size = (
+        (localStorage.getItem(STORAGE_KEYS.lessons)?.length || 0) +
+        (localStorage.getItem(STORAGE_KEYS.history)?.length || 0) +
+        (localStorage.getItem(STORAGE_KEYS.models)?.length || 0)
+      );
+      document.getElementById('statSize').textContent = (size / 1024).toFixed(1) + ' KB';
+    }
+
+    // --- Rendering ---
+    function renderLessons() {
+      const container = document.getElementById('lessonList');
+      if (lessons.length === 0) {
+        container.innerHTML = '<div class="lesson-list empty">Zatím žádné lekce. Klikni "Nová lekce" pro začátek, nebo napiš do chatu "nauč se: [téma] = [odpověď]"</div>';
+        return;
+      }
+      container.innerHTML = lessons.map((l, idx) => `
+        <div class="lesson-item" data-id="${l.id}" onclick="openEditLesson('${l.id}')">
+          <div class="trigger">${escapeHtml(l.trigger)}</div>
+          <div class="reply">${escapeHtml(l.reply)}</div>
+          <div class="meta">Použito: ${l.uses || 0}× | Vytvořeno: ${formatDate(l.created)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderModels() {
+      const container = document.getElementById('modelList');
+      const selected = models.filter(m => m.selected);
+      if (selected.length === 0) {
+        container.innerHTML = '<div class="model-item empty">Žádné cesty vybrány. Klikni "Vybrat z CHT" pro přidání.</div>';
+        return;
+      }
+      container.innerHTML = selected.map(m => `
+        <div class="model-item">
+          <div>
+            <div class="name">${escapeHtml(m.name)}</div>
+            <div class="kind">${escapeHtml(m.kind)}</div>
+          </div>
+          <button class="quiet-button" onclick="window.open('${m.url}', '_blank')">Otevřít</button>
+        </div>
+      `).join('');
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('conversation');
+      if (history.length === 0) {
+        container.innerHTML = `
+          <div class="msg bot system">
+            <div>Vítej v Mluvě CHT (Offline). Jsem připravena se učit. Napiš mi cokoli — pokud to odpovídá nějaké lekci, použiji ji. Pokud ne, zeptám se, co mám naučit.</div>
+            <div class="msg-time">nyní</div>
+          </div>`;
+        return;
+      }
+      container.innerHTML = history.map(h => `
+        <div class="msg ${h.role} ${h.learning ? 'learning' : ''} ${h.system ? 'system' : ''}">
+          <div>${escapeHtml(h.text)}</div>
+          <div class="msg-time">${formatTime(h.time)}</div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // --- Conversation Logic ---
+    function addMessage(role, text, options = {}) {
+      const msg = { role, text, time: Date.now(), ...options };
+      history.push(msg);
+      if (history.length > 100) history = history.slice(-100); // Keep last 100
+      saveData();
+      renderHistory();
+    }
+
+    function addSystemMessage(text) {
+      addMessage('bot', text, { system: true });
+    }
+
+    function findLesson(text) {
+      const lower = text.toLowerCase();
+      // Exact match first
+      let match = lessons.find(l => lower.includes(l.trigger.toLowerCase()));
+      if (match) return match;
+      // Word overlap
+      const words = lower.split(/\\s+/).filter(w => w.length > 2);
+      let bestMatch = null, bestScore = 0;
+      for (const l of lessons) {
+        const triggerWords = l.trigger.toLowerCase().split(/\\s+/).filter(w => w.length > 2);
+        const score = words.filter(w => triggerWords.includes(w)).length;
+        if (score > bestScore) { bestScore = score; bestMatch = l; }
+      }
+      return bestScore >= 2 ? bestMatch : null;
+    }
+
+    function generateResponse(text) {
+      const lower = text.toLowerCase().trim();
+      
+      // --- Auto-learning from "nauč se:" pattern ---
+      const teachMatch = text.match(/^nauč\\s*se\\s*[:=]\\s*(.+?)\\s*[=:]\\s*(.+)$/i);
+      if (teachMatch) {
+        const trigger = teachMatch[1].trim();
+        const reply = teachMatch[2].trim();
+        const id = 'lesson_' + Date.now();
+        lessons.push({ id, trigger, reply, created: Date.now(), uses: 0 });
+        saveData(); renderLessons();
+        return `✅ Nová lekce uložena:\n**Když napíšeš:** "${trigger}"\n**Odpovím:** "${reply}"\n\nPříště to použiji automaticky.`;
+      }
+
+      // --- Special commands ---
+      if (lower === 'stav' || lower === 'jaký je stav cht?' || lower === 'jaký je stav paměti?') {
+        const selected = models.filter(m => m.selected).length;
+        return `📊 **Stav Mluvy CHT (Offline)**\n\n• Lekce: ${lessons.length}\n• Interakce: ${interactionCount}\n• Vybrané cesty: ${selected} / 24\n• Historie: ${history.length} zpráv\n\nJsem v offline režimu. Učím se z každé interakce.`;
+      }
+      
+      if (lower === 'modely' || lower === 'jaké modely mám vybrané?') {
+        const selected = models.filter(m => m.selected);
+        if (selected.length === 0) return `🤖 Žádné cesty nejsou vybrány. Klikni na "Vybrat z CHT" pro přidání modelů.`;
+        return `🤖 **Vybrané cesty (${selected.length} / 24):**\n\n` + selected.map(m => `• ${m.name} (${m.kind})`).join('\\n');
+      }
+      
+      if (lower === 'pomoc' || lower === 'co umíš offline?' || lower === 'help') {
+        return `🧠 **Co umím offline:**\n\n1. **Učit se z lekcí** — každá lekce = klíčová slova + odpověď\n2. **Auto-učení** — napiš "nauč se: [téma] = [odpověď]"\n3. **Paměť** — pamatuji si posledních 100 zpráv\n4. **Export/Import** — záloha jako JSON pro Kimi analýzu\n5. **Vybrané cesty** — odkazy na AI služby\n\n**Příkazy:**\n• "stav" — přehled Paměti\n• "modely" — vybrané cesty\n• "nauč se: X = Y" — nová lekce\n• "zapomeň vše" — smaže všechna data`;
+      }
+
+      if (lower === 'zapomeň vše' || lower === 'smaž vše' || lower === 'clear all') {
+        clearAllData();
+        return null; // Message handled by clearAllData
+      }
+
+      // --- Lesson-based response ---
+      const lesson = findLesson(text);
+      if (lesson) {
+        lesson.uses = (lesson.uses || 0) + 1;
+        saveData(); renderLessons();
+        return lesson.reply + `\n\n_(použita lekce: "${lesson.trigger}")_`;
+      }
+
+      // --- Learning from context (simple pattern matching from history) ---
+      // Check if user asked similar thing before and we learned
+      for (const h of history.slice(-20).reverse()) {
+        if (h.role === 'bot' && h.learning && lower.includes(h.originalTrigger?.toLowerCase())) {
+          return h.text;
+        }
+      }
+
+      // --- Default: ask to teach ---
+      return `🤔 Toto zatím neznám.\n\nChceš mě to naučit? Napiš:\n\n**nauč se: ${text.substring(0, 40)} = [tvá odpověď]**\n\nNebo použij tlačítko "Nová lekce" nahoře.`;
+    }
+
+    function handleUserMessage(text) {
+      if (!text.trim()) return;
+      
+      interactionCount++;
+      addMessage('user', text);
+      
+      const response = generateResponse(text);
+      if (response) {
+        // Check if this was a learning moment
+        const isLearning = !findLesson(text) && !text.match(/^nauč\\s*se/i) && 
+          !['stav','modely','pomoc','help','zapomeň vše'].includes(text.toLowerCase().trim());
+        
+        addMessage('bot', response, { learning: isLearning, originalTrigger: text });
+      }
+      
+      saveData();
+    }
+
+    // --- Dialogs ---
+    function openDialog(id) { document.getElementById(id).classList.add('active'); }
+    function closeDialog(id) { document.getElementById(id).classList.remove('active'); }
+
+    // Model Dialog
+    document.getElementById('scanModels').addEventListener('click', () => {
+      const container = document.getElementById('candidateList');
+      const selectedCount = models.filter(m => m.selected).length;
+      
+      function renderCandidates(filter = '') {
+        const filtered = models.filter(m => 
+          m.name.toLowerCase().includes(filter.toLowerCase()) ||
+          m.kind.toLowerCase().includes(filter.toLowerCase())
+        );
+        
+        document.getElementById('modelCandidateInfo').textContent = 
+          `${selectedCount} / 24 vybráno | ${filtered.length} zobrazeno`;
+        
+        container.innerHTML = filtered.map(m => `
+          <div class="candidate-item">
+            <input type="checkbox" id="cb_${m.id}" ${m.selected ? 'checked' : ''} 
+              onchange="toggleModel('${m.id}', this.checked)" 
+              ${!m.selected && selectedCount >= 24 ? 'disabled' : ''}>
+            <label for="cb_${m.id}">${escapeHtml(m.name)} <span class="candidate-kind">${escapeHtml(m.kind)}</span></label>
+          </div>
+        `).join('');
+      }
+      
+      renderCandidates();
+      document.getElementById('modelSearch').value = '';
+      document.getElementById('modelSearch').oninput = (e) => renderCandidates(e.target.value);
+      openDialog('modelDialog');
+    });
+
+    window.toggleModel = function(id, checked) {
+      const model = models.find(m => m.id === id);
+      if (model) {
+        const selectedCount = models.filter(m => m.selected).length;
+        if (checked && selectedCount >= 24) {
+          alert('Maximum 24 cest dosaženo.');
+          return;
+        }
+        model.selected = checked;
+        saveData();
+        // Re-render
+        document.getElementById('scanModels').click();
+        document.getElementById('scanModels').click(); // Toggle back to refresh
+      }
+    };
+
+    document.getElementById('saveModels').addEventListener('click', () => {
+      closeDialog('modelDialog');
+      renderModels();
+      updateStats();
+      addSystemMessage(`Cesty aktualizovány: ${models.filter(m => m.selected).length} / 24 vybráno.`);
+    });
+
+    // Lesson Dialog
+    document.getElementById('openLesson').addEventListener('click', () => {
+      document.getElementById('lessonTrigger').value = '';
+      document.getElementById('lessonReply').value = '';
+      openDialog('lessonDialog');
+      setTimeout(() => document.getElementById('lessonTrigger').focus(), 100);
+    });
+
+    document.getElementById('saveLesson').addEventListener('click', () => {
+      const trigger = document.getElementById('lessonTrigger').value.trim();
+      const reply = document.getElementById('lessonReply').value.trim();
+      if (!trigger || !reply) { alert('Vyplň obě pole.'); return; }
+      
+      const id = 'lesson_' + Date.now();
+      lessons.push({ id, trigger, reply, created: Date.now(), uses: 0 });
+      saveData(); renderLessons(); closeDialog('lessonDialog');
+      addSystemMessage(`✅ Nová lekce uložena: "${trigger}"`);
+    });
+
+    // Edit Lesson Dialog
+    window.openEditLesson = function(id) {
+      const lesson = lessons.find(l => l.id === id);
+      if (!lesson) return;
+      currentEditId = id;
+      document.getElementById('editLessonId').value = id;
+      document.getElementById('editLessonTrigger').value = lesson.trigger;
+      document.getElementById('editLessonReply').value = lesson.reply;
+      openDialog('editLessonDialog');
+    };
+
+    document.getElementById('updateLesson').addEventListener('click', () => {
+      const trigger = document.getElementById('editLessonTrigger').value.trim();
+      const reply = document.getElementById('editLessonReply').value.trim();
+      if (!trigger || !reply) { alert('Vyplň obě pole.'); return; }
+      
+      const lesson = lessons.find(l => l.id === currentEditId);
+      if (lesson) { lesson.trigger = trigger; lesson.reply = reply; }
+      saveData(); renderLessons(); closeDialog('editLessonDialog');
+      addSystemMessage('✅ Lekce aktualizována.');
+    });
+
+    document.getElementById('deleteLessonBtn').addEventListener('click', () => {
+      if (!confirm('Smazat tuto lekci?')) return;
+      lessons = lessons.filter(l => l.id !== currentEditId);
+      saveData(); renderLessons(); closeDialog('editLessonDialog');
+      addSystemMessage('🗑️ Lekce smazána.');
+    });
+
+    // Export
+    document.getElementById('exportLearning').addEventListener('click', () => {
+      const data = {
+        version: 'mluva_offline_v1',
+        exported: Date.now(),
+        lessons,
+        history,
+        models: models.filter(m => m.selected),
+        interactionCount,
+        stats: {
+          lessonCount: lessons.length,
+          historyLength: history.length,
+          selectedModels: models.filter(m => m.selected).length
+        }
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mluva_cht_backup_${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      addSystemMessage('💾 Záloha exportována. Soubor si ulož a pošli Kimi pro analýzu.');
+    });
+
+    // Import (hidden feature via console or drag)
+    window.importBackup = function(jsonText) {
+      try {
+        const data = JSON.parse(jsonText);
+        if (data.lessons) lessons = data.lessons;
+        if (data.models) {
+          // Merge models
+          data.models.forEach(m => {
+            const existing = models.find(em => em.id === m.id);
+            if (existing) existing.selected = true;
+          });
+        }
+        saveData(); renderLessons(); renderModels(); updateStats();
+        addSystemMessage('📥 Záloha importována. Data sloučena s existujícími.');
+      } catch (e) { alert('Chybný formát zálohy.'); }
+    };
+
+    // Quick actions
+    document.querySelectorAll('.quick-actions button[data-prompt]').forEach(btn => {
+      btn.addEventListener('click', () => handleUserMessage(btn.dataset.prompt));
+    });
+    document.getElementById('teachFromQuick').addEventListener('click', () => {
+      document.getElementById('talkInput').value = 'nauč se: ';
+      document.getElementById('talkInput').focus();
+    });
+
+    // Form submit
+    document.getElementById('talkForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = document.getElementById('talkInput');
+      handleUserMessage(input.value);
+      input.value = '';
+    });
+
+    // Enter to send (Ctrl+Enter for new line)
+    document.getElementById('talkInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('talkForm').dispatchEvent(new Event('submit')); }
+    });
+
+    // Refresh
+    document.getElementById('refreshContext').addEventListener('click', () => {
+      updateStats();
+      addSystemMessage('🔄 Paměť obnovena. Aktuální stav: ' + lessons.length + ' lekcí, ' + interactionCount + ' interakcí.');
+    });
+
+    // Speak (simple speech synthesis)
+    document.getElementById('speakLast').addEventListener('click', () => {
+      const lastBot = history.slice().reverse().find(h => h.role === 'bot');
+      if (!lastBot) { alert('Žádná odpověď k přečtení.'); return; }
+      if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(lastBot.text.replace(/[_*]/g, ''));
+        u.lang = 'cs-CZ';
+        u.rate = 1.1;
+        speechSynthesis.speak(u);
+      } else { alert('Tento prohlížeč nepodporuje čtení.'); }
+    });
+
+    // Close dialogs
+    document.querySelectorAll('[data-action="close-models"]').forEach(b => b.addEventListener('click', () => closeDialog('modelDialog')));
+    document.querySelectorAll('[data-action="close-lesson"]').forEach(b => b.addEventListener('click', () => closeDialog('lessonDialog')));
+    document.querySelectorAll('[data-action="close-edit"]').forEach(b => b.addEventListener('click', () => closeDialog('editLessonDialog')));
+    
+    // Close on overlay click
+    document.querySelectorAll('.dialog-overlay').forEach(d => {
+      d.addEventListener('click', (e) => { if (e.target === d) d.classList.remove('active'); });
+    });
+
+    // Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.querySelectorAll('.dialog-overlay.active').forEach(d => d.classList.remove('active'));
+    });
+
+    // Helpers
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    function formatDate(ts) {
+      const d = new Date(ts);
+      return d.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'short' });
+    }
+    function formatTime(ts) {
+      const d = new Date(ts);
+      return d.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Init
+    loadData();
+    renderLessons();
+    renderModels();
+    renderHistory();
+    updateStats();
+    
+    // Check online status
+    function updateOnlineStatus() {
+      const pill = document.getElementById('connectionState');
+      if (navigator.onLine) {
+        pill.textContent = 'offline (prohlížeč online)';
+        pill.className = 'state-pill online';
+      } else {
+        pill.textContent = 'offline';
+        pill.className = 'state-pill offline';
+      }
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    updateOnlineStatus();
+
+    // Welcome message if first visit
+    if (interactionCount === 0 && lessons.length === 0) {
+      setTimeout(() => {
+        addSystemMessage('🎯 **Tip pro začátečníky:**\n\n1. Napiš "nauč se: ahoj = Ahoj! Jak se máš?"\n2. Pak napiš "ahoj" — a uvidíš, jak se učím!\n3. Použij "pomoc" kdykoliv pro seznam příkazů.');
+      }, 500);
+    }
+
+    console.log('🧠 Mluva CHT Offline inicializována. Příkazy v konzoli: importBackup(json)');
+  </script>
 </body>
-</html>
+</html>'''
+
+with open('/mnt/agents/output/mluva_cht_offline.html', 'w', encoding='utf-8') as f:
+    f.write(html_content)
+
+print("Hotovo! Soubor uložen.")
+print(f"Velikost: {len(html_content)} znaků")
