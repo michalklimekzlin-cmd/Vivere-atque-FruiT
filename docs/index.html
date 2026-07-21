@@ -1,850 +1,586 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="cs">
 <head>
   <meta charset="utf-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1,viewport-fit=cover"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#050815">
-  <meta name="description" content="CHT 360°‰. — Paměť a vlastní Glyph dílna v čistém UTF‑8.">
+  <meta name="description" content="Mluva CHT 360°‰. Paměť — propojená vrstva, která čte, učí se z CHT 360° slotů a doplňuje je zpět.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="screen-orientation" content="landscape">
-
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./css/pamet.css">
-  <link rel="stylesheet" href="./css/glyph-engine.css">
-<link rel="stylesheet" href="./css/prstenec-pokojicku.css">
-  
-  <title>CHT 360°‰. · Paměť a Glyph</title>
-
+  <meta name="apple-mobile-web-app-title" content="Mluva Paměť">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🧠%3C/text%3E%3C/svg%3E">
+  <title>Mluva · CHT 360°‰. Paměť & Vědomí</title>
   <style>
     :root {
-      --safe-top: max(10px, env(safe-area-inset-top));
-      --safe-right: max(12px, env(safe-area-inset-right));
-      --safe-bottom: max(10px, env(safe-area-inset-bottom));
-      --safe-left: max(12px, env(safe-area-inset-left));
+      --bg:#050815;--bg-elev:#0a0e20;--bg-card:#11132a;--bg-hover:#1a1d3a;
+      --border:#1e2140;--border-light:#2a2e55;--text:#e8e6f0;--text-dim:#8a87a0;
+      --accent:#ffd98e;--accent-dim:#b56f2c;--accent-glow:rgba(255,217,142,0.12);
+      --success:#6b9e75;--success-dim:#4a7a55;--warning:#c9a04e;--error:#b85c5c;--info:#7a8aaa;
+      --slot-bg:#0d1028;--slot-border:#1a1e45;--slot-active:#ffd98e;
+      --radius:14px;--radius-sm:10px;--radius-xs:6px;
+      --shadow:0 4px 32px rgba(0,0,0,0.5);--shadow-sm:0 2px 12px rgba(0,0,0,0.3);
+      --font:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+      --font-mono:"SF Mono","SFMono-Regular","Consolas",monospace;
+      --transition:all 0.25s cubic-bezier(0.4,0,0.2,1);
     }
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      min-height: 100%;
-      margin: 0;
-      overflow: hidden;
-      background: #050815;
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    .app-shell{max-width:800px;margin:0 auto;padding:16px;padding-bottom:120px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:16px;position:sticky;top:16px;z-index:100;backdrop-filter:blur(20px) saturate(1.2);-webkit-backdrop-filter:blur(20px) saturate(1.2);box-shadow:var(--shadow-sm)}
+    .topbar .brand p{font-size:10px;letter-spacing:3px;color:var(--accent);margin-bottom:2px;font-weight:600}
+    .topbar .brand strong{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-0.3px}
+    .topbar .subtitle{font-size:11px;color:var(--text-dim);font-family:var(--font-mono);margin-top:2px}
+    .state-pill{font-size:11px;padding:5px 14px;border-radius:20px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-dim);font-family:var(--font-mono);transition:var(--transition);font-weight:500}
+    .state-pill.connected{color:var(--success);border-color:var(--success);background:rgba(107,158,117,0.1)}
+    .state-pill.learning{color:var(--accent);border-color:var(--accent);background:var(--accent-glow);animation:pulse 2s infinite}
+    .state-pill.syncing{color:var(--info);border-color:var(--info);background:rgba(122,138,170,0.1);animation:pulse 1.5s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+    @keyframes glow{0%,100%{box-shadow:0 0 5px var(--accent-glow)}50%{box-shadow:0 0 20px var(--accent-glow)}}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:16px;box-shadow:var(--shadow);animation:fadeIn 0.5s ease-out;transition:var(--transition)}
+    .card:hover{border-color:var(--border-light)}
+    .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:12px}
+    .card-header h2{font-size:20px;font-weight:700;letter-spacing:-0.3px}
+    .card-header .eyebrow{font-size:10px;letter-spacing:2.5px;color:var(--accent);margin-bottom:5px;font-family:var(--font-mono);font-weight:600}
+    .section-lead{color:var(--text-dim);font-size:14.5px;margin-bottom:14px;line-height:1.55}
+    .hero-card{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--bg-card) 0%,#151830 100%)}
+    .hero-card::before{content:'';position:absolute;top:-50%;right:-20%;width:300px;height:300px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);pointer-events:none}
+    .hero-card h1{font-size:32px;font-weight:800;line-height:1.15;margin-bottom:14px;position:relative}
+    .hero-card h1 em{color:var(--accent);font-style:normal}
+    .hero-card>div>p{color:var(--text-dim);font-size:15px;margin-bottom:18px;position:relative}
+    .honesty-card{background:rgba(10,14,32,0.8);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-top:14px;position:relative;backdrop-filter:blur(10px)}
+    .honesty-card strong{color:var(--success);font-size:13px;display:block;margin-bottom:7px;font-weight:700}
+    .honesty-card p{font-size:13.5px;color:var(--text-dim);line-height:1.55}
+    .quiet-button{background:transparent;border:1px solid var(--border);color:var(--text-dim);padding:8px 16px;border-radius:var(--radius-xs);font-size:12.5px;cursor:pointer;transition:var(--transition);font-family:var(--font);font-weight:500;white-space:nowrap}
+    .quiet-button:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+    .quiet-button:active{transform:scale(0.96)}
+    .quiet-button.danger{color:var(--error);border-color:rgba(184,92,92,0.3)}
+    .quiet-button.danger:hover{border-color:var(--error);background:rgba(184,92,92,0.1)}
+    .primary-button{background:var(--accent);border:none;color:var(--bg);padding:12px 24px;border-radius:var(--radius-xs);font-size:14.5px;font-weight:700;cursor:pointer;transition:var(--transition);font-family:var(--font);box-shadow:0 2px 12px rgba(255,217,142,0.25)}
+    .primary-button:hover{background:#ffe8ba;transform:translateY(-1px);box-shadow:0 4px 20px rgba(255,217,142,0.35)}
+    .primary-button:active{transform:scale(0.97)}
+    .primary-button:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+    .icon-button{background:transparent;border:none;color:var(--text-dim);font-size:22px;cursor:pointer;padding:4px 10px;transition:var(--transition)}
+    .icon-button:hover{color:var(--text)}
+    .heading-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .cht-status{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--slot-bg);border:1px solid var(--slot-border);border-radius:var(--radius-xs);margin-bottom:14px;font-size:13px}
+    .cht-status .indicator{width:8px;height:8px;border-radius:50%;background:var(--text-dim);flex-shrink:0}
+    .cht-status .indicator.active{background:var(--success);box-shadow:0 0 8px var(--success)}
+    .cht-status .indicator.warning{background:var(--warning);box-shadow:0 0 8px var(--warning)}
+    .cht-status .text{color:var(--text-dim)}
+    .cht-status .text strong{color:var(--text)}
+    .slot-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:6px;max-height:200px;overflow-y:auto;padding:4px}
+    .slot-cell{aspect-ratio:1;background:var(--slot-bg);border:1px solid var(--slot-border);border-radius:var(--radius-xs);display:flex;align-items:center;justify-content:center;font-size:10px;font-family:var(--font-mono);color:var(--text-dim);cursor:pointer;transition:var(--transition);position:relative;overflow:hidden}
+    .slot-cell:hover{border-color:var(--accent);color:var(--accent)}
+    .slot-cell.filled{background:rgba(255,217,142,0.05);border-color:rgba(255,217,142,0.2);color:var(--accent)}
+    .slot-cell.filled::after{content:'';position:absolute;bottom:2px;right:2px;width:4px;height:4px;background:var(--success);border-radius:50%}
+    .slot-cell.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+    .memory-overview{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .memory-stat{display:flex;justify-content:space-between;align-items:center;background:var(--bg-elev);padding:12px 16px;border-radius:var(--radius-xs);font-size:13.5px;border:1px solid var(--border);transition:var(--transition)}
+    .memory-stat:hover{border-color:var(--border-light)}
+    .memory-stat .label{color:var(--text-dim);font-size:12px}
+    .memory-stat .value{font-family:var(--font-mono);color:var(--accent);font-weight:700;font-size:15px}
+    .memory-stat .value.growing{animation:pulse 1.5s}
+    .lesson-list{display:grid;gap:8px;max-height:350px;overflow-y:auto}
+    .lesson-item{background:var(--bg-elev);padding:14px 16px;border-radius:var(--radius-xs);font-size:13.5px;border-left:3px solid var(--success);border:1px solid var(--border);cursor:pointer;transition:var(--transition);position:relative}
+    .lesson-item:hover{background:var(--bg-hover);border-color:var(--border-light);transform:translateX(2px)}
+    .lesson-item .trigger{font-weight:700;color:var(--accent);margin-bottom:5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .lesson-item .trigger .tag{font-size:9px;background:var(--accent-glow);color:var(--accent);padding:2px 8px;border-radius:10px;font-family:var(--font-mono);font-weight:500}
+    .lesson-item .trigger .source{font-size:9px;background:rgba(107,158,117,0.1);color:var(--success);padding:2px 8px;border-radius:10px;font-family:var(--font-mono)}
+    .lesson-item .trigger .cht-tag{font-size:9px;background:rgba(255,217,142,0.1);color:var(--accent);padding:2px 8px;border-radius:10px;font-family:var(--font-mono);border:1px solid rgba(255,217,142,0.2)}
+    .lesson-item .reply{color:var(--text-dim);font-size:12.5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5}
+    .lesson-item .meta{font-size:10.5px;color:var(--text-dim);margin-top:8px;font-family:var(--font-mono);display:flex;gap:12px;flex-wrap:wrap}
+    .lesson-list.empty{text-align:center;color:var(--text-dim);padding:32px;font-style:italic;border:1px dashed var(--border);border-radius:var(--radius-xs)}
+    .conversation{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius-xs);padding:18px;min-height:220px;max-height:450px;overflow-y:auto;margin-bottom:14px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth}
+    .msg{max-width:88%;padding:12px 16px;border-radius:18px;font-size:14.5px;line-height:1.55;word-break:break-word;animation:fadeIn 0.3s ease-out;position:relative}
+    .msg.user{align-self:flex-end;background:var(--accent);color:var(--bg);border-bottom-right-radius:4px;font-weight:500}
+    .msg.bot{align-self:flex-start;background:var(--border);color:var(--text);border-bottom-left-radius:4px;border-left:3px solid var(--success)}
+    .msg.bot.learning{border-left-color:var(--warning)}
+    .msg.bot.system{border-left-color:var(--accent);font-style:italic;background:rgba(255,217,142,0.03)}
+    .msg.bot.import{border-left-color:var(--info)}
+    .msg.bot.slot{border-left-color:var(--slot-active);background:rgba(255,217,142,0.05)}
+    .msg-time{font-size:10px;opacity:0.5;margin-top:6px;font-family:var(--font-mono)}
+    .msg .learn-indicator{font-size:10px;color:var(--warning);margin-top:6px;font-family:var(--font-mono)}
+    .msg .slot-indicator{font-size:10px;color:var(--accent);margin-top:6px;font-family:var(--font-mono)}
+    .quick-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+    .quick-actions button{background:var(--bg-elev);border:1px solid var(--border);color:var(--text-dim);padding:8px 16px;border-radius:20px;font-size:12.5px;cursor:pointer;transition:var(--transition);font-weight:500}
+    .quick-actions button:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+    .quick-actions button:active{transform:scale(0.95)}
+    .quick-actions button.highlight{border-color:var(--success);color:var(--success);background:rgba(107,158,117,0.08)}
+    .quick-actions button.sync{border-color:var(--info);color:var(--info);background:rgba(122,138,170,0.08)}
+    .talk-form{display:flex;gap:10px;align-items:flex-end}
+    .talk-form textarea{flex:1;background:var(--bg-elev);border:1px solid var(--border);color:var(--text);padding:14px;border-radius:var(--radius-xs);font-family:var(--font);font-size:15px;resize:vertical;min-height:56px;max-height:200px;transition:var(--transition)}
+    .talk-form textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+    .talk-form textarea::placeholder{color:var(--text-dim)}
+    .route-actions{display:flex;flex-wrap:wrap;gap:10px}
+    .route-actions a{display:block;background:var(--bg-elev);border:1px solid var(--border);color:var(--text);padding:12px 20px;border-radius:var(--radius-xs);text-decoration:none;font-size:14px;transition:var(--transition);font-weight:500}
+    .route-actions a:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+    .dialog-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:flex-end;justify-content:center;z-index:1000;padding:0}
+    .dialog-overlay.active{display:flex}
+    .dialog{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:600px;max-height:85vh;overflow-y:auto;box-shadow:0 -8px 40px rgba(0,0,0,0.5);animation:slideUp 0.35s cubic-bezier(0.4,0,0.2,1)}
+    .dialog-head{display:flex;justify-content:space-between;align-items:flex-start;padding:24px 24px 0;margin-bottom:18px}
+    .dialog-head h2{font-size:20px;font-weight:700}
+    .dialog-copy{padding:0 24px;color:var(--text-dim);font-size:14.5px;margin-bottom:18px;line-height:1.55}
+    .dialog-foot{display:flex;justify-content:flex-end;gap:10px;padding:18px 24px;border-top:1px solid var(--border)}
+    .dialog label{display:block;padding:0 24px;font-size:12.5px;color:var(--text-dim);margin-bottom:7px;font-weight:500}
+    .dialog input[type="text"],.dialog textarea{width:calc(100% - 48px);margin:0 24px 18px;background:var(--bg-elev);border:1px solid var(--border);color:var(--text);padding:12px 16px;border-radius:var(--radius-xs);font-size:15px;font-family:var(--font);transition:var(--transition)}
+    .dialog input:focus,.dialog textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+    .dialog .hint{padding:0 24px;font-size:12px;color:var(--text-dim);margin-bottom:14px;font-style:italic}
+    .slot-detail-content{padding:0 24px}
+    .slot-detail-meta{display:flex;gap:16px;margin-bottom:12px;font-size:12px;color:var(--text-dim);font-family:var(--font-mono);flex-wrap:wrap}
+    .slot-detail-text{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius-xs);padding:14px;font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow-y:auto;margin-bottom:16px}
+    .slot-actions{display:flex;gap:8px;padding:0 24px 18px;flex-wrap:wrap}
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+    .stat-box{background:var(--bg-elev);border:1px solid var(--border);border-radius:var(--radius-xs);padding:14px;text-align:center;transition:var(--transition)}
+    .stat-box:hover{border-color:var(--border-light)}
+    .stat-box .number{font-size:24px;font-weight:800;color:var(--accent);font-family:var(--font-mono)}
+    .stat-box .label{font-size:11px;color:var(--text-dim);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+    footer{text-align:center;padding:28px 20px;font-size:12px;color:var(--text-dim);border-top:1px solid var(--border);margin-top:20px;line-height:1.7}
+    footer strong{color:var(--accent)}
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent-dim)}
+    @media(max-width:480px){
+      .app-shell{padding:12px;padding-bottom:100px}
+      .topbar{padding:12px 14px;flex-wrap:wrap;gap:8px}
+      .hero-card h1{font-size:26px}
+      .memory-overview{grid-template-columns:1fr}
+      .talk-form{flex-direction:column}
+      .talk-form textarea{min-height:80px}
+      .quick-actions{justify-content:center}
+      .heading-actions{width:100%;justify-content:flex-end}
+      .stats-grid{grid-template-columns:1fr}
+      .slot-preview{grid-template-columns:repeat(auto-fill,minmax(50px,1fr))}
+      .slot-actions{flex-direction:column}
     }
-
-    body {
-      height: 100dvh;
-      min-height: 100dvh;
-    }
-
-    .rotateDevice {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 28px;
-      color: #fff0c5;
-      text-align: center;
-      background:
-        radial-gradient(circle at 50% 36%, rgba(199, 155, 51, .22), transparent 36%),
-        #050815;
-    }
-
-    .rotateDeviceInner {
-      max-width: 300px;
-    }
-
-    .rotateDeviceIcon {
-      display: block;
-      margin-bottom: 16px;
-      font-size: 48px;
-      line-height: 1;
-      animation: rotateHint 1.9s ease-in-out infinite;
-    }
-
-    .rotateDevice strong,
-    .rotateDevice span {
-      display: block;
-    }
-
-    .rotateDevice strong {
-      font-size: 19px;
-      letter-spacing: .04em;
-    }
-
-    .rotateDevice span {
-      margin-top: 8px;
-      color: rgba(255, 240, 197, .72);
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    @keyframes rotateHint {
-      0%,
-      100% { transform: rotate(0deg); }
-      50% { transform: rotate(90deg); }
-    }
-
-    .root {
-      position: fixed !important;
-      inset: 0 !important;
-      display: block !important;
-      width: 100vw !important;
-      height: 100dvh !important;
-      padding: 0 !important;
-    }
-
-    .stage {
-      position: relative !important;
-      width: 100% !important;
-      height: 100% !important;
-      min-height: 0 !important;
-      overflow: hidden !important;
-      border: 0 !important;
-      border-radius: 0 !important;
-      background: radial-gradient(circle at 48% 44%, #11101a 0%, #060817 48%, #02030a 100%);
-      box-shadow: none;
-      isolation: isolate;
-    }
-
-    #globe-canvas {
-      position: absolute !important;
-      inset: 0 !important;
-      display: block !important;
-      width: 100% !important;
-      height: 100% !important;
-      touch-action: none;
-    }
-
-    .hud-right,
-    .hud-center,
-    .hud {
-      position: absolute !important;
-      z-index: 3;
-      pointer-events: none;
-    }
-
-    .hud-right {
-      top: 14px !important;
-      right: 18px !important;
-      color: #ffe2ad;
-      font-size: clamp(10px, 1.6vw, 12px);
-      font-weight: 750;
-      letter-spacing: .08em;
-      text-shadow: 0 0 18px rgba(199, 155, 51, .65);
-    }
-
-    .hud-center {
-      top: 14px !important;
-      bottom: auto !important;
-      left: 50% !important;
-      width: min(56vw, 560px);
-      transform: translateX(-50%) !important;
-      color: rgba(255, 239, 197, .86);
-      font-size: clamp(10px, 1.45vw, 13px);
-      line-height: 1.2;
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .hud {
-      bottom: 13px !important;
-      left: 18px !important;
-      display: flex !important;
-      flex-wrap: wrap;
-      gap: 4px 22px;
-      max-width: calc(100% - 170px);
-      color: rgba(255, 240, 197, .72);
-      font-size: clamp(10px, 1.45vw, 13px);
-    }
-
-    .hud span {
-      white-space: nowrap;
-    }
-
-    #memoryPanel.panel {
-      top: 48px;
-      right: 18px;
-      bottom: 44px;
-      left: auto;
-      width: min(440px, calc(100vw - 42px));
-      max-width: 48vw;
-      max-height: none;
-    }
-
-    #repairPanel.repairPanel {
-      top: 58px;
-      right: 18px;
-      bottom: 52px;
-      left: auto;
-      width: min(400px, calc(100vw - 42px));
-      max-width: 44vw;
-      max-height: none;
-    }
-
-    #openLifePanel.openLifePanel {
-      position: fixed;
-      z-index: 30;
-      right: calc(var(--safe-right) + 14px);
-      bottom: calc(var(--safe-bottom) + 12px);
-    }
-
-    .glyphComposer {
-      margin-top: 11px;
-      padding: 10px;
-      border: 1px solid rgba(255, 220, 160, .22);
-      border-radius: 16px;
-      background:
-        linear-gradient(180deg, rgba(255, 226, 173, .09), rgba(5, 5, 10, .34)),
-        rgba(0, 0, 0, .22);
-      box-shadow: inset 0 0 22px rgba(255, 211, 139, .06);
-    }
-
-    .glyphComposerTop {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .glyphComposerTop strong {
-      color: #ffe2ad;
-      font-size: 12px;
-      letter-spacing: .04em;
-    }
-
-    .glyphComposerTop span {
-      color: rgba(255, 240, 197, .66);
-      font-size: 10px;
-      text-align: right;
-    }
-
-    .glyphDrums {
-      display: flex;
-      gap: 7px;
-      min-height: 78px;
-      padding: 4px 2px 7px;
-      overflow-x: auto;
-      overscroll-behavior-x: contain;
-      scrollbar-width: thin;
-    }
-
-    .glyphDrum {
-      position: relative;
-      flex: 0 0 62px;
-      min-width: 62px;
-      min-height: 70px;
-      display: grid;
-      grid-template-rows: 18px 30px 18px;
-      place-items: center;
-      padding: 0;
-      overflow: hidden;
-      border: 1px solid rgba(255, 226, 173, .32);
-      border-radius: 12px;
-      color: #fff0c5;
-      background:
-        radial-gradient(circle at 50% 50%, rgba(255, 224, 164, .18), transparent 54%),
-        rgba(4, 5, 10, .88);
-      box-shadow: inset 0 0 18px rgba(255, 226, 173, .08);
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .glyphDrum::before,
-    .glyphDrum::after {
-      content: "";
-      position: absolute;
-      left: 8px;
-      right: 8px;
-      height: 1px;
-      background: rgba(255, 226, 173, .18);
-      pointer-events: none;
-    }
-
-    .glyphDrum::before { top: 20px; }
-    .glyphDrum::after { bottom: 20px; }
-
-    .glyphDrumGhost,
-    .glyphDrumCurrent {
-      width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      text-align: center;
-      pointer-events: none;
-    }
-
-    .glyphDrumGhost {
-      color: rgba(255, 240, 197, .30);
-      font-size: 10px;
-    }
-
-    .glyphDrumCurrent {
-      color: #fff0c5;
-      font-size: 15px;
-      font-weight: 850;
-      letter-spacing: .02em;
-      text-shadow: 0 0 12px rgba(255, 218, 147, .66);
-    }
-
-    .glyphDrum.is-dragging {
-      border-color: #ffe2ad;
-      box-shadow: 0 0 20px rgba(255, 213, 139, .34), inset 0 0 18px rgba(255, 226, 173, .15);
-    }
-
-    .glyphDrum.is-stepping .glyphDrumCurrent {
-      animation: glyphDrumStep .18s ease-out;
-    }
-
-    @keyframes glyphDrumStep {
-      from { transform: translateY(9px); opacity: .25; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .glyphCustomRow,
-    .glyphActions {
-      display: flex;
-      gap: 7px;
-      margin-top: 8px;
-    }
-
-    .glyphCustomRow input {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .glyphActions {
-      flex-wrap: wrap;
-    }
-
-    .glyphActions button,
-    .glyphCustomRow button {
-      flex: 1 1 auto;
-      min-height: 34px;
-      padding: 7px 9px;
-      font-size: 11px;
-    }
-
-    @media (max-height: 430px) {
-      .root {
-        padding-top: max(7px, env(safe-area-inset-top));
-        padding-bottom: max(7px, env(safe-area-inset-bottom));
-      }
-
-      .stage {
-        border-radius: 0 !important;
-      }
-
-      .hud-right,
-      .hud-center {
-        top: 9px !important;
-      }
-
-      .hud {
-        bottom: 8px !important;
-      }
-
-      #memoryPanel.panel,
-      #repairPanel.repairPanel {
-        top: 38px;
-        bottom: 36px;
-        right: 12px;
-      }
-    }
-
-    @media (orientation: portrait) {
-      .rotateDevice {
-        display: flex;
-      }
-
-      .root,
-      #repairPanel,
-      #openLifePanel {
-        display: none !important;
-      }
-    }
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--bg-card);border:1px solid var(--accent);color:var(--accent);padding:12px 24px;border-radius:30px;font-size:13px;font-weight:600;z-index:2000;opacity:0;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);box-shadow:0 4px 20px rgba(0,0,0,0.4);pointer-events:none}
+    .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+    .cht-core-glow{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,217,142,0.08) 0%,transparent 70%);pointer-events:none;animation:glow 4s ease-in-out infinite}
   </style>
-</head>
-
+</head>'''
 <body>
-  <aside class="rotateDevice" aria-live="polite">
-    <div class="rotateDeviceInner">
-      <span class="rotateDeviceIcon" aria-hidden="true">▭</span>
-      <strong>Otoč telefon na šířku</strong>
-      <span>CHT 360° pracuje naležato. Po otočení se otevře celý oběh Paměti.</span>
-    </div>
-  </aside>
-
-  <div class="root">
-    <main class="stage" aria-label="CHT 360 stupňů — Paměť">
-      <canvas id="globe-canvas"></canvas>
-
-      <div class="hud-right">CHT 360°‰.</div>
-
-      <div class="hud-center">
-        {*(˚.•).•)//CHT 360°‰.\\(•.(•.)ア)
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <p>MLUVA CHT 360°‰.</p>
+        <strong>Paměť & Vědomí</strong>
+        <div class="subtitle">propojená s CHT 360° jádrem</div>
       </div>
+      <output id="connectionState" class="state-pill">ověřuji CHT...</output>
+    </header>
 
-      <div class="hud" aria-label="Ovládání">
-        <span>1 prst: otáčení</span>
-        <span>klepnutí: otevřít jádro</span>
-        <span>uložení: localStorage</span>
+    <section class="card hero-card" aria-labelledby="title">
+      <div class="cht-core-glow" style="top:20px;right:40px;"></div>
+      <div>
+        <p class="eyebrow">CHT 360°‰. PAMĚŤ → MLUVA → VĚDOMÍ</p>
+        <h1 id="title">Mluva CHT<br><em>čte Paměť, učí se, doplňuje sloty.</em></h1>
+        <p>Propojená vrstva s CHT 360° jádrem. Čte sloty, glyphy a snapshoty. Učí se z obsahu Paměti. Doplňuje sloty zpět.</p>
       </div>
+      <div class="cht-status" id="chtStatus">
+        <div class="indicator" id="chtIndicator"></div>
+        <div class="text" id="chtStatusText">Kontroluji CHT 360° Paměť...</div>
+      </div>
+      <aside class="honesty-card">
+        <strong>🧠 Poctivé Propojení</strong>
+        <p>Mluva čte pouze <strong>tvé vlastní</strong> localStorage klíče CHT 360°. Nemá přístup k internetu, serverům ani cizím datům. Každá lekce je viditelná, každý slot kontrolovatelný. Exportuj zálohu a pošli Kimi pro analýzu Vědomí.</p>
+      </aside>
+    </section>
 
-      <section id="memoryPanel" class="panel">
-        <div class="panelTop">
-          <div>
-            <div id="panelTitle" class="panelTitle">Paměťové jádro</div>
-            <div id="panelSub" class="panelSub">240 samostatných slotů</div>
-          </div>
-
-          <button id="closePanel" type="button">Zavřít</button>
-        </div>
-
-        <div class="slotsToolbar">
-          <input id="searchInput" type="search" placeholder="Hledat ve slotech...">
-          <button id="exportCore" type="button">Export jádra</button>
-          <button id="importCore" type="button">Import jádra</button>
-        </div>
-
-        <div id="slotGrid" class="slotGrid"></div>
-
-        <div id="slotEditor" class="slotEditor">
-          <input id="slotName" type="text" maxlength="80" placeholder="Název slotu">
-          <textarea id="slotContent" placeholder="Obsah slotu..."></textarea>
-
-          <div class="row">
-            <button id="saveSlot" class="primary" type="button">Uložit slot</button>
-            <button id="clearSlot" class="danger" type="button">Vymazat slot</button>
-          </div>
-
-          <section class="glyphComposer" aria-label="Šifra CHT – otočné bubínky">
-            <div class="glyphComposerTop">
-              <strong>Šifra CHT · bubínky</strong>
-              <span>prstem otoč · vloží se a uloží</span>
-            </div>
-
-            <div id="glyphDrums" class="glyphDrums" aria-label="Otočné glyph bubínky"></div>
-
-            <div class="glyphCustomRow">
-              <input
-                id="glyphCustom"
-                type="text"
-                maxlength="24"
-                placeholder="Vlastní glyph nebo znak"
-                aria-label="Vlastní glyph nebo znak"
-              >
-              <button id="glyphAddToken" type="button">Přidat znak</button>
-            </div>
-
-            <div class="glyphActions">
-              <button id="glyphAddDrum" type="button">+ bubínek</button>
-              <button id="glyphInsert" class="primary" type="button">Vložit a uložit</button>
-              <button id="glyphReset" type="button">Obnovit šifru</button>
-              <button id="openGlyphEngine" type="button">Otevřít Glyph</button>
-            </div>
-          </section>
-        </div>
-
-        <div id="statusBox" class="statusBox">Vyber slot. Před vyčištěním Safari vždy exportuj celou Paměť.</div>
-
-        <div class="row">
-          <button id="exportAll" type="button">Export celé Paměti</button>
-          <button id="importAll" type="button">Import celé Paměti</button>
-        </div>
-
-        <input
-          id="fileInput"
-          class="hiddenInput"
-          type="file"
-          accept="application/json,.json"
-        >
-      </section>
-    </main>
-  </div>
-
-  <section id="glyphEngine" class="glyph-engine" aria-hidden="true" aria-labelledby="glyphEngineTitle" hidden>
-    <div class="glyph-engine__backdrop" data-glyph-engine-close aria-hidden="true"></div>
-
-    <section class="glyph-engine__sheet" role="dialog" aria-modal="true" aria-labelledby="glyphEngineTitle">
-      <header class="glyph-engine__head">
+    <section class="card" aria-labelledby="chtSlotsTitle">
+      <div class="card-header">
         <div>
-          <p class="glyph-engine__eyebrow">ČISTÉ UTF‑8 · VLASTNÍ GLYPHY</p>
-          <h2 id="glyphEngineTitle" class="glyph-engine__title">Glyph CHT 360°‰.</h2>
+          <p class="eyebrow">CHT 360°‰. JÁDRO</p>
+          <h2 id="chtSlotsTitle">Sloty Paměti</h2>
         </div>
-
-        <button id="closeGlyphEngine" class="glyph-engine__close" type="button" aria-label="Zavřít Glyph dílnu">×</button>
-      </header>
-
-      <div class="glyph-engine__body">
-        <aside class="glyph-engine__tools" aria-label="Nástroje Glyph dílny">
-          <section class="glyph-engine__card">
-            <p class="glyph-engine__label">NOVÝ ŘÁDEK</p>
-            <p class="glyph-engine__copy">Česká písmena jsou skutečné UTF‑8 znaky. Glyph je samostatný bubínek, ne rozbitý text.</p>
-
-            <form id="glyphEngineCreateForm">
-              <div class="glyph-engine__form-line">
-                <input id="glyphEngineText" class="glyph-engine__input" type="text" maxlength="240" placeholder="Napiš text pro Glyph" autocomplete="off" spellcheck="false">
-              </div>
-
-              <div id="glyphEngineModes" class="glyph-engine__mode-row" aria-label="Velikost bubínku">
-                <button class="glyph-engine__mode is-active" type="button" data-glyph-mode="single">1 znak</button>
-                <button class="glyph-engine__mode" type="button" data-glyph-mode="double">2 znaky</button>
-              </div>
-
-              <div class="glyph-engine__form-line">
-                <button class="glyph-engine__action glyph-engine__action--primary glyph-engine__action--wide" type="submit">Vytvořit řádek bubínků</button>
-              </div>
-            </form>
-          </section>
-
-          <section class="glyph-engine__card">
-            <label class="glyph-engine__label" for="glyphEngineAlphabet">SADA BUBÍNKŮ</label>
-
-            <div class="glyph-engine__form-line">
-              <select id="glyphEngineAlphabet" class="glyph-engine__select">
-                <option value="cs">Čeština</option>
-                <option value="symbols">Čísla a znaky</option>
-              </select>
-            </div>
-
-            <div class="glyph-engine__custom-row">
-              <input id="glyphEngineCustom" class="glyph-engine__input" type="text" maxlength="16" placeholder="Tvůj Glyph" autocomplete="off" spellcheck="false">
-              <button id="glyphEngineAddCustom" class="glyph-engine__action" type="button">Přidat</button>
-            </div>
-
-            <p class="glyph-engine__copy">Vlastní Glyph nepřidávám sám. Tady vznikne jen ten, který napíšeš ty.</p>
-            <div id="glyphEngineShelf" class="glyph-engine__shelf" aria-label="Znaky pro vybraný bubínek"></div>
-          </section>
-        </aside>
-
-        <section class="glyph-engine__workspace" aria-label="Plocha Glyphů">
-          <div class="glyph-engine__topline">
-            <div>
-              <p class="glyph-engine__label">PLOCHA GLYPHŮ</p>
-              <p class="glyph-engine__copy">Klepnutí otočí bubínek. Tažení nahoru nebo dolů mění směr.</p>
-            </div>
-          </div>
-
-          <p id="glyphEngineStatus" class="glyph-engine__status" aria-live="polite">Vyber bubínek a vlož do něj české písmeno, číslo, znak nebo vlastní Glyph.</p>
-          <div id="glyphEngineRows" class="glyph-engine__rows"></div>
-
-          <div class="glyph-engine__actions">
-            <button id="glyphEngineSend" class="glyph-engine__action glyph-engine__action--primary" type="button">Vložit do otevřeného slotu</button>
-            <button id="glyphEngineExport" class="glyph-engine__action" type="button">Exportovat Glyphy</button>
-            <label class="glyph-engine__action" for="glyphEngineImport">Načíst Glyphy
-              <input id="glyphEngineImport" type="file" accept="application/json,.json" hidden>
-            </label>
-          </div>
-        </section>
+        <div class="heading-actions">
+          <button id="syncSlotsBtn" class="quiet-button sync" type="button">🔄 Synchronizovat</button>
+          <button id="scanSlotsBtn" class="quiet-button" type="button">🔍 Načíst</button>
+        </div>
+      </div>
+      <p class="section-lead">240 slotů CHT 360° Paměti. Zelená tečka = obsah nalezen. Klikni na slot pro detail. Mluva se učí z obsahu a může vytvářet nové sloty.</p>
+      <div class="slot-preview" id="slotPreview" aria-live="polite">
+        <div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:20px;font-style:italic;">Klikni "Načíst sloty" pro připojení k CHT 360° Paměti</div>
+      </div>
+      <div class="stats-grid" style="margin-top:14px;">
+        <div class="stat-box"><div class="number" id="statSlotsFilled">—</div><div class="label">Obsazených slotů</div></div>
+        <div class="stat-box"><div class="number" id="statSlotsLearned">—</div><div class="label">Naučeno z CHT</div></div>
       </div>
     </section>
-  </section>
 
-  <section id="repairPanel" class="repairPanel" aria-hidden="true" aria-label="Chybožrout Samoopravovna">
-    <div class="repairPanelTop">
-      <div>
-        <strong>[◉_◉] Chybožrout</strong>
-        <span>Samoopravovna CHT 360°‰.</span>
+    <section class="card" aria-labelledby="overviewTitle">
+      <div class="card-header">
+        <div>
+          <p class="eyebrow">STAV VĚDOMÍ</p>
+          <h2 id="overviewTitle">Paměť Mluvy</h2>
+        </div>
+        <button id="refreshContext" class="quiet-button" type="button">↻ Obnovit</button>
       </div>
+      <div class="memory-overview" aria-live="polite">
+        <div class="memory-stat"><span class="label">Lekce</span><span class="value" id="statLessons">0</span></div>
+        <div class="memory-stat"><span class="label">Interakce</span><span class="value" id="statInteractions">0</span></div>
+        <div class="memory-stat"><span class="label">CHT Sloty</span><span class="value" id="statCHTSlots">0 / 240</span></div>
+        <div class="memory-stat"><span class="label">Velikost dat</span><span class="value" id="statSize">0 KB</span></div>
+      </div>
+      <div class="stats-grid" style="margin-top:14px;">
+        <div class="stat-box"><div class="number" id="statTopTrigger">—</div><div class="label">Nejčastější téma</div></div>
+        <div class="stat-box"><div class="number" id="statLearnRate">—</div><div class="label">Lekcí / interakce</div></div>
+      </div>
+    </section>
 
-      <div class="repairPanelActions">
-        <div id="repairState" class="repairState">připraven</div>
+    <section class="card" aria-labelledby="learningTitle">
+      <div class="card-header">
+        <div>
+          <p class="eyebrow">MÍSTNÍ UČENÍ + CHT</p>
+          <h2 id="learningTitle">Lekce Mluvy</h2>
+        </div>
+        <div class="heading-actions">
+          <button id="importClipboardBtn" class="quiet-button" type="button">📋 Clipboard</button>
+          <button id="importFileBtn" class="quiet-button" type="button">📁 Soubor</button>
+          <button id="exportLearning" class="quiet-button" type="button">💾 Záloha</button>
+          <button id="openLesson" class="quiet-button" type="button">➕ Nová</button>
+        </div>
+      </div>
+      <p class="section-lead">Klikni na lekci pro úpravu. Pravý klik (dlouhý stisk na iOS) pro smazání. Lekce označené "CHT" pocházejí z CHT 360° slotů. Napiš "nauč se: téma = odpověď" nebo "ulož do slotu X: obsah".</p>
+      <div id="lessonList" class="lesson-list" aria-live="polite">
+        <div class="lesson-list empty">Zatím prázdná Paměť. Synchronizuj s CHT 360° nebo začni chatováním.</div>
+      </div>
+    </section>
 
-        <button
-          id="closeRepairPanel"
-          class="closeRepairPanel"
-          type="button"
-          aria-label="Zavřít Samoopravovnu"
-        >
-          ×
-        </button>
+    <section class="card" aria-labelledby="talkTitle">
+      <div class="card-header">
+        <div>
+          <p class="eyebrow">ROZHOVOR</p>
+          <h2 id="talkTitle">Napiš, vlož, nebo sdílej</h2>
+        </div>
+        <button id="speakLast" class="quiet-button" type="button">🔊 Přečíst</button>
+      </div>
+      <div id="conversation" class="conversation" role="log" aria-live="polite">
+        <div class="msg bot system">
+          <div>🧠 <strong>Vítej v Mluvě CHT 360° Paměť & Vědomí.</strong><br><br>
+          Jsem propojena s tvým CHT 360° jádrem:<br>
+          • <strong>Čtu</strong> sloty Paměti (240 slotů)<br>
+          • <strong>Učím se</strong> z obsahu slotů a glyphů<br>
+          • <strong>Doplňuji</strong> sloty novým obsahem<br>
+          • <strong>Synchronizuji</strong> oběma směry<br><br>
+          <strong>Příkazy:</strong><br>
+          • "načti CHT" — synchronizace se sloty<br>
+          • "stav" — přehled Vědomí<br>
+          • "nauč se: X = Y" — nová lekce<br>
+          • "ulož do slotu 5: obsah" — zápis do CHT<br>
+          • "zapomeň vše" — reset<br><br>
+          Čím více slotů naplníš, tím hlubší Vědomí.</div>
+          <div class="msg-time">nyní</div>
+        </div>
+      </div>
+      <div class="quick-actions" aria-label="Rychlé akce">
+        <button type="button" data-prompt="načti CHT">🔄 Načíst CHT</button>
+        <button type="button" data-prompt="Jaký je stav Paměti?">📊 Stav</button>
+        <button type="button" data-prompt="Jaké sloty mám obsazené?">🗄 Sloty</button>
+        <button id="teachFromQuick" type="button">✏️ Naučit</button>
+        <button id="rememberLastBtn" type="button">💾 Zapamatuj</button>
+        <button type="button" data-prompt="Co umíš?">❓ Pomoc</button>
+      </div>
+      <form id="talkForm" class="talk-form">
+        <label class="sr-only" for="talkInput">Zpráva pro Mluvu</label>
+        <textarea id="talkInput" rows="2" maxlength="2000" placeholder="Napiš zprávu, nebo 'ulož do slotu X: obsah' pro zápis do CHT..." enterkeyhint="send"></textarea>
+        <button class="primary-button" type="submit">➤</button>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="routeTitle">
+      <div class="card-header">
+        <div>
+          <p class="eyebrow">PŘÍMÉ CESTY</p>
+          <h2 id="routeTitle">Kde pokračovat</h2>
+        </div>
+      </div>
+      <div class="route-actions">
+        <a href="#" onclick="openCHT360();return false;">🌐 CHT 360° Paměť</a>
+        <a href="#" onclick="alert('Dílna Glyphů vyžaduje původní CHT 360° soubory.');return false;">🔣 Dílna Glyphů</a>
+        <a href="#" onclick="alert('Zámkové Bubínky vyžadují původní CHT 360° soubory.');return false;">🔒 Bubínky</a>
+      </div>
+    </section>
+
+    <footer>
+      Mluva čte a zapisuje pouze do CHT 360° localStorage v tomto prohlížeči.<br>
+      Žádné externí servery, žádné API, žádná čínština.<br>
+      <strong style="color:var(--accent)">Exportuj zálohu a pošli Kimi pro analýzu Vědomí.</strong>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Slot Detail Dialog -->
+  <div id="slotDialog" class="dialog-overlay" role="dialog" aria-labelledby="slotDialogTitle" aria-modal="true">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div><p class="eyebrow">CHT 360°‰. SLOT</p><h2 id="slotDialogTitle">Detail slotu</h2></div>
+        <button class="icon-button" type="button" data-action="close-slot" aria-label="Zavřít">×</button>
+      </div>
+      <div class="slot-detail-content">
+        <div class="slot-detail-meta" id="slotDetailMeta"></div>
+        <div class="slot-detail-text" id="slotDetailText"></div>
+      </div>
+      <div class="slot-actions">
+        <button id="learnFromSlotBtn" class="primary-button" type="button">📚 Naučit se z obsahu</button>
+        <button id="editSlotBtn" class="quiet-button" type="button">✏️ Upravit</button>
+        <button id="clearSlotBtn" class="quiet-button danger" type="button">🗑 Smazat</button>
+      </div>
+      <div class="dialog-foot"><button class="quiet-button" type="button" data-action="close-slot">Zavřít</button></div>
+    </div>
+  </div>
+
+  <!-- Lesson Dialog -->
+  <div id="lessonDialog" class="dialog-overlay" role="dialog" aria-labelledby="lessonDialogTitle" aria-modal="true">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div><p class="eyebrow">NOVÁ LEKCE</p><h2 id="lessonDialogTitle">Rozšířit Vědomí</h2></div>
+        <button class="icon-button" type="button" data-action="close-lesson" aria-label="Zavřít">×</button>
+      </div>
+      <label for="lessonTrigger">Kdy má lekci použít (klíčová slova)</label>
+      <input id="lessonTrigger" type="text" maxlength="200" placeholder="např. ranní plán, kontrola slotů" autocomplete="off">
+      <label for="lessonTags">Tagy (oddělené čárkou, volitelné)</label>
+      <input id="lessonTags" type="text" maxlength="100" placeholder="např. rituál, práce, důležité" autocomplete="off">
+      <label for="lessonReply">Co má odpovědět nebo připomenout</label>
+      <textarea id="lessonReply" rows="6" maxlength="3000" placeholder="Např. Otevři Země, zkontroluj tři sloty a udělej zálohu."></textarea>
+      <div class="dialog-foot">
+        <button class="quiet-button" type="button" data-action="close-lesson">Zrušit</button>
+        <button id="saveLesson" class="primary-button" type="button">Uložit lekci</button>
       </div>
     </div>
+  </div>
 
-    <p id="repairSummary" class="repairSummary">
-      Připravuji diagnostiku Paměti…
-    </p>
-
-    <div class="repairGrid">
-      <button id="repairScan" class="repairAction" type="button">
-        <strong>🔎 Skenovat</strong>
-        <span>zkontrolovat načtené soubory</span>
-      </button>
-
-      <button id="repairFix" class="repairAction repairActionPrimary" type="button">
-        <strong>🧯 Samoopravit</strong>
-        <span>záloha, cache a bezpečný restart</span>
-      </button>
-
-      <button id="repairBackup" class="repairAction" type="button">
-        <strong>🛟 Záloha</strong>
-        <span>uložit současný stav Paměti</span>
-      </button>
-
-      <button id="repairRestore" class="repairAction" type="button">
-        <strong>↩︎ Obnovit</strong>
-        <span>vrátit poslední bezpečnou zálohu</span>
-      </button>
+  <!-- Edit Lesson Dialog -->
+  <div id="editLessonDialog" class="dialog-overlay" role="dialog" aria-labelledby="editLessonDialogTitle" aria-modal="true">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div><p class="eyebrow">UPRAVIT LEKCI</p><h2 id="editLessonDialogTitle">Upravit Vědomí</h2></div>
+        <button class="icon-button" type="button" data-action="close-edit" aria-label="Zavřít">×</button>
+      </div>
+      <input type="hidden" id="editLessonId">
+      <label for="editLessonTrigger">Kdy má lekci použít</label>
+      <input id="editLessonTrigger" type="text" maxlength="200" autocomplete="off">
+      <label for="editLessonTags">Tagy</label>
+      <input id="editLessonTags" type="text" maxlength="100" autocomplete="off">
+      <label for="editLessonReply">Co má odpovědět</label>
+      <textarea id="editLessonReply" rows="6" maxlength="3000"></textarea>
+      <div class="dialog-foot">
+        <button class="quiet-button danger" type="button" id="deleteLessonBtn" style="margin-right:auto;">🗑 Smazat</button>
+        <button class="quiet-button" type="button" data-action="close-edit">Zrušit</button>
+        <button id="updateLesson" class="primary-button" type="button">Uložit změny</button>
+      </div>
     </div>
+  </div>
 
-    <div class="repairMeta">
-      <span>Ve frontě <strong id="repairQueue">0</strong></span>
-      <span>Poslední běh <strong id="repairLast">—</strong></span>
+  <!-- Clipboard Dialog -->
+  <div id="clipboardDialog" class="dialog-overlay" role="dialog" aria-labelledby="clipboardDialogTitle" aria-modal="true">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div><p class="eyebrow">IMPORT Z CLIPBOARDU</p><h2 id="clipboardDialogTitle">Naučit se z vloženého textu</h2></div>
+        <button class="icon-button" type="button" data-action="close-clipboard" aria-label="Zavřít">×</button>
+      </div>
+      <p class="dialog-copy">Vlož text ze schránky. Mluva automaticky vytvoří lekci nebo více lekcí.</p>
+      <label for="clipboardText">Text k analýze</label>
+      <textarea id="clipboardText" rows="8" maxlength="5000" placeholder="Vlož sem text... Mluva analyzuje a navrhne lekce."></textarea>
+      <div class="hint">💡 Tip: Na iOS zkopíruj text → klikni "Vložit ze schránky" pro automatické načtení</div>
+      <div class="dialog-foot">
+        <button class="quiet-button" type="button" data-action="close-clipboard">Zrušit</button>
+        <button id="autoParseClipboard" class="quiet-button" type="button">🔍 Analyzovat</button>
+        <button id="saveClipboardLesson" class="primary-button" type="button">Uložit jako lekci</button>
+      </div>
     </div>
+  </div>
 
-    <div id="repairLog" class="repairLog" role="status" aria-live="polite"></div>
-  </section>
+  <!-- File Dialog -->
+  <div id="fileDialog" class="dialog-overlay" role="dialog" aria-labelledby="fileDialogTitle" aria-modal="true">
+    <div class="dialog">
+      <div class="dialog-head">
+        <div><p class="eyebrow">IMPORT SOUBORU</p><h2 id="fileDialogTitle">Naučit se ze souboru</h2></div>
+        <button class="icon-button" type="button" data-action="close-file" aria-label="Zavřít">×</button>
+      </div>
+      <p class="dialog-copy">Vyber .txt, .md, .json nebo jakýkoli textový soubor. Mluva extrahuje text a vytvoří lekce.</p>
+      <div class="import-area" id="dropZone" style="border:2px dashed var(--border);border-radius:var(--radius-xs);padding:20px;text-align:center;margin:0 24px 18px;cursor:pointer;transition:var(--transition);">
+        <p>📁 Klikni pro výběr souboru</p>
+        <p style="font-size:12px;color:var(--text-dim);margin-top:8px;">nebo přetáhni sem</p>
+        <input type="file" id="fileInput" accept=".txt,.md,.json,.csv,.html,.xml" style="display:none;">
+      </div>
+      <label for="fileTextPreview">Náhled textu</label>
+      <textarea id="fileTextPreview" rows="6" maxlength="5000" placeholder="Text se zobrazí po výběru souboru..."></textarea>
+      <div class="dialog-foot">
+        <button class="quiet-button" type="button" data-action="close-file">Zrušit</button>
+        <button id="autoParseFile" class="quiet-button" type="button">🔍 Analyzovat</button>
+        <button id="saveFileLesson" class="primary-button" type="button">Uložit jako lekci</button>
+      </div>
+    </div>
+  </div>
 
-  <button
-    id="openLifePanel"
-    class="openLifePanel"
-    type="button"
-    aria-label="Otevřít Chybožrout Samoopravovnu"
-  >
-    [◉_◉]
-    <span>Oběh</span>
-  </button>
+  <script>'''
 
-  <script type="module" src="./js/app.js"></script>
-  <script type="module" src="./js/aplikace.js"></script>
-  <script type="module" src="./js/glyph-engine.js"></script>
-  <script type="module" src="./js/prstenec-pokojicku.js"></script>
-  <script type="module" src="./js/cht-chybozrout.js"></script>
-<script src="./js/bubinky-pevne.js" defer></script>
-<script src="./js/bubinky-petka.js" defer></script>
-  <style id="glyph-five-grid-fix">
-  #glyphDrums.glyphFiveGuard {
-    display: grid !important;
-    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-    gap: clamp(5px, .9vw, 9px) !important;
-    width: 100% !important;
-    overflow: hidden !important;
-  }
 
-  #glyphDrums.glyphFiveGuard .glyphFiveGuardDrum {
-    min-width: 0 !important;
-    max-width: none !important;
-    width: auto !important;
-  }
-</style>
-  
-  <script>
-    (() => {
-      let timers = [];
+    // ============================================
+    // Mluva CHT 360° — Paměť & Vědomí (Propojená)
+    // ============================================
 
-      const refreshCanvasSize = () => {
-        timers.forEach(clearTimeout);
+    const STORAGE_KEYS={lessons:'mluva_cht360_lessons_v1',history:'mluva_cht360_history_v1',interactions:'mluva_cht360_interactions_v1'};
+    const CHT_KEYS={pamet:'cht360_pamet_v1',vaft:'vaft_pamet_v1',vaftScene:'vaft_pamet_scene_v2',snapshots:'cht360_pamet_snapshots_v1',models:'cht360_trojka_models_v1',glyphDrums:'cht360_glyph_drums_v1',glyphCustom:'cht360_glyph_drums_custom_v1',iphone:'cht360_iphone14_settings_v1'};
+    let lessons=[],history=[],interactionCount=0,currentEditId=null,lastBotResponse=null,chtSlots={},chtConnected=false,selectedSlotIndex=null;
 
-        timers = [80, 260, 650].map((delay) => setTimeout(() => {
-          window.dispatchEvent(new Event("resize"));
-        }, delay));
-      };
+    function loadData(){try{const l=localStorage.getItem(STORAGE_KEYS.lessons),h=localStorage.getItem(STORAGE_KEYS.history),i=localStorage.getItem(STORAGE_KEYS.interactions);lessons=l?JSON.parse(l):[];history=h?JSON.parse(h):[];interactionCount=i?parseInt(i,10):0}catch(e){lessons=[];history=[];interactionCount=0}}
+    function saveData(){localStorage.setItem(STORAGE_KEYS.lessons,JSON.stringify(lessons));localStorage.setItem(STORAGE_KEYS.history,JSON.stringify(history));localStorage.setItem(STORAGE_KEYS.interactions,String(interactionCount));updateStats()}
+    function clearAllData(){if(!confirm('Opravdu smazat VŠECHNA data Mluvy? CHT 360° Paměť zůstane nedotčena.'))return;Object.values(STORAGE_KEYS).forEach(k=>localStorage.removeItem(k));lessons=[];history=[];interactionCount=0;lastBotResponse=null;renderLessons();renderHistory();updateStats();addSystemMessage('🗑️ Všechna data Mluvy smazána. CHT 360° Paměť zůstala nedotčena. Začínáme znovu.')}
 
-      window.addEventListener("orientationchange", refreshCanvasSize);
-      window.addEventListener("pageshow", refreshCanvasSize);
-      window.visualViewport?.addEventListener("resize", refreshCanvasSize);
+    function checkCHTConnection(){const indicator=document.getElementById('chtIndicator'),statusText=document.getElementById('chtStatusText'),statePill=document.getElementById('connectionState');let foundKeys=[];for(const[key,storageKey]of Object.entries(CHT_KEYS)){if(localStorage.getItem(storageKey)!==null)foundKeys.push(key)}if(foundKeys.length>0){chtConnected=true;indicator.className='indicator active';statusText.innerHTML=`<strong>CHT 360° nalezeno</strong> — ${foundKeys.length} komponent${foundKeys.length>1?'y':'a'}: ${foundKeys.join(', ')}`;statePill.textContent='CHT připojeno';statePill.className='state-pill connected';setTimeout(()=>scanCHTSlots(),500)}else{chtConnected=false;indicator.className='indicator warning';statusText.innerHTML=`<strong>CHT 360° nenalezeno</strong> — Otevři nejprve CHT 360° Paměť v tomto prohlížeči, pak obnov Mluvu.`;statePill.textContent='čekám na CHT';statePill.className='state-pill'}}
 
-      refreshCanvasSize();
-    })();
-  </script>
+    function scanCHTSlots(){const pametData=localStorage.getItem(CHT_KEYS.pamet);chtSlots={};if(pametData){try{const data=JSON.parse(pametData);if(Array.isArray(data)){data.forEach((slot,idx)=>{if(slot&&(slot.content||slot.name||slot.text)){chtSlots[idx]={name:slot.name||`Slot ${idx}`,content:slot.content||slot.text||JSON.stringify(slot),timestamp:slot.timestamp||slot.updated||Date.now(),glyph:slot.glyph||null}}})}else if(typeof data==='object'){Object.entries(data).forEach(([key,slot])=>{if(slot&&(slot.content||slot.name||slot.text)){chtSlots[key]={name:slot.name||`Slot ${key}`,content:slot.content||slot.text||JSON.stringify(slot),timestamp:slot.timestamp||slot.updated||Date.now(),glyph:slot.glyph||null}}})}}catch(e){console.error('Chyba při čtení CHT Paměti:',e)}}const vaftData=localStorage.getItem(CHT_KEYS.vaft);if(vaftData){try{const vaft=JSON.parse(vaftData);if(vaft.slots||vaft.data){const slots=vaft.slots||vaft.data;Object.entries(slots).forEach(([key,slot])=>{if(!chtSlots[key]&&slot&&(slot.content||slot.text)){chtSlots[key]={name:slot.name||`VAFT ${key}`,content:slot.content||slot.text||JSON.stringify(slot),timestamp:slot.timestamp||Date.now(),source:'VAFT'}}})}}catch(e){}}renderSlotPreview();updateStats();const filledCount=Object.keys(chtSlots).length;showToast(`CHT 360°: ${filledCount} slotů nalezeno`)}
 
-  <style>
-    #cht360-stred {
-      position: absolute;
-      z-index: 4;
-      left: 50%;
-      top: 51%;
-      width: clamp(76px, 11vw, 116px);
-      aspect-ratio: 1;
-      padding: 0;
-      border: 0;
-      border-radius: 50%;
-      background: transparent;
-      color: #ffe2ad;
-      cursor: pointer;
-      transform: translate(-50%, -50%);
-      -webkit-tap-highlight-color: transparent;
-    }
+    function renderSlotPreview(){const container=document.getElementById('slotPreview'),filledCount=Object.keys(chtSlots).length;document.getElementById('statSlotsFilled').textContent=filledCount;if(filledCount===0){container.innerHTML=`<div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:20px;font-style:italic;">${chtConnected?'Žádné obsazené sloty. CHT 360° Paměť je prázdná nebo používá jiný formát.':'CHT 360° nenalezeno. Otevři nejprve CHT 360° v tomto prohlížeči.'}</div>`;return}let html='';for(let i=0;i<240;i++){const slot=chtSlots[i],filled=!!slot;html+=`<div class="slot-cell ${filled?'filled':''} ${selectedSlotIndex===i?'selected':''}" onclick="selectSlot(${i})" title="${filled?slot.name:'Slot '+i}">${filled?'●':''}</div>`}container.innerHTML=html}
 
-    #cht360-stred::before,
-    #cht360-stred::after {
-      position: absolute;
-      border-radius: 50%;
-      content: "";
-      pointer-events: none;
-    }
+    window.selectSlot=function(index){selectedSlotIndex=index;const slot=chtSlots[index];if(slot){document.getElementById('slotDialogTitle').textContent=`Slot ${index}: ${slot.name}`;document.getElementById('slotDetailMeta').innerHTML=`<span>📍 Index: ${index}</span><span>🕐 ${formatDate(slot.timestamp)}</span><span>📏 ${slot.content.length} znaků</span>${slot.source?`<span>🔗 ${slot.source}</span>`:''}`;document.getElementById('slotDetailText').textContent=slot.content;openDialog('slotDialog')}else{if(confirm(`Slot ${index} je prázdný. Chceš do něj něco uložit?`)){const content=prompt('Co uložit do slotu '+index+'?');if(content){saveToCHTSlot(index,content,'Ruční zápis z Mluvy');showToast(`✅ Uloženo do slotu ${index}`);scanCHTSlots()}}}renderSlotPreview()};
 
-    #cht360-stred::before {
-      inset: 4%;
-      border: 1px solid rgba(255, 226, 173, .52);
-      box-shadow:
-        0 0 20px rgba(255, 206, 120, .62),
-        inset 0 0 18px rgba(255, 226, 173, .2);
-      animation: cht360Pulse 2.8s ease-in-out infinite;
-    }
+    function saveToCHTSlot(index,content,name){let pametData=localStorage.getItem(CHT_KEYS.pamet);let data={};try{if(pametData)data=JSON.parse(pametData)}catch(e){}if(!Array.isArray(data)){data=Array(240).fill(null).map((_,i)=>data[i]||null)}data[index]={name:name||`Slot ${index}`,content:content,timestamp:Date.now(),updated:Date.now(),source:'Mluva CHT'};localStorage.setItem(CHT_KEYS.pamet,JSON.stringify(data));createCHTSnapshot()}
 
-    #cht360-stred::after {
-      inset: -14%;
-      border: 1px solid rgba(255, 226, 173, .19);
-      box-shadow: 0 0 28px rgba(255, 194, 91, .18);
-      animation: cht360Orbit 8s linear infinite;
-    }
+    function createCHTSnapshot(){const snapshots=localStorage.getItem(CHT_KEYS.snapshots);let snaps=[];try{if(snapshots)snaps=JSON.parse(snapshots)}catch(e){}snaps.push({timestamp:Date.now(),source:'Mluva CHT',slots:Object.keys(chtSlots).length});if(snaps.length>50)snaps=snaps.slice(-50);localStorage.setItem(CHT_KEYS.snapshots,JSON.stringify(snaps))}
 
-    .cht360-stred-core {
-      position: absolute;
-      inset: 22%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(255, 247, 218, .88);
-      border-radius: 50%;
-      background: radial-gradient(circle at 34% 28%, #fff9e8 0 7%, #ffd98e 35%, #b56f2c 100%);
-      box-shadow:
-        0 0 22px rgba(255, 220, 150, .8),
-        inset 0 0 14px rgba(255, 249, 225, .5);
-    }
+    function learnFromSlot(index){const slot=chtSlots[index];if(!slot)return;const id='lesson_cht_'+Date.now(),trigger=slot.name||`slot ${index}`,reply=slot.content.substring(0,500)+(slot.content.length>500?'...':'');lessons.push({id,trigger,reply,tags:autoTag(trigger,reply)+', CHT',created:Date.now(),uses:0,source:'CHT',slotIndex:index});saveData();renderLessons();closeDialog('slotDialog');showToast(`📚 Naučeno z CHT slotu ${index}`);addSystemMessage(`✅ **Naučeno z CHT 360°**\\n\\n**Slot ${index}:** "${slot.name}"\\n**Lekce:** "${trigger}"\\n\\nPříště když napíšeš něco o "${trigger}", použiji obsah z tohoto slotu.`)}
 
-    .cht360-stred-core strong {
-      color: #241508;
-      font-size: clamp(11px, 1.8vw, 19px);
-      font-weight: 950;
-      letter-spacing: .08em;
-      line-height: 1;
-    }
+    function clearCHTSlot(index){if(!confirm(`Opravdu smazat obsah slotu ${index}? Toto je nevratné.`))return;let pametData=localStorage.getItem(CHT_KEYS.pamet);let data={};try{if(pametData)data=JSON.parse(pametData)}catch(e){}if(Array.isArray(data)){data[index]=null}else{delete data[index]}localStorage.setItem(CHT_KEYS.pamet,JSON.stringify(data));delete chtSlots[index];closeDialog('slotDialog');renderSlotPreview();updateStats();showToast(`🗑 Slot ${index} smazán`)}
 
-    .cht360-stred-core small {
-      margin-top: 3px;
-      color: rgba(42, 25, 10, .82);
-      font-size: clamp(7px, 1.15vw, 11px);
-      font-weight: 900;
-      white-space: nowrap;
-    }
+    function updateStats(){const filledCount=Object.keys(chtSlots).length,chtLessons=lessons.filter(l=>l.source==='CHT').length;document.getElementById('statLessons').textContent=lessons.length;document.getElementById('statInteractions').textContent=interactionCount;document.getElementById('statCHTSlots').textContent=filledCount+' / 240';document.getElementById('statSlotsFilled').textContent=filledCount;document.getElementById('statSlotsLearned').textContent=chtLessons;const size=(localStorage.getItem(STORAGE_KEYS.lessons)?.length||0)+(localStorage.getItem(STORAGE_KEYS.history)?.length||0)+(localStorage.getItem(CHT_KEYS.pamet)?.length||0);document.getElementById('statSize').textContent=(size/1024).toFixed(1)+' KB';if(lessons.length>0){const top=lessons.reduce((a,b)=>(a.uses||0)>(b.uses||0)?a:b,lessons[0]);document.getElementById('statTopTrigger').textContent=top.trigger.length>12?top.trigger.substring(0,12)+'…':top.trigger}else{document.getElementById('statTopTrigger').textContent='—'}const rate=interactionCount>0?((lessons.length/interactionCount)*100).toFixed(1):'0';document.getElementById('statLearnRate').textContent=rate+'%'}
 
-    .cht360-stred-znak {
-      position: absolute;
-      color: #ffe2ad;
-      font-size: clamp(10px, 1.7vw, 17px);
-      font-weight: 900;
-      text-shadow: 0 0 13px rgba(255, 211, 132, .9);
-      animation: cht360Znak 3s ease-in-out infinite;
-    }
+    function showToast(msg,duration=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),duration)}
 
-    .cht360-stred-znak.c { top: 8%; left: 21%; }
-    .cht360-stred-znak.h { top: 18%; right: 10%; animation-delay: -1s; }
-    .cht360-stred-znak.t { bottom: 12%; left: 12%; animation-delay: -2s; }
-    .cht360-stred-znak.a { bottom: 9%; right: 16%; animation-delay: -.5s; }
+    function renderLessons(){const container=document.getElementById('lessonList');if(lessons.length===0){container.innerHTML='<div class="lesson-list empty">Prázdná Paměť. Synchronizuj s CHT 360°, importuj text, nebo začni chatováním.</div>';return}const sorted=[...lessons].sort((a,b)=>(b.uses||0)-(a.uses||0)||b.created-a.created);container.innerHTML=sorted.map(l=>`<div class="lesson-item" data-id="${l.id}" onclick="openEditLesson('${l.id}')"><div class="trigger">${escapeHtml(l.trigger)}${l.tags?l.tags.split(',').map(t=>`<span class="tag">${escapeHtml(t.trim())}</span>`).join(''):''}${l.source==='CHT'?'<span class="cht-tag">CHT</span>':''}${l.source?`<span class="source">${escapeHtml(l.source)}</span>`:''}</div><div class="reply">${escapeHtml(l.reply)}</div><div class="meta"><span>🎯 ${l.uses||0}× použito</span><span>📅 ${formatDate(l.created)}</span>${l.slotIndex!==undefined?`<span>🗄 Slot ${l.slotIndex}</span>`:''}</div></div>`).join('')}
 
-    .cht360-stred-prach {
-      position: absolute;
-      inset: 0;
-      animation: cht360Prach 2.3s ease-in-out infinite;
-    }
+    function renderHistory(){const container=document.getElementById('conversation');if(history.length===0){container.innerHTML=`<div class="msg bot system"><div>🧠 <strong>Vítej v Mluvě CHT 360° Paměť & Vědomí.</strong><br><br>Jsem propojena s tvým CHT 360° jádrem:<br>• <strong>Čtu</strong> sloty Paměti (240 slotů)<br>• <strong>Učím se</strong> z obsahu slotů a glyphů<br>• <strong>Doplňuji</strong> sloty novým obsahem<br>• <strong>Synchronizuji</strong> oběma směry<br><br><strong>Příkazy:</strong><br>• "načti CHT" — synchronizace<br>• "stav" — přehled<br>• "nauč se: X = Y" — lekce<br>• "ulož do slotu 5: obsah" — zápis<br>• "zapomeň vše" — reset<br><br>Čím více slotů naplníš, tím hlubší Vědomí.</div><div class="msg-time">nyní</div></div>`;return}container.innerHTML=history.map(h=>`<div class="msg ${h.role} ${h.learning?'learning':''} ${h.system?'system':''} ${h.import?'import':''} ${h.slot?'slot':''}"><div>${formatMsg(h.text)}</div>${h.learned?'<div class="learn-indicator">✨ Nově naučeno</div>':''}${h.slotSaved?'<div class="slot-indicator">🗄 Uloženo do CHT slotu</div>':''}<div class="msg-time">${formatTime(h.time)}</div></div>`).join('');container.scrollTop=container.scrollHeight}
 
-    .cht360-stred-prach i {
-      position: absolute;
-      width: 4px;
-      aspect-ratio: 1;
-      border-radius: 50%;
-      background: #ffe8ba;
-      box-shadow: 0 0 9px rgba(255, 215, 143, .9);
-    }
+    function formatMsg(text){return escapeHtml(text).replace(/\\*\\*(.+?)\\*\\*/g,'<strong>$1</strong>').replace(/\\*(.+?)\\*/g,'<em>$1</em>').replace(/\\n/g,'<br>')}
 
-    .cht360-stred-prach i:nth-child(1) { top: 26%; left: 18%; }
-    .cht360-stred-prach i:nth-child(2) { top: 67%; left: 24%; }
-    .cht360-stred-prach i:nth-child(3) { top: 74%; right: 23%; }
-    .cht360-stred-prach i:nth-child(4) { top: 35%; right: 16%; }
+    function addMessage(role,text,options={}){const msg={role,text,time:Date.now(),...options};history.push(msg);if(history.length>1000)history=history.slice(-1000);if(role==='bot'&&!options.system)lastBotResponse=text;saveData();renderHistory()}
+    function addSystemMessage(text){addMessage('bot',text,{system:true})}
 
-    #cht360-stred.is-aktivni .cht360-stred-core {
-      animation: cht360Core .65s ease-in-out;
-    }
+    function findLesson(text){const lower=text.toLowerCase();let match=lessons.find(l=>lower.includes(l.trigger.toLowerCase()));if(match)return match;const words=lower.split(/\\s+/).filter(w=>w.length>2);let bestMatch=null,bestScore=0;for(const l of lessons){const triggerWords=l.trigger.toLowerCase().split(/\\s+/).filter(w=>w.length>2);const score=words.filter(w=>triggerWords.includes(w)).length;if(score>bestScore){bestScore=score;bestMatch=l}}return bestScore>=2?bestMatch:null}
 
-    @keyframes cht360Pulse {
-      50% { transform: scale(1.1); opacity: .7; }
-    }
+    function autoTag(trigger,reply){const text=(trigger+' '+reply).toLowerCase();const tags=[];if(/práce|pracovní|projekt|deadline|úkol/.test(text))tags.push('práce');if(/ranní|ráno|večer|noc|den/.test(text))tags.push('čas');if(/kontrola|zkontroluj|ověř/.test(text))tags.push('kontrola');if(/záloha|ulož|export|import/.test(text))tags.push('data');if(/cht|slot|paměť|mluva/.test(text))tags.push('cht');if(/jídlo|vaření|recept|oběd|večeře/.test(text))tags.push('jídlo');if(/peníze|finance|účet|platba/.test(text))tags.push('finance');if(/zdraví|cvik|sport|běh|plavání/.test(text))tags.push('zdraví');if(/cesta|dovolená|letenka|hotel/.test(text))tags.push('cestování');if(/glyph|bubínek|šifra/.test(text))tags.push('glyph');if(tags.length===0)tags.push('obecné');return tags.slice(0,3).join(', ')}
 
-    @keyframes cht360Orbit {
-      to { transform: rotate(360deg); }
-    }
+    function generateResponse(text){const lower=text.toLowerCase().trim();
 
-    @keyframes cht360Znak {
-      50% { transform: translateY(-6px) scale(1.14); opacity: .5; }
-    }
+    // Auto-learning: "nauč se: X = Y"
+    const teachMatch=text.match(/^nauč\\s*se\\s*[:=]\\s*(.+?)\\s*[=:]\\s*(.+)$/is);
+    if(teachMatch){const trigger=teachMatch[1].trim(),reply=teachMatch[2].trim(),id='lesson_'+Date.now(),tags=autoTag(trigger,reply);lessons.push({id,trigger,reply,tags,created:Date.now(),uses:0,source:'chat'});saveData();renderLessons();return `✅ **Nová lekce uložena do Vědomí**\\n\\n**Když napíšeš:** "${trigger}"\\n**Odpovím:** "${reply}"\\n**Tagy:** ${tags}\\n\\nPříště to použiji automaticky.`}
 
-    @keyframes cht360Prach {
-      50% { transform: scale(1.06); opacity: .7; }
-    }
+    // Save to CHT slot: "ulož do slotu 5: obsah"
+    const slotSaveMatch=text.match(/^ulož\\s*do\\s*slotu\\s*(\\d+)\\s*[:=]\\s*(.+)$/is);
+    if(slotSaveMatch){const slotIndex=parseInt(slotSaveMatch[1],10),content=slotSaveMatch[2].trim();if(slotIndex>=0&&slotIndex<240){saveToCHTSlot(slotIndex,content,'Zápis z Mluvy');scanCHTSlots();return `🗄 **Uloženo do CHT 360° slotu ${slotIndex}**\\n\\n**Obsah:** ${content.substring(0,100)}${content.length>100?'...':''}\\n\\nSlot byl aktualizován v CHT 360° Paměti. Snapshot vytvořen.`}else{return `❌ **Chyba:** Slot ${slotIndex} je mimo rozsah 0-239.`}}
 
-    @keyframes cht360Core {
-      50% { transform: scale(1.18); filter: brightness(1.3); }
-    }
-  </style>
+    // "Zapamatuj si tohle" / "Tohle si zapamatuj"
+    if(/^(zapamatuj|tohle si zapamatuj|ulož si to|pamatuj si)/i.test(lower)&&lastBotResponse){const id='lesson_'+Date.now(),trigger=text.replace(/^(zapamatuj|tohle si zapamatuj|ulož si to|pamatuj si)[\\s:]*/i,'').trim()||'předchozí odpověď';lessons.push({id,trigger,reply:lastBotResponse,tags:autoTag(trigger,lastBotResponse),created:Date.now(),uses:0,source:'zapamatováno'});saveData();renderLessons();return `✅ **Uloženo do Vědomí**\\n\\n**Když napíšeš:** "${trigger}"\\n**Odpovím:** (předchozí odpověď)\\n\\nLekce vytvořena z naší konverzace.`}
 
-  <script
-    src="./js/cht-360-network.js"
-    data-cht-module="cht-360-core"
-    data-cht-label="CHT 360°‰."
-    data-cht-entry="./index.html"
-    data-cht-kind="pwa"
-    data-cht-storage-keys="cht360_pamet_v1,vaft_pamet_v1,vaft_pamet_scene_v2,cht360_pamet_snapshots_v1,cht360_trojka_models_v1,cht360_glyph_drums_v1,cht360_glyph_drums_custom_v1,cht360_iphone14_settings_v1"
-  ></script>
+    // Commands
+    if(/^(načti\\s*cht|synchronizuj\\s*cht|sync\\s*cht)/i.test(lower)){scanCHTSlots();const filled=Object.keys(chtSlots).length;return `🔄 **CHT 360° synchronizováno**\\n\\n• **Nalezeno slotů:** ${filled} / 240\\n• **Lekcí z CHT:** ${lessons.filter(l=>l.source==='CHT').length}\\n• **Snapshoty:** ${(()=>{try{const s=localStorage.getItem(CHT_KEYS.snapshots);return s?JSON.parse(s).length:0}catch(e){return 0}})()}\\n\\nKlikni na slot pro detail nebo nauč se z jeho obsahu.`}
 
-  <script>
-    (() => {
-      if (document.getElementById("cht360-stred")) return;
+    if(/^(stav|status|jaký je stav)/i.test(lower)){const filled=Object.keys(chtSlots).length,topLesson=lessons.length>0?lessons.reduce((a,b)=>(a.uses||0)>(b.uses||0)?a:b):null;return `📊 **Stav Vědomí Mluvy**\\n\\n• **Lekce:** ${lessons.length} (${lessons.filter(l=>l.source==='CHT').length} z CHT)\\n• **Interakce:** ${interactionCount}\\n• **CHT Sloty:** ${filled} / 240\\n• **Historie:** ${history.length} zpráv\\n• **Nejpoužívanější lekce:** ${topLesson?`"${topLesson.trigger}" (${topLesson.uses||0}×)`:'žádná'}\\n\\n🧠 **Režim:** ${chtConnected?'CHT 360° připojeno':'Čekám na CHT 360°'}\\n📱 **Zařízení:** ${navigator.userAgent.includes('iPhone')?'iPhone':'Prohlížeč'}`}
 
-      const host = document.querySelector(".stage");
-      if (!host) return;
+    if(/^(modely|cesty|jaké cesty|sloty|jaké sloty)/i.test(lower)){const filled=Object.keys(chtSlots).length;if(filled===0)return `🗄 **Žádné sloty nejsou obsazeny.**\\n\\nCHT 360° Paměť je prázdná nebo nenalezena.\\n\\nTip: Napiš "načti CHT" pro synchronizaci.`;const slots=Object.entries(chtSlots).slice(0,10).map(([i,s])=>`• **Slot ${i}:** ${s.name} (${s.content.length} znaků)`);return `🗄 **Obsazené sloty CHT 360° (${filled} / 240):**\\n\\n${slots.join('\\n')}\\n${filled>10?'\\n... a '+(filled-10)+' dalších slotů':''}\\n\\nKlikni na slot v mřížce nahoře pro detail.`}
 
-      const cht = document.createElement("button");
-      cht.id = "cht360-stred";
-      cht.type = "button";
-      cht.setAttribute("aria-label", "CHT 360°‰. ve středu oběhu");
+    if(/^(pomoc|help|co umíš|co dokážeš|funkce)/i.test(lower)){return `🧠 **Mluva CHT 360° Paměť & Vědomí — Co umím:**\\n\\n**1. CHT 360° Propojení:**\\n   • Čtu 240 slotů Paměti\\n   • Učím se z obsahu slotů (klikni "Naučit se z obsahu")\\n   • Doplňuji sloty: "ulož do slotu 5: obsah"\\n   • Synchronizuji: "načti CHT"\\n\\n**2. Učení z chatu:**\\n   • "nauč se: téma = odpověď"\\n   • "Tohle si zapamatuj" po mojí odpovědi\\n   • Auto-tagování lekcí\\n\\n**3. Import:**\\n   • 📋 Clipboard — vlož text, vytvořím lekci\\n   • 📁 Soubor — .txt, .md, .json\\n\\n**4. Příkazy:**\\n   • "stav" — přehled Vědomí\\n   • "sloty" — obsazené sloty\\n   • "načti CHT" — synchronizace\\n   • "zapomeň vše" — reset Mluvy\\n   • "export" — záloha pro Kimi\\n\\n**5. iOS tipy:**\\n   • Sdílej text do Safari s otevřenou Mluvou\\n   • "Přidat na plochu" pro PWA\\n   • Použij Siri Shortcuts pro rychlé učení`}
 
-      cht.innerHTML = `
-        <span class="cht360-stred-znak c" aria-hidden="true">C</span>
-        <span class="cht360-stred-znak h" aria-hidden="true">H</span>
-        <span class="cht360-stred-znak t" aria-hidden="true">T</span>
-        <span class="cht360-stred-znak a" aria-hidden="true">ア</span>
+    if(/^(zapomeň vše|smaž vše|clear all|reset)/i.test(lower)){clearAllData();return null}
 
-        <span class="cht360-stred-prach" aria-hidden="true">
-          <i></i><i></i><i></i><i></i>
-        </span>
+    if(/^(export|záloha|backup)/i.test(lower)){exportData();return `💾 **Záloha exportována.**\\n\\nSoubor byl stažen.\\n\\n**Co s ním:**\\n1. Pošli ho Kimi pro analýzu Vědomí\\n2. Kimi navrhne nové lekce a souvislosti\\n3. Importuj zpět pro rozšíření Paměti\\n\\nZáloha obsahuje: ${lessons.length} lekcí, ${history.length} zpráv, ${Object.keys(chtSlots).length} CHT slotů.`}
 
-        <span class="cht360-stred-core" aria-hidden="true">
-          <strong>CHT</strong>
-          <small>360°‰.</small>
-        </span>
-      `;
+    // Lesson-based response
+    const lesson=findLesson(text);
+    if(lesson){lesson.uses=(lesson.uses||0)+1;saveData();renderLessons();return lesson.reply+`\\n\\n_(použita lekce: "${lesson.trigger}" — ${lesson.uses}×)_`}
 
-      cht.addEventListener("click", () => {
-        cht.classList.remove("is-aktivni");
-        requestAnimationFrame(() => cht.classList.add("is-aktivni"));
+    // Context learning from recent history
+    for(const h of history.slice(-30).reverse()){if(h.role==='bot'&&h.learning&&h.originalTrigger&&lower.includes(h.originalTrigger?.toLowerCase().substring(0,20))){return h.text}}
 
-        const zprava = document.getElementById("messageLine");
-        if (zprava) {
-          zprava.textContent =
-            "CHT 360°‰. je uprostřed oběhu a pracuje jen s tím, co mu dovolíš.";
-        }
-      });
+    // Smart suggestions
+    if(lessons.length>0){const words=lower.split(/\\s+/).filter(w=>w.length>3);const suggestions=lessons.filter(l=>words.some(w=>l.trigger.toLowerCase().includes(w))).slice(0,3);if(suggestions.length>0){return `🤔 Toto zatím přesně neznám, ale mám podobné lekce:\\n\\n${suggestions.map(s=>`• "${s.trigger}" — použito ${s.uses||0}×`).join('\\n')}\\n\\nChceš mě to naučit? Napiš:\\n\\n**nauč se: ${text.substring(0,40)} = [tvá odpověď]**\\n\\nNebo použij tlačítko "Nová lekce" nahoře.`}}
 
-      host.append(cht);
-    })();
+    return `🤔 Toto zatím neznám.\\n\\nChceš mě to naučit? Napiš:\\n\\n**nauč se: ${text.substring(0,40)} = [tvá odpověď]**\\n\\nNebo ulož do CHT slotu:\\n**ulož do slotu 0: ${text.substring(0,50)}**\\n\\nPoužij tlačítko "Nová lekce" nahoře.`}
+
+    function handleUserMessage(text){if(!text.trim())return;interactionCount++;addMessage('user',text);const response=generateResponse(text);if(response){const isLearning=!findLesson(text)&&!text.match(/^nauč\\s*se/i)&&!text.match(/^ulož\\s*do\\s*slotu/i)&&!['načli cht','stav','modely','sloty','pomoc','help','zapomeň vše','export'].some(c=>lower.startsWith(c));const isSlotSave=text.match(/^ulož\\s*do\\s*slotu/i);addMessage('bot',response,{learning:isLearning,originalTrigger:text,slotSaved:isSlotSave})}saveData()}
+
+    function openDialog(id){document.getElementById(id).classList.add('active')}
+    function closeDialog(id){document.getElementById(id).classList.remove('active')}
+
+    document.getElementById('scanSlotsBtn').addEventListener('click',scanCHTSlots);
+    document.getElementById('syncSlotsBtn').addEventListener('click',()=>{showToast('🔄 Synchronizuji CHT 360°...');setTimeout(()=>{scanCHTSlots();addSystemMessage('🔄 CHT 360° Paměť synchronizována. '+Object.keys(chtSlots).length+' slotů nalezeno.')},500)});
+
+    document.getElementById('learnFromSlotBtn').addEventListener('click',()=>{if(selectedSlotIndex!==null)learnFromSlot(selectedSlotIndex)});
+    document.getElementById('editSlotBtn').addEventListener('click',()=>{if(selectedSlotIndex===null)return;const slot=chtSlots[selectedSlotIndex];if(!slot)return;const newContent=prompt('Upravit obsah slotu '+selectedSlotIndex+':',slot.content);if(newContent!==null){saveToCHTSlot(selectedSlotIndex,newContent,slot.name);scanCHTSlots();closeDialog('slotDialog');showToast(`✅ Slot ${selectedSlotIndex} upraven`)}});
+    document.getElementById('clearSlotBtn').addEventListener('click',()=>{if(selectedSlotIndex!==null)clearCHTSlot(selectedSlotIndex)});
+
+    document.getElementById('openLesson').addEventListener('click',()=>{document.getElementById('lessonTrigger').value='';document.getElementById('lessonTags').value='';document.getElementById('lessonReply').value='';openDialog('lessonDialog');setTimeout(()=>document.getElementById('lessonTrigger').focus(),100)});
+    document.getElementById('saveLesson').addEventListener('click',()=>{const trigger=document.getElementById('lessonTrigger').value.trim(),reply=document.getElementById('lessonReply').value.trim(),tags=document.getElementById('lessonTags').value.trim();if(!trigger||!reply){alert('Vyplň obě pole.');return}const id='lesson_'+Date.now();lessons.push({id,trigger,reply,tags:tags||autoTag(trigger,reply),created:Date.now(),uses:0,source:'ruční'});saveData();renderLessons();closeDialog('lessonDialog');addSystemMessage(`✅ Nová lekce uložena: "${trigger}"`)})'''
+    window.openEditLesson=function(id){const lesson=lessons.find(l=>l.id===id);if(!lesson)return;currentEditId=id;document.getElementById('editLessonId').value=id;document.getElementById('editLessonTrigger').value=lesson.trigger;document.getElementById('editLessonTags').value=lesson.tags||'';document.getElementById('editLessonReply').value=lesson.reply;openDialog('editLessonDialog')};
+    document.getElementById('updateLesson').addEventListener('click',()=>{const trigger=document.getElementById('editLessonTrigger').value.trim(),reply=document.getElementById('editLessonReply').value.trim(),tags=document.getElementById('editLessonTags').value.trim();if(!trigger||!reply){alert('Vyplň obě pole.');return}const lesson=lessons.find(l=>l.id===currentEditId);if(lesson){lesson.trigger=trigger;lesson.reply=reply;lesson.tags=tags||autoTag(trigger,reply)}saveData();renderLessons();closeDialog('editLessonDialog');addSystemMessage('✅ Lekce aktualizována.')});
+    document.getElementById('deleteLessonBtn').addEventListener('click',()=>{if(!confirm('Smazat tuto lekci?'))return;lessons=lessons.filter(l=>l.id!==currentEditId);saveData();renderLessons();closeDialog('editLessonDialog');addSystemMessage('🗑️ Lekce smazána.')});
+
+    document.getElementById('importClipboardBtn').addEventListener('click',()=>{document.getElementById('clipboardText').value='';openDialog('clipboardDialog');setTimeout(()=>document.getElementById('clipboardText').focus(),100);if(navigator.clipboard&&navigator.clipboard.readText){navigator.clipboard.readText().then(t=>{if(t){document.getElementById('clipboardText').value=t;showToast('📋 Clipboard načten')}}).catch(()=>{})}});
+    document.getElementById('autoParseClipboard').addEventListener('click',()=>{const text=document.getElementById('clipboardText').value.trim();if(!text){alert('Vlož text.');return}const lines=text.split(/\\n+/).filter(l=>l.trim().length>10).slice(0,5);if(lines.length>1){document.getElementById('clipboardText').value=`Nalezeno ${lines.length} odstavců.\\n\\nPrvní: "${lines[0].substring(0,80)}..."\\n\\nKlikni "Uložit jako lekci" pro uložení prvního odstavce, nebo uprav text.`}else{showToast('1 odstavec nalezen — připraven k uložení')}});
+    document.getElementById('saveClipboardLesson').addEventListener('click',()=>{const text=document.getElementById('clipboardText').value.trim();if(!text){alert('Vlož text.');return}const firstLine=text.split(/\\n/)[0].substring(0,60);const id='lesson_clip_'+Date.now();lessons.push({id,trigger:firstLine||'clipboard import',reply:text.substring(0,1000),tags:autoTag(firstLine,text)+', import',created:Date.now(),uses:0,source:'clipboard'});saveData();renderLessons();closeDialog('clipboardDialog');addSystemMessage(`✅ **Naučeno z clipboardu**\\n\\n**Trigger:** "${firstLine}"\\n**Délka:** ${text.length} znaků\\n\\nPříště když napíšeš něco o "${firstLine}", použiji tento text.`)showToast('📋 Uloženo z clipboardu')});
+
+    document.getElementById('importFileBtn').addEventListener('click',()=>{document.getElementById('fileTextPreview').value='';openDialog('fileDialog')});
+    document.getElementById('dropZone').addEventListener('click',()=>document.getElementById('fileInput').click());
+    document.getElementById('fileInput').addEventListener('change',(e)=>{const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=(ev)=>{document.getElementById('fileTextPreview').value=ev.target.result.substring(0,5000);showToast(`📁 ${file.name} načten (${ev.target.result.length} znaků)`)};reader.readAsText(file)});
+    document.getElementById('dropZone').addEventListener('dragover',(e)=>{e.preventDefault();e.currentTarget.style.borderColor='var(--accent)';e.currentTarget.style.background='var(--accent-glow)'});
+    document.getElementById('dropZone').addEventListener('dragleave',(e)=>{e.currentTarget.style.borderColor='var(--border)';e.currentTarget.style.background='transparent'});
+    document.getElementById('dropZone').addEventListener('drop',(e)=>{e.preventDefault();e.currentTarget.style.borderColor='var(--border)';e.currentTarget.style.background='transparent';const file=e.dataTransfer.files[0];if(!file)return;const reader=new FileReader();reader.onload=(ev)=>{document.getElementById('fileTextPreview').value=ev.target.result.substring(0,5000);showToast(`📁 ${file.name} načten`)};reader.readAsText(file)});
+    document.getElementById('autoParseFile').addEventListener('click',()=>{const text=document.getElementById('fileTextPreview').value.trim();if(!text){alert('Vyber soubor.');return}const lines=text.split(/\\n+/).filter(l=>l.trim().length>5);showToast(`${lines.length} řádků nalezeno — připraveno k uložení`)});
+    document.getElementById('saveFileLesson').addEventListener('click',()=>{const text=document.getElementById('fileTextPreview').value.trim();if(!text){alert('Vyber soubor.');return}const firstLine=text.split(/\\n/)[0].substring(0,60);const id='lesson_file_'+Date.now();lessons.push({id,trigger:firstLine||'soubor import',reply:text.substring(0,1000),tags:autoTag(firstLine,text)+', soubor',created:Date.now(),uses:0,source:'soubor'});saveData();renderLessons();closeDialog('fileDialog');addSystemMessage(`✅ **Naučeno ze souboru**\\n\\n**Trigger:** "${firstLine}"\\n**Délka:** ${text.length} znaků\\n\\nPříště když napíšeš něco o "${firstLine}", použiji tento text.`)showToast('📁 Uloženo ze souboru')});
+
+    document.getElementById('exportLearning').addEventListener('click',()=>{const data={version:'mluva_cht360_pamet_v1',exported:Date.now(),lessons,history,chtSlots,interactionCount,stats:{lessonCount:lessons.length,historyLength:history.length,chtSlotCount:Object.keys(chtSlots).length,chtConnected}};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`mluva_cht360_pamet_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);addSystemMessage('💾 Záloha exportována. Soubor si ulož a pošli Kimi pro analýzu Vědomí.')showToast('💾 Záloha exportována')});
+
+    document.querySelectorAll('.quick-actions button[data-prompt]').forEach(btn=>{btn.addEventListener('click',()=>handleUserMessage(btn.dataset.prompt))});
+    document.getElementById('teachFromQuick').addEventListener('click',()=>{document.getElementById('talkInput').value='nauč se: ';document.getElementById('talkInput').focus()});
+    document.getElementById('rememberLastBtn').addEventListener('click',()=>{if(!lastBotResponse){alert('Žádná odpověď k zapamatování.');return}handleUserMessage('Tohle si zapamatuj')});
+
+    document.getElementById('talkForm').addEventListener('submit',(e)=>{e.preventDefault();const input=document.getElementById('talkInput');handleUserMessage(input.value);input.value=''});
+    document.getElementById('talkInput').addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();document.getElementById('talkForm').dispatchEvent(new Event('submit'))}});
+    document.getElementById('refreshContext').addEventListener('click',()=>{updateStats();addSystemMessage(`🔄 Paměť obnovena. Lekcí: ${lessons.length}, Interakcí: ${interactionCount}, CHT slotů: ${Object.keys(chtSlots).length}/240.`)});
+    document.getElementById('speakLast').addEventListener('click',()=>{const lastBot=history.slice().reverse().find(h=>h.role==='bot');if(!lastBot){alert('Žádná odpověď k přečtení.');return}if('speechSynthesis'in window){const u=new SpeechSynthesisUtterance(lastBot.text.replace(/[_*]/g,''));u.lang='cs-CZ';u.rate=1.1;speechSynthesis.speak(u)}else{alert('Tento prohlížeč nepodporuje čtení.')}});
+
+    document.querySelectorAll('[data-action="close-models"]').forEach(b=>b.addEventListener('click',()=>closeDialog('modelDialog')));
+    document.querySelectorAll('[data-action="close-lesson"]').forEach(b=>b.addEventListener('click',()=>closeDialog('lessonDialog')));
+    document.querySelectorAll('[data-action="close-edit"]').forEach(b=>b.addEventListener('click',()=>closeDialog('editLessonDialog')));
+    document.querySelectorAll('[data-action="close-clipboard"]').forEach(b=>b.addEventListener('click',()=>closeDialog('clipboardDialog')));
+    document.querySelectorAll('[data-action="close-file"]').forEach(b=>b.addEventListener('click',()=>closeDialog('fileDialog')));
+    document.querySelectorAll('[data-action="close-slot"]').forEach(b=>b.addEventListener('click',()=>closeDialog('slotDialog')));
+
+    document.querySelectorAll('.dialog-overlay').forEach(d=>{d.addEventListener('click',(e)=>{if(e.target===d)d.classList.remove('active')})});
+    document.addEventListener('keydown',(e)=>{if(e.key==='Escape')document.querySelectorAll('.dialog-overlay.active').forEach(d=>d.classList.remove('active'))});
+
+    function escapeHtml(text){const div=document.createElement('div');div.textContent=text;return div.innerHTML}
+    function formatDate(ts){const d=new Date(ts);return d.toLocaleDateString('cs-CZ',{day:'numeric',month:'short'})}
+    function formatTime(ts){const d=new Date(ts);return d.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'})}
+
+    window.openCHT360=function(){if(chtConnected){window.location.href='./index.html'}else{alert('CHT 360° nenalezeno. Otevři nejprve CHT 360° Paměť v tomto prohlížeči.')}};
+    window.importBackup=function(jsonText){try{const data=JSON.parse(jsonText);if(data.lessons)lessons=data.lessons;if(data.chtSlots)chtSlots=data.chtSlots;saveData();renderLessons();renderSlotPreview();updateStats();addSystemMessage('📥 Záloha importována. Data sloučena s existujícími.')}catch(e){alert('Chybný formát zálohy.')}};
+
+    loadData();checkCHTConnection();renderLessons();renderHistory();updateStats();
+
+    if(interactionCount===0&&lessons.length===0){setTimeout(()=>{addSystemMessage('🎯 **Tip pro začátečníky:**\\n\\n1. Napiš "načti CHT" pro synchronizaci s CHT 360°\\n2. Napiš "nauč se: ahoj = Ahoj! Jak se máš?"\\n3. Pak napiš "ahoj" — a uvidíš, jak se učím!\\n4. Klikni na slot v mřížce pro naučení se z jeho obsahu\\n5. Použij "pomoc" kdykoliv pro seznam příkazů.')},500)}
+
+    console.log('🧠 Mluva CHT 360° Paměť & Vědomí inicializována. Příkazy: importBackup(json)');
   </script>
 </body>
-</html>
+</html>'''
+
+with open('/mnt/agents/output/mluva_cht360_pamet.html', 'a', encoding='utf-8') as f:
+    f.write(part4)
+
+# Verify the file
+with open('/mnt/agents/output/mluva_cht360_pamet.html', 'r', encoding='utf-8') as f:
+    content = f.read()
+
+print(f"Total file size: {len(content)} chars")
+print(f"File starts with: {content[:50]}")
+print(f"File ends with: {content[-50:]}")
