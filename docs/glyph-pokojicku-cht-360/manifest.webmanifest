@@ -1,12 +1,17 @@
 {
-  "name": "Glyph CHT 360°‰",
-  "short_name": "Glyph CHT",
+  "name": "CHT 360°‰. · pokojíčky",
+  "short_name": "CHT 360°‰.",
+  "description": "Lokální česká Paměť se čtyřmi jádry a Glyph pokojíčky.",
   "lang": "cs",
+  "dir": "ltr",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#070706",
-  "theme_color": "#070706",
-  "description": "ChybaŽrout pro UTF-8, kód a návaznosti projektu.",
+  "display_override": ["standalone", "browser"],
+  "orientation": "any",
+  "theme_color": "#17120b",
+  "background_color": "#120e09",
+  "categories": ["productivity", "utilities", "education"],
   "icons": [
     {
       "src": "./icon.svg",
