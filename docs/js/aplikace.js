@@ -31,7 +31,7 @@ const LEGACY_STORAGE_KEYS = ["vaft_pamet_v1"];
 const MEMORY_SNAPSHOT_KEY = "cht360_pamet_snapshots_v1";
 const CHYBOZROUT_BACKUP_KEY = "cht360_samoopravovna_backup_v1";
 const LEGACY_SLOT_PREFIX = "VaFiT_SLOT_";
-const SLOT_COUNT = 70;
+const SLOT_COUNT = 240;
 const SCENE_KEY = "vaft_pamet_scene_v2";
 const MIN_SCENE_SPREAD = .96;
 const MAX_SCENE_SPREAD = 2.8;
@@ -41,7 +41,7 @@ const TROJKA_MODEL_STORAGE_KEY = "cht360_trojka_models_v1";
 const GLYPH_DRUM_STORAGE_KEY = "cht360_glyph_drums_v1";
 const GLYPH_DRUM_CUSTOM_STORAGE_KEY = "cht360_glyph_drums_custom_v1";
 const PHONE_SETTINGS_KEY = "cht360_iphone14_settings_v1";
-const PHONE_APP_LIMIT = 70;
+const PHONE_APP_LIMIT = 240;
 
 const GLYPH_DRUM_TOKENS = Object.freeze([
   ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -601,7 +601,7 @@ function updatePills() {
     }
 
     const stats = getCoreStats(core.id);
-    pill.textContent = `${core.title.toUpperCase()} · ${stats.used}/70`;
+    pill.textContent = `${core.title.toUpperCase()} · ${stats.used}/${SLOT_COUNT}`;
   }
 }
 
@@ -2017,7 +2017,7 @@ function drawCore(core, time) {
 
   context.fillStyle = "rgba(255,240,210,.74)";
   context.font = Math.max(8, Math.round(9 * scale)) + "px system-ui";
-  context.fillText(stats.used + "/70", position.x, position.y + 12);
+  context.fillText(stats.used + "/" + SLOT_COUNT, position.x, position.y + 12);
 
   context.restore();
 
@@ -2090,7 +2090,7 @@ function openCore(core) {
   delete slotEditor.dataset.chtSlot;
 
   panelTitle.textContent = `${core.title} · Paměť`;
-  panelSub.textContent = "70 slotů · samostatné uložení";
+  panelSub.textContent = SLOT_COUNT + " slotů · samostatné uložení";
 
   panel.classList.add("open");
   slotEditor.classList.remove("open");
@@ -2169,7 +2169,7 @@ function updateStatus(message = "") {
   const stats = getCoreStats(selectedCore.id);
 
   let text =
-    `${selectedCore.title}: obsazeno ${stats.used}/70 · ` +
+    `${selectedCore.title}: obsazeno ${stats.used}/${SLOT_COUNT} · ` +
     `velikost ${formatBytes(stats.size)}`;
 
   if (selectedSlotIndex !== null) {
@@ -2920,5 +2920,6 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
+
 
 
