@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -163,7 +162,7 @@
     .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
     .cht-core-glow{position:absolute;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,217,142,0.08) 0%,transparent 70%);pointer-events:none;animation:glow 4s ease-in-out infinite}
   </style>
-</head>'''
+</head>
 <body>
   <div class="app-shell">
     <header class="topbar">
@@ -468,7 +467,7 @@
 
     function autoTag(trigger,reply){const text=(trigger+' '+reply).toLowerCase();const tags=[];if(/práce|pracovní|projekt|deadline|úkol/.test(text))tags.push('práce');if(/ranní|ráno|večer|noc|den/.test(text))tags.push('čas');if(/kontrola|zkontroluj|ověř/.test(text))tags.push('kontrola');if(/záloha|ulož|export|import/.test(text))tags.push('data');if(/cht|slot|paměť|mluva/.test(text))tags.push('cht');if(/jídlo|vaření|recept|oběd|večeře/.test(text))tags.push('jídlo');if(/peníze|finance|účet|platba/.test(text))tags.push('finance');if(/zdraví|cvik|sport|běh|plavání/.test(text))tags.push('zdraví');if(/cesta|dovolená|letenka|hotel/.test(text))tags.push('cestování');if(/glyph|bubínek|šifra/.test(text))tags.push('glyph');if(tags.length===0)tags.push('obecné');return tags.slice(0,3).join(', ')}
 
-    function generateResponse(text){const lower=text.toLowerCase().trim();
+    function generateResponse(text){const lower = text.toLowerCase().trim();
 
     // Auto-learning: "nauč se: X = Y"
     const teachMatch=text.match(/^nauč\\s*se\\s*[:=]\\s*(.+?)\\s*[=:]\\s*(.+)$/is);
@@ -572,15 +571,4 @@
     console.log('🧠 Mluva CHT 360° Paměť & Vědomí inicializována. Příkazy: importBackup(json)');
   </script>
 </body>
-</html>'''
-
-with open('/mnt/agents/output/mluva_cht360_pamet.html', 'a', encoding='utf-8') as f:
-    f.write(part4)
-
-# Verify the file
-with open('/mnt/agents/output/mluva_cht360_pamet.html', 'r', encoding='utf-8') as f:
-    content = f.read()
-
-print(f"Total file size: {len(content)} chars")
-print(f"File starts with: {content[:50]}")
-print(f"File ends with: {content[-50:]}")
+</html>
