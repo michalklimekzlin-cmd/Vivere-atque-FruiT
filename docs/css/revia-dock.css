@@ -1,0 +1,152 @@
+:root{
+  --revia-zlata:#ffe2ad;
+  --revia-zlata-tmava:#c79b33;
+  --revia-pozadi:rgba(7,6,10,.94);
+}
+
+.srOnly{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+
+.openReviaPanel{
+  position:fixed;
+  z-index:28;
+  bottom:max(46px,calc(env(safe-area-inset-bottom) + 34px));
+  left:max(15px,env(safe-area-inset-left));
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 10px 7px 7px;
+  border:1px solid rgba(255,226,173,.42);
+  border-radius:999px;
+  background:linear-gradient(145deg,rgba(33,22,18,.94),rgba(5,5,9,.94));
+  color:var(--revia-zlata);
+  box-shadow:0 0 22px rgba(226,171,84,.2), inset 0 0 14px rgba(255,222,173,.08);
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.04em;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.openReviaPanel:active{transform:scale(.96)}
+
+.reviaOrb{
+  display:grid;
+  width:25px;
+  height:25px;
+  place-items:center;
+  border:1px solid rgba(255,241,206,.86);
+  border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,#fffaf0 0 8%,#efd18d 35%,#8d4e22 100%);
+  color:#241407;
+  font-size:12px;
+  font-weight:950;
+  box-shadow:0 0 12px rgba(255,220,150,.72);
+}
+
+.reviaPanel{
+  position:fixed;
+  z-index:35;
+  top:max(45px,env(safe-area-inset-top));
+  bottom:max(35px,env(safe-area-inset-bottom));
+  left:max(13px,env(safe-area-inset-left));
+  display:none;
+  width:min(356px,calc(100vw - 26px));
+  min-height:0;
+  flex-direction:column;
+  overflow:hidden;
+  border:1px solid rgba(255,226,173,.38);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 20% 0%,rgba(210,158,75,.15),transparent 38%),
+    var(--revia-pozadi);
+  box-shadow:0 18px 60px rgba(0,0,0,.62),0 0 38px rgba(207,151,65,.14),inset 0 0 26px rgba(255,220,160,.035);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+
+.reviaPanel.is-open{display:flex}
+.openReviaPanel[aria-hidden="true"]{display:none}
+
+.reviaTop{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:9px;
+  padding:11px 12px 10px;
+  border-bottom:1px solid rgba(255,226,173,.14);
+}
+
+.reviaMode,
+.reviaClose,
+.reviaShortcuts button,
+.reviaForm button{
+  border:1px solid rgba(255,226,173,.24);
+  color:var(--revia-zlata);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.reviaMode{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  min-height:30px;
+  padding:5px 8px;
+  border-radius:12px;
+  background:rgba(255,220,160,.08);
+  font-size:10px;
+  font-weight:800;
+}
+
+.reviaTitle{min-width:0}
+.reviaTitle strong,.reviaTitle small{display:block}
+.reviaTitle strong{font-size:13px;letter-spacing:.04em}
+.reviaTitle small{margin-top:2px;overflow:hidden;color:rgba(255,240,207,.56);font-size:9px;text-overflow:ellipsis;white-space:nowrap}
+
+.reviaClose{
+  display:grid;
+  width:30px;
+  height:30px;
+  padding:0;
+  place-items:center;
+  border-radius:10px;
+  background:rgba(255,220,160,.07);
+  font-size:20px;
+  line-height:1;
+}
+
+.reviaShortcuts{display:flex;gap:6px;padding:9px 12px;overflow-x:auto;border-bottom:1px solid rgba(255,226,173,.09)}
+.reviaShortcuts button{flex:0 0 auto;padding:6px 8px;border-radius:999px;background:rgba(255,220,160,.06);font-size:10px;font-weight:750}
+.reviaShortcuts button:active,.reviaMode:active,.reviaClose:active{background:rgba(255,220,160,.2);transform:scale(.96)}
+
+.reviaLog{display:flex;min-height:0;flex:1;flex-direction:column;gap:8px;padding:11px 12px;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.reviaMessage{max-width:92%;padding:8px 10px;border:1px solid rgba(255,226,173,.13);border-radius:14px;color:rgba(255,248,229,.9);font-size:11px;line-height:1.42;overflow-wrap:anywhere}
+.reviaMessage strong{display:block;margin-bottom:3px;color:var(--revia-zlata);font-size:9px;letter-spacing:.07em;text-transform:uppercase}
+.reviaMessage-user{align-self:flex-end;border-color:rgba(255,226,173,.28);background:rgba(179,112,42,.16)}
+.reviaMessage-revia{align-self:flex-start;background:rgba(255,255,255,.04)}
+
+.reviaForm{display:grid;grid-template-columns:minmax(0,1fr) 38px;gap:7px;padding:9px 12px;border-top:1px solid rgba(255,226,173,.12)}
+.reviaForm textarea{width:100%;min-height:40px;max-height:100px;padding:9px 10px;resize:vertical;border:1px solid rgba(255,226,173,.18);border-radius:13px;outline:none;background:rgba(0,0,0,.24);color:#fff3d7;font-size:12px;line-height:1.35}
+.reviaForm textarea:focus{border-color:rgba(255,226,173,.6);box-shadow:0 0 0 3px rgba(255,210,130,.09)}
+.reviaForm button{align-self:stretch;border-radius:13px;background:linear-gradient(145deg,#d79a44,#7f3d1c);color:#281306;font-size:19px;font-weight:950}
+.reviaState{margin:0;padding:0 12px 10px;color:rgba(255,240,207,.48);font-size:9px;line-height:1.32}
+
+@media (max-height:440px){
+  .reviaPanel{top:34px;bottom:26px;width:min(330px,calc(100vw - 26px))}
+  .reviaTop{padding:8px 10px}
+  .reviaShortcuts{padding:6px 10px}
+  .reviaLog{gap:6px;padding:8px 10px}
+  .reviaMessage{padding:6px 8px;font-size:10px}
+  .reviaForm{padding:7px 10px}
+  .reviaState{padding:0 10px 7px}
+}
