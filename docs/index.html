@@ -624,11 +624,35 @@
       <button type="button" data-revia-action="plans">Plány</button>
       <button type="button" data-revia-action="links">Odkazy</button>
       <button type="button" data-revia-action="vafit">VaFiT</button>
+      <button type="button" data-revia-action="inbox">Schránka</button>
+      <button type="button" data-revia-action="backup">Záloha</button>
+      <button type="button" data-revia-action="signal">Signál</button>
       <button type="button" data-revia-action="memory">Paměť</button>
       <button type="button" data-revia-action="glyph">Glyph</button>
       <button type="button" data-revia-action="rooms">Pokojíčky</button>
       <button type="button" data-revia-action="iphone">iPhone</button>
     </div>
+
+    <section id="reviaContinuity" class="reviaContinuity" hidden aria-label="Schránka objevů a záloha Revii">
+      <div class="reviaContinuityTop">
+        <strong>Schránka objevů</strong>
+        <button id="closeReviaContinuity" type="button" aria-label="Zavřít schránku">×</button>
+      </div>
+      <p>Vlož poznatek z jiného chatu, GPT nebo světa. Nejdřív jen čeká na tvoje potvrzení a nic se samo neposílá ven.</p>
+      <input id="reviaDiscoverySource" type="text" maxlength="160" value="GPT / bratříček / vlastní poznámka" aria-label="Zdroj objevu">
+      <textarea id="reviaDiscoveryInput" rows="4" maxlength="12000" placeholder="Vlož sem objev nebo důležitý výňatek…"></textarea>
+      <div class="reviaContinuityActions">
+        <button id="reviaDiscoverySave" type="button">Uložit návrh</button>
+        <button id="reviaDiscoveryApprove" type="button">Potvrdit poslední</button>
+        <button id="reviaContinuityReview" type="button">Zobrazit schránku</button>
+      </div>
+      <div class="reviaContinuityActions">
+        <button id="reviaExport" type="button">Export Revii</button>
+        <label class="reviaImportLabel">Import Revii<input id="reviaImport" type="file" accept="application/json,.json"></label>
+        <button id="reviaStorage" type="button">Zajistit offline</button>
+      </div>
+      <small id="reviaContinuityState">Revia připraví místní bod obnovy při změně, přechodu offline i návratu připojení.</small>
+    </section>
 
     <div id="reviaLog" class="reviaLog" role="log" aria-live="polite"></div>
 
