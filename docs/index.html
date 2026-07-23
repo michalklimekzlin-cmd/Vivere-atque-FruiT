@@ -1245,6 +1245,10 @@
       const REVIA_API_ENDPOINT_KEY = "cht360_revia_api_endpoint_v1";
       const REVIA_API_STATUS_KEY = "cht360_revia_api_status_v1";
       const NETWORK_PULSE_KEY = "cht360_network_pulse_v1";
+      const FUNCTION_REPORT_KEY = "cht360_funkcni_most_report_v1";
+      const FUNCTION_BACKUP_KEY = "cht360_funkcni_most_backup_v1";
+      const CHYBOZROUT_KEY = "cht360_chybozrout_v2";
+      const CHYBOZROUT_BACKUP_KEY = "cht360_samoopravovna_backup_v1";
       const NETWORK_EVENT = "cht360.network.changed";
 
       const coreMap = {
@@ -1556,6 +1560,259 @@
         `;
       }
 
+      function uniqueStorageKeys() {
+        const baseKeys = [
+          STORAGE_KEY,
+          LEGACY_STORAGE_KEY,
+          ROOMS_KEY,
+          REVIA_KEY,
+          SPEECH_KEY,
+          REVIA_API_ENDPOINT_KEY,
+          REVIA_API_STATUS_KEY,
+          NETWORK_PULSE_KEY,
+          FUNCTION_REPORT_KEY,
+          FUNCTION_BACKUP_KEY,
+          CHYBOZROUT_KEY,
+          CHYBOZROUT_BACKUP_KEY
+        ];
+        repoModules.forEach((module) => {
+          module.storageKeys.forEach((key) => baseKeys.push(key));
+        });
+        return [...new Set(baseKeys)].filter(Boolean);
+      }
+
+      function byteSize(value) {
+        return new Blob([String(value || "")]).size;
+      }
+
+      function readStorageShape(key) {
+        const raw = localStorage.getItem(key);
+        if (raw === null) {
+          return { key, present: false, bytes: 0, type: "prázdné", validJson: false };
+        }
+        let parsed = null;
+        let validJson = false;
+        try {
+          parsed = JSON.parse(raw);
+          validJson = true;
+        } catch {
+          parsed = raw;
+        }
+        const type = !validJson ? "text" : Array.isArray(parsed) ? "pole" : parsed && typeof parsed === "object" ? "objekt" : typeof parsed;
+        return {
+          key,
+          present: true,
+          bytes: byteSize(raw),
+          type,
+          validJson
+        };
+      }
+
+      function buildFunctionReport(reason = "ruční sken") {
+        const now = new Date().toISOString();
+        const issues = [];
+        const actions = [];
+        const moduleFlow = repoModules.slice().reverse().map((module, index) => ({
+          orderFromEnd: index + 1,
+          id: module.id,
+          label: module.label,
+          kind: module.kind,
+          entry: module.entry || module.source || "",
+          functions: module.id === "chybozrout"
+            ? ["sken", "záloha", "bezpečná oprava"]
+            : ["čtení klíčů", "napojení do sítě"]
+        }));
+
+        Object.entries(coreMap).forEach(([coreId, core]) => {
+          const slots = state.memory.cores[coreId]?.slots;
+          if (!Array.isArray(slots)) {
+            issues.push({ level: "opravit", area: core.title, text: "Jádro nemá pole slotů." });
+            actions.push(`Doplnit sloty pro ${core.title}.`);
+            return;
+          }
+          if (slots.length !== SLOT_LIMIT) {
+            issues.push({ level: "opravit", area: core.title, text: `Slotů je ${slots.length}, má být ${SLOT_LIMIT}.` });
+            actions.push(`Srovnat počet slotů pro ${core.title}.`);
+          }
+        });
+
+        if (!Array.isArray(state.rooms) || state.rooms.length !== ROOM_LIMIT) {
+          issues.push({ level: "opravit", area: "Pokojíčky", text: `Pokojíčků je ${Array.isArray(state.rooms) ? state.rooms.length : 0}, má být ${ROOM_LIMIT}.` });
+          actions.push("Doplnit prstenec pokojíčků.");
+        }
+
+        if (!state.revia || typeof state.revia !== "object") {
+          issues.push({ level: "opravit", area: "Revia", text: "Revia nemá uložený stav." });
+          actions.push("Obnovit základní stav Revie.");
+        }
+
+        const storage = uniqueStorageKeys().map(readStorageShape);
+        const missingModuleKeys = repoModules.flatMap((module) => {
+          return module.storageKeys
+            .filter((key) => localStorage.getItem(key) === null)
+            .map((key) => ({ module: module.label, key }));
+        });
+
+        if (missingModuleKeys.length) {
+          issues.push({
+            level: "info",
+            area: "Úložné klíče",
+            text: `${missingModuleKeys.length} klíčů zatím nemá data. To je v pořádku, pokud modul ještě nebyl otevřený.`
+          });
+        }
+
+        const report = {
+          version: VERSION,
+          kind: "CHT 360°‰ · funkční most",
+          reason,
+          createdAt: now,
+          summary: {
+            modules: repoModules.length,
+            storageKeys: storage.length,
+            presentKeys: storage.filter((item) => item.present).length,
+            issues: issues.length,
+            fixableIssues: issues.filter((item) => item.level === "opravit").length
+          },
+          moduleFlow,
+          storage,
+          missingModuleKeys,
+          issues,
+          actions
+        };
+
+        localStorage.setItem(FUNCTION_REPORT_KEY, JSON.stringify(report));
+        localStorage.setItem(CHYBOZROUT_KEY, JSON.stringify({
+          lastReportAt: now,
+          summary: report.summary,
+          issues: report.issues.slice(0, 12),
+          actions: report.actions.slice(0, 12)
+        }));
+        saveNetworkPulse("sken funkcí");
+        return report;
+      }
+
+      function makeFunctionBackup(reason = "ruční záloha") {
+        const now = new Date().toISOString();
+        const storage = {};
+        uniqueStorageKeys().forEach((key) => {
+          const value = localStorage.getItem(key);
+          if (value !== null) storage[key] = value;
+        });
+
+        const backup = {
+          version: VERSION,
+          reason,
+          createdAt: now,
+          memory: clone(state.memory),
+          rooms: clone(state.rooms),
+          revia: clone(state.revia),
+          speech: clone(state.speech.slice(-120)),
+          storage
+        };
+
+        const previous = loadArray(FUNCTION_BACKUP_KEY, [], 4);
+        previous.push(backup);
+        const backups = previous.slice(-4);
+        localStorage.setItem(FUNCTION_BACKUP_KEY, JSON.stringify(backups));
+        localStorage.setItem(CHYBOZROUT_BACKUP_KEY, JSON.stringify(backup));
+        saveNetworkPulse("záloha funkcí");
+        return backup;
+      }
+
+      function repairFunctionBridge() {
+        const before = buildFunctionReport("sken před opravou");
+        const backup = makeFunctionBackup("záloha před bezpečnou opravou");
+        const repairs = [];
+
+        Object.keys(coreMap).forEach((coreId) => {
+          const current = state.memory.cores[coreId] || { slots: [] };
+          const slots = Array.isArray(current.slots) ? current.slots.slice(0, SLOT_LIMIT) : [];
+          while (slots.length < SLOT_LIMIT) slots.push(null);
+          state.memory.cores[coreId] = { ...current, slots };
+          if (!Array.isArray(current.slots) || current.slots.length !== SLOT_LIMIT) {
+            repairs.push(`Jádro ${coreMap[coreId].title}: sloty srovnané na ${SLOT_LIMIT}.`);
+          }
+        });
+
+        const hadRoomShapeIssue = !Array.isArray(state.rooms) || state.rooms.length !== ROOM_LIMIT;
+        if (!Array.isArray(state.rooms)) state.rooms = [];
+        while (state.rooms.length < ROOM_LIMIT) {
+          const fallbackRoom = defaultRooms[state.rooms.length] || { id: state.rooms.length + 1, title: "", glyph: "", note: "", linked: "", updatedAt: "" };
+          state.rooms.push(clone(fallbackRoom));
+        }
+        if (state.rooms.length > ROOM_LIMIT) state.rooms = state.rooms.slice(0, ROOM_LIMIT);
+        state.rooms = state.rooms.map((room, index) => ({
+          ...clone(defaultRooms[index]),
+          ...(room || {}),
+          id: index + 1
+        }));
+        if (hadRoomShapeIssue) {
+          repairs.push(`Prstenec pokojíčků srovnaný na ${ROOM_LIMIT}.`);
+        }
+
+        state.revia = {
+          ...clone(defaultRevia),
+          ...(state.revia || {}),
+          sourcePaths: [...new Set([...(defaultRevia.sourcePaths || []), ...((state.revia && state.revia.sourcePaths) || [])])]
+        };
+
+        if (!Array.isArray(state.speech)) state.speech = [];
+        state.speech = state.speech.slice(-120);
+
+        saveAll();
+        if (!localStorage.getItem(LEGACY_STORAGE_KEY)) {
+          localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(state.memory));
+          repairs.push("Starší paměťový klíč doplněný pro staré moduly.");
+        }
+
+        const after = buildFunctionReport("sken po opravě");
+        localStorage.setItem(CHYBOZROUT_KEY, JSON.stringify({
+          lastRepairAt: new Date().toISOString(),
+          backupAt: backup.createdAt,
+          before: before.summary,
+          after: after.summary,
+          repairs
+        }));
+        saveNetworkPulse("bezpečná oprava funkcí");
+        return { before, after, backup, repairs };
+      }
+
+      function renderFunctionReport(report) {
+        const issues = report.issues.map((issue) => `
+          <div class="log-item"><strong>${escapeHtml(issue.level)} · ${escapeHtml(issue.area)}</strong><br><small>${escapeHtml(issue.text)}</small></div>
+        `).join("");
+        const flow = report.moduleFlow.slice(0, 9).map((module) => `
+          <div class="log-item">${module.orderFromEnd}. ${escapeHtml(module.label)}<br><small>${escapeHtml(module.functions.join(" · "))}</small></div>
+        `).join("");
+
+        return `
+          <div class="status-row">
+            <div class="pill"><strong>${report.summary.modules}</strong>funkčních kostek</div>
+            <div class="pill"><strong>${report.summary.presentKeys}/${report.summary.storageKeys}</strong>klíče</div>
+            <div class="pill"><strong>${report.summary.fixableIssues}</strong>k opravě</div>
+            <div class="pill"><strong>${new Date(report.createdAt).toLocaleTimeString("cs-CZ")}</strong>sken</div>
+          </div>
+          <p>Most bere moduly od konce seznamu a skládá z nich jen malé schopnosti: čtení klíčů, sken, zálohu a jemnou opravu. Celé PWA se dovnitř netahá.</p>
+          <div class="actions">
+            <button class="primary" data-scan-functions type="button">Znovu skenovat</button>
+            <button class="ghost" data-backup-functions type="button">Udělat zálohu</button>
+            <button class="ghost" data-repair-functions type="button">Bezpečně opravit</button>
+          </div>
+          <p>Tok od konce repozitáře:</p>
+          <div class="log">${flow}</div>
+          <p>Nálezy:</p>
+          <div class="log">${issues || `<div class="log-item">Bez tvrdé chyby. Chybějící klíče jen čekají, až se moduly poprvé použijí.</div>`}</div>
+        `;
+      }
+
+      function openFunctionBridge(report = buildFunctionReport("otevření mostu")) {
+        openDrawer(
+          "Funkční most CHT",
+          "Krátké schopnosti z repozitáře bez přenášení celých PWA.",
+          renderFunctionReport(report)
+        );
+      }
+
       function openDrawer(title, lead, html) {
         drawerTitle.textContent = title;
         drawerLead.textContent = lead;
@@ -1670,6 +1927,7 @@
             <div class="actions">
               <button class="primary" data-open-revia type="button">Otevřít Revii</button>
               <button class="ghost" data-open-network type="button">Síť repozitáře</button>
+              <button class="ghost" data-open-function-bridge type="button">Funkce CHT</button>
               <button class="ghost" data-export-state type="button">Exportovat stav</button>
             </div>
             ${renderModuleCards({ limit: 6 })}
@@ -1722,9 +1980,11 @@
               <div class="pill"><strong>240</strong>pokojíčků</div>
               <div class="pill"><strong>iPhone 14</strong>optimalizace</div>
             </div>
-            <p>Viditelné odkazy otevírají jen moduly, které leží pod docs/. Revia je zatím napojená vnitřně, protože její hlavní zdroje jsou v repozitáři mimo webový kořen Pages.</p>
+            <p>Viditelné odkazy otevírají jen moduly, které leží pod docs/. Funkční most bere z repozitáře jen malé schopnosti: sken, zálohu, kontrolu klíčů a bezpečnou opravu.</p>
             <div class="actions">
               <button class="primary" data-check-modules type="button">Zkontrolovat dostupnost</button>
+              <button class="ghost" data-open-function-bridge type="button">Funkce CHT</button>
+              <button class="ghost" data-scan-functions type="button">Sken funkcí</button>
               <button class="ghost" data-open-revia type="button">Otevřít Revii</button>
             </div>
             ${renderModuleCards()}
@@ -1762,6 +2022,10 @@
         if (!module) return;
         if (module.id === "revia-master") {
           openRevia();
+          return;
+        }
+        if (module.id === "chybozrout") {
+          openFunctionBridge();
           return;
         }
 
@@ -2012,7 +2276,8 @@
           rooms: state.rooms,
           revia: state.revia,
           speech: state.speech,
-          modules: repoModules
+          modules: repoModules,
+          functionReport: safeParse(localStorage.getItem(FUNCTION_REPORT_KEY), null)
         };
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
         const url = URL.createObjectURL(blob);
@@ -2048,8 +2313,24 @@
           if (target.dataset.linkRevia) linkRoomToRevia(Number(target.dataset.linkRevia));
           if (target.dataset.openRevia !== undefined) openRevia();
           if (target.dataset.openNetwork !== undefined) openNetwork();
+          if (target.dataset.openFunctionBridge !== undefined) openFunctionBridge();
           if (target.dataset.openModule) openModule(target.dataset.openModule);
           if (target.dataset.checkModules !== undefined) void checkModules();
+          if (target.dataset.scanFunctions !== undefined) {
+            const report = buildFunctionReport("ruční sken z panelu");
+            showToast(report.summary.fixableIssues ? "Sken našel věci k opravě." : "Sken funkcí hotový.");
+            openFunctionBridge(report);
+          }
+          if (target.dataset.backupFunctions !== undefined) {
+            const backup = makeFunctionBackup("ruční záloha z panelu");
+            showToast(`Záloha mostu uložená ${new Date(backup.createdAt).toLocaleTimeString("cs-CZ")}.`);
+            openFunctionBridge(buildFunctionReport("sken po záloze"));
+          }
+          if (target.dataset.repairFunctions !== undefined) {
+            const result = repairFunctionBridge();
+            showToast(result.repairs.length ? "Bezpečná oprava hotová." : "Nebyla potřeba tvrdá oprava.");
+            openFunctionBridge(result.after);
+          }
           if (target.dataset.goModule) {
             const module = repoModules.find((item) => item.id === target.dataset.goModule);
             if (module?.entry) window.location.href = module.entry;
@@ -2158,6 +2439,30 @@
             openNetwork();
           },
           openModule
+        };
+
+        window.CHT360FunctionBridge = {
+          version: VERSION,
+          modules: clone(repoModules),
+          storageKeys: uniqueStorageKeys(),
+          scan(reason = "externí sken") {
+            return buildFunctionReport(reason);
+          },
+          backup(reason = "externí záloha") {
+            return makeFunctionBackup(reason);
+          },
+          repair() {
+            return repairFunctionBridge();
+          },
+          getLastReport() {
+            return safeParse(localStorage.getItem(FUNCTION_REPORT_KEY), null);
+          },
+          getLastBackup() {
+            return safeParse(localStorage.getItem(CHYBOZROUT_BACKUP_KEY), null);
+          },
+          open() {
+            openFunctionBridge();
+          }
         };
       }
 
