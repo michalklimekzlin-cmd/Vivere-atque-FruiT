@@ -11,6 +11,7 @@
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="stylesheet" href="./style.css">
   <title>CHT 360°‰ · Revia</title>
   <style>
     :root {
@@ -1251,6 +1252,9 @@
       const CHYBOZROUT_BACKUP_KEY = "cht360_samoopravovna_backup_v1";
       const API_REPAIR_KEY = "cht360_api_opravar_pack_v1";
       const TERRY_EGG_KEY = "cht360_terry_easter_egg_v1";
+      const BATOLE_KEY = "cht360_batole_v1";
+      const BATOLE_LEGACY_KEY = "BATOLE_SVET";
+      const BATOLE_EVENT = "cht.batole.changed";
       const NETWORK_EVENT = "cht360.network.changed";
 
       const coreMap = {
@@ -1357,6 +1361,15 @@
           note: "Chatové okno, signály a Chybožrout mluvy."
         },
         {
+          id: "cht360-batole",
+          label: "Batole •ア",
+          kind: "svět / zárodek",
+          entry: "./cht360-batole/",
+          source: "cht360-batole/",
+          storageKeys: ["cht360_batole_v1", "BATOLE_SVET"],
+          note: "Vědomě uložené kroky čtyř jader, čtené přes Batole most."
+        },
+        {
           id: "signal-360",
           label: "Signal 360°‰.",
           kind: "PWA modul",
@@ -1400,6 +1413,7 @@
       let activeRoomId = 1;
       let dragState = null;
       let terryEggTap = { count: 0, timer: 0 };
+      let batoleBridgeWriting = false;
 
       const state = {
         memory: loadMemory(),
@@ -1464,6 +1478,14 @@
         localStorage.setItem(ROOMS_KEY, JSON.stringify(state.rooms));
         localStorage.setItem(REVIA_KEY, JSON.stringify(state.revia));
         localStorage.setItem(SPEECH_KEY, JSON.stringify(state.speech.slice(-120)));
+        window.dispatchEvent(new CustomEvent("cht.memory.changed", {
+          detail: {
+            version: VERSION,
+            reason: "uložení indexu",
+            updatedAt: state.memory.updatedAt,
+            storageKey: STORAGE_KEY
+          }
+        }));
         saveNetworkPulse("uložení indexu");
         refreshCounts();
       }
@@ -1578,7 +1600,9 @@
           CHYBOZROUT_KEY,
           CHYBOZROUT_BACKUP_KEY,
           API_REPAIR_KEY,
-          TERRY_EGG_KEY
+          TERRY_EGG_KEY,
+          BATOLE_KEY,
+          BATOLE_LEGACY_KEY
         ];
         repoModules.forEach((module) => {
           module.storageKeys.forEach((key) => baseKeys.push(key));
@@ -1617,6 +1641,7 @@
         const now = new Date().toISOString();
         const issues = [];
         const actions = [];
+        const batole = readBatoleState();
         const moduleFlow = repoModules.slice().reverse().map((module, index) => ({
           orderFromEnd: index + 1,
           id: module.id,
@@ -1651,6 +1676,14 @@
           actions.push("Obnovit základní stav Revie.");
         }
 
+        if (!batole.steps.length) {
+          issues.push({
+            level: "info",
+            area: "Batole",
+            text: "Batole je napojené, ale zatím nemá uložené kroky v tomto prohlížeči."
+          });
+        }
+
         const storage = uniqueStorageKeys().map(readStorageShape);
         const missingModuleKeys = repoModules.flatMap((module) => {
           return module.storageKeys
@@ -1676,7 +1709,9 @@
             storageKeys: storage.length,
             presentKeys: storage.filter((item) => item.present).length,
             issues: issues.length,
-            fixableIssues: issues.filter((item) => item.level === "opravit").length
+            fixableIssues: issues.filter((item) => item.level === "opravit").length,
+            batoleSteps: batole.steps.length,
+            batoleLevel: batoleLevel(batole)
           },
           moduleFlow,
           storage,
@@ -1879,6 +1914,11 @@
             status: state.revia.status || "",
             mode: state.revia.mode || "",
             apiStatus: apiStatus.state || ""
+          },
+          batole: {
+            level: batoleLevel(readBatoleState()),
+            counts: batoleCounts(readBatoleState()),
+            steps: readBatoleState().steps.slice(-12)
           }
         };
       }
@@ -2024,6 +2064,155 @@
         return true;
       }
 
+      function defaultBatoleState() {
+        return {
+          version: 1,
+          kind: "CHT 360°‰ · Batole",
+          bornAt: new Date().toISOString(),
+          updatedAt: "",
+          steps: []
+        };
+      }
+
+      function normalizeBatoleState(value, source = BATOLE_KEY) {
+        const fallback = defaultBatoleState();
+        const raw = value && typeof value === "object" ? value : {};
+        const steps = Array.isArray(raw.steps) ? raw.steps : Array.isArray(raw) ? raw : [];
+        return {
+          ...fallback,
+          ...raw,
+          source,
+          steps: steps
+            .filter(Boolean)
+            .slice(-120)
+            .map((step, index) => ({
+              id: step.id || `batole-${index + 1}`,
+              core: ["earth", "language", "game", "control"].includes(step.core) ? step.core : "control",
+              title: String(step.title || step.name || `Krok ${index + 1}`).slice(0, 80),
+              text: String(step.text || step.content || step.note || "").slice(0, 900),
+              createdAt: step.createdAt || step.at || step.updatedAt || new Date().toISOString()
+            }))
+        };
+      }
+
+      function readBatoleState() {
+        if (window.CHTBatole?.getState) {
+          try {
+            return normalizeBatoleState(window.CHTBatole.getState(), "window.CHTBatole");
+          } catch {
+            // Pokračujeme přes localStorage.
+          }
+        }
+
+        const current = safeParse(localStorage.getItem(BATOLE_KEY), null);
+        if (current && typeof current === "object") return normalizeBatoleState(current, BATOLE_KEY);
+
+        const legacy = safeParse(localStorage.getItem(BATOLE_LEGACY_KEY), null);
+        if (legacy) return normalizeBatoleState(legacy, BATOLE_LEGACY_KEY);
+
+        return normalizeBatoleState(null, "čeká");
+      }
+
+      function batoleCounts(batole = readBatoleState()) {
+        const result = { earth: 0, language: 0, game: 0, control: 0 };
+        batole.steps.forEach((step) => {
+          result[step.core] = (result[step.core] || 0) + 1;
+        });
+        return result;
+      }
+
+      function batoleLevel(batole = readBatoleState()) {
+        return Math.floor((batole.steps.length || 0) / 4) + 1;
+      }
+
+      function writeBatoleState(batole, reason = "cht-save") {
+        batoleBridgeWriting = true;
+        const next = normalizeBatoleState({
+          ...batole,
+          updatedAt: new Date().toISOString()
+        }, BATOLE_KEY);
+        localStorage.setItem(BATOLE_KEY, JSON.stringify(next));
+        localStorage.setItem(BATOLE_LEGACY_KEY, JSON.stringify({
+          updatedAt: next.updatedAt,
+          level: batoleLevel(next),
+          counts: batoleCounts(next),
+          steps: next.steps.slice(-24)
+        }));
+        const detail = { ...next, level: batoleLevel(next), counts: batoleCounts(next), reason };
+        window.dispatchEvent(new CustomEvent(BATOLE_EVENT, { detail }));
+        batoleBridgeWriting = false;
+        saveNetworkPulse("batole most");
+        return next;
+      }
+
+      function addBatoleStep(core, title, text) {
+        const batole = readBatoleState();
+        const step = {
+          id: `cht-batole-${Date.now()}`,
+          core: ["earth", "language", "game", "control"].includes(core) ? core : "control",
+          title: String(title || "Krok z CHT").trim().slice(0, 80),
+          text: String(text || "").trim().slice(0, 900),
+          createdAt: new Date().toISOString(),
+          source: "CHT 360°‰"
+        };
+        if (!step.text) return null;
+        batole.steps.push(step);
+        return writeBatoleState(batole, "cht-add-step");
+      }
+
+      function renderBatolePanel(batole = readBatoleState(), statusText = "") {
+        const counts = batoleCounts(batole);
+        const latest = batole.steps.slice(-5).reverse().map((step) => `
+          <div class="log-item"><strong>${escapeHtml(step.title)}</strong><br><small>${escapeHtml(coreMap[step.core]?.title || step.core)} · ${escapeHtml(step.text || "bez textu")}</small></div>
+        `).join("");
+        const hasSteps = batole.steps.length > 0;
+        return `
+          <div class="status-row">
+            <div class="pill"><strong>${batole.steps.length}</strong>kroků</div>
+            <div class="pill"><strong>${batoleLevel(batole)}</strong>úroveň</div>
+            <div class="pill"><strong>${escapeHtml(batole.source)}</strong>zdroj</div>
+            <div class="pill"><strong>${hasSteps ? "žije" : "čeká"}</strong>stav</div>
+          </div>
+          <p>Batole je napojené jako lehký svět: CHT čte jeho kroky z <code>${BATOLE_KEY}</code>, umí mu předat nový krok a drží starší zrcadlo <code>${BATOLE_LEGACY_KEY}</code> pro Hlavouna/Pikoše.</p>
+          <div class="status-row">
+            <div class="pill"><strong>${counts.earth}</strong>Země</div>
+            <div class="pill"><strong>${counts.language}</strong>Jazyk</div>
+            <div class="pill"><strong>${counts.game}</strong>Hra</div>
+            <div class="pill"><strong>${counts.control}</strong>Řízení</div>
+          </div>
+          ${statusText ? `<div class="log"><div class="log-item">${escapeHtml(statusText)}</div></div>` : ""}
+          <label>Jádro pro krok
+            <select id="batoleCore">
+              <option value="earth">Země</option>
+              <option value="language">Jazyk</option>
+              <option value="game">Hra</option>
+              <option value="control" selected>Řízení</option>
+            </select>
+          </label>
+          <label>Název kroku
+            <input id="batoleTitle" maxlength="80" placeholder="Krátký název kroku">
+          </label>
+          <label>Stopa pro Batole
+            <textarea id="batoleText" maxlength="900" placeholder="Jedna věta, pravidlo, nápad nebo skutečný krok…"></textarea>
+          </label>
+          <div class="actions">
+            <button class="primary" data-save-batole-step type="button">Předat Batoleti</button>
+            <button class="ghost" data-sync-batole type="button">Obnovit stav</button>
+            <button class="ghost" data-go-batole type="button">Otevřít Batole</button>
+          </div>
+          <p>Poslední stopy:</p>
+          <div class="log">${latest || `<div class="log-item">Zatím tu nejsou uložené kroky Batoleti.</div>`}</div>
+        `;
+      }
+
+      function openBatole(statusText = "") {
+        openDrawer(
+          "Batole •ア",
+          "Lehký svět napojený na čtyři jádra CHT přes localStorage a událost.",
+          renderBatolePanel(readBatoleState(), statusText)
+        );
+      }
+
       function openDrawer(title, lead, html) {
         drawerTitle.textContent = title;
         drawerLead.textContent = lead;
@@ -2124,6 +2313,7 @@
         const used = Object.keys(coreMap).reduce((sum, id) => {
           return sum + (state.memory.cores[id]?.slots || []).filter(Boolean).length;
         }, 0);
+        const batole = readBatoleState();
         openDrawer(
           "CHT 360°‰.",
           "Střed drží jádra, iPhone vrstvu, prstenec pokojíčků a Revii v jedné scéně.",
@@ -2132,11 +2322,13 @@
               <div class="pill"><strong>${used}/${SLOT_LIMIT * Object.keys(coreMap).length}</strong>paměť jader</div>
               <div class="pill"><strong>${VISIBLE_ROOMS}/240</strong>viditelné pokojíčky</div>
               <div class="pill"><strong>${state.revia.connected ? "Ano" : "Ne"}</strong>Revia</div>
+              <div class="pill"><strong>${batole.steps.length}</strong>Batole</div>
               <div class="pill"><strong>${repoModules.length}</strong>napojené kostry</div>
             </div>
             <p>Tento index je postavený podle fotky: levá síť s iPhonem, střed CHT a pravý 3D prstenec pokojíčků.</p>
             <div class="actions">
               <button class="primary" data-open-revia type="button">Otevřít Revii</button>
+              <button class="ghost" data-open-batole type="button">Batole</button>
               <button class="ghost" data-open-network type="button">Síť repozitáře</button>
               <button class="ghost" data-open-function-bridge type="button">Funkce CHT</button>
               <button class="ghost" data-export-state type="button">Exportovat stav</button>
@@ -2181,6 +2373,7 @@
 
       function openNetwork() {
         saveNetworkPulse("otevření sítě");
+        const batole = readBatoleState();
         openDrawer(
           "Síť repozitáře",
           "Kostry z hlavního repozitáře jsou připojené do CHT jako moduly a úložné klíče.",
@@ -2189,11 +2382,13 @@
               <div class="pill"><strong>${repoModules.length}</strong>modulů</div>
               <div class="pill"><strong>240</strong>slotů jader</div>
               <div class="pill"><strong>240</strong>pokojíčků</div>
+              <div class="pill"><strong>${batole.steps.length}</strong>Batole</div>
               <div class="pill"><strong>iPhone 14</strong>optimalizace</div>
             </div>
             <p>Viditelné odkazy otevírají jen moduly, které leží pod docs/. Funkční most bere z repozitáře jen malé schopnosti: sken, zálohu, kontrolu klíčů a bezpečnou opravu.</p>
             <div class="actions">
               <button class="primary" data-check-modules type="button">Zkontrolovat dostupnost</button>
+              <button class="ghost" data-open-batole type="button">Batole most</button>
               <button class="ghost" data-open-function-bridge type="button">Funkce CHT</button>
               <button class="ghost" data-open-api-repair type="button">Terry API</button>
               <button class="ghost" data-scan-functions type="button">Sken funkcí</button>
@@ -2208,6 +2403,17 @@
         const checks = await Promise.all(repoModules.map(async (module) => {
           if (!module.entry || module.entry.endsWith(".js")) {
             return { module, ok: module.id === "revia-master", note: module.id === "revia-master" ? "vnitřní můstek" : "zdrojový modul" };
+          }
+          if (module.id === "cht360-batole") {
+            const batole = readBatoleState();
+            const hasBridge = localStorage.getItem(BATOLE_KEY) !== null || localStorage.getItem(BATOLE_LEGACY_KEY) !== null;
+            return {
+              module,
+              ok: hasBridge || batole.steps.length > 0,
+              note: hasBridge
+                ? "localStorage most aktivní"
+                : "v repu je v kořeni; pro Pages ho dej do docs/cht360-batole/"
+            };
           }
 
           try {
@@ -2234,6 +2440,10 @@
         if (!module) return;
         if (module.id === "revia-master") {
           openRevia();
+          return;
+        }
+        if (module.id === "cht360-batole") {
+          openBatole();
           return;
         }
         if (module.id === "chybozrout") {
@@ -2492,6 +2702,7 @@
           rooms: state.rooms,
           revia: state.revia,
           speech: state.speech,
+          batole: readBatoleState(),
           modules: repoModules,
           functionReport: safeParse(localStorage.getItem(FUNCTION_REPORT_KEY), null),
           apiRepairPacks: safeParse(localStorage.getItem(API_REPAIR_KEY), [])
@@ -2534,9 +2745,29 @@
           if (target.dataset.openNetwork !== undefined) openNetwork();
           if (target.dataset.openFunctionBridge !== undefined) openFunctionBridge();
           if (target.dataset.openApiRepair !== undefined) openApiRepairPanel();
+          if (target.dataset.openBatole !== undefined) openBatole();
           if (target.dataset.openModule) openModule(target.dataset.openModule);
           if (target.dataset.checkModules !== undefined) void checkModules();
           if (target.dataset.runApiRepair) void runApiRepair(target.dataset.runApiRepair);
+          if (target.dataset.syncBatole !== undefined) {
+            showToast("Batole stav obnovený.");
+            openBatole("Stav Batoleti byl znovu načtený z mostu.");
+          }
+          if (target.dataset.saveBatoleStep !== undefined) {
+            const core = document.getElementById("batoleCore")?.value || "control";
+            const title = document.getElementById("batoleTitle")?.value || "Krok z CHT";
+            const text = document.getElementById("batoleText")?.value || "";
+            const saved = addBatoleStep(core, title, text);
+            if (!saved) {
+              showToast("Napiš stopu pro Batole.");
+              return;
+            }
+            showToast("Krok předaný Batoleti.");
+            openBatole("Krok byl uložený do Batole mostu.");
+          }
+          if (target.dataset.goBatole !== undefined) {
+            window.location.href = "./cht360-batole/";
+          }
           if (target.dataset.saveRepairControl !== undefined) {
             const pack = getLastApiRepairPack();
             if (!pack) {
@@ -2702,12 +2933,42 @@
             openFunctionBridge();
           }
         };
+
+        window.CHT360BatoleBridge = {
+          version: VERSION,
+          storageKeys: [BATOLE_KEY, BATOLE_LEGACY_KEY],
+          getState() {
+            return readBatoleState();
+          },
+          addStep(core, title, text) {
+            return addBatoleStep(core, title, text);
+          },
+          counts() {
+            return batoleCounts(readBatoleState());
+          },
+          open() {
+            openBatole();
+          }
+        };
+      }
+
+      function bindBatoleBridge() {
+        window.addEventListener(BATOLE_EVENT, (event) => {
+          if (batoleBridgeWriting) return;
+          if (!event.detail || typeof event.detail !== "object") return;
+          writeBatoleState(event.detail, event.detail.reason || "batole-event");
+        });
+        window.addEventListener("message", (event) => {
+          if (event.data?.type !== BATOLE_EVENT || !event.data.detail) return;
+          writeBatoleState(event.data.detail, event.data.detail.reason || "batole-message");
+        });
       }
 
       function boot() {
         setAppHeight();
         bindActions();
         bindRingDrag();
+        bindBatoleBridge();
         refreshCounts();
         renderRooms();
         exposeBridge();
