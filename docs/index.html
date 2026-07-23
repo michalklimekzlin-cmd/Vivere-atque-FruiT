@@ -1249,6 +1249,8 @@
       const FUNCTION_BACKUP_KEY = "cht360_funkcni_most_backup_v1";
       const CHYBOZROUT_KEY = "cht360_chybozrout_v2";
       const CHYBOZROUT_BACKUP_KEY = "cht360_samoopravovna_backup_v1";
+      const API_REPAIR_KEY = "cht360_api_opravar_pack_v1";
+      const TERRY_EGG_KEY = "cht360_terry_easter_egg_v1";
       const NETWORK_EVENT = "cht360.network.changed";
 
       const coreMap = {
@@ -1397,6 +1399,7 @@
       let ringRotation = -18;
       let activeRoomId = 1;
       let dragState = null;
+      let terryEggTap = { count: 0, timer: 0 };
 
       const state = {
         memory: loadMemory(),
@@ -1573,7 +1576,9 @@
           FUNCTION_REPORT_KEY,
           FUNCTION_BACKUP_KEY,
           CHYBOZROUT_KEY,
-          CHYBOZROUT_BACKUP_KEY
+          CHYBOZROUT_BACKUP_KEY,
+          API_REPAIR_KEY,
+          TERRY_EGG_KEY
         ];
         repoModules.forEach((module) => {
           module.storageKeys.forEach((key) => baseKeys.push(key));
@@ -1797,6 +1802,7 @@
             <button class="primary" data-scan-functions type="button">Znovu skenovat</button>
             <button class="ghost" data-backup-functions type="button">Udělat zálohu</button>
             <button class="ghost" data-repair-functions type="button">Bezpečně opravit</button>
+            <button class="ghost" data-open-api-repair type="button">Terry API</button>
           </div>
           <p>Tok od konce repozitáře:</p>
           <div class="log">${flow}</div>
@@ -1811,6 +1817,211 @@
           "Krátké schopnosti z repozitáře bez přenášení celých PWA.",
           renderFunctionReport(report)
         );
+      }
+
+      function getLastApiRepairPack() {
+        const packs = loadArray(API_REPAIR_KEY, [], 8).filter(Boolean);
+        return packs.at(-1) || null;
+      }
+
+      function buildApiRepairContext(goal = "Najdi bezpečné opravy pro CHT 360°‰.", backupAt = "") {
+        const report = buildFunctionReport("AI opravářský sken");
+        const coreUsage = Object.fromEntries(Object.entries(coreMap).map(([coreId, core]) => {
+          const slots = state.memory.cores[coreId]?.slots || [];
+          return [coreId, {
+            title: core.title,
+            used: slots.filter(Boolean).length,
+            capacity: SLOT_LIMIT
+          }];
+        }));
+        const roomUsage = {
+          used: state.rooms.filter((room) => room?.title || room?.glyph || room?.note || room?.linked).length,
+          capacity: ROOM_LIMIT,
+          linked: state.rooms.filter((room) => room?.linked).map((room) => ({ id: room.id, linked: room.linked })).slice(0, 16)
+        };
+        const apiStatus = loadObject(REVIA_API_STATUS_KEY, { state: "čeká" });
+
+        return {
+          goal,
+          source: "Terryho easter egg · API Opravář",
+          createdAt: new Date().toISOString(),
+          backupAt,
+          page: {
+            title: document.title,
+            url: location.href,
+            endpointConfigured: Boolean(getReviaApiEndpoint())
+          },
+          report: {
+            summary: report.summary,
+            issues: report.issues,
+            actions: report.actions,
+            missingModuleKeys: report.missingModuleKeys.slice(0, 40)
+          },
+          modules: repoModules.map((module) => ({
+            id: module.id,
+            label: module.label,
+            kind: module.kind,
+            entry: module.entry || "",
+            source: module.source || "",
+            storageKeys: module.storageKeys
+          })),
+          storage: report.storage.map((item) => ({
+            key: item.key,
+            present: item.present,
+            bytes: item.bytes,
+            type: item.type,
+            validJson: item.validJson
+          })),
+          coreUsage,
+          roomUsage,
+          revia: {
+            connected: Boolean(state.revia.connected),
+            status: state.revia.status || "",
+            mode: state.revia.mode || "",
+            apiStatus: apiStatus.state || ""
+          }
+        };
+      }
+
+      function repairGoal(kind) {
+        const goals = {
+          local: "Z lokálního skenu navrhni nejbezpečnější opravy pro CHT 360°‰. Zaměř se na paměť, sloty, pokojíčky, klíče a napojení Revie.",
+          repo: "Navrhni repo opravný balíček pro docs/index.html, moduly, manifesty, service workery, cesty a UTF-8. Neprováděj zápis, připrav plán.",
+          pr: "Připrav stručný PR plán: větev, commit message, soubory, pořadí změn a kontroly po nahrání."
+        };
+        return goals[kind] || goals.local;
+      }
+
+      function storeApiRepairPack(reply, context, api = {}) {
+        const pack = {
+          id: `api-oprava-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+          goal: context.goal,
+          reply,
+          model: api.model || "",
+          usage: api.usage || null,
+          summary: context.report?.summary || {},
+          backupAt: context.backupAt || ""
+        };
+        const packs = loadArray(API_REPAIR_KEY, [], 8).filter(Boolean);
+        packs.push(pack);
+        localStorage.setItem(API_REPAIR_KEY, JSON.stringify(packs.slice(-8)));
+        localStorage.setItem(TERRY_EGG_KEY, JSON.stringify({
+          unlockedAt: new Date().toISOString(),
+          lastPackId: pack.id,
+          mode: "API Opravář"
+        }));
+        saveRepairPackToControl(pack, true);
+        return pack;
+      }
+
+      function saveRepairPackToControl(pack, silent = false) {
+        if (!pack) return;
+        const slots = state.memory.cores.control.slots;
+        const targetIndex = Math.min(slots.findIndex((slot) => !slot), slots.length);
+        const safeIndex = targetIndex >= 0 && targetIndex < SLOT_LIMIT ? targetIndex : Math.min(slots.length, SLOT_LIMIT - 1);
+        slots[safeIndex] = {
+          id: safeIndex + 1,
+          text: `Terry API Opravář\n${pack.goal}\n\n${String(pack.reply || "").slice(0, 2600)}`,
+          source: "Terry API Opravář",
+          updatedAt: new Date().toISOString()
+        };
+        saveAll();
+        if (!silent) showToast("Opravný balíček uložený do Řízení.");
+      }
+
+      function renderApiRepairPanel(pack, context, statusText = "") {
+        const endpoint = getReviaApiEndpoint();
+        const apiStatus = loadObject(REVIA_API_STATUS_KEY, { state: endpoint ? "připraveno" : "čeká na backend" });
+        const summary = pack?.summary || context?.report?.summary || {};
+        return `
+          <div class="status-row">
+            <div class="pill"><strong>${endpoint ? "Ano" : "Ne"}</strong>API adresa</div>
+            <div class="pill"><strong>${escapeHtml(apiStatus.state || "čeká")}</strong>stav</div>
+            <div class="pill"><strong>${summary.fixableIssues ?? 0}</strong>k opravě</div>
+            <div class="pill"><strong>${pack ? "uložený" : "čeká"}</strong>balíček</div>
+          </div>
+          <p>Tohle je skrytý API opravářský režim. Revia tady nemluví jako chat, ale dostane lokální sken CHT a vrátí opravný balíček pro další bezpečný krok.</p>
+          <div class="actions">
+            <button class="primary" data-run-api-repair="local" type="button">AI oprav CHT</button>
+            <button class="ghost" data-run-api-repair="repo" type="button">AI plán pro repo</button>
+            <button class="ghost" data-run-api-repair="pr" type="button">PR návod</button>
+            <button class="ghost" data-open-function-bridge type="button">Zpět na funkce</button>
+          </div>
+          ${statusText ? `<div class="log"><div class="log-item">${escapeHtml(statusText)}</div></div>` : ""}
+          <label>Poslední opravný balíček
+            <textarea readonly placeholder="Tady se objeví odpověď API opraváře.">${pack ? escapeHtml(pack.reply) : ""}</textarea>
+          </label>
+          <div class="actions">
+            <button class="ghost" data-save-repair-control type="button" ${pack ? "" : "disabled"}>Uložit do Řízení</button>
+            <button class="ghost" data-export-state type="button">Exportovat stav</button>
+          </div>
+        `;
+      }
+
+      function openApiRepairPanel(pack = getLastApiRepairPack(), context = null, statusText = "") {
+        openDrawer(
+          "Terry API Opravář",
+          "Easter egg: API režim pro sken, návrh oprav a bezpečný balíček.",
+          renderApiRepairPanel(pack, context, statusText)
+        );
+      }
+
+      async function runApiRepair(kind = "local") {
+        saveReviaApiEndpoint(true);
+        if (!getReviaApiEndpoint()) {
+          showToast("Nejdřív vlož API adresu Revie.");
+          openIphone();
+          return null;
+        }
+
+        const backup = makeFunctionBackup("záloha před Terry API Opravářem");
+        const context = buildApiRepairContext(repairGoal(kind), backup.createdAt);
+        openApiRepairPanel(null, context, "API opravář připravuje balíček. Nezapisuje do GitHubu, jen navrhuje bezpečný postup.");
+
+        const api = await askReviaApi(
+          "Připrav opravný balíček pro CHT 360°‰ podle přiloženého skenu. Drž se bezpečného postupu a nepiš, že jsi změny provedla.",
+          "Terry API Opravář",
+          {
+            intent: "repair",
+            payload: context,
+            messages: [
+              {
+                role: "user",
+                content: "Připrav opravný balíček. Nechci volný chat, chci diagnostiku a postup."
+              }
+            ]
+          }
+        );
+
+        if (!api?.reply) {
+          openApiRepairPanel(null, context, "API teď neodpovědělo. Lokální záloha a sken zůstaly uložené.");
+          return null;
+        }
+
+        const pack = storeApiRepairPack(api.reply, context, api);
+        showToast("Terry API Opravář vrátil balíček.");
+        openApiRepairPanel(pack);
+        return pack;
+      }
+
+      function registerTerryEggTap() {
+        clearTimeout(terryEggTap.timer);
+        terryEggTap.count += 1;
+        terryEggTap.timer = setTimeout(() => {
+          terryEggTap.count = 0;
+        }, 3200);
+
+        if (terryEggTap.count < 7) return false;
+
+        terryEggTap.count = 0;
+        localStorage.setItem(TERRY_EGG_KEY, JSON.stringify({
+          unlockedAt: new Date().toISOString(),
+          mode: "Terry API Opravář"
+        }));
+        showToast("Terry API Opravář odemčený.");
+        openApiRepairPanel();
+        return true;
       }
 
       function openDrawer(title, lead, html) {
@@ -1984,6 +2195,7 @@
             <div class="actions">
               <button class="primary" data-check-modules type="button">Zkontrolovat dostupnost</button>
               <button class="ghost" data-open-function-bridge type="button">Funkce CHT</button>
+              <button class="ghost" data-open-api-repair type="button">Terry API</button>
               <button class="ghost" data-scan-functions type="button">Sken funkcí</button>
               <button class="ghost" data-open-revia type="button">Otevřít Revii</button>
             </div>
@@ -2147,7 +2359,7 @@
         ].filter((item) => item.content && item.content.trim()).slice(-18);
       }
 
-      async function askReviaApi(message, source = "CHT") {
+      async function askReviaApi(message, source = "CHT", options = {}) {
         const endpoint = getReviaApiEndpoint();
         if (!endpoint) {
           localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({ state: "čeká na backend", at: new Date().toISOString() }));
@@ -2161,9 +2373,12 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               message,
-              messages: buildReviaMessages(message),
+              messages: options.messages || buildReviaMessages(message),
               mode: getReviaMode(),
               source,
+              intent: options.intent || "chat",
+              payload: options.payload || null,
+              persona: options.persona || "",
               modules: repoModules.map((module) => ({
                 id: module.id,
                 label: module.label,
@@ -2190,6 +2405,7 @@
 
           return {
             reply,
+            intent: data.intent || options.intent || "chat",
             mode: data.mode || getReviaMode(),
             model: data.model || "",
             usage: data.usage || null
@@ -2277,7 +2493,8 @@
           revia: state.revia,
           speech: state.speech,
           modules: repoModules,
-          functionReport: safeParse(localStorage.getItem(FUNCTION_REPORT_KEY), null)
+          functionReport: safeParse(localStorage.getItem(FUNCTION_REPORT_KEY), null),
+          apiRepairPacks: safeParse(localStorage.getItem(API_REPAIR_KEY), [])
         };
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
         const url = URL.createObjectURL(blob);
@@ -2300,7 +2517,9 @@
         document.querySelectorAll("[data-open-core]").forEach((button) => {
           button.addEventListener("click", () => openCore(button.dataset.openCore));
         });
-        centerButton.addEventListener("click", openCenter);
+        centerButton.addEventListener("click", () => {
+          if (!registerTerryEggTap()) openCenter();
+        });
         iphoneButton.addEventListener("click", openIphone);
         orbitButton.addEventListener("click", openNetwork);
         closeDrawer.addEventListener("click", closePanel);
@@ -2314,8 +2533,18 @@
           if (target.dataset.openRevia !== undefined) openRevia();
           if (target.dataset.openNetwork !== undefined) openNetwork();
           if (target.dataset.openFunctionBridge !== undefined) openFunctionBridge();
+          if (target.dataset.openApiRepair !== undefined) openApiRepairPanel();
           if (target.dataset.openModule) openModule(target.dataset.openModule);
           if (target.dataset.checkModules !== undefined) void checkModules();
+          if (target.dataset.runApiRepair) void runApiRepair(target.dataset.runApiRepair);
+          if (target.dataset.saveRepairControl !== undefined) {
+            const pack = getLastApiRepairPack();
+            if (!pack) {
+              showToast("Zatím není co uložit.");
+              return;
+            }
+            saveRepairPackToControl(pack, false);
+          }
           if (target.dataset.scanFunctions !== undefined) {
             const report = buildFunctionReport("ruční sken z panelu");
             showToast(report.summary.fixableIssues ? "Sken našel věci k opravě." : "Sken funkcí hotový.");
@@ -2454,8 +2683,17 @@
           repair() {
             return repairFunctionBridge();
           },
+          async askApiRepair(kind = "local") {
+            return runApiRepair(kind);
+          },
+          openApiRepair() {
+            openApiRepairPanel();
+          },
           getLastReport() {
             return safeParse(localStorage.getItem(FUNCTION_REPORT_KEY), null);
+          },
+          lastApiRepairPack() {
+            return getLastApiRepairPack();
           },
           getLastBackup() {
             return safeParse(localStorage.getItem(CHYBOZROUT_BACKUP_KEY), null);
