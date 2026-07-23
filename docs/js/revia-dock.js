@@ -1,7 +1,23 @@
 "use strict";
 
+import {
+  CHT_PROJECT_CONTEXT,
+  REVIA_REPOSITORY_MEMORY,
+  REVIA_GLYPH_MEMORY,
+  findProjectContext,
+  formatConversationMilestones,
+  formatGlyphMemory,
+  formatProjectHistory,
+  formatRepositoryLinks,
+  formatRepositoryMap,
+  formatRepositoryPlans,
+  searchRepositoryPaths
+} from "./revia-context.js";
+
 const STORAGE_KEY = "cht360_revia_chat_v1";
+const ACTIVITY_KEY = "cht360_revia_activity_v1";
 const MAX_HISTORY = 80;
+const MAX_ACTIVITY = 60;
 
 const ui = {
   open: document.getElementById("openReviaPanel"),
@@ -16,6 +32,22 @@ const ui = {
 };
 
 let state = loadState();
+
+function loadActivity() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(ACTIVITY_KEY) || "[]");
+    return Array.isArray(saved)
+      ? saved
+        .filter(item => item && typeof item.text === "string" && typeof item.at === "string")
+        .slice(-MAX_ACTIVITY)
+      : [];
+  } catch (error) {
+    console.warn("[Revia] Deník se nepodařilo načíst.", error);
+    return [];
+  }
+}
+
+let activity = loadActivity();
 
 function loadState() {
   try {
@@ -36,7 +68,7 @@ function loadState() {
     mode: "revia",
     messages: [{
       role: "revia",
-      text: "Jsem Revia v oběhu CHT 360°‰. Můžu otevřít Paměť, Glyph dílnu, pokojíčky nebo nastavení iPhonu."
+      text: "Jsem Revia v oběhu CHT 360°‰. Mám mapu projektu i tohoto repozitáře. Můžu otevřít Paměť, Glyph dílnu, pokojíčky nebo iPhone; napiš také historie nebo mapa repozitáře."
     }]
   };
 }
@@ -55,6 +87,40 @@ function saveState() {
 
 function setState(text) {
   if (ui.state) ui.state.textContent = text;
+}
+
+function saveActivity() {
+  try {
+    localStorage.setItem(ACTIVITY_KEY, JSON.stringify(activity.slice(-MAX_ACTIVITY)));
+  } catch (error) {
+    console.warn("[Revia] Deník se nepodařilo uložit.", error);
+  }
+}
+
+function rememberActivity(kind, text) {
+  if (typeof text !== "string" || !text.trim()) return;
+  const last = activity.at(-1);
+  if (last?.kind === kind && last.text === text && Date.now() - Date.parse(last.at) < 1500) return;
+
+  activity.push({
+    kind,
+    text: text.trim().slice(0, 360),
+    at: new Date().toISOString()
+  });
+  activity = activity.slice(-MAX_ACTIVITY);
+  saveActivity();
+}
+
+function formatRecentActivity() {
+  if (!activity.length) return "V tomto zařízení zatím není žádná nová událost. Projektovou mapu už ale znám.";
+
+  return [
+    "Poslední dění v tomto zařízení:",
+    ...activity.slice(-5).reverse().map(item => {
+      const time = new Intl.DateTimeFormat("cs-CZ", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" }).format(new Date(item.at));
+      return `• ${time} — ${item.text}`;
+    })
+  ].join("\n");
 }
 
 function render() {
@@ -93,6 +159,32 @@ function replyFor(message) {
   const text = normalise(message);
   const controlled = state.mode === "kontrola";
 
+  if (/(historie|co se delalo|milnik|vyvoj|posledni zmen|co umis)/.test(text)) {
+    return `${formatProjectHistory()}\n\n${formatConversationMilestones()}\n\n${formatRecentActivity()}`;
+  }
+  if (/(vafit|ascii|glyph.*znamena|znamena.*glyph|‰|٩|נֶ|✧|╦|╤|_;|`)/.test(message) || /(vafit|ascii|glyph.*znamena|znamena.*glyph)/.test(text)) {
+    return formatGlyphMemory(message);
+  }
+  if (/(odkaz|url|github|github pages|vercel|netlify|hosting|server)/.test(text)) {
+    return formatRepositoryLinks();
+  }
+  if (/(plan|roadmap|budouc|otevren|co chybi|dalsi krok)/.test(text)) {
+    return formatRepositoryPlans();
+  }
+  if (/(mapa.*repo|repozitar|slozk|cela aplikace|architektur)/.test(text)) {
+    return formatRepositoryMap();
+  }
+  if (/(co je|najdi|kde je|modul)/.test(text)) {
+    const modules = findProjectContext(message);
+    if (modules.length) {
+      return ["V projektové mapě jsem našla:", ...modules.slice(0, 4).map(item => `• ${item.name} (${item.path}) — ${item.role}`)].join("\n");
+    }
+
+    const paths = searchRepositoryPaths(message);
+    if (paths.length) {
+      return ["V atlasu repozitáře jsem našla:", ...paths.map(path => `• ${path}`)].join("\n");
+    }
+  }
   if (/(pamet|slot|jadro|uloz)/.test(text)) {
     return "Paměť je propojená. Otevřu první jádro; uložení zůstává v místním úložišti zařízení.";
   }
@@ -128,21 +220,55 @@ function closePanel() {
 }
 
 function runAction(action) {
+  if (action === "history") {
+    rememberActivity("revia", "Revia otevřela projektovou paměť.");
+    push("revia", formatProjectHistory());
+    setState("Projektová paměť je otevřená.");
+    return;
+  }
+  if (action === "map") {
+    rememberActivity("revia", "Revia otevřela mapu repozitáře.");
+    push("revia", formatRepositoryMap());
+    setState("Mapa repozitáře je otevřená.");
+    return;
+  }
+  if (action === "plans") {
+    rememberActivity("revia", "Revia otevřela plány repozitáře.");
+    push("revia", formatRepositoryPlans());
+    setState("Plány repozitáře jsou otevřené.");
+    return;
+  }
+  if (action === "links") {
+    rememberActivity("revia", "Revia otevřela provozní odkazy.");
+    push("revia", formatRepositoryLinks());
+    setState("Provozní odkazy jsou otevřené.");
+    return;
+  }
+  if (action === "vafit") {
+    rememberActivity("revia", "Revia otevřela pracovní slovník VaFiT a Glyphů.");
+    push("revia", formatGlyphMemory());
+    setState("Pracovní slovník VaFiT je otevřený a funguje offline.");
+    return;
+  }
   if (action === "memory") {
     window.dispatchEvent(new Event("cht.memory.open"));
+    rememberActivity("navigation", "Otevřena Paměť CHT.");
     setState("Otevírám Paměť CHT.");
     return;
   }
   if (action === "iphone") {
     window.dispatchEvent(new Event("cht.phone.open"));
+    rememberActivity("navigation", "Otevřeno nastavení iPhonu 14.");
     setState("Otevírám nastavení iPhonu 14.");
     return;
   }
   if (action === "glyph") {
+    rememberActivity("navigation", "Přechod do Glyph dílny.");
     window.location.assign("./glyph-cht-360/");
     return;
   }
   if (action === "rooms") {
+    rememberActivity("navigation", "Přechod do Glyph pokojíčků.");
     window.location.assign("./glyph-pokojicku-cht-360/");
   }
 }
@@ -179,7 +305,36 @@ document.querySelectorAll("[data-revia-action]").forEach(button => {
 window.addEventListener("cht.memory.changed", event => {
   const detail = event.detail || {};
   const place = detail.coreId ? " v jádru " + detail.coreId : "";
+  const slot = detail.slotId ? ", slot " + detail.slotId : "";
+  rememberActivity("memory", "Paměť byla upravena" + place + slot + ".");
   setState("Paměť byla právě upravena" + place + ".");
+});
+
+window.addEventListener("cht.track.changed", event => {
+  const reason = event.detail?.reason ? " (" + event.detail.reason + ")" : "";
+  rememberActivity("track", "Změněn model oběhu" + reason + ".");
+});
+
+window.addEventListener("cht.chybozrout.completed", event => {
+  const failures = Number(event.detail?.failures || 0);
+  rememberActivity("diagnostic", failures ? `Chybožrout dokončil kontrolu: ${failures} problémů.` : "Chybožrout dokončil kontrolu bez problémů.");
+  setState(failures ? `Chybožrout našel ${failures} problémů.` : "Chybožrout potvrdil stav bez problémů.");
+});
+
+window.addEventListener("cht.chybozrout.backup", () => {
+  rememberActivity("diagnostic", "Chybožrout vytvořil bezpečnou zálohu Paměti.");
+});
+
+window.addEventListener("cht.chybozrout.repaired", () => {
+  rememberActivity("diagnostic", "Chybožrout dokončil bezpečnou samoopravu.");
+});
+
+window.addEventListener("offline", () => {
+  setState("Revia je offline. Atlas, Glyphy i místní deník zůstávají dostupné.");
+});
+
+window.addEventListener("online", () => {
+  setState("Připojení je zpět. Revia dál používá místní offline paměť.");
 });
 
 window.addEventListener("cht.revia.message", event => {
@@ -193,7 +348,15 @@ window.CHT360Revia = Object.freeze({
   say: text => {
     if (typeof text === "string" && text.trim()) push("revia", text.trim());
   },
-  getHistory: () => state.messages.slice()
+  getHistory: () => state.messages.slice(),
+  getActivity: () => activity.slice(),
+  getProjectContext: () => CHT_PROJECT_CONTEXT,
+  getRepositoryMemory: () => REVIA_REPOSITORY_MEMORY,
+  getGlyphMemory: () => REVIA_GLYPH_MEMORY,
+  showProjectHistory: () => push("revia", formatProjectHistory()),
+  showRepositoryMap: () => push("revia", formatRepositoryMap()),
+  showRepositoryPlans: () => push("revia", formatRepositoryPlans()),
+  showRepositoryLinks: () => push("revia", formatRepositoryLinks())
 });
 
 render();
