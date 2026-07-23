@@ -8,6 +8,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="CHT 360°‰">
   <meta name="description" content="CHT 360°‰ · index podle 3D prstence pokojíčků s napojenou Revií.">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
   <title>CHT 360°‰ · Revia</title>
   <style>
     :root {
@@ -40,6 +43,7 @@
     html,
     body {
       width: 100%;
+      height: 100%;
       min-height: 100%;
       margin: 0;
       overflow: hidden;
@@ -59,6 +63,14 @@
       font: inherit;
     }
 
+    input,
+    textarea {
+      font-size: 16px;
+      -webkit-user-select: text;
+      user-select: text;
+      touch-action: manipulation;
+    }
+
     button {
       color: inherit;
     }
@@ -66,7 +78,7 @@
     .cht-app {
       position: relative;
       width: 100vw;
-      height: 100svh;
+      height: var(--app-height, 100svh);
       min-height: 520px;
       isolation: isolate;
       overflow: hidden;
@@ -648,6 +660,7 @@
       width: min(420px, calc(100vw - 28px));
       max-height: calc(100svh - 36px);
       overflow: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 18px;
       border: 1px solid rgba(255, 226, 163, .26);
       border-radius: 28px;
@@ -773,6 +786,42 @@
       line-height: 1.45;
     }
 
+    .module-grid {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .module-card {
+      display: grid;
+      gap: 4px;
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid rgba(255, 226, 163, .14);
+      border-radius: 18px;
+      background: rgba(255, 238, 199, .055);
+      color: var(--cream);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .module-card strong {
+      font-size: 14px;
+      letter-spacing: .02em;
+    }
+
+    .module-card span {
+      color: rgba(255, 238, 199, .62);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .module-card small {
+      color: rgba(255, 238, 199, .42);
+      font-size: 11px;
+      word-break: break-word;
+    }
+
     .toast {
       position: absolute;
       z-index: 50;
@@ -828,23 +877,251 @@
       }
     }
 
-    @media (orientation: portrait) {
-      body {
-        overflow: auto;
-        touch-action: pan-y;
-      }
-
+    @media (max-height: 520px) and (orientation: landscape) {
       .cht-app {
-        min-height: 900px;
+        min-height: 100svh;
       }
 
-      .scene {
-        min-width: 980px;
-        transform: translateX(calc((100vw - 980px) / 2));
+      .top-title {
+        top: max(4px, env(safe-area-inset-top));
+        font-size: clamp(10px, 1.35vw, 14px);
+        letter-spacing: .08em;
+      }
+
+      .ring-label {
+        top: max(4px, env(safe-area-inset-top));
+        right: max(10px, env(safe-area-inset-right));
+        font-size: 8px;
+        letter-spacing: .12em;
+      }
+
+      .ring-label strong {
+        font-size: 15px;
+      }
+
+      .left-map {
+        left: max(8px, env(safe-area-inset-left));
+        top: 15%;
+        width: 45vw;
+        height: 62%;
+        min-height: 0;
+      }
+
+      .core-node {
+        width: clamp(78px, 12vw, 112px);
+      }
+
+      .game-core {
+        width: clamp(96px, 15vw, 136px);
+      }
+
+      .iphone-zone {
+        top: 38%;
+        width: clamp(112px, 15vw, 150px);
+      }
+
+      .iphone {
+        min-width: 70px;
+        max-width: 86px;
+        border-width: 5px;
+        border-radius: 18px;
+      }
+
+      .iphone-label {
+        font-size: 16px;
+      }
+
+      .center-core {
+        left: 49%;
+        top: 49%;
+        width: clamp(92px, 13vw, 116px);
+        height: clamp(92px, 13vw, 116px);
+      }
+
+      .ring-zone {
+        right: max(2px, env(safe-area-inset-right));
+        top: 18%;
+        width: 38vw;
+        height: 52vh;
+        min-width: 245px;
+        min-height: 175px;
+      }
+
+      .room {
+        width: clamp(48px, 7vw, 72px);
+        height: clamp(25px, 3.6vw, 36px);
+      }
+
+      .talk-box {
+        bottom: max(7px, env(safe-area-inset-bottom));
+        width: min(430px, 45vw);
+        min-width: 240px;
+        padding: 5px;
+      }
+
+      .talk-box input {
+        padding: 8px 10px;
+      }
+
+      .talk-box button {
+        padding: 0 11px;
+      }
+
+      .orbit-button {
+        right: max(10px, env(safe-area-inset-right));
+        bottom: max(9px, env(safe-area-inset-bottom));
+        min-width: 84px;
+        min-height: 58px;
+        padding: 8px 13px;
+        border-radius: 21px;
+      }
+
+      .orbit-button span {
+        font-size: 11px;
+      }
+
+      .bottom-help {
+        display: none;
       }
 
       .drawer {
         position: fixed;
+        top: max(8px, env(safe-area-inset-top));
+        right: max(8px, env(safe-area-inset-right));
+        width: min(390px, calc(100vw - 20px));
+        max-height: calc(var(--app-height, 100svh) - 18px);
+        padding: 14px;
+        border-radius: 22px;
+      }
+    }
+
+    @media (orientation: portrait) {
+      body {
+        overflow: hidden;
+        touch-action: none;
+      }
+
+      .cht-app {
+        min-height: 100svh;
+      }
+
+      .scene {
+        min-width: 0;
+        transform: none;
+      }
+
+      .top-title {
+        top: max(9px, env(safe-area-inset-top));
+        max-width: 96vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 12px;
+        letter-spacing: .08em;
+      }
+
+      .ring-label {
+        top: max(36px, calc(env(safe-area-inset-top) + 28px));
+        right: 14px;
+        font-size: 8px;
+      }
+
+      .ring-label strong {
+        font-size: 16px;
+      }
+
+      .left-map {
+        left: 0;
+        top: 10%;
+        width: 100vw;
+        height: 42%;
+        min-height: 0;
+      }
+
+      .core-node {
+        width: clamp(92px, 29vw, 124px);
+      }
+
+      .earth-core {
+        left: 6%;
+        top: 4%;
+      }
+
+      .language-core {
+        left: 50%;
+        top: 4%;
+      }
+
+      .game-core {
+        left: 36%;
+        top: 42%;
+        width: clamp(116px, 35vw, 150px);
+      }
+
+      .iphone-zone {
+        left: 6%;
+        top: 43%;
+        width: 34vw;
+      }
+
+      .iphone {
+        min-width: 74px;
+        max-width: 94px;
+      }
+
+      .iphone-label {
+        font-size: 16px;
+      }
+
+      .center-core {
+        left: 50%;
+        top: 49%;
+        width: clamp(112px, 35vw, 148px);
+        height: clamp(112px, 35vw, 148px);
+      }
+
+      .ring-zone {
+        left: 50%;
+        right: auto;
+        top: 58%;
+        width: 96vw;
+        height: 27vh;
+        min-width: 0;
+        min-height: 210px;
+        transform: translateX(-50%);
+      }
+
+      .room {
+        width: clamp(56px, 18vw, 82px);
+        height: clamp(29px, 9vw, 42px);
+      }
+
+      .talk-box {
+        left: max(10px, env(safe-area-inset-left));
+        right: max(10px, env(safe-area-inset-right));
+        bottom: max(10px, env(safe-area-inset-bottom));
+        transform: none;
+        width: auto;
+        min-width: 0;
+      }
+
+      .orbit-button {
+        right: max(12px, env(safe-area-inset-right));
+        bottom: max(72px, calc(env(safe-area-inset-bottom) + 64px));
+        min-width: 86px;
+        min-height: 58px;
+        padding: 8px 12px;
+      }
+
+      .bottom-help {
+        display: none;
+      }
+
+      .drawer {
+        position: fixed;
+        inset: auto max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+        width: auto;
+        max-height: min(72svh, 620px);
+        border-radius: 24px;
       }
     }
 
@@ -881,15 +1158,15 @@
       <section class="left-map" aria-label="Jádra a iPhone 14">
         <button class="core-node earth-core" data-open-core="earth" type="button" aria-label="Otevřít jádro Země">
           <span class="glyph">! C {</span>
-          <span class="count" data-count="earth">0/70</span>
+          <span class="count" data-count="earth">0/240</span>
         </button>
         <button class="core-node language-core" data-open-core="language" type="button" aria-label="Otevřít jádro Jazyk">
           <span class="glyph">i ° .</span>
-          <span class="count" data-count="language">0/70</span>
+          <span class="count" data-count="language">0/240</span>
         </button>
         <button class="core-node game-core" data-open-core="game" type="button" aria-label="Otevřít jádro Hra">
           <span class="glyph">H r a</span>
-          <span class="count" data-count="game">0/70</span>
+          <span class="count" data-count="game">0/240</span>
         </button>
 
         <div class="iphone-zone">
@@ -957,7 +1234,7 @@
       "use strict";
 
       const VERSION = "CHT 360°‰ · Revia index 1.0";
-      const SLOT_LIMIT = 70;
+      const SLOT_LIMIT = 240;
       const ROOM_LIMIT = 240;
       const VISIBLE_ROOMS = 6;
       const STORAGE_KEY = "cht360_pamet_v1";
@@ -965,6 +1242,8 @@
       const ROOMS_KEY = "cht360_pokojicky_240_v1";
       const REVIA_KEY = "cht360_revia_bridge_v1";
       const SPEECH_KEY = "cht360_mluva_log_v1";
+      const NETWORK_PULSE_KEY = "cht360_network_pulse_v1";
+      const NETWORK_EVENT = "cht360.network.changed";
 
       const coreMap = {
         earth: {
@@ -1004,6 +1283,13 @@
         path: "worlds/Revia-Master/",
         mode: "Anděl / Ďáblík",
         status: "napojená na CHT 360°‰.",
+        sourcePaths: [
+          "Revia/revia.js",
+          "src/revia-link.js",
+          "worlds/Revia-Master/revia-angel.js",
+          "worlds/Revia-Master/revia-repo-hub.js",
+          "worlds/Revia/index.html"
+        ],
         signals: [
           {
             at: new Date().toISOString(),
@@ -1011,6 +1297,82 @@
           }
         ]
       };
+
+      const repoModules = [
+        {
+          id: "cht-360-core",
+          label: "CHT 360°‰.",
+          kind: "PWA jádro",
+          entry: "./index.html",
+          storageKeys: ["cht360_pamet_v1", "cht360_pokojicky_240_v1", "cht360_revia_bridge_v1"],
+          note: "Hlavní index, paměť, iPhone 14 a prstenec."
+        },
+        {
+          id: "revia-master",
+          label: "Revia-Master",
+          kind: "svět",
+          entry: "",
+          source: "worlds/Revia-Master/",
+          storageKeys: ["cht360_revia_bridge_v1", "revia-master-history-angel", "reviaState", "reviaNotes"],
+          note: "Napojeno vnitřně přes CHT panel a pokojíček 1."
+        },
+        {
+          id: "glyph-cht-360",
+          label: "Glyph CHT 360°‰.",
+          kind: "PWA modul",
+          entry: "./glyph-cht-360/",
+          storageKeys: ["glyph-cht-360-project-guard.v1"],
+          note: "Glyph engine a ochrana znaků."
+        },
+        {
+          id: "glyph-pokojicku-cht-360",
+          label: "Glyph pokojíčků",
+          kind: "PWA modul",
+          entry: "./glyph-pokojicku-cht-360/",
+          storageKeys: ["glyph-cht-360-rooms.v1", "cht360_pokojicky_240_v1"],
+          note: "Pokojíčky, glyph místnosti a uložené dveře."
+        },
+        {
+          id: "cht-360-bubinky",
+          label: "Bubínky",
+          kind: "PWA modul",
+          entry: "./bubinky/",
+          storageKeys: ["cht360_bubinky_values_v1", "cht360_slot_locks_v1", "cht360_slot_unlocks_v1"],
+          note: "Zámky slotů, bubínky a glyph výběr."
+        },
+        {
+          id: "mluva-cht-360",
+          label: "Mluva CHT",
+          kind: "PWA modul",
+          entry: "./mluva-cht-360/",
+          storageKeys: ["cht360_mluva_log_v1"],
+          note: "Chatové okno, signály a Chybožrout mluvy."
+        },
+        {
+          id: "signal-360",
+          label: "Signal 360°‰.",
+          kind: "PWA modul",
+          entry: "./signal-360/",
+          storageKeys: ["vaft_pamet_v1"],
+          note: "Signální 360 vrstva a starší paměť."
+        },
+        {
+          id: "cht-360-jadra",
+          label: "Jádra — pracovní deska",
+          kind: "aplikace",
+          entry: "./cht360-jadra-pracovni-deska/",
+          storageKeys: ["cht360_jadra_pracovni_deska_v1"],
+          note: "Pracovní deska jader."
+        },
+        {
+          id: "chybozrout",
+          label: "Chybožrout",
+          kind: "diagnostika",
+          entry: "./js/cht-chybozrout.js",
+          storageKeys: ["cht360_chybozrout_v2", "cht360_samoopravovna_backup_v1"],
+          note: "Kontrola kostry a lokální zálohy."
+        }
+      ];
 
       const app = document.getElementById("app");
       const ringStage = document.getElementById("ringStage");
@@ -1093,7 +1455,36 @@
         localStorage.setItem(ROOMS_KEY, JSON.stringify(state.rooms));
         localStorage.setItem(REVIA_KEY, JSON.stringify(state.revia));
         localStorage.setItem(SPEECH_KEY, JSON.stringify(state.speech.slice(-120)));
+        saveNetworkPulse("uložení indexu");
         refreshCounts();
+      }
+
+      function saveNetworkPulse(reason) {
+        const detail = {
+          at: new Date().toISOString(),
+          reason,
+          version: VERSION,
+          modules: repoModules.map((module) => ({
+            id: module.id,
+            label: module.label,
+            entry: module.entry || "",
+            source: module.source || "",
+            storageKeys: module.storageKeys || []
+          })),
+          revia: {
+            connected: state.revia.connected,
+            path: state.revia.path,
+            signals: state.revia.signals.length
+          }
+        };
+
+        try {
+          localStorage.setItem(NETWORK_PULSE_KEY, JSON.stringify(detail));
+        } catch {
+          /* Síťový puls nesmí zastavit index. */
+        }
+
+        window.dispatchEvent(new CustomEvent(NETWORK_EVENT, { detail }));
       }
 
       function refreshCounts() {
@@ -1146,6 +1537,21 @@
           .replaceAll(">", "&gt;")
           .replaceAll('"', "&quot;")
           .replaceAll("'", "&#039;");
+      }
+
+      function renderModuleCards(options = {}) {
+        const modules = options.limit ? repoModules.slice(0, options.limit) : repoModules;
+        return `
+          <div class="module-grid">
+            ${modules.map((module) => `
+              <button class="module-card" data-open-module="${escapeHtml(module.id)}" type="button">
+                <strong>${escapeHtml(module.label)} · ${escapeHtml(module.kind)}</strong>
+                <span>${escapeHtml(module.note)}</span>
+                <small>${escapeHtml(module.entry || module.source || "vnitřní napojení")}</small>
+              </button>
+            `).join("")}
+          </div>
+        `;
       }
 
       function openDrawer(title, lead, html) {
@@ -1244,22 +1650,25 @@
           "Střed drží jádra, iPhone vrstvu, prstenec pokojíčků a Revii v jedné scéně.",
           `
             <div class="status-row">
-              <div class="pill"><strong>${used}/280</strong>paměť jader</div>
+              <div class="pill"><strong>${used}/${SLOT_LIMIT * Object.keys(coreMap).length}</strong>paměť jader</div>
               <div class="pill"><strong>${VISIBLE_ROOMS}/240</strong>viditelné pokojíčky</div>
               <div class="pill"><strong>${state.revia.connected ? "Ano" : "Ne"}</strong>Revia</div>
-              <div class="pill"><strong>UTF‑8</strong>čeština drží</div>
+              <div class="pill"><strong>${repoModules.length}</strong>napojené kostry</div>
             </div>
             <p>Tento index je postavený podle fotky: levá síť s iPhonem, střed CHT a pravý 3D prstenec pokojíčků.</p>
             <div class="actions">
               <button class="primary" data-open-revia type="button">Otevřít Revii</button>
+              <button class="ghost" data-open-network type="button">Síť repozitáře</button>
               <button class="ghost" data-export-state type="button">Exportovat stav</button>
             </div>
+            ${renderModuleCards({ limit: 6 })}
           `
         );
       }
 
       function openRevia() {
         const signals = state.revia.signals.slice(-5).reverse();
+        const sourceList = (state.revia.sourcePaths || []).map((path) => `<div class="log-item">${escapeHtml(path)}</div>`).join("");
         openDrawer(
           "Revia-Master",
           `${state.revia.status} · ${state.revia.path}`,
@@ -1267,6 +1676,8 @@
             <div class="status-row">
               <div class="pill"><strong>${state.revia.connected ? "Napojeno" : "Vypnuto"}</strong>stav</div>
               <div class="pill"><strong>${escapeHtml(state.revia.mode)}</strong>režim</div>
+              <div class="pill"><strong>Pokoj 1</strong>kotva</div>
+              <div class="pill"><strong>Repo</strong>zdrojové cesty</div>
             </div>
             <p>Revia je tady přidaná jako první živý svět na prstenci. Pokojíček 1 ji drží jako kotvu; další pokojíčky můžou později nést její dveře, postavy, zápisy nebo AI odkazy.</p>
             <label>Signál pro Revii
@@ -1275,9 +1686,87 @@
             <div class="actions">
               <button class="primary" data-send-revia type="button">Uložit signál</button>
               <button class="ghost" data-toggle-revia type="button">${state.revia.connected ? "Odpojit Revii" : "Připojit Revii"}</button>
+              <button class="ghost" data-open-network type="button">Síť repozitáře</button>
             </div>
+            <p>Zdrojové cesty Revie v repozitáři:</p>
+            <div class="log">${sourceList}</div>
             <div class="log">
               ${signals.map((item) => `<div class="log-item">${escapeHtml(item.text)}<br><small>${new Date(item.at).toLocaleString("cs-CZ")}</small></div>`).join("") || `<div class="log-item">Zatím bez záznamu.</div>`}
+            </div>
+          `
+        );
+      }
+
+      function openNetwork() {
+        saveNetworkPulse("otevření sítě");
+        openDrawer(
+          "Síť repozitáře",
+          "Kostry z hlavního repozitáře jsou připojené do CHT jako moduly a úložné klíče.",
+          `
+            <div class="status-row">
+              <div class="pill"><strong>${repoModules.length}</strong>modulů</div>
+              <div class="pill"><strong>240</strong>slotů jader</div>
+              <div class="pill"><strong>240</strong>pokojíčků</div>
+              <div class="pill"><strong>iPhone 14</strong>optimalizace</div>
+            </div>
+            <p>Viditelné odkazy otevírají jen moduly, které leží pod docs/. Revia je zatím napojená vnitřně, protože její hlavní zdroje jsou v repozitáři mimo webový kořen Pages.</p>
+            <div class="actions">
+              <button class="primary" data-check-modules type="button">Zkontrolovat dostupnost</button>
+              <button class="ghost" data-open-revia type="button">Otevřít Revii</button>
+            </div>
+            ${renderModuleCards()}
+          `
+        );
+      }
+
+      async function checkModules() {
+        const checks = await Promise.all(repoModules.map(async (module) => {
+          if (!module.entry || module.entry.endsWith(".js")) {
+            return { module, ok: module.id === "revia-master", note: module.id === "revia-master" ? "vnitřní můstek" : "zdrojový modul" };
+          }
+
+          try {
+            const response = await fetch(module.entry, { method: "GET", cache: "no-store" });
+            return { module, ok: response.ok, note: response.ok ? "dostupné" : `stav ${response.status}` };
+          } catch {
+            return { module, ok: false, note: "zatím nedostupné" };
+          }
+        }));
+
+        const html = checks.map(({ module, ok, note }) => `
+          <div class="log-item">${ok ? "✓" : "·"} ${escapeHtml(module.label)}<br><small>${escapeHtml(note)} · ${escapeHtml(module.entry || module.source || "vnitřní")}</small></div>
+        `).join("");
+
+        openDrawer(
+          "Kontrola kostry",
+          "Rychlá lokální kontrola dostupných cest pod aktuální PWA.",
+          `<div class="log">${html}</div><div class="actions"><button class="ghost" data-open-network type="button">Zpět na síť</button></div>`
+        );
+      }
+
+      function openModule(moduleId) {
+        const module = repoModules.find((item) => item.id === moduleId);
+        if (!module) return;
+        if (module.id === "revia-master") {
+          openRevia();
+          return;
+        }
+
+        openDrawer(
+          module.label,
+          `${module.kind} · ${module.entry || module.source || "vnitřní napojení"}`,
+          `
+            <p>${escapeHtml(module.note)}</p>
+            <div class="status-row">
+              <div class="pill"><strong>${module.storageKeys.length}</strong>úložné klíče</div>
+              <div class="pill"><strong>${module.entry ? "Ano" : "Ne"}</strong>webová cesta</div>
+            </div>
+            <div class="log">
+              ${module.storageKeys.map((key) => `<div class="log-item">${escapeHtml(key)}</div>`).join("")}
+            </div>
+            <div class="actions">
+              ${module.entry && !module.entry.endsWith(".js") ? `<button class="primary" data-go-module="${escapeHtml(module.id)}" type="button">Otevřít modul</button>` : ""}
+              <button class="ghost" data-open-network type="button">Zpět na síť</button>
             </div>
           `
         );
@@ -1385,7 +1874,8 @@
           memory: state.memory,
           rooms: state.rooms,
           revia: state.revia,
-          speech: state.speech
+          speech: state.speech,
+          modules: repoModules
         };
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
         const url = URL.createObjectURL(blob);
@@ -1410,7 +1900,7 @@
         });
         centerButton.addEventListener("click", openCenter);
         iphoneButton.addEventListener("click", openIphone);
-        orbitButton.addEventListener("click", openRevia);
+        orbitButton.addEventListener("click", openNetwork);
         closeDrawer.addEventListener("click", closePanel);
         talkForm.addEventListener("submit", submitTalk);
         drawerBody.addEventListener("click", (event) => {
@@ -1420,6 +1910,13 @@
           if (target.dataset.saveRoom) saveRoom(Number(target.dataset.saveRoom));
           if (target.dataset.linkRevia) linkRoomToRevia(Number(target.dataset.linkRevia));
           if (target.dataset.openRevia !== undefined) openRevia();
+          if (target.dataset.openNetwork !== undefined) openNetwork();
+          if (target.dataset.openModule) openModule(target.dataset.openModule);
+          if (target.dataset.checkModules !== undefined) void checkModules();
+          if (target.dataset.goModule) {
+            const module = repoModules.find((item) => item.id === target.dataset.goModule);
+            if (module?.entry) window.location.href = module.entry;
+          }
           if (target.dataset.saveIphone !== undefined) saveIphone(false);
           if (target.dataset.iphoneToRevia !== undefined) saveIphone(true);
           if (target.dataset.sendRevia !== undefined) {
@@ -1473,9 +1970,17 @@
       function bootServiceWorker() {
         if (!("serviceWorker" in navigator)) return;
         if (location.protocol === "file:") return;
-        navigator.serviceWorker.register("./sw.js").catch(() => {
-          console.info("CHT 360°‰: sw.js zatím není připojený, index běží i bez něj.");
+        const workers = ["./service-worker.js", "./sw.js"];
+        workers.reduce((promise, worker) => {
+          return promise.catch(() => navigator.serviceWorker.register(worker));
+        }, Promise.reject()).catch(() => {
+          console.info("CHT 360°‰: service worker zatím není připojený, index běží i bez něj.");
         });
+      }
+
+      function setAppHeight() {
+        const height = window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight;
+        document.documentElement.style.setProperty("--app-height", `${Math.max(320, Math.round(height))}px`);
       }
 
       function exposeBridge() {
@@ -1501,16 +2006,38 @@
             openRevia();
           }
         };
+
+        window.CHT360NetworkBridge = {
+          version: VERSION,
+          modules: clone(repoModules),
+          pulse(reason = "externí dotaz") {
+            saveNetworkPulse(reason);
+            return safeParse(localStorage.getItem(NETWORK_PULSE_KEY), null);
+          },
+          open() {
+            openNetwork();
+          },
+          openModule
+        };
       }
 
       function boot() {
+        setAppHeight();
         bindActions();
         bindRingDrag();
         refreshCounts();
         renderRooms();
         exposeBridge();
         bootServiceWorker();
-        window.addEventListener("resize", renderRooms);
+        saveNetworkPulse("start indexu");
+        window.addEventListener("resize", () => {
+          setAppHeight();
+          renderRooms();
+        });
+        window.visualViewport?.addEventListener("resize", () => {
+          setAppHeight();
+          renderRooms();
+        });
         setTimeout(() => showToast("CHT 360°‰ · Revia připravená."), 450);
       }
 
