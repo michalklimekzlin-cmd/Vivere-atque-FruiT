@@ -4,7 +4,7 @@
   Při větší změně stačí zvýšit poslední číslo.
   Staré cache se při aktivaci automaticky odstraní.
 */
-const CACHE_VERSION = "v14-cernozlaty-obeh";
+const CACHE_VERSION = "v17-revia-glyphy-vafit-offline";
 const OWN_CACHE_PREFIX = "cht360-v";
 const CACHE_NAME = `cht360-${CACHE_VERSION}`;
 
@@ -19,6 +19,9 @@ const CORE_FILES = [
   "./js/aplikace.js",
   "./js/glyph-kostra.js",
   "./js/cht-chybozrout.js",
+  "./js/revia-context.js",
+  "./js/revia-glyph-memory.js",
+  "./js/revia-repository-memory.js",
   "./js/revia-dock.js",
   "./glyph-cht-360/style.css",
   "./manifest.json"
