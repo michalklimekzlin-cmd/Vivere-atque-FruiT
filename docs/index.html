@@ -1242,6 +1242,8 @@
       const ROOMS_KEY = "cht360_pokojicky_240_v1";
       const REVIA_KEY = "cht360_revia_bridge_v1";
       const SPEECH_KEY = "cht360_mluva_log_v1";
+      const REVIA_API_ENDPOINT_KEY = "cht360_revia_api_endpoint_v1";
+      const REVIA_API_STATUS_KEY = "cht360_revia_api_status_v1";
       const NETWORK_PULSE_KEY = "cht360_network_pulse_v1";
       const NETWORK_EVENT = "cht360.network.changed";
 
@@ -1621,6 +1623,8 @@
       }
 
       function openIphone() {
+        const endpoint = getReviaApiEndpoint();
+        const apiStatus = loadObject(REVIA_API_STATUS_KEY, { state: endpoint ? "připraveno" : "čeká na backend" });
         openDrawer(
           "iPhone 14 · CHT vrstva",
           "Červená/černá vrstva pro ruční vložení odkazů, PWA vstup a rychlé směrování.",
@@ -1628,12 +1632,19 @@
             <div class="status-row">
               <div class="pill"><strong>PWA</strong>připraveno</div>
               <div class="pill"><strong>Řízení</strong>${(state.memory.cores.control?.slots || []).filter(Boolean).length}/${SLOT_LIMIT}</div>
+              <div class="pill"><strong>Revia API</strong>${escapeHtml(apiStatus.state || "čeká")}</div>
+              <div class="pill"><strong>Klíč</strong>jen server</div>
             </div>
             <p>iPhone tady slouží jako bezpečný ruční můstek: zkopíruješ odkaz, vložíš ho sem a CHT ho uloží do řízení nebo pošle do Revie.</p>
+            <label>API adresa Revie
+              <input id="reviaEndpoint" value="${escapeHtml(endpoint)}" placeholder="https://tvoje-domena.vercel.app/api/revia-chat">
+            </label>
             <label>Odkaz / poznámka z iPhonu
               <input id="iphoneLink" placeholder="https://… nebo text">
             </label>
             <div class="actions">
+              <button class="ghost" data-save-api-endpoint type="button">Uložit API</button>
+              <button class="ghost" data-test-revia-api type="button">Test Revie</button>
               <button class="primary" data-save-iphone type="button">Vložit do Řízení</button>
               <button class="ghost" data-iphone-to-revia type="button">Poslat do Revie</button>
             </div>
@@ -1669,6 +1680,8 @@
       function openRevia() {
         const signals = state.revia.signals.slice(-5).reverse();
         const sourceList = (state.revia.sourcePaths || []).map((path) => `<div class="log-item">${escapeHtml(path)}</div>`).join("");
+        const apiEndpoint = getReviaApiEndpoint();
+        const apiStatus = loadObject(REVIA_API_STATUS_KEY, { state: apiEndpoint ? "připraveno" : "čeká na backend" });
         openDrawer(
           "Revia-Master",
           `${state.revia.status} · ${state.revia.path}`,
@@ -1677,7 +1690,7 @@
               <div class="pill"><strong>${state.revia.connected ? "Napojeno" : "Vypnuto"}</strong>stav</div>
               <div class="pill"><strong>${escapeHtml(state.revia.mode)}</strong>režim</div>
               <div class="pill"><strong>Pokoj 1</strong>kotva</div>
-              <div class="pill"><strong>Repo</strong>zdrojové cesty</div>
+              <div class="pill"><strong>API</strong>${escapeHtml(apiStatus.state || "čeká")}</div>
             </div>
             <p>Revia je tady přidaná jako první živý svět na prstenci. Pokojíček 1 ji drží jako kotvu; další pokojíčky můžou později nést její dveře, postavy, zápisy nebo AI odkazy.</p>
             <label>Signál pro Revii
@@ -1826,7 +1839,136 @@
         state.revia.signals = state.revia.signals.slice(-50);
       }
 
+      function getReviaApiEndpoint() {
+        const saved = localStorage.getItem(REVIA_API_ENDPOINT_KEY) || "";
+        if (saved.trim()) return saved.trim();
+        if (location.hostname.endsWith("github.io")) return "";
+        return "/api/revia-chat";
+      }
+
+      function saveReviaApiEndpoint(silent = false) {
+        const input = document.getElementById("reviaEndpoint");
+        const value = input?.value.trim() || "";
+
+        if (value) {
+          localStorage.setItem(REVIA_API_ENDPOINT_KEY, value);
+          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({ state: "uloženo", at: new Date().toISOString() }));
+        } else {
+          localStorage.removeItem(REVIA_API_ENDPOINT_KEY);
+          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({ state: "čeká na backend", at: new Date().toISOString() }));
+        }
+
+        if (!silent) {
+          showToast(value ? "API adresa Revie je uložená." : "API adresa Revie je vymazaná.");
+          openIphone();
+        }
+      }
+
+      function getReviaMode() {
+        return state.revia.mode.toLowerCase().includes("ď") ? "daemon" : "angel";
+      }
+
+      function buildReviaMessages(message) {
+        const recentSignals = state.revia.signals.slice(-10).map((item) => ({
+          role: "user",
+          content: item.text
+        }));
+        return [
+          ...recentSignals,
+          ...state.speech.slice(-8).map((item) => ({
+            role: item.reply ? "assistant" : "user",
+            content: item.text
+          })),
+          { role: "user", content: message }
+        ].filter((item) => item.content && item.content.trim()).slice(-18);
+      }
+
+      async function askReviaApi(message, source = "CHT") {
+        const endpoint = getReviaApiEndpoint();
+        if (!endpoint) {
+          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({ state: "čeká na backend", at: new Date().toISOString() }));
+          return null;
+        }
+
+        try {
+          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({ state: "volám Revii…", at: new Date().toISOString() }));
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              message,
+              messages: buildReviaMessages(message),
+              mode: getReviaMode(),
+              source,
+              modules: repoModules.map((module) => ({
+                id: module.id,
+                label: module.label,
+                kind: module.kind,
+                entry: module.entry || "",
+                source: module.source || ""
+              }))
+            })
+          });
+
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            throw new Error(data?.error || `API stav ${response.status}`);
+          }
+
+          const reply = String(data?.reply || "").trim();
+          if (!reply) throw new Error("Revia vrátila prázdnou odpověď.");
+
+          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({
+            state: "mluví",
+            at: new Date().toISOString(),
+            model: data.model || ""
+          }));
+
+          return {
+            reply,
+            mode: data.mode || getReviaMode(),
+            model: data.model || "",
+            usage: data.usage || null
+          };
+        } catch (error) {
+          console.warn("Revia API není dostupné.", error);
+          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({
+            state: "offline",
+            at: new Date().toISOString(),
+            error: error.message || "chyba"
+          }));
+          showToast("Revia API zatím neodpovědělo, ukládám lokálně.");
+          return null;
+        }
+      }
+
+      async function sendMessageToRevia(message, source = "CHT") {
+        addReviaSignal(`${source}: ${message}`);
+        saveAll();
+
+        const api = await askReviaApi(message, source);
+        if (api?.reply) {
+          const replyText = `Revia: ${api.reply}`;
+          addReviaSignal(replyText);
+          state.speech.push({ at: new Date().toISOString(), text: api.reply, reply: true, model: api.model });
+          state.speech = state.speech.slice(-120);
+          saveAll();
+          showToast("Revia odpověděla přes API.");
+          return api.reply;
+        }
+
+        return "";
+      }
+
+      async function testReviaApi() {
+        saveReviaApiEndpoint(true);
+        const reply = await sendMessageToRevia("Krátce potvrď, že jsi Revia napojená na CHT 360°‰.", "Test API");
+        if (reply) openRevia();
+        else openIphone();
+      }
+
       function saveIphone(toRevia = false) {
+        saveReviaApiEndpoint(true);
         const input = document.getElementById("iphoneLink");
         const text = input?.value.trim();
         if (!text) {
@@ -1834,10 +1976,7 @@
           return;
         }
         if (toRevia) {
-          addReviaSignal(`iPhone 14 → Revia: ${text}`);
-          showToast("Odesláno do Revie.");
-          saveAll();
-          openRevia();
+          void sendMessageToRevia(text, "iPhone 14").then(() => openRevia());
           return;
         }
         const slots = state.memory.cores.control.slots;
@@ -1854,17 +1993,15 @@
         openIphone();
       }
 
-      function submitTalk(event) {
+      async function submitTalk(event) {
         event.preventDefault();
         const text = talkInput.value.trim();
         if (!text) return;
         const item = { at: new Date().toISOString(), text };
         state.speech.push(item);
         state.speech = state.speech.slice(-120);
-        addReviaSignal(`Mluva CHT: ${text}`);
         talkInput.value = "";
-        saveAll();
-        showToast("Mluva uložená do CHT i Revie.");
+        await sendMessageToRevia(text, "Mluva CHT");
       }
 
       function exportState() {
@@ -1917,6 +2054,8 @@
             const module = repoModules.find((item) => item.id === target.dataset.goModule);
             if (module?.entry) window.location.href = module.entry;
           }
+          if (target.dataset.saveApiEndpoint !== undefined) saveReviaApiEndpoint(false);
+          if (target.dataset.testReviaApi !== undefined) void testReviaApi();
           if (target.dataset.saveIphone !== undefined) saveIphone(false);
           if (target.dataset.iphoneToRevia !== undefined) saveIphone(true);
           if (target.dataset.sendRevia !== undefined) {
@@ -1925,10 +2064,7 @@
               showToast("Napiš signál pro Revii.");
               return;
             }
-            addReviaSignal(signal);
-            saveAll();
-            showToast("Revia signál uložila.");
-            openRevia();
+            void sendMessageToRevia(signal, "Revia panel").then(() => openRevia());
           }
           if (target.dataset.toggleRevia !== undefined) {
             state.revia.connected = !state.revia.connected;
@@ -2001,6 +2137,10 @@
             addReviaSignal(text);
             saveAll();
             return clone(state.revia.signals.at(-1));
+          },
+          async ask(text, source = "externí modul") {
+            const reply = await sendMessageToRevia(text, source);
+            return { reply, revia: clone(state.revia) };
           },
           open() {
             openRevia();
