@@ -4,9 +4,9 @@
 
 export const REVIA_REPOSITORY_MEMORY = Object.freeze({
   "snapshot": {
-    "generatedAt": "2026-07-23T20:23:42.162Z",
+    "generatedAt": "2026-07-23T20:50:42.945Z",
     "repository": "michalklimekzlin-cmd/Vivere-atque-FruiT",
-    "trackedFileCount": 613,
+    "trackedFileCount": 615,
     "note": "Offline snímek struktury repozitáře. Neověřuje, zda jsou vzdálené hostingy právě online."
   },
   "folders": [
@@ -20,7 +20,7 @@ export const REVIA_REPOSITORY_MEMORY = Object.freeze({
     },
     {
       "path": "docs",
-      "files": 54
+      "files": 56
     },
     {
       "path": "worlds",
@@ -544,8 +544,10 @@ export const REVIA_REPOSITORY_MEMORY = Object.freeze({
     "docs/js/cht-panel.js",
     "docs/js/cht-zivot",
     "docs/js/revia-context.js",
+    "docs/js/revia-continuity.js",
     "docs/js/revia-dock.js",
     "docs/js/revia-glyph-memory.js",
+    "docs/js/revia-local-mesh.js",
     "docs/js/revia-repository-memory.js",
     "docs/js/sloty.js",
     "docs/js/uloziste.js",
