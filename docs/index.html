@@ -2,43 +2,29 @@
 <html lang="cs">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <meta name="theme-color" content="#090705">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#050815">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="CHT 360°‰">
-  <meta name="description" content="CHT 360°‰ · index podle 3D prstence pokojíčků s napojenou Revií.">
+  <meta name="screen-orientation" content="landscape">
+
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="./icon.svg">
-  <link rel="stylesheet" href="./style.css">
-  <title>CHT 360°‰ · Revia</title>
+  <link rel="stylesheet" href="./css/pamet.css">
+  <link rel="stylesheet" href="./css/revia-dock.css">
+
+  <title>{*(˚.•).•)//ˇ^360o°˚\\(•.(•.)ア)</title>
+
   <style>
     :root {
-      color-scheme: dark;
-      --bg: #090705;
-      --panel: rgba(13, 11, 9, .72);
-      --panel-strong: rgba(21, 17, 13, .92);
-      --gold: #ffe2a3;
-      --gold-2: #c8a65d;
-      --gold-3: #7f642f;
-      --cream: #fff3d1;
-      --muted: rgba(255, 238, 199, .66);
-      --line: rgba(255, 226, 163, .38);
-      --line-soft: rgba(255, 226, 163, .16);
-      --red: #e32b33;
-      --red-soft: rgba(227, 43, 51, .22);
-      --white: #f8f3e6;
-      --grey: #9d968a;
-      --black: #050505;
-      --shadow: rgba(0, 0, 0, .55);
-      --radius: 22px;
-      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
+      --safe-top: max(10px, env(safe-area-inset-top));
+      --safe-right: max(12px, env(safe-area-inset-right));
+      --safe-bottom: max(10px, env(safe-area-inset-bottom));
+      --safe-left: max(12px, env(safe-area-inset-left));
     }
 
     html,
@@ -48,2945 +34,803 @@
       min-height: 100%;
       margin: 0;
       overflow: hidden;
-      background:
-        radial-gradient(circle at 50% 48%, rgba(255, 216, 139, .17), transparent 18rem),
-        radial-gradient(circle at 14% 52%, rgba(227, 43, 51, .16), transparent 14rem),
-        radial-gradient(circle at 82% 19%, rgba(255, 225, 155, .11), transparent 15rem),
-        linear-gradient(120deg, #0d0907 0%, #15110d 42%, #080604 100%);
-      color: var(--cream);
-      font-family: var(--font);
-      touch-action: none;
+      background: #050815;
     }
 
-    button,
-    input,
-    textarea {
-      font: inherit;
+    body {
+      height: 100dvh;
+      min-height: 100dvh;
     }
 
-    input,
-    textarea {
-      font-size: 16px;
-      -webkit-user-select: text;
-      user-select: text;
-      touch-action: manipulation;
-    }
-
-    button {
-      color: inherit;
-    }
-
-    .cht-app {
-      position: relative;
-      width: 100vw;
-      height: var(--app-height, 100svh);
-      min-height: 520px;
-      isolation: isolate;
-      overflow: hidden;
-    }
-
-    .stars,
-    .grid,
-    .scan {
-      position: absolute;
+    .rotateDevice {
+      position: fixed;
       inset: 0;
-      pointer-events: none;
-    }
-
-    .stars {
-      opacity: .52;
-      background-image:
-        radial-gradient(circle, rgba(255, 238, 199, .55) 0 1px, transparent 1.4px),
-        radial-gradient(circle, rgba(255, 238, 199, .32) 0 1px, transparent 1.6px);
-      background-position: 14px 18px, 92px 74px;
-      background-size: 92px 92px, 137px 137px;
-      mask-image: radial-gradient(circle at 52% 49%, black 0 45%, transparent 82%);
-    }
-
-    .grid {
-      background-image:
-        linear-gradient(90deg, transparent calc(50% - 1px), rgba(255, 238, 199, .26) 50%, transparent calc(50% + 1px)),
-        linear-gradient(0deg, transparent calc(50% - 1px), rgba(255, 238, 199, .24) 50%, transparent calc(50% + 1px)),
-        linear-gradient(90deg, rgba(255, 238, 199, .08) 1px, transparent 1px),
-        linear-gradient(0deg, rgba(255, 238, 199, .08) 1px, transparent 1px);
-      background-size: 100% 100%, 100% 100%, 25vw 33vh, 25vw 33vh;
-    }
-
-    .scan {
-      background: linear-gradient(180deg, transparent, rgba(255, 244, 214, .045), transparent);
-      mix-blend-mode: screen;
-      animation: scan 8s linear infinite;
-    }
-
-    @keyframes scan {
-      0% { transform: translateY(-100%); }
-      100% { transform: translateY(100%); }
-    }
-
-    .scene {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      max-width: 1600px;
-      margin: 0 auto;
-      perspective: 980px;
-      transform-style: preserve-3d;
-    }
-
-    .signal-svg {
-      position: absolute;
-      inset: -4% -2%;
-      width: 104%;
-      height: 108%;
-      opacity: .86;
-      pointer-events: none;
-      filter: drop-shadow(0 0 7px rgba(255, 222, 151, .18));
-    }
-
-    .signal-svg path {
-      fill: none;
-      stroke-linecap: round;
-    }
-
-    .top-title {
-      position: absolute;
-      top: max(10px, env(safe-area-inset-top));
-      left: 50%;
-      z-index: 6;
-      transform: translateX(-50%);
-      color: var(--cream);
-      letter-spacing: .14em;
-      font-weight: 700;
-      font-size: clamp(14px, 1.6vw, 24px);
-      text-shadow: 0 0 18px rgba(255, 225, 163, .42);
-      white-space: nowrap;
-    }
-
-    .ring-label {
-      position: absolute;
-      top: max(8px, env(safe-area-inset-top));
-      right: 4vw;
-      z-index: 6;
-      text-align: right;
-      color: var(--cream);
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      font-weight: 800;
-      font-size: clamp(10px, 1.12vw, 18px);
-      text-shadow: 0 0 14px rgba(255, 225, 163, .42);
-    }
-
-    .ring-label strong {
-      display: block;
-      margin-top: 2px;
-      letter-spacing: .08em;
-      font-size: clamp(16px, 2vw, 30px);
-    }
-
-    .left-map,
-    .center-core,
-    .ring-zone,
-    .bottom-help,
-    .talk-box,
-    .orbit-button {
-      position: absolute;
-      z-index: 4;
-    }
-
-    .left-map {
-      left: clamp(18px, 4vw, 68px);
-      top: 12%;
-      width: min(44vw, 660px);
-      height: 72%;
-      min-height: 410px;
-    }
-
-    .center-core {
-      left: 49.2%;
-      top: 47%;
-      transform: translate(-50%, -50%);
-      width: clamp(126px, 15vw, 214px);
-      height: clamp(126px, 15vw, 214px);
-      border: 0;
-      border-radius: 999px;
-      background:
-        radial-gradient(circle at 50% 48%, #fff2c3 0 28%, rgba(248, 207, 127, .9) 29% 41%, rgba(57, 43, 22, .82) 42% 53%, rgba(15, 12, 8, .78) 54% 68%, transparent 69%),
-        conic-gradient(from 40deg, transparent, rgba(255, 226, 163, .28), transparent, rgba(255, 226, 163, .24), transparent);
-      box-shadow:
-        0 0 0 1px rgba(255, 226, 163, .22),
-        0 0 42px rgba(255, 215, 139, .42),
-        inset 0 0 30px rgba(255, 238, 199, .18);
-      cursor: pointer;
-    }
-
-    .center-core::before,
-    .center-core::after {
-      content: "";
-      position: absolute;
-      inset: -28%;
-      border: 1px solid rgba(255, 226, 163, .25);
-      border-radius: 999px;
-      animation: pulse 6s ease-in-out infinite;
-    }
-
-    .center-core::after {
-      inset: -52%;
-      opacity: .45;
-      animation-delay: -2s;
-    }
-
-    @keyframes pulse {
-      50% { transform: scale(1.06); opacity: .55; }
-    }
-
-    .center-core span {
-      position: relative;
-      z-index: 2;
-      display: grid;
-      place-items: center;
-      width: 100%;
-      height: 100%;
-      color: #0d0b08;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      color: #fff0c5;
       text-align: center;
-      font-weight: 950;
-      letter-spacing: .04em;
-      line-height: 1.05;
-      font-size: clamp(21px, 3vw, 42px);
-      text-shadow: 0 1px 0 rgba(255, 255, 255, .28);
+      background:
+        radial-gradient(circle at 50% 36%, rgba(199, 155, 51, .22), transparent 36%),
+        #050815;
     }
 
-    .center-core small {
+    .rotateDeviceInner {
+      max-width: 300px;
+    }
+
+    .rotateDeviceIcon {
       display: block;
-      font-size: .44em;
-      letter-spacing: .05em;
-    }
-
-    .center-letter {
-      position: absolute;
-      color: rgba(255, 238, 199, .78);
-      font-weight: 900;
-      font-size: clamp(17px, 2.2vw, 32px);
-      text-shadow: 0 0 14px rgba(255, 226, 163, .44);
-      pointer-events: none;
-    }
-
-    .center-letter.c { left: 29%; top: 18%; }
-    .center-letter.h { right: 27%; top: 29%; }
-    .center-letter.t { left: 31%; bottom: 24%; }
-    .center-letter.mark { right: 25%; bottom: 26%; }
-
-    .core-node {
-      position: absolute;
-      width: clamp(124px, 14vw, 222px);
-      aspect-ratio: 1;
-      border: 0;
-      border-radius: 50%;
-      color: var(--cream);
-      background:
-        radial-gradient(circle at 35% 35%, rgba(255, 238, 199, .22), transparent 20%),
-        radial-gradient(circle at 50% 50%, rgba(226, 184, 98, .18), rgba(35, 29, 20, .42) 48%, rgba(9, 7, 5, .16) 70%),
-        repeating-radial-gradient(circle at 50% 50%, transparent 0 17px, rgba(255, 226, 163, .28) 18px 19px),
-        repeating-linear-gradient(25deg, transparent 0 18px, rgba(255, 226, 163, .22) 19px 21px),
-        repeating-linear-gradient(-28deg, transparent 0 21px, rgba(255, 226, 163, .16) 22px 24px);
-      box-shadow:
-        inset 0 0 28px rgba(255, 226, 163, .18),
-        0 0 0 2px rgba(255, 226, 163, .28),
-        0 0 28px rgba(255, 226, 163, .16);
-      cursor: pointer;
-      overflow: hidden;
-    }
-
-    .core-node::before {
-      content: "";
-      position: absolute;
-      inset: 9%;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 226, 163, .35);
-      transform: rotateX(64deg) rotateZ(-12deg);
-    }
-
-    .core-node::after {
-      content: "";
-      position: absolute;
-      inset: 18%;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 226, 163, .22);
-      transform: rotateX(72deg) rotateZ(38deg);
-    }
-
-    .core-node .glyph {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      font-weight: 850;
-      letter-spacing: .22em;
-      font-size: clamp(19px, 3vw, 40px);
-      text-shadow: 0 0 15px rgba(255, 226, 163, .5);
-    }
-
-    .core-node .count {
-      position: absolute;
-      left: 50%;
-      bottom: 34%;
-      transform: translateX(-50%);
-      color: rgba(255, 238, 199, .72);
-      font-weight: 700;
-      font-size: clamp(11px, 1.1vw, 18px);
-      letter-spacing: .06em;
-    }
-
-    .earth-core {
-      left: 7%;
-      top: 5%;
-    }
-
-    .language-core {
-      left: 37%;
-      top: 5%;
-    }
-
-    .game-core {
-      left: 31%;
-      top: 43%;
-      width: clamp(154px, 17vw, 260px);
-    }
-
-    .iphone-zone {
-      position: absolute;
-      left: 5%;
-      top: 39%;
-      width: clamp(140px, 17vw, 240px);
-      text-align: center;
-    }
-
-    .iphone-orbit {
-      position: absolute;
-      left: 50%;
-      top: 42%;
-      width: 190%;
-      aspect-ratio: 1;
-      border: 2px solid rgba(227, 43, 51, .33);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 28px rgba(227, 43, 51, .14);
-      pointer-events: none;
-    }
-
-    .iphone {
-      position: relative;
-      width: 48%;
-      min-width: 92px;
-      max-width: 130px;
-      aspect-ratio: 9 / 18.2;
-      margin: 0 auto;
-      border: 7px solid var(--red);
-      border-radius: 24px;
-      background:
-        linear-gradient(180deg, #161719, #050506 48%, #121112),
-        radial-gradient(circle at 50% 25%, rgba(255, 255, 255, .09), transparent 44%);
-      box-shadow:
-        0 0 0 2px rgba(255, 245, 230, .08),
-        0 18px 30px var(--shadow),
-        0 0 28px rgba(227, 43, 51, .26);
-      cursor: pointer;
-    }
-
-    .iphone::before {
-      content: "";
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      width: 34%;
-      height: 7px;
-      transform: translateX(-50%);
-      border-radius: 999px;
-      background: #020203;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
-    }
-
-    .apple {
-      position: absolute;
-      left: 50%;
-      top: 37%;
-      transform: translate(-50%, -50%);
-      font-size: clamp(24px, 3vw, 38px);
-      filter: drop-shadow(0 0 8px rgba(255,255,255,.25));
-    }
-
-    .iphone-text {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 17%;
-      display: grid;
-      gap: 3px;
-      color: var(--white);
-      font-weight: 900;
-      letter-spacing: .07em;
-      font-size: clamp(10px, 1vw, 15px);
-      text-align: center;
-    }
-
-    .iphone-text small {
-      color: rgba(255, 255, 255, .72);
-      font-size: .65em;
-    }
-
-    .iphone-label {
-      margin-top: 8px;
-      color: var(--white);
-      font-weight: 900;
-      letter-spacing: .02em;
-      font-size: clamp(18px, 2vw, 28px);
-      text-shadow: 0 0 14px rgba(255,255,255,.16);
-    }
-
-    .ring-zone {
-      right: clamp(16px, 4vw, 72px);
-      top: 19%;
-      width: min(36vw, 560px);
-      height: min(39vw, 430px);
-      min-width: 320px;
-      min-height: 260px;
-      transform: rotateX(3deg);
-    }
-
-    .ring-stage {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transform-style: preserve-3d;
-    }
-
-    .ring-ellipse,
-    .ring-ellipse::before,
-    .ring-ellipse::after {
-      position: absolute;
-      border: 2px solid rgba(255, 226, 163, .48);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    .ring-ellipse {
-      inset: 18% 8%;
-      transform: rotateX(64deg);
-      box-shadow:
-        0 0 24px rgba(255, 226, 163, .18),
-        inset 0 0 30px rgba(255, 226, 163, .08);
-    }
-
-    .ring-ellipse::before,
-    .ring-ellipse::after {
-      content: "";
-      inset: 8% -4%;
-      border-color: rgba(255, 226, 163, .28);
-    }
-
-    .ring-ellipse::after {
-      inset: -11% 10%;
-      border-color: rgba(255, 226, 163, .22);
-    }
-
-    .ring-core-shadow {
-      position: absolute;
-      inset: 29% 21%;
-      border-radius: 50%;
-      background:
-        radial-gradient(ellipse at 50% 50%, rgba(255, 226, 163, .12), transparent 56%),
-        repeating-linear-gradient(88deg, transparent 0 20px, rgba(255, 226, 163, .12) 21px 22px),
-        repeating-linear-gradient(12deg, transparent 0 22px, rgba(255, 226, 163, .08) 23px 24px);
-      border: 1px solid rgba(255, 226, 163, .18);
-      transform: rotateX(67deg);
-      filter: blur(.1px);
-      opacity: .8;
-      pointer-events: none;
-    }
-
-    .room {
-      position: absolute;
-      width: clamp(68px, 7vw, 110px);
-      height: clamp(34px, 3.6vw, 54px);
-      border: 1px solid rgba(255, 226, 163, .5);
-      border-radius: 999px;
-      background:
-        radial-gradient(circle at 50% 0%, rgba(255,255,255,.14), transparent 35%),
-        linear-gradient(180deg, rgba(36, 32, 26, .92), rgba(4, 4, 4, .96));
-      box-shadow:
-        0 12px 18px rgba(0,0,0,.4),
-        0 0 16px rgba(255, 226, 163, .18),
-        inset 0 0 18px rgba(255, 226, 163, .08);
-      color: var(--cream);
-      font-weight: 900;
-      cursor: pointer;
-      transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
-    }
-
-    .room::after {
-      content: "";
-      position: absolute;
-      left: 10%;
-      right: 10%;
-      bottom: -54%;
-      height: 72%;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 226, 163, .18);
-      background: rgba(0, 0, 0, .3);
-      transform: perspective(80px) rotateX(56deg);
-      z-index: -1;
-    }
-
-    .room.active,
-    .room:hover {
-      border-color: rgba(255, 241, 205, .92);
-      box-shadow:
-        0 14px 22px rgba(0,0,0,.48),
-        0 0 26px rgba(255, 226, 163, .34),
-        inset 0 0 20px rgba(255, 226, 163, .16);
-    }
-
-    .room b {
-      display: block;
+      margin-bottom: 16px;
+      font-size: 48px;
       line-height: 1;
-      font-size: clamp(12px, 1.2vw, 17px);
-      letter-spacing: .05em;
+      animation: rotateHint 1.9s ease-in-out infinite;
     }
 
-    .room small {
+    .rotateDevice strong,
+    .rotateDevice span {
       display: block;
-      margin-top: 2px;
-      color: rgba(255, 238, 199, .56);
-      font-size: clamp(8px, .78vw, 11px);
-      letter-spacing: .13em;
-      text-transform: uppercase;
     }
 
-    .orbit-button {
-      right: clamp(22px, 6vw, 88px);
-      bottom: max(26px, env(safe-area-inset-bottom));
-      display: grid;
-      place-items: center;
-      min-width: clamp(98px, 10vw, 138px);
-      min-height: 76px;
-      padding: 12px 20px;
-      border: 1px solid rgba(255, 226, 163, .44);
-      border-radius: 28px;
-      background: rgba(6, 6, 6, .58);
-      box-shadow: 0 16px 34px rgba(0,0,0,.36), inset 0 0 20px rgba(255, 226, 163, .08);
-      cursor: pointer;
-      color: var(--cream);
-      font-weight: 900;
-      letter-spacing: .03em;
-    }
-
-    .orbit-button span {
-      display: block;
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 3px;
-    }
-
-    .bottom-help {
-      left: 2vw;
-      right: 2vw;
-      bottom: max(20px, env(safe-area-inset-bottom));
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      padding-right: 20vw;
-      color: rgba(255, 238, 199, .62);
-      font-size: clamp(13px, 1.35vw, 23px);
-      pointer-events: none;
-      text-shadow: 0 0 12px rgba(0,0,0,.44);
-    }
-
-    .talk-box {
-      left: 50%;
-      bottom: max(18px, env(safe-area-inset-bottom));
-      transform: translateX(-50%);
-      width: min(480px, 34vw);
-      min-width: 280px;
-      display: flex;
-      gap: 8px;
-      padding: 8px;
-      border: 1px solid rgba(255, 226, 163, .2);
-      border-radius: 999px;
-      background: rgba(5, 5, 5, .45);
-      box-shadow: inset 0 0 18px rgba(255, 226, 163, .08);
-      backdrop-filter: blur(14px);
-    }
-
-    .talk-box input {
-      min-width: 0;
-      flex: 1;
-      border: 0;
-      outline: 0;
-      border-radius: 999px;
-      padding: 12px 14px;
-      background: rgba(255, 238, 199, .08);
-      color: var(--cream);
-    }
-
-    .talk-box input::placeholder {
-      color: rgba(255, 238, 199, .45);
-    }
-
-    .talk-box button,
-    .drawer button,
-    .drawer input,
-    .drawer textarea {
-      border-radius: 16px;
-    }
-
-    .talk-box button,
-    .drawer .primary,
-    .drawer .ghost {
-      border: 1px solid rgba(255, 226, 163, .28);
-      background: rgba(255, 226, 163, .12);
-      color: var(--cream);
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .talk-box button {
-      padding: 0 15px;
-      white-space: nowrap;
-    }
-
-    .drawer {
-      position: absolute;
-      z-index: 30;
-      top: max(18px, env(safe-area-inset-top));
-      right: clamp(14px, 3vw, 44px);
-      width: min(420px, calc(100vw - 28px));
-      max-height: calc(100svh - 36px);
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 18px;
-      border: 1px solid rgba(255, 226, 163, .26);
-      border-radius: 28px;
-      background: linear-gradient(180deg, rgba(19, 16, 12, .94), rgba(8, 7, 5, .92));
-      box-shadow: 0 24px 70px rgba(0,0,0,.52), inset 0 0 26px rgba(255, 226, 163, .08);
-      backdrop-filter: blur(20px);
-      transform: translateX(calc(100% + 70px));
-      opacity: 0;
-      transition: transform .28s ease, opacity .28s ease;
-    }
-
-    .drawer.open {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    .drawer-head {
-      display: flex;
-      align-items: start;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 12px;
-    }
-
-    .drawer h2 {
-      margin: 0;
-      font-size: 22px;
-      letter-spacing: .03em;
-    }
-
-    .drawer p {
-      margin: 8px 0;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .close {
-      width: 40px;
-      height: 40px;
-      border: 1px solid rgba(255, 226, 163, .2);
-      background: rgba(255,255,255,.04);
-      cursor: pointer;
-    }
-
-    .status-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      margin: 14px 0;
-    }
-
-    .pill {
-      padding: 10px 12px;
-      border: 1px solid rgba(255, 226, 163, .15);
-      border-radius: 18px;
-      background: rgba(255, 238, 199, .06);
-      color: rgba(255, 238, 199, .78);
-      font-size: 13px;
-    }
-
-    .pill strong {
-      display: block;
-      margin-bottom: 3px;
-      color: var(--cream);
-      font-size: 15px;
-    }
-
-    .drawer label {
-      display: grid;
-      gap: 6px;
-      margin: 12px 0;
-      color: rgba(255, 238, 199, .76);
-      font-size: 13px;
-      font-weight: 800;
+    .rotateDevice strong {
+      font-size: 19px;
       letter-spacing: .04em;
-      text-transform: uppercase;
     }
 
-    .drawer input,
-    .drawer textarea {
-      width: 100%;
-      border: 1px solid rgba(255, 226, 163, .18);
-      outline: 0;
-      padding: 12px;
-      background: rgba(0, 0, 0, .24);
-      color: var(--cream);
-      resize: vertical;
-    }
-
-    .drawer textarea {
-      min-height: 110px;
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .drawer .primary,
-    .drawer .ghost {
-      padding: 11px 14px;
-    }
-
-    .drawer .ghost {
-      background: rgba(255,255,255,.035);
-    }
-
-    .log {
-      display: grid;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .log-item {
-      padding: 10px 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255, 226, 163, .12);
-      background: rgba(255, 238, 199, .05);
-      color: rgba(255, 238, 199, .78);
-      font-size: 13px;
+    .rotateDevice span {
+      margin-top: 8px;
+      color: rgba(255, 240, 197, .72);
+      font-size: 14px;
       line-height: 1.45;
     }
 
-    .module-grid {
-      display: grid;
-      gap: 8px;
-      margin-top: 12px;
+    @keyframes rotateHint {
+      0%,
+      100% { transform: rotate(0deg); }
+      50% { transform: rotate(90deg); }
     }
 
-    .module-card {
-      display: grid;
-      gap: 4px;
-      width: 100%;
-      padding: 11px 12px;
-      border: 1px solid rgba(255, 226, 163, .14);
-      border-radius: 18px;
-      background: rgba(255, 238, 199, .055);
-      color: var(--cream);
-      text-align: left;
-      cursor: pointer;
+    .root {
+      position: fixed !important;
+      inset: 0 !important;
+      display: block !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      padding: 0 !important;
     }
 
-    .module-card strong {
-      font-size: 14px;
-      letter-spacing: .02em;
+    .stage {
+      position: relative !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background:
+        radial-gradient(circle at 49% 47%, rgba(125, 84, 39, .22), transparent 19%),
+        radial-gradient(circle at 16% 40%, rgba(214, 171, 87, .08), transparent 23%),
+        linear-gradient(112deg, #050403 0%, #17100b 49%, #060504 100%);
+      box-shadow: none;
+      isolation: isolate;
     }
 
-    .module-card span {
-      color: rgba(255, 238, 199, .62);
-      font-size: 12px;
-      line-height: 1.35;
+    #globe-canvas {
+      position: absolute !important;
+      inset: 0 !important;
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      touch-action: none;
     }
 
-    .module-card small {
-      color: rgba(255, 238, 199, .42);
-      font-size: 11px;
-      word-break: break-word;
-    }
-
-    .toast {
-      position: absolute;
-      z-index: 50;
-      left: 50%;
-      top: max(58px, calc(env(safe-area-inset-top) + 48px));
-      transform: translate(-50%, -16px);
-      max-width: min(520px, calc(100vw - 32px));
-      padding: 11px 16px;
-      border: 1px solid rgba(255, 226, 163, .28);
-      border-radius: 999px;
-      background: rgba(8, 7, 5, .82);
-      color: var(--cream);
-      box-shadow: 0 12px 28px rgba(0,0,0,.36);
-      opacity: 0;
+    .hud-right,
+    .hud-center,
+    .hud {
+      position: absolute !important;
+      z-index: 3;
       pointer-events: none;
-      transition: opacity .25s ease, transform .25s ease;
+    }
+
+    .hud-right {
+      top: 14px !important;
+      right: 18px !important;
+      color: #ffe2ad;
+      font-size: clamp(10px, 1.6vw, 12px);
+      font-weight: 750;
+      letter-spacing: .08em;
+      text-shadow: 0 0 18px rgba(199, 155, 51, .65);
+    }
+
+    .hud-center {
+      top: 14px !important;
+      bottom: auto !important;
+      left: 50% !important;
+      width: min(56vw, 560px);
+      transform: translateX(-50%) !important;
+      color: rgba(255, 239, 197, .86);
+      font-size: clamp(10px, 1.45vw, 13px);
+      line-height: 1.2;
       text-align: center;
-      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .toast.show {
-      opacity: 1;
-      transform: translate(-50%, 0);
+    .hud {
+      bottom: 13px !important;
+      left: 18px !important;
+      display: flex !important;
+      flex-wrap: wrap;
+      gap: 4px 22px;
+      max-width: calc(100% - 170px);
+      color: rgba(255, 240, 197, .72);
+      font-size: clamp(10px, 1.45vw, 13px);
     }
 
-    @media (max-width: 900px) {
-      .left-map {
-        left: 12px;
-        top: 14%;
-        width: 52vw;
-        height: 64%;
-      }
-
-      .ring-zone {
-        right: -14px;
-        top: 18%;
-        width: 47vw;
-        min-width: 290px;
-      }
-
-      .center-core {
-        left: 48%;
-        top: 50%;
-      }
-
-      .talk-box {
-        width: min(440px, 48vw);
-      }
-
-      .bottom-help {
-        font-size: 12px;
-        padding-right: 24vw;
-      }
+    .hud span {
+      white-space: nowrap;
     }
 
-    @media (max-height: 520px) and (orientation: landscape) {
-      .cht-app {
-        min-height: 100svh;
+    #memoryPanel.panel {
+      top: 48px;
+      right: 18px;
+      bottom: 44px;
+      left: auto;
+      width: min(440px, calc(100vw - 42px));
+      max-width: 48vw;
+      max-height: none;
+    }
+
+    #repairPanel.repairPanel {
+      top: 58px;
+      right: 18px;
+      bottom: 52px;
+      left: auto;
+      width: min(400px, calc(100vw - 42px));
+      max-width: 44vw;
+      max-height: none;
+    }
+
+    #openLifePanel.openLifePanel {
+      position: fixed;
+      z-index: 30;
+      right: calc(var(--safe-right) + 14px);
+      bottom: calc(var(--safe-bottom) + 12px);
+    }
+
+
+    .glyphComposer {
+      margin-top: 11px;
+      padding: 10px;
+      border: 1px solid rgba(255, 220, 160, .22);
+      border-radius: 16px;
+      background:
+        linear-gradient(180deg, rgba(255, 226, 173, .09), rgba(5, 5, 10, .34)),
+        rgba(0, 0, 0, .22);
+      box-shadow: inset 0 0 22px rgba(255, 211, 139, .06);
+    }
+
+    .glyphComposerTop {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .glyphComposerTop strong {
+      color: #ffe2ad;
+      font-size: 12px;
+      letter-spacing: .04em;
+    }
+
+    .glyphComposerTop span {
+      color: rgba(255, 240, 197, .66);
+      font-size: 10px;
+      text-align: right;
+    }
+
+    .glyphDrums {
+      display: flex;
+      gap: 7px;
+      min-height: 78px;
+      padding: 4px 2px 7px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+    }
+
+    .glyphDrum {
+      position: relative;
+      flex: 0 0 62px;
+      min-width: 62px;
+      min-height: 70px;
+      display: grid;
+      grid-template-rows: 18px 30px 18px;
+      place-items: center;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255, 226, 173, .32);
+      border-radius: 12px;
+      color: #fff0c5;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255, 224, 164, .18), transparent 54%),
+        rgba(4, 5, 10, .88);
+      box-shadow: inset 0 0 18px rgba(255, 226, 173, .08);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .glyphDrum::before,
+    .glyphDrum::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      height: 1px;
+      background: rgba(255, 226, 173, .18);
+      pointer-events: none;
+    }
+
+    .glyphDrum::before { top: 20px; }
+    .glyphDrum::after { bottom: 20px; }
+
+    .glyphDrumGhost,
+    .glyphDrumCurrent {
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .glyphDrumGhost {
+      color: rgba(255, 240, 197, .30);
+      font-size: 10px;
+    }
+
+    .glyphDrumCurrent {
+      color: #fff0c5;
+      font-size: 15px;
+      font-weight: 850;
+      letter-spacing: .02em;
+      text-shadow: 0 0 12px rgba(255, 218, 147, .66);
+    }
+
+    .glyphDrum.is-dragging {
+      border-color: #ffe2ad;
+      box-shadow: 0 0 20px rgba(255, 213, 139, .34), inset 0 0 18px rgba(255, 226, 173, .15);
+    }
+
+    .glyphDrum.is-stepping .glyphDrumCurrent {
+      animation: glyphDrumStep .18s ease-out;
+    }
+
+    @keyframes glyphDrumStep {
+      from { transform: translateY(9px); opacity: .25; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .glyphCustomRow,
+    .glyphActions {
+      display: flex;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .glyphCustomRow input {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .glyphActions {
+      flex-wrap: wrap;
+    }
+
+    .glyphActions button,
+    .glyphActions a,
+    .glyphCustomRow button {
+      flex: 1 1 auto;
+      min-height: 34px;
+      padding: 7px 9px;
+      font-size: 11px;
+    }
+
+    .glyphWorkshopLink {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 220, 160, .32);
+      border-radius: 10px;
+      color: #ffe2ad;
+      background: rgba(255, 226, 173, .08);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    @media (max-height: 430px) {
+      .root {
+        padding-top: max(7px, env(safe-area-inset-top));
+        padding-bottom: max(7px, env(safe-area-inset-bottom));
       }
 
-      .top-title {
-        top: max(4px, env(safe-area-inset-top));
-        font-size: clamp(10px, 1.35vw, 14px);
-        letter-spacing: .08em;
+      .stage {
+        border-radius: 0 !important;
       }
 
-      .ring-label {
-        top: max(4px, env(safe-area-inset-top));
-        right: max(10px, env(safe-area-inset-right));
-        font-size: 8px;
-        letter-spacing: .12em;
+      .hud-right,
+      .hud-center {
+        top: 9px !important;
       }
 
-      .ring-label strong {
-        font-size: 15px;
+      .hud {
+        bottom: 8px !important;
       }
 
-      .left-map {
-        left: max(8px, env(safe-area-inset-left));
-        top: 15%;
-        width: 45vw;
-        height: 62%;
-        min-height: 0;
+      #memoryPanel.panel,
+      #repairPanel.repairPanel {
+        top: 38px;
+        bottom: 36px;
+        right: 12px;
+        width: min(360px, calc(100vw - 28px));
+        max-width: 45vw;
+        padding: 10px;
       }
 
-      .core-node {
-        width: clamp(78px, 12vw, 112px);
+      .glyphComposer {
+        margin-top: 8px;
+        padding: 8px;
+        border-radius: 13px;
       }
 
-      .game-core {
-        width: clamp(96px, 15vw, 136px);
+      .glyphComposerTop span {
+        font-size: 9px;
       }
 
-      .iphone-zone {
-        top: 38%;
-        width: clamp(112px, 15vw, 150px);
+      .glyphDrum {
+        flex-basis: 54px;
+        min-width: 54px;
+        min-height: 59px;
+        grid-template-rows: 14px 28px 14px;
       }
 
-      .iphone {
-        min-width: 70px;
-        max-width: 86px;
-        border-width: 5px;
-        border-radius: 18px;
-      }
-
-      .iphone-label {
-        font-size: 16px;
-      }
-
-      .center-core {
-        left: 49%;
-        top: 49%;
-        width: clamp(92px, 13vw, 116px);
-        height: clamp(92px, 13vw, 116px);
-      }
-
-      .ring-zone {
-        right: max(2px, env(safe-area-inset-right));
-        top: 18%;
-        width: 38vw;
-        height: 52vh;
-        min-width: 245px;
-        min-height: 175px;
-      }
-
-      .room {
-        width: clamp(48px, 7vw, 72px);
-        height: clamp(25px, 3.6vw, 36px);
-      }
-
-      .talk-box {
-        bottom: max(7px, env(safe-area-inset-bottom));
-        width: min(430px, 45vw);
-        min-width: 240px;
-        padding: 5px;
-      }
-
-      .talk-box input {
-        padding: 8px 10px;
-      }
-
-      .talk-box button {
-        padding: 0 11px;
-      }
-
-      .orbit-button {
-        right: max(10px, env(safe-area-inset-right));
-        bottom: max(9px, env(safe-area-inset-bottom));
-        min-width: 84px;
-        min-height: 58px;
-        padding: 8px 13px;
-        border-radius: 21px;
-      }
-
-      .orbit-button span {
-        font-size: 11px;
-      }
-
-      .bottom-help {
-        display: none;
-      }
-
-      .drawer {
-        position: fixed;
-        top: max(8px, env(safe-area-inset-top));
-        right: max(8px, env(safe-area-inset-right));
-        width: min(390px, calc(100vw - 20px));
-        max-height: calc(var(--app-height, 100svh) - 18px);
-        padding: 14px;
-        border-radius: 22px;
+      .glyphActions button,
+      .glyphActions a,
+      .glyphCustomRow button {
+        min-height: 29px;
+        padding: 5px 7px;
+        font-size: 10px;
       }
     }
 
     @media (orientation: portrait) {
-      body {
-        overflow: hidden;
-        touch-action: none;
+      .rotateDevice {
+        display: flex;
       }
 
-      .cht-app {
-        min-height: 100svh;
-      }
-
-      .scene {
-        min-width: 0;
-        transform: none;
-      }
-
-      .top-title {
-        top: max(9px, env(safe-area-inset-top));
-        max-width: 96vw;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        font-size: 12px;
-        letter-spacing: .08em;
-      }
-
-      .ring-label {
-        top: max(36px, calc(env(safe-area-inset-top) + 28px));
-        right: 14px;
-        font-size: 8px;
-      }
-
-      .ring-label strong {
-        font-size: 16px;
-      }
-
-      .left-map {
-        left: 0;
-        top: 10%;
-        width: 100vw;
-        height: 42%;
-        min-height: 0;
-      }
-
-      .core-node {
-        width: clamp(92px, 29vw, 124px);
-      }
-
-      .earth-core {
-        left: 6%;
-        top: 4%;
-      }
-
-      .language-core {
-        left: 50%;
-        top: 4%;
-      }
-
-      .game-core {
-        left: 36%;
-        top: 42%;
-        width: clamp(116px, 35vw, 150px);
-      }
-
-      .iphone-zone {
-        left: 6%;
-        top: 43%;
-        width: 34vw;
-      }
-
-      .iphone {
-        min-width: 74px;
-        max-width: 94px;
-      }
-
-      .iphone-label {
-        font-size: 16px;
-      }
-
-      .center-core {
-        left: 50%;
-        top: 49%;
-        width: clamp(112px, 35vw, 148px);
-        height: clamp(112px, 35vw, 148px);
-      }
-
-      .ring-zone {
-        left: 50%;
-        right: auto;
-        top: 58%;
-        width: 96vw;
-        height: 27vh;
-        min-width: 0;
-        min-height: 210px;
-        transform: translateX(-50%);
-      }
-
-      .room {
-        width: clamp(56px, 18vw, 82px);
-        height: clamp(29px, 9vw, 42px);
-      }
-
-      .talk-box {
-        left: max(10px, env(safe-area-inset-left));
-        right: max(10px, env(safe-area-inset-right));
-        bottom: max(10px, env(safe-area-inset-bottom));
-        transform: none;
-        width: auto;
-        min-width: 0;
-      }
-
-      .orbit-button {
-        right: max(12px, env(safe-area-inset-right));
-        bottom: max(72px, calc(env(safe-area-inset-bottom) + 64px));
-        min-width: 86px;
-        min-height: 58px;
-        padding: 8px 12px;
-      }
-
-      .bottom-help {
-        display: none;
-      }
-
-      .drawer {
-        position: fixed;
-        inset: auto max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
-        width: auto;
-        max-height: min(72svh, 620px);
-        border-radius: 24px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation-duration: .001ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .001ms !important;
+      .root,
+      #repairPanel,
+      #openLifePanel {
+        display: none !important;
       }
     }
   </style>
 </head>
+
 <body>
-  <main class="cht-app" id="app">
-    <div class="stars"></div>
-    <div class="grid"></div>
-    <div class="scan"></div>
+  <aside class="rotateDevice" aria-live="polite">
+    <div class="rotateDeviceInner">
+      <span class="rotateDeviceIcon" aria-hidden="true">▭</span>
+      <strong>Bez otočení telefonu na šířku nelze pokračovat</strong>
+      <span>CHT 360° nezpřístupní celý oběh Paměti bez otočení.</span>
+    </div>
+  </aside>
 
-    <section class="scene" id="scene" aria-label="CHT 360°‰ · hlavní scéna">
-      <svg class="signal-svg" viewBox="0 0 1600 760" preserveAspectRatio="none" aria-hidden="true">
-        <path d="M -40 140 C 240 206, 342 16, 580 103 S 922 234, 1114 131 S 1354 44, 1640 92" stroke="rgba(255,226,163,.55)" stroke-width="3"/>
-        <path d="M -60 154 C 247 224, 366 32, 596 118 S 930 252, 1128 147 S 1370 59, 1660 106" stroke="rgba(255,226,163,.28)" stroke-width="2"/>
-        <path d="M -60 612 C 246 558, 350 555, 535 640 S 857 727, 1047 626 S 1326 536, 1660 594" stroke="rgba(255,226,163,.58)" stroke-width="3"/>
-        <path d="M -60 625 C 260 580, 358 578, 548 660 S 872 744, 1060 643 S 1346 552, 1660 610" stroke="rgba(255,226,163,.28)" stroke-width="2"/>
-        <path d="M 120 690 C 325 586, 489 584, 695 585 S 1078 557, 1305 471 S 1504 432, 1640 445" stroke="rgba(255,226,163,.13)" stroke-width="2"/>
-        <path d="M 26 214 C 337 260, 472 300, 697 286 S 1035 207, 1310 227 S 1528 256, 1640 244" stroke="rgba(255,226,163,.11)" stroke-width="2"/>
-      </svg>
+  <div class="root">
+    <main class="stage" aria-label="CHT 360 stupňů — Paměť">
+      <canvas id="globe-canvas"></canvas>
 
-      <div class="top-title">{*(˚.•).•)//CHT 360°‰.\\(•.(•.)ア)</div>
-      <div class="ring-label">3D prstenec · pokojíčky 1–6<strong>CHT 360°‰.</strong></div>
+      <div class="hud-right">CHT 360°‰.</div>
 
-      <section class="left-map" aria-label="Jádra a iPhone 14">
-        <button class="core-node earth-core" data-open-core="earth" type="button" aria-label="Otevřít jádro Země">
-          <span class="glyph">! C {</span>
-          <span class="count" data-count="earth">0/240</span>
-        </button>
-        <button class="core-node language-core" data-open-core="language" type="button" aria-label="Otevřít jádro Jazyk">
-          <span class="glyph">i ° .</span>
-          <span class="count" data-count="language">0/240</span>
-        </button>
-        <button class="core-node game-core" data-open-core="game" type="button" aria-label="Otevřít jádro Hra">
-          <span class="glyph">H r a</span>
-          <span class="count" data-count="game">0/240</span>
-        </button>
+      <div class="hud-center">
+        {*(˚.•).•)//CHT 360°‰.\\(•.(•.)ア)
+      </div>
 
-        <div class="iphone-zone">
-          <div class="iphone-orbit"></div>
-          <button class="iphone" id="iphoneButton" type="button" aria-label="Otevřít iPhone 14 vrstvu">
-            <span class="apple">●</span>
-            <span class="iphone-text">
-              CHT
-              <small>360°‰.</small>
-              <small>PWA · PŘIPOJENO</small>
-            </span>
-          </button>
-          <div class="iphone-label">iPhone 14</div>
-        </div>
-      </section>
-
-      <button class="center-core" id="centerButton" type="button" aria-label="Otevřít střed CHT">
-        <span>CHT<small>360°‰.</small></span>
-        <i class="center-letter c">C</i>
-        <i class="center-letter h">H</i>
-        <i class="center-letter t">T</i>
-        <i class="center-letter mark">›</i>
-      </button>
-
-      <section class="ring-zone" aria-label="3D prstenec pokojíčků">
-        <div class="ring-stage" id="ringStage">
-          <div class="ring-ellipse"></div>
-          <div class="ring-core-shadow"></div>
-        </div>
-      </section>
-
-      <form class="talk-box" id="talkForm" autocomplete="off">
-        <input id="talkInput" name="talk" inputmode="text" placeholder="Napiš CHT / Revii…" aria-label="Mluva CHT">
-        <button type="submit">Vložit</button>
-      </form>
-
-      <button class="orbit-button" id="orbitButton" type="button">
-        [◉_◉]
-        <span>Oběh</span>
-      </button>
-
-      <div class="bottom-help" aria-hidden="true">
+      <div class="hud" aria-label="Ovládání">
         <span>1 prst: 3D otáčení</span>
         <span>2 prsty: posun · zoom · šejdr</span>
         <span>klepnutí: otevřít jádro</span>
       </div>
-    </section>
 
-    <aside class="drawer" id="drawer" aria-live="polite" aria-label="Panel CHT">
-      <div class="drawer-head">
-        <div>
-          <h2 id="drawerTitle">CHT 360°‰.</h2>
-          <p id="drawerLead">Připraveno.</p>
+      <section id="memoryPanel" class="panel">
+        <div class="panelTop">
+          <div>
+            <div id="panelTitle" class="panelTitle">Paměťové jádro</div>
+            <div id="panelSub" class="panelSub">70 slotů · místní uložení</div>
+          </div>
+
+          <button id="closePanel" type="button">Zavřít</button>
         </div>
-        <button class="close" id="closeDrawer" type="button" aria-label="Zavřít">×</button>
-      </div>
-      <div id="drawerBody"></div>
-    </aside>
 
-    <div class="toast" id="toast" role="status"></div>
-  </main>
+        <div class="slotsToolbar">
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Hledat ve slotech..."
+          >
+
+          <button id="exportCore" type="button">Export</button>
+          <button id="importCore" type="button">Import</button>
+          <a class="necesstinaShortcut" href="./necesstina-cht-360/">NeČEŠTINA</a>
+        </div>
+
+        <div id="slotGrid" class="slotGrid"></div>
+
+        <div id="slotEditor" class="slotEditor">
+          <input
+            id="slotName"
+            type="text"
+            maxlength="80"
+            placeholder="Název slotu"
+          >
+
+          <textarea
+            id="slotContent"
+            placeholder="Obsah slotu..."
+          ></textarea>
+
+          <div class="row">
+            <button id="saveSlot" class="primary" type="button">Uložit slot</button>
+            <button id="clearSlot" class="danger" type="button">Vymazat slot</button>
+          </div>
+
+          <section class="glyphComposer" aria-label="Šifra CHT – otočné bubínky">
+            <div class="glyphComposerTop">
+              <strong>Šifra CHT · bubínky</strong>
+              <span>otoč prstem · vlož do slotu</span>
+            </div>
+
+            <div id="glyphDrums" class="glyphDrums" aria-label="Otočné glyph bubínky"></div>
+
+            <div class="glyphCustomRow">
+              <input
+                id="glyphCustom"
+                type="text"
+                maxlength="24"
+                placeholder="Glyph nebo znak, který CHT nevlastní"
+                aria-label="Glyph nebo znak, který CHT nevlastní"
+              >
+              <button id="glyphAddToken" type="button">Přidat znak</button>
+            </div>
+
+            <div class="glyphActions">
+              <button id="glyphAddDrum" type="button">Bubínek</button>
+              <button id="glyphInsert" class="primary" type="button">Vložit</button>
+              <button id="glyphReset" type="button">Obnovit</button>
+              <a class="glyphWorkshopLink" href="./glyph-cht-360/">Glyph dílna</a>
+              <a class="glyphWorkshopLink" href="./glyph-pokojicku-cht-360/">Pokojíčky</a>
+            </div>
+          </section>
+        </div>
+
+        <div id="statusBox" class="statusBox">Vyber jádro nebo slot. Před vyčištěním Safari si Paměť vyexportuj.</div>
+
+        <div class="row">
+          <button id="exportAll" type="button">Export celé Paměti</button>
+          <button id="importAll" type="button">Import celé Paměti</button>
+        </div>
+
+        <input
+          id="fileInput"
+          class="hiddenInput"
+          type="file"
+          accept="application/json,.json"
+        >
+      </section>
+    </main>
+  </div>
+
+  <section id="repairPanel" class="repairPanel" aria-hidden="true" aria-label="Chybožrout Samoopravovna">
+    <div class="repairPanelTop">
+      <div>
+        <strong>[◉_◉] Chybožrout</strong>
+        <span>Nenechá chybu bez bezpečné kontroly.</span>
+      </div>
+
+      <div class="repairPanelActions">
+        <div id="repairState" class="repairState">nepozastaven</div>
+
+        <button
+          id="closeRepairPanel"
+          class="closeRepairPanel"
+          type="button"
+          aria-label="Zavřít Samoopravovnu"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+
+    <p id="repairSummary" class="repairSummary">
+      Připravuji diagnostiku Paměti…
+    </p>
+
+    <div class="repairGrid">
+      <button id="repairScan" class="repairAction" type="button">
+        <strong>🔎 Nenechat bez skenu</strong>
+        <span>načtené soubory nesmí zůstat bez kontroly</span>
+      </button>
+
+      <button id="repairFix" class="repairAction repairActionPrimary" type="button">
+        <strong>🧯 Nenechat poruchu bez opravy</strong>
+        <span>záloha, cache a neohrožený restart</span>
+      </button>
+
+      <button id="repairBackup" class="repairAction" type="button">
+        <strong>🛟 Neztratit stav</strong>
+        <span>současný stav Paměti nesmí zůstat neuložený</span>
+      </button>
+
+      <button id="repairRestore" class="repairAction" type="button">
+        <strong>↩︎ Nenechat zálohu neobnovenou</strong>
+        <span>poslední bezpečná záloha nezůstane nevrácená</span>
+      </button>
+    </div>
+
+    <div class="repairMeta">
+      <span>Ve frontě <strong id="repairQueue">0</strong></span>
+      <span>Poslední běh <strong id="repairLast">—</strong></span>
+    </div>
+
+    <div id="repairLog" class="repairLog" role="status" aria-live="polite"></div>
+  </section>
+
+  <button
+    id="openLifePanel"
+    class="openLifePanel"
+    type="button"
+    aria-label="Otevřít Chybožrout Samoopravovnu"
+  >
+    [◉_◉]
+    <span>Oběh</span>
+  </button>
+
+  <button id="openReviaPanel" class="openReviaPanel" type="button" aria-label="Otevřít Revia chat">
+    <span class="reviaOrb" aria-hidden="true">R</span>
+    <span>Revia</span>
+  </button>
+
+  <section id="reviaPanel" class="reviaPanel" aria-hidden="true" aria-label="Revia — chat CHT 360°‰.">
+    <header class="reviaTop">
+      <button id="reviaMode" class="reviaMode" type="button" aria-label="Přepnout hlas Revia">
+        <span aria-hidden="true">✦</span>
+        <span id="reviaModeLabel">Revia</span>
+      </button>
+      <div class="reviaTitle">
+        <strong>Revia</strong>
+        <small>propojená vrstva CHT 360°‰.</small>
+      </div>
+      <button id="closeReviaPanel" class="reviaClose" type="button" aria-label="Zavřít Revia">×</button>
+    </header>
+
+    <div class="reviaShortcuts" aria-label="Rychlé propojení">
+      <button type="button" data-revia-action="memory">Paměť</button>
+      <button type="button" data-revia-action="glyph">Glyph</button>
+      <button type="button" data-revia-action="rooms">Pokojíčky</button>
+      <button type="button" data-revia-action="iphone">iPhone</button>
+    </div>
+
+    <div id="reviaLog" class="reviaLog" role="log" aria-live="polite"></div>
+
+    <form id="reviaForm" class="reviaForm">
+      <label class="srOnly" for="reviaInput">Zpráva pro Revia</label>
+      <textarea id="reviaInput" rows="2" maxlength="1200" placeholder="Napiš Revii…"></textarea>
+      <button type="submit" aria-label="Odeslat zprávu Revii">↗</button>
+    </form>
+    <p id="reviaState" class="reviaState">Revia je připravená. Zprávy zůstávají v tomto zařízení.</p>
+  </section>
+
+  <script type="module" src="./js/app.js"></script>
+  <script type="module" src="./js/aplikace.js"></script>
+  <script type="module" src="./js/cht-chybozrout.js"></script>
+  <script type="module" src="./js/revia-dock.js"></script>
 
   <script>
     (() => {
-      "use strict";
+      let timers = [];
 
-      const VERSION = "CHT 360°‰ · Revia index 1.0";
-      const SLOT_LIMIT = 240;
-      const ROOM_LIMIT = 240;
-      const VISIBLE_ROOMS = 6;
-      const STORAGE_KEY = "cht360_pamet_v1";
-      const LEGACY_STORAGE_KEY = "vaft_pamet_v1";
-      const ROOMS_KEY = "cht360_pokojicky_240_v1";
-      const REVIA_KEY = "cht360_revia_bridge_v1";
-      const SPEECH_KEY = "cht360_mluva_log_v1";
-      const REVIA_API_ENDPOINT_KEY = "cht360_revia_api_endpoint_v1";
-      const REVIA_API_STATUS_KEY = "cht360_revia_api_status_v1";
-      const NETWORK_PULSE_KEY = "cht360_network_pulse_v1";
-      const FUNCTION_REPORT_KEY = "cht360_funkcni_most_report_v1";
-      const FUNCTION_BACKUP_KEY = "cht360_funkcni_most_backup_v1";
-      const CHYBOZROUT_KEY = "cht360_chybozrout_v2";
-      const CHYBOZROUT_BACKUP_KEY = "cht360_samoopravovna_backup_v1";
-      const API_REPAIR_KEY = "cht360_api_opravar_pack_v1";
-      const TERRY_EGG_KEY = "cht360_terry_easter_egg_v1";
-      const BATOLE_KEY = "cht360_batole_v1";
-      const BATOLE_LEGACY_KEY = "BATOLE_SVET";
-      const BATOLE_EVENT = "cht.batole.changed";
-      const NETWORK_EVENT = "cht360.network.changed";
+      const refreshCanvasSize = () => {
+        timers.forEach(clearTimeout);
 
-      const coreMap = {
-        earth: {
-          title: "Země",
-          glyph: "! C {",
-          purpose: "Modeling, světy a úhel pohledu."
-        },
-        language: {
-          title: "Jazyk",
-          glyph: "i ° .",
-          purpose: "Písmena, symboly, glyphy a význam."
-        },
-        game: {
-          title: "Hra",
-          glyph: "H r a",
-          purpose: "Pravidla, události a postup."
-        },
-        control: {
-          title: "Řízení / iPhone 14",
-          glyph: "CHT",
-          purpose: "Připojení PWA, odkazy, rychlé vstupy a bezpečné řízení."
-        }
+        timers = [80, 260, 650].map((delay) => setTimeout(() => {
+          window.dispatchEvent(new Event("resize"));
+        }, delay));
       };
 
-      const defaultRooms = Array.from({ length: ROOM_LIMIT }, (_, index) => ({
-        id: index + 1,
-        title: index < 6 ? `Pokojíček ${index + 1}` : "",
-        glyph: index < 6 ? String(index + 1) : "",
-        note: "",
-        linked: index === 0 ? "Revia-Master" : "",
-        updatedAt: ""
-      }));
-
-      const defaultRevia = {
-        connected: true,
-        title: "Revia-Master",
-        path: "worlds/Revia-Master/",
-        mode: "Anděl / Ďáblík",
-        status: "napojená na CHT 360°‰.",
-        sourcePaths: [
-          "Revia/revia.js",
-          "src/revia-link.js",
-          "worlds/Revia-Master/revia-angel.js",
-          "worlds/Revia-Master/revia-repo-hub.js",
-          "worlds/Revia/index.html"
-        ],
-        signals: [
-          {
-            at: new Date().toISOString(),
-            text: "Revia je připravená jako živý svět napojený na prstenec pokojíčků."
-          }
-        ]
-      };
-
-      const repoModules = [
-        {
-          id: "cht-360-core",
-          label: "CHT 360°‰.",
-          kind: "PWA jádro",
-          entry: "./index.html",
-          storageKeys: ["cht360_pamet_v1", "cht360_pokojicky_240_v1", "cht360_revia_bridge_v1"],
-          note: "Hlavní index, paměť, iPhone 14 a prstenec."
-        },
-        {
-          id: "revia-master",
-          label: "Revia-Master",
-          kind: "svět",
-          entry: "",
-          source: "worlds/Revia-Master/",
-          storageKeys: ["cht360_revia_bridge_v1", "revia-master-history-angel", "reviaState", "reviaNotes"],
-          note: "Napojeno vnitřně přes CHT panel a pokojíček 1."
-        },
-        {
-          id: "glyph-cht-360",
-          label: "Glyph CHT 360°‰.",
-          kind: "PWA modul",
-          entry: "./glyph-cht-360/",
-          storageKeys: ["glyph-cht-360-project-guard.v1"],
-          note: "Glyph engine a ochrana znaků."
-        },
-        {
-          id: "glyph-pokojicku-cht-360",
-          label: "Glyph pokojíčků",
-          kind: "PWA modul",
-          entry: "./glyph-pokojicku-cht-360/",
-          storageKeys: ["glyph-cht-360-rooms.v1", "cht360_pokojicky_240_v1"],
-          note: "Pokojíčky, glyph místnosti a uložené dveře."
-        },
-        {
-          id: "cht-360-bubinky",
-          label: "Bubínky",
-          kind: "PWA modul",
-          entry: "./bubinky/",
-          storageKeys: ["cht360_bubinky_values_v1", "cht360_slot_locks_v1", "cht360_slot_unlocks_v1"],
-          note: "Zámky slotů, bubínky a glyph výběr."
-        },
-        {
-          id: "mluva-cht-360",
-          label: "Mluva CHT",
-          kind: "PWA modul",
-          entry: "./mluva-cht-360/",
-          storageKeys: ["cht360_mluva_log_v1"],
-          note: "Chatové okno, signály a Chybožrout mluvy."
-        },
-        {
-          id: "cht360-batole",
-          label: "Batole •ア",
-          kind: "svět / zárodek",
-          entry: "./cht360-batole/",
-          source: "cht360-batole/",
-          storageKeys: ["cht360_batole_v1", "BATOLE_SVET"],
-          note: "Vědomě uložené kroky čtyř jader, čtené přes Batole most."
-        },
-        {
-          id: "signal-360",
-          label: "Signal 360°‰.",
-          kind: "PWA modul",
-          entry: "./signal-360/",
-          storageKeys: ["vaft_pamet_v1"],
-          note: "Signální 360 vrstva a starší paměť."
-        },
-        {
-          id: "cht-360-jadra",
-          label: "Jádra — pracovní deska",
-          kind: "aplikace",
-          entry: "./cht360-jadra-pracovni-deska/",
-          storageKeys: ["cht360_jadra_pracovni_deska_v1"],
-          note: "Pracovní deska jader."
-        },
-        {
-          id: "chybozrout",
-          label: "Chybožrout",
-          kind: "diagnostika",
-          entry: "./js/cht-chybozrout.js",
-          storageKeys: ["cht360_chybozrout_v2", "cht360_samoopravovna_backup_v1"],
-          note: "Kontrola kostry a lokální zálohy."
-        }
-      ];
-
-      const app = document.getElementById("app");
-      const ringStage = document.getElementById("ringStage");
-      const drawer = document.getElementById("drawer");
-      const drawerTitle = document.getElementById("drawerTitle");
-      const drawerLead = document.getElementById("drawerLead");
-      const drawerBody = document.getElementById("drawerBody");
-      const closeDrawer = document.getElementById("closeDrawer");
-      const centerButton = document.getElementById("centerButton");
-      const iphoneButton = document.getElementById("iphoneButton");
-      const orbitButton = document.getElementById("orbitButton");
-      const talkForm = document.getElementById("talkForm");
-      const talkInput = document.getElementById("talkInput");
-      const toast = document.getElementById("toast");
-
-      let ringRotation = -18;
-      let activeRoomId = 1;
-      let dragState = null;
-      let terryEggTap = { count: 0, timer: 0 };
-      let batoleBridgeWriting = false;
-
-      const state = {
-        memory: loadMemory(),
-        rooms: loadArray(ROOMS_KEY, defaultRooms, ROOM_LIMIT),
-        revia: loadObject(REVIA_KEY, defaultRevia),
-        speech: loadArray(SPEECH_KEY, [], 120)
-      };
-
-      function safeParse(value, fallback) {
-        if (!value) return clone(fallback);
-        try {
-          const parsed = JSON.parse(value);
-          return parsed ?? clone(fallback);
-        } catch (error) {
-          console.warn("CHT 360°‰: nepovedlo se načíst uložená data.", error);
-          return clone(fallback);
-        }
-      }
-
-      function clone(value) {
-        return JSON.parse(JSON.stringify(value));
-      }
-
-      function loadObject(key, fallback) {
-        const parsed = safeParse(localStorage.getItem(key), fallback);
-        return { ...clone(fallback), ...parsed };
-      }
-
-      function loadArray(key, fallback, maxLength) {
-        const parsed = safeParse(localStorage.getItem(key), fallback);
-        const source = Array.isArray(parsed) ? parsed : fallback;
-        const merged = clone(fallback);
-        source.slice(0, maxLength).forEach((item, index) => {
-          if (item && typeof item === "object") merged[index] = { ...merged[index], ...item };
-        });
-        return merged;
-      }
-
-      function loadMemory() {
-        const fallback = {
-          version: VERSION,
-          cores: Object.fromEntries(Object.keys(coreMap).map((id) => [id, { slots: [] }])),
-          updatedAt: new Date().toISOString()
-        };
-        const primary = safeParse(localStorage.getItem(STORAGE_KEY), null);
-        const legacy = safeParse(localStorage.getItem(LEGACY_STORAGE_KEY), null);
-        const loaded = primary || legacy || fallback;
-        const memory = { ...fallback, ...loaded, cores: { ...fallback.cores, ...(loaded.cores || {}) } };
-        Object.keys(coreMap).forEach((id) => {
-          const core = memory.cores[id] || { slots: [] };
-          memory.cores[id] = {
-            ...core,
-            slots: Array.isArray(core.slots) ? core.slots.slice(0, SLOT_LIMIT) : []
-          };
-        });
-        return memory;
-      }
-
-      function saveAll() {
-        state.memory.updatedAt = new Date().toISOString();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.memory));
-        localStorage.setItem(ROOMS_KEY, JSON.stringify(state.rooms));
-        localStorage.setItem(REVIA_KEY, JSON.stringify(state.revia));
-        localStorage.setItem(SPEECH_KEY, JSON.stringify(state.speech.slice(-120)));
-        window.dispatchEvent(new CustomEvent("cht.memory.changed", {
-          detail: {
-            version: VERSION,
-            reason: "uložení indexu",
-            updatedAt: state.memory.updatedAt,
-            storageKey: STORAGE_KEY
-          }
-        }));
-        saveNetworkPulse("uložení indexu");
-        refreshCounts();
-      }
-
-      function saveNetworkPulse(reason) {
-        const detail = {
-          at: new Date().toISOString(),
-          reason,
-          version: VERSION,
-          modules: repoModules.map((module) => ({
-            id: module.id,
-            label: module.label,
-            entry: module.entry || "",
-            source: module.source || "",
-            storageKeys: module.storageKeys || []
-          })),
-          revia: {
-            connected: state.revia.connected,
-            path: state.revia.path,
-            signals: state.revia.signals.length
-          }
-        };
-
-        try {
-          localStorage.setItem(NETWORK_PULSE_KEY, JSON.stringify(detail));
-        } catch {
-          /* Síťový puls nesmí zastavit index. */
-        }
-
-        window.dispatchEvent(new CustomEvent(NETWORK_EVENT, { detail }));
-      }
-
-      function refreshCounts() {
-        Object.keys(coreMap).forEach((id) => {
-          const target = document.querySelector(`[data-count="${id}"]`);
-          if (!target) return;
-          const used = (state.memory.cores[id]?.slots || []).filter(Boolean).length;
-          target.textContent = `${used}/${SLOT_LIMIT}`;
-        });
-      }
-
-      function renderRooms() {
-        ringStage.querySelectorAll(".room").forEach((node) => node.remove());
-        const rect = ringStage.getBoundingClientRect();
-        const width = rect.width || 520;
-        const height = rect.height || 330;
-        const cx = width / 2;
-        const cy = height / 2;
-        const rx = width * 0.39;
-        const ry = height * 0.22;
-
-        state.rooms.slice(0, VISIBLE_ROOMS).forEach((room, index) => {
-          const angle = ((index / VISIBLE_ROOMS) * Math.PI * 2) + degreesToRadians(ringRotation);
-          const depth = Math.sin(angle);
-          const x = cx + Math.cos(angle) * rx;
-          const y = cy + depth * ry;
-          const scale = 0.82 + ((depth + 1) / 2) * 0.24;
-          const node = document.createElement("button");
-          node.type = "button";
-          node.className = `room${room.id === activeRoomId ? " active" : ""}`;
-          node.style.left = `${x}px`;
-          node.style.top = `${y}px`;
-          node.style.zIndex = String(Math.round(50 + depth * 20));
-          node.style.transform = `translate(-50%, -50%) scale(${scale.toFixed(3)})`;
-          node.dataset.room = String(room.id);
-          node.innerHTML = `<b>${escapeHtml(room.glyph || room.id)}</b><small>${room.linked ? "Revia" : "slot"}</small>`;
-          node.addEventListener("click", () => openRoom(room.id));
-          ringStage.appendChild(node);
-        });
-      }
-
-      function degreesToRadians(value) {
-        return (value * Math.PI) / 180;
-      }
-
-      function escapeHtml(value) {
-        return String(value)
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-      }
-
-      function renderModuleCards(options = {}) {
-        const modules = options.limit ? repoModules.slice(0, options.limit) : repoModules;
-        return `
-          <div class="module-grid">
-            ${modules.map((module) => `
-              <button class="module-card" data-open-module="${escapeHtml(module.id)}" type="button">
-                <strong>${escapeHtml(module.label)} · ${escapeHtml(module.kind)}</strong>
-                <span>${escapeHtml(module.note)}</span>
-                <small>${escapeHtml(module.entry || module.source || "vnitřní napojení")}</small>
-              </button>
-            `).join("")}
-          </div>
-        `;
-      }
-
-      function uniqueStorageKeys() {
-        const baseKeys = [
-          STORAGE_KEY,
-          LEGACY_STORAGE_KEY,
-          ROOMS_KEY,
-          REVIA_KEY,
-          SPEECH_KEY,
-          REVIA_API_ENDPOINT_KEY,
-          REVIA_API_STATUS_KEY,
-          NETWORK_PULSE_KEY,
-          FUNCTION_REPORT_KEY,
-          FUNCTION_BACKUP_KEY,
-          CHYBOZROUT_KEY,
-          CHYBOZROUT_BACKUP_KEY,
-          API_REPAIR_KEY,
-          TERRY_EGG_KEY,
-          BATOLE_KEY,
-          BATOLE_LEGACY_KEY
-        ];
-        repoModules.forEach((module) => {
-          module.storageKeys.forEach((key) => baseKeys.push(key));
-        });
-        return [...new Set(baseKeys)].filter(Boolean);
-      }
-
-      function byteSize(value) {
-        return new Blob([String(value || "")]).size;
-      }
-
-      function readStorageShape(key) {
-        const raw = localStorage.getItem(key);
-        if (raw === null) {
-          return { key, present: false, bytes: 0, type: "prázdné", validJson: false };
-        }
-        let parsed = null;
-        let validJson = false;
-        try {
-          parsed = JSON.parse(raw);
-          validJson = true;
-        } catch {
-          parsed = raw;
-        }
-        const type = !validJson ? "text" : Array.isArray(parsed) ? "pole" : parsed && typeof parsed === "object" ? "objekt" : typeof parsed;
-        return {
-          key,
-          present: true,
-          bytes: byteSize(raw),
-          type,
-          validJson
-        };
-      }
-
-      function buildFunctionReport(reason = "ruční sken") {
-        const now = new Date().toISOString();
-        const issues = [];
-        const actions = [];
-        const batole = readBatoleState();
-        const moduleFlow = repoModules.slice().reverse().map((module, index) => ({
-          orderFromEnd: index + 1,
-          id: module.id,
-          label: module.label,
-          kind: module.kind,
-          entry: module.entry || module.source || "",
-          functions: module.id === "chybozrout"
-            ? ["sken", "záloha", "bezpečná oprava"]
-            : ["čtení klíčů", "napojení do sítě"]
-        }));
-
-        Object.entries(coreMap).forEach(([coreId, core]) => {
-          const slots = state.memory.cores[coreId]?.slots;
-          if (!Array.isArray(slots)) {
-            issues.push({ level: "opravit", area: core.title, text: "Jádro nemá pole slotů." });
-            actions.push(`Doplnit sloty pro ${core.title}.`);
-            return;
-          }
-          if (slots.length !== SLOT_LIMIT) {
-            issues.push({ level: "opravit", area: core.title, text: `Slotů je ${slots.length}, má být ${SLOT_LIMIT}.` });
-            actions.push(`Srovnat počet slotů pro ${core.title}.`);
-          }
-        });
-
-        if (!Array.isArray(state.rooms) || state.rooms.length !== ROOM_LIMIT) {
-          issues.push({ level: "opravit", area: "Pokojíčky", text: `Pokojíčků je ${Array.isArray(state.rooms) ? state.rooms.length : 0}, má být ${ROOM_LIMIT}.` });
-          actions.push("Doplnit prstenec pokojíčků.");
-        }
-
-        if (!state.revia || typeof state.revia !== "object") {
-          issues.push({ level: "opravit", area: "Revia", text: "Revia nemá uložený stav." });
-          actions.push("Obnovit základní stav Revie.");
-        }
-
-        if (!batole.steps.length) {
-          issues.push({
-            level: "info",
-            area: "Batole",
-            text: "Batole je napojené, ale zatím nemá uložené kroky v tomto prohlížeči."
-          });
-        }
-
-        const storage = uniqueStorageKeys().map(readStorageShape);
-        const missingModuleKeys = repoModules.flatMap((module) => {
-          return module.storageKeys
-            .filter((key) => localStorage.getItem(key) === null)
-            .map((key) => ({ module: module.label, key }));
-        });
-
-        if (missingModuleKeys.length) {
-          issues.push({
-            level: "info",
-            area: "Úložné klíče",
-            text: `${missingModuleKeys.length} klíčů zatím nemá data. To je v pořádku, pokud modul ještě nebyl otevřený.`
-          });
-        }
-
-        const report = {
-          version: VERSION,
-          kind: "CHT 360°‰ · funkční most",
-          reason,
-          createdAt: now,
-          summary: {
-            modules: repoModules.length,
-            storageKeys: storage.length,
-            presentKeys: storage.filter((item) => item.present).length,
-            issues: issues.length,
-            fixableIssues: issues.filter((item) => item.level === "opravit").length,
-            batoleSteps: batole.steps.length,
-            batoleLevel: batoleLevel(batole)
-          },
-          moduleFlow,
-          storage,
-          missingModuleKeys,
-          issues,
-          actions
-        };
-
-        localStorage.setItem(FUNCTION_REPORT_KEY, JSON.stringify(report));
-        localStorage.setItem(CHYBOZROUT_KEY, JSON.stringify({
-          lastReportAt: now,
-          summary: report.summary,
-          issues: report.issues.slice(0, 12),
-          actions: report.actions.slice(0, 12)
-        }));
-        saveNetworkPulse("sken funkcí");
-        return report;
-      }
-
-      function makeFunctionBackup(reason = "ruční záloha") {
-        const now = new Date().toISOString();
-        const storage = {};
-        uniqueStorageKeys().forEach((key) => {
-          const value = localStorage.getItem(key);
-          if (value !== null) storage[key] = value;
-        });
-
-        const backup = {
-          version: VERSION,
-          reason,
-          createdAt: now,
-          memory: clone(state.memory),
-          rooms: clone(state.rooms),
-          revia: clone(state.revia),
-          speech: clone(state.speech.slice(-120)),
-          storage
-        };
-
-        const previous = loadArray(FUNCTION_BACKUP_KEY, [], 4);
-        previous.push(backup);
-        const backups = previous.slice(-4);
-        localStorage.setItem(FUNCTION_BACKUP_KEY, JSON.stringify(backups));
-        localStorage.setItem(CHYBOZROUT_BACKUP_KEY, JSON.stringify(backup));
-        saveNetworkPulse("záloha funkcí");
-        return backup;
-      }
-
-      function repairFunctionBridge() {
-        const before = buildFunctionReport("sken před opravou");
-        const backup = makeFunctionBackup("záloha před bezpečnou opravou");
-        const repairs = [];
-
-        Object.keys(coreMap).forEach((coreId) => {
-          const current = state.memory.cores[coreId] || { slots: [] };
-          const slots = Array.isArray(current.slots) ? current.slots.slice(0, SLOT_LIMIT) : [];
-          while (slots.length < SLOT_LIMIT) slots.push(null);
-          state.memory.cores[coreId] = { ...current, slots };
-          if (!Array.isArray(current.slots) || current.slots.length !== SLOT_LIMIT) {
-            repairs.push(`Jádro ${coreMap[coreId].title}: sloty srovnané na ${SLOT_LIMIT}.`);
-          }
-        });
-
-        const hadRoomShapeIssue = !Array.isArray(state.rooms) || state.rooms.length !== ROOM_LIMIT;
-        if (!Array.isArray(state.rooms)) state.rooms = [];
-        while (state.rooms.length < ROOM_LIMIT) {
-          const fallbackRoom = defaultRooms[state.rooms.length] || { id: state.rooms.length + 1, title: "", glyph: "", note: "", linked: "", updatedAt: "" };
-          state.rooms.push(clone(fallbackRoom));
-        }
-        if (state.rooms.length > ROOM_LIMIT) state.rooms = state.rooms.slice(0, ROOM_LIMIT);
-        state.rooms = state.rooms.map((room, index) => ({
-          ...clone(defaultRooms[index]),
-          ...(room || {}),
-          id: index + 1
-        }));
-        if (hadRoomShapeIssue) {
-          repairs.push(`Prstenec pokojíčků srovnaný na ${ROOM_LIMIT}.`);
-        }
-
-        state.revia = {
-          ...clone(defaultRevia),
-          ...(state.revia || {}),
-          sourcePaths: [...new Set([...(defaultRevia.sourcePaths || []), ...((state.revia && state.revia.sourcePaths) || [])])]
-        };
-
-        if (!Array.isArray(state.speech)) state.speech = [];
-        state.speech = state.speech.slice(-120);
-
-        saveAll();
-        if (!localStorage.getItem(LEGACY_STORAGE_KEY)) {
-          localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(state.memory));
-          repairs.push("Starší paměťový klíč doplněný pro staré moduly.");
-        }
-
-        const after = buildFunctionReport("sken po opravě");
-        localStorage.setItem(CHYBOZROUT_KEY, JSON.stringify({
-          lastRepairAt: new Date().toISOString(),
-          backupAt: backup.createdAt,
-          before: before.summary,
-          after: after.summary,
-          repairs
-        }));
-        saveNetworkPulse("bezpečná oprava funkcí");
-        return { before, after, backup, repairs };
-      }
-
-      function renderFunctionReport(report) {
-        const issues = report.issues.map((issue) => `
-          <div class="log-item"><strong>${escapeHtml(issue.level)} · ${escapeHtml(issue.area)}</strong><br><small>${escapeHtml(issue.text)}</small></div>
-        `).join("");
-        const flow = report.moduleFlow.slice(0, 9).map((module) => `
-          <div class="log-item">${module.orderFromEnd}. ${escapeHtml(module.label)}<br><small>${escapeHtml(module.functions.join(" · "))}</small></div>
-        `).join("");
-
-        return `
-          <div class="status-row">
-            <div class="pill"><strong>${report.summary.modules}</strong>funkčních kostek</div>
-            <div class="pill"><strong>${report.summary.presentKeys}/${report.summary.storageKeys}</strong>klíče</div>
-            <div class="pill"><strong>${report.summary.fixableIssues}</strong>k opravě</div>
-            <div class="pill"><strong>${new Date(report.createdAt).toLocaleTimeString("cs-CZ")}</strong>sken</div>
-          </div>
-          <p>Most bere moduly od konce seznamu a skládá z nich jen malé schopnosti: čtení klíčů, sken, zálohu a jemnou opravu. Celé PWA se dovnitř netahá.</p>
-          <div class="actions">
-            <button class="primary" data-scan-functions type="button">Znovu skenovat</button>
-            <button class="ghost" data-backup-functions type="button">Udělat zálohu</button>
-            <button class="ghost" data-repair-functions type="button">Bezpečně opravit</button>
-            <button class="ghost" data-open-api-repair type="button">Terry API</button>
-          </div>
-          <p>Tok od konce repozitáře:</p>
-          <div class="log">${flow}</div>
-          <p>Nálezy:</p>
-          <div class="log">${issues || `<div class="log-item">Bez tvrdé chyby. Chybějící klíče jen čekají, až se moduly poprvé použijí.</div>`}</div>
-        `;
-      }
-
-      function openFunctionBridge(report = buildFunctionReport("otevření mostu")) {
-        openDrawer(
-          "Funkční most CHT",
-          "Krátké schopnosti z repozitáře bez přenášení celých PWA.",
-          renderFunctionReport(report)
-        );
-      }
-
-      function getLastApiRepairPack() {
-        const packs = loadArray(API_REPAIR_KEY, [], 8).filter(Boolean);
-        return packs.at(-1) || null;
-      }
-
-      function buildApiRepairContext(goal = "Najdi bezpečné opravy pro CHT 360°‰.", backupAt = "") {
-        const report = buildFunctionReport("AI opravářský sken");
-        const coreUsage = Object.fromEntries(Object.entries(coreMap).map(([coreId, core]) => {
-          const slots = state.memory.cores[coreId]?.slots || [];
-          return [coreId, {
-            title: core.title,
-            used: slots.filter(Boolean).length,
-            capacity: SLOT_LIMIT
-          }];
-        }));
-        const roomUsage = {
-          used: state.rooms.filter((room) => room?.title || room?.glyph || room?.note || room?.linked).length,
-          capacity: ROOM_LIMIT,
-          linked: state.rooms.filter((room) => room?.linked).map((room) => ({ id: room.id, linked: room.linked })).slice(0, 16)
-        };
-        const apiStatus = loadObject(REVIA_API_STATUS_KEY, { state: "čeká" });
-
-        return {
-          goal,
-          source: "Terryho easter egg · API Opravář",
-          createdAt: new Date().toISOString(),
-          backupAt,
-          page: {
-            title: document.title,
-            url: location.href,
-            endpointConfigured: Boolean(getReviaApiEndpoint())
-          },
-          report: {
-            summary: report.summary,
-            issues: report.issues,
-            actions: report.actions,
-            missingModuleKeys: report.missingModuleKeys.slice(0, 40)
-          },
-          modules: repoModules.map((module) => ({
-            id: module.id,
-            label: module.label,
-            kind: module.kind,
-            entry: module.entry || "",
-            source: module.source || "",
-            storageKeys: module.storageKeys
-          })),
-          storage: report.storage.map((item) => ({
-            key: item.key,
-            present: item.present,
-            bytes: item.bytes,
-            type: item.type,
-            validJson: item.validJson
-          })),
-          coreUsage,
-          roomUsage,
-          revia: {
-            connected: Boolean(state.revia.connected),
-            status: state.revia.status || "",
-            mode: state.revia.mode || "",
-            apiStatus: apiStatus.state || ""
-          },
-          batole: {
-            level: batoleLevel(readBatoleState()),
-            counts: batoleCounts(readBatoleState()),
-            steps: readBatoleState().steps.slice(-12)
-          }
-        };
-      }
-
-      function repairGoal(kind) {
-        const goals = {
-          local: "Z lokálního skenu navrhni nejbezpečnější opravy pro CHT 360°‰. Zaměř se na paměť, sloty, pokojíčky, klíče a napojení Revie.",
-          repo: "Navrhni repo opravný balíček pro docs/index.html, moduly, manifesty, service workery, cesty a UTF-8. Neprováděj zápis, připrav plán.",
-          pr: "Připrav stručný PR plán: větev, commit message, soubory, pořadí změn a kontroly po nahrání."
-        };
-        return goals[kind] || goals.local;
-      }
-
-      function storeApiRepairPack(reply, context, api = {}) {
-        const pack = {
-          id: `api-oprava-${Date.now()}`,
-          createdAt: new Date().toISOString(),
-          goal: context.goal,
-          reply,
-          model: api.model || "",
-          usage: api.usage || null,
-          summary: context.report?.summary || {},
-          backupAt: context.backupAt || ""
-        };
-        const packs = loadArray(API_REPAIR_KEY, [], 8).filter(Boolean);
-        packs.push(pack);
-        localStorage.setItem(API_REPAIR_KEY, JSON.stringify(packs.slice(-8)));
-        localStorage.setItem(TERRY_EGG_KEY, JSON.stringify({
-          unlockedAt: new Date().toISOString(),
-          lastPackId: pack.id,
-          mode: "API Opravář"
-        }));
-        saveRepairPackToControl(pack, true);
-        return pack;
-      }
-
-      function saveRepairPackToControl(pack, silent = false) {
-        if (!pack) return;
-        const slots = state.memory.cores.control.slots;
-        const targetIndex = Math.min(slots.findIndex((slot) => !slot), slots.length);
-        const safeIndex = targetIndex >= 0 && targetIndex < SLOT_LIMIT ? targetIndex : Math.min(slots.length, SLOT_LIMIT - 1);
-        slots[safeIndex] = {
-          id: safeIndex + 1,
-          text: `Terry API Opravář\n${pack.goal}\n\n${String(pack.reply || "").slice(0, 2600)}`,
-          source: "Terry API Opravář",
-          updatedAt: new Date().toISOString()
-        };
-        saveAll();
-        if (!silent) showToast("Opravný balíček uložený do Řízení.");
-      }
-
-      function renderApiRepairPanel(pack, context, statusText = "") {
-        const endpoint = getReviaApiEndpoint();
-        const apiStatus = loadObject(REVIA_API_STATUS_KEY, { state: endpoint ? "připraveno" : "čeká na backend" });
-        const summary = pack?.summary || context?.report?.summary || {};
-        return `
-          <div class="status-row">
-            <div class="pill"><strong>${endpoint ? "Ano" : "Ne"}</strong>API adresa</div>
-            <div class="pill"><strong>${escapeHtml(apiStatus.state || "čeká")}</strong>stav</div>
-            <div class="pill"><strong>${summary.fixableIssues ?? 0}</strong>k opravě</div>
-            <div class="pill"><strong>${pack ? "uložený" : "čeká"}</strong>balíček</div>
-          </div>
-          <p>Tohle je skrytý API opravářský režim. Revia tady nemluví jako chat, ale dostane lokální sken CHT a vrátí opravný balíček pro další bezpečný krok.</p>
-          <div class="actions">
-            <button class="primary" data-run-api-repair="local" type="button">AI oprav CHT</button>
-            <button class="ghost" data-run-api-repair="repo" type="button">AI plán pro repo</button>
-            <button class="ghost" data-run-api-repair="pr" type="button">PR návod</button>
-            <button class="ghost" data-open-function-bridge type="button">Zpět na funkce</button>
-          </div>
-          ${statusText ? `<div class="log"><div class="log-item">${escapeHtml(statusText)}</div></div>` : ""}
-          <label>Poslední opravný balíček
-            <textarea readonly placeholder="Tady se objeví odpověď API opraváře.">${pack ? escapeHtml(pack.reply) : ""}</textarea>
-          </label>
-          <div class="actions">
-            <button class="ghost" data-save-repair-control type="button" ${pack ? "" : "disabled"}>Uložit do Řízení</button>
-            <button class="ghost" data-export-state type="button">Exportovat stav</button>
-          </div>
-        `;
-      }
-
-      function openApiRepairPanel(pack = getLastApiRepairPack(), context = null, statusText = "") {
-        openDrawer(
-          "Terry API Opravář",
-          "Easter egg: API režim pro sken, návrh oprav a bezpečný balíček.",
-          renderApiRepairPanel(pack, context, statusText)
-        );
-      }
-
-      async function runApiRepair(kind = "local") {
-        saveReviaApiEndpoint(true);
-        if (!getReviaApiEndpoint()) {
-          showToast("Nejdřív vlož API adresu Revie.");
-          openIphone();
-          return null;
-        }
-
-        const backup = makeFunctionBackup("záloha před Terry API Opravářem");
-        const context = buildApiRepairContext(repairGoal(kind), backup.createdAt);
-        openApiRepairPanel(null, context, "API opravář připravuje balíček. Nezapisuje do GitHubu, jen navrhuje bezpečný postup.");
-
-        const api = await askReviaApi(
-          "Připrav opravný balíček pro CHT 360°‰ podle přiloženého skenu. Drž se bezpečného postupu a nepiš, že jsi změny provedla.",
-          "Terry API Opravář",
-          {
-            intent: "repair",
-            payload: context,
-            messages: [
-              {
-                role: "user",
-                content: "Připrav opravný balíček. Nechci volný chat, chci diagnostiku a postup."
-              }
-            ]
-          }
-        );
-
-        if (!api?.reply) {
-          openApiRepairPanel(null, context, "API teď neodpovědělo. Lokální záloha a sken zůstaly uložené.");
-          return null;
-        }
-
-        const pack = storeApiRepairPack(api.reply, context, api);
-        showToast("Terry API Opravář vrátil balíček.");
-        openApiRepairPanel(pack);
-        return pack;
-      }
-
-      function registerTerryEggTap() {
-        clearTimeout(terryEggTap.timer);
-        terryEggTap.count += 1;
-        terryEggTap.timer = setTimeout(() => {
-          terryEggTap.count = 0;
-        }, 3200);
-
-        if (terryEggTap.count < 7) return false;
-
-        terryEggTap.count = 0;
-        localStorage.setItem(TERRY_EGG_KEY, JSON.stringify({
-          unlockedAt: new Date().toISOString(),
-          mode: "Terry API Opravář"
-        }));
-        showToast("Terry API Opravář odemčený.");
-        openApiRepairPanel();
-        return true;
-      }
-
-      function defaultBatoleState() {
-        return {
-          version: 1,
-          kind: "CHT 360°‰ · Batole",
-          bornAt: new Date().toISOString(),
-          updatedAt: "",
-          steps: []
-        };
-      }
-
-      function normalizeBatoleState(value, source = BATOLE_KEY) {
-        const fallback = defaultBatoleState();
-        const raw = value && typeof value === "object" ? value : {};
-        const steps = Array.isArray(raw.steps) ? raw.steps : Array.isArray(raw) ? raw : [];
-        return {
-          ...fallback,
-          ...raw,
-          source,
-          steps: steps
-            .filter(Boolean)
-            .slice(-120)
-            .map((step, index) => ({
-              id: step.id || `batole-${index + 1}`,
-              core: ["earth", "language", "game", "control"].includes(step.core) ? step.core : "control",
-              title: String(step.title || step.name || `Krok ${index + 1}`).slice(0, 80),
-              text: String(step.text || step.content || step.note || "").slice(0, 900),
-              createdAt: step.createdAt || step.at || step.updatedAt || new Date().toISOString()
-            }))
-        };
-      }
-
-      function readBatoleState() {
-        if (window.CHTBatole?.getState) {
-          try {
-            return normalizeBatoleState(window.CHTBatole.getState(), "window.CHTBatole");
-          } catch {
-            // Pokračujeme přes localStorage.
-          }
-        }
-
-        const current = safeParse(localStorage.getItem(BATOLE_KEY), null);
-        if (current && typeof current === "object") return normalizeBatoleState(current, BATOLE_KEY);
-
-        const legacy = safeParse(localStorage.getItem(BATOLE_LEGACY_KEY), null);
-        if (legacy) return normalizeBatoleState(legacy, BATOLE_LEGACY_KEY);
-
-        return normalizeBatoleState(null, "čeká");
-      }
-
-      function batoleCounts(batole = readBatoleState()) {
-        const result = { earth: 0, language: 0, game: 0, control: 0 };
-        batole.steps.forEach((step) => {
-          result[step.core] = (result[step.core] || 0) + 1;
-        });
-        return result;
-      }
-
-      function batoleLevel(batole = readBatoleState()) {
-        return Math.floor((batole.steps.length || 0) / 4) + 1;
-      }
-
-      function writeBatoleState(batole, reason = "cht-save") {
-        batoleBridgeWriting = true;
-        const next = normalizeBatoleState({
-          ...batole,
-          updatedAt: new Date().toISOString()
-        }, BATOLE_KEY);
-        localStorage.setItem(BATOLE_KEY, JSON.stringify(next));
-        localStorage.setItem(BATOLE_LEGACY_KEY, JSON.stringify({
-          updatedAt: next.updatedAt,
-          level: batoleLevel(next),
-          counts: batoleCounts(next),
-          steps: next.steps.slice(-24)
-        }));
-        const detail = { ...next, level: batoleLevel(next), counts: batoleCounts(next), reason };
-        window.dispatchEvent(new CustomEvent(BATOLE_EVENT, { detail }));
-        batoleBridgeWriting = false;
-        saveNetworkPulse("batole most");
-        return next;
-      }
-
-      function addBatoleStep(core, title, text) {
-        const batole = readBatoleState();
-        const step = {
-          id: `cht-batole-${Date.now()}`,
-          core: ["earth", "language", "game", "control"].includes(core) ? core : "control",
-          title: String(title || "Krok z CHT").trim().slice(0, 80),
-          text: String(text || "").trim().slice(0, 900),
-          createdAt: new Date().toISOString(),
-          source: "CHT 360°‰"
-        };
-        if (!step.text) return null;
-        batole.steps.push(step);
-        return writeBatoleState(batole, "cht-add-step");
-      }
-
-      function renderBatolePanel(batole = readBatoleState(), statusText = "") {
-        const counts = batoleCounts(batole);
-        const latest = batole.steps.slice(-5).reverse().map((step) => `
-          <div class="log-item"><strong>${escapeHtml(step.title)}</strong><br><small>${escapeHtml(coreMap[step.core]?.title || step.core)} · ${escapeHtml(step.text || "bez textu")}</small></div>
-        `).join("");
-        const hasSteps = batole.steps.length > 0;
-        return `
-          <div class="status-row">
-            <div class="pill"><strong>${batole.steps.length}</strong>kroků</div>
-            <div class="pill"><strong>${batoleLevel(batole)}</strong>úroveň</div>
-            <div class="pill"><strong>${escapeHtml(batole.source)}</strong>zdroj</div>
-            <div class="pill"><strong>${hasSteps ? "žije" : "čeká"}</strong>stav</div>
-          </div>
-          <p>Batole je napojené jako lehký svět: CHT čte jeho kroky z <code>${BATOLE_KEY}</code>, umí mu předat nový krok a drží starší zrcadlo <code>${BATOLE_LEGACY_KEY}</code> pro Hlavouna/Pikoše.</p>
-          <div class="status-row">
-            <div class="pill"><strong>${counts.earth}</strong>Země</div>
-            <div class="pill"><strong>${counts.language}</strong>Jazyk</div>
-            <div class="pill"><strong>${counts.game}</strong>Hra</div>
-            <div class="pill"><strong>${counts.control}</strong>Řízení</div>
-          </div>
-          ${statusText ? `<div class="log"><div class="log-item">${escapeHtml(statusText)}</div></div>` : ""}
-          <label>Jádro pro krok
-            <select id="batoleCore">
-              <option value="earth">Země</option>
-              <option value="language">Jazyk</option>
-              <option value="game">Hra</option>
-              <option value="control" selected>Řízení</option>
-            </select>
-          </label>
-          <label>Název kroku
-            <input id="batoleTitle" maxlength="80" placeholder="Krátký název kroku">
-          </label>
-          <label>Stopa pro Batole
-            <textarea id="batoleText" maxlength="900" placeholder="Jedna věta, pravidlo, nápad nebo skutečný krok…"></textarea>
-          </label>
-          <div class="actions">
-            <button class="primary" data-save-batole-step type="button">Předat Batoleti</button>
-            <button class="ghost" data-sync-batole type="button">Obnovit stav</button>
-            <button class="ghost" data-go-batole type="button">Otevřít Batole</button>
-          </div>
-          <p>Poslední stopy:</p>
-          <div class="log">${latest || `<div class="log-item">Zatím tu nejsou uložené kroky Batoleti.</div>`}</div>
-        `;
-      }
-
-      function openBatole(statusText = "") {
-        openDrawer(
-          "Batole •ア",
-          "Lehký svět napojený na čtyři jádra CHT přes localStorage a událost.",
-          renderBatolePanel(readBatoleState(), statusText)
-        );
-      }
-
-      function openDrawer(title, lead, html) {
-        drawerTitle.textContent = title;
-        drawerLead.textContent = lead;
-        drawerBody.innerHTML = html;
-        drawer.classList.add("open");
-      }
-
-      function closePanel() {
-        drawer.classList.remove("open");
-      }
-
-      function openCore(coreId) {
-        const core = coreMap[coreId];
-        const coreState = state.memory.cores[coreId] || { slots: [] };
-        const used = coreState.slots.filter(Boolean).length;
-        const latest = coreState.slots.slice().reverse().find(Boolean);
-        openDrawer(
-          `Jádro · ${core.title}`,
-          core.purpose,
-          `
-            <div class="status-row">
-              <div class="pill"><strong>${used}/${SLOT_LIMIT}</strong>obsazené sloty</div>
-              <div class="pill"><strong>${escapeHtml(core.glyph)}</strong>glyph jádra</div>
-            </div>
-            <p>Rychlé uložení zapíše poznámku do prvního volného slotu jádra. Data zůstanou uložená v prohlížeči.</p>
-            <label>Nová poznámka pro ${escapeHtml(core.title)}
-              <textarea id="coreNote" placeholder="Sem napiš, co má jádro nést…">${latest ? escapeHtml(latest.text || "") : ""}</textarea>
-            </label>
-            <div class="actions">
-              <button class="primary" data-save-core="${coreId}" type="button">Uložit do jádra</button>
-              <button class="ghost" data-open-revia type="button">Napojit na Revii</button>
-            </div>
-          `
-        );
-      }
-
-      function openRoom(roomId) {
-        activeRoomId = roomId;
-        renderRooms();
-        const room = state.rooms[roomId - 1];
-        const reviaHint = room.linked ? `Napojeno: ${room.linked}` : "Volný pokojíček pro glyph, AI modul nebo poznámku.";
-        openDrawer(
-          `Pokojíček ${room.id}`,
-          reviaHint,
-          `
-            <div class="status-row">
-              <div class="pill"><strong>${room.id}/240</strong>kapacita prstence</div>
-              <div class="pill"><strong>${room.linked ? "Revia" : "volný"}</strong>napojení</div>
-            </div>
-            <label>Název
-              <input id="roomTitle" value="${escapeHtml(room.title || `Pokojíček ${room.id}`)}" maxlength="60">
-            </label>
-            <label>Glyph / značka
-              <input id="roomGlyph" value="${escapeHtml(room.glyph || String(room.id))}" maxlength="8">
-            </label>
-            <label>Poznámka
-              <textarea id="roomNote" placeholder="Co má pokojíček držet?">${escapeHtml(room.note || "")}</textarea>
-            </label>
-            <div class="actions">
-              <button class="primary" data-save-room="${room.id}" type="button">Uložit pokojíček</button>
-              <button class="ghost" data-link-revia="${room.id}" type="button">Napojit Revii</button>
-            </div>
-          `
-        );
-      }
-
-      function openIphone() {
-        const endpoint = getReviaApiEndpoint();
-        const apiStatus = loadObject(REVIA_API_STATUS_KEY, { state: endpoint ? "připraveno" : "čeká na backend" });
-        openDrawer(
-          "iPhone 14 · CHT vrstva",
-          "Červená/černá vrstva pro ruční vložení odkazů, PWA vstup a rychlé směrování.",
-          `
-            <div class="status-row">
-              <div class="pill"><strong>PWA</strong>připraveno</div>
-              <div class="pill"><strong>Řízení</strong>${(state.memory.cores.control?.slots || []).filter(Boolean).length}/${SLOT_LIMIT}</div>
-              <div class="pill"><strong>Revia API</strong>${escapeHtml(apiStatus.state || "čeká")}</div>
-              <div class="pill"><strong>Klíč</strong>jen server</div>
-            </div>
-            <p>iPhone tady slouží jako bezpečný ruční můstek: zkopíruješ odkaz, vložíš ho sem a CHT ho uloží do řízení nebo pošle do Revie.</p>
-            <label>API adresa Revie
-              <input id="reviaEndpoint" value="${escapeHtml(endpoint)}" placeholder="https://tvoje-domena.vercel.app/api/revia-chat">
-            </label>
-            <label>Odkaz / poznámka z iPhonu
-              <input id="iphoneLink" placeholder="https://… nebo text">
-            </label>
-            <div class="actions">
-              <button class="ghost" data-save-api-endpoint type="button">Uložit API</button>
-              <button class="ghost" data-test-revia-api type="button">Test Revie</button>
-              <button class="primary" data-save-iphone type="button">Vložit do Řízení</button>
-              <button class="ghost" data-iphone-to-revia type="button">Poslat do Revie</button>
-            </div>
-          `
-        );
-      }
-
-      function openCenter() {
-        const used = Object.keys(coreMap).reduce((sum, id) => {
-          return sum + (state.memory.cores[id]?.slots || []).filter(Boolean).length;
-        }, 0);
-        const batole = readBatoleState();
-        openDrawer(
-          "CHT 360°‰.",
-          "Střed drží jádra, iPhone vrstvu, prstenec pokojíčků a Revii v jedné scéně.",
-          `
-            <div class="status-row">
-              <div class="pill"><strong>${used}/${SLOT_LIMIT * Object.keys(coreMap).length}</strong>paměť jader</div>
-              <div class="pill"><strong>${VISIBLE_ROOMS}/240</strong>viditelné pokojíčky</div>
-              <div class="pill"><strong>${state.revia.connected ? "Ano" : "Ne"}</strong>Revia</div>
-              <div class="pill"><strong>${batole.steps.length}</strong>Batole</div>
-              <div class="pill"><strong>${repoModules.length}</strong>napojené kostry</div>
-            </div>
-            <p>Tento index je postavený podle fotky: levá síť s iPhonem, střed CHT a pravý 3D prstenec pokojíčků.</p>
-            <div class="actions">
-              <button class="primary" data-open-revia type="button">Otevřít Revii</button>
-              <button class="ghost" data-open-batole type="button">Batole</button>
-              <button class="ghost" data-open-network type="button">Síť repozitáře</button>
-              <button class="ghost" data-open-function-bridge type="button">Funkce CHT</button>
-              <button class="ghost" data-export-state type="button">Exportovat stav</button>
-            </div>
-            ${renderModuleCards({ limit: 6 })}
-          `
-        );
-      }
-
-      function openRevia() {
-        const signals = state.revia.signals.slice(-5).reverse();
-        const sourceList = (state.revia.sourcePaths || []).map((path) => `<div class="log-item">${escapeHtml(path)}</div>`).join("");
-        const apiEndpoint = getReviaApiEndpoint();
-        const apiStatus = loadObject(REVIA_API_STATUS_KEY, { state: apiEndpoint ? "připraveno" : "čeká na backend" });
-        openDrawer(
-          "Revia-Master",
-          `${state.revia.status} · ${state.revia.path}`,
-          `
-            <div class="status-row">
-              <div class="pill"><strong>${state.revia.connected ? "Napojeno" : "Vypnuto"}</strong>stav</div>
-              <div class="pill"><strong>${escapeHtml(state.revia.mode)}</strong>režim</div>
-              <div class="pill"><strong>Pokoj 1</strong>kotva</div>
-              <div class="pill"><strong>API</strong>${escapeHtml(apiStatus.state || "čeká")}</div>
-            </div>
-            <p>Revia je tady přidaná jako první živý svět na prstenci. Pokojíček 1 ji drží jako kotvu; další pokojíčky můžou později nést její dveře, postavy, zápisy nebo AI odkazy.</p>
-            <label>Signál pro Revii
-              <textarea id="reviaSignal" placeholder="Co má Revia převzít?"></textarea>
-            </label>
-            <div class="actions">
-              <button class="primary" data-send-revia type="button">Uložit signál</button>
-              <button class="ghost" data-toggle-revia type="button">${state.revia.connected ? "Odpojit Revii" : "Připojit Revii"}</button>
-              <button class="ghost" data-open-network type="button">Síť repozitáře</button>
-            </div>
-            <p>Zdrojové cesty Revie v repozitáři:</p>
-            <div class="log">${sourceList}</div>
-            <div class="log">
-              ${signals.map((item) => `<div class="log-item">${escapeHtml(item.text)}<br><small>${new Date(item.at).toLocaleString("cs-CZ")}</small></div>`).join("") || `<div class="log-item">Zatím bez záznamu.</div>`}
-            </div>
-          `
-        );
-      }
-
-      function openNetwork() {
-        saveNetworkPulse("otevření sítě");
-        const batole = readBatoleState();
-        openDrawer(
-          "Síť repozitáře",
-          "Kostry z hlavního repozitáře jsou připojené do CHT jako moduly a úložné klíče.",
-          `
-            <div class="status-row">
-              <div class="pill"><strong>${repoModules.length}</strong>modulů</div>
-              <div class="pill"><strong>240</strong>slotů jader</div>
-              <div class="pill"><strong>240</strong>pokojíčků</div>
-              <div class="pill"><strong>${batole.steps.length}</strong>Batole</div>
-              <div class="pill"><strong>iPhone 14</strong>optimalizace</div>
-            </div>
-            <p>Viditelné odkazy otevírají jen moduly, které leží pod docs/. Funkční most bere z repozitáře jen malé schopnosti: sken, zálohu, kontrolu klíčů a bezpečnou opravu.</p>
-            <div class="actions">
-              <button class="primary" data-check-modules type="button">Zkontrolovat dostupnost</button>
-              <button class="ghost" data-open-batole type="button">Batole most</button>
-              <button class="ghost" data-open-function-bridge type="button">Funkce CHT</button>
-              <button class="ghost" data-open-api-repair type="button">Terry API</button>
-              <button class="ghost" data-scan-functions type="button">Sken funkcí</button>
-              <button class="ghost" data-open-revia type="button">Otevřít Revii</button>
-            </div>
-            ${renderModuleCards()}
-          `
-        );
-      }
-
-      async function checkModules() {
-        const checks = await Promise.all(repoModules.map(async (module) => {
-          if (!module.entry || module.entry.endsWith(".js")) {
-            return { module, ok: module.id === "revia-master", note: module.id === "revia-master" ? "vnitřní můstek" : "zdrojový modul" };
-          }
-          if (module.id === "cht360-batole") {
-            const batole = readBatoleState();
-            const hasBridge = localStorage.getItem(BATOLE_KEY) !== null || localStorage.getItem(BATOLE_LEGACY_KEY) !== null;
-            return {
-              module,
-              ok: hasBridge || batole.steps.length > 0,
-              note: hasBridge
-                ? "localStorage most aktivní"
-                : "v repu je v kořeni; pro Pages ho dej do docs/cht360-batole/"
-            };
-          }
-
-          try {
-            const response = await fetch(module.entry, { method: "GET", cache: "no-store" });
-            return { module, ok: response.ok, note: response.ok ? "dostupné" : `stav ${response.status}` };
-          } catch {
-            return { module, ok: false, note: "zatím nedostupné" };
-          }
-        }));
-
-        const html = checks.map(({ module, ok, note }) => `
-          <div class="log-item">${ok ? "✓" : "·"} ${escapeHtml(module.label)}<br><small>${escapeHtml(note)} · ${escapeHtml(module.entry || module.source || "vnitřní")}</small></div>
-        `).join("");
-
-        openDrawer(
-          "Kontrola kostry",
-          "Rychlá lokální kontrola dostupných cest pod aktuální PWA.",
-          `<div class="log">${html}</div><div class="actions"><button class="ghost" data-open-network type="button">Zpět na síť</button></div>`
-        );
-      }
-
-      function openModule(moduleId) {
-        const module = repoModules.find((item) => item.id === moduleId);
-        if (!module) return;
-        if (module.id === "revia-master") {
-          openRevia();
-          return;
-        }
-        if (module.id === "cht360-batole") {
-          openBatole();
-          return;
-        }
-        if (module.id === "chybozrout") {
-          openFunctionBridge();
-          return;
-        }
-
-        openDrawer(
-          module.label,
-          `${module.kind} · ${module.entry || module.source || "vnitřní napojení"}`,
-          `
-            <p>${escapeHtml(module.note)}</p>
-            <div class="status-row">
-              <div class="pill"><strong>${module.storageKeys.length}</strong>úložné klíče</div>
-              <div class="pill"><strong>${module.entry ? "Ano" : "Ne"}</strong>webová cesta</div>
-            </div>
-            <div class="log">
-              ${module.storageKeys.map((key) => `<div class="log-item">${escapeHtml(key)}</div>`).join("")}
-            </div>
-            <div class="actions">
-              ${module.entry && !module.entry.endsWith(".js") ? `<button class="primary" data-go-module="${escapeHtml(module.id)}" type="button">Otevřít modul</button>` : ""}
-              <button class="ghost" data-open-network type="button">Zpět na síť</button>
-            </div>
-          `
-        );
-      }
-
-      function saveCore(coreId) {
-        const textarea = document.getElementById("coreNote");
-        const text = textarea?.value.trim();
-        if (!text) {
-          showToast("Nejdřív napiš poznámku pro jádro.");
-          return;
-        }
-        const slots = state.memory.cores[coreId].slots;
-        const nextIndex = Math.min(slots.findIndex((slot) => !slot), slots.length);
-        const targetIndex = nextIndex >= 0 && nextIndex < SLOT_LIMIT ? nextIndex : Math.min(slots.length, SLOT_LIMIT - 1);
-        slots[targetIndex] = {
-          id: targetIndex + 1,
-          text,
-          source: "index podle fotky",
-          updatedAt: new Date().toISOString()
-        };
-        saveAll();
-        showToast(`Uloženo do jádra ${coreMap[coreId].title}.`);
-        openCore(coreId);
-      }
-
-      function saveRoom(roomId) {
-        const room = state.rooms[roomId - 1];
-        room.title = document.getElementById("roomTitle")?.value.trim() || `Pokojíček ${roomId}`;
-        room.glyph = document.getElementById("roomGlyph")?.value.trim() || String(roomId);
-        room.note = document.getElementById("roomNote")?.value.trim() || "";
-        room.updatedAt = new Date().toISOString();
-        saveAll();
-        renderRooms();
-        showToast(`Pokojíček ${roomId} je uložený.`);
-        openRoom(roomId);
-      }
-
-      function linkRoomToRevia(roomId) {
-        const room = state.rooms[roomId - 1];
-        room.linked = "Revia-Master";
-        room.title = room.title || `Revia pokoj ${roomId}`;
-        room.glyph = room.glyph || "R";
-        room.updatedAt = new Date().toISOString();
-        state.revia.connected = true;
-        addReviaSignal(`Pokojíček ${roomId} byl napojený na Revii.`);
-        saveAll();
-        renderRooms();
-        showToast(`Revia napojená na pokojíček ${roomId}.`);
-        openRoom(roomId);
-      }
-
-      function addReviaSignal(text) {
-        const clean = String(text || "").trim();
-        if (!clean) return;
-        state.revia.signals.push({ at: new Date().toISOString(), text: clean });
-        state.revia.signals = state.revia.signals.slice(-50);
-      }
-
-      function getReviaApiEndpoint() {
-        const saved = localStorage.getItem(REVIA_API_ENDPOINT_KEY) || "";
-        if (saved.trim()) return saved.trim();
-        if (location.hostname.endsWith("github.io")) return "";
-        return "/api/revia-chat";
-      }
-
-      function saveReviaApiEndpoint(silent = false) {
-        const input = document.getElementById("reviaEndpoint");
-        const value = input?.value.trim() || "";
-
-        if (value) {
-          localStorage.setItem(REVIA_API_ENDPOINT_KEY, value);
-          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({ state: "uloženo", at: new Date().toISOString() }));
-        } else {
-          localStorage.removeItem(REVIA_API_ENDPOINT_KEY);
-          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({ state: "čeká na backend", at: new Date().toISOString() }));
-        }
-
-        if (!silent) {
-          showToast(value ? "API adresa Revie je uložená." : "API adresa Revie je vymazaná.");
-          openIphone();
-        }
-      }
-
-      function getReviaMode() {
-        return state.revia.mode.toLowerCase().includes("ď") ? "daemon" : "angel";
-      }
-
-      function buildReviaMessages(message) {
-        const recentSignals = state.revia.signals.slice(-10).map((item) => ({
-          role: "user",
-          content: item.text
-        }));
-        return [
-          ...recentSignals,
-          ...state.speech.slice(-8).map((item) => ({
-            role: item.reply ? "assistant" : "user",
-            content: item.text
-          })),
-          { role: "user", content: message }
-        ].filter((item) => item.content && item.content.trim()).slice(-18);
-      }
-
-      async function askReviaApi(message, source = "CHT", options = {}) {
-        const endpoint = getReviaApiEndpoint();
-        if (!endpoint) {
-          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({ state: "čeká na backend", at: new Date().toISOString() }));
-          return null;
-        }
-
-        try {
-          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({ state: "volám Revii…", at: new Date().toISOString() }));
-          const response = await fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message,
-              messages: options.messages || buildReviaMessages(message),
-              mode: getReviaMode(),
-              source,
-              intent: options.intent || "chat",
-              payload: options.payload || null,
-              persona: options.persona || "",
-              modules: repoModules.map((module) => ({
-                id: module.id,
-                label: module.label,
-                kind: module.kind,
-                entry: module.entry || "",
-                source: module.source || ""
-              }))
-            })
-          });
-
-          const data = await response.json().catch(() => ({}));
-          if (!response.ok) {
-            throw new Error(data?.error || `API stav ${response.status}`);
-          }
-
-          const reply = String(data?.reply || "").trim();
-          if (!reply) throw new Error("Revia vrátila prázdnou odpověď.");
-
-          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({
-            state: "mluví",
-            at: new Date().toISOString(),
-            model: data.model || ""
-          }));
-
-          return {
-            reply,
-            intent: data.intent || options.intent || "chat",
-            mode: data.mode || getReviaMode(),
-            model: data.model || "",
-            usage: data.usage || null
-          };
-        } catch (error) {
-          console.warn("Revia API není dostupné.", error);
-          localStorage.setItem(REVIA_API_STATUS_KEY, JSON.stringify({
-            state: "offline",
-            at: new Date().toISOString(),
-            error: error.message || "chyba"
-          }));
-          showToast("Revia API zatím neodpovědělo, ukládám lokálně.");
-          return null;
-        }
-      }
-
-      async function sendMessageToRevia(message, source = "CHT") {
-        addReviaSignal(`${source}: ${message}`);
-        saveAll();
-
-        const api = await askReviaApi(message, source);
-        if (api?.reply) {
-          const replyText = `Revia: ${api.reply}`;
-          addReviaSignal(replyText);
-          state.speech.push({ at: new Date().toISOString(), text: api.reply, reply: true, model: api.model });
-          state.speech = state.speech.slice(-120);
-          saveAll();
-          showToast("Revia odpověděla přes API.");
-          return api.reply;
-        }
-
-        return "";
-      }
-
-      async function testReviaApi() {
-        saveReviaApiEndpoint(true);
-        const reply = await sendMessageToRevia("Krátce potvrď, že jsi Revia napojená na CHT 360°‰.", "Test API");
-        if (reply) openRevia();
-        else openIphone();
-      }
-
-      function saveIphone(toRevia = false) {
-        saveReviaApiEndpoint(true);
-        const input = document.getElementById("iphoneLink");
-        const text = input?.value.trim();
-        if (!text) {
-          showToast("Vlož odkaz nebo text z iPhonu.");
-          return;
-        }
-        if (toRevia) {
-          void sendMessageToRevia(text, "iPhone 14").then(() => openRevia());
-          return;
-        }
-        const slots = state.memory.cores.control.slots;
-        const targetIndex = Math.min(slots.findIndex((slot) => !slot), slots.length);
-        const safeIndex = targetIndex >= 0 && targetIndex < SLOT_LIMIT ? targetIndex : Math.min(slots.length, SLOT_LIMIT - 1);
-        slots[safeIndex] = {
-          id: safeIndex + 1,
-          text,
-          source: "iPhone 14",
-          updatedAt: new Date().toISOString()
-        };
-        saveAll();
-        showToast("Vloženo do Řízení.");
-        openIphone();
-      }
-
-      async function submitTalk(event) {
-        event.preventDefault();
-        const text = talkInput.value.trim();
-        if (!text) return;
-        const item = { at: new Date().toISOString(), text };
-        state.speech.push(item);
-        state.speech = state.speech.slice(-120);
-        talkInput.value = "";
-        await sendMessageToRevia(text, "Mluva CHT");
-      }
-
-      function exportState() {
-        const payload = {
-          version: VERSION,
-          exportedAt: new Date().toISOString(),
-          memory: state.memory,
-          rooms: state.rooms,
-          revia: state.revia,
-          speech: state.speech,
-          batole: readBatoleState(),
-          modules: repoModules,
-          functionReport: safeParse(localStorage.getItem(FUNCTION_REPORT_KEY), null),
-          apiRepairPacks: safeParse(localStorage.getItem(API_REPAIR_KEY), [])
-        };
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "cht360-revia-stav.json";
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(url), 600);
-        showToast("Export připravený.");
-      }
-
-      function showToast(message) {
-        toast.textContent = message;
-        toast.classList.add("show");
-        clearTimeout(showToast.timer);
-        showToast.timer = setTimeout(() => toast.classList.remove("show"), 2300);
-      }
-
-      function bindActions() {
-        document.querySelectorAll("[data-open-core]").forEach((button) => {
-          button.addEventListener("click", () => openCore(button.dataset.openCore));
-        });
-        centerButton.addEventListener("click", () => {
-          if (!registerTerryEggTap()) openCenter();
-        });
-        iphoneButton.addEventListener("click", openIphone);
-        orbitButton.addEventListener("click", openNetwork);
-        closeDrawer.addEventListener("click", closePanel);
-        talkForm.addEventListener("submit", submitTalk);
-        drawerBody.addEventListener("click", (event) => {
-          const target = event.target.closest("button");
-          if (!target) return;
-          if (target.dataset.saveCore) saveCore(target.dataset.saveCore);
-          if (target.dataset.saveRoom) saveRoom(Number(target.dataset.saveRoom));
-          if (target.dataset.linkRevia) linkRoomToRevia(Number(target.dataset.linkRevia));
-          if (target.dataset.openRevia !== undefined) openRevia();
-          if (target.dataset.openNetwork !== undefined) openNetwork();
-          if (target.dataset.openFunctionBridge !== undefined) openFunctionBridge();
-          if (target.dataset.openApiRepair !== undefined) openApiRepairPanel();
-          if (target.dataset.openBatole !== undefined) openBatole();
-          if (target.dataset.openModule) openModule(target.dataset.openModule);
-          if (target.dataset.checkModules !== undefined) void checkModules();
-          if (target.dataset.runApiRepair) void runApiRepair(target.dataset.runApiRepair);
-          if (target.dataset.syncBatole !== undefined) {
-            showToast("Batole stav obnovený.");
-            openBatole("Stav Batoleti byl znovu načtený z mostu.");
-          }
-          if (target.dataset.saveBatoleStep !== undefined) {
-            const core = document.getElementById("batoleCore")?.value || "control";
-            const title = document.getElementById("batoleTitle")?.value || "Krok z CHT";
-            const text = document.getElementById("batoleText")?.value || "";
-            const saved = addBatoleStep(core, title, text);
-            if (!saved) {
-              showToast("Napiš stopu pro Batole.");
-              return;
-            }
-            showToast("Krok předaný Batoleti.");
-            openBatole("Krok byl uložený do Batole mostu.");
-          }
-          if (target.dataset.goBatole !== undefined) {
-            window.location.href = "./cht360-batole/";
-          }
-          if (target.dataset.saveRepairControl !== undefined) {
-            const pack = getLastApiRepairPack();
-            if (!pack) {
-              showToast("Zatím není co uložit.");
-              return;
-            }
-            saveRepairPackToControl(pack, false);
-          }
-          if (target.dataset.scanFunctions !== undefined) {
-            const report = buildFunctionReport("ruční sken z panelu");
-            showToast(report.summary.fixableIssues ? "Sken našel věci k opravě." : "Sken funkcí hotový.");
-            openFunctionBridge(report);
-          }
-          if (target.dataset.backupFunctions !== undefined) {
-            const backup = makeFunctionBackup("ruční záloha z panelu");
-            showToast(`Záloha mostu uložená ${new Date(backup.createdAt).toLocaleTimeString("cs-CZ")}.`);
-            openFunctionBridge(buildFunctionReport("sken po záloze"));
-          }
-          if (target.dataset.repairFunctions !== undefined) {
-            const result = repairFunctionBridge();
-            showToast(result.repairs.length ? "Bezpečná oprava hotová." : "Nebyla potřeba tvrdá oprava.");
-            openFunctionBridge(result.after);
-          }
-          if (target.dataset.goModule) {
-            const module = repoModules.find((item) => item.id === target.dataset.goModule);
-            if (module?.entry) window.location.href = module.entry;
-          }
-          if (target.dataset.saveApiEndpoint !== undefined) saveReviaApiEndpoint(false);
-          if (target.dataset.testReviaApi !== undefined) void testReviaApi();
-          if (target.dataset.saveIphone !== undefined) saveIphone(false);
-          if (target.dataset.iphoneToRevia !== undefined) saveIphone(true);
-          if (target.dataset.sendRevia !== undefined) {
-            const signal = document.getElementById("reviaSignal")?.value.trim();
-            if (!signal) {
-              showToast("Napiš signál pro Revii.");
-              return;
-            }
-            void sendMessageToRevia(signal, "Revia panel").then(() => openRevia());
-          }
-          if (target.dataset.toggleRevia !== undefined) {
-            state.revia.connected = !state.revia.connected;
-            state.revia.status = state.revia.connected ? "napojená na CHT 360°‰." : "čeká na opětovné připojení";
-            addReviaSignal(state.revia.connected ? "Revia byla znovu připojena." : "Revia byla dočasně odpojena.");
-            saveAll();
-            renderRooms();
-            showToast(state.revia.connected ? "Revia připojená." : "Revia odpojená.");
-            openRevia();
-          }
-          if (target.dataset.exportState !== undefined) exportState();
-        });
-      }
-
-      function bindRingDrag() {
-        ringStage.addEventListener("pointerdown", (event) => {
-          dragState = {
-            id: event.pointerId,
-            x: event.clientX,
-            rotation: ringRotation
-          };
-          ringStage.setPointerCapture(event.pointerId);
-        });
-        ringStage.addEventListener("pointermove", (event) => {
-          if (!dragState || dragState.id !== event.pointerId) return;
-          const dx = event.clientX - dragState.x;
-          ringRotation = dragState.rotation + dx * 0.5;
-          renderRooms();
-        });
-        ringStage.addEventListener("pointerup", endDrag);
-        ringStage.addEventListener("pointercancel", endDrag);
-      }
-
-      function endDrag(event) {
-        if (!dragState || dragState.id !== event.pointerId) return;
-        dragState = null;
-      }
-
-      function bootServiceWorker() {
-        if (!("serviceWorker" in navigator)) return;
-        if (location.protocol === "file:") return;
-        const workers = ["./service-worker.js", "./sw.js"];
-        workers.reduce((promise, worker) => {
-          return promise.catch(() => navigator.serviceWorker.register(worker));
-        }, Promise.reject()).catch(() => {
-          console.info("CHT 360°‰: service worker zatím není připojený, index běží i bez něj.");
-        });
-      }
-
-      function setAppHeight() {
-        const height = window.visualViewport?.height || window.innerHeight || document.documentElement.clientHeight;
-        document.documentElement.style.setProperty("--app-height", `${Math.max(320, Math.round(height))}px`);
-      }
-
-      function exposeBridge() {
-        window.CHT360ReviaBridge = {
-          version: VERSION,
-          getState() {
-            return clone(state);
-          },
-          connect() {
-            state.revia.connected = true;
-            state.revia.status = "napojená na CHT 360°‰.";
-            addReviaSignal("Externí můstek připojil Revii.");
-            saveAll();
-            renderRooms();
-            return clone(state.revia);
-          },
-          addSignal(text) {
-            addReviaSignal(text);
-            saveAll();
-            return clone(state.revia.signals.at(-1));
-          },
-          async ask(text, source = "externí modul") {
-            const reply = await sendMessageToRevia(text, source);
-            return { reply, revia: clone(state.revia) };
-          },
-          open() {
-            openRevia();
-          }
-        };
-
-        window.CHT360NetworkBridge = {
-          version: VERSION,
-          modules: clone(repoModules),
-          pulse(reason = "externí dotaz") {
-            saveNetworkPulse(reason);
-            return safeParse(localStorage.getItem(NETWORK_PULSE_KEY), null);
-          },
-          open() {
-            openNetwork();
-          },
-          openModule
-        };
-
-        window.CHT360FunctionBridge = {
-          version: VERSION,
-          modules: clone(repoModules),
-          storageKeys: uniqueStorageKeys(),
-          scan(reason = "externí sken") {
-            return buildFunctionReport(reason);
-          },
-          backup(reason = "externí záloha") {
-            return makeFunctionBackup(reason);
-          },
-          repair() {
-            return repairFunctionBridge();
-          },
-          async askApiRepair(kind = "local") {
-            return runApiRepair(kind);
-          },
-          openApiRepair() {
-            openApiRepairPanel();
-          },
-          getLastReport() {
-            return safeParse(localStorage.getItem(FUNCTION_REPORT_KEY), null);
-          },
-          lastApiRepairPack() {
-            return getLastApiRepairPack();
-          },
-          getLastBackup() {
-            return safeParse(localStorage.getItem(CHYBOZROUT_BACKUP_KEY), null);
-          },
-          open() {
-            openFunctionBridge();
-          }
-        };
-
-        window.CHT360BatoleBridge = {
-          version: VERSION,
-          storageKeys: [BATOLE_KEY, BATOLE_LEGACY_KEY],
-          getState() {
-            return readBatoleState();
-          },
-          addStep(core, title, text) {
-            return addBatoleStep(core, title, text);
-          },
-          counts() {
-            return batoleCounts(readBatoleState());
-          },
-          open() {
-            openBatole();
-          }
-        };
-      }
-
-      function bindBatoleBridge() {
-        window.addEventListener(BATOLE_EVENT, (event) => {
-          if (batoleBridgeWriting) return;
-          if (!event.detail || typeof event.detail !== "object") return;
-          writeBatoleState(event.detail, event.detail.reason || "batole-event");
-        });
-        window.addEventListener("message", (event) => {
-          if (event.data?.type !== BATOLE_EVENT || !event.data.detail) return;
-          writeBatoleState(event.data.detail, event.data.detail.reason || "batole-message");
-        });
-      }
-
-      function boot() {
-        setAppHeight();
-        bindActions();
-        bindRingDrag();
-        bindBatoleBridge();
-        refreshCounts();
-        renderRooms();
-        exposeBridge();
-        bootServiceWorker();
-        saveNetworkPulse("start indexu");
-        window.addEventListener("resize", () => {
-          setAppHeight();
-          renderRooms();
-        });
-        window.visualViewport?.addEventListener("resize", () => {
-          setAppHeight();
-          renderRooms();
-        });
-        setTimeout(() => showToast("CHT 360°‰ · Revia připravená."), 450);
-      }
-
-      boot();
+      window.addEventListener("orientationchange", refreshCanvasSize);
+      window.addEventListener("pageshow", refreshCanvasSize);
+      window.visualViewport?.addEventListener("resize", refreshCanvasSize);
+
+      refreshCanvasSize();
     })();
   </script>
-</body>
-</html>
+<style>
+  #cht360-stred{
+    position:absolute;
+    z-index:4;
+    left:50%;
+    top:51%;
+    width:clamp(76px,11vw,116px);
+    aspect-ratio:1;
+    padding:0;
+    border:0;
+    border-radius:50%;
+    background:transparent;
+    color:#ffe2ad;
+    cursor:pointer;
+    transform:translate(-50%,-50%);
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  #cht360-stred::before,
+  #cht360-stred::after{
+    position:absolute;
+    border-radius:50%;
+    content:"";
+    pointer-events:none;
+  }
+
+  #cht360-stred::before{
+    inset:4%;
+    border:1px solid rgba(255,226,173,.52);
+    box-shadow:
+      0 0 20px rgba(255,206,120,.62),
+      inset 0 0 18px rgba(255,226,173,.2);
+    animation:cht360Pulse 2.8s ease-in-out infinite;
+  }
+
+  #cht360-stred::after{
+    inset:-14%;
+    border:1px solid rgba(255,226,173,.19);
+    box-shadow:0 0 28px rgba(255,194,91,.18);
+    animation:cht360Orbit 8s linear infinite;
+  }
+
+  .cht360-stred-core{
+    position:absolute;
+    inset:22%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(255,247,218,.88);
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 34% 28%,#fff9e8 0 7%,#ffd98e 35%,#b56f2c 100%);
+    box-shadow:
+      0 0 22px rgba(255,220,150,.8),
+      inset 0 0 14px rgba(255,249,225,.5);
+  }
+
+  .cht360-stred-core strong{
+    color:#241508;
+    font-size:clamp(11px,1.8vw,19px);
+    font-weight:950;
+    letter-spacing:.08em;
+    line-height:1;
+  }
+
+  .cht360-stred-core small{
+    margin-top:3px;
+    color:rgba(42,25,10,.82);
+    font-size:clamp(7px,1.15vw,11px);
+    font-weight:900;
+    white-space:nowrap;
+  }
+
+  .cht360-stred-znak{
+    position:absolute;
+    color:#ffe2ad;
+    font-size:clamp(10px,1.7vw,17px);
+    font-weight:900;
+    text-shadow:0 0 13px rgba(255,211,132,.9);
+    animation:cht360Znak 3s ease-in-out infinite;
+  }
+
+  .cht360-stred-znak.c{top:8%;left:21%}
+  .cht360-stred-znak.h{top:18%;right:10%;animation-delay:-1s}
+  .cht360-stred-znak.t{bottom:12%;left:12%;animation-delay:-2s}
+  .cht360-stred-znak.a{bottom:9%;right:16%;animation-delay:-.5s}
+
+  .cht360-stred-prach{
+    position:absolute;
+    inset:0;
+    animation:cht360Prach 2.3s ease-in-out infinite;
+  }
+
+  .cht360-stred-prach i{
+    position:absolute;
+    width:4px;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:#ffe8ba;
+    box-shadow:0 0 9px rgba(255,215,143,.9);
+  }
+
+  .cht360-stred-prach i:nth-child(1){top:26%;left:18%}
+  .cht360-stred-prach i:nth-child(2){top:67%;left:24%}
+  .cht360-stred-prach i:nth-child(3){top:74%;right:23%}
+  .cht360-stred-prach i:nth-child(4){top:35%;right:16%}
+
+  #cht360-stred.is-aktivni .cht360-stred-core{
+    animation:cht360Core .65s ease-in-out;
+  }
+
+  @keyframes cht360Pulse{
+    50%{transform:scale(1.1);opacity:.7}
+  }
+
+  @keyframes cht360Orbit{
+    to{transform:rotate(360deg)}
+  }
+
+  @keyframes cht360Znak{
+    50%{transform:translateY(-6px) scale(1.14);opacity:.5}
+  }
+
+  @keyframes cht360Prach{
+    50%{transform:scale(1.06);opacity:.7}
+  }
+
+  @keyframes cht360Core{
+    50%{transform:scale(1.18);filter:brightness(1.3)}
+  }
+</style>
+
+<script>
+(() => {
+  if (document.getElementById("cht360-stred")) return;
+
+  const host = document.querySelector(".stage");
+  if (!host) return;
+
+  const cht = document.createElement("button");
+  cht.id = "cht360-stred";
+  cht.type = "button";
+  cht.setAttribute("aria-label", "CHT 360°‰. ve středu oběhu");
+
+  cht.innerHTML = `
+    <span class="cht360-stred-znak c" aria-hidden="true">C</span>
+    <span class="cht360-stred-znak h" aria-hidden="true">H</span>
+    <span class="cht360-stred-znak t" aria-hidden="true">T</span>
+    <span class="cht360-stred-znak a" aria-hidden="true">ア</span>
+
+    <span class="cht360-stred-prach" aria-hidden="true">
+      <i></i><i></i><i></i><i></i>
+    </span>
+
+    <span class="cht360-stred-core" aria-hidden="true">
+      <strong>CHT</strong>
+      <small>360°‰.</small>
+    </span>
+  `;
+
+  cht.addEventListener("click", () => {
+    cht.classList.remove("is-aktivni");
+    requestAnimationFrame(() => cht.classList.add("is-aktivni"));
+
+    const zprava = document.getElementById("messageLine");
+    if (zprava) {
+      zprava.textContent =
+        "CHT 360°‰. je uprostřed oběhu a pracuje jen s tím, co mu dovolíš.";
+    }
+  });
+
+  host.append(cht);
+})();
+</script>
