@@ -13,6 +13,8 @@ import {
   formatRepositoryPlans,
   searchRepositoryPaths
 } from "./revia-context.js";
+import { createReviaContinuity } from "./revia-continuity.js";
+import { createReviaLocalMesh, formatLocalMeshStatus } from "./revia-local-mesh.js";
 
 const STORAGE_KEY = "cht360_revia_chat_v1";
 const ACTIVITY_KEY = "cht360_revia_activity_v1";
@@ -28,7 +30,18 @@ const ui = {
   log: document.getElementById("reviaLog"),
   form: document.getElementById("reviaForm"),
   input: document.getElementById("reviaInput"),
-  state: document.getElementById("reviaState")
+  state: document.getElementById("reviaState"),
+  continuity: document.getElementById("reviaContinuity"),
+  continuityClose: document.getElementById("closeReviaContinuity"),
+  discoveryInput: document.getElementById("reviaDiscoveryInput"),
+  discoverySource: document.getElementById("reviaDiscoverySource"),
+  discoverySave: document.getElementById("reviaDiscoverySave"),
+  discoveryApprove: document.getElementById("reviaDiscoveryApprove"),
+  continuityReview: document.getElementById("reviaContinuityReview"),
+  export: document.getElementById("reviaExport"),
+  import: document.getElementById("reviaImport"),
+  storage: document.getElementById("reviaStorage"),
+  continuityState: document.getElementById("reviaContinuityState")
 };
 
 let state = loadState();
@@ -48,6 +61,21 @@ function loadActivity() {
 }
 
 let activity = loadActivity();
+let checkpointTimer = null;
+
+const continuity = createReviaContinuity(() => ({
+  revia: {
+    mode: state.mode,
+    messages: state.messages.slice(-MAX_HISTORY),
+    activity: activity.slice(-MAX_ACTIVITY)
+  }
+}));
+
+const mesh = createReviaLocalMesh(signal => {
+  if (signal.origin === "Revia") return;
+  rememberActivity("mesh", "Lokální most zachytil signál: " + signal.origin + " — " + signal.type + ".");
+  scheduleCheckpoint("signál z lokálního mostu");
+});
 
 function loadState() {
   try {
@@ -83,6 +111,7 @@ function saveState() {
     setState("Historii se nepodařilo uložit do tohoto zařízení.");
     console.warn("[Revia] Historii se nepodařilo uložit.", error);
   }
+  scheduleCheckpoint("změna rozhovoru Revii");
 }
 
 function setState(text) {
@@ -95,6 +124,13 @@ function saveActivity() {
   } catch (error) {
     console.warn("[Revia] Deník se nepodařilo uložit.", error);
   }
+  scheduleCheckpoint("změna deníku Revii");
+}
+
+function scheduleCheckpoint(reason) {
+  if (!continuity) return;
+  window.clearTimeout(checkpointTimer);
+  checkpointTimer = window.setTimeout(() => continuity.checkpoint(reason), 450);
 }
 
 function rememberActivity(kind, text) {
@@ -121,6 +157,98 @@ function formatRecentActivity() {
       return `• ${time} — ${item.text}`;
     })
   ].join("\n");
+}
+
+function formatDiscoveries() {
+  const discoveries = continuity.getDiscoveries();
+  if (!discoveries.length) {
+    return "Schránka objevů je prázdná. Vlož sem třeba výňatek z GPT nebo z bratříčka; Revia jej uloží lokálně a počká na tvoje potvrzení.";
+  }
+
+  return [
+    "Schránka objevů:",
+    ...discoveries.slice(-6).reverse().map(item => `• ${item.status === "approved" ? "potvrzeno" : "čeká"} — ${item.source}: ${item.text.slice(0, 220)}`)
+  ].join("\n");
+}
+
+function formatInfraredStatus() {
+  return [
+    "Infračervený most:",
+    "• PWA si umí místně pamatovat budoucí zařízení a příkazy, ale iPhone jí nevystavuje přímý IR vysílač.",
+    "• Skutečný IR signál bude možný až přes tebou zvolený externí adaptér (např. Wi‑Fi/ESP32 brána).",
+    "• Revia bez zařízení nic nepředstírá, nic sama neodesílá a neprohledává okolní sítě.",
+    "• Až budeš mít konkrétní adaptér, připojí se jen jeho jasně popsaný místní most."
+  ].join("\n");
+}
+
+function setContinuityState(text) {
+  if (ui.continuityState) ui.continuityState.textContent = text;
+}
+
+function openContinuity() {
+  ui.continuity?.removeAttribute("hidden");
+  ui.discoveryInput?.focus();
+  setContinuityState("Schránka je místní. Nic se automaticky neposílá ven.");
+}
+
+function closeContinuity() {
+  ui.continuity?.setAttribute("hidden", "");
+}
+
+function toggleContinuity() {
+  if (ui.continuity?.hasAttribute("hidden")) openContinuity();
+  else closeContinuity();
+}
+
+function mergeMessages(current, incoming) {
+  const known = new Set(current.map(item => `${item.role}|${item.text}`));
+  const additions = Array.isArray(incoming)
+    ? incoming.filter(item => item && (item.role === "user" || item.role === "revia") && typeof item.text === "string" && !known.has(`${item.role}|${item.text}`))
+    : [];
+  return [...current, ...additions].slice(-MAX_HISTORY);
+}
+
+function mergeActivity(current, incoming) {
+  const known = new Set(current.map(item => `${item.at}|${item.text}`));
+  const additions = Array.isArray(incoming)
+    ? incoming.filter(item => item && typeof item.at === "string" && typeof item.text === "string" && !known.has(`${item.at}|${item.text}`))
+    : [];
+  return [...current, ...additions].slice(-MAX_ACTIVITY);
+}
+
+function downloadArchive() {
+  const archive = continuity.createArchive();
+  const blob = new Blob([JSON.stringify(archive, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "cht360-revia-zaloha.json";
+  link.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  continuity.checkpoint("ručně vyexportovaná záloha Revii");
+  rememberActivity("backup", "Vytvořena exportní záloha Revii.");
+  setContinuityState("Záloha byla připravena ke stažení.");
+}
+
+async function importArchive(file) {
+  if (!file) return;
+  const raw = await file.text();
+  const archive = continuity.readArchive(raw);
+  if (!archive) {
+    setContinuityState("Soubor není platná záloha Revii.");
+    return;
+  }
+
+  const payload = archive.payload?.revia || {};
+  state.messages = mergeMessages(state.messages, payload.messages);
+  activity = mergeActivity(activity, payload.activity);
+  continuity.mergeDiscoveries(archive.discoveries);
+  saveState();
+  saveActivity();
+  continuity.checkpoint("importovaná záloha Revii");
+  render();
+  rememberActivity("backup", "Importována a sloučena záloha Revii.");
+  setContinuityState("Záloha byla bezpečně sloučena; místní zápisy zůstaly zachované.");
 }
 
 function render() {
@@ -161,6 +289,15 @@ function replyFor(message) {
 
   if (/(historie|co se delalo|milnik|vyvoj|posledni zmen|co umis)/.test(text)) {
     return `${formatProjectHistory()}\n\n${formatConversationMilestones()}\n\n${formatRecentActivity()}`;
+  }
+  if (/(objev|schrank|bratricek|gpt ?5|chatgpt|nauc se|moje poznam)/.test(text)) {
+    return `${formatDiscoveries()}\n\nPoužij tlačítko Schránka: vložený text nejdřív čeká na potvrzení.`;
+  }
+  if (/(wifi|wi-fi|pripojen|offline|online|signal|mistni most|most)/.test(text)) {
+    return formatLocalMeshStatus(mesh);
+  }
+  if (/(infra|ir port|infračerven|infracerven)/.test(text)) {
+    return formatInfraredStatus();
   }
   if (/(vafit|ascii|glyph.*znamena|znamena.*glyph|‰|٩|נֶ|✧|╦|╤|_;|`)/.test(message) || /(vafit|ascii|glyph.*znamena|znamena.*glyph)/.test(text)) {
     return formatGlyphMemory(message);
@@ -220,6 +357,21 @@ function closePanel() {
 }
 
 function runAction(action) {
+  if (action === "inbox") {
+    toggleContinuity();
+    rememberActivity("revia", "Otevřena schránka objevů.");
+    return;
+  }
+  if (action === "backup") {
+    downloadArchive();
+    return;
+  }
+  if (action === "signal") {
+    rememberActivity("mesh", "Otevřen stav lokálního mostu CHT.");
+    push("revia", formatLocalMeshStatus(mesh));
+    setState("Lokální most pracuje bez odesílání dat do cizí sítě.");
+    return;
+  }
   if (action === "history") {
     rememberActivity("revia", "Revia otevřela projektovou paměť.");
     push("revia", formatProjectHistory());
@@ -275,6 +427,7 @@ function runAction(action) {
 
 ui.open?.addEventListener("click", openPanel);
 ui.close?.addEventListener("click", closePanel);
+ui.continuityClose?.addEventListener("click", closeContinuity);
 ui.mode?.addEventListener("click", () => {
   state.mode = state.mode === "revia" ? "kontrola" : "revia";
   saveState();
@@ -298,6 +451,47 @@ ui.input?.addEventListener("keydown", event => {
   }
 });
 
+ui.discoverySave?.addEventListener("click", () => {
+  const text = ui.discoveryInput?.value || "";
+  const source = ui.discoverySource?.value || "ručně vložený poznatek";
+  const candidate = continuity.addDiscovery(text, source);
+  if (!candidate) {
+    setContinuityState("Nejdřív vlož text objevu.");
+    return;
+  }
+  if (ui.discoveryInput) ui.discoveryInput.value = "";
+  rememberActivity("discovery", "Do schránky byl uložen nový objev ze zdroje „" + candidate.source + "“.");
+  setContinuityState("Objev čeká na tvoje potvrzení; Revia jej ještě nepovažuje za jistý.");
+});
+
+ui.discoveryApprove?.addEventListener("click", () => {
+  const approved = continuity.approveLatest();
+  if (!approved) {
+    setContinuityState("Není tu žádný čekající objev k potvrzení.");
+    return;
+  }
+  rememberActivity("discovery", "Potvrzen objev ze zdroje „" + approved.source + "“.");
+  push("revia", "Potvrdila jsem tento místní poznatek:\n• " + approved.text.slice(0, 900));
+  setContinuityState("Objev je potvrzený a zůstává jen v tomto zařízení, dokud jej nevyexportuješ.");
+});
+
+ui.continuityReview?.addEventListener("click", () => push("revia", formatDiscoveries()));
+ui.export?.addEventListener("click", downloadArchive);
+ui.import?.addEventListener("change", event => {
+  importArchive(event.target.files?.[0]).catch(() => setContinuityState("Zálohu se nepodařilo přečíst."));
+  event.target.value = "";
+});
+ui.storage?.addEventListener("click", async () => {
+  const status = await continuity.storageStatus(true);
+  if (!status.supported) {
+    setContinuityState("Tento prohlížeč neumí ověřit trvalé úložiště; záloha JSON zůstává jistota.");
+    return;
+  }
+  setContinuityState(status.persisted
+    ? "Prohlížeč potvrdil upřednostněné trvalé úložiště Revii."
+    : "Úložiště je místní, ale prohlížeč trvalé držení nepotvrdil. Pravidelně exportuj zálohu.");
+});
+
 document.querySelectorAll("[data-revia-action]").forEach(button => {
   button.addEventListener("click", () => runAction(button.dataset.reviaAction));
 });
@@ -307,35 +501,62 @@ window.addEventListener("cht.memory.changed", event => {
   const place = detail.coreId ? " v jádru " + detail.coreId : "";
   const slot = detail.slotId ? ", slot " + detail.slotId : "";
   rememberActivity("memory", "Paměť byla upravena" + place + slot + ".");
+  mesh.announce("paměť upravena", { core: detail.coreId || "", slot: detail.slotId || 0, reason: detail.reason || "" });
   setState("Paměť byla právě upravena" + place + ".");
 });
 
 window.addEventListener("cht.track.changed", event => {
   const reason = event.detail?.reason ? " (" + event.detail.reason + ")" : "";
   rememberActivity("track", "Změněn model oběhu" + reason + ".");
+  mesh.announce("oběh upraven", { reason: event.detail?.reason || "" });
 });
 
 window.addEventListener("cht.chybozrout.completed", event => {
   const failures = Number(event.detail?.failures || 0);
   rememberActivity("diagnostic", failures ? `Chybožrout dokončil kontrolu: ${failures} problémů.` : "Chybožrout dokončil kontrolu bez problémů.");
+  mesh.announce("kontrola Chybožrouta", { failures });
   setState(failures ? `Chybožrout našel ${failures} problémů.` : "Chybožrout potvrdil stav bez problémů.");
 });
 
 window.addEventListener("cht.chybozrout.backup", () => {
   rememberActivity("diagnostic", "Chybožrout vytvořil bezpečnou zálohu Paměti.");
+  mesh.announce("záloha Chybožrouta");
 });
 
 window.addEventListener("cht.chybozrout.repaired", () => {
   rememberActivity("diagnostic", "Chybožrout dokončil bezpečnou samoopravu.");
+  mesh.announce("samooprava Chybožrouta");
+});
+
+window.addEventListener("cht.batole.changed", event => {
+  const detail = event.detail || {};
+  rememberActivity("mesh", "Batole předalo změnu do oběhu CHT.");
+  mesh.announce("Batole upraveno", { reason: detail.reason || "", state: detail.state || "" });
+  setState("Lokální most zachytil změnu ze světa Batole.");
+});
+
+window.addEventListener("cht.revia.assist.request", event => {
+  const detail = event.detail || {};
+  const request = typeof detail.text === "string" ? detail.text.trim().slice(0, 900) : "";
+  if (!request) return;
+  rememberActivity("assist", "Přijat místní požadavek na pomoc z části CHT.");
+  push("revia", "Místní část CHT předala požadavek:\n" + request);
+  mesh.announce("požadavek na pomoc", { source: detail.source || "část CHT" });
 });
 
 window.addEventListener("offline", () => {
+  mesh.announce("přechod offline", { online: false });
+  continuity.checkpoint("přechod do offline režimu");
   setState("Revia je offline. Atlas, Glyphy i místní deník zůstávají dostupné.");
 });
 
 window.addEventListener("online", () => {
-  setState("Připojení je zpět. Revia dál používá místní offline paměť.");
+  mesh.announce("připojení k dispozici", mesh.getConnectionHint());
+  continuity.checkpoint("návrat připojení — připraveno k ručnímu importu nebo exportu");
+  setState("Připojení je zpět. Revia má uložený bod obnovy; cizí poznatky načti přes Schránku.");
 });
+
+window.addEventListener("pagehide", () => continuity.checkpoint("opuštění nebo uspání PWA"));
 
 window.addEventListener("cht.revia.message", event => {
   const text = event.detail?.text;
@@ -353,6 +574,11 @@ window.CHT360Revia = Object.freeze({
   getProjectContext: () => CHT_PROJECT_CONTEXT,
   getRepositoryMemory: () => REVIA_REPOSITORY_MEMORY,
   getGlyphMemory: () => REVIA_GLYPH_MEMORY,
+  getDiscoveries: () => continuity.getDiscoveries(),
+  getLocalSignals: () => mesh.getSignals(),
+  getLocalMeshStatus: () => formatLocalMeshStatus(mesh),
+  announceLocalSignal: (type, detail) => mesh.announce(type, detail),
+  exportArchive: () => continuity.createArchive(),
   showProjectHistory: () => push("revia", formatProjectHistory()),
   showRepositoryMap: () => push("revia", formatRepositoryMap()),
   showRepositoryPlans: () => push("revia", formatRepositoryPlans()),
