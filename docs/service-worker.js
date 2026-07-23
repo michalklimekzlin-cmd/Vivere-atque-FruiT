@@ -1,69 +1,69 @@
 "use strict";
 
-/* Hlavní Paměť má vlastní cache a nemaže cache vedlejších PWA. */
-const ROOT_CACHE_PREFIX = "cht360-root-";
-const LEGACY_ROOT_CACHE_PREFIX = "cht360-v";
-const CACHE_VERSION = "v18-cht-network-stable";
-const CACHE_NAME = ROOT_CACHE_PREFIX + CACHE_VERSION;
-const OFFLINE_PAGE = "./index.html";
+/*
+  Při větší změně stačí zvýšit poslední číslo.
+  Staré cache se při aktivaci automaticky odstraní.
+*/
+const CACHE_VERSION = "v14-cernozlaty-obeh";
+const OWN_CACHE_PREFIX = "cht360-v";
+const CACHE_NAME = `cht360-${CACHE_VERSION}`;
 
-/* Tyto aplikace zůstávají izolované ve vlastních service workerech. */
-const SIDE_APP_SCOPES = [
-  new URL("./bubinky/", self.registration.scope).pathname,
-  new URL("./cht360-jadra-pracovni-deska/", self.registration.scope).pathname,
-  new URL("./glyph-cht-360/", self.registration.scope).pathname,
-  new URL("./glyph-pokojicku-cht-360/", self.registration.scope).pathname,
-  new URL("./mluva-cht-360/", self.registration.scope).pathname,
-  new URL("./signal-360/", self.registration.scope).pathname
-];
+const OFFLINE_PAGE = "./index.html";
 
 const CORE_FILES = [
   "./",
   "./index.html",
   "./css/pamet.css",
-  "./css/glyph-engine.css",
+  "./css/revia-dock.css",
   "./js/app.js",
   "./js/aplikace.js",
-  "./js/bubinky-pevne.js",
-  "./js/bubinky-petka.js",
-  "./js/glyph-engine.js",
+  "./js/glyph-kostra.js",
   "./js/cht-chybozrout.js",
-  "./js/cht-360-network.js",
-  "./manifest.json",
-  "./icon.svg",
-  "./css/prstenec-pokojicku.css",
-  "./js/prstenec-pokojicku.js",
+  "./js/revia-dock.js",
+  "./glyph-cht-360/style.css",
+  "./manifest.json"
 ];
 
+/*
+  Instalace:
+  každý soubor ukládáme zvlášť.
+  Jeden chybějící soubor tak nezastaví celý service worker.
+*/
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(async cache => {
-        await Promise.allSettled(
-          CORE_FILES.map(async file => {
-            const response = await fetch(file, { cache: "no-store" });
-            if (!response.ok) {
-              throw new Error("Soubor " + file + " vrátil stav " + response.status);
-            }
-            await cache.put(file, response);
-          })
-        );
-      })
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(async cache => {
+      await Promise.allSettled(
+        CORE_FILES.map(async file => {
+          const response = await fetch(file, {
+            cache: "no-store"
+          });
+
+          if (!response.ok) {
+            throw new Error(
+              `Soubor ${file} vrátil stav ${response.status}`
+            );
+          }
+
+          await cache.put(file, response);
+        })
+      );
+    }).then(() => self.skipWaiting())
   );
 });
 
+/*
+  Aktivace:
+  odstranění pouze předchozích verzí hlavní CHT cache.
+  Samostatné PWA (Glyph, Bubínky a další) mají vlastní cache,
+  kterou hlavní aplikace nesmí mazat.
+*/
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
       .then(keys =>
         Promise.all(
           keys
-            .filter(key =>
-              (key.startsWith(ROOT_CACHE_PREFIX) ||
-                key.startsWith(LEGACY_ROOT_CACHE_PREFIX)) &&
-              key !== CACHE_NAME
-            )
+            .filter(key => key.startsWith(OWN_CACHE_PREFIX) && key !== CACHE_NAME)
             .map(key => caches.delete(key))
         )
       )
@@ -71,54 +71,101 @@ self.addEventListener("activate", event => {
   );
 });
 
+/*
+  HTML, CSS a JavaScript:
+  vždy se nejdřív zkouší nejnovější verze ze sítě.
+
+  Když síť nefunguje:
+  použije se poslední uložená verze.
+*/
 async function networkFirst(request) {
   const cache = await caches.open(CACHE_NAME);
 
   try {
-    const response = await fetch(request, { cache: "no-store" });
-    if (response?.ok) await cache.put(request, response.clone());
+    const response = await fetch(request, {
+      cache: "no-store"
+    });
+
+    if (response && response.ok) {
+      await cache.put(request, response.clone());
+    }
+
     return response;
-  } catch (_) {
-    const cached = await cache.match(request, { ignoreSearch: true });
-    if (cached) return cached;
-    if (request.mode === "navigate") return cache.match(OFFLINE_PAGE);
-    throw _;
+  } catch (error) {
+    const cached = await cache.match(request, {
+      ignoreSearch: true
+    });
+
+    if (cached) {
+      return cached;
+    }
+
+    if (request.mode === "navigate") {
+      return await cache.match(OFFLINE_PAGE);
+    }
+
+    throw error;
   }
 }
 
+/*
+  Ostatní soubory:
+  cache se ukáže okamžitě,
+  ale na pozadí se zkusí obnovit.
+*/
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request, { ignoreSearch: true });
 
-  const network = fetch(request, { cache: "no-store" })
+  const cached = await cache.match(request, {
+    ignoreSearch: true
+  });
+
+  const networkPromise = fetch(request, {
+    cache: "no-store"
+  })
     .then(async response => {
-      if (response?.ok) await cache.put(request, response.clone());
+      if (response && response.ok) {
+        await cache.put(request, response.clone());
+      }
+
       return response;
     })
     .catch(() => null);
 
-  return cached || network;
+  return cached || networkPromise;
 }
 
 self.addEventListener("fetch", event => {
   const request = event.request;
-  if (request.method !== "GET") return;
+
+  if (request.method !== "GET") {
+    return;
+  }
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
 
-  /* Vedlejší PWA obsluhuje vlastní worker, případně přímo síť. */
-  if (SIDE_APP_SCOPES.some(scope => url.pathname.startsWith(scope))) return;
+  /* Cizí weby necháme prohlížeči. */
+  if (url.origin !== self.location.origin) {
+    return;
+  }
 
-  const freshCode =
+  const isFreshCode =
     request.mode === "navigate" ||
-    /\.(?:html|css|js|json|svg)$/u.test(url.pathname);
+    url.pathname.endsWith(".html") ||
+    url.pathname.endsWith(".css") ||
+    url.pathname.endsWith(".js") ||
+    url.pathname.endsWith(".json");
 
-  event.respondWith(freshCode ? networkFirst(request) : staleWhileRevalidate(request));
+  event.respondWith(
+    isFreshCode
+      ? networkFirst(request)
+      : staleWhileRevalidate(request)
+  );
 });
 
+/* Umožní stránce nového workera okamžitě aktivovat. */
 self.addEventListener("message", event => {
-  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
-
-
