@@ -5,7 +5,6 @@ import {
   IR_COMMANDS,
   WAYS,
   addEntry,
-  compostTrash,
   createArchive,
   createPulse,
   loadState,
@@ -15,7 +14,7 @@ import {
   safeCleanup,
   saveState,
   scanCleanup
-} from "./memory.js";
+} from "./memory.js?v=kompost3";
 
 const $ = id => document.getElementById(id);
 const ui = {
@@ -36,6 +35,7 @@ let state = loadState();
 let way = "local";
 let channel = null;
 
+const lastItem = list => list[list.length - 1];
 const say = text => {
   ui.status.textContent = text;
 };
@@ -160,7 +160,7 @@ function routeLight() {
   const actions = document.createElement("div");
   actions.className = "routeActions";
   actions.append(button("Vytvořit Světelný puls", () => {
-    const pulse = emit("světelný puls", { excerpt: (state.entries.at(-1)?.text || "prázdná stopa").slice(0, 180) });
+    const pulse = emit("světelný puls", { excerpt: (lastItem(state.entries)?.text || "prázdná stopa").slice(0, 180) });
     renderMemory();
     renderTrash();
     say("Světelný puls je připraven; zatím se pouze ukazuje a ukládá.");
@@ -323,11 +323,12 @@ window.addEventListener("pagehide", () => persist("uspání PWA"));
 renderMemory();
 renderTrash();
 renderWay();
-if (state.pulses.at(-1)) showPulse(state.pulses.at(-1));
+if (lastItem(state.pulses)) showPulse(lastItem(state.pulses));
 ui.connection.textContent = navigator.onLine ? "místní oběh · připojení k dispozici" : "offline · Paměť drží";
+say("CHT Puls je připravený. Koš, Kompost i Revia mají živá tlačítka.");
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker
-    .register("./sw.js")
+    .register("./sw.js?v=kompost3")
     .catch(() => say("Offline vrstvu se nepodařilo zapnout; Paměť dál běží místně.")));
 }
