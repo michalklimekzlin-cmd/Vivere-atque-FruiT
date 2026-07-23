@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b0805">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./style.css">
+  <title>CHT Puls 360°‰.</title>
+</head>
+<body>
+  <main class="shell">
+    <header class="top">
+      <div>
+        <p class="eyebrow">{*(˚.•).•)//</p>
+        <h1>CHT Puls <span>360°‰.</span></h1>
+      </div>
+      <div id="connectionState" class="connectionState">místní oběh</div>
+    </header>
+
+    <p class="intro">Jedna Paměť, čtyři cesty. Puls se nikdy sám nevykoná: nejdřív se uloží, ukáže a čeká na tebe.</p>
+
+    <nav class="ways" aria-label="Čtyři cesty CHT Puls">
+      <button class="way is-active" type="button" data-way="local"><b>1</b> Lokální most</button>
+      <button class="way" type="button" data-way="json"><b>2</b> JSON paměť</button>
+      <button class="way" type="button" data-way="light"><b>3</b> Světelný puls</button>
+      <button class="way" type="button" data-way="bridge"><b>4</b> IR / brána</button>
+    </nav>
+
+    <section class="core">
+      <section class="memoryPanel" aria-label="Paměť CHT Puls">
+        <div class="panelTop">
+          <div><strong>Paměť Pulsu</strong><small id="memoryStats">0 stop</small></div>
+          <button id="clearDraft" class="quiet" type="button">Vyčistit návrh</button>
+        </div>
+        <label>Nová stopa nebo objev
+          <textarea id="memoryInput" rows="4" maxlength="4000" placeholder="Napiš, co CHT nemá ztratit…"></textarea>
+        </label>
+        <div class="actions">
+          <button id="saveMemory" class="primary" type="button">Uložit stopu</button>
+          <button id="exportMemory" type="button">Export JSON</button>
+          <label class="fileButton">Import JSON<input id="importMemory" type="file" accept="application/json,.json"></label>
+        </div>
+        <div id="memoryLog" class="memoryLog" aria-live="polite"></div>
+      </section>
+
+      <section class="wayPanel" aria-label="Aktivní cesta Pulsu">
+        <div id="wayContent"></div>
+        <div class="pulsePreview">
+          <div class="pulseHead"><strong>Poslední puls</strong><span id="pulseChecksum">čeká</span></div>
+          <pre id="pulsePreview">Žádný puls zatím nevznikl.</pre>
+        </div>
+      </section>
+    </section>
+
+    <footer id="status" class="status">CHT Puls je připravený offline. První otevření uloží PWA do zařízení.</footer>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
