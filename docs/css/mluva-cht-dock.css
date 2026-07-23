@@ -1,0 +1,340 @@
+/* Malé lokální okno Mluvy v hlavním CHT 360°‰. */
+.mluva-dock {
+  position: fixed;
+  z-index: 90;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(52px, calc(env(safe-area-inset-bottom) + 12px));
+  width: min(370px, calc(100vw - 24px));
+  color: #fff0c5;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  pointer-events: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mluva-dock__toggle,
+.mluva-dock__panel {
+  pointer-events: auto;
+}
+
+.mluva-dock .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.mluva-dock__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 226, 173, .48);
+  border-radius: 999px;
+  color: #fff0c5;
+  background: linear-gradient(135deg, rgba(24, 18, 20, .96), rgba(10, 9, 16, .94));
+  box-shadow: 0 7px 24px rgba(0, 0, 0, .46), inset 0 0 18px rgba(255, 212, 135, .05);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  touch-action: manipulation;
+}
+
+.mluva-dock__toggle::before {
+  content: "◌";
+  color: #ffd98e;
+  font-size: 20px;
+  line-height: 1;
+  text-shadow: 0 0 13px rgba(255, 211, 132, .9);
+}
+
+.mluva-dock__toggle small {
+  color: rgba(255, 240, 197, .63);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.mluva-dock__toggle:active,
+.mluva-dock__action:active,
+.mluva-dock__send:active,
+.mluva-dock__close:active {
+  transform: scale(.97);
+}
+
+.mluva-dock__panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(86px, 1fr) auto auto auto;
+  gap: 8px;
+  max-height: min(418px, calc(100vh - 104px));
+  margin-top: 9px;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 226, 173, .42);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(255, 211, 132, .13), transparent 35%),
+    linear-gradient(140deg, rgba(17, 13, 18, .98), rgba(5, 6, 13, .98));
+  box-shadow: 0 16px 44px rgba(0, 0, 0, .58), inset 0 0 22px rgba(255, 225, 166, .04);
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transform-origin: left bottom;
+  transition: opacity .2s ease, transform .2s ease, max-height .25s ease, margin .25s ease, padding .25s ease, border-width .25s ease;
+}
+
+.mluva-dock[data-open="false"] .mluva-dock__panel {
+  max-height: 0;
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-width: 0;
+  opacity: 0;
+  transform: translateY(8px) scale(.98);
+  pointer-events: none;
+}
+
+.mluva-dock__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.mluva-dock__title {
+  min-width: 0;
+  flex: 1;
+}
+
+.mluva-dock__eyebrow {
+  margin: 0 0 2px;
+  color: #ffd98e;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .2em;
+}
+
+.mluva-dock__title strong {
+  display: block;
+  color: #fff6de;
+  font-size: 15px;
+  letter-spacing: .02em;
+}
+
+.mluva-dock__title span {
+  display: block;
+  margin-top: 2px;
+  color: rgba(255, 240, 197, .64);
+  font-size: 11px;
+}
+
+.mluva-dock__close {
+  width: 31px;
+  height: 31px;
+  border: 1px solid rgba(255, 226, 173, .28);
+  border-radius: 50%;
+  color: #fff0c5;
+  background: rgba(255, 255, 255, .04);
+  cursor: pointer;
+  font: inherit;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.mluva-dock__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid rgba(255, 226, 173, .17);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .18);
+}
+
+.mluva-dock__summary-text {
+  min-width: 0;
+  flex: 1;
+  color: rgba(255, 240, 197, .75);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.mluva-dock__core {
+  max-width: 116px;
+  border: 1px solid rgba(255, 226, 173, .25);
+  border-radius: 8px;
+  color: #fff0c5;
+  background: rgba(8, 8, 14, .72);
+  padding: 6px 7px;
+  font: inherit;
+  font-size: 11px;
+}
+
+.mluva-dock__messages {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-height: 88px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 2px 2px 0;
+  scrollbar-width: thin;
+}
+
+.mluva-dock__message {
+  align-self: flex-start;
+  max-width: 94%;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 226, 173, .17);
+  border-radius: 11px 11px 11px 3px;
+  color: rgba(255, 246, 222, .95);
+  background: rgba(255, 255, 255, .05);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.mluva-dock__message--user {
+  align-self: flex-end;
+  border-color: rgba(255, 217, 142, .5);
+  border-radius: 11px 11px 3px 11px;
+  color: #241508;
+  background: linear-gradient(135deg, #ffe6aa, #d59a42);
+  font-weight: 700;
+}
+
+.mluva-dock__time {
+  display: block;
+  margin-top: 4px;
+  color: inherit;
+  font-size: 9px;
+  opacity: .6;
+}
+
+.mluva-dock__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 7px;
+}
+
+.mluva-dock__input {
+  min-height: 42px;
+  max-height: 92px;
+  resize: vertical;
+  border: 1px solid rgba(255, 226, 173, .25);
+  border-radius: 10px;
+  color: #fff6de;
+  background: rgba(3, 4, 9, .65);
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.mluva-dock__input:focus,
+.mluva-dock__core:focus {
+  outline: 0;
+  border-color: rgba(255, 217, 142, .82);
+  box-shadow: 0 0 0 3px rgba(255, 217, 142, .12);
+}
+
+.mluva-dock__input::placeholder {
+  color: rgba(255, 240, 197, .46);
+}
+
+.mluva-dock__send {
+  min-width: 68px;
+  border: 1px solid #ffe0a0;
+  border-radius: 10px;
+  color: #281709;
+  background: linear-gradient(180deg, #ffedbd, #e3ad55);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .03em;
+}
+
+.mluva-dock__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mluva-dock__action {
+  border: 1px solid rgba(255, 226, 173, .22);
+  border-radius: 999px;
+  color: rgba(255, 240, 197, .83);
+  background: rgba(255, 255, 255, .035);
+  padding: 5px 8px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.mluva-dock__action:hover,
+.mluva-dock__close:hover {
+  border-color: rgba(255, 217, 142, .74);
+  color: #fff6de;
+  background: rgba(255, 217, 142, .08);
+}
+
+.mluva-dock__status {
+  min-height: 14px;
+  margin: 0;
+  color: rgba(255, 240, 197, .55);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+@media (max-height: 510px) {
+  .mluva-dock {
+    bottom: max(42px, calc(env(safe-area-inset-bottom) + 7px));
+    width: min(335px, calc(100vw - 20px));
+  }
+
+  .mluva-dock__panel {
+    max-height: min(350px, calc(100vh - 70px));
+    padding: 9px;
+    gap: 6px;
+  }
+
+  .mluva-dock__messages {
+    min-height: 68px;
+  }
+
+  .mluva-dock__message {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .mluva-dock__input {
+    min-height: 37px;
+  }
+}
+
+@media (max-width: 420px) {
+  .mluva-dock__panel {
+    border-radius: 15px;
+  }
+
+  .mluva-dock__summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .mluva-dock__core {
+    max-width: 100%;
+    width: 100%;
+  }
+}
