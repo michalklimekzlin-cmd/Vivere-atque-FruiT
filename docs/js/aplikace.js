@@ -31,7 +31,7 @@ const LEGACY_STORAGE_KEYS = ["vaft_pamet_v1"];
 const MEMORY_SNAPSHOT_KEY = "cht360_pamet_snapshots_v1";
 const CHYBOZROUT_BACKUP_KEY = "cht360_samoopravovna_backup_v1";
 const LEGACY_SLOT_PREFIX = "VaFiT_SLOT_";
-const SLOT_COUNT = 240;
+const SLOT_COUNT = 70;
 const SCENE_KEY = "vaft_pamet_scene_v2";
 const MIN_SCENE_SPREAD = .96;
 const MAX_SCENE_SPREAD = 2.8;
@@ -41,7 +41,6 @@ const TROJKA_MODEL_STORAGE_KEY = "cht360_trojka_models_v1";
 const GLYPH_DRUM_STORAGE_KEY = "cht360_glyph_drums_v1";
 const GLYPH_DRUM_CUSTOM_STORAGE_KEY = "cht360_glyph_drums_custom_v1";
 const PHONE_SETTINGS_KEY = "cht360_iphone14_settings_v1";
-const PHONE_APP_LIMIT = 240;
 
 const GLYPH_DRUM_TOKENS = Object.freeze([
   ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -461,7 +460,7 @@ function loadPhoneSettings() {
         ? saved.apps
           .map(normalisePhoneApp)
           .filter(app => app.name || app.url)
-          .slice(0, PHONE_APP_LIMIT)
+          .slice(0, 12)
         : []
     };
   } catch (error) {
@@ -601,7 +600,7 @@ function updatePills() {
     }
 
     const stats = getCoreStats(core.id);
-    pill.textContent = `${core.title.toUpperCase()} · ${stats.used}/${SLOT_COUNT}`;
+    pill.textContent = `${core.title.toUpperCase()} · ${stats.used}/70`;
   }
 }
 
@@ -786,6 +785,79 @@ function getCorePosition(core) {
 
 function drawBackground() {
   const layout = getLandscapeLayout();
+
+  const base = context.createLinearGradient(0, 0, width, height);
+  base.addColorStop(0, "#050403");
+  base.addColorStop(.48, "#18100b");
+  base.addColorStop(1, "#060504");
+  context.fillStyle = base;
+  context.fillRect(0, 0, width, height);
+
+  context.save();
+  context.lineWidth = .7;
+  context.strokeStyle = "rgba(255,226,173,.15)";
+
+  const columns = [0, .125, .25, .5, .75, .875, 1];
+  columns.forEach((amount, index) => {
+    const x = width * amount;
+    context.globalAlpha = index === 3 ? .95 : .52;
+    context.beginPath();
+    context.moveTo(x, 0);
+    context.lineTo(x, height);
+    context.stroke();
+  });
+
+  const rows = [.015, .105, .50, .895, .985];
+  rows.forEach((amount, index) => {
+    const y = height * amount;
+    context.globalAlpha = index === 2 ? .96 : .52;
+    context.beginPath();
+    context.moveTo(0, y);
+    context.lineTo(width, y);
+    context.stroke();
+  });
+
+  const waves = [
+    { y: .20, bend: -.12, alpha: .66 },
+    { y: .23, bend: -.10, alpha: .34 },
+    { y: .78, bend: .13, alpha: .66 },
+    { y: .81, bend: .10, alpha: .34 }
+  ];
+
+  waves.forEach((wave, index) => {
+    const y = height * wave.y;
+    context.globalAlpha = wave.alpha;
+    context.strokeStyle = index % 2 ? "rgba(199,155,51,.72)" : "rgba(255,226,173,.92)";
+    context.lineWidth = index % 2 ? .8 : 1.35;
+    context.beginPath();
+    context.moveTo(-18, y);
+    context.bezierCurveTo(
+      width * .24,
+      y + height * wave.bend,
+      width * .63,
+      y - height * wave.bend,
+      width + 18,
+      y + height * .015
+    );
+    context.stroke();
+  });
+
+  context.globalAlpha = .86;
+  context.strokeStyle = "rgba(255,226,173,.76)";
+  context.lineWidth = 1.1;
+  [
+    [width * .26, height * .245],
+    [width * .50, height * .105],
+    [width * .74, height * .245],
+    [width * .26, height * .78],
+    [width * .50, height * .895],
+    [width * .74, height * .78]
+  ].forEach(([x, y]) => {
+    context.beginPath();
+    context.arc(x, y, 5, 0, Math.PI * 2);
+    context.stroke();
+  });
+  context.restore();
 
   const glow = context.createRadialGradient(
     layout.centerX,
@@ -1329,7 +1401,7 @@ function saveCustomGlyphTokens() {
       JSON.stringify(customGlyphTokens)
     );
   } catch {
-    /* Vlastní glyph nesmí zastavit Paměť. */
+    /* Glyph, který CHT nevlastní, nesmí zastavit Paměť. */
   }
 }
 
@@ -1642,7 +1714,7 @@ function renderIPhoneSettings() {
   const appCount = phoneSettings.apps.length;
   const onlineText = navigator.onLine ? "PWA je online" : "PWA je bez připojení";
 
-  state.textContent = onlineText + " · otočení je uložené · AI aplikace: " + appCount + "/" + PHONE_APP_LIMIT;
+  state.textContent = onlineText + " · otočení je uložené · AI aplikace: " + appCount + "/12";
   list.replaceChildren();
 
   if (!appCount) {
@@ -1704,7 +1776,7 @@ function addIPhoneApp() {
     name,
     url
   });
-  phoneSettings.apps = phoneSettings.apps.slice(0, PHONE_APP_LIMIT);
+  phoneSettings.apps = phoneSettings.apps.slice(0, 12);
   savePhoneSettings();
   nameInput.value = "";
   urlInput.value = "";
@@ -1720,6 +1792,12 @@ function openIPhoneSettings() {
 function closeIPhoneSettings() {
   document.getElementById("iphoneSettingsPanel")?.classList.remove("is-open");
 }
+
+window.addEventListener("cht.phone.open", openIPhoneSettings);
+window.addEventListener("cht.memory.open", () => {
+  const firstCore = cores.find(core => core.type !== "iphone14") || cores[0];
+  if (firstCore) openCore(firstCore);
+});
 
 function drawIPhoneCore(core, time) {
   const position = getCorePosition(core);
@@ -2017,7 +2095,7 @@ function drawCore(core, time) {
 
   context.fillStyle = "rgba(255,240,210,.74)";
   context.font = Math.max(8, Math.round(9 * scale)) + "px system-ui";
-  context.fillText(stats.used + "/" + SLOT_COUNT, position.x, position.y + 12);
+  context.fillText(stats.used + "/70", position.x, position.y + 12);
 
   context.restore();
 
@@ -2085,12 +2163,9 @@ function findCoreAt(x, y) {
 function openCore(core) {
   selectedCore = core;
   selectedSlotIndex = null;
-  panel.dataset.chtCore = core.id;
-  slotEditor.dataset.chtCore = core.id;
-  delete slotEditor.dataset.chtSlot;
 
   panelTitle.textContent = `${core.title} · Paměť`;
-  panelSub.textContent = SLOT_COUNT + " slotů · samostatné uložení";
+  panelSub.textContent = "70 slotů · samostatné uložení";
 
   panel.classList.add("open");
   slotEditor.classList.remove("open");
@@ -2147,9 +2222,6 @@ function selectSlot(index) {
 
   const slot = memory.cores[selectedCore.id][index];
 
-  slotEditor.dataset.chtCore = selectedCore.id;
-  slotEditor.dataset.chtSlot = String(index + 1);
-
   slotName.value = slot.name;
   slotContent.value = slot.content;
 
@@ -2169,7 +2241,7 @@ function updateStatus(message = "") {
   const stats = getCoreStats(selectedCore.id);
 
   let text =
-    `${selectedCore.title}: obsazeno ${stats.used}/${SLOT_COUNT} · ` +
+    `${selectedCore.title}: obsazeno ${stats.used}/70 · ` +
     `velikost ${formatBytes(stats.size)}`;
 
   if (selectedSlotIndex !== null) {
@@ -2920,6 +2992,3 @@ if ("serviceWorker" in navigator) {
     }
   });
 }
-
-
-
