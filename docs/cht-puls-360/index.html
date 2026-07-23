@@ -43,6 +43,19 @@
           <button id="exportMemory" type="button">Export JSON</button>
           <label class="fileButton">Import JSON<input id="importMemory" type="file" accept="application/json,.json"></label>
         </div>
+        <section class="selfCleaner" aria-label="Samočistička CHT Puls">
+          <div class="panelTop">
+            <div><strong>Koš · Kompost · Revia</strong><small id="trashStats">0 střepů · 0 semínek</small></div>
+          </div>
+          <p>Co se uklízí, nemizí. CHT to rozloží na střepy, uloží do Koše a vytvoří z toho semínka mluvy.</p>
+          <div class="actions">
+            <button id="scanTrash" type="button">Najít nepořádek</button>
+            <button id="safeClean" class="primary" type="button">Vyčistit bezpečně</button>
+            <button id="restoreTrash" type="button">Vrátit z koše</button>
+            <button id="clearCache" type="button">Obnovit cache</button>
+          </div>
+          <div id="seedLog" class="seedLog" aria-live="polite"></div>
+        </section>
         <div id="memoryLog" class="memoryLog" aria-live="polite"></div>
       </section>
 
