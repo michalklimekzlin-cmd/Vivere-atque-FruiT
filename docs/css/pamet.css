@@ -1,9 +1,16 @@
+/* Sdílený základ Glyphu. Načítá skutečný style.css z dílny v nízké vrstvě,
+   takže CHT získá stejné tokeny a stavy bez přepsání vlastního 3D rozhraní. */
+@import url("../glyph-cht-360/style.css") layer(glyph-workshop);
+
 :root{
   --zlata:#ffe2ad;
   --zlata2:#c79b33;
   --panel:rgba(4,5,10,.95);
   --tmava:#020208;
   --okraj:rgba(255,220,160,.24);
+  --cht-glyph-gold:var(--gold,#ffe2ad);
+  --cht-glyph-gold-soft:var(--gold-soft,#fff0c5);
+  --cht-glyph-line:var(--line,rgba(255,226,173,.18));
 }
 
 *{
@@ -21,8 +28,8 @@ body{
   background:
     radial-gradient(
       circle at top,
-      #080d1f,
-      #020208 70%
+      #19110b,
+      #050403 70%
     );
 
   color:#f5f5f5;
@@ -75,8 +82,8 @@ textarea{
     ),
     radial-gradient(
       circle at top,
-      #06091a,
-      #020208
+      #17100b,
+      #050403
     );
 
   box-shadow:
@@ -284,10 +291,30 @@ button.danger{
 
 .slotsToolbar{
   display:grid;
-  grid-template-columns:1fr auto auto;
+  grid-template-columns:1fr auto auto auto;
   gap:8px;
 
   margin-bottom:8px;
+}
+
+.necesstinaShortcut{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:38px;
+  padding:8px 10px;
+  border:1px solid rgba(255,220,160,.22);
+  border-radius:14px;
+  color:var(--zlata);
+  background:rgba(255,220,160,.10);
+  font-size:12px;
+  font-weight:750;
+  text-decoration:none;
+  touch-action:manipulation;
+}
+
+.necesstinaShortcut:active{
+  transform:scale(.97);
 }
 
 .slotsToolbar input,
@@ -795,5 +822,85 @@ button.danger{
 
   .panelTop{
     align-items:center;
+  }
+}
+
+/* Hlavní režim CHT je iPhone 14 na šířku. Panely jsou úsporné,
+   ale vstupy zůstávají pohodlně ovladatelné prstem. */
+@media (orientation:landscape) and (max-height:430px){
+  .panel{
+    padding:10px;
+    border-radius:18px;
+  }
+
+  .panelTitle{font-size:13px}
+  .panelSub{font-size:10px}
+
+  button,
+  .necesstinaShortcut{
+    min-height:32px;
+    padding:6px 8px;
+    border-radius:11px;
+    font-size:10px;
+  }
+
+  .slotsToolbar{
+    gap:6px;
+    margin-bottom:6px;
+  }
+
+  .slotsToolbar input,
+  .slotEditor input,
+  .slotEditor textarea{
+    padding:8px;
+    border-radius:11px;
+    font-size:12px;
+  }
+
+  .slotGrid{
+    gap:5px;
+    max-height:26dvh;
+  }
+
+  .slotBtn{
+    min-height:45px;
+    padding:5px;
+    border-radius:11px;
+  }
+
+  .slotBtn strong{font-size:10px}
+  .slotBtn span{font-size:8px}
+
+  .slotEditor{margin-top:7px}
+
+  .slotEditor textarea{
+    min-height:82px;
+    max-height:116px;
+    line-height:1.3;
+  }
+
+  .statusBox{
+    margin-top:6px;
+    padding:7px 8px;
+    border-radius:11px;
+    font-size:10px;
+  }
+
+  .openLifePanel{
+    min-width:62px;
+    min-height:39px;
+    padding:5px 8px;
+    border-radius:14px;
+  }
+
+  .openLifePanel span{font-size:8px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto !important;
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
   }
 }
