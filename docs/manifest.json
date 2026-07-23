@@ -1,21 +1,11 @@
 {
-  "name": "CHT 360°‰. · Paměť a Glyph",
+  "name": "CHT 360°‰.",
   "short_name": "CHT 360°‰.",
-  "description": "Česká offline Paměť se čtyřmi jádry a vlastní UTF‑8 Glyph dílnou.",
-  "lang": "cs-CZ",
+  "lang": "cs",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#020208",
-  "theme_color": "#050815",
-  "orientation": "landscape",
-  "icons": [
-    {
-      "src": "./icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
-  ]
+  "background_color": "#050403",
+  "theme_color": "#17100b",
+  "orientation": "landscape"
 }
-
