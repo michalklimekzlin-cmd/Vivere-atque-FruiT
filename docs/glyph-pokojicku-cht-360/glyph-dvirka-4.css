@@ -1,0 +1,215 @@
+/*
+  CHT 360°‰. — ROSTOUCÍ GLYPH DVÍŘKA
+  Nahraj jako:
+  docs/glyph-pokojicku-cht-360/glyph-dvirka-4.css
+*/
+
+#room-list {
+  margin-top: 18px;
+}
+
+.grow-doors-shell {
+  padding: 14px 0 2px;
+}
+
+.grow-doors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(110px, 1fr));
+  gap: 16px 14px;
+  align-items: start;
+}
+
+.grow-door-card {
+  position: relative;
+  min-height: 245px;
+  transform-style: preserve-3d;
+}
+
+.grow-door {
+  width: 100%;
+  min-height: 245px;
+  padding: 12px 10px 14px;
+  border: 1px solid rgba(255, 220, 150, 0.22);
+  border-radius: 18px;
+  color: #fff0c5;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.04), transparent 18% 82%, rgba(0,0,0,0.18)),
+    repeating-linear-gradient(90deg, #4a351f 0 10px, #3a291a 10px 20px);
+  box-shadow:
+    inset 0 0 0 2px rgba(18, 12, 7, 0.45),
+    inset 0 0 24px rgba(0,0,0,0.25),
+    0 12px 24px rgba(0,0,0,0.22);
+  text-align: center;
+}
+
+.grow-door-number {
+  display: block;
+  min-height: 28px;
+  color: rgba(255, 240, 197, 0.75);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.grow-door-leaf {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(95px, 25vw, 112px);
+  height: clamp(150px, 32vw, 185px);
+  margin: 10px auto 10px;
+  border: 3px solid #23170e;
+  border-radius: 10px 10px 6px 6px;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.04), transparent 32%),
+    #302013;
+  box-shadow:
+    inset 0 0 18px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(255,220,150,0.15);
+  transform-origin: left center;
+  transition: transform .45s cubic-bezier(.2,.78,.22,1);
+}
+
+.grow-door-card.is-open .grow-door-leaf {
+  transform: rotateY(-72deg);
+}
+
+.grow-door-window {
+  display: grid;
+  place-items: center;
+  width: clamp(42px, 12vw, 50px);
+  height: clamp(42px, 12vw, 50px);
+  border: 3px solid #1c120b;
+  border-radius: 50%;
+  color: #fff0c5;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255,255,255,0.18), transparent 20%),
+    radial-gradient(circle, rgba(239,184,91,0.18), rgba(8,7,6,0.92) 70%);
+  font-size: 1.02rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.grow-door-handle {
+  position: absolute;
+  right: 8px;
+  top: 58%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d6a247;
+  box-shadow: 0 0 0 3px #1d130b;
+}
+
+.grow-door-light {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffe2a2;
+  box-shadow: 0 0 10px rgba(255, 219, 139, 0.8);
+}
+
+.grow-door-label {
+  display: block;
+  min-height: 34px;
+  margin-top: 4px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.grow-door-tip {
+  display: block;
+  min-height: 22px;
+  margin-top: 5px;
+  color: rgba(255, 240, 197, 0.56);
+  font-size: 0.65rem;
+}
+
+.grow-door-card.is-empty .grow-door-label {
+  color: rgba(255, 240, 197, 0.82);
+}
+
+.grow-door-panel {
+  display: none;
+  margin-top: 10px;
+  padding: 12px 11px;
+  border: 1px solid rgba(255, 220, 150, 0.16);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 70% 20%, rgba(255,203,112,0.12), transparent 34%),
+    linear-gradient(155deg, #20170f, #0d0a07);
+  color: #fff0c5;
+}
+
+.grow-door-card.is-open .grow-door-panel {
+  display: block;
+}
+
+.grow-door-panel strong,
+.grow-door-panel p,
+.grow-door-panel small,
+.grow-door-panel-glyph {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.grow-door-panel strong {
+  font-size: 0.88rem;
+}
+
+.grow-door-panel-glyph {
+  margin-top: 8px;
+  font-size: 1.3rem;
+}
+
+.grow-door-panel p {
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.grow-door-panel small {
+  margin-top: 8px;
+  color: rgba(255,240,197,0.6);
+  font-size: 0.66rem;
+}
+
+.grow-door-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.grow-door-actions button {
+  flex: 1;
+  min-height: 34px;
+  border: 1px solid rgba(255,220,150,0.18);
+  border-radius: 10px;
+  color: #fff0c5;
+  background: rgba(255,220,150,0.08);
+}
+
+@media (min-width: 780px) {
+  .grow-doors-grid {
+    grid-template-columns: repeat(4, minmax(110px, 1fr));
+  }
+}
+
+@media (max-width: 420px) {
+  .grow-doors-grid {
+    gap: 14px 10px;
+  }
+
+  .grow-door {
+    min-height: 232px;
+  }
+
+  .grow-door-leaf {
+    width: clamp(88px, 25vw, 104px);
+    height: clamp(145px, 31vw, 175px);
+  }
+}
