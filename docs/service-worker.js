@@ -1,13 +1,7 @@
 "use strict";
 
-/*
-  Při větší změně stačí zvýšit poslední číslo.
-  Staré cache se při aktivaci automaticky odstraní.
-*/
-const CACHE_VERSION = "v19-revia-localni-most";
-const OWN_CACHE_PREFIX = "cht360-v";
-const CACHE_NAME = `cht360-${CACHE_VERSION}`;
-
+const CACHE_PREFIX = "cht360-shared-";
+const CACHE_NAME = `${CACHE_PREFIX}v1`;
 const OFFLINE_PAGE = "./index.html";
 
 const CORE_FILES = [
@@ -25,71 +19,44 @@ const CORE_FILES = [
   "./js/revia-glyph-memory.js",
   "./js/revia-repository-memory.js",
   "./js/revia-dock.js",
-  "./glyph-cht-360/style.css",
   "./manifest.json"
 ];
 
-/*
-  Instalace:
-  každý soubor ukládáme zvlášť.
-  Jeden chybějící soubor tak nezastaví celý service worker.
-*/
 self.addEventListener("install", event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      await Promise.allSettled(
+    caches.open(CACHE_NAME)
+      .then(cache => Promise.allSettled(
         CORE_FILES.map(async file => {
-          const response = await fetch(file, {
-            cache: "no-store"
-          });
-
-          if (!response.ok) {
-            throw new Error(
-              `Soubor ${file} vrátil stav ${response.status}`
-            );
-          }
-
-          await cache.put(file, response);
+          const response = await fetch(file, { cache: "no-store" });
+          if (response.ok) await cache.put(file, response.clone());
         })
-      );
-    }).then(() => self.skipWaiting())
+      ))
+      .then(() => self.skipWaiting())
   );
 });
 
-/*
-  Aktivace:
-  odstranění pouze předchozích verzí hlavní CHT cache.
-  Samostatné PWA (Glyph, Bubínky a další) mají vlastní cache,
-  kterou hlavní aplikace nesmí mazat.
-*/
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
-      .then(keys =>
-        Promise.all(
-          keys
-            .filter(key => key.startsWith(OWN_CACHE_PREFIX) && key !== CACHE_NAME)
-            .map(key => caches.delete(key))
-        )
-      )
+      .then(keys => Promise.all(
+        keys
+          .filter(key => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
 
-/*
-  HTML, CSS a JavaScript:
-  vždy se nejdřív zkouší nejnovější verze ze sítě.
+function isFreshAsset(url, request) {
+  return request.mode === "navigate" ||
+    /\.(?:html|css|js|json|webmanifest)$/i.test(url.pathname);
+}
 
-  Když síť nefunguje:
-  použije se poslední uložená verze.
-*/
 async function networkFirst(request) {
   const cache = await caches.open(CACHE_NAME);
 
   try {
-    const response = await fetch(request, {
-      cache: "no-store"
-    });
+    const response = await fetch(request, { cache: "no-store" });
 
     if (response && response.ok) {
       await cache.put(request, response.clone());
@@ -97,37 +64,20 @@ async function networkFirst(request) {
 
     return response;
   } catch (error) {
-    const cached = await cache.match(request, {
-      ignoreSearch: true
-    });
+    const cached = await cache.match(request, { ignoreSearch: true });
 
-    if (cached) {
-      return cached;
-    }
-
-    if (request.mode === "navigate") {
-      return await cache.match(OFFLINE_PAGE);
-    }
+    if (cached) return cached;
+    if (request.mode === "navigate") return cache.match(OFFLINE_PAGE);
 
     throw error;
   }
 }
 
-/*
-  Ostatní soubory:
-  cache se ukáže okamžitě,
-  ale na pozadí se zkusí obnovit.
-*/
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request, { ignoreSearch: true });
 
-  const cached = await cache.match(request, {
-    ignoreSearch: true
-  });
-
-  const networkPromise = fetch(request, {
-    cache: "no-store"
-  })
+  const fresh = fetch(request, { cache: "no-store" })
     .then(async response => {
       if (response && response.ok) {
         await cache.put(request, response.clone());
@@ -137,40 +87,94 @@ async function staleWhileRevalidate(request) {
     })
     .catch(() => null);
 
-  return cached || networkPromise;
+  return cached || fresh;
 }
 
 self.addEventListener("fetch", event => {
   const request = event.request;
 
-  if (request.method !== "GET") {
-    return;
-  }
+  if (request.method !== "GET") return;
 
   const url = new URL(request.url);
 
-  /* Cizí weby necháme prohlížeči. */
-  if (url.origin !== self.location.origin) {
-    return;
-  }
-
-  const isFreshCode =
-    request.mode === "navigate" ||
-    url.pathname.endsWith(".html") ||
-    url.pathname.endsWith(".css") ||
-    url.pathname.endsWith(".js") ||
-    url.pathname.endsWith(".json");
+  if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    isFreshCode
+    isFreshAsset(url, request)
       ? networkFirst(request)
       : staleWhileRevalidate(request)
   );
 });
 
-/* Umožní stránce nového workera okamžitě aktivovat. */
+async function clearOwnCaches() {
+  const keys = await caches.keys();
+
+  await Promise.all(
+    keys
+      .filter(key => key.startsWith(CACHE_PREFIX))
+      .map(key => caches.delete(key))
+  );
+}
+
+async function refreshUrls(urls = []) {
+  const cache = await caches.open(CACHE_NAME);
+
+  const results = await Promise.allSettled(
+    urls.map(async url => {
+      const response = await fetch(url, { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error(`${url}: ${response.status}`);
+      }
+
+      await cache.put(url, response.clone());
+      return url;
+    })
+  );
+
+  return results.map((result, index) => ({
+    url: urls[index],
+    ok: result.status === "fulfilled"
+  }));
+}
+
 self.addEventListener("message", event => {
-  if (event.data?.type === "SKIP_WAITING") {
+  const data = event.data || {};
+  const reply = payload => event.ports?.[0]?.postMessage(payload);
+
+  if (data.type === "SKIP_WAITING") {
     self.skipWaiting();
+    return;
+  }
+
+  if (data.type === "CHYBOZROUT_CLEAR_CACHE") {
+    event.waitUntil(
+      clearOwnCaches()
+        .then(() => reply({ ok: true, action: "cache-cleared" }))
+        .catch(error => reply({ ok: false, error: String(error) }))
+    );
+    return;
+  }
+
+  if (data.type === "CHYBOZROUT_REFRESH_URLS") {
+    event.waitUntil(
+      refreshUrls(Array.isArray(data.urls) ? data.urls : [])
+        .then(results => reply({ ok: true, results }))
+        .catch(error => reply({ ok: false, error: String(error) }))
+    );
+    return;
+  }
+
+  if (data.type === "CHYBOZROUT_STATUS") {
+    event.waitUntil(
+      caches.open(CACHE_NAME)
+        .then(cache => cache.keys())
+        .then(keys => reply({
+          ok: true,
+          cacheName: CACHE_NAME,
+          entries: keys.length
+        }))
+        .catch(error => reply({ ok: false, error: String(error) }))
+    );
   }
 });
