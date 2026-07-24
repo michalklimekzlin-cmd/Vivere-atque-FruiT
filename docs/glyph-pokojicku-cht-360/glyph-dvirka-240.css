@@ -1,0 +1,417 @@
+/*
+  CHT 360°‰. — Glyph dvířka 240
+  Nahraj jako:
+  docs/glyph-pokojicku-cht-360/glyph-dvirka-240.css
+*/
+
+#roomScene {
+  position: relative;
+  min-height: 410px;
+  overflow: hidden;
+  border-radius: 22px;
+  touch-action: pan-y;
+}
+
+.glyph-ring {
+  position: relative;
+  min-height: 370px;
+  padding: 42px 48px 48px;
+  perspective: 1200px;
+  isolation: isolate;
+}
+
+.glyph-ring::before {
+  content: "";
+  position: absolute;
+  inset: 11% 5% 9%;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255, 200, 105, 0.15),
+      transparent 64%
+    );
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.glyph-ring-back,
+.glyph-ring-front {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  height: 38%;
+  border: 2px solid rgba(222, 171, 82, 0.34);
+  border-right-color: transparent;
+  border-left-color: transparent;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.glyph-ring-back {
+  top: 22%;
+  opacity: 0.46;
+  transform:
+    rotateX(68deg)
+    translateZ(-44px);
+}
+
+.glyph-ring-front {
+  top: 48%;
+  z-index: 8;
+  transform:
+    rotateX(72deg)
+    translateZ(30px);
+  box-shadow:
+    0 0 24px rgba(230, 177, 86, 0.18);
+}
+
+.glyph-ring-doors {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns:
+    repeat(8, minmax(112px, 1fr));
+  gap: 12px;
+  min-width: 980px;
+  transform-style: preserve-3d;
+}
+
+.glyph-door.room-wall {
+  position: relative;
+  display: block;
+  min-height: 274px;
+  padding: 14px 11px 16px;
+  overflow: visible;
+  border:
+    1px solid rgba(255, 224, 165, 0.24);
+  border-radius: 15px;
+  color: #fff0c5;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.035),
+      transparent 14% 86%,
+      rgba(0, 0, 0, 0.25)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #49341f 0 11px,
+      #3d2a1a 11px 22px
+    );
+  box-shadow:
+    inset 0 0 0 3px rgba(16, 11, 7, 0.55),
+    inset 0 0 28px rgba(0, 0, 0, 0.3),
+    0 16px 28px rgba(0, 0, 0, 0.28);
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition:
+    transform 0.5s cubic-bezier(.2, .78, .22, 1),
+    filter 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.glyph-door.room-wall:nth-child(odd) {
+  transform:
+    translateY(15px)
+    rotateY(5deg);
+}
+
+.glyph-door.room-wall:nth-child(even) {
+  transform:
+    translateY(-8px)
+    rotateY(-5deg);
+}
+
+.glyph-door.room-wall.is-selected {
+  border-color:
+    rgba(255, 226, 173, 0.72);
+  filter:
+    drop-shadow(
+      0 0 17px rgba(255, 210, 125, 0.25)
+    );
+}
+
+.glyph-door.room-wall.is-revealed {
+  z-index: 20;
+  transform:
+    translateY(-18px)
+    scale(1.04) !important;
+}
+
+.room-door-frame {
+  position: absolute;
+  inset: 7px -7px -7px 7px;
+  z-index: -1;
+  border:
+    1px solid rgba(255, 220, 150, 0.13);
+  border-radius: 15px;
+  background:
+    linear-gradient(
+      135deg,
+      #3b2b1c,
+      #15100b
+    );
+}
+
+.glyph-door .room-number {
+  display: block;
+  min-height: 34px;
+  color:
+    rgba(255, 240, 197, 0.78);
+  font-size: 0.69rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  overflow-wrap: anywhere;
+}
+
+.glyph-door .room-empty-title {
+  display: block;
+  min-height: 22px;
+  color:
+    rgba(255, 240, 197, 0.7);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.glyph-door .room-door {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 112px;
+  margin: 13px auto 11px;
+  border: 3px solid #25180d;
+  border-radius: 9px 9px 5px 5px;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.05),
+      transparent 30%
+    ),
+    #302013;
+  box-shadow:
+    inset 0 0 17px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 220, 150, 0.17);
+  transform-origin: left center;
+  transition:
+    transform 0.5s cubic-bezier(.2, .78, .22, 1);
+}
+
+.glyph-door.is-revealed .room-door {
+  transform: rotateY(-78deg);
+}
+
+.glyph-door .room-window {
+  display: grid;
+  place-items: center;
+  width: 51px;
+  height: 51px;
+  overflow: hidden;
+  border: 3px solid #1d130b;
+  border-radius: 50%;
+  color: #fff0c5;
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      rgba(255, 255, 255, 0.2),
+      transparent 18%
+    ),
+    radial-gradient(
+      circle,
+      rgba(239, 184, 91, 0.18),
+      rgba(8, 7, 6, 0.92) 70%
+    );
+  font-size: 1.08rem;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.glyph-door .room-handle {
+  position: absolute;
+  top: 59%;
+  right: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #d6a247;
+  box-shadow:
+    0 0 0 3px #1d130b;
+}
+
+.glyph-door .room-light {
+  position: absolute;
+  bottom: 7px;
+  left: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffe2a2;
+  box-shadow:
+    0 0 10px rgba(255, 219, 139, 0.8);
+}
+
+.glyph-door .room-tip {
+  display: block;
+  min-height: 28px;
+  color:
+    rgba(255, 240, 197, 0.52);
+  font-size: 0.62rem;
+  line-height: 1.3;
+}
+
+.glyph-door .room-reveal {
+  position: absolute;
+  z-index: -1;
+  inset: 10px -78px 10px 18px;
+  display: block;
+  overflow: auto;
+  padding: 17px 13px 13px 62px;
+  border:
+    1px solid rgba(255, 220, 150, 0.18);
+  border-radius: 14px;
+  color: #fff0c5;
+  background:
+    radial-gradient(
+      circle at 72% 20%,
+      rgba(255, 203, 112, 0.13),
+      transparent 34%
+    ),
+    linear-gradient(
+      155deg,
+      #20170f,
+      #0d0a07
+    );
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-10px);
+  transition:
+    opacity 0.28s ease,
+    transform 0.38s ease;
+}
+
+.glyph-door.is-revealed .room-reveal {
+  z-index: 3;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.glyph-door .revealed-glyph,
+.glyph-door .revealed-description,
+.glyph-door .room-reveal small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.glyph-door .revealed-glyph {
+  font-size: 1.35rem;
+}
+
+.glyph-door .revealed-description {
+  margin-top: 8px;
+  font-size: 0.73rem;
+  line-height: 1.42;
+}
+
+.glyph-door .room-reveal small {
+  margin-top: 10px;
+  color:
+    rgba(255, 240, 197, 0.55);
+  font-size: 0.65rem;
+  line-height: 1.4;
+}
+
+.glyph-ring-nav {
+  position: absolute;
+  z-index: 30;
+  top: 50%;
+  width: 38px;
+  height: 56px;
+  padding: 0;
+  transform: translateY(-50%);
+  border:
+    1px solid rgba(255, 220, 150, 0.2);
+  border-radius: 13px;
+  color: #fff0c5;
+  background:
+    rgba(17, 12, 8, 0.89);
+  font-size: 1.7rem;
+}
+
+.glyph-ring-nav--prev {
+  left: 3px;
+}
+
+.glyph-ring-nav--next {
+  right: 3px;
+}
+
+.glyph-ring-nav:disabled {
+  opacity: 0.28;
+}
+
+.glyph-ring-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  padding: 9px 12px;
+  border-top:
+    1px solid rgba(255, 220, 150, 0.11);
+  color:
+    rgba(255, 240, 197, 0.58);
+  font-size: 0.69rem;
+}
+
+.glyph-ring-status strong {
+  color: #fff0c5;
+}
+
+@media (max-width: 900px) {
+  .glyph-ring {
+    overflow: hidden;
+    padding-inline: 42px;
+  }
+
+  .glyph-ring-doors {
+    grid-template-columns:
+      repeat(8, 108px);
+    min-width: 948px;
+  }
+}
+
+@media (max-height: 560px) {
+  #roomScene {
+    min-height: 330px;
+  }
+
+  .glyph-ring {
+    min-height: 295px;
+    padding-top: 28px;
+    padding-bottom: 34px;
+  }
+
+  .glyph-door.room-wall {
+    min-height: 220px;
+  }
+
+  .glyph-door .room-door {
+    width: 65px;
+    height: 88px;
+    margin-block: 8px;
+  }
+
+  .glyph-door .room-window {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glyph-door.room-wall,
+  .glyph-door .room-door,
+  .glyph-door .room-reveal {
+    transition: none;
+  }
+}
