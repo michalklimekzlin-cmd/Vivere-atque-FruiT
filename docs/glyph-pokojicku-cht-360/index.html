@@ -14,9 +14,10 @@
     <link rel="manifest" href="./manifest.webmanifest">
     <link rel="icon" href="./icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="./icon.svg">
-    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./styles.css?v=glyph-room-1">
     <title>CHT 360°‰.</title>
   </head>
+
   <body>
     <main class="app-shell" id="app">
       <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -30,12 +31,19 @@
             <small>lokální Paměť</small>
           </span>
         </button>
-        <button class="round-button" type="button" data-action="open-info" aria-label="Otevřít nastavení a přenosy">•••</button>
+
+        <button
+          class="round-button"
+          type="button"
+          data-action="open-info"
+          aria-label="Otevřít nastavení a přenosy"
+        >•••</button>
       </header>
 
       <section class="intro" aria-labelledby="page-title">
         <p class="eyebrow">NEVEŘEJNÉ · POUZE NA TOMTO ZAŘÍZENÍ</p>
         <h1 id="page-title">CHT 360°‰.<br><span>Čtyři jádra, jeden domov.</span></h1>
+
         <p class="lead">
           Paměť, Glyphy, pokojíčky a iPhone 14 mají společný klidný prostor.
           Nic se samo neposílá na internet.
@@ -63,16 +71,19 @@
           <strong id="metric-cores">4 / 4</strong>
           <p>jsou připravená</p>
         </article>
+
         <article class="metric-card">
           <span>PAMĚŤ</span>
           <strong id="metric-memory">0 / 280</strong>
           <p>obsazených slotů</p>
         </article>
+
         <article class="metric-card">
           <span>POKOJÍČKY</span>
           <strong id="metric-rooms">0 / 240</strong>
           <p>Glyphy mají domov</p>
         </article>
+
         <article class="metric-card metric-storage">
           <span>ULOŽENÍ</span>
           <strong id="metric-storage">Lokální</strong>
@@ -84,8 +95,11 @@
         <div>
           <p class="eyebrow">NENECHAT NIC ZTRATIT</p>
           <h2 id="promise-title">Zapsaná věc má své místo.</h2>
-          <p id="status-message" role="status">CHT je připravené. Vyber jádro nebo přidej pokojíček.</p>
+          <p id="status-message" role="status">
+            CHT je připravené. Vyber jádro nebo přidej pokojíček.
+          </p>
         </div>
+
         <button class="small-action" type="button" data-action="export">Záloha</button>
       </section>
 
@@ -97,121 +111,458 @@
           </div>
           <span class="section-note">70 slotů v každém</span>
         </div>
+
         <div class="core-list" id="core-list"></div>
       </section>
 
-      <section class="section-block rooms-section" id="rooms-section" aria-labelledby="rooms-title">
+      <!-- =========================================================
+           GLYPH POKOJÍČKY · VZOR 01
+           ========================================================= -->
+      <section
+        class="section-block rooms-section"
+        id="rooms-section"
+        aria-labelledby="rooms-title"
+      >
         <div class="section-heading">
           <div>
             <p class="eyebrow">GLYPH POKOJÍČKY</p>
             <h2 id="rooms-title">Dveře, které rostou s tebou</h2>
           </div>
-          <button class="small-action" type="button" data-action="add-room">Přidat pokojíček</button>
+
+          <button class="small-action" type="button" data-action="add-room">
+            Přidat pokojíček
+          </button>
         </div>
+
         <p class="section-lead">
-          Prázdné dveře nejsou vidět. Nový pokojíček vznikne až ve chvíli, kdy mu dáš Glyph a jméno.
+          Jeden vzorový pokojíček. Klepnutím otevři dvířka, tlačítky nebo dvěma
+          prsty přibliž a přečti Glyph, VaF`¡´T nebo nápis.
         </p>
+
+        <section class="glyph-room-workbench" aria-label="Vzorový Glyph pokojíček">
+          <div class="glyph-room-toolbar" aria-label="Ovládání přiblížení">
+            <button
+              class="room-zoom-button"
+              id="roomZoomOut"
+              type="button"
+              aria-label="Oddálit pokojíček"
+            >−</button>
+
+            <output id="roomZoomValue" for="roomZoomOut roomZoomIn">100 %</output>
+
+            <button
+              class="room-zoom-button"
+              id="roomZoomIn"
+              type="button"
+              aria-label="Přiblížit pokojíček"
+            >+</button>
+
+            <button
+              class="room-reset-button"
+              id="roomZoomReset"
+              type="button"
+            >Původní velikost</button>
+          </div>
+
+          <div class="glyph-room-viewport" id="glyphRoomViewport">
+            <article
+              class="glyph-room-prototype"
+              id="glyphRoomPrototype"
+              data-room-open="false"
+              aria-label="Pokojíček 01"
+            >
+              <div class="room-wall" aria-hidden="true">
+                <span class="wall-line wall-line-one"></span>
+                <span class="wall-line wall-line-two"></span>
+                <span class="wall-line wall-line-three"></span>
+              </div>
+
+              <div class="room-number">POKOJÍČEK 01</div>
+
+              <div class="mini-room-cabinet">
+                <div class="mini-room-inside" aria-label="Vnitřek pokojíčku">
+                  <header class="inside-head">
+                    <span class="inside-kicker">UVNITŘ POKOJÍČKU</span>
+                    <strong id="prototypeInsideName">Jméno čeká</strong>
+                  </header>
+
+                  <section class="inside-glyph">
+                    <small>GLYPH / VaF`¡´T</small>
+                    <strong id="prototypeInsideGlyph">`i´</strong>
+                  </section>
+
+                  <section class="inside-story">
+                    <small>PŘÍBĚH</small>
+                    <p id="prototypeInsideStory">
+                      Sem přijde příběh obyvatele pokojíčku.
+                    </p>
+                  </section>
+
+                  <section class="inside-mini-app">
+                    <small>MINI APLIKACE</small>
+                    <div class="mini-app-placeholder">
+                      Mini aplikace čeká na napojení
+                    </div>
+                  </section>
+                </div>
+
+                <button
+                  class="mini-room-door"
+                  id="prototypeDoor"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="glyphRoomPrototype"
+                >
+                  <span class="door-top-label" id="prototypeDoorName">
+                    JMÉNO
+                  </span>
+
+                  <span class="door-window">
+                    <span class="door-window-glyph" id="prototypeDoorGlyph">`i´</span>
+                  </span>
+
+                  <span class="door-nameplate">
+                    <small>GLYPH / VaF`¡´T</small>
+                    <strong id="prototypeDoorCaption">NÁPIS</strong>
+                  </span>
+
+                  <span class="door-handle" aria-hidden="true"></span>
+                  <span class="door-status-light" aria-hidden="true"></span>
+                </button>
+              </div>
+
+              <p class="room-gesture-note">
+                Klepni na dvířka · dvěma prsty přibliž · tažením posuň
+              </p>
+            </article>
+          </div>
+
+          <section class="little-i-register" aria-labelledby="little-i-title">
+            <div class="little-i-head">
+              <div>
+                <p class="eyebrow">MALÍ `i´</p>
+                <h3 id="little-i-title">Glyph / VaF`¡´T řádky</h3>
+              </div>
+              <small>automatické místní uložení doplníme v app.js</small>
+            </div>
+
+            <div class="little-i-lines">
+              <label class="little-i-row">
+                <span>01</span>
+                <b>`i´</b>
+                <input
+                  id="littleI01"
+                  type="text"
+                  maxlength="80"
+                  autocomplete="off"
+                  placeholder="Glyph, VaF`¡´T nebo krátký nápis"
+                >
+              </label>
+
+              <label class="little-i-row">
+                <span>02</span>
+                <b>`i´</b>
+                <input
+                  id="littleI02"
+                  type="text"
+                  maxlength="80"
+                  autocomplete="off"
+                  placeholder="Glyph, VaF`¡´T nebo krátký nápis"
+                >
+              </label>
+
+              <label class="little-i-row">
+                <span>03</span>
+                <b>`i´</b>
+                <input
+                  id="littleI03"
+                  type="text"
+                  maxlength="80"
+                  autocomplete="off"
+                  placeholder="Glyph, VaF`¡´T nebo krátký nápis"
+                >
+              </label>
+
+              <label class="little-i-row">
+                <span>04</span>
+                <b>`i´</b>
+                <input
+                  id="littleI04"
+                  type="text"
+                  maxlength="80"
+                  autocomplete="off"
+                  placeholder="Glyph, VaF`¡´T nebo krátký nápis"
+                >
+              </label>
+
+              <label class="little-i-row">
+                <span>05</span>
+                <b>`i´</b>
+                <input
+                  id="littleI05"
+                  type="text"
+                  maxlength="80"
+                  autocomplete="off"
+                  placeholder="Glyph, VaF`¡´T nebo krátký nápis"
+                >
+              </label>
+            </div>
+          </section>
+        </section>
+
+        <!-- Sem app.js dál vykresluje uložené pokojíčky. -->
         <div class="room-list" id="room-list"></div>
       </section>
 
-      <section class="section-block integrity-section" aria-labelledby="integrity-title">
+      <section
+        class="section-block integrity-section"
+        aria-labelledby="integrity-title"
+      >
         <div class="section-heading">
           <div>
             <p class="eyebrow">CHYBOŽROUT</p>
             <h2 id="integrity-title">Bezpečná kontrola</h2>
           </div>
-          <button class="small-action" type="button" data-action="scan">Zkontrolovat</button>
+
+          <button class="small-action" type="button" data-action="scan">
+            Zkontrolovat
+          </button>
         </div>
+
         <p class="section-lead">
-          Kontrola pouze čte místní data. Nic neopravuje, nemaže ani neposílá bez tvého kliknutí.
+          Kontrola pouze čte místní data. Nic neopravuje, nemaže ani neposílá
+          bez tvého kliknutí.
         </p>
+
         <div class="scan-result" id="scan-result" aria-live="polite"></div>
       </section>
 
       <footer class="footer">
         <span>CHT 360°‰. · redesign pokojíčků</span>
-        <button type="button" data-action="open-info">Přenosy a nastavení</button>
+        <button type="button" data-action="open-info">
+          Přenosy a nastavení
+        </button>
       </footer>
     </main>
 
-    <dialog class="dialog dialog-wide" id="core-dialog" aria-labelledby="core-dialog-title">
+    <dialog
+      class="dialog dialog-wide"
+      id="core-dialog"
+      aria-labelledby="core-dialog-title"
+    >
       <div class="dialog-head">
         <div>
           <p class="eyebrow" id="core-dialog-kicker">JÁDRO</p>
           <h2 id="core-dialog-title">Paměť</h2>
           <p class="dialog-subtitle" id="core-dialog-subtitle"></p>
         </div>
-        <button class="round-button" type="button" data-action="close-core" aria-label="Zavřít jádro">×</button>
+
+        <button
+          class="round-button"
+          type="button"
+          data-action="close-core"
+          aria-label="Zavřít jádro"
+        >×</button>
       </div>
+
       <label class="field-label" for="slot-search">Hledat ve slotech</label>
-      <input id="slot-search" type="search" autocomplete="off" placeholder="Název nebo obsah…">
+      <input
+        id="slot-search"
+        type="search"
+        autocomplete="off"
+        placeholder="Název nebo obsah…"
+      >
+
       <div class="slot-summary" id="slot-summary"></div>
       <div class="slot-grid" id="slot-grid"></div>
+
       <div class="dialog-foot">
-        <button class="button-quiet" type="button" data-action="close-core">Hotovo</button>
+        <button class="button-quiet" type="button" data-action="close-core">
+          Hotovo
+        </button>
       </div>
     </dialog>
 
-    <dialog class="dialog" id="slot-dialog" aria-labelledby="slot-dialog-title">
+    <dialog
+      class="dialog"
+      id="slot-dialog"
+      aria-labelledby="slot-dialog-title"
+    >
       <div class="dialog-head">
         <div>
           <p class="eyebrow" id="slot-dialog-kicker">SLOT</p>
           <h2 id="slot-dialog-title">Úprava slotu</h2>
         </div>
-        <button class="round-button" type="button" data-action="close-slot" aria-label="Zavřít úpravu slotu">×</button>
+
+        <button
+          class="round-button"
+          type="button"
+          data-action="close-slot"
+          aria-label="Zavřít úpravu slotu"
+        >×</button>
       </div>
+
       <label class="field-label" for="slot-name">Název</label>
-      <input id="slot-name" maxlength="96" autocomplete="off" placeholder="Např. Můj nápad">
+      <input
+        id="slot-name"
+        maxlength="96"
+        autocomplete="off"
+        placeholder="Např. Můj nápad"
+      >
+
       <label class="field-label" for="slot-content">Obsah</label>
-      <textarea id="slot-content" rows="8" maxlength="12000" placeholder="Napiš poznámku, odkaz nebo návrh…"></textarea>
+      <textarea
+        id="slot-content"
+        rows="8"
+        maxlength="12000"
+        placeholder="Napiš poznámku, odkaz nebo návrh…"
+      ></textarea>
+
       <div class="dialog-foot dialog-foot-split">
-        <button class="button-danger" type="button" data-action="clear-slot">Vyprázdnit</button>
-        <button class="button-primary" type="button" data-action="save-slot">Uložit slot</button>
+        <button
+          class="button-danger"
+          type="button"
+          data-action="clear-slot"
+        >Vyprázdnit</button>
+
+        <button
+          class="button-primary"
+          type="button"
+          data-action="save-slot"
+        >Uložit slot</button>
       </div>
     </dialog>
 
-    <dialog class="dialog" id="room-dialog" aria-labelledby="room-dialog-title">
+    <dialog
+      class="dialog"
+      id="room-dialog"
+      aria-labelledby="room-dialog-title"
+    >
       <div class="dialog-head">
         <div>
           <p class="eyebrow">GLYPH POKOJÍČEK</p>
           <h2 id="room-dialog-title">Nový pokojíček</h2>
         </div>
-        <button class="round-button" type="button" data-action="close-room" aria-label="Zavřít úpravu pokojíčku">×</button>
+
+        <button
+          class="round-button"
+          type="button"
+          data-action="close-room"
+          aria-label="Zavřít úpravu pokojíčku"
+        >×</button>
       </div>
-      <label class="field-label" for="room-glyph">Glyph</label>
-      <input id="room-glyph" maxlength="16" autocomplete="off" autocapitalize="characters" placeholder="ア">
-      <label class="field-label" for="room-name">Jméno pokojíčku</label>
-      <input id="room-name" maxlength="96" autocomplete="off" placeholder="Např. Pokojíček pro ア">
+
+      <label class="field-label" for="room-glyph">Glyph nebo VaF`¡´T</label>
+      <input
+        id="room-glyph"
+        maxlength="24"
+        autocomplete="off"
+        autocapitalize="off"
+        placeholder="`i´"
+      >
+
+      <label class="field-label" for="room-name">Jméno</label>
+      <input
+        id="room-name"
+        maxlength="96"
+        autocomplete="off"
+        placeholder="Jméno obyvatele nebo pokojíčku"
+      >
+
+      <label class="field-label" for="room-door-label">Nápis na dvířkách</label>
+      <input
+        id="room-door-label"
+        maxlength="96"
+        autocomplete="off"
+        placeholder="Krátký nápis pod okénko"
+      >
+
+      <label class="field-label" for="room-story">Příběh</label>
+      <textarea
+        id="room-story"
+        rows="7"
+        maxlength="10000"
+        placeholder="Příběh obyvatele pokojíčku…"
+      ></textarea>
+
+      <!-- Původní ID room-note zůstává kvůli současnému app.js. -->
       <label class="field-label" for="room-note">Poznámka</label>
-      <textarea id="room-note" rows="6" maxlength="6000" placeholder="Co v tomto pokojíčku bydlí?"></textarea>
+      <textarea
+        id="room-note"
+        rows="4"
+        maxlength="6000"
+        placeholder="Krátká poznámka nebo účel pokojíčku"
+      ></textarea>
+
+      <label class="field-label" for="room-mini-app">Mini aplikace</label>
+      <select id="room-mini-app">
+        <option value="priprava">Připraveno na napojení</option>
+        <option value="poznamky">Poznámky</option>
+        <option value="hra">Mini hra</option>
+        <option value="ai">AI modul</option>
+        <option value="odkaz">Odkaz / cesta</option>
+      </select>
+
       <div class="dialog-foot dialog-foot-split">
-        <button class="button-danger is-hidden" id="delete-room" type="button" data-action="delete-room">Smazat</button>
-        <button class="button-primary" type="button" data-action="save-room">Uložit pokojíček</button>
+        <button
+          class="button-danger is-hidden"
+          id="delete-room"
+          type="button"
+          data-action="delete-room"
+        >Smazat</button>
+
+        <button
+          class="button-primary"
+          type="button"
+          data-action="save-room"
+        >Uložit pokojíček</button>
       </div>
     </dialog>
 
-    <dialog class="dialog" id="info-dialog" aria-labelledby="info-dialog-title">
+    <dialog
+      class="dialog"
+      id="info-dialog"
+      aria-labelledby="info-dialog-title"
+    >
       <div class="dialog-head">
         <div>
           <p class="eyebrow">PŘENOSY A NASTAVENÍ</p>
           <h2 id="info-dialog-title">CHT zůstává u tebe</h2>
         </div>
-        <button class="round-button" type="button" data-action="close-info" aria-label="Zavřít nastavení">×</button>
+
+        <button
+          class="round-button"
+          type="button"
+          data-action="close-info"
+          aria-label="Zavřít nastavení"
+        >×</button>
       </div>
+
       <p class="dialog-copy">
-        Paměť i pokojíčky jsou uložené přímo v prohlížeči tohoto zařízení. Pro jistotu si můžeš stáhnout zálohu jako JSON a později ji bezpečně připojit zpět.
+        Paměť i pokojíčky jsou uložené přímo v prohlížeči tohoto zařízení.
+        Pro jistotu si můžeš stáhnout zálohu jako JSON a později ji bezpečně
+        připojit zpět.
       </p>
+
       <div class="info-actions">
-        <button class="button-primary" type="button" data-action="export">Stáhnout zálohu</button>
-        <button class="button-quiet" type="button" data-action="import">Připojit zálohu</button>
-        <button class="button-quiet" type="button" data-action="backup">Vytvořit místní kopii</button>
+        <button class="button-primary" type="button" data-action="export">
+          Stáhnout zálohu
+        </button>
+        <button class="button-quiet" type="button" data-action="import">
+          Připojit zálohu
+        </button>
+        <button class="button-quiet" type="button" data-action="backup">
+          Vytvořit místní kopii
+        </button>
       </div>
+
       <p class="dialog-copy dialog-copy-small">
-        iPhone 14 zůstává jedním z jader. CHT nemá přístup k jiným aplikacím ani složkám telefonu, dokud mu konkrétní odkaz nebo text sám nepředáš.
+        iPhone 14 zůstává jedním z jader. CHT nemá přístup k jiným aplikacím
+        ani složkám telefonu, dokud mu konkrétní odkaz nebo text sám nepředáš.
       </p>
     </dialog>
 
     <input id="import-input" type="file" accept="application/json,.json" hidden>
-    <script src="./app.js" defer></script>
+    <script src="./app.js?v=glyph-room-1" defer></script>
   </body>
 </html>
