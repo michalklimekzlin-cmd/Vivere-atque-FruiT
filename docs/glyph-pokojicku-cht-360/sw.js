@@ -1,12 +1,15 @@
 "use strict";
 
 const CACHE_PREFIX = "cht360-gold-redesign-";
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v3-glyph-doors`;
+
 const APP_FILES = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
+  "./glyph-dvirka-4.css",
+  "./glyph-dvirka-4.js",
   "./manifest.webmanifest",
   "./icon.svg"
 ];
@@ -45,16 +48,28 @@ self.addEventListener("fetch", event => {
       fetch(request)
         .then(response => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put("./index.html", copy));
+
+          caches.open(CACHE_NAME)
+            .then(cache => cache.put("./index.html", copy));
+
           return response;
         })
         .catch(() => caches.match("./index.html"))
     );
+
     return;
   }
 
   event.respondWith(
-    caches.match(request, { ignoreSearch: true })
-      .then(cached => cached || fetch(request))
+    fetch(request)
+      .then(response => {
+        const copy = response.clone();
+
+        caches.open(CACHE_NAME)
+          .then(cache => cache.put(request, copy));
+
+        return response;
+      })
+      .catch(() => caches.match(request))
   );
 });
