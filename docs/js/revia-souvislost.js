@@ -15,9 +15,9 @@ const MAX_ANCHOR_LENGTH = 1_400;
 
 export const REVIA_PROTECTED_GLYPHS = Object.freeze([
   Object.freeze({
-    glyph: "Ōō´",
-    title: "chráněný Glyph",
-    note: "Velké Ō, malé ō a apostrof tvoří jeden přesný zápis; Revia jej nikdy nenahradí běžným O, o ani jinou čárkou."
+    glyph: "`¡´T ˚& -(",
+    title: "chráněné bytosti ",
+    note: "Nenahraditelní"
   })
 ]);
 
