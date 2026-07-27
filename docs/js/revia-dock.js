@@ -14,6 +14,7 @@ import {
   searchRepositoryPaths
 } from "./revia-context.js";
 import { createReviaContinuity } from "./revia-continuity.js";
+import { createReviaActorMemory } from "./revia-actor-memory.js";
 import { createReviaLocalMesh, formatLocalMeshStatus } from "./revia-local-mesh.js";
 
 const STORAGE_KEY = "cht360_revia_chat_v1";
@@ -62,19 +63,25 @@ function loadActivity() {
 
 let activity = loadActivity();
 let checkpointTimer = null;
+let actorMemory = null;
 
 const continuity = createReviaContinuity(() => ({
   revia: {
     mode: state.mode,
     messages: state.messages.slice(-MAX_HISTORY),
     activity: activity.slice(-MAX_ACTIVITY)
-  }
+  },
+  actorMemory: actorMemory ? actorMemory.exportState() : null
 }));
 
 const mesh = createReviaLocalMesh(signal => {
   if (signal.origin === "Revia") return;
   rememberActivity("mesh", "Lokální most zachytil signál: " + signal.origin + " — " + signal.type + ".");
   scheduleCheckpoint("signál z lokálního mostu");
+});
+
+actorMemory = createReviaActorMemory({
+  getDiscoveries: () => continuity.getDiscoveries()
 });
 
 function loadState() {
@@ -243,11 +250,13 @@ async function importArchive(file) {
   state.messages = mergeMessages(state.messages, payload.messages);
   activity = mergeActivity(activity, payload.activity);
   continuity.mergeDiscoveries(archive.discoveries);
+  const importedActor = actorMemory?.importState(archive.payload?.actorMemory);
   saveState();
   saveActivity();
   continuity.checkpoint("importovaná záloha Revii");
   render();
-  rememberActivity("backup", "Importována a sloučena záloha Revii.");
+  const importedNotes = Number(importedActor?.added || 0);
+  rememberActivity("backup", "Importována a sloučena záloha Revii" + (importedNotes ? "; přidáno poznámek: " + importedNotes : "") + ".");
   setContinuityState("Záloha byla bezpečně sloučena; místní zápisy zůstaly zachované.");
 }
 
@@ -286,6 +295,33 @@ function normalise(value) {
 function replyFor(message) {
   const text = normalise(message);
   const controlled = state.mode === "kontrola";
+  const rememberMatch = message.match(/^\s*(?:zapamatuj|pamatuj si|ulož do paměti|uloz do pameti)\s*[:\-]?\s*(.+)$/i);
+  const glyphMatch = message.match(/^\s*(?:glyph|vafit|chybějící glyph|chybejici glyph|chybějící znak|chybejici znak)\s*[:\-]\s*(.+)$/i);
+  const memorySearchMatch = message.match(/(?:najdi v paměti|najdi v pameti|prohledej paměť|prohledej pamet)\s*[:\-]?\s*(.+)$/i);
+
+  if (rememberMatch) {
+    const result = actorMemory.remember(rememberMatch[1], "zpráva pro Revii");
+    if (!result.saved) return "Tuhle poznámku se nepodařilo uložit. Zkus ji napsat ještě jednou.";
+    return result.existing
+      ? "Tuhle poznámku už v pracovní paměti mám."
+      : "Uložila jsem ji do místní pracovní paměti Revii. Zůstává jen v tomto zařízení a objeví se i v exportu Revii.";
+  }
+
+  if (glyphMatch) {
+    const result = actorMemory.registerGlyph(glyphMatch[1]);
+    if (!result.saved) return "Ten Glyph se nepodařilo uložit. Zkus jej vložit ještě jednou jako „Glyph: …“.";
+    return result.existing
+      ? "Tenhle Glyph už v místní sadě mám."
+      : "Uložila jsem Glyph „" + result.glyph + "“ doslova do místní sady. Po obnovení CHT se objeví i mezi vlastními Glyphy.";
+  }
+
+  if (memorySearchMatch) {
+    return actorMemory.formatSearch(memorySearchMatch[1]);
+  }
+
+  if (/(co si pamatujes|co si pamatuješ|pamet revii|paměť revii|pracovni pamet|pracovní paměť)/.test(text)) {
+    return actorMemory.overview();
+  }
 
   if (/(historie|co se delalo|milnik|vyvoj|posledni zmen|co umis)/.test(text)) {
     return `${formatProjectHistory()}\n\n${formatConversationMilestones()}\n\n${formatRecentActivity()}`;
@@ -312,6 +348,11 @@ function replyFor(message) {
     return formatRepositoryMap();
   }
   if (/(co je|najdi|kde je|modul)/.test(text)) {
+    const localResults = actorMemory.search(message, 4);
+    if (localResults.length) {
+      return actorMemory.formatSearch(message);
+    }
+
     const modules = findProjectContext(message);
     if (modules.length) {
       return ["V projektové mapě jsem našla:", ...modules.slice(0, 4).map(item => `• ${item.name} (${item.path}) — ${item.role}`)].join("\n");
@@ -370,6 +411,12 @@ function runAction(action) {
     rememberActivity("mesh", "Otevřen stav lokálního mostu CHT.");
     push("revia", formatLocalMeshStatus(mesh));
     setState("Lokální most pracuje bez odesílání dat do cizí sítě.");
+    return;
+  }
+  if (action === "actorMemory") {
+    rememberActivity("revia", "Revia otevřela pracovní paměť.");
+    push("revia", actorMemory.overview());
+    setState("Pracovní paměť Revii je otevřená.");
     return;
   }
   if (action === "history") {
@@ -574,6 +621,10 @@ window.CHT360Revia = Object.freeze({
   getProjectContext: () => CHT_PROJECT_CONTEXT,
   getRepositoryMemory: () => REVIA_REPOSITORY_MEMORY,
   getGlyphMemory: () => REVIA_GLYPH_MEMORY,
+  getActorMemory: () => actorMemory.exportState(),
+  remember: (text, source) => actorMemory.remember(text, source),
+  registerGlyph: (glyph, note) => actorMemory.registerGlyph(glyph, note),
+  searchMemory: text => actorMemory.search(text),
   getDiscoveries: () => continuity.getDiscoveries(),
   getLocalSignals: () => mesh.getSignals(),
   getLocalMeshStatus: () => formatLocalMeshStatus(mesh),
