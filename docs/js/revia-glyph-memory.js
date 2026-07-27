@@ -40,10 +40,61 @@ export const REVIA_GLYPH_MEMORY = Object.freeze({
       glyph: "९נֶ ._;´/`",
       reading: "ASCII a kombinovaný zápis",
       note: "Interpunkce, mezery, apostrof a zpětný apostrof jsou součástí zápisu. Při exportu se nic nemění ani neodstraňuje."
+    },
+    {
+      glyph: "CHT 360°‰.",
+      reading: "znak hlavního oběhu",
+      note: "Název a sigil místní PWA. Revia jej nevydává za běžné slovo; drží ho jako přesný projektový zápis."
+    },
+    {
+      glyph: "7O7°‰.",
+      reading: "vlastní projektový Glyph",
+      note: "Zachovat beze změny velké O, číslice i tečky. Význam zůstává u autora a jeho konkrétního kontextu."
+    },
+    {
+      glyph: "101% - 7O7%",
+      reading: "pracovní vztah dvou značek",
+      note: "Zápis se ukládá doslova včetně mezer, pomlčky a procent. Revia mu bez další souvislosti nepřidává skrytý význam."
+    },
+    {
+      glyph: "९נֶ ​._;´/``",
+      reading: "rozšířený vlastní Glyph",
+      note: "Jemná mezera i dvojitý zpětný apostrof patří k zápisu. Při přenosu se zachovává UTF-8 podoba, ne zjednodušená náhrada."
+    },
+    {
+      glyph: "(∩^o^)⊃━☆ﾟ.*･｡",
+      reading: "pohybový a radostný Glyph",
+      note: "Celý obrazec je jeden znakový celek. Revia může uložit větu kolem něj, ale samotný Glyph nerozděluje."
+    },
+    {
+      glyph: "•ア",
+      reading: "krátká koncová značka",
+      note: "Krátký vlastní podpisový Glyph. Jeho vyznění se bere z věty nebo slotu, kde byl uložen."
+    },
+    {
+      glyph: "7/",
+      reading: "samostatný pracovní Glyph",
+      note: "Revia jej zapisuje a hledá doslova jako vlastní znak. Jeho čtení ani význam nedoplňuje bez věty, slotu nebo uživatelem potvrzené souvislosti."
+    },
+    {
+      glyph: "^ˇ^ˇv<>vVvw",
+      reading: "šelestový / pohybový Glyph",
+      note: "Celý řetězec je jeden Glyph. Háčky, šipky, velikost písmen a opakování v zůstávají přesně v tomto pořadí."
+    },
+    {
+      glyph: "MámŠelesti",
+      reading: "slovní Glyph se šelestí",
+      note: "Psaní velkého Š uvnitř slova je součástí záznamu. Revia jej nenormalizuje na obyčejné s ani nerozděluje bez souvislosti."
+    },
+    {
+      glyph: "Havaj · jH = Ť · ava → Ťava",
+      reading: "VaFiT jazyková proměna",
+      note: "Pravidlo zapsané autorem: dvojice jH se v této konkrétní hře vazeb vynechá a její stopa se vloží před ava, čímž vznikne Ťava — velbloud. Revia to drží jako místní jazykové pravidlo, ne jako obecné pravidlo češtiny."
     }
   ]),
   principles: Object.freeze([
     "Glyphy se ukládají a exportují v UTF-8; Revia je zobrazuje doslova.",
+    "Znak z dlouhého podržení klávesy se vloží příkazem „Glyph: …“; Revia zachová jeho přesnou Unicode podobu.",
     "Bez potvrzené souvislosti Revia neprohlašuje, že zná jediný správný význam Glyphu.",
     "Novou souvislost lze připsat do Paměti nebo pokojíčku; Revia ji v tomto zařízení uvidí jako novou událost.",
     "Tato slovní zásoba nevyžaduje síť ani externí AI službu."
