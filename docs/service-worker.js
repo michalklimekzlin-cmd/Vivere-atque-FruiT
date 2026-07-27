@@ -1,7 +1,7 @@
 "use strict";
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v1`;
+const CACHE_NAME = `${CACHE_PREFIX}v2`;
 const OFFLINE_PAGE = "./index.html";
 
 const CORE_FILES = [
@@ -15,6 +15,7 @@ const CORE_FILES = [
   "./js/cht-chybozrout.js",
   "./js/revia-context.js",
   "./js/revia-continuity.js",
+  "./js/revia-actor-memory.js",
   "./js/revia-local-mesh.js",
   "./js/revia-glyph-memory.js",
   "./js/revia-repository-memory.js",
@@ -178,3 +179,4 @@ self.addEventListener("message", event => {
     );
   }
 });
+
