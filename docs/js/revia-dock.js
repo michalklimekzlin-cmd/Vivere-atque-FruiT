@@ -5,6 +5,7 @@ import {
   REVIA_REPOSITORY_MEMORY,
   REVIA_GLYPH_MEMORY,
   REVIA_VIVE_MEMORY,
+  findRepositoryContent,
   findProjectContext,
   formatConversationMilestones,
   formatGlyphMemory,
@@ -13,7 +14,7 @@ import {
   formatRepositoryLinks,
   formatRepositoryMap,
   formatRepositoryPlans,
-  searchRepositoryPaths
+  formatRepositorySearch
 } from "./revia-context.js";
 import { createReviaContinuity } from "./revia-continuity.js";
 import { createReviaActorMemory } from "./revia-actor-memory.js";
@@ -105,7 +106,7 @@ function loadState() {
     mode: "revia",
     messages: [{
       role: "revia",
-      text: "Jsem Revia v oběhu CHT 360°‰. Mám mapu projektu i tohoto repozitáře. Můžu otevřít Paměť, Glyph dílnu, pokojíčky nebo iPhone; napiš také historie nebo mapa repozitáře."
+      text: "Jsem Revia v oběhu CHT 360°‰. Živě si pamatuju místní zdroje tohoto repozitáře — soubory, funkce i řádky. Můžu otevřít Paměť, Glyph dílnu, pokojíčky nebo iPhone; pro zdroj napiš třeba „repo: název funkce“."
     }]
   };
 }
@@ -301,6 +302,7 @@ function replyFor(message) {
   const rememberMatch = message.match(/^\s*(?:zapamatuj|pamatuj si|ulož do paměti|uloz do pameti)\s*[:\-]?\s*(.+)$/i);
   const glyphMatch = message.match(/^\s*(?:glyph|vafit|chybějící glyph|chybejici glyph|chybějící znak|chybejici znak)\s*[:\-]\s*(.+)$/i);
   const memorySearchMatch = message.match(/(?:najdi v paměti|najdi v pameti|prohledej paměť|prohledej pamet)\s*[:\-]?\s*(.+)$/i);
+  const repositorySearchMatch = message.match(/^\s*(?:repo(?:zitář|zitar)?|zdroj(?:e)?|soubor|funkce|řádek|radek|kód|kod)\s*[:\-]\s*(.+)$/i);
   const archiveMatch = message.match(/^\s*(?:odlož paměť|odloz pamet|do koše paměti|do kose pameti)\s*[:\-]?\s*(.+)$/i);
   const restoreMatch = message.match(/^\s*(?:vrať paměť|vrat pamet|obnov paměť|obnov pamet)\s*[:\-]?\s*(.+)$/i);
 
@@ -320,6 +322,15 @@ function replyFor(message) {
     return result.existing
       ? "Tenhle Glyph už v místní sadě mám."
       : "Uložila jsem Glyph „" + result.glyph + "“ doslova do místní sady. Po obnovení CHT se objeví i mezi vlastními Glyphy.";
+  }
+
+  if (repositorySearchMatch) {
+    const query = repositorySearchMatch[1];
+    const found = findRepositoryContent(query, 8);
+    if (found.length) {
+      rememberActivity("repository", "Revia dohledala místní zdroje pro „" + query.slice(0, 120) + "“.");
+    }
+    return formatRepositorySearch(query);
   }
 
   if (/(vive|vivere|fruit|frui|ovoce|v planeta|soustava v|zpriserek|příšerek)/.test(text)) {
@@ -394,6 +405,10 @@ function replyFor(message) {
   if (/(mapa.*repo|repozitar|slozk|cela aplikace|architektur)/.test(text)) {
     return formatRepositoryMap();
   }
+  if (/(funkce|soubor|radek|řádek|zdroj|kod|kód)/.test(text)) {
+    const sourceMatches = findRepositoryContent(message, 6);
+    if (sourceMatches.length) return formatRepositorySearch(message);
+  }
   if (/(co je|najdi|kde je|modul)/.test(text)) {
     const localResults = actorMemory.search(message, 4);
     if (localResults.length) {
@@ -405,9 +420,9 @@ function replyFor(message) {
       return ["V projektové mapě jsem našla:", ...modules.slice(0, 4).map(item => `• ${item.name} (${item.path}) — ${item.role}`)].join("\n");
     }
 
-    const paths = searchRepositoryPaths(message);
-    if (paths.length) {
-      return ["V atlasu repozitáře jsem našla:", ...paths.map(path => `• ${path}`)].join("\n");
+    const sourceMatches = findRepositoryContent(message, 6);
+    if (sourceMatches.length) {
+      return formatRepositorySearch(message);
     }
   }
   if (/(pamet|slot|jadro|uloz)/.test(text)) {
@@ -479,9 +494,20 @@ function runAction(action) {
     return;
   }
   if (action === "map") {
-    rememberActivity("revia", "Revia otevřela mapu repozitáře.");
+    rememberActivity("revia", "Revia otevřela přehled repozitáře.");
     push("revia", formatRepositoryMap());
-    setState("Mapa repozitáře je otevřená.");
+    setState("Přehled repozitáře je otevřený.");
+    return;
+  }
+  if (action === "repository") {
+    rememberActivity("repository", "Revia otevřela živou paměť zdrojů repozitáře.");
+    push("revia", [
+      "Živá paměť zdrojů je připravená.",
+      "• " + REVIA_REPOSITORY_MEMORY.snapshot.trackedFileCount + " souborů · " + REVIA_REPOSITORY_MEMORY.snapshot.sourceLines + " místních řádků · " + REVIA_REPOSITORY_MEMORY.snapshot.functionCount + " rozpoznaných částí.",
+      "• Napiš „repo: název funkce nebo souboru“ — vrátím konkrétní cestu, části a odpovídající řádky.",
+      "• Zdroje pouze čtu; žádný soubor tím nespustím, nezměním ani neodešlu."
+    ].join("\n"));
+    setState("Živá paměť zdrojů je připravená offline.");
     return;
   }
   if (action === "plans") {
@@ -696,6 +722,8 @@ window.CHT360Revia = Object.freeze({
   exportArchive: () => continuity.createArchive(),
   showProjectHistory: () => push("revia", formatProjectHistory()),
   showRepositoryMap: () => push("revia", formatRepositoryMap()),
+  searchRepository: text => findRepositoryContent(text),
+  showRepositoryMemory: () => runAction("repository"),
   showRepositoryPlans: () => push("revia", formatRepositoryPlans()),
   showRepositoryLinks: () => push("revia", formatRepositoryLinks()),
   showViveMemory: () => push("revia", formatViveMemory())
