@@ -1,39 +1,42 @@
 "use strict";
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v2`;
+const CACHE_NAME = `${CACHE_PREFIX}v4-offline-complete`;
 const OFFLINE_PAGE = "./index.html";
 
 const CORE_FILES = [
   "./",
   "./index.html",
-  "./css/pamet.css",
-  "./css/revia-dock.css",
-  "./js/app.js",
-  "./js/aplikace.js",
-  "./js/glyph-kostra.js",
-  "./js/cht-chybozrout.js",
-  "./js/revia-context.js",
-  "./js/revia-continuity.js",
-  "./js/revia-actor-memory.js",
-  "./js/revia-local-mesh.js",
-  "./js/revia-glyph-memory.js",
-  "./js/revia-repository-memory.js",
-  "./js/revia-dock.js",
-  "./manifest.json"
+  "./offline-cache-assets.json"
 ];
 
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => Promise.allSettled(
-        CORE_FILES.map(async file => {
-          const response = await fetch(file, { cache: "no-store" });
-          if (response.ok) await cache.put(file, response.clone());
-        })
-      ))
-      .then(() => self.skipWaiting())
+async function offlineFileList() {
+  try {
+    const response = await fetch("./offline-cache-assets.json", { cache: "no-store" });
+    if (!response.ok) throw new Error("manifest: " + response.status);
+    const manifest = await response.json();
+    return Array.isArray(manifest.files) ? manifest.files : [];
+  } catch (error) {
+    console.warn("[CHT 360°‰.] Offline seznam se nepodařilo načíst.", error);
+    return [];
+  }
+}
+
+async function precacheAll() {
+  const cache = await caches.open(CACHE_NAME);
+  const files = [...new Set([...CORE_FILES, ...(await offlineFileList())])];
+  const results = await Promise.allSettled(
+    files.map(async file => {
+      const response = await fetch(file, { cache: "no-store" });
+      if (response.ok) await cache.put(file, response.clone());
+    })
   );
+  const failed = results.filter(result => result.status === "rejected").length;
+  if (failed) console.warn("[CHT 360°‰.] Offline vrstva vynechala souborů:", failed);
+}
+
+self.addEventListener("install", event => {
+  event.waitUntil(precacheAll().then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", event => {
@@ -178,5 +181,12 @@ self.addEventListener("message", event => {
         .catch(error => reply({ ok: false, error: String(error) }))
     );
   }
-});
 
+  if (data.type === "CHT360_PREPARE_OFFLINE") {
+    event.waitUntil(
+      precacheAll()
+        .then(() => reply({ ok: true, action: "offline-complete" }))
+        .catch(error => reply({ ok: false, error: String(error) }))
+    );
+  }
+});
