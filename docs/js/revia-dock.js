@@ -4,9 +4,11 @@ import {
   CHT_PROJECT_CONTEXT,
   REVIA_REPOSITORY_MEMORY,
   REVIA_GLYPH_MEMORY,
+  REVIA_VIVE_MEMORY,
   findProjectContext,
   formatConversationMilestones,
   formatGlyphMemory,
+  formatViveMemory,
   formatProjectHistory,
   formatRepositoryLinks,
   formatRepositoryMap,
@@ -151,6 +153,7 @@ function rememberActivity(kind, text) {
     at: new Date().toISOString()
   });
   activity = activity.slice(-MAX_ACTIVITY);
+  actorMemory?.recordTrace(kind, text, "CHT 360°‰. / Revia");
   saveActivity();
 }
 
@@ -298,12 +301,16 @@ function replyFor(message) {
   const rememberMatch = message.match(/^\s*(?:zapamatuj|pamatuj si|ulož do paměti|uloz do pameti)\s*[:\-]?\s*(.+)$/i);
   const glyphMatch = message.match(/^\s*(?:glyph|vafit|chybějící glyph|chybejici glyph|chybějící znak|chybejici znak)\s*[:\-]\s*(.+)$/i);
   const memorySearchMatch = message.match(/(?:najdi v paměti|najdi v pameti|prohledej paměť|prohledej pamet)\s*[:\-]?\s*(.+)$/i);
+  const archiveMatch = message.match(/^\s*(?:odlož paměť|odloz pamet|do koše paměti|do kose pameti)\s*[:\-]?\s*(.+)$/i);
+  const restoreMatch = message.match(/^\s*(?:vrať paměť|vrat pamet|obnov paměť|obnov pamet)\s*[:\-]?\s*(.+)$/i);
 
   if (rememberMatch) {
     const result = actorMemory.remember(rememberMatch[1], "zpráva pro Revii");
     if (!result.saved) return "Tuhle poznámku se nepodařilo uložit. Zkus ji napsat ještě jednou.";
     return result.existing
       ? "Tuhle poznámku už v pracovní paměti mám."
+      : result.restored
+        ? "Tuhle poznámku jsem vytáhla z místního koše zpátky do pracovní paměti."
       : "Uložila jsem ji do místní pracovní paměti Revii. Zůstává jen v tomto zařízení a objeví se i v exportu Revii.";
   }
 
@@ -315,8 +322,48 @@ function replyFor(message) {
       : "Uložila jsem Glyph „" + result.glyph + "“ doslova do místní sady. Po obnovení CHT se objeví i mezi vlastními Glyphy.";
   }
 
+  if (/(vive|vivere|fruit|frui|ovoce|v planeta|soustava v|zpriserek|příšerek)/.test(text)) {
+    return formatViveMemory(message);
+  }
+
   if (memorySearchMatch) {
     return actorMemory.formatSearch(memorySearchMatch[1]);
+  }
+
+  if (archiveMatch) {
+    const result = actorMemory.archiveNote(archiveMatch[1]);
+    if (result.reason === "not-found") return "Takovou aktivní poznámku jsem v pracovní paměti nenašla.";
+    if (result.reason === "ambiguous") {
+      return [
+        "Našla jsem víc poznámek. Napiš delší přesný úryvek:",
+        ...result.matches.map(note => "• " + note.text.slice(0, 140))
+      ].join("\n");
+    }
+    return result.saved
+      ? "Poznámku jsem odložila do místního koše paměti. Nesmazala se a můžeš ji kdykoli vrátit."
+      : "Poznámku se teď nepodařilo odložit.";
+  }
+
+  if (restoreMatch) {
+    const result = actorMemory.restoreNote(restoreMatch[1]);
+    if (result.reason === "not-found") return "Takovou poznámku v koši paměti nevidím.";
+    if (result.reason === "ambiguous") {
+      return [
+        "V koši je víc podobných poznámek. Napiš delší přesný úryvek:",
+        ...result.matches.map(note => "• " + note.text.slice(0, 140))
+      ].join("\n");
+    }
+    return result.saved
+      ? "Poznámka je zpátky v pracovní paměti Revii."
+      : "Poznámku se teď nepodařilo vrátit.";
+  }
+
+  if (/(koš paměti|kos pameti|odlozene poznam|odložené poznám)/.test(text)) {
+    return actorMemory.formatArchive();
+  }
+
+  if (/(stopy cht|stopa cht|posledni stop|poslední stop|zmeny cht|změny cht)/.test(text)) {
+    return actorMemory.formatTraces();
   }
 
   if (/(co si pamatujes|co si pamatuješ|pamet revii|paměť revii|pracovni pamet|pracovní paměť)/.test(text)) {
@@ -419,6 +466,12 @@ function runAction(action) {
     setState("Pracovní paměť Revii je otevřená.");
     return;
   }
+  if (action === "traces") {
+    rememberActivity("revia", "Revia otevřela místní stopy CHT.");
+    push("revia", actorMemory.formatTraces());
+    setState("Místní stopy CHT jsou otevřené.");
+    return;
+  }
   if (action === "history") {
     rememberActivity("revia", "Revia otevřela projektovou paměť.");
     push("revia", formatProjectHistory());
@@ -447,6 +500,12 @@ function runAction(action) {
     rememberActivity("revia", "Revia otevřela pracovní slovník VaFiT a Glyphů.");
     push("revia", formatGlyphMemory());
     setState("Pracovní slovník VaFiT je otevřený a funguje offline.");
+    return;
+  }
+  if (action === "vive") {
+    rememberActivity("revia", "Revia otevřela projektovou paměť Vive.");
+    push("revia", formatViveMemory());
+    setState("Projektová paměť Vive je otevřená a funguje offline.");
     return;
   }
   if (action === "memory") {
@@ -621,10 +680,15 @@ window.CHT360Revia = Object.freeze({
   getProjectContext: () => CHT_PROJECT_CONTEXT,
   getRepositoryMemory: () => REVIA_REPOSITORY_MEMORY,
   getGlyphMemory: () => REVIA_GLYPH_MEMORY,
+  getViveMemory: () => REVIA_VIVE_MEMORY,
   getActorMemory: () => actorMemory.exportState(),
   remember: (text, source) => actorMemory.remember(text, source),
   registerGlyph: (glyph, note) => actorMemory.registerGlyph(glyph, note),
   searchMemory: text => actorMemory.search(text),
+  getMemoryTraces: () => actorMemory.getTraces(),
+  getArchivedMemory: () => actorMemory.getArchivedNotes(),
+  archiveMemory: text => actorMemory.archiveNote(text),
+  restoreMemory: text => actorMemory.restoreNote(text),
   getDiscoveries: () => continuity.getDiscoveries(),
   getLocalSignals: () => mesh.getSignals(),
   getLocalMeshStatus: () => formatLocalMeshStatus(mesh),
@@ -633,7 +697,8 @@ window.CHT360Revia = Object.freeze({
   showProjectHistory: () => push("revia", formatProjectHistory()),
   showRepositoryMap: () => push("revia", formatRepositoryMap()),
   showRepositoryPlans: () => push("revia", formatRepositoryPlans()),
-  showRepositoryLinks: () => push("revia", formatRepositoryLinks())
+  showRepositoryLinks: () => push("revia", formatRepositoryLinks()),
+  showViveMemory: () => push("revia", formatViveMemory())
 });
 
 render();
