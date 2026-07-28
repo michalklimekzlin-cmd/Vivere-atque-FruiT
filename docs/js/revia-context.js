@@ -2,10 +2,13 @@
 
 import {
   REVIA_REPOSITORY_MEMORY,
+  findRepositoryContent,
   formatConversationMilestones,
   formatRepositoryAtlas,
   formatRepositoryLinks,
   formatRepositoryPlans,
+  formatRepositorySearch,
+  getRepositoryEntry,
   searchRepositoryPaths
 } from "./revia-repository-memory.js";
 import {
@@ -28,9 +31,12 @@ export {
   findViveMemory,
   formatViveMemory,
   formatConversationMilestones,
+  findRepositoryContent,
   formatRepositoryAtlas,
   formatRepositoryLinks,
   formatRepositoryPlans,
+  formatRepositorySearch,
+  getRepositoryEntry,
   searchRepositoryPaths
 };
 
