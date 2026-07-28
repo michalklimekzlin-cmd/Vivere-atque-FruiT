@@ -13,12 +13,20 @@ import {
   findGlyphNotes,
   formatGlyphMemory
 } from "./revia-glyph-memory.js";
+import {
+  REVIA_VIVE_MEMORY,
+  findViveMemory,
+  formatViveMemory
+} from "./revia-vive-memory.js";
 
 export {
   REVIA_REPOSITORY_MEMORY,
   REVIA_GLYPH_MEMORY,
+  REVIA_VIVE_MEMORY,
   findGlyphNotes,
   formatGlyphMemory,
+  findViveMemory,
+  formatViveMemory,
   formatConversationMilestones,
   formatRepositoryAtlas,
   formatRepositoryLinks,
@@ -47,6 +55,7 @@ export const CHT_PROJECT_CONTEXT = Object.freeze({
     { name: "Bubínky", path: "./bubinky/", role: "Samostatný nástroj bubínků a zámků slotů." },
     { name: "NeČEŠTINA", path: "./necesstina-cht-360/", role: "Místní paměť souvislostí vět a jejich stop, bez domnělého překladu." },
     { name: "Signal 360°‰.", path: "./signal-360/", role: "Samostatná signálová věž s napojením na paměťové cesty." },
+    { name: "Vive", path: "./js/revia-vive-memory.js", role: "Projektový návrh digitálního společníka: hráčem řízené stavění ze znaků, Glyphů, slov a signálů." },
     { name: "Jádra — pracovní deska", path: "./cht360-jadra-pracovni-deska/", role: "Pracovní pohled na jádra CHT." },
     { name: "Chybožrout", path: "./js/cht-chybozrout.js", role: "Kontrola souborů a bezpečná záloha před opravou." },
     { name: "Revia", path: "./js/revia-dock.js", role: "Místní průvodkyně oběhem, projektová paměť a deník událostí tohoto zařízení." }
@@ -68,7 +77,8 @@ export const CHT_PROJECT_CONTEXT = Object.freeze({
     "iPhone 14 se stal připojeným bodem v oběhu; jeho odkazy zůstávají pod kontrolou uživatele.",
     "Chybožrout získal sken, zálohu a bezpečnou samoopravu místo slepých zásahů do dat.",
     "Hlavní pohled byl vrácen k černo-zlatému krajinnému oběhu pro iPhone 14; Revia je součástí indexu, ne cizí odkaz mimo CHT.",
-    "Revia nyní drží tuto mapu repozitáře a na tomto zařízení zapisuje nové události CHT do vlastního malého deníku."
+    "Revia nyní drží tuto mapu repozitáře a na tomto zařízení zapisuje nové události CHT do vlastního malého deníku.",
+    "Vive má vlastní projektovou paměť: návrh průvodce, stavění z Glyphů a signálů, role Revii i roztříděné autorské znakové banky."
   ])
 });
 
@@ -94,6 +104,7 @@ export function formatProjectHistory() {
     "Projektová paměť CHT 360°‰.",
     "• Paměť: čtyři jádra, místní uložení, export/import.",
     "• Glyph: dílna bubínků; pokojíčky drží Glyphy dohledatelné.",
+    "• Vive: připravený herní návrh pro stavění z hráčem potvrzených Glyphů, slov a signálů.",
     "• Oběh: iPhone 14, Signal, NeČEŠTINA, pracovní jádra a Chybožrout.",
     "• Současný vzhled: černo-zlatý prostor pro iPhone 14, Revia přímo v hlavním CHT.",
     "• Tahle Revia si navíc vede malý místní deník nových změn."
