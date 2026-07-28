@@ -9,6 +9,7 @@
 */
 
 const ACTOR_MEMORY_KEY = "cht360_revia_actor_memory_v1";
+const TRACE_MEMORY_KEY = "cht360_revia_memory_traces_v1";
 const MEMORY_KEYS = Object.freeze(["cht360_pamet_v1", "vaft_pamet_v1"]);
 const ROOMS_KEY = "cht360_glyph_rooms_v2";
 const CUSTOM_GLYPHS_KEY = "cht360_glyph_drums_custom_v1";
@@ -17,6 +18,7 @@ const GLYPH_KEYS = Object.freeze([
   "cht360_glyph_drums_kostra_v1"
 ]);
 const MAX_NOTES = 120;
+const MAX_TRACES = 160;
 const MAX_NOTE_LENGTH = 1_600;
 const MAX_LIVE_ENTRIES = 180;
 
@@ -42,7 +44,7 @@ function writeJson(key, value) {
     localStorage.setItem(key, JSON.stringify(value));
     return true;
   } catch (error) {
-    console.warn("[Revia] Místní Glyph se nepodařilo uložit.", error);
+    console.warn("[Revia] Místní data se nepodařilo uložit.", error);
     return false;
   }
 }
@@ -74,8 +76,10 @@ function loadNotes() {
       text: cleanText(note.text),
       source: cleanText(note.source, 160) || "ručně uložená poznámka",
       tags: Array.isArray(note.tags) ? note.tags.map(tag => cleanText(tag, 48)).filter(Boolean).slice(0, 12) : [],
+      status: note.status === "archived" ? "archived" : "active",
       createdAt: typeof note.createdAt === "string" ? note.createdAt : new Date().toISOString(),
-      updatedAt: typeof note.updatedAt === "string" ? note.updatedAt : new Date().toISOString()
+      updatedAt: typeof note.updatedAt === "string" ? note.updatedAt : new Date().toISOString(),
+      archivedAt: typeof note.archivedAt === "string" ? note.archivedAt : null
     }))
     .slice(-MAX_NOTES);
 }
@@ -83,7 +87,7 @@ function loadNotes() {
 function saveNotes(notes) {
   try {
     localStorage.setItem(ACTOR_MEMORY_KEY, JSON.stringify({
-      version: 1,
+      version: 2,
       updatedAt: new Date().toISOString(),
       notes: notes.slice(-MAX_NOTES)
     }));
@@ -92,6 +96,31 @@ function saveNotes(notes) {
     console.warn("[Revia] Pracovní paměť se nepodařilo uložit.", error);
     return false;
   }
+}
+
+function cleanTrace(value) {
+  if (!value || typeof value !== "object") return null;
+  const text = cleanText(value.text, 360);
+  if (!text) return null;
+
+  return {
+    id: cleanText(value.id, 96) || "revia-trace-" + Date.now().toString(36),
+    kind: cleanText(value.kind, 48) || "změna",
+    source: cleanText(value.source, 120) || "CHT 360°‰.",
+    text,
+    at: typeof value.at === "string" ? value.at : new Date().toISOString()
+  };
+}
+
+function loadTraces() {
+  const saved = readJson(TRACE_MEMORY_KEY, []);
+  return Array.isArray(saved)
+    ? saved.map(cleanTrace).filter(Boolean).slice(-MAX_TRACES)
+    : [];
+}
+
+function saveTraces(traces) {
+  return writeJson(TRACE_MEMORY_KEY, traces.slice(-MAX_TRACES));
 }
 
 function entryWords(value) {
@@ -197,6 +226,7 @@ function formatEntry(entry) {
 
 export function createReviaActorMemory({ getDiscoveries = () => [] } = {}) {
   let notes = loadNotes();
+  let traces = loadTraces();
 
   function currentEntries() {
     const discoveries = getDiscoveries()
@@ -211,7 +241,16 @@ export function createReviaActorMemory({ getDiscoveries = () => [] } = {}) {
       }));
 
     return [
-      ...notes.map(note => ({ ...note, kind: "poznámka", source: "Revia · " + note.source })),
+      ...notes
+        .filter(note => note.status !== "archived")
+        .map(note => ({ ...note, kind: "poznámka", source: "Revia · " + note.source })),
+      ...traces.map(trace => ({
+        id: "trace:" + trace.id,
+        kind: "stopa CHT",
+        source: trace.source + " · " + trace.kind,
+        text: trace.text,
+        updatedAt: trace.at
+      })),
       ...collectSlots(),
       ...collectRooms(),
       ...collectCustomGlyphs(),
@@ -224,7 +263,15 @@ export function createReviaActorMemory({ getDiscoveries = () => [] } = {}) {
     if (!cleaned) return { saved: false, reason: "empty" };
 
     const existing = notes.find(note => normalise(note.text) === normalise(cleaned));
-    if (existing) return { saved: true, existing: true, entry: existing };
+    if (existing) {
+      if (existing.status === "archived") {
+        existing.status = "active";
+        existing.archivedAt = null;
+        existing.updatedAt = new Date().toISOString();
+        return { saved: saveNotes(notes), existing: false, restored: true, entry: existing };
+      }
+      return { saved: true, existing: true, entry: existing };
+    }
 
     const now = new Date().toISOString();
     const entry = {
@@ -232,8 +279,10 @@ export function createReviaActorMemory({ getDiscoveries = () => [] } = {}) {
       text: cleaned,
       source: cleanText(source, 160) || "ručně uložená poznámka",
       tags: entryWords(cleaned),
+      status: "active",
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
+      archivedAt: null
     };
 
     notes = [...notes, entry].slice(-MAX_NOTES);
@@ -281,15 +330,89 @@ export function createReviaActorMemory({ getDiscoveries = () => [] } = {}) {
   function overview() {
     const entries = currentEntries();
     const count = kind => entries.filter(entry => entry.kind === kind).length;
+    const archivedCount = notes.filter(note => note.status === "archived").length;
 
     return [
       "Pracovní paměť Revii",
       "• ručně uložené poznámky: " + count("poznámka"),
+      "• odložené poznámky v koši: " + archivedCount,
+      "• místní stopy změn CHT: " + count("stopa CHT"),
       "• živé zápisy z Paměti CHT: " + count("slot"),
       "• Glyph pokojíčky: " + count("pokojíček"),
       "• vlastní Glyphy: " + count("glyph"),
       "• potvrzené objevy: " + count("potvrzený objev"),
-      "Napiš „zapamatuj: …“ pro místní poznámku, „Glyph: …“ pro nový znak z klávesnice nebo „najdi v paměti: …“ pro hledání. Revia nic sama neodesílá."
+      "Napiš „zapamatuj: …“ pro místní poznámku, „najdi v paměti: …“ pro hledání, „odlož paměť: …“ pro bezpečný koš nebo „vrať paměť: …“ pro obnovení. Revia nic sama neodesílá."
+    ].join("\n");
+  }
+
+  function recordTrace(kind, text, source = "CHT 360°‰.") {
+    const trace = cleanTrace({ kind, text, source, at: new Date().toISOString() });
+    if (!trace) return { saved: false, reason: "empty" };
+
+    const last = traces.at(-1);
+    if (last && last.kind === trace.kind && last.text === trace.text && last.source === trace.source) {
+      return { saved: true, existing: true, entry: last };
+    }
+
+    traces = [...traces, trace].slice(-MAX_TRACES);
+    return { saved: saveTraces(traces), existing: false, entry: trace };
+  }
+
+  function matchesNotes(query, status) {
+    const needle = normalise(query);
+    if (!needle) return [];
+    return notes.filter(note =>
+      note.status === status &&
+      (normalise(note.id) === needle || normalise(`${note.text} ${note.source} ${(note.tags || []).join(" ")}`).includes(needle))
+    );
+  }
+
+  function moveNote(query, nextStatus) {
+    const currentStatus = nextStatus === "archived" ? "active" : "archived";
+    const matches = matchesNotes(query, currentStatus);
+    if (!matches.length) return { saved: false, reason: "not-found" };
+    if (matches.length > 1) return { saved: false, reason: "ambiguous", matches: matches.slice(0, 4) };
+
+    const note = matches[0];
+    note.status = nextStatus;
+    note.archivedAt = nextStatus === "archived" ? new Date().toISOString() : null;
+    note.updatedAt = new Date().toISOString();
+    return { saved: saveNotes(notes), entry: note };
+  }
+
+  function archiveNote(query) {
+    return moveNote(query, "archived");
+  }
+
+  function restoreNote(query) {
+    return moveNote(query, "active");
+  }
+
+  function formatTraces(limit = 8) {
+    if (!traces.length) return "Zatím nemám žádnou místní stopu změny CHT.";
+    const formatter = new Intl.DateTimeFormat("cs-CZ", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+    return [
+      "Místní stopy CHT:",
+      ...traces.slice(-limit).reverse().map(trace => {
+        const date = new Date(trace.at);
+        const stamp = Number.isNaN(date.getTime()) ? "bez času" : formatter.format(date);
+        return `• ${stamp} — ${trace.text}`;
+      })
+    ].join("\n");
+  }
+
+  function formatArchive() {
+    const archived = notes.filter(note => note.status === "archived");
+    if (!archived.length) return "Koš paměti je prázdný. Odložená poznámka se nemaže; můžeš ji kdykoli vrátit.";
+    return [
+      "Koš paměti Revii:",
+      ...archived.slice(-8).reverse().map(note => "• " + cleanText(note.text, 240).replace(/\s+/g, " ")),
+      "Pro návrat napiš „vrať paměť: přesný úryvek“."
     ].join("\n");
   }
 
@@ -308,8 +431,9 @@ export function createReviaActorMemory({ getDiscoveries = () => [] } = {}) {
 
   function exportState() {
     return {
-      version: 1,
-      notes: notes.slice(-MAX_NOTES)
+      version: 2,
+      notes: notes.slice(-MAX_NOTES),
+      traces: traces.slice(-MAX_TRACES)
     };
   }
 
@@ -323,26 +447,44 @@ export function createReviaActorMemory({ getDiscoveries = () => [] } = {}) {
         text: cleanText(note.text),
         source: cleanText(note.source, 160) || "importovaná poznámka",
         tags: Array.isArray(note.tags) ? note.tags.map(tag => cleanText(tag, 48)).filter(Boolean).slice(0, 12) : entryWords(note.text),
+        status: note.status === "archived" ? "archived" : "active",
         createdAt: typeof note.createdAt === "string" ? note.createdAt : new Date().toISOString(),
-        updatedAt: typeof note.updatedAt === "string" ? note.updatedAt : new Date().toISOString()
+        updatedAt: typeof note.updatedAt === "string" ? note.updatedAt : new Date().toISOString(),
+        archivedAt: typeof note.archivedAt === "string" ? note.archivedAt : null
       }))
       .filter(note => note.text);
 
-    if (!additions.length) return { added: 0, saved: true };
+    const incomingTraces = Array.isArray(source?.traces) ? source.traces.map(cleanTrace).filter(Boolean) : [];
+    const knownTraces = new Set(traces.map(trace => `${trace.at}|${trace.text}`));
+    const traceAdditions = incomingTraces.filter(trace => !knownTraces.has(`${trace.at}|${trace.text}`));
+
+    if (!additions.length && !traceAdditions.length) return { added: 0, tracesAdded: 0, saved: true };
 
     notes = [...notes, ...additions].slice(-MAX_NOTES);
-    return { added: additions.length, saved: saveNotes(notes) };
+    traces = [...traces, ...traceAdditions].slice(-MAX_TRACES);
+    return {
+      added: additions.length,
+      tracesAdded: traceAdditions.length,
+      saved: saveNotes(notes) && saveTraces(traces)
+    };
   }
 
   return Object.freeze({
     remember,
     registerGlyph,
+    recordTrace,
+    archiveNote,
+    restoreNote,
     search,
     overview,
     formatSearch,
+    formatTraces,
+    formatArchive,
     exportState,
     importState,
     getNotes: () => notes.slice(),
+    getArchivedNotes: () => notes.filter(note => note.status === "archived").map(note => ({ ...note })),
+    getTraces: () => traces.slice(),
     getLiveEntries: () => currentEntries().filter(entry => entry.kind !== "poznámka")
   });
 }
