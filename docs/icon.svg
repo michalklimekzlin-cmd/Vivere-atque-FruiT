@@ -67,3 +67,10 @@
     text-anchor="middle"
   >360°‰.</text>
 </svg>
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Atlas CHT">
+  <rect width="128" height="128" rx="28" fill="#110c07"/>
+  <circle cx="64" cy="64" r="44" fill="none" stroke="#ffe2ad" stroke-width="6"/>
+  <path d="M42 44h44v40H42zM52 55h24M52 66h24M52 77h14" fill="none" stroke="#c98936" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="94" cy="36" r="8" fill="#cbe99e"/>
+</svg>
