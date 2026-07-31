@@ -860,6 +860,66 @@
 
     .toast.show{opacity:1;transform:translate(-50%,0)}
 
+    .module-list{display:grid;gap:9px}
+
+    .module-card{
+      display:grid;
+      grid-template-columns:auto 1fr auto;
+      gap:10px;
+      align-items:center;
+      width:100%;
+      padding:11px;
+      border:1px solid var(--line-soft);
+      border-radius:14px;
+      color:var(--mist);
+      background:rgba(255,255,255,.025);
+      text-align:left;
+    }
+
+    .module-card:hover,
+    .module-card:focus-visible{
+      border-color:var(--line);
+      background:rgba(248,207,128,.08);
+    }
+
+    .module-mark{
+      display:grid;
+      place-items:center;
+      width:31px;
+      height:31px;
+      border:1px solid var(--line);
+      border-radius:50%;
+      color:var(--gold-3);
+      background:rgba(248,207,128,.08);
+      font-size:15px;
+      font-weight:900;
+    }
+
+    .module-copy strong{display:block;color:var(--gold-3);font-size:13px}
+    .module-copy small{display:block;margin-top:2px;color:var(--muted);font-size:11px;line-height:1.28}
+
+    .module-state{
+      min-width:44px;
+      color:var(--success);
+      font-size:10px;
+      font-weight:900;
+      text-align:right;
+    }
+
+    .module-state.waiting{color:var(--muted)}
+    .module-state.problem{color:var(--danger)}
+
+    .network-note{
+      margin:0 0 14px;
+      padding:10px 11px;
+      border:1px solid rgba(248,207,128,.2);
+      border-radius:13px;
+      color:var(--muted);
+      background:rgba(248,207,128,.055);
+      font-size:12px;
+      line-height:1.4;
+    }
+
     @media (max-width:900px){
       .stage{inset:66px 40% 56px 1%}
       .status-panel{right:12px;width:38vw;min-width:290px}
@@ -919,6 +979,7 @@
       <div class="sigil">{*(°..).}//CHT 360°‰.\\(·.(.. )フ)</div>
       <div class="top-actions">
         <output id="connectionState" class="top-pill">lokální Paměť</output>
+        <button id="modulesButton" class="round-button" type="button" aria-label="Otevřít síť modulů CHT" title="Síť modulů">⌘</button>
         <button id="transparencyButton" class="round-button" type="button" aria-label="Otevřít Průhlednou Mluvu" title="Průhledná Mluva">✧</button>
       </div>
       <div class="brand">CHT 360°‰.</div>
@@ -987,6 +1048,7 @@
       <div id="activity" class="activity" aria-live="polite"></div>
       <div class="panel-actions">
         <button id="flashButton" class="action" type="button">✧ Záblesk</button>
+        <button id="scanButton" class="action ghost" type="button">⌘ Zkontrolovat docs</button>
         <button id="backupButton" class="action ghost" type="button">Uložit zálohu</button>
         <button id="exportButton" class="action ghost" type="button">Export</button>
         <button id="importButton" class="action ghost" type="button">Import</button>
@@ -999,6 +1061,28 @@
       <span><b>klepnutí:</b> otevřít jádro</span>
     </footer>
   </main>
+
+  <aside id="modulesDrawer" class="drawer" aria-hidden="true">
+    <section class="drawer-card">
+      <header class="drawer-head">
+        <div>
+          <p class="drawer-kicker">SÍŤ CHT 360°‰.</p>
+          <h2 class="drawer-title">Moduly z docs/</h2>
+        </div>
+        <button id="modulesClose" class="drawer-close" type="button" aria-label="Zavřít síť modulů">×</button>
+      </header>
+      <div class="drawer-body">
+        <p class="network-note">
+          Každý modul zůstává vlastní PWA. Hlavní CHT je spojuje přes místní Paměť, záznam změny a bezpečné otevření — ne tím, že by se všechny skripty spouštěly naráz.
+        </p>
+        <div id="moduleList" class="module-list" aria-live="polite"></div>
+        <div class="panel-actions" style="padding:16px 0 0">
+          <button id="modulesScan" class="action" type="button">Zkontrolovat cesty</button>
+          <button id="modulesRefresh" class="action ghost" type="button">Obnovit síť</button>
+        </div>
+      </div>
+    </section>
+  </aside>
 
   <aside id="worldDrawer" class="drawer" aria-hidden="true">
     <section class="drawer-card">
@@ -1092,9 +1176,20 @@
       var SETTINGS_KEY = "cht360_revia_settings_v1";
       var SNAPSHOT_KEY = "cht360_pamet_snapshots_v1";
       var ACTIVITY_KEY = "cht360_index_activity_v1";
+      var MODULES_KEY = "cht360_docs_modules_v1";
       var LIMIT = 70;
       var WORLD_ORDER = ["earth","game","language","control"];
       var WORLD_LABELS = {earth:"Země",game:"Hra",language:"Jazyk",control:"Řízení"};
+      var MODULES = [
+        {id:"cht-360-core",glyph:"◉",label:"CHT 360°‰.",entry:"./",note:"Hlavní Paměť, čtyři světy, iPhone 14 a Revia.",keys:["cht360_pamet_v1","vaft_pamet_v1"]},
+        {id:"glyph-cht-360",glyph:"✧",label:"Glyph CHT 360°‰.",entry:"./glyph-cht-360/",note:"Dílna Glyphů, vlastní znaky a přenos do Paměti.",keys:["glyph-cht-360-project-guard.v1"]},
+        {id:"glyph-pokojicku",glyph:"⌂",label:"Glyph pokojíčků",entry:"./glyph-pokojicku-cht-360/",note:"Pokojíčky, dvířka a domov Glyphů.",keys:["glyph-cht-360-rooms.v1","cht360_pokojicky_240_v1"]},
+        {id:"bubinky",glyph:"◌",label:"Bubínky",entry:"./bubinky/",note:"Zámky slotů a otočné Glyph bubínky.",keys:["cht360_bubinky_values_v1","cht360_slot_locks_v1"]},
+        {id:"jadra",glyph:"⌬",label:"Jádra — pracovní deska",entry:"./cht360-jadra-pracovni-deska/",note:"Pracovní pohled na čtyři jádra.",keys:["cht360_jadra_pracovni_deska_v1"]},
+        {id:"mluva",glyph:"R",label:"Mluva CHT",entry:"./mluva-cht-360/",note:"Lokální průvodce, souvislost a pracovní rozhovor.",keys:["cht360_mluva_history_v1","cht360_revia_chat_v1"]},
+        {id:"puls",glyph:"⌁",label:"CHT Puls",entry:"./cht-puls-360/",note:"Čtyři cesty, JSON Paměť a bezpečný oběh.",keys:["cht360_puls_v1"]},
+        {id:"signal",glyph:"↟",label:"Signal 360°‰.",entry:"./signal-360/",note:"Signálová věž a 360° Paměť.",keys:["vaft_pamet_v1"]}
+      ];
       var selectedWorld = "earth";
       var selectedSlot = 1;
       var toastTimer = 0;
@@ -1265,6 +1360,27 @@
         window.dispatchEvent(new CustomEvent("cht.ai.transparency.changed",{detail:{source:"cht360-index",key:TRANSPARENCY_KEY}}));
       }
 
+      function updateConnection(){
+        var node = byId("connectionState");
+        if(!node) return;
+        if(!navigator.onLine){
+          node.textContent = "offline · Paměť zůstává";
+          return;
+        }
+        var modules = readModuleState();
+        var all = plainObject(modules.modules) ? Object.keys(modules.modules) : [];
+        var checked = all.filter(function(key){
+          return modules.modules[key] && modules.modules[key].checkedAt;
+        }).length;
+        if(remoteAllowed()){
+          node.textContent = "Mluva · AI označená";
+        }else if(checked){
+          node.textContent = "docs síť " + checked + "/" + MODULES.length;
+        }else{
+          node.textContent = "lokální Paměť";
+        }
+      }
+
       function renderStatus(){
         var worldCounts = counts();
         var total = WORLD_ORDER.reduce(function(sum,world){return sum + worldCounts[world]},0);
@@ -1302,6 +1418,131 @@
           holder.append(row);
         });
         updateConnection();
+      }
+
+      function readModuleState(){
+        var raw = safeJson(localStorage.getItem(MODULES_KEY),"");
+        return plainObject(raw) ? raw : {version:1,updatedAt:"",modules:{}};
+      }
+      function saveModuleState(value,reason){
+        value.updatedAt = now();
+        localStorage.setItem(MODULES_KEY,JSON.stringify(value));
+        dispatchMemory(reason || "síť modulů");
+      }
+      function registerModules(){
+        var current = readModuleState();
+        if(!plainObject(current.modules)) current.modules = {};
+        MODULES.forEach(function(module){
+          var saved = plainObject(current.modules[module.id]) ? current.modules[module.id] : {};
+          current.modules[module.id] = {
+            id:module.id,
+            label:module.label,
+            entry:module.entry,
+            keys:module.keys,
+            available:saved.available !== false,
+            checkedAt:saved.checkedAt || "",
+            openedAt:saved.openedAt || ""
+          };
+        });
+        saveModuleState(current,"registrace modulů docs");
+      }
+      function moduleState(module){
+        var current = readModuleState();
+        return plainObject(current.modules) && plainObject(current.modules[module.id]) ? current.modules[module.id] : {};
+      }
+      function renderModules(){
+        var holder = byId("moduleList");
+        holder.replaceChildren();
+        MODULES.forEach(function(module){
+          var saved = moduleState(module);
+          var card = document.createElement("button");
+          card.type = "button";
+          card.className = "module-card";
+          card.setAttribute("aria-label","Otevřít " + module.label);
+          var mark = document.createElement("span");
+          mark.className = "module-mark";
+          mark.textContent = module.glyph;
+          var copy = document.createElement("span");
+          copy.className = "module-copy";
+          var title = document.createElement("strong");
+          title.textContent = module.label;
+          var note = document.createElement("small");
+          note.textContent = module.note;
+          copy.append(title,note);
+          var state = document.createElement("span");
+          state.className = "module-state";
+          if(saved.available === false){
+            state.classList.add("problem");
+            state.textContent = "chyba";
+          }else if(saved.checkedAt){
+            state.textContent = "živé";
+          }else{
+            state.classList.add("waiting");
+            state.textContent = "čeká";
+          }
+          card.append(mark,copy,state);
+          card.addEventListener("click",function(){
+            openModule(module);
+          });
+          holder.append(card);
+        });
+      }
+      function openModules(){
+        restoreFocus = document.activeElement;
+        byId("modulesDrawer").classList.add("open");
+        byId("modulesDrawer").setAttribute("aria-hidden","false");
+        renderModules();
+      }
+      function closeModules(){
+        byId("modulesDrawer").classList.remove("open");
+        byId("modulesDrawer").setAttribute("aria-hidden","true");
+        restoreFocus && restoreFocus.focus && restoreFocus.focus();
+      }
+      function openModule(module){
+        var current = readModuleState();
+        if(!plainObject(current.modules)) current.modules = {};
+        current.modules[module.id] = Object.assign({},current.modules[module.id] || {},{
+          id:module.id,
+          label:module.label,
+          entry:module.entry,
+          keys:module.keys,
+          available:true,
+          openedAt:now()
+        });
+        saveModuleState(current,"otevření modulu " + module.id);
+        addActivity("Otevírám modul docs.",module.label);
+        window.location.assign(module.entry);
+      }
+      async function scanModules(){
+        var current = readModuleState();
+        if(!plainObject(current.modules)) current.modules = {};
+        notify("Chybožrout ověřuje " + MODULES.length + " cest…");
+        var result = await Promise.all(MODULES.map(async function(module){
+          try{
+            var response = await fetch(module.entry,{cache:"no-store"});
+            return {module:module,ok:response.ok};
+          }catch(error){
+            return {module:module,ok:false};
+          }
+        }));
+        var good = 0;
+        result.forEach(function(item){
+          if(item.ok) good += 1;
+          var previous = current.modules[item.module.id] || {};
+          current.modules[item.module.id] = Object.assign({},previous,{
+            id:item.module.id,
+            label:item.module.label,
+            entry:item.module.entry,
+            keys:item.module.keys,
+            available:item.ok,
+            checkedAt:now()
+          });
+        });
+        saveModuleState(current,"kontrola cest docs");
+        addActivity("Chybožrout prověřil docs.",good + "/" + MODULES.length + " cest odpovídá.");
+        renderModules();
+        renderStatus();
+        notify(good + "/" + MODULES.length + " modulů odpovídá.");
       }
 
       function openDrawer(world){
@@ -1663,6 +1904,14 @@
         document.querySelectorAll("[data-world]").forEach(function(button){
           button.addEventListener("click",function(){openDrawer(button.dataset.world)});
         });
+        byId("modulesButton").addEventListener("click",openModules);
+        byId("modulesClose").addEventListener("click",closeModules);
+        byId("modulesScan").addEventListener("click",scanModules);
+        byId("modulesRefresh").addEventListener("click",function(){
+          registerModules();
+          renderModules();
+          notify("Síť modulů je znovu napojená na Paměť.");
+        });
         byId("drawerClose").addEventListener("click",closeDrawer);
         byId("slotSave").addEventListener("click",function(){
           writeSlot(selectedWorld,selectedSlot,byId("slotText").value);
@@ -1683,6 +1932,10 @@
         byId("saveAiSettings").addEventListener("click",saveAiSettings);
         byId("exportTransparency").addEventListener("click",exportTransparency);
         byId("flashButton").addEventListener("click",quickFlash);
+        byId("scanButton").addEventListener("click",function(){
+          openModules();
+          scanModules();
+        });
         byId("backupButton").addEventListener("click",function(){
           createSnapshot(readPrimary(),"ruční záloha");
           addActivity("Bezpečnostní záloha připravená.","Paměť se nemění.");
@@ -1695,6 +1948,7 @@
         document.addEventListener("keydown",function(event){
           if(event.key === "Escape"){
             closeDrawer();
+            closeModules();
             closeTransparency();
             byId("chatDock").classList.remove("open");
           }
@@ -1728,6 +1982,7 @@
         getShell(memory);
         if(!localStorage.getItem(MEMORY_KEY)) writePrimary(memory,"první spuštění");
         addActivity("CHT 360°‰. je připravené.","Paměť, Světy, Revia a Průhledná Mluva jsou v jednom indexu.");
+        registerModules();
         renderStatus();
         renderChat();
         drawField();
@@ -1739,5 +1994,13 @@
       boot();
     })();
   </script>
+  <script
+    src="./js/cht-360-network.js"
+    data-cht-module="cht-360-core"
+    data-cht-label="CHT 360°‰."
+    data-cht-entry="./index.html"
+    data-cht-kind="pwa"
+    data-cht-storage-keys="cht360_pamet_v1,vaft_pamet_v1,cht360_pamet_snapshots_v1,cht360_docs_modules_v1"
+    data-cht-capture-mode="full"></script>
 </body>
 </html>
