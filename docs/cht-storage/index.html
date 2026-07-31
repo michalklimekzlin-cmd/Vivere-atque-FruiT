@@ -1,0 +1,815 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#100a06">
+  <meta name="color-scheme" content="dark">
+
+  <meta
+    name="description"
+    content="CHT 360°‰. — správa lokální paměti, záloh a uložených dat."
+  >
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+  >
+  <meta name="apple-mobile-web-app-title" content="CHT Úložiště">
+
+  <title>CHT 360°‰. — Úložiště</title>
+
+  <style>
+    :root {
+      --pozadi: #0b0806;
+      --panel: rgba(25, 17, 11, 0.92);
+      --panel-2: rgba(39, 25, 14, 0.88);
+      --zlata: #f4cf88;
+      --zlata-2: #c9923f;
+      --svetla: #f2e5cf;
+      --ztlumena: #ac9b84;
+      --cara: rgba(244, 207, 136, 0.23);
+      --cara-silna: rgba(244, 207, 136, 0.48);
+      --chyba: #f0a08d;
+      --uspech: #cbe4ad;
+      --stín: 0 22px 60px rgba(0, 0, 0, 0.38);
+      --zaobleni: 22px;
+      --safe-top: max(16px, env(safe-area-inset-top));
+      --safe-bottom: max(20px, env(safe-area-inset-bottom));
+
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+      min-height: 100%;
+      background: var(--pozadi);
+    }
+
+    body {
+      min-width: 320px;
+      min-height: 100dvh;
+      margin: 0;
+      overflow-x: hidden;
+      color: var(--svetla);
+      background:
+        radial-gradient(
+          circle at 15% 0%,
+          rgba(201, 146, 63, 0.18),
+          transparent 28rem
+        ),
+        radial-gradient(
+          circle at 92% 30%,
+          rgba(244, 207, 136, 0.08),
+          transparent 27rem
+        ),
+        linear-gradient(
+          145deg,
+          #0a0705,
+          #171009 54%,
+          #070605
+        );
+      font-family:
+        ui-rounded,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible {
+      outline: 2px solid var(--zlata);
+      outline-offset: 2px;
+    }
+
+    .aplikace {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding:
+        var(--safe-top)
+        14px
+        var(--safe-bottom);
+    }
+
+    .horni-lista {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .nadpisek {
+      margin: 0 0 5px;
+      color: var(--zlata-2);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+      color: var(--svetla);
+      font-size: clamp(27px, 6vw, 44px);
+      line-height: 1.04;
+    }
+
+    h2 {
+      margin-bottom: 4px;
+      font-size: 18px;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      color: var(--zlata);
+      font-size: 14px;
+    }
+
+    .popis,
+    .panel-popis,
+    .napoveda {
+      margin-bottom: 0;
+      color: var(--ztlumena);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .souhrn {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .souhrn-karta,
+    .panel,
+    .nastroje {
+      border: 1px solid var(--cara);
+      background:
+        linear-gradient(
+          145deg,
+          rgba(37, 24, 14, 0.9),
+          rgba(14, 10, 7, 0.95)
+        );
+      box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.04),
+        var(--stín);
+      backdrop-filter: blur(18px);
+    }
+
+    .souhrn-karta {
+      min-height: 108px;
+      padding: 15px;
+      border-radius: 18px;
+    }
+
+    .souhrn-stit {
+      display: block;
+      color: var(--zlata-2);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .souhrn-karta strong {
+      display: block;
+      margin: 8px 0 2px;
+      color: var(--zlata);
+      font-size: 24px;
+    }
+
+    .souhrn-karta small {
+      color: var(--ztlumena);
+    }
+
+    .nastroje {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 11px;
+      margin-bottom: 12px;
+      border-radius: 18px;
+    }
+
+    .hledani {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      gap: 8px;
+      min-width: 180px;
+      color: var(--ztlumena);
+      font-size: 12px;
+    }
+
+    .hledani input {
+      width: 100%;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--cara);
+      border-radius: 13px;
+      color: var(--svetla);
+      background: rgba(8, 6, 5, 0.88);
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--zlata);
+    }
+
+    textarea {
+      min-height: 210px;
+      resize: vertical;
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .tlacitko,
+    .male-tlacitko,
+    .ikona-tlacitko {
+      border: 1px solid rgba(244, 207, 136, 0.38);
+      font-weight: 900;
+    }
+
+    .tlacitko {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 999px;
+      color: #241608;
+      background:
+        linear-gradient(
+          180deg,
+          #ffe6ae,
+          #c9923f
+        );
+      white-space: nowrap;
+    }
+
+    .tlacitko.secondary {
+      color: var(--zlata);
+      background: rgba(22, 15, 10, 0.9);
+    }
+
+    .soubor-tlacitko input {
+      display: none;
+    }
+
+    .slozky {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding: 2px 1px 12px;
+      scrollbar-width: none;
+    }
+
+    .slozky::-webkit-scrollbar {
+      display: none;
+    }
+
+    .slozka-tlacitko {
+      min-height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--cara);
+      border-radius: 999px;
+      color: var(--ztlumena);
+      background: rgba(15, 10, 7, 0.76);
+      white-space: nowrap;
+    }
+
+    .slozka-tlacitko.aktivni {
+      color: #231506;
+      border-color: var(--zlata);
+      background: var(--zlata);
+    }
+
+    .panel {
+      padding: 15px;
+      margin-bottom: 12px;
+      border-radius: var(--zaobleni);
+    }
+
+    .panel-hlavicka {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .seznam {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .polozka {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid rgba(244, 207, 136, 0.14);
+      border-radius: 15px;
+      background: rgba(7, 6, 5, 0.48);
+    }
+
+    .polozka-klic {
+      color: var(--zlata);
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+      font-size: 12px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .polozka-hodnota {
+      max-height: 58px;
+      margin-top: 5px;
+      overflow: hidden;
+      color: var(--ztlumena);
+      font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .polozka-meta {
+      margin-top: 6px;
+      color: rgba(172, 155, 132, 0.72);
+      font-size: 10px;
+    }
+
+    .polozka-akce {
+      display: flex;
+      gap: 6px;
+    }
+
+    .male-tlacitko {
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 10px;
+      color: var(--svetla);
+      background: #181009;
+    }
+
+    .male-tlacitko.nebezpecne {
+      color: var(--chyba);
+    }
+
+    .prazdno {
+      padding: 28px 0 12px;
+      color: var(--ztlumena);
+      text-align: center;
+    }
+
+    .system-mrizka {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .system-karta {
+      padding: 13px;
+      border: 1px solid rgba(244, 207, 136, 0.14);
+      border-radius: 15px;
+      background: rgba(8, 6, 5, 0.42);
+    }
+
+    .mini-seznam {
+      display: grid;
+      gap: 7px;
+    }
+
+    .mini-radek {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.026);
+      font-size: 12px;
+    }
+
+    .mini-radek span:last-child {
+      color: var(--ztlumena);
+      text-align: right;
+    }
+
+    dialog {
+      width: min(640px, calc(100% - 22px));
+      padding: 0;
+      border: 1px solid var(--cara-silna);
+      border-radius: 24px;
+      color: var(--svetla);
+      background: #15100c;
+      box-shadow: 0 34px 100px rgba(0, 0, 0, 0.74);
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.68);
+      backdrop-filter: blur(8px);
+    }
+
+    dialog form {
+      display: grid;
+      gap: 14px;
+      padding: 18px;
+    }
+
+    dialog label {
+      display: grid;
+      gap: 7px;
+      color: var(--ztlumena);
+      font-size: 12px;
+    }
+
+    .dialog-hlavicka,
+    .dialog-akce {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .ikona-tlacitko {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      color: var(--zlata);
+      background: rgba(21, 14, 9, 0.84);
+      font-size: 22px;
+    }
+
+    .upozorneni {
+      position: fixed;
+      right: 16px;
+      bottom: max(16px, env(safe-area-inset-bottom));
+      z-index: 50;
+      max-width: min(370px, calc(100% - 32px));
+      padding: 12px 15px;
+      border: 1px solid var(--cara);
+      border-radius: 14px;
+      color: var(--svetla);
+      background: #1b120b;
+      box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition:
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .upozorneni.zobrazit {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 760px) {
+      .souhrn {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .nastroje {
+        align-items: stretch;
+        flex-wrap: wrap;
+      }
+
+      .hledani {
+        flex-basis: 100%;
+      }
+
+      .system-mrizka {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .horni-lista {
+        align-items: flex-start;
+      }
+
+      .souhrn-karta {
+        min-height: 97px;
+        padding: 13px;
+      }
+
+      .polozka {
+        grid-template-columns: 1fr;
+      }
+
+      .polozka-akce {
+        justify-content: flex-end;
+      }
+
+      .panel-hlavicka {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="aplikace">
+
+    <header class="horni-lista">
+      <div>
+        <p class="nadpisek">
+          CHT 360°‰. • lokální paměť
+        </p>
+
+        <h1>Úložiště iPhonu</h1>
+
+        <p class="popis">
+          Data CHT uložená v této PWA, Safari a na této doméně.
+        </p>
+      </div>
+
+      <button
+        id="obnovitTlacitko"
+        class="tlacitko secondary"
+        type="button"
+      >
+        Obnovit
+      </button>
+    </header>
+
+    <section class="souhrn" aria-label="Souhrn úložiště">
+
+      <article class="souhrn-karta">
+        <span class="souhrn-stit">localStorage</span>
+        <strong id="pocetLocalStorage">0</strong>
+        <small>uložených klíčů</small>
+      </article>
+
+      <article class="souhrn-karta">
+        <span class="souhrn-stit">Velikost klíčů</span>
+        <strong id="velikostLocalStorage">0 B</strong>
+        <small>přibližná velikost</small>
+      </article>
+
+      <article class="souhrn-karta">
+        <span class="souhrn-stit">Úložiště webu</span>
+        <strong id="vyuziteMisto">—</strong>
+        <small id="dostupneMisto">údaj zařízení</small>
+      </article>
+
+      <article class="souhrn-karta">
+        <span class="souhrn-stit">Offline vrstvy</span>
+        <strong id="pocetCache">—</strong>
+        <small>Cache Storage</small>
+      </article>
+
+    </section>
+
+    <section class="nastroje" aria-label="Nástroje úložiště">
+
+      <label class="hledani">
+        <span>Hledat</span>
+
+        <input
+          id="hledaniInput"
+          type="search"
+          autocomplete="off"
+          placeholder="Název klíče nebo jeho obsah"
+        >
+      </label>
+
+      <button
+        id="exportTlacitko"
+        class="tlacitko"
+        type="button"
+      >
+        Exportovat
+      </button>
+
+      <label class="tlacitko secondary soubor-tlacitko">
+        Importovat
+
+        <input
+          id="importInput"
+          type="file"
+          accept="application/json,.json"
+        >
+      </label>
+
+    </section>
+
+    <nav
+      id="slozkyLista"
+      class="slozky"
+      aria-label="Složky uložených dat"
+    ></nav>
+
+    <section class="panel">
+
+      <div class="panel-hlavicka">
+        <div>
+          <h2 id="panelNadpis">Všechna data</h2>
+
+          <p
+            id="panelInformace"
+            class="panel-popis"
+          >
+            Načítám…
+          </p>
+        </div>
+
+        <button
+          id="novyZaznamTlacitko"
+          class="tlacitko secondary"
+          type="button"
+        >
+          Nový záznam
+        </button>
+      </div>
+
+      <div
+        id="seznamUloziste"
+        class="seznam"
+      ></div>
+
+      <p
+        id="prazdnyStav"
+        class="prazdno"
+        hidden
+      >
+        V této složce zatím nic není.
+      </p>
+
+    </section>
+
+    <section class="panel">
+
+      <div class="panel-hlavicka">
+        <div>
+          <h2>Systémové vrstvy</h2>
+
+          <p class="panel-popis">
+            Přehled databází a offline cache této PWA.
+          </p>
+        </div>
+      </div>
+
+      <div class="system-mrizka">
+
+        <article class="system-karta">
+          <h3>IndexedDB</h3>
+
+          <div
+            id="databazeSeznam"
+            class="mini-seznam"
+          ></div>
+        </article>
+
+        <article class="system-karta">
+          <h3>Cache Storage</h3>
+
+          <div
+            id="cacheSeznam"
+            class="mini-seznam"
+          ></div>
+        </article>
+
+      </div>
+
+    </section>
+
+    <dialog id="editorDialog">
+
+      <form id="editorForm">
+
+        <div class="dialog-hlavicka">
+          <div>
+            <p class="nadpisek">
+              CHT 360°‰.
+            </p>
+
+            <h2 id="editorNadpis">
+              Upravit záznam
+            </h2>
+          </div>
+
+          <button
+            id="zavritEditorTlacitko"
+            class="ikona-tlacitko"
+            type="button"
+            aria-label="Zavřít editor"
+          >
+            ×
+          </button>
+        </div>
+
+        <label>
+          Název klíče
+
+          <input
+            id="klicInput"
+            name="klic"
+            required
+            autocomplete="off"
+          >
+        </label>
+
+        <label>
+          Hodnota
+
+          <textarea
+            id="hodnotaInput"
+            name="hodnota"
+            spellcheck="false"
+          ></textarea>
+        </label>
+
+        <p
+          id="editorNapoveda"
+          class="napoveda"
+        ></p>
+
+        <div class="dialog-akce">
+
+          <button
+            id="zrusitEditorTlacitko"
+            class="tlacitko secondary"
+            type="button"
+          >
+            Zrušit
+          </button>
+
+          <button
+            class="tlacitko"
+            type="submit"
+          >
+            Uložit
+          </button>
+
+        </div>
+
+      </form>
+
+    </dialog>
+
+    <div
+      id="upozorneni"
+      class="upozorneni"
+      role="status"
+      aria-live="polite"
+    ></div>
+
+  </main>
+
+  <script src="./storage.js"></script>
+</body>
+</html>
