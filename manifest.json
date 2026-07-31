@@ -1,19 +1,13 @@
 {
-  "name": "Vivere atque Fru'i¡'T",
-  "short_name": "Fru'i¡'T",
-  "description": "Teacher-directed Czech AI studio with persistent semantic learning.",
-  "start_url": "./TEACHER_STUDIO.html",
-  "scope": "./",
+  "name": "Vivere atque Fru'iT",
+  "short_name": "VivereFru",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#111827",
-  "lang": "cs",
+  "background_color": "#f6fbf8",
+  "theme_color": "#0b6e4f",
+  "scope": "/",
+  "description": "Jednoduchá PWA pro projekt Vivere atque Fru'iT",
   "icons": [
-    {
-      "src": "./AFA0870E-F586-4406-8BAA-0A7944120AA3.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
   ]
 }
