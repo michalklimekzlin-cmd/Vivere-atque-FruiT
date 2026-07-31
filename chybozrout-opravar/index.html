@@ -1,515 +1,2183 @@
 <!doctype html>
 <html lang="cs">
 <head>
-    <link rel="manifest" href="./manifest.json">
-  
-  <link rel="stylesheet" href="./chybozrout/chybozrout.css">
-  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080706">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="ChybaŽrout • bezpečný opravář CHT 360°‰., Života, offline vrstev a paměti.">
   <meta name="apple-mobile-web-app-capable" content="yes">
-<meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Chybožrout-Opravář v2.6 • Tiles + Drawer</title>
-  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="ChybaŽrout">
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon-192.png">
   <style>
-    :root{
-      --bg:#000; --fg:#f5f5f5; --muted:#bdbdbd;
-      --pane:#0c0c0c; --line:#1a1a1a; --ok:#86efac; --bad:#fca5a5; --warn:#facc15; --acc:#e84a4a;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-    .wrap{max-width:1120px;margin:18px auto;padding:0 14px}
+:root {
+  color-scheme: dark;
+  --bg: #080706;
+  --bg-soft: #110d09;
+  --panel: rgba(25, 19, 13, 0.94);
+  --panel-2: rgba(15, 12, 9, 0.96);
+  --gold: #f3cf8d;
+  --gold-2: #c6974f;
+  --cream: #f7eddd;
+  --muted: #aa9d8d;
+  --line: rgba(243, 207, 141, 0.22);
+  --line-strong: rgba(243, 207, 141, 0.52);
+  --ok: #91d6a2;
+  --warn: #e8bb69;
+  --bad: #e98d83;
+  --info: #c5bba9;
+  --radius: 22px;
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.46);
+  --safe-top: max(14px, env(safe-area-inset-top));
+  --safe-right: max(12px, env(safe-area-inset-right));
+  --safe-bottom: max(18px, env(safe-area-inset-bottom));
+  --safe-left: max(12px, env(safe-area-inset-left));
+}
 
-    .header{display:flex;gap:12px;align-items:baseline;margin-bottom:10px}
-    .title{font-size:22px;font-weight:800}
-    .sub{color:var(--muted);font-size:13px}
+* {
+  box-sizing: border-box;
+}
 
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .card{background:var(--pane);border:1px solid var(--line);border-radius:14px;padding:14px}
-    .kpi{font-size:30px;font-weight:800}
-    .muted{color:var(--muted);font-size:12px}
-    #scanLog{min-height:140px;white-space:pre-wrap;line-height:1.35;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+html {
+  min-width: 320px;
+  min-height: 100%;
+  background: var(--bg);
+}
 
-    .list{max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:12px}
-    .err{padding:10px 12px;border-bottom:1px solid var(--line)}
-    .err:last-child{border-bottom:none}
-    .msg{font-size:13px}
-    .meta{color:var(--muted);font-size:11px;margin-top:4px}
-    .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
-    @media (max-width:960px){ .grid{grid-template-columns:1fr} }
+body {
+  min-width: 320px;
+  min-height: 100dvh;
+  margin: 0;
+  overflow-x: hidden;
+  color: var(--cream);
+  background:
+    radial-gradient(circle at 8% -8%, rgba(243, 207, 141, 0.15), transparent 26rem),
+    radial-gradient(circle at 96% 30%, rgba(170, 157, 141, 0.09), transparent 25rem),
+    linear-gradient(150deg, #070605, #151009 54%, #060504);
+  font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
 
-    /* ======= Tiles (čtverečky) ======= */
-    .tiles{display:grid;grid-template-columns:repeat(4,minmax(72px,1fr));gap:10px;margin-top:10px}
-    @media (max-width:720px){ .tiles{grid-template-columns:repeat(2,minmax(120px,1fr))} }
-    .tile{
-      aspect-ratio:1 / 1;
-      border:1px solid var(--line);
-      border-radius:14px;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-      background:#0b0b0b; cursor:pointer; user-select:none;
-      transition:transform .1s ease, background .2s ease, border-color .2s ease;
-      text-align:center; padding:8px;
-    }
-    .tile:hover{ background:#111; border-color:#2a2a2a; }
-    .tile:active{ transform:scale(0.98); }
-    .tile b{font-size:20px}
-    .tile span{font-size:12px;color:#ddd}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
 
-    /* ======= Drawer (výsuvný panel) ======= */
-    .drawer{
-      position:fixed; left:0; right:0; bottom:-420px;
-      background:rgba(20,20,20,.98);
-      border-top:1px solid var(--line);
-      box-shadow:0 -30px 80px rgba(0,0,0,.5);
-      transition:bottom .28s ease;
-      z-index:50;
-    }
-    .drawer.open{ bottom:0; }
-    .drawer .inner{max-width:1120px;margin:0 auto;padding:14px}
-    .drawer .row{display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .drawer .desc{font-size:14px;color:#ddd;line-height:1.45; padding:8px 0}
-    .drawer button{
-      background:#111;color:#fff;border:1px solid var(--line);
-      padding:10px 14px;border-radius:12px;cursor:pointer;min-width:160px;
-    }
-    .drawer .primary{border-color:#2a2a2a;background:#151515}
-    .drawer .close{opacity:.7}
+button,
+a,
+label {
+  -webkit-tap-highlight-color: transparent;
+}
 
-    footer{margin:14px 0;color:var(--muted);font-size:12px;text-align:center}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.app-shell {
+  width: min(1160px, 100%);
+  margin: 0 auto;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+}
+
+.hero,
+.panel {
+  border: 1px solid var(--line);
+  background: linear-gradient(150deg, var(--panel), var(--panel-2));
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.035), var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(22px, 5vw, 42px);
+  border-radius: 28px;
+}
+
+.hero::after {
+  position: absolute;
+  right: clamp(18px, 5vw, 48px);
+  bottom: 18px;
+  color: rgba(243, 207, 141, 0.18);
+  content: "[◉_◉]";
+  font: 800 clamp(24px, 8vw, 68px) / 1 ui-monospace, SFMono-Regular, Menlo, monospace;
+  pointer-events: none;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--gold-2);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  max-width: 780px;
+  margin-bottom: 10px;
+  font-size: clamp(30px, 7vw, 62px);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+
+.hero-copy {
+  max-width: 700px;
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(14px, 2.2vw, 17px);
+  line-height: 1.55;
+}
+
+.status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: rgba(7, 6, 5, 0.48);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.badge[data-tone="ok"] {
+  color: var(--ok);
+  border-color: rgba(145, 214, 162, 0.35);
+}
+
+.badge[data-tone="warn"] {
+  color: var(--warn);
+  border-color: rgba(232, 187, 105, 0.42);
+}
+
+.badge[data-tone="bad"] {
+  color: var(--bad);
+  border-color: rgba(233, 141, 131, 0.42);
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.panel {
+  grid-column: span 6;
+  overflow: hidden;
+  border-radius: var(--radius);
+}
+
+.panel-wide {
+  grid-column: 1 / -1;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.panel-head h2 {
+  margin: 0;
+  color: var(--gold);
+  font-size: 17px;
+}
+
+.panel-body {
+  padding: 16px 18px 18px;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.metric {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(243, 207, 141, 0.12);
+  border-radius: 16px;
+  background: rgba(6, 5, 4, 0.42);
+}
+
+.metric strong {
+  display: block;
+  overflow: hidden;
+  color: var(--cream);
+  font-size: clamp(22px, 5vw, 34px);
+  line-height: 1.1;
+  text-overflow: ellipsis;
+}
+
+.metric span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  color: #17100a;
+  background: linear-gradient(180deg, #f3d598, #c99b50);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+
+.button.secondary {
+  color: var(--cream);
+  background: rgba(32, 23, 15, 0.84);
+}
+
+.button.ghost {
+  color: var(--muted);
+  border-color: var(--line);
+  background: rgba(7, 6, 5, 0.42);
+}
+
+.button.danger {
+  color: #fff4f0;
+  border-color: rgba(233, 141, 131, 0.42);
+  background: rgba(104, 41, 35, 0.55);
+}
+
+.button:disabled {
+  cursor: wait;
+  filter: grayscale(0.55);
+  opacity: 0.56;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.field label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+select,
+textarea,
+input[type="text"] {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--cream);
+  background: rgba(7, 6, 5, 0.68);
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.queue,
+.log {
+  display: grid;
+  gap: 8px;
+  max-height: 420px;
+  overflow: auto;
+  padding-right: 3px;
+  scrollbar-color: var(--gold-2) transparent;
+}
+
+.issue,
+.log-line {
+  padding: 11px 12px;
+  border: 1px solid rgba(243, 207, 141, 0.12);
+  border-radius: 14px;
+  background: rgba(6, 5, 4, 0.46);
+}
+
+.issue-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.issue-title {
+  color: var(--cream);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.issue-meta,
+.log-line small {
+  display: block;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font: 10px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.tone-ok {
+  border-color: rgba(145, 214, 162, 0.28);
+}
+
+.tone-warn {
+  border-color: rgba(232, 187, 105, 0.36);
+}
+
+.tone-error {
+  border-color: rgba(233, 141, 131, 0.4);
+}
+
+.mini-button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--gold);
+  background: rgba(23, 17, 12, 0.9);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.empty {
+  padding: 20px 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.drop-zone {
+  padding: 14px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 16px;
+  background: rgba(7, 6, 5, 0.34);
+}
+
+.file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.footer {
+  padding: 18px 6px 4px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.toast {
+  position: fixed;
+  right: var(--safe-right);
+  bottom: var(--safe-bottom);
+  z-index: 1000;
+  max-width: min(390px, calc(100vw - 24px));
+  padding: 12px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  color: var(--cream);
+  background: rgba(20, 15, 10, 0.97);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.toast.open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+dialog {
+  width: min(560px, calc(100vw - 24px));
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  color: var(--cream);
+  background: #120e0a;
+  box-shadow: var(--shadow);
+}
+
+dialog::backdrop {
+  background: rgba(4, 3, 2, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.dialog-body {
+  padding: 18px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 18px 18px;
+}
+
+@media (max-width: 760px) {
+  .panel {
+    grid-column: 1 / -1;
+  }
+
+  .hero {
+    padding: 24px 18px 28px;
+  }
+
+  .hero::after {
+    opacity: 0.62;
+  }
+}
+
+@media (max-width: 420px) {
+  .app-shell {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .panel-head,
+  .panel-body {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .actions {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics {
+    gap: 5px;
+  }
+
+  .metric {
+    padding: 10px 8px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .hero {
+    padding: 18px;
+  }
+
+  .hero-copy {
+    max-width: 74%;
+  }
+
+  .dashboard {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .queue,
+  .log {
+    max-height: 240px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
   </style>
+
+  <title>ChybaŽrout • Opravář 3.6</title>
 </head>
 <body>
-  <div class="wrap">
-    <div class="header">
-      <div class="title">🛠️ Chybožrout-Opravář <span id="ver">v2.6</span></div>
-      <div class="sub">„Více hlav = méně pádů“</div>
-    </div>
+  <main class="app-shell">
+    <header class="hero">
+      <p class="eyebrow">Vivere atque Fru'i¡'T • bezpečná oprava</p>
+      <h1>ChybaŽrout</h1>
+      <p class="hero-copy">
+        Nejdřív změří, potom vytvoří snímek a až pak opravuje. Nic nemaže natvrdo:
+        uzavřené chyby odkládá do Koše, odkud se mohou vrátit nebo dál učit Paměť.
+      </p>
 
-    <div class="grid">
-      <!-- KPI + Tiles -->
-      <div class="card">
-        <div class="row" style="display:flex;justify-content:space-between;gap:12px">
-          <div>
-            <div class="muted">Úroveň</div>
-            <div class="kpi" id="lvl">1</div>
+      <div class="status-strip" aria-live="polite">
+        <span class="badge" id="systemState" data-tone="ready">Připraven</span>
+        <span class="badge" id="networkState">Zjišťuji síť</span>
+        <span class="badge" id="workerState">Zjišťuji offline vrstvu</span>
+        <span class="badge" id="lifeState">Život čeká</span>
+      </div>
+    </header>
+
+    <section class="dashboard">
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Stav opraváře</h2>
+          <span class="badge" data-tone="ok">v3.6</span>
+        </div>
+        <div class="panel-body">
+          <div class="metrics">
+            <div class="metric">
+              <strong id="issueCount">0</strong>
+              <span>otevřené</span>
+            </div>
+            <div class="metric">
+              <strong id="trashCount">0</strong>
+              <span>v Koši</span>
+            </div>
+            <div class="metric">
+              <strong id="backupCount">0</strong>
+              <span>snímky</span>
+            </div>
           </div>
-          <div>
-            <div class="muted">Chyby ve frontě</div>
-            <div class="kpi" id="qcnt">0</div>
+
+          <p class="muted" id="lastSummary" style="margin: 14px 0 0">
+            První sken ještě neproběhl. Existující data CHT zůstávají beze změny.
+          </p>
+
+          <div class="actions">
+            <button class="button" id="scanButton" type="button">🔎 Změřit celý systém</button>
+            <button class="button secondary" id="repairButton" type="button">🛠 Bezpečně opravit</button>
+            <button class="button ghost" id="backupButton" type="button">▣ Vytvořit snímek</button>
+            <button class="button ghost" id="offlineButton" type="button">◉ Připravit offline</button>
           </div>
         </div>
+      </article>
 
-        <!-- ČTVERCE / Tiles -->
-        <div class="tiles" id="tiles">
-          <div class="tile" data-action="attach"><b>🧠</b><span>Zachytávat chyby</span></div>
-          <div class="tile" data-action="scan"><b>🔎</b><span>Sken indexů</span></div>
-          <div class="tile" data-action="deps"><b>📦</b><span>Sken závislostí</span></div>
-          <div class="tile" data-action="fallback"><b>🧯</b><span>Opravit (fallback)</span></div>
-
-          <div class="tile" data-action="fix1"><b>🔧</b><span>Opravit nejbližší</span></div>
-          <div class="tile" data-action="fixall"><b>✨</b><span>Opravit vše</span></div>
-          <div class="tile" data-action="sim"><b>💥</b><span>Simulovat chybu</span></div>
-          <div class="tile" data-action="export"><b>📤</b><span>Export report</span></div>
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Rozsah skenu</h2>
+          <span class="badge">stejná doména</span>
         </div>
-      </div>
+        <div class="panel-body">
+          <p class="muted">
+            Opravář čte pouze veřejné soubory této instalace. Obsah Paměti neposílá na síť.
+          </p>
 
-      <!-- Log -->
-      <div class="card">
-        <div class="muted">Systémový log</div>
-        <div id="scanLog">Inicializace systému…</div>
-      </div>
-    </div>
+          <div class="field">
+            <label for="scanScope">Co zkontrolovat</label>
+            <select id="scanScope">
+              <option value="all">CHT + Život + Revia + kořen</option>
+              <option value="cht">Jen CHT 360°‰.</option>
+              <option value="life">Jen Život a signální vrstvu</option>
+              <option value="repairer">Jen ChybaŽrouta</option>
+            </select>
+          </div>
 
-    <!-- Fronta chyb -->
-    <div class="card" style="margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div class="muted">Fronta chyb / chybějících souborů</div>
-        <button id="btn-clear" style="background:#111;color:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:10px;cursor:pointer">🧹 Vyčistit log</button>
-      </div>
-      <div id="errList" class="list"></div>
-    </div>
+          <div class="field">
+            <label for="customTarget">Volitelná cesta v tomto repozitáři</label>
+            <input id="customTarget" type="text" inputmode="url" placeholder="např. ../docs/mluva-cht-360/index.html">
+          </div>
 
-    <footer>Součást světa Vivere atque Frui¡'T • build v2.6 (tiles + drawer)</footer>
-  </div>
-
-  <!-- Výsuvný panel -->
-  <div class="drawer" id="drawer">
-    <div class="inner">
-      <div class="row">
-        <div id="drawer-title" style="font-weight:700">Akce</div>
-        <div>
-          <button class="close" id="drawer-close">Zavřít</button>
-          <button class="primary" id="drawer-run">Spustit</button>
+          <div class="actions">
+            <button class="button ghost" id="addTargetButton" type="button">＋ Přidat do měření</button>
+            <button class="button ghost" id="workerStatusButton" type="button">◌ Stav cache</button>
+          </div>
         </div>
-      </div>
-      <div id="drawer-desc" class="desc">Popis akce…</div>
+      </article>
+
+      <article class="panel panel-wide">
+        <div class="panel-head">
+          <h2>Fronta skutečných nálezů</h2>
+          <button class="mini-button" id="exportReportButton" type="button">Export reportu</button>
+        </div>
+        <div class="panel-body">
+          <div class="queue" id="issueList" aria-live="polite">
+            <div class="empty">Zatím žádné nálezy.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Koš, který nezapomíná</h2>
+          <button class="mini-button" id="restoreTrashButton" type="button">Vrátit poslední</button>
+        </div>
+        <div class="panel-body">
+          <p class="muted">
+            Vyřešené nebo odložené nálezy zůstávají s původním popisem a důvodem opravy.
+          </p>
+          <div class="queue" id="trashList">
+            <div class="empty">Koš je prázdný.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Zálohy a přenos</h2>
+          <span class="badge">UTF-8</span>
+        </div>
+        <div class="panel-body">
+          <p class="muted">
+            Snímek zahrnuje známé klíče CHT, Života, scén, záblesků, opraváře i starší kompatibilní Paměť.
+          </p>
+          <div class="actions">
+            <button class="button ghost" id="exportBackupButton" type="button">⇩ Stáhnout úplnou zálohu</button>
+            <label class="button ghost" for="importBackupInput">⇧ Načíst zálohu</label>
+            <input class="file-input" id="importBackupInput" type="file" accept="application/json,.json">
+            <button class="button danger" id="restoreBackupButton" type="button">↶ Obnovit poslední snímek</button>
+            <button class="button ghost" id="exportTextButton" type="button">TXT souhrn pro GitHub</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel panel-wide">
+        <div class="panel-head">
+          <h2>Živý záznam</h2>
+          <button class="mini-button" id="clearVisibleLogButton" type="button">Skrýt zobrazený log</button>
+        </div>
+        <div class="panel-body">
+          <div class="log" id="activityLog" aria-live="polite">
+            <div class="empty">Opravář se probouzí…</div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="footer">
+      ChybaŽrout • Opravář 3.6 — poděkování všemu nynějšku.<br>
+      CHT 360°‰. zůstává místní, opravitelné a vratné. •ア
+    </footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="confirmDialog">
+    <div class="dialog-body">
+      <p class="eyebrow">2× měř • 1× toč</p>
+      <h2 id="dialogTitle">Potvrzení</h2>
+      <p class="muted" id="dialogText"></p>
     </div>
-  </div>
+    <div class="dialog-actions">
+      <button class="button ghost" id="dialogCancel" type="button">Zpět</button>
+      <button class="button" id="dialogConfirm" type="button">Potvrdit</button>
+    </div>
+  </dialog>
 
   <script>
-  /* ===========================
-     🧠 RepairNet v2.6 (core)
-     – vychází z v2.5
-  ============================ */
-  (function(){
-    const VERSION = 'v2.6';
-    const MAX_QUEUE = 400;
-    const ROOTS = [
-      '../Revia/',
-      '../Braska-Hlava/',
-      '../Hlavoun/',
-      '../Meziprostor-Core/',
-      '../VAFT-Network/'
-    ];
-    const FALLBACK_BASE = location.origin + location.pathname.replace(/\/[^/]*$/,'/') + '../fallback/';
+"use strict";
 
-    const state = {
-      queue: [],
-      fixed: parseInt(localStorage.getItem('vaft.chzr.fixed')||'0',10),
-      lvl:   parseInt(localStorage.getItem('vaft.chzr.lvl')||'1',10),
-      scanning:false,
-      handlers:false
-    };
-    const save = ()=>{ localStorage.setItem('vaft.chzr.fixed', state.fixed); localStorage.setItem('vaft.chzr.lvl', state.lvl); };
+(function () {
+  const VERSION = "3.6.0";
+  const SYSTEM = "ChybaŽrout • Opravář";
+  const REPO_ROOT = new URL("../", window.location.href);
+  const MAX_ISSUES = 240;
+  const MAX_TRASH = 240;
+  const MAX_ACTIVITY = 320;
+  const MAX_SCAN_FILES = 180;
 
-    function enqueue(obj){
-      const item = {
-        t: Date.now(),
-        type: obj?.type || 'error',
-        msg: (obj && (obj.message||obj.msg||obj)) + '',
-        src: obj?.src || '',
-        line: obj?.line || '',
-        col: obj?.col || '',
-        stack: obj?.stack ? String(obj.stack).slice(0,1500) : ''
-      };
-      state.queue.push(item);
-      if (state.queue.length > MAX_QUEUE) state.queue.shift();
-      return item;
-    }
-    function fixNext(){
-      if (!state.queue.length) return null;
-      const it = state.queue.shift();
-      state.fixed++; if (state.fixed % 3 === 0) state.lvl++; save();
-      return it;
-    }
-    function fixAll(){ let n=state.queue.length; while(state.queue.length) fixNext(); return n; }
+  const KEYS = Object.freeze({
+    state: "cht360_chybozrout_v3",
+    trash: "cht360_chybozrout_kos_v1",
+    targets: "cht360_chybozrout_targets_v1",
+    legacyState: "cht360_chybozrout_v2",
+    legacyBackup: "cht360_samoopravovna_backup_v1"
+  });
 
-    async function check(url){
-      try{ const r = await fetch(url, {cache:'no-store'}); return {ok:r.ok, status:r.status}; }
-      catch(e){ return {ok:false, status:e.message}; }
-    }
-    async function fetchText(url){
-      const r = await fetch(url, {cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); return await r.text();
-    }
-    const RES_RE = /<(script|img|link|audio|video)\b[^>]+?(?:src|href)\s*=\s*["']([^"']+)["'][^>]*>/gi;
-    const toAbs = (base, rel)=> /^https?:\/\//i.test(rel) ? rel : new URL(rel, base).href;
-
-    async function scanIndexAndDeps(root, logFn){
-      const indexUrl = new URL(root+'index.html','https://michalklimekzlin-cmd.github.io/Vivere-atque-FruiT/').href;
-      logFn && logFn('🔎 Index: '+indexUrl);
-      let html='';
-      try{ html = await fetchText(indexUrl); logFn && logFn('✅ '+indexUrl+' (OK)'); }
-      catch(e){ enqueue({type:'missing-index', msg:'Index nedostupný', src:indexUrl, stack:e.message}); logFn && logFn('❌ '+indexUrl+' ('+e.message+')'); return; }
-
-      const base = indexUrl; const found = new Set(); let m;
-      while((m = RES_RE.exec(html)) !== null){ const rel = m[2]; if(/manifest\.json$/i.test(rel)) continue; found.add(toAbs(base, rel)); }
-      for (const u of found){
-        const r = await check(u);
-        if (!r.ok){ enqueue({type:'missing-asset', msg:'Chybí asset', src:u, stack:'status: '+r.status}); logFn && logFn('❌ '+u+' ('+r.status+')'); }
-        else { logFn && logFn('✅ '+u+' ('+r.status+')'); }
-      }
-    }
-    async function scanDeep(logFn){
-      state.scanning = true;
-      for (const r of ROOTS){ await scanIndexAndDeps(r, logFn); }
-      state.scanning = false;
-    }
-
-    async function tryRepairMissing(logFn){
-      const missing = state.queue.filter(x=>x.type==='missing-asset');
-      if(!missing.length){ logFn && logFn('✨ Není co opravovat (missing-asset).'); return 0; }
-      let repaired = 0;
-      for (const m of missing){
-        try{
-          const url = new URL(m.src);
-          const relPath = url.pathname.replace(/^\/+/, '').replace(/^Vivere-atque-FruiT\//,'');
-          const fbUrl = new URL(relPath, FALLBACK_BASE).href;
-          const chk = await check(fbUrl);
-          if (!chk.ok){ logFn && logFn('⚠️ Fallback nenalezen: '+fbUrl); continue; }
-
-          if (/\.(js)(\?|$)/i.test(fbUrl)){
-            await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src=fbUrl; s.onload=res; s.onerror=rej; document.body.appendChild(s); });
-            repaired++; logFn && logFn('🔧 Nahrán fallback skript: '+fbUrl);
-          } else if (/\.(css)(\?|$)/i.test(fbUrl)){
-            const l=document.createElement('link'); l.rel='stylesheet'; l.href=fbUrl; document.head.appendChild(l);
-            repaired++; logFn && logFn('🔧 Nahrán fallback styl: '+fbUrl);
-          } else { repaired++; logFn && logFn('🔧 Fallback dostupný: '+fbUrl); }
-
-          const idx = state.queue.indexOf(m);
-          if (idx>=0){ state.queue.splice(idx,1); state.fixed++; if(state.fixed%3===0) state.lvl++; save(); }
-        }catch(e){ logFn && logFn('❌ Oprava selhala: '+(e.message||e)); }
-      }
-      return repaired;
-    }
-
-    function attachHandlers(){
-      if (state.handlers) return false;
-      state.handlers = true;
-      const origError = console.error;
-      console.error = function(...args){ try{ enqueue({ msg: args.join(' ') }); }catch(e){} return origError.apply(console,args); };
-      window.onerror = (msg, src, line, col, error)=>{ enqueue({ msg, src, line, col, stack:error && error.stack }); return false; };
-      window.addEventListener('unhandledrejection', (e)=>{ const r=e.reason||{}; enqueue({ msg:'PromiseRejection: '+(r.message||r), stack:r.stack }); });
-      return true;
-    }
-
-    window.RepairNet = {
-      version: VERSION,
-      getQueue: ()=> state.queue.slice(),
-      getFixedCount: ()=> state.fixed,
-      getLevel: ()=> state.lvl,
-      isScanning: ()=> state.scanning,
-      feedError: enqueue,
-      fixNext, fixAll,
-      scanDeep, scanIndexAndDeps,
-      tryRepairMissing,
-      attachHandlers
-    };
-  })();
-
-/* ===========================
-   🫀 CORE v1
-=========================== */
-
-const KdeJeToOvoce = "Kde je to Ovoce•ア";
-
-// ===== STAVY =====
-function sleepState() {
-  return {
-    state: "sleep",
-    message: KdeJeToOvoce,
-    pulse: Date.now()
-  };
-}
-
-// ===== PAMĚŤ =====
-function saveState(state) {
-  localStorage.setItem(
+  const MEMORY_KEYS = Object.freeze([
+    "cht360_pamet_v1",
+    "vaft_pamet_v1",
+    "cht360_pamet_snapshots_v1",
+    "vaft_pamet_scene_v2",
+    "cht360_scene_v1",
+    "cht360_trojka_model_v1",
+    "cht360_glyph_drum_v1",
+    "cht360_flashes_v1",
+    "cht360_life_state_v1",
+    "cht360_energy_state_v1",
+    "cht360_docs_modules_v1",
+    "cht360_repo_memory_v1",
+    "cht360_revia_context_v1",
+    "cht360_mluva_chat_v1",
+    "cht360_ai_transparency_v1",
+    "BATOLE_SVET",
     "state_core",
-    JSON.stringify(state)
-  );
-}
+    KEYS.state,
+    KEYS.trash,
+    KEYS.targets,
+    KEYS.legacyState,
+    KEYS.legacyBackup,
+    "vaft.chzr.fixed",
+    "vaft.chzr.lvl"
+  ]);
 
-function loadState() {
-  const saved = localStorage.getItem("state_core");
+  const TARGET_GROUPS = Object.freeze({
+    root: [
+      "index.html",
+      "manifest.json",
+      "service-worker.js"
+    ],
+    repairer: [
+      "chybozrout-opravar/index.html",
+      "chybozrout-opravar/styles.css",
+      "chybozrout-opravar/app.js",
+      "chybozrout-opravar/manifest.webmanifest",
+      "chybozrout-opravar/manifest.json",
+      "chybozrout-opravar/service-worker.js",
+      "chybozrout-opravar/icon.svg"
+    ],
+    cht: [
+      "docs/index.html",
+      "docs/service-worker.js",
+      "docs/js/cht-chybozrout.js",
+      "docs/js/chybozrout-cache-bridge.js",
+      "docs/mluva-cht-360/index.html",
+      "cht360-batole/index.html"
+    ],
+    life: [
+      "docs/js/cht-zivot",
+      "docs/js/cht-zivot.js",
+      "docs/js/ch-scany.js"
+    ],
+    revia: [
+      "worlds/Revia-Master/index.html",
+      "worlds/Revia-Master/service-worker.js",
+      "api/revia-chat.js"
+    ]
+  });
 
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch (e) {
-      console.error("CORE load error:", e);
-    }
-  }
+  const ui = Object.freeze({
+    systemState: byId("systemState"),
+    networkState: byId("networkState"),
+    workerState: byId("workerState"),
+    lifeState: byId("lifeState"),
+    issueCount: byId("issueCount"),
+    trashCount: byId("trashCount"),
+    backupCount: byId("backupCount"),
+    lastSummary: byId("lastSummary"),
+    issueList: byId("issueList"),
+    trashList: byId("trashList"),
+    activityLog: byId("activityLog"),
+    scanScope: byId("scanScope"),
+    customTarget: byId("customTarget"),
+    scanButton: byId("scanButton"),
+    repairButton: byId("repairButton"),
+    backupButton: byId("backupButton"),
+    offlineButton: byId("offlineButton"),
+    addTargetButton: byId("addTargetButton"),
+    workerStatusButton: byId("workerStatusButton"),
+    exportReportButton: byId("exportReportButton"),
+    restoreTrashButton: byId("restoreTrashButton"),
+    exportBackupButton: byId("exportBackupButton"),
+    importBackupInput: byId("importBackupInput"),
+    restoreBackupButton: byId("restoreBackupButton"),
+    exportTextButton: byId("exportTextButton"),
+    clearVisibleLogButton: byId("clearVisibleLogButton"),
+    toast: byId("toast"),
+    confirmDialog: byId("confirmDialog"),
+    dialogTitle: byId("dialogTitle"),
+    dialogText: byId("dialogText"),
+    dialogCancel: byId("dialogCancel"),
+    dialogConfirm: byId("dialogConfirm")
+  });
 
-  return sleepState();
-}
+  let state = loadJson(KEYS.state, createInitialState());
+  let trash = loadJson(KEYS.trash, []);
+  let customTargets = loadJson(KEYS.targets, []);
+  let busy = false;
+  let toastTimer = 0;
+  let lastLifePulse = 0;
+  let channel = null;
 
-// ===== AKTIVACE =====
-function activate(input) {
+  const BackupDB = {
+    db: null,
 
-  if (input === KdeJeToOvoce) {
-
-    const state = {
-      state: "awake",
-      role: "human_core",
-      link: KdeJeToOvoce + " connected",
-      pulse: Date.now(),
-      message: "Jádro aktivováno"
-    };
-
-    saveState(state);
-
-    return state;
-
-  }
-
-  return sleepState();
-}
-
-// ===== PULS (ŽIVOT) =====
-function pulse(core) {
-
-  core.pulse = Date.now();
-
-  saveState(core);
-
-  return core;
-}
-
-// ===== VSTUP =====
-function handleInput(value) {
-
-  CORE = activate(value);
-
-  console.log("[CORE]", CORE);
-
-  return CORE;
-}
-
-// ===== START =====
-let CORE = loadState();
-
-if (CORE.state === "awake") {
-
-  CORE = pulse(CORE);
-
-  console.log("🫀 Jádro běží", CORE);
-
-} else {
-
-  console.log("💤 Jádro spí");
-
-}
-
-  /* ===========================
-     🖥️ UI – Tiles + Drawer
-  ============================ */
-  (function(){
-    const $ = (q)=>document.querySelector(q);
-    const elVer=$('#ver'), elLvl=$('#lvl'), elQ=$('#qcnt'), elLog=$('#scanLog'), elList=$('#errList');
-    const tiles=$('#tiles');
-    const drawer=$('#drawer'), dTitle=$('#drawer-title'), dDesc=$('#drawer-desc'), dRun=$('#drawer-run'), dClose=$('#drawer-close');
-    const bClear=$('#btn-clear');
-
-    const safe = (s)=> (''+s).replace(/[<&>]/g, c=>({ '<':'&lt;','>':'&gt;','&':'&amp;' }[c]));
-    function logLine(txt){ const line=document.createElement('div'); line.textContent=`[${new Date().toLocaleTimeString()}] ${txt}`; elLog.appendChild(line); elLog.scrollTop=elLog.scrollHeight; }
-    function renderKPI(){ elVer.textContent='v'+(window.RepairNet?.version||'?'); elLvl.textContent=window.RepairNet.getLevel(); elQ.textContent=window.RepairNet.getQueue().length; }
-    function renderList(){
-      const q = window.RepairNet.getQueue().slice().reverse();
-      elList.innerHTML = q.map(x=>{
-        const t=new Date(x.t).toLocaleString();
-        const meta=[x.type, x.src, x.line&&('ř:'+x.line), x.col&&('sl:'+x.col)].filter(Boolean).join(' • ');
-        const stack=x.stack?`<div class="meta">${safe(x.stack)}</div>`:'';
-        return `<div class="err"><div class="msg ${x.type==='missing-asset'?'warn':'bad'}">${safe(x.msg||'Chyba')}</div><div class="meta">${safe(t)} • ${safe(meta)}</div>${stack}</div>`;
-      }).join('') || `<div class="err"><div class="msg ok">Žádné položky ve frontě.</div></div>`;
-    }
-
-    // Drawer ovládání
-    let pendingAction = null;
-    function openDrawer(title, desc, run){
-      dTitle.textContent = title;
-      dDesc.textContent = desc;
-      pendingAction = run;
-      drawer.classList.add('open');
-    }
-    dClose.addEventListener('click', ()=> drawer.classList.remove('open'));
-    dRun.addEventListener('click', async ()=>{
-      if (!pendingAction) return;
-      dRun.disabled = true;
-      try{ await pendingAction(); }
-      finally{ dRun.disabled=false; drawer.classList.remove('open'); renderKPI(); renderList(); }
-    });
-
-    // Akce map
-    const actions = {
-      attach(){
-        openDrawer('Zachytávat chyby',
-          'Zapne handlery (window.onerror, unhandledrejection, console.error), aby Chybožrout sbíral události této aplikace.',
-          async ()=>{ const ok = window.RepairNet.attachHandlers(); logLine(ok?'🧠 Zachytávání zapnuto.':'ℹ️ Už běží.'); }
-        );
-      },
-      scan(){
-        openDrawer('Sken indexů',
-          'Zkontroluje index.html ve všech základních modulech (Revia, Hlavoun, Meziprostor…)',
-          async ()=>{ logLine('🔎 Spouštím sken indexů…'); await window.RepairNet.scanDeep(m=>logLine(m)); logLine('✅ Sken indexů hotov.'); }
-        );
-      },
-      deps(){
-        openDrawer('Sken závislostí',
-          'Načte indexy, vyparsuje JS/CSS/IMG/AUDIO/VIDEO a otestuje jejich dostupnost.',
-          async ()=>{
-            logLine('📦 Sken závislostí (všechny moduly)…');
-            const roots=['../Revia/','../Braska-Hlava/','../Hlavoun/','../Meziprostor-Core/','../VAFT-Network/'];
-            for (const r of roots){ await window.RepairNet.scanIndexAndDeps(r, m=>logLine(m)); }
-            logLine('✅ Sken závislostí dokončen.');
-          }
-        );
-      },
-      fallback(){
-        openDrawer('Oprava přes fallback',
-          'Pokusí se automaticky nahrát chybějící soubory ze složky /fallback/ (pokud existují).',
-          async ()=>{ const n = await window.RepairNet.tryRepairMissing(m=>logLine(m)); logLine(n?`✨ Opraveno přes fallback: ${n}`:'ℹ️ Nic k opravě / fallback nedostupný.'); }
-        );
-      },
-      fix1(){
-        openDrawer('Opravit nejbližší',
-          'Odstraní první položku z fronty a zvýší postup/úroveň opraváře.',
-          async ()=>{ const it=window.RepairNet.fixNext(); logLine(it?('🔧 Opraveno: '+(it.msg||'neznámá')):'✨ Není co opravovat.'); }
-        );
-      },
-      fixall(){
-        openDrawer('Opravit vše',
-          'Vyčistí frontu všech chyb a chybějících assetů (jako „hmotná oprava“).',
-          async ()=>{ const n=window.RepairNet.fixAll(); logLine(n?`✨ Opraveno vše: ${n} položek.`:'✨ Fronta prázdná.'); }
-        );
-      },
-      sim(){
-        openDrawer('Nasimulovat chybu',
-          'Vloží do konzole a Promisu testovací chyby, aby bylo co opravovat.',
-          async ()=>{ console.error('SimulatedError: test z UI'); Promise.reject(new Error('AsyncFail: Promise test')); logLine('💥 Chyby nasimulovány.'); }
-        );
-      },
-      export(){
-        openDrawer('Export reportu',
-          'Vygeneruje JSON s frontou chyb a počitadly (úroveň, opravy).',
-          async ()=>{
-            const report = {
-              generatedAt: new Date().toISOString(),
-              version: window.RepairNet.version,
-              level: window.RepairNet.getLevel(),
-              fixed: window.RepairNet.getFixedCount(),
-              queue: window.RepairNet.getQueue()
-            };
-            const blob = new Blob([JSON.stringify(report,null,2)], {type:'application/json'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'vaft-repair-report.json';
-            document.body.appendChild(a); a.click(); a.remove();
-            logLine('📤 Export hotov: vaft-repair-report.json');
-          }
-        );
+    open() {
+      if (this.db) return Promise.resolve(this.db);
+      if (!("indexedDB" in window)) {
+        return Promise.reject(new Error("IndexedDB není dostupná."));
       }
+
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open("cht360_chybozrout_backups", 1);
+
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains("snapshots")) {
+            const store = db.createObjectStore("snapshots", { keyPath: "id" });
+            store.createIndex("createdAt", "createdAt", { unique: false });
+          }
+        };
+
+        request.onsuccess = () => {
+          this.db = request.result;
+          resolve(this.db);
+        };
+        request.onerror = () => reject(request.error || new Error("Zálohová databáze se neotevřela."));
+      });
+    },
+
+    async put(snapshot) {
+      const db = await this.open();
+      await idbRequest(db, "readwrite", store => store.put(snapshot));
+      await this.trim(7);
+      return snapshot;
+    },
+
+    async list() {
+      const db = await this.open();
+      const values = await idbRequest(db, "readonly", store => store.getAll());
+      return Array.isArray(values)
+        ? values.sort((a, b) => Number(b.createdAt || 0) - Number(a.createdAt || 0))
+        : [];
+    },
+
+    async latest() {
+      const values = await this.list();
+      return values[0] || null;
+    },
+
+    async count() {
+      const db = await this.open();
+      return idbRequest(db, "readonly", store => store.count());
+    },
+
+    async trim(maximum) {
+      const values = await this.list();
+      const old = values.slice(maximum);
+      if (!old.length) return;
+      const db = await this.open();
+      await idbTransaction(db, "readwrite", store => {
+        old.forEach(item => store.delete(item.id));
+      });
+    }
+  };
+
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  function now() {
+    return Date.now();
+  }
+
+  function makeId(prefix) {
+    return `${prefix}-${now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+  }
+
+  function safeText(value) {
+    return String(value ?? "").trim();
+  }
+
+  function clone(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function loadJson(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return clone(fallback);
+      const value = JSON.parse(raw);
+      return value === null || value === undefined ? clone(fallback) : value;
+    } catch (error) {
+      console.warn(`[${SYSTEM}] Poškozený místní záznam ${key}.`, error);
+      return clone(fallback);
+    }
+  }
+
+  function saveJson(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (error) {
+      window.dispatchEvent(new CustomEvent("cht.storage.error", {
+        detail: { key, message: safeText(error?.message || error), at: now() }
+      }));
+      return false;
+    }
+  }
+
+  function createInitialState() {
+    return {
+      version: 3,
+      issues: [],
+      reports: [],
+      activity: [],
+      lastScan: null,
+      lastRepairAt: null,
+      hiddenLogBefore: 0,
+      migratedAt: null
     };
+  }
 
-    // Kliky na tiles
-    tiles.addEventListener('click', (e)=>{
-      const t = e.target.closest('.tile');
-      if (!t) return;
-      const act = t.dataset.action;
-      if (actions[act]) actions[act]();
+  function normaliseState() {
+    state = {
+      ...createInitialState(),
+      ...(state && typeof state === "object" ? state : {}),
+      version: 3,
+      issues: Array.isArray(state?.issues) ? state.issues.slice(-MAX_ISSUES) : [],
+      reports: Array.isArray(state?.reports) ? state.reports.slice(-12) : [],
+      activity: Array.isArray(state?.activity) ? state.activity.slice(-MAX_ACTIVITY) : []
+    };
+    trash = Array.isArray(trash) ? trash.slice(-MAX_TRASH) : [];
+    customTargets = Array.isArray(customTargets)
+      ? customTargets.filter(value => typeof value === "string").slice(-40)
+      : [];
+  }
+
+  function migrateLegacy() {
+    if (state.migratedAt) return;
+    const legacy = loadJson(KEYS.legacyState, null);
+
+    if (legacy && Array.isArray(legacy.queue)) {
+      legacy.queue.slice(-60).forEach(item => {
+        recordIssue({
+          kind: "legacy",
+          severity: item.kind === "error" ? "error" : "warn",
+          message: item.message || "Starší nález Chybožrouta",
+          source: item.source || "",
+          details: "Převedeno bezpečně ze stavu v2."
+        }, { silent: true });
+      });
+    }
+
+    const oldFixed = Number(localStorage.getItem("vaft.chzr.fixed") || 0);
+    const oldLevel = Number(localStorage.getItem("vaft.chzr.lvl") || 1);
+    if (oldFixed || oldLevel > 1) {
+      addActivity("info", `Převzata zkušenost staršího Opraváře: ${oldFixed} oprav, úroveň ${oldLevel}.`, "migrace", true);
+    }
+
+    state.migratedAt = now();
+    persist();
+  }
+
+  function persist() {
+    state.issues = state.issues.slice(-MAX_ISSUES);
+    state.activity = state.activity.slice(-MAX_ACTIVITY);
+    trash = trash.slice(-MAX_TRASH);
+    saveJson(KEYS.state, state);
+    saveJson(KEYS.trash, trash);
+    saveJson(KEYS.targets, customTargets);
+    broadcast("state", {
+      issues: state.issues.length,
+      trash: trash.length,
+      lastScanAt: state.lastScan?.finishedAt || null
     });
+  }
 
-    // Vyčistit log panel (ne frontu)
-    bClear.addEventListener('click', ()=>{ elLog.textContent=''; logLine('🧹 Log vyčištěn.'); });
+  function fingerprint(issue) {
+    return [
+      safeText(issue.kind).toLocaleLowerCase("cs"),
+      safeText(issue.source).replace(/[?#].*$/, "").toLocaleLowerCase("cs"),
+      safeText(issue.message).toLocaleLowerCase("cs")
+    ].join("|");
+  }
 
-    // Boot
-    handleInput(KdeJeToOvoce);
-logLine("🫀 CORE aktivován");
-    logLine('✅ UI připraveno • kompatibilní s RepairNet v'+(window.RepairNet?.version||'?'));
-    (function renderLoop(){ renderKPI(); renderList(); setTimeout(renderLoop, 1000); })();
-  })();
-  </script>
+  function recordIssue(input, options = {}) {
+    const at = now();
+    const issue = {
+      id: input.id || makeId("issue"),
+      kind: safeText(input.kind || "diagnostic"),
+      severity: ["ok", "info", "warn", "error"].includes(input.severity)
+        ? input.severity
+        : "warn",
+      message: safeText(input.message || "Neznámý nález"),
+      source: safeText(input.source || ""),
+      details: safeText(input.details || ""),
+      hint: safeText(input.hint || ""),
+      createdAt: Number(input.createdAt || at),
+      lastSeenAt: at,
+      occurrences: Number(input.occurrences || 1),
+      fingerprint: ""
+    };
+    issue.fingerprint = input.fingerprint || fingerprint(issue);
 
-    <script>
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+    const existing = state.issues.find(item => item.fingerprint === issue.fingerprint);
+    if (existing) {
+      existing.lastSeenAt = at;
+      existing.occurrences = Number(existing.occurrences || 1) + 1;
+      existing.details = issue.details || existing.details;
+      existing.hint = issue.hint || existing.hint;
+      existing.severity = issue.severity;
+      if (!options.silent) persist();
+      return existing;
+    }
+
+    state.issues.push(issue);
+    if (!options.silent) {
+      persist();
+      render();
+      window.dispatchEvent(new CustomEvent("cht.chybozrout.event", { detail: clone(issue) }));
+    }
+    return issue;
+  }
+
+  function addActivity(tone, message, source = "", silent = false) {
+    state.activity.push({
+      id: makeId("log"),
+      tone,
+      message: safeText(message),
+      source: safeText(source),
+      at: now()
+    });
+    if (!silent) {
+      persist();
+      renderActivity();
+    }
+  }
+
+  function relativeUrl(value) {
+    try {
+      const url = value instanceof URL ? value : new URL(value, REPO_ROOT);
+      return decodeURIComponent(url.pathname.replace(REPO_ROOT.pathname, "")) + url.search;
+    } catch {
+      return safeText(value);
+    }
+  }
+
+  function resolveRepoUrl(value) {
+    const url = new URL(value, REPO_ROOT);
+    const sameOrigin = url.origin === window.location.origin;
+    const insideRoot = url.pathname.startsWith(REPO_ROOT.pathname);
+    if (!sameOrigin || !insideRoot) {
+      throw new Error("Cesta musí zůstat uvnitř tohoto repozitáře a stejné domény.");
+    }
+    url.hash = "";
+    return url;
+  }
+
+  function targetsForScope(scope) {
+    const groups = scope === "all"
+      ? ["root", "repairer", "cht", "life", "revia"]
+      : scope === "cht"
+        ? ["cht"]
+        : scope === "life"
+          ? ["life"]
+          : ["repairer"];
+
+    return [...new Set([
+      ...groups.flatMap(group => TARGET_GROUPS[group] || []),
+      ...customTargets
+    ])];
+  }
+
+  function isTextAsset(url, contentType) {
+    return /(?:text|javascript|json|xml|svg)/i.test(contentType || "") ||
+      /\.(?:html?|css|m?js|json|webmanifest|svg|txt|md)$/i.test(url.pathname);
+  }
+
+  async function fetchAsset(url) {
+    const startedAt = performance.now();
+    try {
+      const response = await fetch(url.href, {
+        cache: "no-store",
+        credentials: "same-origin",
+        redirect: "follow",
+        headers: { "X-CHT-Scan": "ChybaZrout-3.6" }
+      });
+      const contentType = response.headers.get("content-type") || "";
+      const text = response.ok && isTextAsset(url, contentType)
+        ? await response.text()
+        : "";
+      return {
+        ok: response.ok,
+        status: response.status,
+        contentType,
+        text,
+        ms: Math.round(performance.now() - startedAt),
+        redirected: response.redirected,
+        finalUrl: response.url || url.href
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        status: "ERR",
+        contentType: "",
+        text: "",
+        ms: Math.round(performance.now() - startedAt),
+        error: safeText(error?.message || error),
+        finalUrl: url.href
+      };
+    }
+  }
+
+  function makeFinding(kind, severity, message, source, details, hint) {
+    return { kind, severity, message, source, details, hint };
+  }
+
+  function extractDependencies(html, baseUrl) {
+    const values = [];
+    const pattern = /<(?:script|link|img|source|audio|video)\b[^>]*?\b(?:src|href)\s*=\s*["']([^"']+)["'][^>]*>/gi;
+    let match;
+    while ((match = pattern.exec(html)) !== null) {
+      const value = safeText(match[1]);
+      if (!value || /^(?:#|data:|blob:|javascript:|mailto:|tel:)/i.test(value)) continue;
+      try {
+        const url = new URL(value, baseUrl);
+        if (url.origin !== window.location.origin) continue;
+        if (!url.pathname.startsWith(REPO_ROOT.pathname)) continue;
+        url.hash = "";
+        values.push(url.href);
+      } catch {
+        /* The HTML analyzer reports malformed paths separately when fetch fails. */
+      }
+    }
+    return [...new Set(values)];
+  }
+
+  function visibleHtml(html) {
+    return html
+      .replace(/<script\b[\s\S]*?<\/script>/gi, " ")
+      .replace(/<style\b[\s\S]*?<\/style>/gi, " ")
+      .replace(/<!--([\s\S]*?)-->/g, " ")
+      .replace(/<[^>]+>/g, " ");
+  }
+
+  function analyzeHtml(url, html) {
+    const findings = [];
+    const source = relativeUrl(url);
+    const scriptsOpen = (html.match(/<script\b/gi) || []).length;
+    const scriptsClose = (html.match(/<\/script>/gi) || []).length;
+
+    if (!/^\s*<!doctype html>/i.test(html)) {
+      findings.push(makeFinding("html-doctype", "warn", "HTML nemá platný <!doctype html>.", source, "Safari může přepnout do kompatibilního režimu.", "Doplň <!doctype html> jako první řádek."));
+    }
+    if (!/<meta\s+[^>]*charset\s*=\s*["']?utf-8/i.test(html)) {
+      findings.push(makeFinding("utf8", "error", "Chybí výslovné UTF-8.", source, "České znaky a Glyphy se mohou rozbít.", "Doplň <meta charset=\"utf-8\"> co nejvýše v <head>."));
+    }
+    if (!/<meta\s+[^>]*name\s*=\s*["']viewport["']/i.test(html)) {
+      findings.push(makeFinding("viewport", "warn", "Chybí mobilní viewport.", source, "Rozhraní nemusí sedět na iPhone 14.", "Doplň viewport-fit=cover."));
+    }
+    if (scriptsOpen !== scriptsClose) {
+      findings.push(makeFinding("html-script-balance", "error", "Nesouhlasí počet značek <script>.", source, `${scriptsOpen} otevření / ${scriptsClose} uzavření.`, "Oprav strukturu skriptů před dalším slučováním."));
+    }
+
+    const afterHtml = html.split(/<\/html\s*>/i)[1];
+    if (afterHtml && afterHtml.trim()) {
+      findings.push(makeFinding("html-after-end", "error", "Za </html> zůstal další obsah.", source, "Prohlížeče jej zpracovávají rozdílně.", "Přesuň obsah před </body> a konec souboru nech čistý."));
+    }
+
+    const visible = visibleHtml(html);
+    if (/[ÃÂ�]/.test(visible)) {
+      findings.push(makeFinding("mojibake", "error", "Ve viditelném textu jsou rozbité UTF-8 znaky.", source, "Interní detekční značky ve skriptech se nepočítají.", "Nahraď pouze viditelný rozbitý text čistou češtinou v UTF-8."));
+    }
+
+    const ids = [...html.matchAll(/\sid\s*=\s*["']([^"']+)["']/gi)].map(match => match[1]);
+    const duplicates = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
+    if (duplicates.length) {
+      findings.push(makeFinding("duplicate-id", "warn", "HTML obsahuje duplicitní id.", source, duplicates.slice(0, 8).join(", "), "Každé id ponech pouze jednou."));
+    }
+
+    const registrations = (html.match(/serviceWorker\s*\.\s*register\s*\(/g) || []).length;
+    if (registrations > 1) {
+      findings.push(makeFinding("multiple-sw", "warn", "Stránka registruje více service workerů.", source, `${registrations} registrací může na iOS vytvořit obnovovací smyčku.`, "Ponech jednu registraci s jedním rozsahem."));
+    }
+
+    return findings;
+  }
+
+  function stripComments(text) {
+    return text
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^\s*\/\/.*$/gm, "");
+  }
+
+  function analyzeJavaScript(url, sourceText) {
+    const findings = [];
+    const source = relativeUrl(url);
+    const clean = stripComments(sourceText);
+    const intervals = (clean.match(/setInterval\s*\(/g) || []).length;
+    const swRegistrations = (clean.match(/serviceWorker\s*\.\s*register\s*\(/g) || []).length;
+
+    if (!clean.trim()) {
+      findings.push(makeFinding("empty-js", "error", "JavaScriptový soubor je prázdný.", source, "Prázdná kostra může působit jako načtený modul.", "Doplň modul nebo odeber jeho odkaz z indexu."));
+      return findings;
+    }
+    if (intervals > 4) {
+      findings.push(makeFinding("timer-pressure", "warn", "Soubor zakládá mnoho setInterval časovačů.", source, `${intervals} intervalů může zatěžovat iPhone a životní pulzy.`, "Slouč opakování pod jeden plánovač nebo použij vratný setTimeout."));
+    }
+    if (swRegistrations > 1) {
+      findings.push(makeFinding("multiple-sw", "warn", "Soubor registruje service worker vícekrát.", source, `${swRegistrations} registrací.`, "Ponech jedinou registrační cestu."));
+    }
+    if (/location\.reload\s*\(\s*\)/.test(clean) && /serviceWorker/.test(clean)) {
+      findings.push(makeFinding("reload-loop", "warn", "Service worker může vyvolat tvrdou obnovovací smyčku.", source, "Kombinace registrace workeru a location.reload().", "Aktivaci oznam událostí; stránku neobnovuj automaticky."));
+    }
+    return findings;
+  }
+
+  function analyzeJson(url, text) {
+    try {
+      JSON.parse(text);
+      return [];
+    } catch (error) {
+      return [makeFinding("json-syntax", "error", "JSON není syntakticky platný.", relativeUrl(url), safeText(error?.message || error), "Oprav čárky, uvozovky nebo závorky a ulož jako UTF-8.")];
+    }
+  }
+
+  function analyzeCss(url, text) {
+    const opens = (stripComments(text).match(/{/g) || []).length;
+    const closes = (stripComments(text).match(/}/g) || []).length;
+    if (!text.trim()) {
+      return [makeFinding("empty-css", "warn", "Stylový soubor je prázdný.", relativeUrl(url), "Odkaz existuje, ale nepřináší žádný vzhled.", "Doplň styly nebo odkaz bezpečně odeber.")];
+    }
+    if (opens !== closes) {
+      return [makeFinding("css-balance", "error", "Nesouhlasí složené závorky v CSS.", relativeUrl(url), `${opens} otevření / ${closes} uzavření.`, "Oprav neuzavřený blok CSS.")];
+    }
+    return [];
+  }
+
+  function analyzeAsset(url, result) {
+    if (!result.ok) {
+      return [makeFinding(
+        "missing-asset",
+        "error",
+        `Soubor není dostupný (${result.status}).`,
+        relativeUrl(url),
+        result.error || `${result.ms} ms`,
+        "Zkontroluj přesný název, velikost písmen a cestu. Frontu nemaž bez skutečné opravy."
+      )];
+    }
+
+    const path = url.pathname.toLocaleLowerCase("en");
+    const resultType = result.contentType.toLocaleLowerCase("en");
+    if (/\.(?:js|css|json|webmanifest)$/.test(path) && resultType.includes("text/html")) {
+      return [makeFinding("wrong-content-type", "error", "Asset místo svého obsahu vrátil HTML.", relativeUrl(url), result.contentType, "Na hostingu zkontroluj přepis cest a chybovou stránku." )];
+    }
+    if (/\.html?$/.test(path)) return analyzeHtml(url, result.text);
+    if (/\.(?:m?js)$/.test(path) || resultType.includes("javascript")) return analyzeJavaScript(url, result.text);
+    if (/\.(?:json|webmanifest)$/.test(path) || resultType.includes("json")) return analyzeJson(url, result.text);
+    if (/\.css$/.test(path) || resultType.includes("text/css")) return analyzeCss(url, result.text);
+    return [];
+  }
+
+  async function runScan(options = {}) {
+    const scope = options.scope || ui.scanScope.value || "all";
+    const startedAt = now();
+    const visited = new Set();
+    const queue = targetsForScope(scope).map(value => ({ value, dependency: false }));
+    const results = [];
+    const findings = [];
+
+    setBusy(true, "měřím");
+    addActivity("info", `Začíná měření rozsahu: ${scope}.`, "sken");
+
+    while (queue.length && visited.size < MAX_SCAN_FILES) {
+      const candidate = queue.shift();
+      let url;
+      try {
+        url = resolveRepoUrl(candidate.value);
+      } catch (error) {
+        findings.push(makeFinding("unsafe-path", "error", "Odmítnuta cesta mimo repozitář.", safeText(candidate.value), safeText(error?.message || error), "Použij relativní cestu uvnitř repozitáře."));
+        continue;
+      }
+
+      const key = url.href.replace(/[?#].*$/, "");
+      if (visited.has(key)) continue;
+      visited.add(key);
+
+      addActivity("info", `Měřím ${relativeUrl(url)}.`, `${visited.size}/${MAX_SCAN_FILES}`);
+      const result = await fetchAsset(url);
+      results.push({
+        url: url.href,
+        path: relativeUrl(url),
+        ok: result.ok,
+        status: result.status,
+        ms: result.ms,
+        contentType: result.contentType,
+        dependency: candidate.dependency
+      });
+
+      const assetFindings = analyzeAsset(url, result);
+      findings.push(...assetFindings);
+
+      if (result.ok && /\.html?$/.test(url.pathname.toLocaleLowerCase("en"))) {
+        extractDependencies(result.text, url).forEach(dependency => {
+          if (!visited.has(dependency.replace(/[?#].*$/, ""))) {
+            queue.push({ value: dependency, dependency: true });
+          }
         });
       }
-    </script>
-    <script src="./chybozrout/chybozrout-core.js"></script>
+    }
 
-<script src="./chybozrout/chybozrout-panel.js"></script>
+    if (queue.length) {
+      findings.push(makeFinding("scan-cap", "warn", "Sken dosáhl bezpečnostního limitu.", "", `${queue.length} cest zůstalo nezměřeno.`, "Rozděl sken na menší části, aby se iPhone nezasekl."));
+    }
 
-<script src="./chybozrout/chybozrout-360-bridge.js"></script>
+    findings.forEach(finding => recordIssue(finding, { silent: true }));
+
+    const report = {
+      id: makeId("report"),
+      system: SYSTEM,
+      version: VERSION,
+      scope,
+      startedAt,
+      finishedAt: now(),
+      durationMs: now() - startedAt,
+      scanned: results.length,
+      failedRequests: results.filter(item => !item.ok).length,
+      findings: findings.map(item => ({ ...item, fingerprint: fingerprint(item) })),
+      results
+    };
+
+    state.lastScan = report;
+    state.reports.push(report);
+    state.reports = state.reports.slice(-12);
+    addActivity(
+      findings.length ? "warn" : "ok",
+      findings.length
+        ? `Měření dokončeno: ${results.length} souborů, ${findings.length} nálezů.`
+        : `Měření dokončeno: ${results.length} souborů bez nových nálezů.`,
+      `${report.durationMs} ms`,
+      true
+    );
+    persist();
+    setBusy(false, findings.length ? "pozornost" : "v pořádku");
+    render();
+
+    window.dispatchEvent(new CustomEvent("cht.chybozrout.completed", { detail: clone(report) }));
+    broadcast("scan-complete", { scanned: report.scanned, findings: findings.length, at: report.finishedAt });
+    return report;
+  }
+
+  function collectSnapshotValues() {
+    const values = {};
+    MEMORY_KEYS.forEach(key => {
+      values[key] = localStorage.getItem(key);
+    });
+    return values;
+  }
+
+  async function createBackup(reason = "ruční snímek") {
+    const snapshot = {
+      id: makeId("snapshot"),
+      format: "CHT 360°‰. bezpečnostní snímek",
+      version: 1,
+      createdAt: now(),
+      reason,
+      origin: window.location.origin,
+      repositoryPath: REPO_ROOT.pathname,
+      values: collectSnapshotValues()
+    };
+
+    try {
+      await BackupDB.put(snapshot);
+      addActivity("ok", "Bezpečnostní snímek byl vytvořen.", reason);
+      window.dispatchEvent(new CustomEvent("cht.chybozrout.backup", { detail: { id: snapshot.id, createdAt: snapshot.createdAt, reason } }));
+      await renderBackupCount();
+      return snapshot;
+    } catch (error) {
+      const fallback = {
+        createdAt: new Date(snapshot.createdAt).toISOString(),
+        reason,
+        values: snapshot.values
+      };
+      if (!saveJson(KEYS.legacyBackup, fallback)) {
+        recordIssue({
+          kind: "backup-failed",
+          severity: "error",
+          message: "Bezpečnostní snímek se nepodařilo uložit.",
+          details: safeText(error?.message || error),
+          hint: "Nejdřív použij Stažení úplné zálohy a uvolni místo v Safari."
+        });
+        throw error;
+      }
+      addActivity("warn", "Snímek byl uložen v kompatibilní místní záloze.", reason);
+      await renderBackupCount();
+      return snapshot;
+    }
+  }
+
+  async function latestBackup() {
+    try {
+      const snapshot = await BackupDB.latest();
+      if (snapshot) return snapshot;
+    } catch {
+      /* Fall through to the compatible localStorage snapshot. */
+    }
+    const fallback = loadJson(KEYS.legacyBackup, null);
+    if (!fallback?.values) return null;
+    return {
+      id: "legacy-latest",
+      format: "CHT 360°‰. kompatibilní snímek",
+      createdAt: Date.parse(fallback.createdAt || "") || now(),
+      reason: fallback.reason || "starší záloha",
+      values: fallback.values
+    };
+  }
+
+  function applySnapshotValues(values) {
+    if (!values || typeof values !== "object" || Array.isArray(values)) {
+      throw new Error("Záloha neobsahuje platnou mapu hodnot.");
+    }
+
+    Object.entries(values).forEach(([key, value]) => {
+      if (!MEMORY_KEYS.includes(key)) return;
+      if (value === null || value === undefined) {
+        localStorage.removeItem(key);
+      } else if (typeof value === "string") {
+        localStorage.setItem(key, value);
+      } else {
+        throw new Error(`Hodnota ${key} není textový snímek.`);
+      }
+    });
+  }
+
+  async function restoreLatestBackup() {
+    const target = await latestBackup();
+    if (!target) {
+      toast("Zatím není z čeho obnovovat.");
+      return false;
+    }
+
+    const accepted = await ask(
+      "Obnovit poslední snímek?",
+      `Nejdřív uložím současný stav. Potom obnovím snímek „${target.reason}“ z ${formatDate(target.createdAt)}.`
+    );
+    if (!accepted) return false;
+
+    await createBackup("automaticky před obnovou");
+    applySnapshotValues(target.values);
+    addActivity("ok", "Poslední snímek byl obnoven.", target.reason);
+    window.dispatchEvent(new CustomEvent("cht.memory.changed", { detail: { reason: "obnova ChybaŽroutem" } }));
+    toast("Obnova je hotová. Stránka se bezpečně znovu načte.");
+    window.setTimeout(() => window.location.reload(), 700);
+    return true;
+  }
+
+  function moveIssueToTrash(id, reason) {
+    const index = state.issues.findIndex(item => item.id === id);
+    if (index < 0) return false;
+    const [issue] = state.issues.splice(index, 1);
+    trash.push({
+      ...issue,
+      trashId: makeId("trash"),
+      trashedAt: now(),
+      trashReason: safeText(reason || "odloženo ručně")
+    });
+    addActivity("ok", `Nález uložen do Koše: ${issue.message}`, reason, true);
+    persist();
+    render();
+    window.dispatchEvent(new CustomEvent("cht.chybozrout.trash", { detail: { issue: clone(issue), reason } }));
+    return true;
+  }
+
+  function restoreTrashItem(trashId) {
+    const index = trash.findIndex(item => item.trashId === trashId);
+    if (index < 0) return false;
+    const [item] = trash.splice(index, 1);
+    const restored = { ...item, id: makeId("issue"), lastSeenAt: now(), occurrences: Number(item.occurrences || 1) };
+    delete restored.trashId;
+    delete restored.trashedAt;
+    delete restored.trashReason;
+    restored.fingerprint = fingerprint(restored);
+    state.issues.push(restored);
+    addActivity("info", `Nález vrácen z Koše: ${restored.message}`, "obnova", true);
+    persist();
+    render();
+    return true;
+  }
+
+  async function runSafeRepair() {
+    if (!state.issues.length) {
+      toast("Fronta je prázdná. Nejdřív můžeš systém změřit.");
+      return runScan();
+    }
+
+    const accepted = await ask(
+      "Spustit bezpečnou opravu?",
+      "Vytvořím snímek, obnovím offline vrstvu a znovu ověřím chybějící soubory. Zdrojový kód bez potvrzení nepřepisuji a nevyléčitelné nálezy nemažu."
+    );
+    if (!accepted) return null;
+
+    setBusy(true, "zálohuji");
+    await createBackup("automaticky před bezpečnou opravou");
+    await prepareOffline({ quiet: true });
+
+    const missing = state.issues.filter(item => ["missing-asset", "wrong-content-type"].includes(item.kind));
+    let recovered = 0;
+
+    for (const issue of missing) {
+      try {
+        const url = resolveRepoUrl(issue.source);
+        const result = await fetchAsset(url);
+        const current = analyzeAsset(url, result);
+        if (result.ok && !current.some(item => item.severity === "error")) {
+          moveIssueToTrash(issue.id, "soubor je po obnovení cache znovu dostupný");
+          recovered += 1;
+        }
+      } catch {
+        /* The unresolved issue stays exactly where it is. */
+      }
+    }
+
+    state.lastRepairAt = now();
+    addActivity(
+      recovered ? "ok" : "warn",
+      recovered
+        ? `Bezpečná oprava vrátila ${recovered} souborů. Ostatní nálezy zůstaly pro ruční opravu.`
+        : "Offline vrstva byla obnovena. Zdrojové nálezy zůstaly připravené pro ruční opravu.",
+      "nic nebylo smazáno",
+      true
+    );
+    persist();
+    setBusy(false, state.issues.length ? "pozornost" : "v pořádku");
+    render();
+    window.dispatchEvent(new CustomEvent("cht.chybozrout.repaired", { detail: { recovered, remaining: state.issues.length, at: state.lastRepairAt } }));
+    return { recovered, remaining: state.issues.length };
+  }
+
+  async function getWorkerRegistration() {
+    if (!("serviceWorker" in navigator)) return null;
+    let registration = await navigator.serviceWorker.getRegistration("./");
+    if (!registration) {
+      registration = await navigator.serviceWorker.register("./service-worker.js", {
+        scope: "./",
+        updateViaCache: "none"
+      });
+    }
+    await registration.update().catch(() => registration);
+    return registration;
+  }
+
+  async function workerMessage(type, payload = {}) {
+    try {
+      const registration = await getWorkerRegistration();
+      const worker = registration?.active || registration?.waiting || registration?.installing;
+      if (!worker) return { ok: false, error: "Offline worker ještě není aktivní." };
+
+      return await new Promise(resolve => {
+        const messageChannel = new MessageChannel();
+        const timeout = window.setTimeout(() => resolve({ ok: false, error: "Offline worker neodpověděl včas." }), 7000);
+        messageChannel.port1.onmessage = event => {
+          window.clearTimeout(timeout);
+          resolve(event.data || { ok: true });
+        };
+        worker.postMessage({ type, ...payload }, [messageChannel.port2]);
+      });
+    } catch (error) {
+      return { ok: false, error: safeText(error?.message || error) };
+    }
+  }
+
+  async function prepareOffline(options = {}) {
+    const result = await workerMessage("CHYBOZROUT_PREPARE_OFFLINE");
+    if (result.ok) {
+      addActivity("ok", "Offline balíček je připravený.", `${result.entries || 0} položek`);
+      if (!options.quiet) toast("Offline vrstva je připravená.");
+    } else {
+      recordIssue({
+        kind: "offline-worker",
+        severity: "warn",
+        message: "Offline balíček se nepodařilo připravit.",
+        source: "chybozrout-opravar/service-worker.js",
+        details: result.error || "Neznámá chyba workeru.",
+        hint: "Ověř HTTPS, scope workeru a přesné názvy souborů."
+      });
+      if (!options.quiet) toast("Offline vrstva potřebuje pozornost.");
+    }
+    await updateWorkerState();
+    return result;
+  }
+
+  async function updateWorkerState() {
+    if (!("serviceWorker" in navigator)) {
+      setBadge(ui.workerState, "Offline nepodporováno", "warn");
+      return;
+    }
+    const result = await workerMessage("CHYBOZROUT_STATUS");
+    if (result.ok) {
+      setBadge(ui.workerState, `Offline ${result.entries || 0} souborů`, "ok");
+    } else {
+      setBadge(ui.workerState, "Offline čeká", "warn");
+    }
+  }
+
+  function download(name, content, type = "application/json;charset=utf-8") {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 800);
+  }
+
+  function exportReport() {
+    const payload = {
+      format: "ChybaŽrout report",
+      version: VERSION,
+      exportedAt: new Date().toISOString(),
+      repositoryPath: REPO_ROOT.pathname,
+      lastScan: state.lastScan,
+      openIssues: state.issues,
+      trash,
+      note: "Koš je součást historie; položky nebyly natvrdo smazány."
+    };
+    download(`chybozrout-report-${dateStamp()}.json`, JSON.stringify(payload, null, 2));
+    addActivity("ok", "Report byl vyexportován.", "JSON");
+  }
+
+  function exportTextSummary() {
+    const lines = [
+      `${SYSTEM} ${VERSION}`,
+      `Export: ${new Date().toLocaleString("cs-CZ")}`,
+      `Repozitář: ${REPO_ROOT.href}`,
+      "",
+      `Otevřené nálezy: ${state.issues.length}`,
+      `Koš: ${trash.length}`,
+      `Poslední sken: ${state.lastScan ? formatDate(state.lastScan.finishedAt) : "neproběhl"}`,
+      "",
+      "NÁLEZY",
+      ...state.issues.map((item, index) => `${index + 1}. [${item.severity}] ${item.message}\n   ${item.source || "bez cesty"}\n   Doporučení: ${item.hint || "ruční kontrola"}`),
+      "",
+      "PRAVIDLO OPRAVY",
+      "Nejdřív snímek, potom kontrola, teprve potom potvrzená oprava. Nic se nemaže natvrdo."
+    ];
+    download(`chybozrout-souhrn-${dateStamp()}.txt`, lines.join("\n"), "text/plain;charset=utf-8");
+    addActivity("ok", "Textový souhrn pro GitHub byl připraven.", "TXT");
+  }
+
+  async function exportBackup() {
+    const snapshot = await createBackup("export úplné zálohy");
+    const payload = {
+      format: "CHT 360°‰. úplná přenosná záloha",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      backup: snapshot
+    };
+    download(`cht-360-zaloha-pred-opravou-${dateStamp()}.json`, JSON.stringify(payload, null, 2));
+    toast("Úplná záloha je připravená ke stažení.");
+  }
+
+  async function importBackup(file) {
+    if (!file) return;
+    let payload;
+    try {
+      payload = JSON.parse(await file.text());
+    } catch (error) {
+      toast("Soubor není čitelný JSON v UTF-8.");
+      return;
+    }
+
+    const snapshot = payload?.backup?.values ? payload.backup : payload?.values ? payload : null;
+    if (!snapshot?.values || typeof snapshot.values !== "object") {
+      toast("Soubor není záloha CHT 360°‰.");
+      return;
+    }
+
+    const accepted = await ask(
+      "Načíst vybranou zálohu?",
+      "Současný stav nejdřív zachovám v novém snímku. Přijmu jen známé klíče CHT a žádný kód ze souboru nespustím."
+    );
+    if (!accepted) return;
+
+    await createBackup("automaticky před importem");
+    applySnapshotValues(snapshot.values);
+    addActivity("ok", "Přenosná záloha byla načtena.", file.name);
+    window.dispatchEvent(new CustomEvent("cht.memory.changed", { detail: { reason: "import bezpečné zálohy" } }));
+    toast("Záloha je načtená. Stránka se znovu otevře.");
+    window.setTimeout(() => window.location.reload(), 700);
+  }
+
+  function installErrorCapture() {
+    window.addEventListener("error", event => {
+      const target = event.target;
+      if (target && target !== window && (target.src || target.href)) {
+        recordIssue({
+          kind: "resource-error",
+          severity: "error",
+          message: "Prohlížeč nenačetl zdroj.",
+          source: target.src || target.href,
+          details: target.tagName || "resource",
+          hint: "Zkontroluj cestu, velikost písmen a offline cache."
+        });
+        return;
+      }
+      if (!event.message) return;
+      recordIssue({
+        kind: "runtime-error",
+        severity: "error",
+        message: event.message,
+        source: event.filename || "okno aplikace",
+        details: `řádek ${event.lineno || "?"}, sloupec ${event.colno || "?"}`,
+        hint: "Najdi první chybu v pořadí; další mohou být jen její následek."
+      });
+    }, true);
+
+    window.addEventListener("unhandledrejection", event => {
+      const reason = event.reason;
+      recordIssue({
+        kind: "promise-rejection",
+        severity: "error",
+        message: `Nedokončený úkol: ${reason?.message || safeText(reason || "neznámá chyba")}`,
+        details: safeText(reason?.stack || ""),
+        hint: "Ošetři zamítnutí Promisu a zachovej lokální fallback."
+      });
+    });
+
+    document.addEventListener("securitypolicyviolation", event => {
+      recordIssue({
+        kind: "security-policy",
+        severity: "warn",
+        message: "Bezpečnostní pravidlo zablokovalo zdroj.",
+        source: event.blockedURI || event.sourceFile || "CSP",
+        details: event.violatedDirective || "",
+        hint: "Neuvolňuj celou politiku; povol pouze přesně potřebný zdroj."
+      });
+    });
+
+    window.addEventListener("cht.storage.error", event => {
+      recordIssue({
+        kind: "storage-error",
+        severity: "error",
+        message: "Místní úložiště odmítlo zápis.",
+        source: event.detail?.key || "localStorage",
+        details: event.detail?.message || "",
+        hint: "Vyexportuj zálohu a uvolni místo; Paměť nepřepisuj naslepo."
+      });
+    });
+  }
+
+  function connectLife() {
+    window.addEventListener("cht.life.pulse", event => {
+      lastLifePulse = Number(event.detail?.timestamp || now());
+      setBadge(ui.lifeState, `Život pulzuje • ${event.detail?.coreName || "CHT"}`, "ok");
+      broadcast("life-pulse", { at: lastLifePulse, loopId: event.detail?.loopId || "" });
+    });
+
+    window.addEventListener("cht.life.error", event => {
+      recordIssue({
+        kind: "life-error",
+        severity: "error",
+        message: event.detail?.message || "Životní kruh ohlásil chybu.",
+        source: event.detail?.loopId || "Život",
+        details: event.detail?.details || "",
+        hint: "Izoluj vadný kruh; ostatní pulzy musí pokračovat."
+      });
+    });
+
+    window.addEventListener("cht.memory.changed", event => {
+      addActivity("info", "Paměť oznámila změnu.", event.detail?.reason || event.detail?.coreId || "CHT");
+    });
+
+    if (window.CHTLife?.getState) {
+      try {
+        const life = window.CHTLife.getState();
+        lastLifePulse = Number(life?.state?.lastPulseAt || 0);
+      } catch {
+        /* The bridge can work without direct CHTLife access. */
+      }
+    }
+  }
+
+  function setupChannel() {
+    if (!("BroadcastChannel" in window)) return;
+    channel = new BroadcastChannel("cht360_mesh_v1");
+    channel.addEventListener("message", event => {
+      const data = event.data || {};
+      if (data.source === "chybozrout-3.6") return;
+      if (data.type === "life-pulse") {
+        lastLifePulse = Number(data.payload?.at || now());
+        setBadge(ui.lifeState, "Život pulzuje přes síť", "ok");
+      }
+      if (data.type === "memory-changed") {
+        addActivity("info", "CHT oznámilo změnu přes místní síť.", "BroadcastChannel");
+      }
+    });
+  }
+
+  function broadcast(type, payload) {
+    try {
+      channel?.postMessage({ source: "chybozrout-3.6", type, payload, at: now() });
+    } catch {
+      /* Local synchronization is optional. */
+    }
+  }
+
+  function setBadge(element, text, tone = "") {
+    if (!element) return;
+    element.textContent = text;
+    if (tone) element.dataset.tone = tone;
+    else delete element.dataset.tone;
+  }
+
+  function setBusy(value, label = "") {
+    busy = Boolean(value);
+    [ui.scanButton, ui.repairButton, ui.backupButton, ui.offlineButton].forEach(button => {
+      if (button) button.disabled = busy;
+    });
+    setBadge(ui.systemState, busy ? label : label || "Připraven", busy ? "warn" : label === "v pořádku" ? "ok" : "ready");
+  }
+
+  function formatDate(value) {
+    if (!value) return "zatím nikdy";
+    try {
+      return new Date(value).toLocaleString("cs-CZ", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+    } catch {
+      return "neznámý čas";
+    }
+  }
+
+  function dateStamp() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function toast(message) {
+    if (!ui.toast) return;
+    ui.toast.textContent = message;
+    ui.toast.classList.add("open");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => ui.toast.classList.remove("open"), 3200);
+  }
+
+  function ask(title, message) {
+    if (!ui.confirmDialog?.showModal) {
+      return Promise.resolve(window.confirm(`${title}\n\n${message}`));
+    }
+    ui.dialogTitle.textContent = title;
+    ui.dialogText.textContent = message;
+    ui.confirmDialog.showModal();
+
+    return new Promise(resolve => {
+      const finish = value => {
+        ui.dialogConfirm.removeEventListener("click", confirm);
+        ui.dialogCancel.removeEventListener("click", cancel);
+        ui.confirmDialog.removeEventListener("cancel", cancelEvent);
+        ui.confirmDialog.close();
+        resolve(value);
+      };
+      const confirm = () => finish(true);
+      const cancel = () => finish(false);
+      const cancelEvent = event => {
+        event.preventDefault();
+        finish(false);
+      };
+      ui.dialogConfirm.addEventListener("click", confirm, { once: true });
+      ui.dialogCancel.addEventListener("click", cancel, { once: true });
+      ui.confirmDialog.addEventListener("cancel", cancelEvent, { once: true });
+    });
+  }
+
+  function createTextElement(tag, className, text) {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    element.textContent = text;
+    return element;
+  }
+
+  function renderIssues() {
+    ui.issueList.textContent = "";
+    const issues = state.issues.slice().sort((a, b) => {
+      const weight = { error: 3, warn: 2, info: 1, ok: 0 };
+      return (weight[b.severity] || 0) - (weight[a.severity] || 0) || Number(b.lastSeenAt) - Number(a.lastSeenAt);
+    });
+    if (!issues.length) {
+      ui.issueList.appendChild(createTextElement("div", "empty", "Žádné otevřené nálezy."));
+      return;
+    }
+
+    issues.forEach(issue => {
+      const row = createTextElement("article", `issue tone-${issue.severity}`, "");
+      const top = createTextElement("div", "issue-top", "");
+      const content = document.createElement("div");
+      content.appendChild(createTextElement("div", "issue-title", issue.message));
+      const meta = [issue.kind, issue.source, `viděno ${issue.occurrences || 1}×`, formatDate(issue.lastSeenAt)].filter(Boolean).join(" • ");
+      content.appendChild(createTextElement("div", "issue-meta", meta));
+      if (issue.details) content.appendChild(createTextElement("div", "issue-meta", issue.details));
+      if (issue.hint) content.appendChild(createTextElement("div", "issue-meta", `Doporučení: ${issue.hint}`));
+
+      const button = createTextElement("button", "mini-button", "Do Koše");
+      button.type = "button";
+      button.addEventListener("click", () => moveIssueToTrash(issue.id, "odloženo uživatelem; obsah zachován"));
+      top.append(content, button);
+      row.appendChild(top);
+      ui.issueList.appendChild(row);
+    });
+  }
+
+  function renderTrash() {
+    ui.trashList.textContent = "";
+    const values = trash.slice(-36).reverse();
+    if (!values.length) {
+      ui.trashList.appendChild(createTextElement("div", "empty", "Koš je prázdný."));
+      return;
+    }
+    values.forEach(item => {
+      const row = createTextElement("article", "issue tone-ok", "");
+      const top = createTextElement("div", "issue-top", "");
+      const content = document.createElement("div");
+      content.appendChild(createTextElement("div", "issue-title", item.message));
+      content.appendChild(createTextElement("div", "issue-meta", `${item.trashReason || "vyřešeno"} • ${formatDate(item.trashedAt)}`));
+      const button = createTextElement("button", "mini-button", "Vrátit");
+      button.type = "button";
+      button.addEventListener("click", () => restoreTrashItem(item.trashId));
+      top.append(content, button);
+      row.appendChild(top);
+      ui.trashList.appendChild(row);
+    });
+  }
+
+  function renderActivity() {
+    ui.activityLog.textContent = "";
+    const items = state.activity
+      .filter(item => Number(item.at) > Number(state.hiddenLogBefore || 0))
+      .slice(-80)
+      .reverse();
+    if (!items.length) {
+      ui.activityLog.appendChild(createTextElement("div", "empty", "Zobrazený log je čistý. Starší záznamy zůstávají v exportu."));
+      return;
+    }
+    items.forEach(item => {
+      const row = createTextElement("div", `log-line tone-${item.tone || "info"}`, item.message);
+      row.appendChild(createTextElement("small", "", `${formatDate(item.at)}${item.source ? ` • ${item.source}` : ""}`));
+      ui.activityLog.appendChild(row);
+    });
+  }
+
+  async function renderBackupCount() {
+    let count = 0;
+    try {
+      count = await BackupDB.count();
+    } catch {
+      count = localStorage.getItem(KEYS.legacyBackup) ? 1 : 0;
+    }
+    ui.backupCount.textContent = String(count);
+  }
+
+  function render() {
+    ui.issueCount.textContent = String(state.issues.length);
+    ui.trashCount.textContent = String(trash.length);
+    if (state.lastScan) {
+      ui.lastSummary.textContent = `Poslední měření ${formatDate(state.lastScan.finishedAt)}: ${state.lastScan.scanned} souborů, ${state.lastScan.findings.length} nálezů, ${state.lastScan.durationMs} ms.`;
+      setBadge(ui.systemState, state.issues.length ? "Potřebuje pozornost" : "V pořádku", state.issues.length ? "warn" : "ok");
+    } else {
+      ui.lastSummary.textContent = "První sken ještě neproběhl. Existující data CHT zůstávají beze změny.";
+    }
+    setBadge(ui.networkState, navigator.onLine ? "Síť je dostupná" : "Offline režim", navigator.onLine ? "ok" : "warn");
+    if (!lastLifePulse) setBadge(ui.lifeState, "Život čeká na propojení", "ready");
+    else if (now() - lastLifePulse > 20000) setBadge(ui.lifeState, "Život spí", "warn");
+    renderIssues();
+    renderTrash();
+    renderActivity();
+    renderBackupCount();
+  }
+
+  function addCustomTarget() {
+    const value = safeText(ui.customTarget.value);
+    if (!value) return;
+    try {
+      const url = resolveRepoUrl(value);
+      const relative = relativeUrl(url).replace(/^\/+/, "");
+      if (!customTargets.includes(relative)) customTargets.push(relative);
+      ui.customTarget.value = "";
+      persist();
+      toast(`Přidáno do měření: ${relative}`);
+    } catch (error) {
+      toast(safeText(error?.message || error));
+    }
+  }
+
+  function wireUi() {
+    ui.scanButton.addEventListener("click", () => runScan().catch(handleTaskError));
+    ui.repairButton.addEventListener("click", () => runSafeRepair().catch(handleTaskError));
+    ui.backupButton.addEventListener("click", () => createBackup("ruční snímek").then(() => toast("Bezpečnostní snímek je hotový.")).catch(handleTaskError));
+    ui.offlineButton.addEventListener("click", () => prepareOffline().catch(handleTaskError));
+    ui.addTargetButton.addEventListener("click", addCustomTarget);
+    ui.workerStatusButton.addEventListener("click", async () => {
+      await updateWorkerState();
+      toast(ui.workerState.textContent);
+    });
+    ui.exportReportButton.addEventListener("click", exportReport);
+    ui.restoreTrashButton.addEventListener("click", () => {
+      const latest = trash[trash.length - 1];
+      if (!latest) return toast("Koš je prázdný.");
+      restoreTrashItem(latest.trashId);
+      toast("Poslední nález je zpět ve frontě.");
+    });
+    ui.exportBackupButton.addEventListener("click", () => exportBackup().catch(handleTaskError));
+    ui.importBackupInput.addEventListener("change", event => {
+      const file = event.target.files?.[0];
+      importBackup(file).catch(handleTaskError).finally(() => { event.target.value = ""; });
+    });
+    ui.restoreBackupButton.addEventListener("click", () => restoreLatestBackup().catch(handleTaskError));
+    ui.exportTextButton.addEventListener("click", exportTextSummary);
+    ui.clearVisibleLogButton.addEventListener("click", () => {
+      state.hiddenLogBefore = now();
+      persist();
+      renderActivity();
+      toast("Log je jen skrytý. V exportu zůstal zachovaný.");
+    });
+
+    window.addEventListener("online", () => {
+      addActivity("ok", "Připojení je zpět.", "síť");
+      render();
+      updateWorkerState();
+    });
+    window.addEventListener("offline", () => {
+      addActivity("warn", "Zařízení přešlo do offline režimu.", "Paměť zůstává místní");
+      render();
+    });
+    window.addEventListener("storage", event => {
+      if ([KEYS.state, KEYS.trash, KEYS.targets].includes(event.key)) {
+        state = loadJson(KEYS.state, createInitialState());
+        trash = loadJson(KEYS.trash, []);
+        customTargets = loadJson(KEYS.targets, []);
+        normaliseState();
+        render();
+      }
+    });
+  }
+
+  function handleTaskError(error) {
+    setBusy(false, "pozornost");
+    recordIssue({
+      kind: "repairer-task",
+      severity: "error",
+      message: "Úkol ChybaŽrouta se nedokončil.",
+      source: "chybozrout-opravar/app.js",
+      details: safeText(error?.message || error),
+      hint: "Vyexportuj report; Paměť zůstala před změnou zálohovaná."
+    });
+    toast("Úkol se nedokončil. Nález zůstal ve frontě.");
+  }
+
+  function idbRequest(db, mode, operation) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction("snapshots", mode);
+      const store = transaction.objectStore("snapshots");
+      const request = operation(store);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || transaction.error);
+      transaction.onabort = () => reject(transaction.error || new Error("Zálohová transakce byla přerušena."));
+    });
+  }
+
+  function idbTransaction(db, mode, operation) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction("snapshots", mode);
+      const store = transaction.objectStore("snapshots");
+      operation(store);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error || new Error("Zálohová transakce byla přerušena."));
+    });
+  }
+
+  function publishApi() {
+    window.CHTChybozrout = Object.freeze({
+      name: SYSTEM,
+      version: VERSION,
+      scan(scope = "all") {
+        return runScan({ scope });
+      },
+      repair: runSafeRepair,
+      backup: createBackup,
+      restore: restoreLatestBackup,
+      prepareOffline,
+      addIssue: recordIssue,
+      getState() {
+        return clone({ state, trash, customTargets });
+      },
+      connect() {
+        broadcast("connected", { version: VERSION });
+        return true;
+      }
+    });
+  }
+
+  async function boot() {
+    normaliseState();
+    migrateLegacy();
+    setupChannel();
+    installErrorCapture();
+    connectLife();
+    wireUi();
+    publishApi();
+
+    addActivity("ok", "ChybaŽrout 3.6 je připravený.", "nic se nemaže natvrdo", true);
+    persist();
+    render();
+    await updateWorkerState();
+
+    broadcast("connected", { version: VERSION, path: window.location.pathname });
+    window.dispatchEvent(new CustomEvent("cht.chybozrout.ready", { detail: { version: VERSION, api: "window.CHTChybozrout" } }));
+
+    const updateLifeBadge = () => {
+      if (lastLifePulse && now() - lastLifePulse > 20000) {
+        setBadge(ui.lifeState, document.hidden ? "Život bezpečně spí" : "Život čeká na puls", "warn");
+      }
+      window.setTimeout(updateLifeBadge, 10000);
+    };
+    window.setTimeout(updateLifeBadge, 10000);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => boot().catch(handleTaskError), { once: true });
+  } else {
+    boot().catch(handleTaskError);
+  }
+})();
+
+  </script>
 </body>
 </html>
