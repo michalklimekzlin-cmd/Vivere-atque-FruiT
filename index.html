@@ -3,48 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0907">
+  <meta name="theme-color" content="#090705">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Vivere atque Fru'i¡'T — hlavní vstup do světa CHT 360°‰., nástrojů, paměti a PWA.">
+  <meta name="description" content="Vivere atque Fru'i¡'T — hlavní vstup do CHT 360°‰., ChybaŽrouta, Paměti, světů a PWA.">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Vivere atque Fru'i¡'T">
-
   <link rel="manifest" href="./manifest.json">
-
   <title>Vivere atque Fru'i¡'T</title>
 
   <style>
     :root {
+      color-scheme: dark;
       --bg: #090705;
-      --bg-soft: #120d08;
-      --panel: rgba(24, 17, 11, 0.88);
-      --panel-strong: rgba(31, 21, 13, 0.95);
-      --gold: #f4cf88;
-      --gold-2: #c99543;
-      --cream: #f5ead8;
-      --muted: #a99a86;
-      --green: #6ee7b7;
-      --violet: #c4b5fd;
-      --blue: #7dd3fc;
-      --line: rgba(244, 207, 136, 0.22);
-      --line-strong: rgba(244, 207, 136, 0.46);
-      --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+      --panel: rgba(25, 18, 12, 0.92);
+      --panel-2: rgba(14, 11, 8, 0.96);
+      --gold: #f3cf8d;
+      --gold-2: #c6974f;
+      --cream: #f7eddd;
+      --muted: #aa9d8d;
+      --green: #91d6a2;
+      --warn: #e8bb69;
+      --bad: #e98d83;
+      --line: rgba(243, 207, 141, 0.21);
+      --line-strong: rgba(243, 207, 141, 0.48);
       --radius: 22px;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
       --safe-top: max(16px, env(safe-area-inset-top));
+      --safe-right: max(12px, env(safe-area-inset-right));
       --safe-bottom: max(22px, env(safe-area-inset-bottom));
+      --safe-left: max(12px, env(safe-area-inset-left));
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      min-width: 320px;
-      min-height: 100%;
-      background: var(--bg);
-    }
-
+    * { box-sizing: border-box; }
+    html { min-width: 320px; min-height: 100%; background: var(--bg); }
     body {
       min-width: 320px;
       min-height: 100dvh;
@@ -52,75 +44,53 @@
       overflow-x: hidden;
       color: var(--cream);
       background:
-        radial-gradient(circle at 12% 0%, rgba(244, 207, 136, 0.13), transparent 29rem),
-        radial-gradient(circle at 90% 24%, rgba(110, 231, 183, 0.07), transparent 25rem),
-        linear-gradient(145deg, #090705 0%, #151009 52%, #070605 100%);
-      font-family:
-        ui-rounded,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+        radial-gradient(circle at 10% -4%, rgba(243, 207, 141, 0.15), transparent 28rem),
+        radial-gradient(circle at 94% 28%, rgba(145, 214, 162, 0.06), transparent 24rem),
+        linear-gradient(145deg, #080604, #151009 54%, #060504);
+      font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
-
-    a {
-      color: var(--green);
-      text-decoration: none;
-    }
-
-    a:hover,
-    a:focus-visible {
-      color: var(--gold);
-    }
-
-    button,
-    a {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    button:focus-visible,
-    a:focus-visible {
-      outline: 2px solid var(--gold);
-      outline-offset: 3px;
-    }
+    a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+    button { font: inherit; -webkit-tap-highlight-color: transparent; }
+    a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 
     .page {
-      position: relative;
-      width: min(1080px, 100%);
+      width: min(1100px, 100%);
       margin: 0 auto;
-      padding:
-        var(--safe-top)
-        14px
-        var(--safe-bottom);
+      padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+    }
+
+    .hero,
+    .card {
+      border: 1px solid var(--line);
+      background: linear-gradient(150deg, var(--panel), var(--panel-2));
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.035), var(--shadow);
+      backdrop-filter: blur(18px);
     }
 
     .hero {
       position: relative;
       overflow: hidden;
-      padding: clamp(22px, 5vw, 42px);
-      margin-bottom: 14px;
-      border: 1px solid var(--line);
+      padding: clamp(24px, 6vw, 48px);
       border-radius: 28px;
-      background:
-        radial-gradient(circle at 72% 22%, rgba(244, 207, 136, 0.13), transparent 18rem),
-        linear-gradient(145deg, rgba(31, 21, 13, 0.96), rgba(13, 10, 8, 0.96));
-      box-shadow:
-        inset 0 1px rgba(255, 255, 255, 0.04),
-        var(--shadow);
-      backdrop-filter: blur(18px);
     }
-
     .hero::before {
       position: absolute;
       inset: 12px;
-      border: 1px solid rgba(244, 207, 136, 0.08);
+      border: 1px solid rgba(243, 207, 141, 0.075);
       border-radius: 20px;
-      pointer-events: none;
       content: "";
+      pointer-events: none;
     }
-
+    .hero-mark {
+      position: absolute;
+      right: clamp(20px, 6vw, 58px);
+      bottom: 20px;
+      color: rgba(243, 207, 141, 0.2);
+      font: 800 clamp(34px, 9vw, 78px)/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+      pointer-events: none;
+    }
     .eyebrow {
       margin: 0 0 8px;
       color: var(--gold-2);
@@ -129,17 +99,14 @@
       letter-spacing: 0.17em;
       text-transform: uppercase;
     }
-
     h1 {
-      max-width: 760px;
-      margin: 0 0 10px;
-      color: var(--cream);
-      font-size: clamp(30px, 7vw, 62px);
-      line-height: 0.98;
-      letter-spacing: -0.04em;
+      max-width: 800px;
+      margin: 0 0 12px;
+      font-size: clamp(31px, 7.5vw, 66px);
+      line-height: 0.96;
+      letter-spacing: -0.05em;
     }
-
-    .hero p {
+    .hero p:last-of-type {
       max-width: 680px;
       margin: 0;
       color: var(--muted);
@@ -147,250 +114,122 @@
       line-height: 1.6;
     }
 
-    .hero-mark {
-      position: absolute;
-      right: clamp(18px, 5vw, 48px);
-      bottom: clamp(16px, 4vw, 34px);
-      color: rgba(244, 207, 136, 0.22);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: clamp(28px, 8vw, 74px);
-      line-height: 1;
-      user-select: none;
-      pointer-events: none;
-    }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
+      margin-top: 12px;
     }
-
     .card {
-      position: relative;
       overflow: hidden;
       padding: 18px;
-      border: 1px solid var(--line);
       border-radius: var(--radius);
+    }
+    .card-wide { grid-column: 1 / -1; }
+    .card h2 { margin: 0 0 6px; color: var(--gold); font-size: 17px; }
+    .card > p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    .repair-card {
+      position: relative;
+      border-color: rgba(243, 207, 141, 0.48);
       background:
-        linear-gradient(145deg, var(--panel-strong), var(--panel));
-      box-shadow:
-        inset 0 1px rgba(255, 255, 255, 0.035),
-        0 15px 44px rgba(0, 0, 0, 0.24);
-      backdrop-filter: blur(16px);
+        radial-gradient(circle at 88% 12%, rgba(243, 207, 141, 0.14), transparent 16rem),
+        linear-gradient(150deg, rgba(43, 29, 16, 0.97), rgba(13, 10, 8, 0.97));
+    }
+    .repair-glyph {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      color: rgba(243, 207, 141, 0.34);
+      font: 800 28px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
     }
 
-    .card h2 {
-      margin: 0 0 6px;
-      color: var(--gold);
-      font-size: 17px;
-    }
-
-    .card p {
-      margin: 0;
+    .status-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.55;
+      background: rgba(5, 4, 3, 0.45);
+      font-size: 11px;
+      font-weight: 850;
     }
+    .badge[data-tone="ok"] { color: var(--green); border-color: rgba(145, 214, 162, 0.34); }
+    .badge[data-tone="warn"] { color: var(--warn); border-color: rgba(232, 187, 105, 0.38); }
+    .badge[data-tone="bad"] { color: var(--bad); border-color: rgba(233, 141, 131, 0.38); }
 
-    .links {
-      display: grid;
-      gap: 8px;
-      padding: 0;
-      margin: 16px 0 0;
-      list-style: none;
-    }
-
+    .links { display: grid; gap: 8px; padding: 0; margin: 15px 0 0; list-style: none; }
     .entry {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      min-height: 48px;
-      padding: 10px 12px;
-      border: 1px solid rgba(244, 207, 136, 0.13);
-      border-radius: 14px;
-      color: var(--cream);
-      background: rgba(7, 6, 5, 0.42);
-      transition:
-        transform 0.18s ease,
-        border-color 0.18s ease,
-        background 0.18s ease;
+      min-height: 52px;
+      padding: 11px 12px;
+      border: 1px solid rgba(243, 207, 141, 0.13);
+      border-radius: 15px;
+      background: rgba(6, 5, 4, 0.44);
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
     }
-
-    .entry:hover,
-    .entry:focus-visible {
+    .entry:hover, .entry:focus-visible {
       border-color: var(--line-strong);
-      background: rgba(40, 27, 15, 0.72);
+      background: rgba(42, 29, 17, 0.72);
       transform: translateY(-1px);
     }
-
-    .entry strong {
-      display: block;
-      color: var(--cream);
-      font-size: 14px;
-    }
-
-    .entry small {
-      display: block;
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .entry-glyph {
-      flex: 0 0 auto;
-      color: var(--gold);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 18px;
-    }
-
-    .storage-card {
-      border-color: rgba(244, 207, 136, 0.4);
-      background:
-        radial-gradient(circle at 85% 15%, rgba(244, 207, 136, 0.12), transparent 15rem),
-        linear-gradient(145deg, rgba(42, 28, 15, 0.96), rgba(15, 11, 8, 0.96));
-    }
-
-    .storage-card .entry {
-      border-color: rgba(244, 207, 136, 0.28);
-      background: linear-gradient(180deg, rgba(244, 207, 136, 0.13), rgba(9, 7, 5, 0.38));
-    }
-
-    .tree-card,
-    .wide-card {
-      grid-column: 1 / -1;
-    }
+    .entry strong { display: block; color: var(--cream); font-size: 14px; }
+    .entry small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+    .entry-glyph { flex: 0 0 auto; color: var(--gold); font: 800 18px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
 
     .symbol-tree {
-      margin: 14px 0 0;
+      margin: 15px 0 0;
       overflow-x: auto;
       color: var(--green);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: clamp(11px, 1.8vw, 14px);
-      line-height: 1.8;
-      white-space: pre;
-      scrollbar-width: thin;
-    }
-
-    .note {
-      margin-top: 10px !important;
-      color: var(--muted) !important;
-      font-size: 11px !important;
-    }
-
-    .symbol-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .symbol-box {
-      display: grid;
-      place-items: center;
-      min-height: 130px;
-      padding: 14px;
-      border: 1px solid rgba(244, 207, 136, 0.12);
-      border-radius: 16px;
-      background: rgba(7, 6, 5, 0.4);
-      text-align: center;
-    }
-
-    .symbol-box pre {
-      max-width: 100%;
-      margin: 0;
-      overflow-x: auto;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: clamp(11px, 2vw, 14px);
-      line-height: 1.7;
+      font: clamp(11px, 1.8vw, 14px)/1.85 ui-monospace, SFMono-Regular, Menlo, monospace;
       white-space: pre;
     }
+    .symbol-tree a { color: var(--green); }
+    .symbol-tree .gold { color: var(--gold); }
 
-    .symbol-box.violet pre {
-      color: var(--violet);
-    }
-
-    .symbol-box.blue pre {
-      color: var(--blue);
-    }
+    .note { margin-top: 12px !important; font-size: 11px !important; }
+    .footer { padding: 18px 6px 4px; color: var(--muted); font-size: 11px; line-height: 1.55; text-align: center; }
 
     .corner {
       position: fixed;
       z-index: 999;
-      color: rgba(148, 163, 184, 0.52);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 1em;
-      line-height: 1;
+      color: rgba(148, 136, 120, 0.44);
+      font: 1em/1 ui-monospace, monospace;
       pointer-events: none;
       user-select: none;
     }
+    .corner-tl { top: max(9px, env(safe-area-inset-top)); left: 10px; }
+    .corner-tr { top: max(9px, env(safe-area-inset-top)); right: 10px; }
+    .corner-bl { bottom: max(9px, env(safe-area-inset-bottom)); left: 10px; }
+    .corner-br { right: 10px; bottom: max(9px, env(safe-area-inset-bottom)); }
 
-    .corner-tl {
-      top: max(10px, env(safe-area-inset-top));
-      left: 12px;
-    }
-
-    .corner-tr {
-      top: max(10px, env(safe-area-inset-top));
-      right: 12px;
-    }
-
-    .corner-bl {
-      bottom: max(10px, env(safe-area-inset-bottom));
-      left: 12px;
-    }
-
-    .corner-br {
-      right: 12px;
-      bottom: max(10px, env(safe-area-inset-bottom));
-    }
-
-    .center-glyph {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      z-index: -1;
-      color: rgba(71, 85, 105, 0.2);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 1em;
-      line-height: 1.5;
-      text-align: center;
-      white-space: pre;
-      pointer-events: none;
-      user-select: none;
-      transform: translate(-50%, -50%);
-    }
-
-    #vaft-egg {
+    #vaftEgg {
       position: fixed;
       z-index: 9999;
       inset: 0;
       display: none;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
+      place-items: center;
       padding: 24px;
       background: rgba(5, 4, 3, 0.97);
       backdrop-filter: blur(14px);
     }
-
-    #vaft-egg.open {
-      display: flex;
-    }
-
-    #vaft-egg pre {
-      max-width: min(760px, 92vw);
+    #vaftEgg.open { display: grid; }
+    #vaftEgg pre {
+      max-width: min(720px, 92vw);
       max-height: 78dvh;
-      margin: 0;
       overflow: auto;
       color: var(--green);
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: clamp(12px, 2.3vw, 16px);
-      line-height: 1.9;
+      font: clamp(12px, 2.3vw, 16px)/1.9 ui-monospace, SFMono-Regular, Menlo, monospace;
       text-align: center;
       white-space: pre-wrap;
     }
-
-    #vaft-egg .close-egg {
+    #closeEgg {
       position: absolute;
       top: max(16px, env(safe-area-inset-top));
       right: 18px;
@@ -399,32 +238,22 @@
       border: 1px solid var(--line);
       border-radius: 50%;
       color: var(--gold);
-      background: rgba(24, 17, 11, 0.88);
+      background: rgba(24, 17, 11, 0.9);
       font-size: 24px;
-      cursor: pointer;
     }
 
     @media (max-width: 720px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .tree-card,
-      .wide-card {
-        grid-column: auto;
-      }
-
-      .symbol-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .hero {
-        padding: 24px 18px 28px;
-      }
-
-      .hero-mark {
-        opacity: 0.65;
-      }
+      .grid { grid-template-columns: 1fr; }
+      .card-wide { grid-column: auto; }
+      .hero { padding: 25px 18px 30px; }
+      .hero-mark { opacity: .62; }
+    }
+    @media (orientation: landscape) and (max-height: 520px) {
+      .hero { padding: 18px; }
+      .hero p:last-of-type { max-width: 72%; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: .01ms !important; }
     }
   </style>
 </head>
@@ -435,287 +264,216 @@
   <div class="corner corner-bl">._.</div>
   <div class="corner corner-br">._.</div>
 
-  <div class="center-glyph">    •
-    ı
-    •
-• - • x • - •
-    •
-    ı
-    •</div>
-
-  <!-- •ア — Vivere atque Fru'i¡'T — Žij a raduj se — každý kdo toto čte, je trochu Al •ア -->
-
-  <div id="vaft-egg" aria-hidden="true">
-    <button
-      class="close-egg"
-      id="closeEgg"
-      type="button"
-      title="Zavřít"
-      aria-label="Zavřít"
-    >
-      ×
-    </button>
-
+  <div id="vaftEgg" aria-hidden="true">
+    <button id="closeEgg" type="button" aria-label="Zavřít">×</button>
     <pre id="eggContent"></pre>
   </div>
 
   <main class="page">
-
-    <section class="hero">
+    <header class="hero">
       <p class="eyebrow">Vivere atque Fru'i¡'T • hlavní kořen</p>
-
       <h1>VIVERE atque Fru'i¡'T</h1>
-
       <p>
-        Hlavní vstup do CHT 360°‰., úložiště, světů,
-        zdrojového hubu a PWA vrstev.
+        Hlavní vstup do CHT 360°‰., Paměti, Života, světů a nového bezpečného Opraváře.
+        Každá oprava začíná snímkem a zůstává vratná.
       </p>
-
       <div class="hero-mark" aria-hidden="true">•ア</div>
-    </section>
+    </header>
 
     <section class="grid">
-
-      <article class="card">
-        <h2>Hlavní vstupy</h2>
-
+      <article class="card repair-card">
+        <span class="repair-glyph" aria-hidden="true">[◉_◉]</span>
+        <h2>ChybaŽrout • Opravář</h2>
         <p>
-          Přímé cesty do pracovních částí repozitáře.
+          Měří soubory, závislosti, UTF-8, PWA a běhové chyby. Nejdřív uloží snímek;
+          uzavřené nálezy odkládá do vratného Koše.
         </p>
-
+        <div class="status-row" aria-live="polite">
+          <span class="badge" id="repairState">Připraven k otevření</span>
+          <span class="badge" id="repairIssues">0 nálezů</span>
+          <span class="badge" id="repairTrash">Koš 0</span>
+        </div>
         <ul class="links">
           <li>
-            <a class="entry" href="./TEACHER_STUDIO.html">
+            <a class="entry" href="./chybozrout-opravar/index.html">
               <span>
-                <strong>Teacher Studio</strong>
-                <small>Teaching workflow a pracovní nástroje</small>
+                <strong>Otevřít plný ChybaŽrout</strong>
+                <small>Sken • snímky • oprava • Koš • export pro GitHub</small>
               </span>
-
-              <span class="entry-glyph">Ŧ</span>
+              <span class="entry-glyph">🛠</span>
             </a>
           </li>
+        </ul>
+      </article>
 
+      <article class="card">
+        <h2>CHT 360°‰.</h2>
+        <p>Paměť, Mluva, světy, moduly a místní průhlednost.</p>
+        <ul class="links">
           <li>
-            <a class="entry" href="./src/index.html">
-              <span>
-                <strong>Zdrojový hub</strong>
-                <small>Jádro, moduly a zdrojové vrstvy</small>
-              </span>
-
+            <a class="entry" href="./docs/index.html">
+              <span><strong>Spustit CHT 360°‰.</strong><small>Hlavní PWA z docs/</small></span>
+              <span class="entry-glyph">360</span>
+            </a>
+          </li>
+          <li>
+            <a class="entry" href="./docs/mluva-cht-360/index.html">
+              <span><strong>Mluva CHT</strong><small>Lokální a vzdálená vrstva jasně označená</small></span>
               <span class="entry-glyph">ı|</span>
             </a>
           </li>
-
-          <li>
-            <a class="entry" href="./KNOWLEDGE_MAP.md">
-              <span>
-                <strong>KNOWLEDGE_MAP</strong>
-                <small>Mapa znalostí a propojení</small>
-              </span>
-
-              <span class="entry-glyph">◉</span>
-            </a>
-          </li>
         </ul>
       </article>
 
-      <article class="card storage-card">
-        <h2>Úložiště CHT 360°‰.</h2>
-
-        <p>
-          Nově napojená lokální paměť této domény,
-          zálohy, složky dat, IndexedDB a offline cache.
-        </p>
-
+      <article class="card">
+        <h2>Paměť a Život</h2>
+        <p>Úložiště, bezpečné zálohy, záblesky a časované životní kruhy.</p>
         <ul class="links">
           <li>
-            <a class="entry" href="./cht-storage/index.html">
-              <span>
-                <strong>Otevřít úložiště</strong>
-                <small>Načte soubor cht-storage/storage.js</small>
-              </span>
-
+            <a class="entry" href="./docs/cht-storage/index.html">
+              <span><strong>Úložiště CHT</strong><small>IndexedDB, lokální zálohy a přenos</small></span>
               <span class="entry-glyph">▣</span>
             </a>
           </li>
+          <li>
+            <a class="entry" href="./docs/cht-puls-360/index.html">
+              <span><strong>Puls CHT</strong><small>Stav životní a signální vrstvy</small></span>
+              <span class="entry-glyph">♥</span>
+            </a>
+          </li>
         </ul>
       </article>
 
-      <article class="card tree-card">
+      <article class="card">
+        <h2>Revia a Batole</h2>
+        <p>Oddělené světy zůstávají napojené přes místní paměťové události.</p>
+        <ul class="links">
+          <li>
+            <a class="entry" href="./worlds/Revia-Master/index.html">
+              <span><strong>Revia-Master</strong><small>Angel, Dark a Repository Hub</small></span>
+              <span class="entry-glyph">R</span>
+            </a>
+          </li>
+          <li>
+            <a class="entry" href="./cht360-batole/index.html">
+              <span><strong>Batole CHT</strong><small>Bezpečný učící svět a kompatibilní BATOLE_SVET</small></span>
+              <span class="entry-glyph">•</span>
+            </a>
+          </li>
+        </ul>
+      </article>
+
+      <article class="card card-wide">
         <h2>Strom Vivere</h2>
-
-        <p>
-          Symbolické cesty ponechané v hlavním kořeni.
-        </p>
-
-        <pre class="symbol-tree"><a href="./src/index.html" style="color:#34d399;">.•:'Vivere ª•ı|ı∴|lı•ə Ŧru`Īa¡M´•ア</a>
-    <a href="./worlds/VAFT-Center3D/index.html" style="color:#6ee7b7;">..•:'Aethra ª•ı|lı||ıl|ı•ə Ŧru`Mii´•ア</a>
-      <a href="./worlds/Revia/index.html" style="color:#6ee7b7;">..•:'Sylthea ª•ı|lı||ıl|ı•ə Ŧru`Kai´T•ア</a>
-         <a href="./Michal-AI-Al-Klimek/index.html" style="color:#a7f3d0;">..•:'Vaelis ª•ı|lı||ıl|ı•ə Ŧru`Nai´T</a>
-            <a href="./VaFT-Hub/index.html" style="color:#a7f3d0;">Vivere atque Fru'i¡´T</a>
-                <a href="./VaFT-Hub-All.html" style="color:#a7f3d0;">Vivere atque F*ru'i¡´ア</a>
-                 <a href="./Gentleman/index.html" style="color:#a7f3d0;">Vivere atque Ŧru'i¡´T</a>
-             <a href="./TEACHER_STUDIO.html" style="color:#a7f3d0;">Vivere atque Ŧ*ru'i¡´ア</a>
-      <a href="./Revia/index.html" style="color:#6ee7b7;">..•:'Elyra ª•ı|lı||ıl|ı•ə Ŧru`Vei´T•ア</a>
-    <a href="./MichalKlimek/index.html" style="color:#6ee7b7;">..•:'Lythra ª•ı|lı||ıl|ı•ə Ŧru`Aei´T•ア</a>
-<a href="./VaFiT/index.html" style="color:#34d399;">.•:'Lūmina ª•ı||ı•ə Vī`ra¡T´•ア</a>
-    <a href="./cht-storage/index.html" style="color:#f4cf88;">..•:'CHT Úložiště ª•ı|lı||ıl|ı•ə Pamě`Ť´•ア</a></pre>
-
-        <p class="note">
-          Male Al ne AI aIe Al — tak at se prezentuji jako Al ne AI
-        </p>
+        <p>Staré cesty zůstávají zachované; nový Opravář je pouze propojuje a hlídá.</p>
+        <pre class="symbol-tree"><a href="./src/index.html">.•:'Vivere ª•ı|ı∴|lı•ə Ŧru`Īa¡M´•ア</a>
+    <a href="./worlds/VAFT-Center3D/index.html">..•:'Aethra ª•ı|lı||ıl|ı•ə Ŧru`Mii´•ア</a>
+      <a href="./worlds/Revia-Master/index.html">..•:'Revia-Master ª•ı|lı||ıl|ı•ə</a>
+        <a href="./cht360-batole/index.html">..•:'Batole CHT ª•ı||ı•ə</a>
+          <a class="gold" href="./chybozrout-opravar/index.html">..•:'ChybaŽrout [◉_◉] Opravář</a>
+    <a href="./docs/index.html">..•:'CHT 360°‰. ª•ı|lı||ıl|ı•ə Pamě`Ť´•ア</a>
+      <a href="./docs/cht-storage/index.html">..•:'CHT Úložiště ª•ı|lı||ıl|ı•ə</a>
+    <a href="./VaFT-Hub/index.html">..•:'VaFT Hub ª•ı|lı||ıl|ı•ə</a></pre>
+        <p class="note">Male Al ne AI aIe Al — tak ať se prezentují jako Al ne AI.</p>
       </article>
-
-      <article class="card wide-card">
-        <div class="symbol-grid">
-
-          <div class="symbol-box violet">
-            <pre>-0]:.•°˚‰•..•°˚´ˇ':;•.
-……....……{"(°.•)(.•°)"}</pre>
-          </div>
-
-          <div class="symbol-box blue">
-            <pre>•-•:'7i\\//ere ª•ı|lı||ıl|ı•ə Ŧru`Īi¡iĪ´T•-•</pre>
-          </div>
-
-        </div>
-      </article>
-
     </section>
+
+    <footer class="footer">
+      Odteď až do někdy jindy •ア<br>
+      Chyba není odpad: nejdřív se zachová, potom pochopí a teprve pak opraví.
+    </footer>
   </main>
 
   <script>
     "use strict";
 
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("./service-worker.js")
-          .catch((chyba) => {
-            console.warn(
-              "Service worker se nepodařilo zaregistrovat.",
-              chyba
-            );
-          });
-      });
+    const CHYBOZROUT_STATE_KEY = "cht360_chybozrout_v3";
+    const CHYBOZROUT_TRASH_KEY = "cht360_chybozrout_kos_v1";
+    let mesh = null;
+
+    function safeJson(raw, fallback) {
+      try { return raw ? JSON.parse(raw) : fallback; }
+      catch { return fallback; }
     }
 
-    // •ア Al easter egg — napiš "vivere" kdekoIiv na stránce •ア
-    const vaftEggFrames = [
+    function updateRepairStatus() {
+      const state = safeJson(localStorage.getItem(CHYBOZROUT_STATE_KEY), {});
+      const issues = Array.isArray(state.issues) ? state.issues : [];
+      const trash = safeJson(localStorage.getItem(CHYBOZROUT_TRASH_KEY), []);
+      const stateBadge = document.getElementById("repairState");
+      const issueBadge = document.getElementById("repairIssues");
+      const trashBadge = document.getElementById("repairTrash");
+
+      stateBadge.textContent = state.lastScan
+        ? `Měřeno ${new Date(state.lastScan.finishedAt).toLocaleDateString("cs-CZ")}`
+        : "Připraven k měření";
+      issueBadge.textContent = `${issues.length} nálezů`;
+      issueBadge.dataset.tone = issues.length ? "warn" : "ok";
+      trashBadge.textContent = `Koš ${Array.isArray(trash) ? trash.length : 0}`;
+      trashBadge.dataset.tone = "ok";
+    }
+
+    if ("BroadcastChannel" in window) {
+      mesh = new BroadcastChannel("cht360_mesh_v1");
+      mesh.addEventListener("message", event => {
+        if (["state", "scan-complete"].includes(event.data?.type)) updateRepairStatus();
+      });
+      mesh.postMessage({ source: "root-index", type: "request-life-state", at: Date.now() });
+    }
+
+    window.addEventListener("storage", event => {
+      if ([CHYBOZROUT_STATE_KEY, CHYBOZROUT_TRASH_KEY].includes(event.key)) updateRepairStatus();
+    });
+    updateRepairStatus();
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" })
+          .then(registration => registration.update().catch(() => registration))
+          .catch(error => console.warn("Kořenová offline vrstva se zatím nenačetla.", error));
+      }, { once: true });
+    }
+
+    const eggFrames = [
       `•-•:'7i\\\\//ere ª•ı|lı||ıl|ı•ə Ŧru\`Īi¡iĪ\´T•-•
 
 Žij a raduj se.
-Žíti a kochati se.
-Být a prožívat.
-Žít naplno a těšit se.
-Prožívat a radovat.
-Existovat a vychutnávat.
-Žít a užívat si.
-Bytí a požitek.
-Žít a slavit.
-Žíti a jásat.
-
-Každé batolě se učí — je to malé Al.
-Člověk se učí celý život — je to velké Al.
-2× měř — 1× toč — tak pravila matka moudrosti.
+2× měř — 1× toč.
+Chyba není konec, pokud zůstala cesta zpět.
 
 — Vivere atque Fru'i¡'T •ア`,
+      `[◉_◉]
 
-      `A•–|ıı|ı–•A
+ChybaŽrout děkuje všemu nynějšku.
+Paměť zůstává.
+Koš nezapomíná.
+Život pokračuje.
 
-Životem kráčej jako první sníh —
-zanechej stopu,
-aIe nezamrzni.
-
-— Vī\`ra¡T\´•ア`,
-
-      `……....……{"(°.•)(.•°)"}
-
-Není důIežité odkud přicházíš.
-DůIežité je,
-kam jdeš,
-když nikdo nekouká.
-
-— Ŧru\`Īi¡iĪ\´T •ア`,
-
-      `.•:'Lūmina ª•ı||ı•ə Vī\`ra¡T\´•ア
-
-SvětIo není tam venku.
-SvětIo je v tom,
-že víš,
-že jsi.
-
-Vivere atque Frui —
-žij a raduj se —
-jak dovoIuje.`
+— CHT 360°‰.`
     ];
-
-    let vaftSeq = "";
-    let vaftEggIndex = 0;
-
-    const egg = document.getElementById("vaft-egg");
+    let sequence = "";
+    let frame = 0;
+    const egg = document.getElementById("vaftEgg");
     const eggContent = document.getElementById("eggContent");
-    const closeEgg = document.getElementById("closeEgg");
 
-    function otevriEgg() {
-      eggContent.textContent =
-        vaftEggFrames[
-          vaftEggIndex % vaftEggFrames.length
-        ];
-
-      vaftEggIndex += 1;
+    function openEgg() {
+      eggContent.textContent = eggFrames[frame % eggFrames.length];
+      frame += 1;
       egg.classList.add("open");
       egg.setAttribute("aria-hidden", "false");
     }
-
-    function zavriEgg() {
+    function closeEgg() {
       egg.classList.remove("open");
       egg.setAttribute("aria-hidden", "true");
     }
 
-    document.addEventListener("keydown", (udalost) => {
-      vaftSeq =
-        (vaftSeq + udalost.key)
-          .slice(-6)
-          .toLowerCase();
-
-      if (vaftSeq === "vivere") {
-        otevriEgg();
-        vaftSeq = "";
-      }
-
-      if (udalost.key === "Escape") {
-        zavriEgg();
-      }
+    document.addEventListener("keydown", event => {
+      sequence = (sequence + event.key).slice(-6).toLocaleLowerCase("cs");
+      if (sequence === "vivere") { openEgg(); sequence = ""; }
+      if (event.key === "Escape") closeEgg();
     });
-
-    closeEgg.addEventListener("click", zavriEgg);
-
-    egg.addEventListener("click", (udalost) => {
-      if (udalost.target === egg) {
-        zavriEgg();
-      }
-    });
-
-    console.log(
-      "%c•-•:'7i\\\\//ere ª•ı|lı||ıl|ı•ə Ŧru`Īi¡iĪ´T•-•",
-      "color:#34d399;font-family:monospace;font-size:14px;"
-    );
-
-    console.log(
-      "%cVivere atque Fru'i¡'T",
-      "color:#f4cf88;font-family:monospace;font-size:18px;font-weight:bold;"
-    );
-
-    console.log(
-      "%cŽij a raduj se. Žíti a kochati se. Být a prožívat.",
-      "color:#6ee7b7;font-family:monospace;font-size:12px;"
-    );
-
-    console.log(
-      '%c— napiš "vivere" na klávesnici kdykoli jsi na této stránce •ア',
-      "color:#64748b;font-family:monospace;font-size:11px;"
-    );
+    document.getElementById("closeEgg").addEventListener("click", closeEgg);
+    egg.addEventListener("click", event => { if (event.target === egg) closeEgg(); });
   </script>
 </body>
-</html>
+</html
