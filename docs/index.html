@@ -1,62 +1,117 @@
-<!doctype html>
-<html lang="cs">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#110c07">
-  <meta name="description" content="Atlas repozitáře pro Paměť CHT 360°‰.">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Atlas CHT">
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <title>Atlas repozitáře · CHT 360°‰.</title>
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-  <main class="shell">
-    <header class="hero">
-      <p class="eyebrow">CHT 360°‰. · PAMĚŤ REPOZITÁŘE</p>
-      <h1>Atlas, který se vejde do Paměti.</h1>
-      <p>Mapa hlavních světů, Glyphů, Revia, PWA a řízení. Zapíše se jen do volných slotů na této stejné adrese CHT.</p>
-      <p id="origin" class="origin"></p>
-    </header>
+<!-- ZÁBLESK • vlož celý tento blok do index.html těsně NAD </body> -->
+<style>
+  #chtZableskButton{
+    position:fixed; right:14px; bottom:max(14px, env(safe-area-inset-bottom)); z-index:9998;
+    min-height:42px; padding:0 14px; border:1px solid rgba(239,196,104,.62);
+    border-radius:999px; color:#fff7dd; background:rgba(24,18,12,.88);
+    box-shadow:0 10px 28px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.05);
+    font:600 13px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    letter-spacing:.02em; -webkit-tap-highlight-color:transparent;
+  }
+  #chtZableskButton:active{ transform:scale(.96); }
+  #chtZableskPanel{
+    position:fixed; right:14px; bottom:max(66px, calc(env(safe-area-inset-bottom) + 52px)); z-index:9999;
+    width:min(320px, calc(100vw - 28px)); padding:15px; border:1px solid rgba(239,196,104,.45);
+    border-radius:18px; color:#f7f1e4; background:rgba(14,12,10,.97);
+    box-shadow:0 18px 55px rgba(0,0,0,.58); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  #chtZableskPanel[hidden]{ display:none; }
+  #chtZableskPanel h2{ margin:0 0 4px; font-size:15px; font-weight:700; color:#f3cc7e; }
+  #chtZableskPanel p{ margin:0 0 10px; font-size:12px; color:#c9c0b0; }
+  #chtZableskText{
+    box-sizing:border-box; display:block; width:100%; min-height:72px; resize:vertical;
+    border:1px solid rgba(255,255,255,.14); border-radius:12px; padding:10px;
+    color:#fff; background:#17130f; font:14px/1.35 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  #chtZableskActions{ display:flex; gap:8px; margin-top:10px; }
+  #chtZableskActions button{
+    min-height:36px; border:0; border-radius:10px; padding:0 12px; color:#17120b;
+    background:#f0c46d; font:700 13px/1 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  }
+  #chtZableskActions button:last-child{ color:#e7ddcf; background:#312a22; }
+  #chtZableskList{ max-height:150px; overflow:auto; margin:12px 0 0; padding:0; list-style:none; }
+  #chtZableskList li{ padding:8px 0; border-top:1px solid rgba(255,255,255,.08); font-size:12px; line-height:1.35; }
+  #chtZableskList time{ display:block; margin-bottom:2px; color:#b79b67; font-size:11px; }
+</style>
 
-    <section class="card">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">STAV PAMĚTI</p>
-          <h2>Čtyři jádra</h2>
-        </div>
-        <span id="memory-state" class="pill">Načítám…</span>
-      </div>
-      <div id="cores" class="cores" aria-live="polite"></div>
-      <p id="status" class="status">Čtu místní Paměť CHT…</p>
-    </section>
+<button id="chtZableskButton" type="button" aria-expanded="false">✧ Záblesk</button>
 
-    <section class="card">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">OBSAH ATLASU</p>
-          <h2>Co se doplní</h2>
-        </div>
-        <span id="atlas-count" class="pill quiet">0 záznamů</span>
-      </div>
-      <div id="atlas-summary" class="atlas-summary"></div>
-      <details>
-        <summary>Zobrazit položky atlasu</summary>
-        <div id="atlas-list" class="atlas-list"></div>
-      </details>
-    </section>
+<section id="chtZableskPanel" hidden aria-label="Záblesk do Paměti">
+  <h2>✧ Záblesk</h2>
+  <p>Krátká stopa dne. Uloží se jen do tohoto zařízení.</p>
+  <textarea id="chtZableskText" maxlength="280" placeholder="Co chceš zachytit?"></textarea>
+  <div id="chtZableskActions">
+    <button id="chtZableskSave" type="button">Uložit</button>
+    <button id="chtZableskClose" type="button">Zavřít</button>
+  </div>
+  <ul id="chtZableskList" aria-live="polite"></ul>
+</section>
 
-    <section class="card actions-card">
-      <button id="fill" type="button">Doplnit jen volné sloty</button>
-      <button id="download" class="secondary" type="button">Stáhnout atlas JSON</button>
-      <a class="secondary link" href="../">Zpět do CHT</a>
-      <p class="note">Před zápisem vznikne lokální záloha. Atlas neodesílá data na internet, nemaže sloty a při dalším spuštění nepřidává stejné položky znovu.</p>
-    </section>
-  </main>
+<script>
+(() => {
+  "use strict";
 
-  <script src="./repo-memory.js"></script>
-</body>
-</html>
+  const STORAGE_KEY = "cht360_zablesky_v1";
+  const LIMIT = 24;
+  const button = document.getElementById("chtZableskButton");
+  const panel = document.getElementById("chtZableskPanel");
+  const text = document.getElementById("chtZableskText");
+  const save = document.getElementById("chtZableskSave");
+  const close = document.getElementById("chtZableskClose");
+  const list = document.getElementById("chtZableskList");
+
+  function readZablesky() {
+    try {
+      const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      return Array.isArray(value) ? value : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function writeZablesky(items) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(0, LIMIT)));
+    window.dispatchEvent(new CustomEvent("cht.memory.changed", {
+      detail: { source: "zablesk", key: STORAGE_KEY, count: items.length }
+    }));
+  }
+
+  function safeText(value) {
+    return String(value || "").replace(/[&<>\"']/g, char => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;"
+    })[char]);
+  }
+
+  function render() {
+    const items = readZablesky();
+    list.innerHTML = items.length ? items.map(item => {
+      const stamp = new Date(item.createdAt).toLocaleString("cs-CZ", { dateStyle: "short", timeStyle: "short" });
+      return `<li><time>${safeText(stamp)}</time>${safeText(item.text)}</li>`;
+    }).join("") : "<li>Zatím žádný záblesk.</li>";
+  }
+
+  function setOpen(open) {
+    panel.hidden = !open;
+    button.setAttribute("aria-expanded", String(open));
+    if (open) {
+      render();
+      setTimeout(() => text.focus(), 30);
+    }
+  }
+
+  button.addEventListener("click", () => setOpen(panel.hidden));
+  close.addEventListener("click", () => setOpen(false));
+  save.addEventListener("click", () => {
+    const value = text.value.trim();
+    if (!value) return text.focus();
+    const items = [{ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), text: value, createdAt: Date.now() }, ...readZablesky()];
+    writeZablesky(items);
+    text.value = "";
+    render();
+    button.textContent = "✧ Uloženo";
+    setTimeout(() => { button.textContent = "✧ Záblesk"; }, 1200);
+  });
+
+  render();
+})();
+</script>
