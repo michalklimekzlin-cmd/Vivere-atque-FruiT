@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ff6fb4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Batolete">
+  <meta name="description" content="Batolete – dětská vzdělávací aplikace se světy, hry, příběhy a postavičkami.">
+  <link rel="manifest" href="./manifest.json">
+  <title>🌈 Batolete – Dětský svět</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<!-- ====== SPLASH SCREEN ====== -->
+<div id="splash" class="splash">
+  <div class="splash-inner">
+    <div class="splash-emoji">🌈</div>
+    <h1 class="splash-title">Batolete</h1>
+    <p class="splash-sub">Dětský svět plný her a dobrodružství</p>
+    <button class="splash-btn" id="splashStart">Vstoupit do světa! 🚀</button>
+    <div class="splash-chars">
+      <span class="char-bubble" data-char="hlavoun">🧠</span>
+      <span class="char-bubble" data-char="pikos">👶</span>
+      <span class="char-bubble" data-char="viri">💖</span>
+      <span class="char-bubble" data-char="bicak">💪</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MAIN APP ====== -->
+<div id="app" class="app hidden">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <button class="home-btn" id="homeBtn" aria-label="Domů">🏠</button>
+    <div class="topbar-title" id="pageTitle">🌈 Batolete</div>
+    <div class="rewards-bar">
+      <span class="star-count" id="starCount">⭐ 0</span>
+    </div>
+  </header>
+
+  <!-- CHARACTER STRIP -->
+  <div class="char-strip" id="charStrip">
+    <button class="char-btn active" data-char="hlavoun" aria-label="Hlavoun">
+      <span class="char-icon">🧠</span>
+      <span class="char-name">Hlavoun</span>
+    </button>
+    <button class="char-btn" data-char="pikos" aria-label="Pikoš">
+      <span class="char-icon">👶</span>
+      <span class="char-name">Pikoš</span>
+    </button>
+    <button class="char-btn" data-char="viri" aria-label="Viri">
+      <span class="char-icon">💖</span>
+      <span class="char-name">Viri</span>
+    </button>
+    <button class="char-btn" data-char="bicak" aria-label="Bičák">
+      <span class="char-icon">💪</span>
+      <span class="char-name">Bičák</span>
+    </button>
+  </div>
+
+  <!-- CHARACTER SPEECH BUBBLE -->
+  <div class="speech-bubble" id="speechBubble">
+    <span id="speechText">👋 Ahoj! Jsem Hlavoun. Vyber si hru!</span>
+  </div>
+
+  <!-- ====== HOME SCREEN ====== -->
+  <main class="screen active" id="screenHome">
+    <div class="game-grid">
+      <button class="game-card" data-game="abeceda" style="--card-color: #ff6fb4">
+        <span class="game-icon">🔤</span>
+        <span class="game-name">Abeceda</span>
+        <span class="game-desc">Uč se písmenka</span>
+      </button>
+      <button class="game-card" data-game="cisla" style="--card-color: #6fb4ff">
+        <span class="game-icon">🔢</span>
+        <span class="game-name">Čísla</span>
+        <span class="game-desc">Počítáme spolu</span>
+      </button>
+      <button class="game-card" data-game="barvy" style="--card-color: #ffb46f">
+        <span class="game-icon">🎨</span>
+        <span class="game-name">Barvy</span>
+        <span class="game-desc">Poznáváme barvy</span>
+      </button>
+      <button class="game-card" data-game="tvary" style="--card-color: #6fffb4">
+        <span class="game-icon">🔷</span>
+        <span class="game-name">Tvary</span>
+        <span class="game-desc">Hrajeme si s tvary</span>
+      </button>
+      <button class="game-card" data-game="zviratka" style="--card-color: #d4b4ff">
+        <span class="game-icon">🐾</span>
+        <span class="game-name">Zvířátka</span>
+        <span class="game-desc">Poznáš je všechna?</span>
+      </button>
+      <button class="game-card" data-game="pribehy" style="--card-color: #fff06f">
+        <span class="game-icon">📖</span>
+        <span class="game-name">Příběhy</span>
+        <span class="game-desc">Pohádky a dobrodružství</span>
+      </button>
+      <button class="game-card" data-game="pohyb" style="--card-color: #ff9f6f">
+        <span class="game-icon">🏃</span>
+        <span class="game-name">Pohyb</span>
+        <span class="game-desc">Cvičíme s Bičákem</span>
+      </button>
+      <button class="game-card" data-game="galerie" style="--card-color: #6fe8ff">
+        <span class="game-icon">🖼️</span>
+        <span class="game-name">Galerie</span>
+        <span class="game-desc">Světy a obrázky</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- ====== ABECEDA ====== -->
+  <main class="screen" id="screenAbeceda">
+    <div class="section-header">
+      <h2>🔤 Abeceda</h2>
+      <p>Klepni na písmenku a uslyšíš ji!</p>
+    </div>
+    <div class="letter-grid" id="letterGrid"></div>
+    <div class="letter-display" id="letterDisplay">
+      <div class="big-letter" id="bigLetter">A</div>
+      <div class="letter-word" id="letterWord">Autíčko 🚗</div>
+      <canvas class="letter-canvas" id="letterCanvas" width="200" height="200"></canvas>
+    </div>
+  </main>
+
+  <!-- ====== ČÍSLA ====== -->
+  <main class="screen" id="screenCisla">
+    <div class="section-header">
+      <h2>🔢 Čísla</h2>
+      <p>Napočítáme spolu do deseti!</p>
+    </div>
+    <div class="number-game" id="numberGame">
+      <div class="number-task" id="numberTask"></div>
+      <div class="number-dots" id="numberDots"></div>
+      <div class="number-btns" id="numberBtns"></div>
+    </div>
+  </main>
+
+  <!-- ====== BARVY ====== -->
+  <main class="screen" id="screenBarvy">
+    <div class="section-header">
+      <h2>🎨 Barvy</h2>
+      <p>Jaká je to barva?</p>
+    </div>
+    <div class="color-game" id="colorGame">
+      <div class="color-blob" id="colorBlob"></div>
+      <div class="color-question" id="colorQuestion">Jaká je to barva?</div>
+      <div class="color-answers" id="colorAnswers"></div>
+    </div>
+  </main>
+
+  <!-- ====== TVARY ====== -->
+  <main class="screen" id="screenTvary">
+    <div class="section-header">
+      <h2>🔷 Tvary</h2>
+      <p>Nakresli nebo spoj tvar!</p>
+    </div>
+    <div class="shape-game" id="shapeGame">
+      <canvas class="shape-canvas" id="shapeCanvas" width="400" height="300"></canvas>
+      <div class="shape-controls">
+        <div class="shape-btns" id="shapeBtns"></div>
+        <button class="shape-next" id="shapeNext">Další tvar ➡️</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====== ZVÍŘÁTKA ====== -->
+  <main class="screen" id="screenZviratka">
+    <div class="section-header">
+      <h2>🐾 Zvířátka</h2>
+      <p>Klepni na zvířátko a uslyšíš jeho hlas!</p>
+    </div>
+    <div class="animal-grid" id="animalGrid"></div>
+    <div class="animal-info" id="animalInfo">
+      <div class="animal-big" id="animalBig">🐶</div>
+      <div class="animal-name" id="animalName">Pejsek</div>
+      <div class="animal-sound" id="animalSound">Haf haf! 🐕</div>
+    </div>
+  </main>
+
+  <!-- ====== PŘÍBĚHY ====== -->
+  <main class="screen" id="screenPribehy">
+    <div class="section-header">
+      <h2>📖 Příběhy</h2>
+      <p>Vyber si pohádku</p>
+    </div>
+    <div class="story-list" id="storyList"></div>
+    <div class="story-reader" id="storyReader">
+      <div class="story-scene" id="storyScene"></div>
+      <div class="story-text" id="storyText"></div>
+      <div class="story-nav">
+        <button class="story-btn" id="storyPrev">⬅️ Zpět</button>
+        <span class="story-page" id="storyPage">1 / 1</span>
+        <button class="story-btn" id="storyNext">Dál ➡️</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ====== POHYB ====== -->
+  <main class="screen" id="screenPohyb">
+    <div class="section-header">
+      <h2>🏃 Pohyb s Bičákem</h2>
+      <p>Cvičíme a hrajeme si!</p>
+    </div>
+    <div class="pohyb-game" id="pohybGame">
+      <div class="bicak-display" id="bicakDisplay">
+        <canvas class="bicak-canvas" id="bicakCanvas" width="300" height="300"></canvas>
+      </div>
+      <div class="pohyb-task" id="pohybTask"></div>
+      <div class="pohyb-btns" id="pohybBtns"></div>
+      <div class="pohyb-counter" id="pohybCounter">💪 Skóre: 0</div>
+    </div>
+  </main>
+
+  <!-- ====== GALERIE ====== -->
+  <main class="screen" id="screenGalerie">
+    <div class="section-header">
+      <h2>🖼️ Galerie světů</h2>
+      <p>Prozkoumej všechny světy Vivere atque Frui'T</p>
+    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+    <div class="gallery-viewer" id="galleryViewer">
+      <canvas class="gallery-canvas" id="galleryCanvas" width="400" height="300"></canvas>
+      <div class="gallery-title" id="galleryTitle"></div>
+      <div class="gallery-desc" id="galleryDesc"></div>
+    </div>
+  </main>
+
+</div><!-- /app -->
+
+<!-- ====== REWARD POPUP ====== -->
+<div class="reward-popup hidden" id="rewardPopup">
+  <div class="reward-inner">
+    <div class="reward-emoji" id="rewardEmoji">⭐</div>
+    <div class="reward-text" id="rewardText">Skvěle! Získal jsi hvězdičku!</div>
+    <button class="reward-btn" id="rewardClose">Super! 😊</button>
+  </div>
+</div>
+
+<!-- CANVAS CONFETTI -->
+<canvas class="confetti-canvas" id="confettiCanvas"></canvas>
+
+<!-- Scripts -->
+<script src="./characters.js"></script>
+<script src="./app.js"></script>
+
+</body>
+</html>

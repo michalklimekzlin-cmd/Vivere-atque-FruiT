@@ -1,0 +1,45 @@
+{
+  "name": "Batolete – Dětský svět",
+  "short_name": "Batolete",
+  "description": "Dětská vzdělávací aplikace s hrami, příběhy, zvířátky a postavičkami. Abeceda, čísla, barvy, tvary – vše pro malé průzkumníky!",
+  "lang": "cs",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fff8f0",
+  "theme_color": "#ff6fb4",
+  "categories": ["education", "kids", "games"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%23ff6fb4'/><text y='.9em' font-size='420' x='50%' text-anchor='middle' dominant-baseline='auto'>🌈</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Abeceda",
+      "short_name": "Abeceda",
+      "description": "Hra s písmenky",
+      "url": "./#abeceda",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='.9em' font-size='72'>🔤</text></svg>", "sizes": "any" }]
+    },
+    {
+      "name": "Zvířátka",
+      "short_name": "Zvířátka",
+      "description": "Poznáváme zvířátka",
+      "url": "./#zviratka",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='.9em' font-size='72'>🐾</text></svg>", "sizes": "any" }]
+    },
+    {
+      "name": "Příběhy",
+      "short_name": "Příběhy",
+      "description": "Pohádky a příběhy",
+      "url": "./#pribehy",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='.9em' font-size='72'>📖</text></svg>", "sizes": "any" }]
+    }
+  ]
+}
