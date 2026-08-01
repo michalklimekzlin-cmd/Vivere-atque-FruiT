@@ -1,0 +1,343 @@
+/*
+  Batolete – Hub Menu CSS
+  Centrální hub pro děti, rodiče i prarodiče
+  Modulární design – přizpůsob dle libosti!
+*/
+
+/* ── RESET & BASE ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── DESIGN TOKENS ── */
+:root {
+  --hub-bg:         #1a1a2e;
+  --hub-surface:    #16213e;
+  --hub-card:       #0f3460;
+  --hub-card-app:   #1b2a4a;
+  --hub-accent:     #e94560;
+  --hub-gold:       #ffd700;
+  --hub-green:      #4caf50;
+  --hub-text:       #f0f0f0;
+  --hub-muted:      #a0a8b8;
+  --hub-radius:     1.2rem;
+  --hub-shadow:     0 4px 20px rgba(0,0,0,0.5);
+  --hub-font:       system-ui, -apple-system, "Segoe UI", sans-serif;
+  --hub-touch:      56px;  /* minimum touch target */
+}
+
+/* ── BODY ── */
+.hub-body {
+  min-height: 100dvh;
+  background: var(--hub-bg);
+  color: var(--hub-text);
+  font-family: var(--hub-font);
+  overflow-x: hidden;
+}
+
+/* ── TOP BAR ── */
+.hub-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: var(--hub-surface);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.6);
+  padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
+}
+
+.hub-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hub-logo-icon {
+  font-size: 1.8rem;
+}
+
+.hub-logo-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--hub-gold);
+}
+
+.hub-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255,215,0,0.15);
+  border: 1px solid rgba(255,215,0,0.4);
+  border-radius: 2rem;
+  padding: 0.3rem 0.8rem;
+  cursor: default;
+}
+
+.hub-star-icon {
+  font-size: 1.2rem;
+}
+
+.hub-star-count {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--hub-gold);
+  min-width: 1.5ch;
+}
+
+/* ── MAIN CONTENT ── */
+.hub-main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+/* ── WELCOME ── */
+.hub-welcome {
+  text-align: center;
+  padding: 1.5rem 0 2rem;
+}
+
+.hub-welcome-title {
+  font-size: clamp(1.6rem, 5vw, 2.4rem);
+  font-weight: 900;
+  color: var(--hub-gold);
+  text-shadow: 0 2px 8px rgba(255,215,0,0.3);
+  margin-bottom: 0.5rem;
+}
+
+.hub-welcome-sub {
+  font-size: clamp(0.95rem, 3vw, 1.2rem);
+  color: var(--hub-muted);
+}
+
+/* ── SECTION ── */
+.hub-section {
+  margin-bottom: 2.5rem;
+}
+
+.hub-section-title {
+  font-size: clamp(1.1rem, 4vw, 1.5rem);
+  font-weight: 800;
+  color: var(--hub-text);
+  margin-bottom: 1rem;
+  padding-left: 0.2rem;
+  border-left: 4px solid var(--hub-accent);
+  padding-left: 0.75rem;
+}
+
+/* ── GRID ── */
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+
+/* ── CARD ── */
+.hub-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: var(--hub-touch);
+  padding: 1rem 0.75rem;
+  background: var(--hub-card);
+  border: 2px solid transparent;
+  border-radius: var(--hub-radius);
+  box-shadow: var(--hub-shadow);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+  color: inherit;
+  font-family: inherit;
+}
+
+.hub-card--app {
+  background: var(--hub-card-app);
+}
+
+.hub-card:hover,
+.hub-card:focus-visible {
+  transform: translateY(-3px) scale(1.03);
+  border-color: var(--hub-accent);
+  outline: none;
+  background: #1e4080;
+}
+
+.hub-card:active {
+  transform: scale(0.97);
+}
+
+.hub-card-icon {
+  font-size: 2.4rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+.hub-card-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--hub-text);
+  line-height: 1.2;
+}
+
+.hub-card-tag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--hub-muted);
+  background: rgba(255,255,255,0.07);
+  border-radius: 1rem;
+  padding: 0.15rem 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── GAME SCREEN ── */
+.game-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  background: var(--hub-bg);
+  animation: slideIn 0.25s ease;
+}
+
+.game-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 1rem 1rem;
+}
+
+/* ── MINI-APP VIEWER ── */
+.app-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+  animation: slideIn 0.25s ease;
+}
+
+.app-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  display: block;
+}
+
+/* ── BACK BUTTON ── */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  margin: 0.5rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 2rem;
+  color: var(--hub-text);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  font-family: inherit;
+  min-height: var(--hub-touch);
+}
+
+.back-btn:hover,
+.back-btn:focus-visible {
+  background: rgba(255,255,255,0.2);
+  outline: none;
+}
+
+.back-btn--app {
+  position: absolute;
+  top: calc(0.5rem + env(safe-area-inset-top, 0px));
+  left: 0.5rem;
+  z-index: 10;
+  background: rgba(0,0,0,0.75);
+  border-color: rgba(255,255,255,0.3);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* ── TOAST ── */
+.hub-toast {
+  position: fixed;
+  bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%) translateY(4rem);
+  z-index: 999;
+  background: rgba(30,30,50,0.95);
+  color: var(--hub-text);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 2rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  white-space: nowrap;
+}
+
+.hub-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── ANIMATION ── */
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 400px) {
+  .hub-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .hub-card-icon {
+    font-size: 2rem;
+  }
+}
+
+@media (min-width: 600px) {
+  .hub-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .hub-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  .hub-card {
+    padding: 1.25rem 1rem;
+  }
+  .hub-card-icon {
+    font-size: 2.8rem;
+  }
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  .hub-card,
+  .hub-toast,
+  .game-screen,
+  .app-viewer {
+    transition: none;
+    animation: none;
+  }
+}

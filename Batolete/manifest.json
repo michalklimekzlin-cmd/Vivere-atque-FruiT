@@ -1,0 +1,32 @@
+{
+  "name": "Batolete – Centrální Hub",
+  "short_name": "Batolete",
+  "description": "Centrální herní hub pro děti, rodiče i prarodiče. 8 základních her + 12 mini-aplikací.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "lang": "cs",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌟</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "games", "kids"],
+  "shortcuts": [
+    {
+      "name": "Abeceda",
+      "url": "./index.html?game=abeceda",
+      "description": "Česká abeceda"
+    },
+    {
+      "name": "Čísla",
+      "url": "./index.html?game=cisla",
+      "description": "Počítání čísel"
+    }
+  ]
+}
