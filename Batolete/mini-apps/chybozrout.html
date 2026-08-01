@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>🔧 Chybožrout Opravář – Batolete</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { height: 100%; background: #0a0c18; font-family: system-ui, sans-serif; }
+      .bar {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0.5rem 1rem; padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+        background: rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      .bar-title { color: #ffd700; font-weight: 800; font-size: 1rem; }
+      .back { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25);
+        color: #fff; border-radius: 2rem; padding: 0.35rem 0.85rem; cursor: pointer;
+        font-size: 0.9rem; font-family: inherit; min-height: 40px; }
+      .back:hover { background: rgba(255,255,255,0.2); }
+      iframe { display: block; width: 100%; height: calc(100dvh - 48px); border: none; }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <button class="back" onclick="goBack()">← Hub</button>
+      <span class="bar-title">🔧 Chybožrout Opravář</span>
+      <span></span>
+    </div>
+    <iframe
+      src="../../chybozrout-opravar/index.html"
+      title="Chybožrout Opravář"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+      allowfullscreen
+      loading="lazy"
+    ></iframe>
+    <script>
+      function goBack() {
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: 'batolete:back' }, '*');
+        } else {
+          window.location.href = '../index.html';
+        }
+      }
+    </script>
+  </body>
+</html>
