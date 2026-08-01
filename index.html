@@ -256,6 +256,7 @@
       *, *::before, *::after { transition-duration: .01ms !important; }
     }
   </style>
+<link rel="stylesheet" href="./batole-core.css">
 </head>
 
 <body>
@@ -385,7 +386,7 @@
   </main>
 
   <script>
-    "use strict";
+     "use strict";
 
     const CHYBOZROUT_STATE_KEY = "cht360_chybozrout_v3";
     const CHYBOZROUT_TRASH_KEY = "cht360_chybozrout_kos_v1";
@@ -474,6 +475,8 @@ Koš nezapomíná.
     });
     document.getElementById("closeEgg").addEventListener("click", closeEgg);
     egg.addEventListener("click", event => { if (event.target === egg) closeEgg(); });
-  </script>
+    </script>
+
+  <script defer src="./batole-core.js"></script>
 </body>
-</html
+</html>
