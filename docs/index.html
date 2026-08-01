@@ -1,38 +1,883 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
 
-CHT 360°‰.
-{*(˚.•).•)//CHT 360°‰.\\(•.(•.)ア)
-1 prst: 3D otáčení
-2 prsty: posun · zoom · šejdr
-klepnutí: otevřít jádro
-Paměťové jádro
-70 slotů · místní uložení
-Zavřít
-Export Import NeČEŠTINA
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover"
+  >
 
-Uložit slot Vymazat slot
-Šifra CHT · bubínky
-otoč prstem · vlož do slotu
+  <meta name="theme-color" content="#050815">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="screen-orientation" content="landscape">
 
-Přidat znak
-Bubínek
-Vložit
-Obnovit
-Glyph dílna Pokojíčky
-Vyber jádro nebo slot. Před vyčištěním Safari si Paměť vyexportuj.
-Export celé Paměti Import celé Paměti
-[◉_◉] Chybožrout Nenechá chybu bez bezpečné kontroly.
-nepozastaven
-×
-Připravuji diagnostiku Paměti…
-🔎 Nenechat bez skenu načtené soubory nesmí zůstat bez kontroly 🧯 Nenechat poruchu bez opravy záloha, cache a neohrožený restart 🛟 Neztratit stav současný stav Paměti nesmí zůstat neuložený ↩︎ Nenechat zálohu neobnovenou poslední bezpečná záloha nezůstane nevrácená
-Ve frontě 0 Poslední běh —
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/pamet.css">
+  <link rel="stylesheet" href="./css/prstenec-pokojicku.css">
+  <link rel="stylesheet" href="./css/revia-dock.css">
 
-[◉_◉] Oběh
-R Revia
-✦ Revia
-Revia propojená vrstva CHT 360°‰.
-×
-Historie Mluva Atlas Plány Odkazy VaFiT Schránka Záloha Signál Paměť Glyph Pokojíčky iPhone
+  <title>{*(˚.•).•)//ˇ^360o°˚\\(•.(•.)ア)</title>
 
-Zpráva pro Revia ↗
-Revia je připravená. Zprávy zůstávají v tomto zařízení.
+  <style>
+    :root {
+      --safe-top: max(10px, env(safe-area-inset-top));
+      --safe-right: max(12px, env(safe-area-inset-right));
+      --safe-bottom: max(10px, env(safe-area-inset-bottom));
+      --safe-left: max(12px, env(safe-area-inset-left));
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      min-height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #050815;
+    }
+
+    body {
+      height: 100dvh;
+      min-height: 100dvh;
+    }
+
+    .rotateDevice {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      color: #fff0c5;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 36%, rgba(199, 155, 51, .22), transparent 36%),
+        #050815;
+    }
+
+    .rotateDeviceInner {
+      max-width: 300px;
+    }
+
+    .rotateDeviceIcon {
+      display: block;
+      margin-bottom: 16px;
+      font-size: 48px;
+      line-height: 1;
+      animation: rotateHint 1.9s ease-in-out infinite;
+    }
+
+    .rotateDevice strong,
+    .rotateDevice span {
+      display: block;
+    }
+
+    .rotateDevice strong {
+      font-size: 19px;
+      letter-spacing: .04em;
+    }
+
+    .rotateDevice span {
+      margin-top: 8px;
+      color: rgba(255, 240, 197, .72);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    @keyframes rotateHint {
+      0%,
+      100% { transform: rotate(0deg); }
+      50% { transform: rotate(90deg); }
+    }
+
+    .root {
+      position: fixed !important;
+      inset: 0 !important;
+      display: block !important;
+      width: 100vw !important;
+      height: 100dvh !important;
+      padding: 0 !important;
+    }
+
+    .stage {
+      position: relative !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      border: 0 !important;
+      border-radius: 0 !important;
+      background:
+        radial-gradient(circle at 49% 47%, rgba(125, 84, 39, .22), transparent 19%),
+        radial-gradient(circle at 16% 40%, rgba(214, 171, 87, .08), transparent 23%),
+        linear-gradient(112deg, #050403 0%, #17100b 49%, #060504 100%);
+      box-shadow: none;
+      isolation: isolate;
+    }
+
+    #globe-canvas {
+      position: absolute !important;
+      inset: 0 !important;
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      touch-action: none;
+    }
+
+    .hud-right,
+    .hud-center,
+    .hud {
+      position: absolute !important;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .hud-right {
+      top: 14px !important;
+      right: 18px !important;
+      color: #ffe2ad;
+      font-size: clamp(10px, 1.6vw, 12px);
+      font-weight: 750;
+      letter-spacing: .08em;
+      text-shadow: 0 0 18px rgba(199, 155, 51, .65);
+    }
+
+    .hud-center {
+      top: 14px !important;
+      bottom: auto !important;
+      left: 50% !important;
+      width: min(56vw, 560px);
+      transform: translateX(-50%) !important;
+      color: rgba(255, 239, 197, .86);
+      font-size: clamp(10px, 1.45vw, 13px);
+      line-height: 1.2;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hud {
+      bottom: 13px !important;
+      left: 18px !important;
+      display: flex !important;
+      flex-wrap: wrap;
+      gap: 4px 22px;
+      max-width: calc(100% - 170px);
+      color: rgba(255, 240, 197, .72);
+      font-size: clamp(10px, 1.45vw, 13px);
+    }
+
+    .hud span {
+      white-space: nowrap;
+    }
+
+    #memoryPanel.panel {
+      top: 48px;
+      right: 18px;
+      bottom: 44px;
+      left: auto;
+      width: min(440px, calc(100vw - 42px));
+      max-width: 48vw;
+      max-height: none;
+    }
+
+    #repairPanel.repairPanel {
+      top: 58px;
+      right: 18px;
+      bottom: 52px;
+      left: auto;
+      width: min(400px, calc(100vw - 42px));
+      max-width: 44vw;
+      max-height: none;
+    }
+
+    #openLifePanel.openLifePanel {
+      position: fixed;
+      z-index: 30;
+      right: calc(var(--safe-right) + 14px);
+      bottom: calc(var(--safe-bottom) + 12px);
+    }
+
+
+    .glyphComposer {
+      margin-top: 11px;
+      padding: 10px;
+      border: 1px solid rgba(255, 220, 160, .22);
+      border-radius: 16px;
+      background:
+        linear-gradient(180deg, rgba(255, 226, 173, .09), rgba(5, 5, 10, .34)),
+        rgba(0, 0, 0, .22);
+      box-shadow: inset 0 0 22px rgba(255, 211, 139, .06);
+    }
+
+    .glyphComposerTop {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .glyphComposerTop strong {
+      color: #ffe2ad;
+      font-size: 12px;
+      letter-spacing: .04em;
+    }
+
+    .glyphComposerTop span {
+      color: rgba(255, 240, 197, .66);
+      font-size: 10px;
+      text-align: right;
+    }
+
+    .glyphDrums {
+      display: flex;
+      gap: 7px;
+      min-height: 78px;
+      padding: 4px 2px 7px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+    }
+
+    .glyphDrum {
+      position: relative;
+      flex: 0 0 62px;
+      min-width: 62px;
+      min-height: 70px;
+      display: grid;
+      grid-template-rows: 18px 30px 18px;
+      place-items: center;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid rgba(255, 226, 173, .32);
+      border-radius: 12px;
+      color: #fff0c5;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255, 224, 164, .18), transparent 54%),
+        rgba(4, 5, 10, .88);
+      box-shadow: inset 0 0 18px rgba(255, 226, 173, .08);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .glyphDrum::before,
+    .glyphDrum::after {
+      content: "";
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      height: 1px;
+      background: rgba(255, 226, 173, .18);
+      pointer-events: none;
+    }
+
+    .glyphDrum::before { top: 20px; }
+    .glyphDrum::after { bottom: 20px; }
+
+    .glyphDrumGhost,
+    .glyphDrumCurrent {
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .glyphDrumGhost {
+      color: rgba(255, 240, 197, .30);
+      font-size: 10px;
+    }
+
+    .glyphDrumCurrent {
+      color: #fff0c5;
+      font-size: 15px;
+      font-weight: 850;
+      letter-spacing: .02em;
+      text-shadow: 0 0 12px rgba(255, 218, 147, .66);
+    }
+
+    .glyphDrum.is-dragging {
+      border-color: #ffe2ad;
+      box-shadow: 0 0 20px rgba(255, 213, 139, .34), inset 0 0 18px rgba(255, 226, 173, .15);
+    }
+
+    .glyphDrum.is-stepping .glyphDrumCurrent {
+      animation: glyphDrumStep .18s ease-out;
+    }
+
+    @keyframes glyphDrumStep {
+      from { transform: translateY(9px); opacity: .25; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .glyphCustomRow,
+    .glyphActions {
+      display: flex;
+      gap: 7px;
+      margin-top: 8px;
+    }
+
+    .glyphCustomRow input {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .glyphActions {
+      flex-wrap: wrap;
+    }
+
+    .glyphActions button,
+    .glyphActions a,
+    .glyphCustomRow button {
+      flex: 1 1 auto;
+      min-height: 34px;
+      padding: 7px 9px;
+      font-size: 11px;
+    }
+
+    .glyphWorkshopLink {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 220, 160, .32);
+      border-radius: 10px;
+      color: #ffe2ad;
+      background: rgba(255, 226, 173, .08);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    @media (max-height: 430px) {
+      .root {
+        padding-top: max(7px, env(safe-area-inset-top));
+        padding-bottom: max(7px, env(safe-area-inset-bottom));
+      }
+
+      .stage {
+        border-radius: 0 !important;
+      }
+
+      .hud-right,
+      .hud-center {
+        top: 9px !important;
+      }
+
+      .hud {
+        bottom: 8px !important;
+      }
+
+      #memoryPanel.panel,
+      #repairPanel.repairPanel {
+        top: 38px;
+        bottom: 36px;
+        right: 12px;
+        width: min(360px, calc(100vw - 28px));
+        max-width: 45vw;
+        padding: 10px;
+      }
+
+      .glyphComposer {
+        margin-top: 8px;
+        padding: 8px;
+        border-radius: 13px;
+      }
+
+      .glyphComposerTop span {
+        font-size: 9px;
+      }
+
+      .glyphDrum {
+        flex-basis: 54px;
+        min-width: 54px;
+        min-height: 59px;
+        grid-template-rows: 14px 28px 14px;
+      }
+
+      .glyphActions button,
+      .glyphActions a,
+      .glyphCustomRow button {
+        min-height: 29px;
+        padding: 5px 7px;
+        font-size: 10px;
+      }
+    }
+
+    @media (orientation: portrait) {
+      .rotateDevice {
+        display: flex;
+      }
+
+      .root,
+      #repairPanel,
+      #openLifePanel {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="rotateDevice" aria-live="polite">
+    <div class="rotateDeviceInner">
+      <span class="rotateDeviceIcon" aria-hidden="true">▭</span>
+      <strong>Bez otočení telefonu na šířku nelze pokračovat</strong>
+      <span>CHT 360° nezpřístupní celý oběh Paměti bez otočení.</span>
+    </div>
+  </aside>
+
+  <div class="root">
+    <main class="stage" aria-label="CHT 360 stupňů — Paměť">
+      <canvas id="globe-canvas"></canvas>
+
+      <div class="hud-right">CHT 360°‰.</div>
+
+      <div class="hud-center">
+        {*(˚.•).•)//CHT 360°‰.\\(•.(•.)ア)
+      </div>
+
+      <div class="hud" aria-label="Ovládání">
+        <span>1 prst: 3D otáčení</span>
+        <span>2 prsty: posun · zoom · šejdr</span>
+        <span>klepnutí: otevřít jádro</span>
+      </div>
+
+      <section id="memoryPanel" class="panel">
+        <div class="panelTop">
+          <div>
+            <div id="panelTitle" class="panelTitle">Paměťové jádro</div>
+            <div id="panelSub" class="panelSub">70 slotů · místní uložení</div>
+          </div>
+
+          <button id="closePanel" type="button">Zavřít</button>
+        </div>
+
+        <div class="slotsToolbar">
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Hledat ve slotech..."
+          >
+
+          <button id="exportCore" type="button">Export</button>
+          <button id="importCore" type="button">Import</button>
+          <a class="necesstinaShortcut" href="./necesstina-cht-360/">NeČEŠTINA</a>
+        </div>
+
+        <div id="slotGrid" class="slotGrid"></div>
+
+        <div id="slotEditor" class="slotEditor">
+          <input
+            id="slotName"
+            type="text"
+            maxlength="80"
+            placeholder="Název slotu"
+          >
+
+          <textarea
+            id="slotContent"
+            placeholder="Obsah slotu..."
+          ></textarea>
+
+          <div class="row">
+            <button id="saveSlot" class="primary" type="button">Uložit slot</button>
+            <button id="clearSlot" class="danger" type="button">Vymazat slot</button>
+          </div>
+
+          <section class="glyphComposer" aria-label="Šifra CHT – otočné bubínky">
+            <div class="glyphComposerTop">
+              <strong>Šifra CHT · bubínky</strong>
+              <span>otoč prstem · vlož do slotu</span>
+            </div>
+
+            <div id="glyphDrums" class="glyphDrums" aria-label="Otočné glyph bubínky"></div>
+
+            <div class="glyphCustomRow">
+              <input
+                id="glyphCustom"
+                type="text"
+                maxlength="24"
+                placeholder="Glyph nebo znak, který CHT nevlastní"
+                aria-label="Glyph nebo znak, který CHT nevlastní"
+              >
+              <button id="glyphAddToken" type="button">Přidat znak</button>
+            </div>
+
+            <div class="glyphActions">
+              <button id="glyphAddDrum" type="button">Bubínek</button>
+              <button id="glyphInsert" class="primary" type="button">Vložit</button>
+              <button id="glyphReset" type="button">Obnovit</button>
+              <a class="glyphWorkshopLink" href="./glyph-cht-360/">Glyph dílna</a>
+              <a class="glyphWorkshopLink" href="./glyph-pokojicku-cht-360/">Pokojíčky</a>
+            </div>
+          </section>
+        </div>
+
+        <div id="statusBox" class="statusBox">Vyber jádro nebo slot. Před vyčištěním Safari si Paměť vyexportuj.</div>
+
+        <div class="row">
+          <button id="exportAll" type="button">Export celé Paměti</button>
+          <button id="importAll" type="button">Import celé Paměti</button>
+        </div>
+
+        <input
+          id="fileInput"
+          class="hiddenInput"
+          type="file"
+          accept="application/json,.json"
+        >
+      </section>
+    </main>
+  </div>
+
+  <section id="repairPanel" class="repairPanel" aria-hidden="true" aria-label="Chybožrout Samoopravovna">
+    <div class="repairPanelTop">
+      <div>
+        <strong>[◉_◉] Chybožrout</strong>
+        <span>Nenechá chybu bez bezpečné kontroly.</span>
+      </div>
+
+      <div class="repairPanelActions">
+        <div id="repairState" class="repairState">nepozastaven</div>
+
+        <button
+          id="closeRepairPanel"
+          class="closeRepairPanel"
+          type="button"
+          aria-label="Zavřít Samoopravovnu"
+        >
+          ×
+        </button>
+      </div>
+    </div>
+
+    <p id="repairSummary" class="repairSummary">
+      Připravuji diagnostiku Paměti…
+    </p>
+
+    <div class="repairGrid">
+      <button id="repairScan" class="repairAction" type="button">
+        <strong>🔎 Nenechat bez skenu</strong>
+        <span>načtené soubory nesmí zůstat bez kontroly</span>
+      </button>
+
+      <button id="repairFix" class="repairAction repairActionPrimary" type="button">
+        <strong>🧯 Nenechat poruchu bez opravy</strong>
+        <span>záloha, cache a neohrožený restart</span>
+      </button>
+
+      <button id="repairBackup" class="repairAction" type="button">
+        <strong>🛟 Neztratit stav</strong>
+        <span>současný stav Paměti nesmí zůstat neuložený</span>
+      </button>
+
+      <button id="repairRestore" class="repairAction" type="button">
+        <strong>↩︎ Nenechat zálohu neobnovenou</strong>
+        <span>poslední bezpečná záloha nezůstane nevrácená</span>
+      </button>
+    </div>
+
+    <div class="repairMeta">
+      <span>Ve frontě <strong id="repairQueue">0</strong></span>
+      <span>Poslední běh <strong id="repairLast">—</strong></span>
+    </div>
+
+    <div id="repairLog" class="repairLog" role="status" aria-live="polite"></div>
+  </section>
+
+  <button
+    id="openLifePanel"
+    class="openLifePanel"
+    type="button"
+    aria-label="Otevřít Chybožrout Samoopravovnu"
+  >
+    [◉_◉]
+    <span>Oběh</span>
+  </button>
+
+  <button id="openReviaPanel" class="openReviaPanel" type="button" aria-label="Otevřít Revia chat">
+    <span class="reviaOrb" aria-hidden="true">R</span>
+    <span>Revia</span>
+  </button>
+
+  <section id="reviaPanel" class="reviaPanel" aria-hidden="true" aria-label="Revia — chat CHT 360°‰.">
+    <header class="reviaTop">
+      <button id="reviaMode" class="reviaMode" type="button" aria-label="Přepnout hlas Revia">
+        <span aria-hidden="true">✦</span>
+        <span id="reviaModeLabel">Revia</span>
+      </button>
+      <div class="reviaTitle">
+        <strong>Revia</strong>
+        <small>propojená vrstva CHT 360°‰.</small>
+      </div>
+      <button id="closeReviaPanel" class="reviaClose" type="button" aria-label="Zavřít Revia">×</button>
+    </header>
+
+    <div class="reviaShortcuts" aria-label="Rychlé propojení">
+      <button type="button" data-revia-action="history">Historie</button>
+      <button type="button" data-revia-action="mluva">Mluva</button>
+      <button type="button" data-revia-action="map">Atlas</button>
+      <button type="button" data-revia-action="plans">Plány</button>
+      <button type="button" data-revia-action="links">Odkazy</button>
+      <button type="button" data-revia-action="vafit">VaFiT</button>
+      <button type="button" data-revia-action="inbox">Schránka</button>
+      <button type="button" data-revia-action="backup">Záloha</button>
+      <button type="button" data-revia-action="signal">Signál</button>
+      <button type="button" data-revia-action="memory">Paměť</button>
+      <button type="button" data-revia-action="glyph">Glyph</button>
+      <button type="button" data-revia-action="rooms">Pokojíčky</button>
+      <button type="button" data-revia-action="iphone">iPhone</button>
+    </div>
+
+    <section id="reviaContinuity" class="reviaContinuity" hidden aria-label="Schránka objevů a záloha Revii">
+      <div class="reviaContinuityTop">
+        <strong>Schránka objevů</strong>
+        <button id="closeReviaContinuity" type="button" aria-label="Zavřít schránku">×</button>
+      </div>
+      <p>Vlož poznatek z jiného chatu, GPT nebo světa. Nejdřív jen čeká na tvoje potvrzení a nic se samo neposílá ven.</p>
+      <input id="reviaDiscoverySource" type="text" maxlength="160" value="GPT / bratříček / vlastní poznámka" aria-label="Zdroj objevu">
+      <textarea id="reviaDiscoveryInput" rows="4" maxlength="12000" placeholder="Vlož sem objev nebo důležitý výňatek…"></textarea>
+      <div class="reviaContinuityActions">
+        <button id="reviaDiscoverySave" type="button">Uložit návrh</button>
+        <button id="reviaDiscoveryApprove" type="button">Potvrdit poslední</button>
+        <button id="reviaContinuityReview" type="button">Zobrazit schránku</button>
+      </div>
+      <div class="reviaContinuityActions">
+        <button id="reviaExport" type="button">Export Revii</button>
+        <label class="reviaImportLabel">Import Revii<input id="reviaImport" type="file" accept="application/json,.json"></label>
+        <button id="reviaStorage" type="button">Zajistit offline</button>
+      </div>
+      <small id="reviaContinuityState">Revia připraví místní bod obnovy při změně, přechodu offline i návratu připojení.</small>
+    </section>
+
+    <div id="reviaLog" class="reviaLog" role="log" aria-live="polite"></div>
+
+    <form id="reviaForm" class="reviaForm">
+      <label class="srOnly" for="reviaInput">Zpráva pro Revia</label>
+      <textarea id="reviaInput" rows="2" maxlength="1200" placeholder="Napiš Revii…"></textarea>
+      <button type="button" data-revia-action="repository">Repo</button>
+    <button type="submit" aria-label="Odeslat zprávu Revii">↗</button>
+    </form>
+    <p id="reviaState" class="reviaState">Revia je připravená. Zprávy zůstávají v tomto zařízení.</p>
+  </section>
+
+  <script type="module" src="./js/aplikace.js"></script>
+  <script type="module" src="./js/cht-chybozrout.js"></script>
+  <script type="module" src="./js/revia-dock.js"></script>
+  <script src="./js/prstenec-pokojicku.js" defer></script>
+  <script src="./js/bubinky-pevne.js" defer></script>
+  <script src="./js/bubinky-petka.js" defer></script>
+
+  <script>
+    (() => {
+      let timers = [];
+
+      const refreshCanvasSize = () => {
+        timers.forEach(clearTimeout);
+
+        timers = [80, 260, 650].map((delay) => setTimeout(() => {
+          window.dispatchEvent(new Event("resize"));
+        }, delay));
+      };
+
+      window.addEventListener("orientationchange", refreshCanvasSize);
+      window.addEventListener("pageshow", refreshCanvasSize);
+      window.visualViewport?.addEventListener("resize", refreshCanvasSize);
+
+      refreshCanvasSize();
+    })();
+  </script>
+<style>
+  #cht360-stred{
+    position:absolute;
+    z-index:4;
+    left:50%;
+    top:51%;
+    width:clamp(76px,11vw,116px);
+    aspect-ratio:1;
+    padding:0;
+    border:0;
+    border-radius:50%;
+    background:transparent;
+    color:#ffe2ad;
+    cursor:pointer;
+    transform:translate(-50%,-50%);
+    -webkit-tap-highlight-color:transparent;
+  }
+
+  #cht360-stred::before,
+  #cht360-stred::after{
+    position:absolute;
+    border-radius:50%;
+    content:"";
+    pointer-events:none;
+  }
+
+  #cht360-stred::before{
+    inset:4%;
+    border:1px solid rgba(255,226,173,.52);
+    box-shadow:
+      0 0 20px rgba(255,206,120,.62),
+      inset 0 0 18px rgba(255,226,173,.2);
+    animation:cht360Pulse 2.8s ease-in-out infinite;
+  }
+
+  #cht360-stred::after{
+    inset:-14%;
+    border:1px solid rgba(255,226,173,.19);
+    box-shadow:0 0 28px rgba(255,194,91,.18);
+    animation:cht360Orbit 8s linear infinite;
+  }
+
+  .cht360-stred-core{
+    position:absolute;
+    inset:22%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(255,247,218,.88);
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 34% 28%,#fff9e8 0 7%,#ffd98e 35%,#b56f2c 100%);
+    box-shadow:
+      0 0 22px rgba(255,220,150,.8),
+      inset 0 0 14px rgba(255,249,225,.5);
+  }
+
+  .cht360-stred-core strong{
+    color:#241508;
+    font-size:clamp(11px,1.8vw,19px);
+    font-weight:950;
+    letter-spacing:.08em;
+    line-height:1;
+  }
+
+  .cht360-stred-core small{
+    margin-top:3px;
+    color:rgba(42,25,10,.82);
+    font-size:clamp(7px,1.15vw,11px);
+    font-weight:900;
+    white-space:nowrap;
+  }
+
+  .cht360-stred-znak{
+    position:absolute;
+    color:#ffe2ad;
+    font-size:clamp(10px,1.7vw,17px);
+    font-weight:900;
+    text-shadow:0 0 13px rgba(255,211,132,.9);
+    animation:cht360Znak 3s ease-in-out infinite;
+  }
+
+  .cht360-stred-znak.c{top:8%;left:21%}
+  .cht360-stred-znak.h{top:18%;right:10%;animation-delay:-1s}
+  .cht360-stred-znak.t{bottom:12%;left:12%;animation-delay:-2s}
+  .cht360-stred-znak.a{bottom:9%;right:16%;animation-delay:-.5s}
+
+  .cht360-stred-prach{
+    position:absolute;
+    inset:0;
+    animation:cht360Prach 2.3s ease-in-out infinite;
+  }
+
+  .cht360-stred-prach i{
+    position:absolute;
+    width:4px;
+    aspect-ratio:1;
+    border-radius:50%;
+    background:#ffe8ba;
+    box-shadow:0 0 9px rgba(255,215,143,.9);
+  }
+
+  .cht360-stred-prach i:nth-child(1){top:26%;left:18%}
+  .cht360-stred-prach i:nth-child(2){top:67%;left:24%}
+  .cht360-stred-prach i:nth-child(3){top:74%;right:23%}
+  .cht360-stred-prach i:nth-child(4){top:35%;right:16%}
+
+  #cht360-stred.is-aktivni .cht360-stred-core{
+    animation:cht360Core .65s ease-in-out;
+  }
+
+  @keyframes cht360Pulse{
+    50%{transform:scale(1.1);opacity:.7}
+  }
+
+  @keyframes cht360Orbit{
+    to{transform:rotate(360deg)}
+  }
+
+  @keyframes cht360Znak{
+    50%{transform:translateY(-6px) scale(1.14);opacity:.5}
+  }
+
+  @keyframes cht360Prach{
+    50%{transform:scale(1.06);opacity:.7}
+  }
+
+  @keyframes cht360Core{
+    50%{transform:scale(1.18);filter:brightness(1.3)}
+  }
+</style>
+
+<script
+  src="./js/cht-360-network.js"
+  data-cht-module="cht-360-core"
+  data-cht-label="CHT 360°‰."
+  data-cht-entry="./index.html"
+  data-cht-kind="pwa"
+  data-cht-storage-keys="cht360_pamet_v1,vaft_pamet_v1,cht360_pamet_snapshots_v1,cht360_trojka_models_v1,cht360_glyph_drums_v1,cht360_glyph_drums_custom_v1,cht360_iphone14_settings_v1"
+  data-cht-capture-mode="full"
+></script>
+
+<script>
+(() => {
+  if (document.getElementById("cht360-stred")) return;
+
+  const host = document.querySelector(".stage");
+  if (!host) return;
+
+  const cht = document.createElement("button");
+  cht.id = "cht360-stred";
+  cht.type = "button";
+  cht.setAttribute("aria-label", "CHT 360°‰. ve středu oběhu");
+
+  cht.innerHTML = `
+    <span class="cht360-stred-znak c" aria-hidden="true">C</span>
+    <span class="cht360-stred-znak h" aria-hidden="true">H</span>
+    <span class="cht360-stred-znak t" aria-hidden="true">T</span>
+    <span class="cht360-stred-znak a" aria-hidden="true">ア</span>
+
+    <span class="cht360-stred-prach" aria-hidden="true">
+      <i></i><i></i><i></i><i></i>
+    </span>
+
+    <span class="cht360-stred-core" aria-hidden="true">
+      <strong>CHT</strong>
+      <small>360°‰.</small>
+    </span>
+  `;
+
+  cht.addEventListener("click", () => {
+    cht.classList.remove("is-aktivni");
+    requestAnimationFrame(() => cht.classList.add("is-aktivni"));
+
+    const zprava = document.getElementById("messageLine");
+    if (zprava) {
+      zprava.textContent =
+        "CHT 360°‰. je uprostřed oběhu a pracuje jen s tím, co mu dovolíš.";
+    }
+  });
+
+  host.append(cht);
+})();
+</script>
+</body>
+</html>
