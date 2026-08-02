@@ -40,6 +40,9 @@
         "cht360_trojka_models_v1",
         "cht360_glyph_drums_v1",
         "cht360_glyph_drums_custom_v1",
+        "cht360_glyph_context_v1",
+        "cht360_glyph_transfer_v1",
+        "cht360_glyph_transfer_applied_v1",
         "cht360_iphone14_settings_v1"
       ],
       captureMode: "full"
@@ -49,15 +52,36 @@
       label: "Glyph CHT 360°‰.",
       entry: "./glyph-cht-360/",
       kind: "pwa",
-      storageKeys: ["glyph-cht-360-project-guard.v1"],
-      captureMode: "summary"
+      storageKeys: [
+        "cht360_glyph_workshop_v1",
+        "cht360_glyph_context_v1",
+        "cht360_glyph_transfer_v1"
+      ],
+      captureMode: "full"
     },
     {
       id: "glyph-pokojicku-cht-360",
       label: "Glyph pokojíčků CHT 360°‰.",
       entry: "./glyph-pokojicku-cht-360/",
       kind: "pwa",
-      storageKeys: ["glyph-cht-360-rooms.v1"],
+      storageKeys: [
+        "glyph-cht-360-rooms.v1",
+        "cht360_glyph_rooms_v2"
+      ],
+      captureMode: "full"
+    },
+    {
+      id: "cht-mluva",
+      label: "Mluva CHT 360°‰.",
+      entry: "./mluva-cht-360/",
+      kind: "pwa",
+      storageKeys: [
+        "cht360_mluva_history_v1",
+        "cht360_mluva_lessons_v1",
+        "cht360_pamet_v1",
+        "cht360_glyph_workshop_v1",
+        "cht360_slot_locks_v1"
+      ],
       captureMode: "full"
     },
     {
