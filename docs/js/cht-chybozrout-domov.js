@@ -469,3 +469,92 @@ if (document.readyState === "loading") {
 } else {
   initialise();
 }
+/* Zobrazení historie: skryje jen vyřešené staré chyby Domova. */
+(() => {
+  "use strict";
+
+  let observer = null;
+
+  function isOldDomov404(row) {
+    const text = String(row?.textContent || "").toLowerCase();
+    return text.includes("chybozrout-domov.js") &&
+      text.includes("soubor se nenačetl");
+  }
+
+  function refreshRepairLog() {
+    const log = document.getElementById("repairLog");
+    const queue = document.getElementById("repairQueue");
+
+    if (!log) return;
+
+    const rows = Array.from(log.querySelectorAll(".repairLogLine"));
+    const resolved = new Set();
+
+    rows.forEach((row, index) => {
+      if (!isOldDomov404(row)) return;
+
+      resolved.add(row);
+
+      [rows[index - 1], rows[index + 1]].forEach(neighbour => {
+        const text = String(neighbour?.textContent || "").toLowerCase();
+
+        if (text.includes("běhová chyba: script error")) {
+          resolved.add(neighbour);
+        }
+      });
+    });
+
+    resolved.forEach(row => {
+      row.hidden = true;
+      row.setAttribute("aria-hidden", "true");
+    });
+
+    const activeProblems = rows.filter(row =>
+      !row.hidden &&
+      (row.classList.contains("repairLogLine-error") ||
+        row.classList.contains("repairLogLine-warn"))
+    ).length;
+
+    if (queue && resolved.size) {
+      queue.textContent = String(activeProblems);
+    }
+
+    let notice = log.querySelector(".cht-domov-clean-log");
+
+    if (resolved.size && !rows.some(row => !row.hidden)) {
+      if (!notice) {
+        notice = document.createElement("div");
+        notice.className = "cht-domov-clean-log";
+        notice.textContent = "Žádné aktuální chyby.";
+        log.appendChild(notice);
+      }
+    } else {
+      notice?.remove();
+    }
+  }
+
+  function start() {
+    const log = document.getElementById("repairLog");
+
+    if (!log || observer) {
+      refreshRepairLog();
+      return;
+    }
+
+    observer = new MutationObserver(() => {
+      requestAnimationFrame(refreshRepairLog);
+    });
+
+    observer.observe(log, { childList: true, subtree: true });
+    refreshRepairLog();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start, { once: true });
+  } else {
+    start();
+  }
+
+  window.addEventListener("cht.chybozrout.completed", refreshRepairLog);
+  window.addEventListener("cht.chybozrout.repaired", refreshRepairLog);
+})();
