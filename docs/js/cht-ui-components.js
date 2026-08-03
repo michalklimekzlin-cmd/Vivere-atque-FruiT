@@ -16,42 +16,35 @@
     var style = document.createElement("style");
     style.id = "cht360-ui-shell-style";
     style.textContent = [
-      ":root{--cht360-gold-primary:#e7b65c;--cht360-gold-light:#f5e6c8;--cht360-gold-dark:#b8933c;--cht360-bg-primary:#fafaf8;--cht360-bg-secondary:#f0ede6;--cht360-text-primary:#2a2a2a;--cht360-text-secondary:#666666;--cht360-border:#d4cfc5;--cht360-success:#4caf50;--cht360-error:#f44336;--cht360-warning:#ff9800;--cht360-info:#2196f3;--cht360-cream:#fff0d3;--cht360-shell-bg:rgba(10,8,7,.88);--cht360-shell-line:rgba(245,230,200,.18);--cht360-shell-shadow:0 14px 32px rgba(0,0,0,.24);--cht360-shell-radius:18px;--cht360-shell-gap:12px;--cht360-shell-font:Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}",
-      ".cht360-shell{position:fixed;left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));z-index:9999;font-family:var(--cht360-shell-font);pointer-events:none}",
-      ".cht360-shell *{box-sizing:border-box}",
-      ".cht360-shell--top{top:max(10px,env(safe-area-inset-top))}",
-      ".cht360-shell--bottom{bottom:max(10px,env(safe-area-inset-bottom))}",
-      ".cht360-shell__panel{pointer-events:auto;display:flex;align-items:center;gap:var(--cht360-shell-gap);padding:10px 12px;border:1px solid var(--cht360-shell-line);border-radius:var(--cht360-shell-radius);background:var(--cht360-shell-bg);backdrop-filter:blur(18px);box-shadow:var(--cht360-shell-shadow);color:var(--cht360-gold-light)}",
-      ".cht360-shell__nav{display:flex;align-items:center;gap:8px;min-width:0;flex:1}",
-      ".cht360-shell__crumbs{display:flex;align-items:center;gap:6px;min-width:0;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
-      ".cht360-shell__crumbs span:last-child{color:#fff}",
-      ".cht360-shell__menu{display:flex;gap:8px;overflow:auto;scrollbar-width:none;padding-top:8px}",
-      ".cht360-shell__menu::-webkit-scrollbar{display:none}",
-      ".cht360-shell__chip,.cht360-shell__action,.cht360-shell__link{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 14px;border:1px solid rgba(231,182,92,.24);border-radius:999px;background:rgba(255,240,211,.08);color:#fff0d3;text-decoration:none;font-size:14px;cursor:pointer;transition:transform .18s ease,background .18s ease,border-color .18s ease}",
-      ".cht360-shell__chip[aria-current='page']{background:rgba(231,182,92,.22);border-color:rgba(231,182,92,.5);color:#fff}",
-      ".cht360-shell__action:hover,.cht360-shell__chip:hover,.cht360-shell__link:hover,.cht360-shell__action:focus-visible,.cht360-shell__chip:focus-visible,.cht360-shell__link:focus-visible{outline:none;transform:translateY(-1px);border-color:rgba(231,182,92,.65);background:rgba(231,182,92,.18)}",
-      ".cht360-shell__badge{display:inline-flex;align-items:center;min-height:32px;padding:0 10px;border-radius:999px;background:rgba(231,182,92,.18);color:#fff;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}",
-      ".cht360-shell__spacer{flex:1}",
-      ".cht360-shell__status{display:inline-flex;align-items:center;gap:8px;min-height:32px;padding:0 10px;border-radius:999px;background:rgba(255,255,255,.06);font-size:12px;color:#fff0d3}",
-      ".cht360-shell__status-dot{width:10px;height:10px;border-radius:50%;background:var(--cht360-success);box-shadow:0 0 0 4px rgba(76,175,80,.14)}",
-      ".cht360-shell__status[data-state='stale'] .cht360-shell__status-dot{background:var(--cht360-warning);box-shadow:0 0 0 4px rgba(255,152,0,.18)}",
-      ".cht360-shell__status[data-state='error'] .cht360-shell__status-dot{background:var(--cht360-error);box-shadow:0 0 0 4px rgba(244,67,54,.18)}",
-      ".cht360-toast-stack{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:max(80px,calc(env(safe-area-inset-bottom) + 80px));z-index:10000;display:grid;gap:10px;max-width:min(92vw,360px)}",
-      ".cht360-toast{padding:12px 14px;border-radius:16px;border:1px solid rgba(231,182,92,.22);background:rgba(12,10,8,.92);color:#fff;box-shadow:var(--cht360-shell-shadow);font:500 14px/1.45 var(--cht360-shell-font)}",
-      ".cht360-toast[data-tone='good']{border-color:rgba(76,175,80,.45)}",
-      ".cht360-toast[data-tone='error']{border-color:rgba(244,67,54,.52)}",
-      ".cht360-toast[data-tone='warn']{border-color:rgba(255,152,0,.5)}",
-      ".cht360-shell-dialog{width:min(92vw,640px);border:1px solid rgba(231,182,92,.24);border-radius:24px;padding:0;background:#120f0c;color:#fff0d3;box-shadow:0 20px 50px rgba(0,0,0,.35)}",
+      ":root{--cht360-gold-primary:#e7b65c;--cht360-gold-light:#f5e6c8;--cht360-gold-dark:#b8933c;--cht360-success:#4caf50;--cht360-error:#f44336;--cht360-warning:#ff9800;--cht360-shell-bg:rgba(10,8,7,.92);--cht360-shell-line:rgba(245,230,200,.2);--cht360-shell-shadow:0 18px 42px rgba(0,0,0,.34);--cht360-shell-font:Inter,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}",
+      ".cht360-arc{position:fixed;z-index:9999;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));left:max(10px,env(safe-area-inset-left));display:grid;justify-items:center;pointer-events:none;font-family:var(--cht360-shell-font);}",
+      ".cht360-arc *{box-sizing:border-box}",
+      ".cht360-arc__panel{width:min(960px,100%);max-height:0;overflow:hidden;opacity:0;transform:translateY(34px);pointer-events:none;border:0 solid transparent;border-radius:34px 34px 18px 18px;background:var(--cht360-shell-bg);box-shadow:var(--cht360-shell-shadow);transition:max-height .34s ease,opacity .2s ease,transform .34s ease,border-color .2s ease;}",
+      ".cht360-arc.is-open .cht360-arc__panel{max-height:min(58dvh,560px);opacity:1;transform:translateY(0);pointer-events:auto;border-width:1px;border-color:var(--cht360-shell-line);}",
+      ".cht360-arc__inner{max-height:min(58dvh,560px);overflow:auto;padding:13px;scrollbar-width:thin;overscroll-behavior:contain;}",
+      ".cht360-arc__signatures{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:min(620px,100%);margin:0 auto 11px;}",
+      ".cht360-arc__signature{min-height:42px;display:flex;align-items:center;justify-content:center;padding:8px 10px;border:1px solid rgba(231,182,92,.25);border-radius:16px;background:linear-gradient(135deg,rgba(255,240,211,.14),rgba(255,255,255,.035));color:#fff0d3;font-size:12px;font-weight:800;letter-spacing:.02em;text-align:center;box-shadow:inset 0 0 18px rgba(255,226,173,.045);}",
+      ".cht360-arc__utilities,.cht360-arc__modules{display:flex;align-items:flex-end;justify-content:center;gap:8px;flex-wrap:wrap;}",
+      ".cht360-arc__utilities{padding:0 0 11px;border-bottom:1px solid rgba(245,230,200,.12);}",
+      ".cht360-arc__modules{padding:14px 0 2px;}",
+      ".cht360-arc__card,.cht360-shell__action{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:42px;padding:8px 13px;border:1px solid rgba(231,182,92,.28);border-radius:15px;background:rgba(255,240,211,.075);color:#fff0d3;font:750 13px/1.15 var(--cht360-shell-font);text-decoration:none;cursor:pointer;transform:translateY(calc(var(--cht360-arc-lift,0) * -1px));transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease;}",
+      ".cht360-arc__card:hover,.cht360-arc__card:focus-visible,.cht360-shell__action:hover,.cht360-shell__action:focus-visible{outline:none;transform:translateY(calc(var(--cht360-arc-lift,0) * -1px - 2px));border-color:rgba(231,182,92,.72);background:rgba(231,182,92,.2);box-shadow:0 7px 18px rgba(0,0,0,.2);}",
+      ".cht360-arc__card[aria-current='page']{border-color:rgba(231,182,92,.75);background:rgba(231,182,92,.23);color:#fff;}",
+      ".cht360-arc__handle{position:relative;z-index:1;pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:150px;min-height:48px;margin-top:7px;padding:9px 19px;border:1px solid rgba(231,182,92,.42);border-radius:999px;background:linear-gradient(180deg,rgba(39,29,16,.98),rgba(13,10,8,.98));color:#fff0d3;box-shadow:0 9px 24px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,240,211,.12);font:900 14px/1 var(--cht360-shell-font);letter-spacing:.04em;cursor:pointer;transition:transform .2s ease,border-color .2s ease,background .2s ease;}",
+      ".cht360-arc__handle:hover,.cht360-arc__handle:focus-visible{outline:none;transform:translateY(-2px);border-color:#f5e6c8;background:rgba(62,43,18,.98);}",
+      ".cht360-arc__handle-glyph{font-size:18px;line-height:1;transition:transform .28s ease;}",
+      ".cht360-arc.is-open .cht360-arc__handle-glyph{transform:rotate(180deg);}",
+      ".cht360-toast-stack{position:fixed;right:max(12px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 74px);z-index:10000;display:grid;gap:10px;max-width:min(92vw,360px);}",
+      ".cht360-toast{padding:12px 14px;border:1px solid rgba(231,182,92,.22);border-radius:16px;background:rgba(12,10,8,.94);color:#fff;box-shadow:var(--cht360-shell-shadow);font:500 14px/1.45 var(--cht360-shell-font);}",
+      ".cht360-toast[data-tone='good']{border-color:rgba(76,175,80,.45)}.cht360-toast[data-tone='error']{border-color:rgba(244,67,54,.52)}.cht360-toast[data-tone='warn']{border-color:rgba(255,152,0,.5)}",
+      ".cht360-shell-dialog{width:min(92vw,640px);border:1px solid rgba(231,182,92,.24);border-radius:24px;padding:0;background:#120f0c;color:#fff0d3;box-shadow:0 20px 50px rgba(0,0,0,.35);}",
       ".cht360-shell-dialog::backdrop{background:rgba(0,0,0,.55);backdrop-filter:blur(6px)}",
       ".cht360-shell-dialog__head,.cht360-shell-dialog__foot{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid rgba(231,182,92,.14)}",
-      ".cht360-shell-dialog__foot{border-top:1px solid rgba(231,182,92,.14);border-bottom:0;justify-content:flex-end}",
-      ".cht360-shell-dialog__body{padding:18px;display:grid;gap:14px;max-height:min(70vh,640px);overflow:auto}",
-      ".cht360-shell-dialog__body pre{margin:0;padding:12px;border-radius:14px;background:rgba(255,255,255,.04);white-space:pre-wrap;word-break:break-word;color:#f5e6c8}",
-      ".cht360-shell-dialog__body ul{margin:0;padding-left:18px}",
-      ".cht360-shell-dialog__body li{margin:0 0 8px}",
-      ".cht360-shell-sr{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}",
-      "[data-cht-loading='true']{opacity:.72;pointer-events:none}",
-      "@media (max-width: 768px){.cht360-shell__panel{padding:10px}.cht360-shell__crumbs{display:none}.cht360-shell__menu{padding-top:0}.cht360-shell__status-label{display:none}}"
+      ".cht360-shell-dialog__foot{justify-content:flex-end;border-top:1px solid rgba(231,182,92,.14);border-bottom:0}",
+      ".cht360-shell-dialog__body{display:grid;gap:14px;max-height:min(70vh,640px);overflow:auto;padding:18px}.cht360-shell-dialog__body pre{margin:0;padding:12px;border-radius:14px;background:rgba(255,255,255,.04);white-space:pre-wrap;word-break:break-word;color:#f5e6c8}.cht360-shell-dialog__body ul{margin:0;padding-left:18px}.cht360-shell-dialog__body li{margin:0 0 8px}",
+      ".cht360-shell__spacer{flex:1}.cht360-shell-sr{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}[data-cht-loading='true']{opacity:.72;pointer-events:none}",
+      "@media (max-width:560px){.cht360-arc{right:max(7px,env(safe-area-inset-right));bottom:max(7px,env(safe-area-inset-bottom));left:max(7px,env(safe-area-inset-left))}.cht360-arc__inner{padding:10px}.cht360-arc__signatures{gap:6px}.cht360-arc__signature{min-height:38px;padding:6px;font-size:10px}.cht360-arc__card{min-height:38px;padding:7px 10px;font-size:11px}.cht360-arc__utilities{padding-bottom:9px}.cht360-arc__modules{padding-top:11px}.cht360-arc__handle{min-height:44px;margin-top:5px;min-width:132px}}",
+      "@media (prefers-reduced-motion:reduce){.cht360-arc__panel,.cht360-arc__card,.cht360-arc__handle,.cht360-arc__handle-glyph{transition:none!important}}"
     ].join("");
     document.head.appendChild(style);
   }
@@ -66,81 +59,76 @@
   }
 
   function createShell() {
-    if (document.getElementById("cht360-shell-top")) return;
-    var current = navigation.getCurrentModule() || { title: "CHT", longTitle: "CHT 360°‰." };
-    var top = document.createElement("div");
-    top.className = "cht360-shell cht360-shell--top";
-    top.id = "cht360-shell-top";
-    var panel = document.createElement("div");
-    panel.className = "cht360-shell__panel";
+    if (document.getElementById("cht360-arc")) return;
+    var current = navigation.getCurrentModule() || { id: "", title: "Paměť", longTitle: "CHT 360°‰." };
+    var dock = document.createElement("div");
+    dock.className = "cht360-arc";
+    dock.id = "cht360-arc";
 
-    var nav = document.createElement("div");
-    nav.className = "cht360-shell__nav";
-    nav.appendChild(createButton("← Zpět", function () { navigation.goBack(); }));
-    nav.appendChild(createButton("⌂ Domů", function () { navigation.goHome(); }));
+    var panel = document.createElement("section");
+    panel.className = "cht360-arc__panel";
+    panel.id = "cht360-arc-panel";
+    panel.setAttribute("aria-label", "Oblouk přepínacích karet CHT 360°‰.");
 
-    var crumbWrap = document.createElement("div");
-    var badge = document.createElement("span");
-    badge.className = "cht360-shell__badge";
-    badge.textContent = current.badge || current.title || "Modul";
-    crumbWrap.appendChild(badge);
+    var inner = document.createElement("div");
+    inner.className = "cht360-arc__inner";
 
-    var crumbs = document.createElement("div");
-    crumbs.className = "cht360-shell__crumbs";
-    navigation.getBreadcrumbs().forEach(function (crumb, index, all) {
-      var part = document.createElement("span");
-      part.textContent = crumb.label;
-      crumbs.appendChild(part);
-      if (index < all.length - 1) {
-        var sep = document.createElement("span");
-        sep.textContent = "›";
-        crumbs.appendChild(sep);
-      }
+    var signatures = document.createElement("div");
+    signatures.className = "cht360-arc__signatures";
+    ["Michal Klimek", "Terry", "Dominik"].forEach(function (name) {
+      var card = document.createElement("div");
+      card.className = "cht360-arc__signature";
+      card.textContent = name;
+      signatures.appendChild(card);
     });
-    crumbWrap.appendChild(crumbs);
-    nav.appendChild(crumbWrap);
-    panel.appendChild(nav);
+    inner.appendChild(signatures);
 
-    panel.appendChild(createButton("? Pomoc", openHelp));
-    var sync = document.createElement("div");
-    sync.className = "cht360-shell__status";
-    sync.id = "cht360-shell-sync";
-    sync.dataset.state = "ok";
-    sync.innerHTML = '<span class="cht360-shell__status-dot" aria-hidden="true"></span><span class="cht360-shell__status-label">Synchronizováno</span>';
-    panel.appendChild(sync);
-    top.appendChild(panel);
+    var utilities = document.createElement("nav");
+    utilities.className = "cht360-arc__utilities";
+    utilities.setAttribute("aria-label", "Rychlé ovládání CHT");
+    utilities.appendChild(createButton("← Zpět", function () { navigation.goBack(); }, "cht360-arc__card"));
+    utilities.appendChild(createButton("⌂ Domů", function () { navigation.goHome(); }, "cht360-arc__card"));
+    utilities.appendChild(createButton("? Pomoc", openHelp, "cht360-arc__card"));
+    utilities.appendChild(createButton("Ladění", openDebug, "cht360-arc__card"));
+    inner.appendChild(utilities);
 
-    var menu = document.createElement("nav");
-    menu.className = "cht360-shell__panel cht360-shell__menu";
-    menu.setAttribute("aria-label", "Rychlé moduly CHT 360°‰.");
-    navigation.getModuleLinks().forEach(function (module) {
+    var modules = document.createElement("nav");
+    modules.className = "cht360-arc__modules";
+    modules.setAttribute("aria-label", "Moduly CHT 360°‰.");
+    var lifts = [10, 5, 1, 0, 1, 5, 10, 5, 1, 0];
+    navigation.getModuleLinks().forEach(function (module, index) {
       var link = document.createElement("a");
-      link.className = "cht360-shell__chip";
+      link.className = "cht360-arc__card";
       link.href = module.url;
       link.textContent = module.title;
-      if ((current && current.id) === module.id) link.setAttribute("aria-current", "page");
-      menu.appendChild(link);
+      link.style.setProperty("--cht360-arc-lift", String(lifts[index % lifts.length]));
+      if (current.id === module.id) link.setAttribute("aria-current", "page");
+      modules.appendChild(link);
     });
-    top.appendChild(menu);
-    document.body.appendChild(top);
+    inner.appendChild(modules);
+    panel.appendChild(inner);
 
-    var bottom = document.createElement("div");
-    bottom.className = "cht360-shell cht360-shell--bottom";
-    bottom.id = "cht360-shell-bottom";
-    var bottomPanel = document.createElement("div");
-    bottomPanel.className = "cht360-shell__panel";
-    var moduleState = document.createElement("div");
-    moduleState.className = "cht360-shell__status";
-    moduleState.innerHTML = '<span class="cht360-shell__status-dot" aria-hidden="true"></span><span>' + (current.longTitle || current.title) + '</span>';
-    bottomPanel.appendChild(moduleState);
-    bottomPanel.appendChild(createButton("ChybaŽrout", function () { navigation.openModule("cht-chybozrout"); }, "cht360-shell__action"));
-    bottomPanel.appendChild(createButton("Ladění", openDebug));
-    var version = document.createElement("span");
-    version.className = "cht360-shell__status";
-    version.innerHTML = '<span>Verze ' + config.version + '</span>';
-    bottomPanel.appendChild(version);
-    bottom.appendChild(bottomPanel);
-    document.body.appendChild(bottom);
+    var handle = document.createElement("button");
+    handle.type = "button";
+    handle.className = "cht360-arc__handle";
+    handle.setAttribute("aria-controls", panel.id);
+    handle.setAttribute("aria-expanded", "false");
+    handle.setAttribute("aria-label", "Otevřít oblouk přepínacích karet");
+    handle.innerHTML = '<span class="cht360-arc__handle-glyph" aria-hidden="true">⌃</span><span> Karty</span>';
+
+    function setOpen(open) {
+      dock.classList.toggle("is-open", open);
+      handle.setAttribute("aria-expanded", open ? "true" : "false");
+      handle.setAttribute("aria-label", open ? "Zasunout oblouk přepínacích karet" : "Otevřít oblouk přepínacích karet");
+    }
+
+    handle.addEventListener("click", function () {
+      setOpen(!dock.classList.contains("is-open"));
+    });
+
+    dock.appendChild(panel);
+    dock.appendChild(handle);
+    document.body.appendChild(dock);
 
     var stack = document.createElement("div");
     stack.className = "cht360-toast-stack";
@@ -180,10 +168,10 @@
     intro.textContent = current.description || "Tento modul je součástí propojeného oběhu CHT 360°‰.";
     var list = document.createElement("ul");
     [
-      "Horní lišta drží Zpět, Domů, modul a rychlé přepínání mezi hlavními částmi.",
-      "Klávesa Escape zavře otevřený dialog, panel nebo modální okno.",
-      "Spodní lišta ukazuje aktuální modul, stav synchronizace a rychlou cestu do ChybaŽrouta.",
-      "Barevné notifikace potvrzují úspěch, varování i chybu při práci se stavem aplikace."
+      "Šipka Karty u spodního okraje vysune nebo zasune oblouk ovládání.",
+      "V oblouku jsou podpisové karty Michal Klimek, Terry a Dominik a cesty do hlavních částí CHT.",
+      "Karty Paměť, Mluva, Glyphy, Pokojíčky, Bubínky, Jádra, Puls, Signal, ChybaŽrout a Revia vedou přímo do svých modulů.",
+      "Klávesa Escape zavře otevřený dialog, panel nebo modální okno."
     ].forEach(function (text) {
       var item = document.createElement("li");
       item.textContent = text;
@@ -375,3 +363,5 @@
     initShell();
   }
 })(window, document);
+
+
