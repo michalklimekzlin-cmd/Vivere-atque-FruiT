@@ -1,12 +1,15 @@
 "use strict";
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v5-stable-cht-scene`;
+const CACHE_NAME = `${CACHE_PREFIX}v6-deset-bubinku`;
 const OFFLINE_PAGE = "./index.html";
 
 const CORE_FILES = [
   "./",
   "./index.html",
+  "./js/cht-360-oblouk-osmi-zamku.js",
+  "./js/cht-360-devaty-desaty-bubinek.js",
+  "./js/cht-ui-components.js",
   "./offline-cache-assets.json"
 ];
 
@@ -190,3 +193,4 @@ self.addEventListener("message", event => {
     );
   }
 });
+
