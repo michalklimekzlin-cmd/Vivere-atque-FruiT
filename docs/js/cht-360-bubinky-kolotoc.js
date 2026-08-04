@@ -1,12 +1,13 @@
 "use strict";
 
-/* CHT 360°‰. — osm bubínků zůstává ve svém úsměvu a zasouvá se do stran CHT. */
+/* CHT 360°‰. — osm bubínků se v úsměvu postupně zasouvá do stran CHT. */
 (() => {
   const ROOT_ID = "cht360-oblouk-osmi-zamku";
   const STORAGE_KEY = "cht360_bubinky_kolotoc_v1";
   const SNAPSHOT_KEY = "cht360_bubinky_kolotoc_snapshots_v1";
   const DRUM_COUNT = 8;
   const SMILE = [0, 15, 29, 38, 38, 29, 15, 0];
+  const RAIL_LIFT = -8;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
   const previous = read(STORAGE_KEY);
@@ -69,16 +70,26 @@
       .sort((a, b) => Number(a.dataset.lockIndex) - Number(b.dataset.lockIndex));
   }
 
+  function sequenceProgress(progress, index, direction) {
+    const rank = direction < 0 ? index : DRUM_COUNT - 1 - index;
+    return clamp((progress - rank * 0.105) / 0.265, 0, 1);
+  }
+
   function paint(root, side = state.side, amount = Math.abs(side)) {
     const direction = side < 0 ? -1 : side > 0 ? 1 : 0;
     const progress = clamp(amount, 0, 1);
 
     drums(root).forEach((node, index) => {
+      const localProgress = direction === 0
+        ? 0
+        : sequenceProgress(progress, index, direction);
+
       node.style.setProperty("--smile-y", `${SMILE[index]}px`);
-      node.style.setProperty("--cht-inset-x", `${direction * progress * 106}px`);
-      node.style.setProperty("--cht-inset-y", `${-progress * 8}px`);
-      node.style.setProperty("--cht-inset-scale", String(1 - progress * 0.42));
-      node.style.setProperty("--cht-inset-opacity", String(1 - progress * 0.93));
+      node.style.setProperty("--cht-rail-lift", `${RAIL_LIFT}px`);
+      node.style.setProperty("--cht-inset-x", `${direction * localProgress * 74}px`);
+      node.style.setProperty("--cht-inset-y", "0px");
+      node.style.setProperty("--cht-inset-scale", "1");
+      node.style.setProperty("--cht-inset-opacity", "1");
     });
 
     root.dataset.chtInsetSide =
@@ -103,7 +114,7 @@
       #${ROOT_ID} .cht360OsmZamek {
         transform: translate3d(
           var(--cht-inset-x, 0px),
-          calc(var(--smile-y, 0px) + var(--cht-inset-y, 0px)),
+          calc(var(--smile-y, 0px) + var(--cht-rail-lift, -8px) + var(--cht-inset-y, 0px)),
           0
         ) scale(var(--cht-inset-scale, 1)) !important;
 
