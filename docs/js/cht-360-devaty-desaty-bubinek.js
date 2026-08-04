@@ -5,6 +5,7 @@
   const ROOT = "cht360-oblouk-osmi-zamku";
   const STATE = "cht360_extra_bubinky_v1";
   const AI_STATE = "cht360_ai_brana_v1";
+  const STATE_SNAPSHOTS = "cht360_extra_bubinky_snapshots_v1";
   const PANEL = "cht360-ai-brana-panel";
   const DRUMS = [
     { label: "Ladění", glyphs: ["⌁", "⚙", "•ア", "°"], action: "debug" },
@@ -13,15 +14,36 @@
   const SMILE = [0, 8, 17, 25, 25, 17, 8, 0];
   const mod = (value, size) => ((value % size) + size) % size;
   const json = key => { try { return JSON.parse(localStorage.getItem(key) || "null"); } catch (_) { return null; } };
-  let state = json(STATE) || { version: 1, indices: [0, 0], history: [] };
-  state.indices = Array.isArray(state.indices) ? [Number(state.indices[0]) || 0, Number(state.indices[1]) || 0] : [0, 0];
-  let ai = json(AI_STATE) || { version: 1, status: "odpojeno", provider: "", activeGlyph: DRUMS[1].glyphs[0] };
 
-  const glyph = index => DRUMS[index].glyphs[mod(state.indices[index], DRUMS[index].glyphs.length)];
+  const previousState = json(STATE);
+  let state = previousState || { version: 1, indices: [0, 0], history: [] };
+  state.indices = Array.isArray(state.indices)
+    ? [Number(state.indices[0]) || 0, Number(state.indices[1]) || 0]
+    : [0, 0];
+
+  if (previousState && !Array.isArray(previousState.carousel)) {
+    snapshotState(previousState, "před přidáním kolotoče bubínků");
+  }
+
+  state.carousel = normaliseCarousel(state.carousel);
+
+  let ai = json(AI_STATE) || {
+    version: 1,
+    status: "odpojeno",
+    provider: "",
+    activeGlyph: DRUMS[1].glyphs[0]
+  };
+
+  const glyph = index =>
+    DRUMS[index].glyphs[mod(state.indices[index], DRUMS[index].glyphs.length)];
 
   function save(reason) {
     state.updatedAt = new Date().toISOString();
-    try { localStorage.setItem(STATE, JSON.stringify(state)); } catch (_) {}
+
+    try {
+      localStorage.setItem(STATE, JSON.stringify(state));
+    } catch (_) {}
+
     window.dispatchEvent(new CustomEvent("cht.extra.drum.changed", {
       detail: { reason, values: [glyph(0), glyph(1)] }
     }));
@@ -29,14 +51,22 @@
 
   function saveAI(reason) {
     ai.updatedAt = new Date().toISOString();
-    try { localStorage.setItem(AI_STATE, JSON.stringify({ ...ai, reason })); } catch (_) {}
+
+    try {
+      localStorage.setItem(AI_STATE, JSON.stringify({ ...ai, reason }));
+    } catch (_) {}
+
     window.dispatchEvent(new CustomEvent("cht.ai.bridge.changed", {
       detail: { ...ai, reason, source: "cht360-devaty-desaty-bubinek" }
     }));
   }
 
   function step(index, amount, button) {
-    state.indices[index] = mod(state.indices[index] + amount, DRUMS[index].glyphs.length);
+    state.indices[index] = mod(
+      state.indices[index] + amount,
+      DRUMS[index].glyphs.length
+    );
+
     state.history = [
       ...(Array.isArray(state.history) ? state.history : []),
       { at: new Date().toISOString(), glyph: glyph(index), index }
@@ -61,7 +91,9 @@
 
     button.querySelector("[data-reel='prev']").textContent =
       values[mod(at - 1, values.length)];
+
     button.querySelector("[data-reel='now']").textContent = glyph(index);
+
     button.querySelector("[data-reel='next']").textContent =
       values[mod(at + 1, values.length)];
   }
@@ -143,6 +175,9 @@
 
     root.setAttribute("aria-label", "Deset bubínkových zámků CHT 360°‰.");
 
+    bindCarousel(root);
+    syncCarousel(root);
+
     root.querySelectorAll(".cht360OsmZamek").forEach((node, index) => {
       if (index < 8) {
         node.style.setProperty("--smile-y", SMILE[index] + "px");
@@ -174,6 +209,149 @@
       bind(button, index);
       root.append(button);
     });
+  }
+
+  function normaliseCarousel(value) {
+    const allowed = Array.from({ length: 8 }, (_, index) => index);
+
+    const incoming = Array.isArray(value)
+      ? value.map(Number).filter(index => allowed.includes(index))
+      : [];
+
+    return [...new Set([...incoming, ...allowed])];
+  }
+
+  function snapshotState(source, reason) {
+    try {
+      const saved = json(STATE_SNAPSHOTS);
+      const items = Array.isArray(saved?.items) ? saved.items : [];
+
+      items.push({
+        at: new Date().toISOString(),
+        sourceKey: STATE,
+        reason,
+        value: source
+      });
+
+      localStorage.setItem(STATE_SNAPSHOTS, JSON.stringify({
+        version: 1,
+        items: items.slice(-3)
+      }));
+    } catch (_) {}
+  }
+
+  function syncCarousel(root) {
+    const locks = new Map(
+      Array.from(root.querySelectorAll("[data-lock-index]"))
+        .map(node => [Number(node.dataset.lockIndex), node])
+    );
+
+    const firstExtra = root.querySelector(".cht360ExtraDrum");
+
+    state.carousel.forEach(index => {
+      const lock = locks.get(index);
+
+      if (lock) {
+        root.insertBefore(lock, firstExtra || null);
+      }
+    });
+  }
+
+  function turnCarousel(root, direction, count) {
+    for (let step = 0; step < count; step += 1) {
+      if (direction < 0) {
+        state.carousel.push(state.carousel.shift());
+      } else {
+        state.carousel.unshift(state.carousel.pop());
+      }
+    }
+
+    state.history = [
+      ...(Array.isArray(state.history) ? state.history : []),
+      {
+        at: new Date().toISOString(),
+        reason: direction < 0 ? "kolotoč doleva" : "kolotoč doprava",
+        carousel: [...state.carousel]
+      }
+    ].slice(-8);
+
+    save("posun kolotoče bubínků");
+    syncCarousel(root);
+  }
+
+  function bindCarousel(root) {
+    if (root.dataset.carouselBound === "true") return;
+
+    root.dataset.carouselBound = "true";
+
+    let drag = null;
+
+    root.addEventListener("pointerdown", event => {
+      const target = event.target.closest(".cht360OsmZamek");
+      if (!target) return;
+
+      drag = {
+        id: event.pointerId,
+        target,
+        x: event.clientX,
+        y: event.clientY,
+        horizontal: false
+      };
+    }, true);
+
+    root.addEventListener("pointermove", event => {
+      if (!drag || drag.id !== event.pointerId) return;
+
+      const dx = event.clientX - drag.x;
+      const dy = event.clientY - drag.y;
+
+      if (!drag.horizontal && Math.abs(dx) > Math.abs(dy) + 8) {
+        drag.horizontal = true;
+      }
+
+      if (!drag.horizontal) return;
+
+      root.style.setProperty(
+        "--cht-carousel-x",
+        Math.max(-110, Math.min(110, dx)) + "px"
+      );
+
+      root.classList.add("is-carousel-dragging");
+
+      event.preventDefault();
+      event.stopPropagation();
+    }, true);
+
+    const finish = event => {
+      if (!drag || drag.id !== event.pointerId) return;
+
+      const current = drag;
+      drag = null;
+
+      if (!current.horizontal) return;
+
+      const dx = event.clientX - current.x;
+
+      root.style.setProperty("--cht-carousel-x", "0px");
+      root.classList.remove("is-carousel-dragging");
+
+      current.target.releasePointerCapture?.(event.pointerId);
+      current.target.classList.remove("is-dragging");
+
+      if (Math.abs(dx) >= 34) {
+        turnCarousel(
+          root,
+          dx > 0 ? 1 : -1,
+          Math.max(1, Math.round(Math.abs(dx) / 70))
+        );
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    root.addEventListener("pointerup", finish, true);
+    root.addEventListener("pointercancel", finish, true);
   }
 
   function openAI() {
@@ -237,7 +415,10 @@
     if (!panel) return;
 
     panel.classList.remove("is-open");
-    setTimeout(() => { panel.hidden = true; }, 160);
+
+    setTimeout(() => {
+      panel.hidden = true;
+    }, 160);
   }
 
   function paintAI() {
@@ -245,6 +426,7 @@
     if (!panel) return;
 
     panel.querySelector("[data-ai-glyph]").textContent = glyph(1);
+
     panel.querySelector("[data-ai-state]").textContent =
       ai.status === "připojeno"
         ? "Připojeno" + (ai.provider ? " · " + ai.provider : "")
@@ -296,6 +478,7 @@
 
     ai.status = "odpojeno";
     ai.provider = "";
+
     saveAI("odpojení AI");
 
     window.dispatchEvent(new CustomEvent("cht.ai.disconnect", { detail }));
@@ -309,40 +492,96 @@
     node.id = "cht360-extra-drum-style";
 
     node.textContent =
+      '#cht360-oblouk-osmi-zamku{' +
+        'transform:translateX(calc(-50% + var(--cht-carousel-x,0px)))!important;' +
+        'will-change:transform;' +
+        'transition:transform .22s cubic-bezier(.22,.8,.22,1)' +
+      '}' +
+      '#cht360-oblouk-osmi-zamku.is-carousel-dragging{transition:none}' +
       '#cht360-oblouk-osmi-zamku::before{height:64px!important}' +
       '#cht360-oblouk-osmi-zamku .cht360ExtraDrum{' +
-        'position:absolute;bottom:calc(100% - 3px);width:clamp(42px,5.5vw,54px);' +
-        'min-width:42px;max-width:54px;transform:none}' +
+        'position:absolute;' +
+        'bottom:calc(100% - 3px);' +
+        'width:clamp(42px,5.5vw,54px);' +
+        'min-width:42px;' +
+        'max-width:54px;' +
+        'transform:none' +
+      '}' +
       '#cht360-oblouk-osmi-zamku .cht360ExtraDrum[data-extra-drum="0"]{left:8%}' +
       '#cht360-oblouk-osmi-zamku .cht360ExtraDrum[data-extra-drum="1"]{' +
-        'left:calc(8% + clamp(47px,6.1vw,61px))}' +
+        'left:calc(8% + clamp(47px,6.1vw,61px))' +
+      '}' +
       '#cht360-oblouk-osmi-zamku .cht360ExtraDrum[data-extra-drum="1"] ' +
         '.cht360OsmZamekLabel{font-size:6.5px;letter-spacing:0}' +
-      '.cht360AiBrana{position:fixed;z-index:80;inset:0;display:grid;place-items:center;' +
-        'padding:18px;background:rgba(3,3,4,.62);backdrop-filter:blur(8px);' +
-        'opacity:0;transition:opacity .16s ease}' +
+      '.cht360AiBrana{' +
+        'position:fixed;' +
+        'z-index:80;' +
+        'inset:0;' +
+        'display:grid;' +
+        'place-items:center;' +
+        'padding:18px;' +
+        'background:rgba(3,3,4,.62);' +
+        'backdrop-filter:blur(8px);' +
+        'opacity:0;' +
+        'transition:opacity .16s ease' +
+      '}' +
       '.cht360AiBrana.is-open{opacity:1}' +
-      '.cht360AiBranaCard{width:min(350px,92vw);padding:15px;' +
-        'border:1px solid rgba(255,226,173,.34);border-radius:20px;' +
+      '.cht360AiBranaCard{' +
+        'width:min(350px,92vw);' +
+        'padding:15px;' +
+        'border:1px solid rgba(255,226,173,.34);' +
+        'border-radius:20px;' +
         'background:linear-gradient(160deg,rgba(42,30,14,.98),rgba(8,8,12,.98));' +
-        'color:#fff0c5;box-shadow:0 18px 50px rgba(0,0,0,.52)}' +
+        'color:#fff0c5;' +
+        'box-shadow:0 18px 50px rgba(0,0,0,.52)' +
+      '}' +
       '.cht360AiBranaCard header{display:flex;justify-content:space-between;gap:12px}' +
       '.cht360AiBranaCard header strong,.cht360AiBranaCard header span{display:block}' +
       '.cht360AiBranaCard header strong{font-size:18px}' +
       '.cht360AiBranaCard header span,.cht360AiBranaCard small{' +
-        'color:rgba(255,240,197,.62);font-size:11px}' +
-      '.cht360AiBranaCard header button{min-width:36px;min-height:36px;' +
-        'border:1px solid rgba(255,226,173,.24);border-radius:50%;background:transparent;' +
-        'color:#fff0c5;font-size:22px}' +
-      '.cht360AiBranaCard .glyph{margin:14px 0 5px;color:#ffe4aa;' +
-        'font-size:25px;font-weight:900;text-align:center}' +
-      '.cht360AiBranaCard .state{margin:0 0 13px;color:rgba(255,240,197,.76);' +
-        'font-size:12px;text-align:center}' +
-      '.cht360AiBranaCard .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}' +
-      '.cht360AiBranaCard .actions button{min-height:42px;' +
-        'border:1px solid rgba(255,226,173,.28);border-radius:12px;' +
-        'background:rgba(255,232,172,.07);color:#fff0c5;font-weight:800}' +
-      '.cht360AiBranaCard small{display:block;margin-top:12px;line-height:1.35}';
+        'color:rgba(255,240,197,.62);' +
+        'font-size:11px' +
+      '}' +
+      '.cht360AiBranaCard header button{' +
+        'min-width:36px;' +
+        'min-height:36px;' +
+        'border:1px solid rgba(255,226,173,.24);' +
+        'border-radius:50%;' +
+        'background:transparent;' +
+        'color:#fff0c5;' +
+        'font-size:22px' +
+      '}' +
+      '.cht360AiBranaCard .glyph{' +
+        'margin:14px 0 5px;' +
+        'color:#ffe4aa;' +
+        'font-size:25px;' +
+        'font-weight:900;' +
+        'text-align:center' +
+      '}' +
+      '.cht360AiBranaCard .state{' +
+        'margin:0 0 13px;' +
+        'color:rgba(255,240,197,.76);' +
+        'font-size:12px;' +
+        'text-align:center' +
+      '}' +
+      '.cht360AiBranaCard .actions{' +
+        'display:grid;' +
+        'grid-template-columns:1fr 1fr;' +
+        'gap:8px' +
+      '}' +
+      '.cht360AiBranaCard .actions button{' +
+        'min-height:42px;' +
+        'border:1px solid rgba(255,226,173,.28);' +
+        'border-radius:12px;' +
+        'background:rgba(255,232,172,.07);' +
+        'color:#fff0c5;' +
+        'font-weight:800' +
+      '}' +
+      '.cht360AiBranaCard small{' +
+        'display:block;' +
+        'margin-top:12px;' +
+        'line-height:1.35' +
+      '}';
 
     document.head.append(node);
   }
