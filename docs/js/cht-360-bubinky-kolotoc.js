@@ -90,6 +90,13 @@
       node.style.setProperty("--cht-inset-y", "0px");
       node.style.setProperty("--cht-inset-scale", "1");
       node.style.setProperty("--cht-inset-opacity", "1");
+
+      const isLeftPocket = direction < 0 && index < 2;
+      const isRightPocket = direction > 0 && index > DRUM_COUNT - 3;
+
+      node.dataset.chtPocket = isLeftPocket ? "left" : isRightPocket ? "right" : "open";
+      node.style.setProperty("--cht-pocket-left", isLeftPocket ? `${localProgress * 48}%` : "0%");
+      node.style.setProperty("--cht-pocket-right", isRightPocket ? `${localProgress * 48}%` : "0%");
     });
 
     root.dataset.chtInsetSide =
@@ -119,10 +126,18 @@
         ) scale(var(--cht-inset-scale, 1)) !important;
 
         opacity: var(--cht-inset-opacity, 1);
+        clip-path: inset(
+          0
+          var(--cht-pocket-right, 0%)
+          0
+          var(--cht-pocket-left, 0%)
+        );
+
         transition:
-          transform .28s cubic-bezier(.22,.8,.22,1),
-          opacity .22s ease,
-          filter .18s ease;
+          transform .68s cubic-bezier(.18,.82,.2,1),
+          clip-path .68s cubic-bezier(.18,.82,.2,1),
+          opacity .48s ease,
+          filter .24s ease;
 
         will-change: transform, opacity;
       }
