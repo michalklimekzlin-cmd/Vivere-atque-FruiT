@@ -5,22 +5,20 @@
   const ROOT_ID = "cht360-oblouk-osmi-zamku";
   const STORAGE_KEY = "cht360_bubinky_kolotoc_v1";
   const DRUM_COUNT = 8;
+  const SMILE = [0, 11, 23, 31, 31, 23, 11, 0];
 
   let state = load();
 
   function load() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-      const allowed = Array.from({ length: DRUM_COUNT }, (_, index) => index);
+      const valid = Array.from({ length: DRUM_COUNT }, (_, index) => index);
 
       const order = Array.isArray(saved?.order)
-        ? saved.order.map(Number).filter(index => allowed.includes(index))
+        ? saved.order.map(Number).filter(index => valid.includes(index))
         : [];
 
-      return {
-        version: 1,
-        order: [...new Set([...order, ...allowed])]
-      };
+      return { version: 1, order: [...new Set([...order, ...valid])] };
     } catch (_) {
       return {
         version: 1,
@@ -55,6 +53,10 @@
         transition: none;
         filter: brightness(1.16);
       }
+
+      #${ROOT_ID}::before {
+        height: 78px !important;
+      }
     `;
 
     document.head.append(style);
@@ -77,10 +79,11 @@
 
     state.order.forEach(index => {
       const node = byIndex.get(index);
+      if (node) root.insertBefore(node, firstExtra || null);
+    });
 
-      if (node) {
-        root.insertBefore(node, firstExtra || null);
-      }
+    mainDrums(root).forEach((node, index) => {
+      node.style.setProperty("--smile-y", (SMILE[index] || 0) + "px");
     });
   }
 
@@ -185,6 +188,8 @@
 
     [0, 120, 500].forEach(delay => {
       setTimeout(() => {
+        document.getElementById("cht360-arc")?.remove();
+
         const root = document.getElementById(ROOT_ID);
         if (!root) return;
 
