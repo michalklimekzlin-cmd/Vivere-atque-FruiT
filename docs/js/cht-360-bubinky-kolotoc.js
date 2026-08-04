@@ -1,30 +1,53 @@
 "use strict";
 
-/* CHT 360°‰. — pohybový kolotoč osmi spodních bubínků. */
+/* CHT 360°‰. — osm bubínků zůstává ve svém úsměvu a zasouvá se do stran CHT. */
 (() => {
   const ROOT_ID = "cht360-oblouk-osmi-zamku";
   const STORAGE_KEY = "cht360_bubinky_kolotoc_v1";
+  const SNAPSHOT_KEY = "cht360_bubinky_kolotoc_snapshots_v1";
   const DRUM_COUNT = 8;
-  const SMILE = [0, 11, 23, 31, 31, 23, 11, 0];
+  const SMILE = [0, 15, 29, 38, 38, 29, 15, 0];
+  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
-  let state = load();
+  const previous = read(STORAGE_KEY);
+  const hadSide = [-1, 0, 1].includes(Number(previous?.side));
+  const state = {
+    ...(previous && typeof previous === "object" ? previous : {}),
+    version: 2,
+    side: hadSide ? Number(previous.side) : 0
+  };
 
-  function load() {
+  if (previous && !hadSide) {
+    snapshot(previous);
+    save("přechod z kolotoče na zasouvání bubínků");
+  }
+
+  function read(key) {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-      const valid = Array.from({ length: DRUM_COUNT }, (_, index) => index);
-
-      const order = Array.isArray(saved?.order)
-        ? saved.order.map(Number).filter(index => valid.includes(index))
-        : [];
-
-      return { version: 1, order: [...new Set([...order, ...valid])] };
+      return JSON.parse(localStorage.getItem(key) || "null");
     } catch (_) {
-      return {
-        version: 1,
-        order: Array.from({ length: DRUM_COUNT }, (_, index) => index)
-      };
+      return null;
     }
+  }
+
+  function snapshot(value) {
+    try {
+      const current = read(SNAPSHOT_KEY);
+      const items = Array.isArray(current?.items) ? current.items : [];
+
+      items.push({
+        id: `bubinky-${Date.now()}`,
+        at: new Date().toISOString(),
+        sourceKey: STORAGE_KEY,
+        reason: "před zasouváním bubínků do levé a pravé strany",
+        value
+      });
+
+      localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({
+        version: 1,
+        items: items.slice(-3)
+      }));
+    } catch (_) {}
   }
 
   function save(reason) {
@@ -37,86 +60,122 @@
     } catch (_) {}
   }
 
+  function drums(root) {
+    return Array.from(root.querySelectorAll("[data-lock-index]"))
+      .filter(node => {
+        const index = Number(node.dataset.lockIndex);
+        return index >= 0 && index < DRUM_COUNT;
+      })
+      .sort((a, b) => Number(a.dataset.lockIndex) - Number(b.dataset.lockIndex));
+  }
+
+  function paint(root, side = state.side, amount = Math.abs(side)) {
+    const direction = side < 0 ? -1 : side > 0 ? 1 : 0;
+    const progress = clamp(amount, 0, 1);
+
+    drums(root).forEach((node, index) => {
+      node.style.setProperty("--smile-y", `${SMILE[index]}px`);
+      node.style.setProperty("--cht-inset-x", `${direction * progress * 106}px`);
+      node.style.setProperty("--cht-inset-y", `${-progress * 8}px`);
+      node.style.setProperty("--cht-inset-scale", String(1 - progress * 0.42));
+      node.style.setProperty("--cht-inset-opacity", String(1 - progress * 0.93));
+    });
+
+    root.dataset.chtInsetSide =
+      direction === -1 ? "left" :
+      direction === 1 ? "right" :
+      "open";
+  }
+
   function injectStyle() {
-    if (document.getElementById("cht360-bubinky-kolotoc-style")) return;
+    if (document.getElementById("cht360-bubinky-vsouvani-style")) return;
 
     const style = document.createElement("style");
-    style.id = "cht360-bubinky-kolotoc-style";
+    style.id = "cht360-bubinky-vsouvani-style";
     style.textContent = `
-      #${ROOT_ID} {
-        transform: translateX(calc(-50% + var(--cht-carousel-x, 0px))) !important;
-        transition: transform .22s cubic-bezier(.22,.8,.22,1), filter .18s ease;
-        will-change: transform;
+      #${ROOT_ID}::before { height: 96px !important; }
+
+      #${ROOT_ID},
+      #${ROOT_ID} .cht360OsmZamek {
+        touch-action: pan-y;
       }
 
-      #${ROOT_ID}.is-cht-carousel-dragging {
+      #${ROOT_ID} .cht360OsmZamek {
+        transform: translate3d(
+          var(--cht-inset-x, 0px),
+          calc(var(--smile-y, 0px) + var(--cht-inset-y, 0px)),
+          0
+        ) scale(var(--cht-inset-scale, 1)) !important;
+
+        opacity: var(--cht-inset-opacity, 1);
+        transition:
+          transform .28s cubic-bezier(.22,.8,.22,1),
+          opacity .22s ease,
+          filter .18s ease;
+
+        will-change: transform, opacity;
+      }
+
+      #${ROOT_ID}.is-cht-system-dragging .cht360OsmZamek {
         transition: none;
         filter: brightness(1.16);
-      }
-
-      #${ROOT_ID}::before {
-        height: 78px !important;
       }
     `;
 
     document.head.append(style);
   }
 
-  function mainDrums(root) {
-    return Array.from(root.querySelectorAll("[data-lock-index]"))
-      .filter(node => {
-        const index = Number(node.dataset.lockIndex);
-        return index >= 0 && index < DRUM_COUNT;
-      });
-  }
+  function dragVisual(drag, dx) {
+    const moved = clamp(Math.abs(dx) / 124, 0, 1);
 
-  function applyOrder(root) {
-    const byIndex = new Map(
-      mainDrums(root).map(node => [Number(node.dataset.lockIndex), node])
-    );
-
-    const firstExtra = root.querySelector(".cht360ExtraDrum");
-
-    state.order.forEach(index => {
-      const node = byIndex.get(index);
-      if (node) root.insertBefore(node, firstExtra || null);
-    });
-
-    mainDrums(root).forEach((node, index) => {
-      node.style.setProperty("--smile-y", (SMILE[index] || 0) + "px");
-    });
-  }
-
-  function turn(root, direction, steps) {
-    for (let index = 0; index < steps; index += 1) {
-      if (direction < 0) {
-        state.order.push(state.order.shift());
-      } else {
-        state.order.unshift(state.order.pop());
-      }
+    if (drag.startSide === 0) {
+      return {
+        side: dx < 0 ? -1 : 1,
+        amount: moved,
+        pullsOut: false
+      };
     }
 
-    save(direction < 0 ? "kolotoč doleva" : "kolotoč doprava");
-    applyOrder(root);
+    if (Math.sign(dx) === -drag.startSide) {
+      return {
+        side: drag.startSide,
+        amount: 1 - moved,
+        pullsOut: true
+      };
+    }
+
+    return {
+      side: drag.startSide,
+      amount: 1,
+      pullsOut: false
+    };
   }
 
   function bind(root) {
-    if (root.dataset.chtCarouselBound === "true") return;
-
-    root.dataset.chtCarouselBound = "true";
+    if (root.dataset.chtInsetBound === "true") return;
+    root.dataset.chtInsetBound = "true";
 
     let drag = null;
 
     root.addEventListener("pointerdown", event => {
-      const target = event.target.closest(".cht360OsmZamek");
-      if (!target) return;
+      const element = event.target instanceof Element
+        ? event.target.closest(".cht360OsmZamek")
+        : null;
+
+      if (element && !root.contains(element)) return;
 
       drag = {
         id: event.pointerId,
-        target,
+        target: element || root,
         startX: event.clientX,
         startY: event.clientY,
-        horizontal: false
+        startSide: state.side,
+        horizontal: false,
+        visual: {
+          side: state.side,
+          amount: Math.abs(state.side),
+          pullsOut: false
+        }
       };
     }, true);
 
@@ -132,12 +191,9 @@
 
       if (!drag.horizontal) return;
 
-      root.style.setProperty(
-        "--cht-carousel-x",
-        Math.max(-110, Math.min(110, dx)) + "px"
-      );
-
-      root.classList.add("is-cht-carousel-dragging");
+      drag.visual = dragVisual(drag, dx);
+      paint(root, drag.visual.side, drag.visual.amount);
+      root.classList.add("is-cht-system-dragging");
 
       event.preventDefault();
       event.stopPropagation();
@@ -151,21 +207,35 @@
 
       if (!current.horizontal) return;
 
-      const dx = event.clientX - current.startX;
+      let nextSide = current.startSide;
 
-      root.style.setProperty("--cht-carousel-x", "0px");
-      root.classList.remove("is-cht-carousel-dragging");
+      if (event.type !== "pointercancel") {
+        if (current.startSide === 0) {
+          nextSide = current.visual.amount >= 0.46
+            ? current.visual.side
+            : 0;
+        } else if (current.visual.pullsOut) {
+          nextSide = current.visual.amount <= 0.54
+            ? 0
+            : current.startSide;
+        }
+      }
+
+      state.side = nextSide;
+
+      save(
+        nextSide === 0
+          ? "vysunutí bubínků z CHT"
+          : nextSide < 0
+            ? "zasunutí bubínků vlevo do CHT"
+            : "zasunutí bubínků vpravo do CHT"
+      );
+
+      paint(root, nextSide, Math.abs(nextSide));
+      root.classList.remove("is-cht-system-dragging");
 
       current.target.releasePointerCapture?.(event.pointerId);
-      current.target.classList.remove("is-dragging");
-
-      if (event.type !== "pointercancel" && Math.abs(dx) >= 34) {
-        turn(
-          root,
-          dx > 0 ? 1 : -1,
-          Math.max(1, Math.round(Math.abs(dx) / 70))
-        );
-      }
+      current.target.classList.remove?.("is-dragging");
 
       event.preventDefault();
       event.stopPropagation();
@@ -175,34 +245,47 @@
     root.addEventListener("pointercancel", finish, true);
 
     root.addEventListener("keydown", event => {
-      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-      if (!event.target.closest(".cht360OsmZamek")) return;
+      if (!event.target.closest?.(".cht360OsmZamek")) return;
+
+      if (event.key === "Escape") {
+        state.side = 0;
+      } else if (event.key === "ArrowLeft") {
+        state.side = -1;
+      } else if (event.key === "ArrowRight") {
+        state.side = 1;
+      } else {
+        return;
+      }
 
       event.preventDefault();
-      turn(root, event.key === "ArrowRight" ? 1 : -1, 1);
+      save("ovládání bubínků klávesou");
+      paint(root, state.side, Math.abs(state.side));
     }, true);
+  }
+
+  function removeCards() {
+    document.getElementById("cht360-arc")?.remove();
+  }
+
+  function refresh() {
+    removeCards();
+
+    const root = document.getElementById(ROOT_ID);
+    if (!root) return;
+
+    bind(root);
+    paint(root, state.side, Math.abs(state.side));
   }
 
   function boot() {
     injectStyle();
 
-    [0, 120, 500].forEach(delay => {
-      setTimeout(() => {
-        document.getElementById("cht360-arc")?.remove();
-
-        const root = document.getElementById(ROOT_ID);
-        if (!root) return;
-
-        bind(root);
-        applyOrder(root);
-      }, delay);
+    [0, 120, 550].forEach(delay => {
+      setTimeout(refresh, delay);
     });
 
     window.addEventListener("cht.glyph.drums.changed", () => {
-      setTimeout(() => {
-        const root = document.getElementById(ROOT_ID);
-        if (root) applyOrder(root);
-      }, 0);
+      setTimeout(refresh, 0);
     });
   }
 
