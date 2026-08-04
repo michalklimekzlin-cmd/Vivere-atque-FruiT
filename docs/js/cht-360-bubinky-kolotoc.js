@@ -8,6 +8,8 @@
   const DRUM_COUNT = 8;
   const SMILE = [0, 15, 29, 38, 38, 29, 15, 0];
   const RAIL_LIFT = -8;
+  const STEP_DISTANCE = 74;
+  const JOINT_PEAK = Math.tan(Math.PI / 18) * (STEP_DISTANCE / 2);
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
   const previous = read(STORAGE_KEY);
@@ -75,6 +77,14 @@
     return clamp((progress - rank * 0.105) / 0.265, 0, 1);
   }
 
+  function jointLift(progress) {
+    const triangle = progress <= 0.5
+      ? progress * 2
+      : (1 - progress) * 2;
+
+    return Math.max(0, triangle) * JOINT_PEAK;
+  }
+
   function paint(root, side = state.side, amount = Math.abs(side)) {
     const direction = side < 0 ? -1 : side > 0 ? 1 : 0;
     const progress = clamp(amount, 0, 1);
@@ -86,17 +96,34 @@
 
       node.style.setProperty("--smile-y", `${SMILE[index]}px`);
       node.style.setProperty("--cht-rail-lift", `${RAIL_LIFT}px`);
-      node.style.setProperty("--cht-inset-x", `${direction * localProgress * 74}px`);
-      node.style.setProperty("--cht-inset-y", "0px");
+      node.style.setProperty(
+        "--cht-inset-x",
+        `${direction * localProgress * STEP_DISTANCE}px`
+      );
+      node.style.setProperty(
+        "--cht-inset-y",
+        `${-jointLift(localProgress)}px`
+      );
       node.style.setProperty("--cht-inset-scale", "1");
       node.style.setProperty("--cht-inset-opacity", "1");
 
       const isLeftPocket = direction < 0 && index < 2;
       const isRightPocket = direction > 0 && index > DRUM_COUNT - 3;
 
-      node.dataset.chtPocket = isLeftPocket ? "left" : isRightPocket ? "right" : "open";
-      node.style.setProperty("--cht-pocket-left", isLeftPocket ? `${localProgress * 48}%` : "0%");
-      node.style.setProperty("--cht-pocket-right", isRightPocket ? `${localProgress * 48}%` : "0%");
+      node.dataset.chtPocket = isLeftPocket
+        ? "left"
+        : isRightPocket
+          ? "right"
+          : "open";
+
+      node.style.setProperty(
+        "--cht-pocket-left",
+        isLeftPocket ? `${localProgress * 48}%` : "0%"
+      );
+      node.style.setProperty(
+        "--cht-pocket-right",
+        isRightPocket ? `${localProgress * 48}%` : "0%"
+      );
     });
 
     root.dataset.chtInsetSide =
@@ -111,7 +138,9 @@
     const style = document.createElement("style");
     style.id = "cht360-bubinky-vsouvani-style";
     style.textContent = `
-      #${ROOT_ID}::before { height: 96px !important; }
+      #${ROOT_ID}::before {
+        height: 96px !important;
+      }
 
       #${ROOT_ID},
       #${ROOT_ID} .cht360OsmZamek {
@@ -121,11 +150,16 @@
       #${ROOT_ID} .cht360OsmZamek {
         transform: translate3d(
           var(--cht-inset-x, 0px),
-          calc(var(--smile-y, 0px) + var(--cht-rail-lift, -8px) + var(--cht-inset-y, 0px)),
+          calc(
+            var(--smile-y, 0px)
+            + var(--cht-rail-lift, -8px)
+            + var(--cht-inset-y, 0px)
+          ),
           0
         ) scale(var(--cht-inset-scale, 1)) !important;
 
         opacity: var(--cht-inset-opacity, 1);
+
         clip-path: inset(
           0
           var(--cht-pocket-right, 0%)
@@ -134,16 +168,20 @@
         );
 
         transition:
-          transform .68s cubic-bezier(.18,.82,.2,1),
-          clip-path .68s cubic-bezier(.18,.82,.2,1),
-          opacity .48s ease,
+          transform .86s cubic-bezier(.16,.86,.2,1),
+          clip-path .86s cubic-bezier(.16,.86,.2,1),
+          opacity .58s ease,
           filter .24s ease;
 
         will-change: transform, opacity;
       }
 
       #${ROOT_ID}.is-cht-system-dragging .cht360OsmZamek {
-        transition: none;
+        transition:
+          transform .16s ease-out,
+          clip-path .16s ease-out,
+          filter .16s ease-out;
+
         filter: brightness(1.16);
       }
     `;
