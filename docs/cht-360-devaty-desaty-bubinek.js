@@ -117,3 +117,4 @@
   function boot() { style(); setTimeout(render, 0); window.addEventListener("cht.glyph.drums.changed", () => setTimeout(render, 0)); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot, { once: true }); else boot();
 })();
+
