@@ -1,356 +1,177 @@
-"use strict";
-
-/* CHT 360°‰. — osm bubínků se v úsměvu postupně zasouvá do stran CHT. */
+/* CHT 360°‰. — oblý kryt kapsiček pro krajní bubínky. */
 (() => {
   const ROOT_ID = "cht360-oblouk-osmi-zamku";
-  const STORAGE_KEY = "cht360_bubinky_kolotoc_v1";
-  const SNAPSHOT_KEY = "cht360_bubinky_kolotoc_snapshots_v1";
-  const DRUM_COUNT = 8;
-  const SMILE = [0, 15, 29, 38, 38, 29, 15, 0];
-  const RAIL_LIFT = -8;
   const STEP_DISTANCE = 74;
-  const JOINT_PEAK = Math.tan(Math.PI / 18) * (STEP_DISTANCE / 2);
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
-  const previous = read(STORAGE_KEY);
-  const hadSide = [-1, 0, 1].includes(Number(previous?.side));
-  const state = {
-    ...(previous && typeof previous === "object" ? previous : {}),
-    version: 2,
-    side: hadSide ? Number(previous.side) : 0
-  };
+  function numberValue(node, property) {
+    const value = node.style.getPropertyValue(property)
+      || getComputedStyle(node).getPropertyValue(property);
 
-  if (previous && !hadSide) {
-    snapshot(previous);
-    save("přechod z kolotoče na zasouvání bubínků");
+    return Number.parseFloat(value) || 0;
   }
 
-  function read(key) {
-    try {
-      return JSON.parse(localStorage.getItem(key) || "null");
-    } catch (_) {
-      return null;
-    }
+  function ensureCover(node) {
+    let cover = node.querySelector(".cht360PocketCover");
+
+    if (cover) return cover;
+
+    cover = document.createElement("span");
+    cover.className = "cht360PocketCover";
+    cover.setAttribute("aria-hidden", "true");
+    node.append(cover);
+
+    return cover;
   }
 
-  function snapshot(value) {
-    try {
-      const current = read(SNAPSHOT_KEY);
-      const items = Array.isArray(current?.items) ? current.items : [];
+  function syncPocket(node) {
+    const side = node.dataset.chtPocket || "open";
+    const cover = ensureCover(node);
 
-      items.push({
-        id: `bubinky-${Date.now()}`,
-        at: new Date().toISOString(),
-        sourceKey: STORAGE_KEY,
-        reason: "před zasouváním bubínků do levé a pravé strany",
-        value
-      });
+    const isPocket = side === "left" || side === "right";
+    const x = numberValue(node, "--cht-inset-x");
+    const y = numberValue(node, "--cht-inset-y");
+    const progress = isPocket
+      ? Math.min(Math.abs(x) / STEP_DISTANCE, 1)
+      : 0;
 
-      localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({
-        version: 1,
-        items: items.slice(-3)
-      }));
-    } catch (_) {}
+    const shellX = side === "left"
+      ? -STEP_DISTANCE
+      : side === "right"
+        ? STEP_DISTANCE
+        : 0;
+
+    cover.dataset.side = side;
+    cover.style.left = `calc(${shellX}px + ${side === "right" ? "47%" : "0%"})`;
+    cover.style.opacity = String(progress);
+
+    /* Kapsička stojí ve stěně, i když bubínek dělá svůj krok nahoru a dolů. */
+    cover.style.transform = `translate3d(${-x}px, ${-y}px, 0)`;
   }
 
-  function save(reason) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        ...state,
-        updatedAt: new Date().toISOString(),
-        reason
-      }));
-    } catch (_) {}
-  }
+  function refresh() {
+    const root = document.getElementById(ROOT_ID);
+    if (!root) return;
 
-  function drums(root) {
-    return Array.from(root.querySelectorAll("[data-lock-index]"))
-      .filter(node => {
-        const index = Number(node.dataset.lockIndex);
-        return index >= 0 && index < DRUM_COUNT;
-      })
-      .sort((a, b) => Number(a.dataset.lockIndex) - Number(b.dataset.lockIndex));
-  }
-
-  function sequenceProgress(progress, index, direction) {
-    const rank = direction < 0 ? index : DRUM_COUNT - 1 - index;
-    return clamp((progress - rank * 0.105) / 0.265, 0, 1);
-  }
-
-  function jointLift(progress) {
-    const triangle = progress <= 0.5
-      ? progress * 2
-      : (1 - progress) * 2;
-
-    return Math.max(0, triangle) * JOINT_PEAK;
-  }
-
-  function paint(root, side = state.side, amount = Math.abs(side)) {
-    const direction = side < 0 ? -1 : side > 0 ? 1 : 0;
-    const progress = clamp(amount, 0, 1);
-
-    drums(root).forEach((node, index) => {
-      const localProgress = direction === 0
-        ? 0
-        : sequenceProgress(progress, index, direction);
-
-      node.style.setProperty("--smile-y", `${SMILE[index]}px`);
-      node.style.setProperty("--cht-rail-lift", `${RAIL_LIFT}px`);
-      node.style.setProperty(
-        "--cht-inset-x",
-        `${direction * localProgress * STEP_DISTANCE}px`
-      );
-      node.style.setProperty(
-        "--cht-inset-y",
-        `${-jointLift(localProgress)}px`
-      );
-      node.style.setProperty("--cht-inset-scale", "1");
-      node.style.setProperty("--cht-inset-opacity", "1");
-
-      const isLeftPocket = direction < 0 && index < 2;
-      const isRightPocket = direction > 0 && index > DRUM_COUNT - 3;
-
-      node.dataset.chtPocket = isLeftPocket
-        ? "left"
-        : isRightPocket
-          ? "right"
-          : "open";
-
-      node.style.setProperty(
-        "--cht-pocket-left",
-        isLeftPocket ? `${localProgress * 48}%` : "0%"
-      );
-      node.style.setProperty(
-        "--cht-pocket-right",
-        isRightPocket ? `${localProgress * 48}%` : "0%"
-      );
-    });
-
-    root.dataset.chtInsetSide =
-      direction === -1 ? "left" :
-      direction === 1 ? "right" :
-      "open";
+    root.querySelectorAll("[data-lock-index]").forEach(syncPocket);
   }
 
   function injectStyle() {
-    if (document.getElementById("cht360-bubinky-vsouvani-style")) return;
+    if (document.getElementById("cht360-kapsicky-style")) return;
 
     const style = document.createElement("style");
-    style.id = "cht360-bubinky-vsouvani-style";
+    style.id = "cht360-kapsicky-style";
     style.textContent = `
-      #${ROOT_ID}::before {
-        height: 96px !important;
+      #${ROOT_ID} .cht360OsmZamek {
+        position: relative !important;
+        overflow: visible !important;
+        isolation: isolate;
+        clip-path: none !important;
       }
 
-      #${ROOT_ID},
-      #${ROOT_ID} .cht360OsmZamek {
-        touch-action: pan-y;
-      }
+      #${ROOT_ID} .cht360PocketCover {
+        display: block;
+        position: absolute;
+        z-index: 8;
+        top: 5px;
+        bottom: 5px;
+        width: 53%;
+        pointer-events: none;
 
-      #${ROOT_ID} .cht360OsmZamek {
-        transform: translate3d(
-          var(--cht-inset-x, 0px),
-          calc(
-            var(--smile-y, 0px)
-            + var(--cht-rail-lift, -8px)
-            + var(--cht-inset-y, 0px)
+        border: 1px solid rgba(248, 213, 139, .62);
+        box-shadow:
+          inset 0 0 0 2px rgba(8, 6, 3, .56),
+          inset 0 0 13px rgba(255, 190, 71, .16),
+          0 0 8px rgba(255, 190, 71, .18);
+
+        background:
+          repeating-linear-gradient(
+            0deg,
+            rgba(255, 232, 171, .17) 0 1px,
+            transparent 1px 7px
           ),
-          0
-        ) scale(var(--cht-inset-scale, 1)) !important;
-
-        opacity: var(--cht-inset-opacity, 1);
-
-        clip-path: inset(
-          0
-          var(--cht-pocket-right, 0%)
-          0
-          var(--cht-pocket-left, 0%)
-        );
+          linear-gradient(
+            90deg,
+            #0e0a06 0%,
+            #4d3617 29%,
+            #1b1209 75%,
+            #080604 100%
+          );
 
         transition:
           transform .86s cubic-bezier(.16,.86,.2,1),
-          clip-path .86s cubic-bezier(.16,.86,.2,1),
-          opacity .58s ease,
-          filter .24s ease;
-
-        will-change: transform, opacity;
+          opacity .42s ease;
       }
 
-      #${ROOT_ID}.is-cht-system-dragging .cht360OsmZamek {
+      #${ROOT_ID} .cht360PocketCover[data-side="left"] {
+        border-radius: 13px 3px 3px 13px;
+      }
+
+      #${ROOT_ID} .cht360PocketCover[data-side="right"] {
+        border-radius: 3px 13px 13px 3px;
+        background:
+          repeating-linear-gradient(
+            0deg,
+            rgba(255, 232, 171, .17) 0 1px,
+            transparent 1px 7px
+          ),
+          linear-gradient(
+            270deg,
+            #0e0a06 0%,
+            #4d3617 29%,
+            #1b1209 75%,
+            #080604 100%
+          );
+      }
+
+      /* Dvě tenké svislé kolejnice kapsičky. */
+      #${ROOT_ID} .cht360PocketCover::before,
+      #${ROOT_ID} .cht360PocketCover::after {
+        content: "";
+        position: absolute;
+        top: 5px;
+        bottom: 5px;
+        width: 3px;
+        border-radius: 4px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 226, 158, .8),
+          rgba(109, 69, 21, .35)
+        );
+        box-shadow: 0 0 5px rgba(255, 201, 91, .4);
+      }
+
+      #${ROOT_ID} .cht360PocketCover::before {
+        left: 5px;
+      }
+
+      #${ROOT_ID} .cht360PocketCover::after {
+        right: 5px;
+      }
+
+      #${ROOT_ID}.is-cht-system-dragging .cht360PocketCover {
         transition:
           transform .16s ease-out,
-          clip-path .16s ease-out,
-          filter .16s ease-out;
-
-        filter: brightness(1.16);
+          opacity .16s ease-out;
       }
     `;
 
     document.head.append(style);
   }
 
-  function dragVisual(drag, dx) {
-    const moved = clamp(Math.abs(dx) / 124, 0, 1);
-
-    if (drag.startSide === 0) {
-      return {
-        side: dx < 0 ? -1 : 1,
-        amount: moved,
-        pullsOut: false
-      };
-    }
-
-    if (Math.sign(dx) === -drag.startSide) {
-      return {
-        side: drag.startSide,
-        amount: 1 - moved,
-        pullsOut: true
-      };
-    }
-
-    return {
-      side: drag.startSide,
-      amount: 1,
-      pullsOut: false
-    };
-  }
-
-  function bind(root) {
-    if (root.dataset.chtInsetBound === "true") return;
-    root.dataset.chtInsetBound = "true";
-
-    let drag = null;
-
-    root.addEventListener("pointerdown", event => {
-      const element = event.target instanceof Element
-        ? event.target.closest(".cht360OsmZamek")
-        : null;
-
-      if (element && !root.contains(element)) return;
-
-      drag = {
-        id: event.pointerId,
-        target: element || root,
-        startX: event.clientX,
-        startY: event.clientY,
-        startSide: state.side,
-        horizontal: false,
-        visual: {
-          side: state.side,
-          amount: Math.abs(state.side),
-          pullsOut: false
-        }
-      };
-    }, true);
-
-    root.addEventListener("pointermove", event => {
-      if (!drag || drag.id !== event.pointerId) return;
-
-      const dx = event.clientX - drag.startX;
-      const dy = event.clientY - drag.startY;
-
-      if (!drag.horizontal && Math.abs(dx) > Math.abs(dy) + 8) {
-        drag.horizontal = true;
-      }
-
-      if (!drag.horizontal) return;
-
-      drag.visual = dragVisual(drag, dx);
-      paint(root, drag.visual.side, drag.visual.amount);
-      root.classList.add("is-cht-system-dragging");
-
-      event.preventDefault();
-      event.stopPropagation();
-    }, true);
-
-    const finish = event => {
-      if (!drag || drag.id !== event.pointerId) return;
-
-      const current = drag;
-      drag = null;
-
-      if (!current.horizontal) return;
-
-      let nextSide = current.startSide;
-
-      if (event.type !== "pointercancel") {
-        if (current.startSide === 0) {
-          nextSide = current.visual.amount >= 0.46
-            ? current.visual.side
-            : 0;
-        } else if (current.visual.pullsOut) {
-          nextSide = current.visual.amount <= 0.54
-            ? 0
-            : current.startSide;
-        }
-      }
-
-      state.side = nextSide;
-
-      save(
-        nextSide === 0
-          ? "vysunutí bubínků z CHT"
-          : nextSide < 0
-            ? "zasunutí bubínků vlevo do CHT"
-            : "zasunutí bubínků vpravo do CHT"
-      );
-
-      paint(root, nextSide, Math.abs(nextSide));
-      root.classList.remove("is-cht-system-dragging");
-
-      current.target.releasePointerCapture?.(event.pointerId);
-      current.target.classList.remove?.("is-dragging");
-
-      event.preventDefault();
-      event.stopPropagation();
-    };
-
-    root.addEventListener("pointerup", finish, true);
-    root.addEventListener("pointercancel", finish, true);
-
-    root.addEventListener("keydown", event => {
-      if (!event.target.closest?.(".cht360OsmZamek")) return;
-
-      if (event.key === "Escape") {
-        state.side = 0;
-      } else if (event.key === "ArrowLeft") {
-        state.side = -1;
-      } else if (event.key === "ArrowRight") {
-        state.side = 1;
-      } else {
-        return;
-      }
-
-      event.preventDefault();
-      save("ovládání bubínků klávesou");
-      paint(root, state.side, Math.abs(state.side));
-    }, true);
-  }
-
-  function removeCards() {
-    document.getElementById("cht360-arc")?.remove();
-  }
-
-  function refresh() {
-    removeCards();
+  function boot() {
+    injectStyle();
+    refresh();
 
     const root = document.getElementById(ROOT_ID);
     if (!root) return;
 
-    bind(root);
-    paint(root, state.side, Math.abs(state.side));
-  }
-
-  function boot() {
-    injectStyle();
-
-    [0, 120, 550].forEach(delay => {
-      setTimeout(refresh, delay);
+    new MutationObserver(refresh).observe(root, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "data-cht-pocket"]
     });
 
-    window.addEventListener("cht.glyph.drums.changed", () => {
-      setTimeout(refresh, 0);
-    });
+    window.addEventListener("cht.glyph.drums.changed", refresh);
   }
 
   if (document.readyState === "loading") {
