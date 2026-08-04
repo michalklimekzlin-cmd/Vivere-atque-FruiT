@@ -180,3 +180,171 @@
     boot();
   }
 })();
+/* CHT 360°‰. — kapsičky bubínků + trvalé odstranění Karet. */
+(() => {
+  const ROOT_ID = "cht360-oblouk-osmi-zamku";
+  const STEP = 74;
+
+  function removeCards() {
+    document.getElementById("cht360-arc")?.remove();
+  }
+
+  function value(node, name) {
+    return Number.parseFloat(
+      node.style.getPropertyValue(name) ||
+      getComputedStyle(node).getPropertyValue(name)
+    ) || 0;
+  }
+
+  function cover(node) {
+    let item = node.querySelector(".cht360PocketCover");
+
+    if (!item) {
+      item = document.createElement("span");
+      item.className = "cht360PocketCover";
+      item.setAttribute("aria-hidden", "true");
+      node.append(item);
+    }
+
+    return item;
+  }
+
+  function drawPocket(node) {
+    const side = node.dataset.chtPocket || "open";
+    const item = cover(node);
+    const x = value(node, "--cht-inset-x");
+    const y = value(node, "--cht-inset-y");
+    const active = side === "left" || side === "right";
+    const progress = active ? Math.min(Math.abs(x) / STEP, 1) : 0;
+
+    item.dataset.side = side;
+    item.style.left = `calc(${side === "left" ? -STEP : STEP}px + ${side === "right" ? "47%" : "0%"})`;
+    item.style.opacity = String(progress);
+
+    /* Kapsička je pevně ve stěně, bubínek do ní dojede svým krokem 10°. */
+    item.style.transform = `translate3d(${-x}px, ${-y}px, 0)`;
+  }
+
+  function refresh() {
+    removeCards();
+
+    const root = document.getElementById(ROOT_ID);
+    if (!root) return;
+
+    root.querySelectorAll("[data-lock-index]").forEach(drawPocket);
+  }
+
+  function style() {
+    if (document.getElementById("cht360-kapsicky-a-karty-style")) return;
+
+    const css = document.createElement("style");
+    css.id = "cht360-kapsicky-a-karty-style";
+    css.textContent = `
+      /* Karty nesmí znovu vyskočit. */
+      #cht360-arc {
+        display: none !important;
+      }
+
+      #${ROOT_ID} .cht360OsmZamek {
+        position: relative !important;
+        overflow: visible !important;
+        isolation: isolate;
+        clip-path: none !important;
+      }
+
+      #${ROOT_ID} .cht360PocketCover {
+        display: block;
+        position: absolute;
+        z-index: 8;
+        top: 5px;
+        bottom: 5px;
+        width: 53%;
+        pointer-events: none;
+
+        border: 1px solid rgba(248, 213, 139, .62);
+        box-shadow:
+          inset 0 0 0 2px rgba(8, 6, 3, .56),
+          inset 0 0 13px rgba(255, 190, 71, .16),
+          0 0 8px rgba(255, 190, 71, .18);
+
+        background:
+          repeating-linear-gradient(
+            0deg,
+            rgba(255, 232, 171, .17) 0 1px,
+            transparent 1px 7px
+          ),
+          linear-gradient(90deg, #0e0a06, #4d3617 29%, #1b1209 75%, #080604);
+
+        transition:
+          transform .86s cubic-bezier(.16,.86,.2,1),
+          opacity .42s ease;
+      }
+
+      #${ROOT_ID} .cht360PocketCover[data-side="left"] {
+        border-radius: 13px 3px 3px 13px;
+      }
+
+      #${ROOT_ID} .cht360PocketCover[data-side="right"] {
+        border-radius: 3px 13px 13px 3px;
+        background:
+          repeating-linear-gradient(
+            0deg,
+            rgba(255, 232, 171, .17) 0 1px,
+            transparent 1px 7px
+          ),
+          linear-gradient(270deg, #0e0a06, #4d3617 29%, #1b1209 75%, #080604);
+      }
+
+      #${ROOT_ID} .cht360PocketCover::before,
+      #${ROOT_ID} .cht360PocketCover::after {
+        content: "";
+        position: absolute;
+        top: 5px;
+        bottom: 5px;
+        width: 3px;
+        border-radius: 4px;
+        background: linear-gradient(180deg, rgba(255,226,158,.8), rgba(109,69,21,.35));
+        box-shadow: 0 0 5px rgba(255,201,91,.4);
+      }
+
+      #${ROOT_ID} .cht360PocketCover::before { left: 5px; }
+      #${ROOT_ID} .cht360PocketCover::after { right: 5px; }
+
+      #${ROOT_ID}.is-cht-system-dragging .cht360PocketCover {
+        transition: transform .16s ease-out, opacity .16s ease-out;
+      }
+    `;
+
+    document.head.append(css);
+  }
+
+  function boot() {
+    style();
+    refresh();
+
+    let waiting = false;
+
+    new MutationObserver(() => {
+      if (waiting) return;
+      waiting = true;
+
+      requestAnimationFrame(() => {
+        waiting = false;
+        refresh();
+      });
+    }).observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "data-cht-pocket"]
+    });
+
+    [120, 500, 1200].forEach(delay => setTimeout(refresh, delay));
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot, { once: true });
+  } else {
+    boot();
+  }
+})();
