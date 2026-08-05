@@ -1921,7 +1921,487 @@ function drawIPhoneCore(core, time) {
   core.drawRadius = Math.max(phoneWidth, phoneHeight) * .56;
 }
 
+const EARTH_ORBIT_GLYPHS = Object.freeze([
+  "7i_",
+  "९נֶ",
+  "¡´",
+  "ii´",
+  "j´",
+  "°&"
+]);
+
+function drawDigitalEarthLand(x, y, radius, spin) {
+  context.save();
+  context.translate(x + Math.sin(spin) * radius * .07, y);
+  context.rotate(Math.sin(scene.pitch) * .08);
+
+  const land = context.createLinearGradient(
+    -radius * .6,
+    -radius * .7,
+    radius * .55,
+    radius * .72
+  );
+
+  land.addColorStop(0, "rgba(255,247,201,.98)");
+  land.addColorStop(.34, "rgba(255,202,88,.96)");
+  land.addColorStop(.72, "rgba(193,103,26,.92)");
+  land.addColorStop(1, "rgba(104,47,12,.9)");
+
+  context.fillStyle = land;
+  context.shadowColor = "rgba(255,179,55,.82)";
+  context.shadowBlur = radius * .12;
+
+  /* Evropa + Afrika + část Asie */
+  context.beginPath();
+  context.moveTo(-radius * .20, -radius * .68);
+  context.lineTo(radius * .02, -radius * .78);
+  context.lineTo(radius * .25, -radius * .62);
+  context.lineTo(radius * .42, -radius * .43);
+  context.lineTo(radius * .30, -radius * .24);
+  context.lineTo(radius * .37, -radius * .06);
+  context.lineTo(radius * .20, radius * .03);
+  context.lineTo(radius * .13, radius * .30);
+  context.lineTo(radius * .03, radius * .58);
+  context.lineTo(-radius * .11, radius * .76);
+  context.lineTo(-radius * .25, radius * .57);
+  context.lineTo(-radius * .31, radius * .27);
+  context.lineTo(-radius * .43, radius * .04);
+  context.lineTo(-radius * .32, -radius * .17);
+  context.lineTo(-radius * .46, -radius * .34);
+  context.closePath();
+  context.fill();
+
+  /* Amerika */
+  context.globalAlpha = .68;
+  context.beginPath();
+  context.moveTo(-radius * .72, -radius * .53);
+  context.lineTo(-radius * .53, -radius * .66);
+  context.lineTo(-radius * .39, -radius * .46);
+  context.lineTo(-radius * .49, -radius * .25);
+  context.lineTo(-radius * .43, -radius * .06);
+  context.lineTo(-radius * .54, radius * .16);
+  context.lineTo(-radius * .47, radius * .43);
+  context.lineTo(-radius * .58, radius * .64);
+  context.lineTo(-radius * .68, radius * .34);
+  context.lineTo(-radius * .63, radius * .06);
+  context.lineTo(-radius * .76, -radius * .20);
+  context.closePath();
+  context.fill();
+
+  context.restore();
+}
+
+function drawDigitalEarthGlyphs(position, radius, time) {
+  const orbitRadius = radius * 1.43;
+  const nodeRadius = Math.max(7, radius * .17);
+  const turn = time * .00018 + scene.yaw * .22;
+
+  EARTH_ORBIT_GLYPHS.forEach((glyph, index) => {
+    const angle =
+      turn +
+      index / EARTH_ORBIT_GLYPHS.length * Math.PI * 2;
+
+    const x =
+      position.x +
+      Math.cos(angle) * orbitRadius;
+
+    const y =
+      position.y +
+      Math.sin(angle) * orbitRadius * .74;
+
+    context.save();
+
+    /* Spojení Glyphu se Zemí */
+    context.globalAlpha = .72;
+    context.strokeStyle = "rgba(255,203,100,.34)";
+    context.lineWidth = .7;
+
+    context.beginPath();
+    context.moveTo(position.x, position.y);
+    context.lineTo(x, y);
+    context.stroke();
+
+    const glow = context.createRadialGradient(
+      x,
+      y,
+      1,
+      x,
+      y,
+      nodeRadius * 1.8
+    );
+
+    glow.addColorStop(0, "rgba(255,239,188,.95)");
+    glow.addColorStop(.18, "rgba(214,126,31,.88)");
+    glow.addColorStop(.48, "rgba(44,27,12,.98)");
+    glow.addColorStop(1, "rgba(255,171,43,0)");
+
+    context.globalAlpha = 1;
+    context.fillStyle = glow;
+
+    context.beginPath();
+    context.arc(
+      x,
+      y,
+      nodeRadius * 1.8,
+      0,
+      Math.PI * 2
+    );
+    context.fill();
+
+    /* Samotný Glyph */
+    context.fillStyle = "rgba(12,9,6,.96)";
+    context.strokeStyle = "rgba(255,221,151,.86)";
+    context.lineWidth = 1;
+
+    context.beginPath();
+    context.arc(
+      x,
+      y,
+      nodeRadius,
+      0,
+      Math.PI * 2
+    );
+
+    context.fill();
+    context.stroke();
+
+    context.fillStyle = "#ffe8b2";
+    context.font =
+      "800 " +
+      Math.max(6, Math.round(nodeRadius * .72)) +
+      "px system-ui";
+
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(glyph, x, y + .3);
+
+    context.restore();
+  });
+}
+
+function drawDigitalEarthCore(core, time) {
+  const position = getCorePosition(core);
+
+  const scale =
+    (.72 + position.depth * .40) *
+    position.perspective;
+
+  const radius = core.radius * scale;
+
+  const active =
+    selectedCore &&
+    selectedCore.id === core.id;
+
+  const spin =
+    time * .00016 +
+    scene.yaw +
+    scene.roll * .22;
+
+  context.save();
+
+  context.globalAlpha =
+    .64 + position.depth * .34;
+
+  /* Zlatá záře */
+  const halo = context.createRadialGradient(
+    position.x,
+    position.y,
+    radius * .16,
+    position.x,
+    position.y,
+    radius * 1.72
+  );
+
+  halo.addColorStop(
+    0,
+    "rgba(255,235,170,.34)"
+  );
+
+  halo.addColorStop(
+    .44,
+    active
+      ? "rgba(255,167,43,.38)"
+      : "rgba(255,167,43,.22)"
+  );
+
+  halo.addColorStop(
+    1,
+    "rgba(255,155,35,0)"
+  );
+
+  context.fillStyle = halo;
+
+  context.beginPath();
+  context.arc(
+    position.x,
+    position.y,
+    radius * 1.72,
+    0,
+    Math.PI * 2
+  );
+  context.fill();
+
+  /* Světelné kruhy pod Zemí */
+  for (let ring = 0; ring < 3; ring += 1) {
+    context.beginPath();
+
+    context.ellipse(
+      position.x,
+      position.y + radius * 1.08,
+      radius * (1.02 + ring * .18),
+      radius * (.15 + ring * .025),
+      0,
+      0,
+      Math.PI * 2
+    );
+
+    context.strokeStyle =
+      `rgba(255,190,68,${.35 - ring * .09})`;
+
+    context.lineWidth =
+      ring === 0 ? 1.2 : .7;
+
+    context.stroke();
+  }
+
+  /* Samotná planeta */
+  context.save();
+
+  context.beginPath();
+  context.arc(
+    position.x,
+    position.y,
+    radius,
+    0,
+    Math.PI * 2
+  );
+  context.clip();
+
+  const globe = context.createRadialGradient(
+    position.x - radius * .28,
+    position.y - radius * .32,
+    radius * .05,
+    position.x,
+    position.y,
+    radius * 1.08
+  );
+
+  globe.addColorStop(0, "#ffd978");
+  globe.addColorStop(.18, "#a95b19");
+  globe.addColorStop(.52, "#32180a");
+  globe.addColorStop(.82, "#130b06");
+  globe.addColorStop(1, "#050403");
+
+  context.fillStyle = globe;
+
+  context.fillRect(
+    position.x - radius,
+    position.y - radius,
+    radius * 2,
+    radius * 2
+  );
+
+  /* Zeměpisné šířky */
+  context.strokeStyle =
+    "rgba(255,207,113,.20)";
+
+  context.lineWidth = .65;
+
+  for (
+    let latitude = -3;
+    latitude <= 3;
+    latitude += 1
+  ) {
+    const ratio = latitude / 4;
+
+    const yy =
+      position.y +
+      ratio * radius;
+
+    const rx =
+      Math.sqrt(
+        Math.max(0, 1 - ratio * ratio)
+      ) * radius;
+
+    context.beginPath();
+
+    context.ellipse(
+      position.x,
+      yy,
+      rx,
+      Math.max(2, rx * .12),
+      0,
+      0,
+      Math.PI * 2
+    );
+
+    context.stroke();
+  }
+
+  /* Rotující poledníky */
+  for (
+    let longitude = 0;
+    longitude < 7;
+    longitude += 1
+  ) {
+    const phase =
+      longitude / 7 * Math.PI +
+      spin;
+
+    const rx = Math.max(
+      radius * .07,
+      Math.abs(Math.cos(phase)) * radius
+    );
+
+    context.beginPath();
+
+    context.ellipse(
+      position.x,
+      position.y,
+      rx,
+      radius,
+      0,
+      0,
+      Math.PI * 2
+    );
+
+    context.strokeStyle =
+      "rgba(255,218,139,.17)";
+
+    context.stroke();
+  }
+
+  drawDigitalEarthLand(
+    position.x,
+    position.y,
+    radius,
+    spin
+  );
+
+  context.restore();
+
+  /* Žhavá atmosféra */
+  context.shadowColor = active
+    ? "rgba(255,211,116,.95)"
+    : "rgba(255,165,45,.82)";
+
+  context.shadowBlur = active
+    ? radius * .34
+    : radius * .22;
+
+  context.strokeStyle = active
+    ? "rgba(255,238,184,.96)"
+    : "rgba(255,187,69,.88)";
+
+  context.lineWidth =
+    active ? 2.2 : 1.5;
+
+  context.beginPath();
+  context.arc(
+    position.x,
+    position.y,
+    radius,
+    0,
+    Math.PI * 2
+  );
+  context.stroke();
+
+  context.shadowBlur = 0;
+
+  /* Digitální prstence */
+  context.strokeStyle =
+    "rgba(255,211,119,.30)";
+
+  context.lineWidth = .8;
+
+  context.beginPath();
+
+  context.ellipse(
+    position.x,
+    position.y,
+    radius * 1.20,
+    radius * .29,
+    -.18,
+    0,
+    Math.PI * 2
+  );
+
+  context.stroke();
+
+  context.beginPath();
+
+  context.ellipse(
+    position.x,
+    position.y,
+    radius * 1.28,
+    radius * .34,
+    .26,
+    0,
+    Math.PI * 2
+  );
+
+  context.stroke();
+
+  /* Název + původní počítadlo slotů */
+  const stats = getCoreStats(core.id);
+
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+
+  context.fillStyle =
+    "rgba(255,244,211,.94)";
+
+  context.font =
+    "900 " +
+    Math.max(7, Math.round(radius * .16)) +
+    "px system-ui";
+
+  context.fillText(
+    "ZEMĚ",
+    position.x,
+    position.y + radius * .47
+  );
+
+  context.fillStyle =
+    "rgba(255,226,168,.76)";
+
+  context.font =
+    "700 " +
+    Math.max(6, Math.round(radius * .12)) +
+    "px system-ui";
+
+  context.fillText(
+    stats.used + "/70",
+    position.x,
+    position.y + radius * .67
+  );
+
+  /* Po kliknutí na Zemi se objeví 6 Glyphů. */
+  if (active) {
+    drawDigitalEarthGlyphs(
+      position,
+      radius,
+      time
+    );
+  }
+
+  context.restore();
+
+  /*
+   * DŮLEŽITÉ:
+   * Zachovává původní klikací plochu Země.
+   * Díky tomu zůstávají sloty, zámky a openCore().
+   */
+  core.position = position;
+  core.drawRadius = radius;
+}
+
 function drawCore(core, time) {
+  if (core.id === "earth") {
+    drawDigitalEarthCore(core, time);
+    return;
+  }
+
   if (core.type === "iphone14") {
     drawIPhoneCore(core, time);
     return;
