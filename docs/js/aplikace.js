@@ -59,6 +59,39 @@ const CORE_CIPHER_TOKENS = Object.freeze([
   "&", "(", ")", "*", "Ï", "}", "{", "N", "₹", "ア"
 ]);
 
+/*
+  Jazyk není obyčejná drátěná koule. Je to lehká datová planeta:
+  její povrch tvoří písmena a čísla, spoje mezi nimi a tři pomalé
+  oběžné prstence. Vše se kreslí přímo do již existujícího canvasu,
+  aby se neměnila Paměť ani se nenačítal cizí obrázek.
+*/
+const LANGUAGE_SPHERE_LATITUDES = 9;
+const LANGUAGE_SPHERE_LONGITUDES = 14;
+const LANGUAGE_SPHERE_NODES = Object.freeze(createLanguageSphereNodes());
+
+function createLanguageSphereNodes() {
+  const nodes = [];
+
+  for (let row = 0; row < LANGUAGE_SPHERE_LATITUDES; row += 1) {
+    const latitude =
+      ((row / (LANGUAGE_SPHERE_LATITUDES - 1)) - .5) * Math.PI * .88;
+
+    for (let column = 0; column < LANGUAGE_SPHERE_LONGITUDES; column += 1) {
+      nodes.push(Object.freeze({
+        row,
+        column,
+        latitude,
+        longitude: column / LANGUAGE_SPHERE_LONGITUDES * Math.PI * 2,
+        glyph: CORE_CIPHER_TOKENS[
+          positiveModulo(row * 11 + column * 7, CORE_CIPHER_TOKENS.length)
+        ]
+      }));
+    }
+  }
+
+  return nodes;
+}
+
 const TROJKA_PROFILE = [
   { id: "leva-hrana", label: "Levá hrana", x: -1.28, z: .76, depth: 1 },
   { id: "levy-propad", label: "Levý propad", x: -.64, z: -.58, depth: .2 },
@@ -1921,491 +1954,287 @@ function drawIPhoneCore(core, time) {
   core.drawRadius = Math.max(phoneWidth, phoneHeight) * .56;
 }
 
-const EARTH_ORBIT_GLYPHS = Object.freeze([
-  "7i_",
-  "९נֶ",
-  "¡´",
-  "ii´",
-  "j´",
-  "°&"
-]);
+function projectLanguageSphereNode(node, spin, tilt) {
+  const longitude = node.longitude + spin;
+  const latitudeRadius = Math.cos(node.latitude);
+  const x = latitudeRadius * Math.cos(longitude);
+  const y = Math.sin(node.latitude);
+  const z = latitudeRadius * Math.sin(longitude);
+  const tiltCos = Math.cos(tilt);
+  const tiltSin = Math.sin(tilt);
 
-function drawDigitalEarthLand(x, y, radius, spin) {
-  context.save();
-  context.translate(x + Math.sin(spin) * radius * .07, y);
-  context.rotate(Math.sin(scene.pitch) * .08);
-
-  const land = context.createLinearGradient(
-    -radius * .6,
-    -radius * .7,
-    radius * .55,
-    radius * .72
-  );
-
-  land.addColorStop(0, "rgba(255,247,201,.98)");
-  land.addColorStop(.34, "rgba(255,202,88,.96)");
-  land.addColorStop(.72, "rgba(193,103,26,.92)");
-  land.addColorStop(1, "rgba(104,47,12,.9)");
-
-  context.fillStyle = land;
-  context.shadowColor = "rgba(255,179,55,.82)";
-  context.shadowBlur = radius * .12;
-
-  /* Evropa + Afrika + část Asie */
-  context.beginPath();
-  context.moveTo(-radius * .20, -radius * .68);
-  context.lineTo(radius * .02, -radius * .78);
-  context.lineTo(radius * .25, -radius * .62);
-  context.lineTo(radius * .42, -radius * .43);
-  context.lineTo(radius * .30, -radius * .24);
-  context.lineTo(radius * .37, -radius * .06);
-  context.lineTo(radius * .20, radius * .03);
-  context.lineTo(radius * .13, radius * .30);
-  context.lineTo(radius * .03, radius * .58);
-  context.lineTo(-radius * .11, radius * .76);
-  context.lineTo(-radius * .25, radius * .57);
-  context.lineTo(-radius * .31, radius * .27);
-  context.lineTo(-radius * .43, radius * .04);
-  context.lineTo(-radius * .32, -radius * .17);
-  context.lineTo(-radius * .46, -radius * .34);
-  context.closePath();
-  context.fill();
-
-  /* Amerika */
-  context.globalAlpha = .68;
-  context.beginPath();
-  context.moveTo(-radius * .72, -radius * .53);
-  context.lineTo(-radius * .53, -radius * .66);
-  context.lineTo(-radius * .39, -radius * .46);
-  context.lineTo(-radius * .49, -radius * .25);
-  context.lineTo(-radius * .43, -radius * .06);
-  context.lineTo(-radius * .54, radius * .16);
-  context.lineTo(-radius * .47, radius * .43);
-  context.lineTo(-radius * .58, radius * .64);
-  context.lineTo(-radius * .68, radius * .34);
-  context.lineTo(-radius * .63, radius * .06);
-  context.lineTo(-radius * .76, -radius * .20);
-  context.closePath();
-  context.fill();
-
-  context.restore();
+  return {
+    x,
+    y: y * tiltCos - z * tiltSin,
+    z: y * tiltSin + z * tiltCos
+  };
 }
 
-function drawDigitalEarthGlyphs(position, radius, time) {
-  const orbitRadius = radius * 1.43;
-  const nodeRadius = Math.max(7, radius * .17);
-  const turn = time * .00018 + scene.yaw * .22;
-
-  EARTH_ORBIT_GLYPHS.forEach((glyph, index) => {
-    const angle =
-      turn +
-      index / EARTH_ORBIT_GLYPHS.length * Math.PI * 2;
-
-    const x =
-      position.x +
-      Math.cos(angle) * orbitRadius;
-
-    const y =
-      position.y +
-      Math.sin(angle) * orbitRadius * .74;
-
-    context.save();
-
-    /* Spojení Glyphu se Zemí */
-    context.globalAlpha = .72;
-    context.strokeStyle = "rgba(255,203,100,.34)";
-    context.lineWidth = .7;
-
-    context.beginPath();
-    context.moveTo(position.x, position.y);
-    context.lineTo(x, y);
-    context.stroke();
-
-    const glow = context.createRadialGradient(
-      x,
-      y,
-      1,
-      x,
-      y,
-      nodeRadius * 1.8
-    );
-
-    glow.addColorStop(0, "rgba(255,239,188,.95)");
-    glow.addColorStop(.18, "rgba(214,126,31,.88)");
-    glow.addColorStop(.48, "rgba(44,27,12,.98)");
-    glow.addColorStop(1, "rgba(255,171,43,0)");
-
-    context.globalAlpha = 1;
-    context.fillStyle = glow;
-
-    context.beginPath();
-    context.arc(
-      x,
-      y,
-      nodeRadius * 1.8,
-      0,
-      Math.PI * 2
-    );
-    context.fill();
-
-    /* Samotný Glyph */
-    context.fillStyle = "rgba(12,9,6,.96)";
-    context.strokeStyle = "rgba(255,221,151,.86)";
-    context.lineWidth = 1;
-
-    context.beginPath();
-    context.arc(
-      x,
-      y,
-      nodeRadius,
-      0,
-      Math.PI * 2
-    );
-
-    context.fill();
-    context.stroke();
-
-    context.fillStyle = "#ffe8b2";
-    context.font =
-      "800 " +
-      Math.max(6, Math.round(nodeRadius * .72)) +
-      "px system-ui";
-
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillText(glyph, x, y + .3);
-
-    context.restore();
-  });
-}
-
-function drawDigitalEarthCore(core, time) {
+function drawLanguageCore(core, time) {
   const position = getCorePosition(core);
-
   const scale =
     (.72 + position.depth * .40) *
     position.perspective;
-
   const radius = core.radius * scale;
+  const active = selectedCore && selectedCore.id === core.id;
+  const surfaceSpin =
+    scene.yaw * .84 +
+    scene.roll * .28 +
+    time * .000085;
+  const surfaceTilt =
+    scene.pitch * .48 +
+    Math.sin(time * .00031) * .075;
+  const projectedNodes = LANGUAGE_SPHERE_NODES.map(node => {
+    const projected = projectLanguageSphereNode(
+      node,
+      surfaceSpin,
+      surfaceTilt
+    );
+    const perspective = .78 + (projected.z + 1) * .14;
 
-  const active =
-    selectedCore &&
-    selectedCore.id === core.id;
+    return {
+      ...node,
+      x: projected.x * radius * perspective,
+      y: projected.y * radius * perspective,
+      z: projected.z,
+      perspective
+    };
+  });
 
-  const spin =
-    time * .00016 +
-    scene.yaw +
-    scene.roll * .22;
+  const nodeAt = (row, column) => {
+    const safeColumn = positiveModulo(column, LANGUAGE_SPHERE_LONGITUDES);
+    return projectedNodes[row * LANGUAGE_SPHERE_LONGITUDES + safeColumn];
+  };
 
   context.save();
+  context.globalAlpha = .58 + position.depth * .36;
 
-  context.globalAlpha =
-    .64 + position.depth * .34;
+  /* Stín drží kouli ve scéně, podobně jako na referenční Signálové sféře. */
+  context.beginPath();
+  context.ellipse(
+    position.x,
+    position.y + radius * 1.09,
+    radius * 1.12,
+    radius * .23,
+    0,
+    0,
+    Math.PI * 2
+  );
+  context.fillStyle = "rgba(0,0,0,.48)";
+  context.fill();
 
-  /* Zlatá záře */
   const halo = context.createRadialGradient(
     position.x,
     position.y,
-    radius * .16,
+    radius * .15,
     position.x,
     position.y,
-    radius * 1.72
+    radius * 1.76
   );
-
-  halo.addColorStop(
-    0,
-    "rgba(255,235,170,.34)"
-  );
-
-  halo.addColorStop(
-    .44,
-    active
-      ? "rgba(255,167,43,.38)"
-      : "rgba(255,167,43,.22)"
-  );
-
-  halo.addColorStop(
-    1,
-    "rgba(255,155,35,0)"
-  );
-
+  halo.addColorStop(0, active ? "rgba(255,238,192,.92)" : "rgba(255,207,112,.48)");
+  halo.addColorStop(.34, "rgba(247,167,60,.25)");
+  halo.addColorStop(.72, "rgba(126,192,210,.09)");
+  halo.addColorStop(1, "rgba(255,174,72,0)");
   context.fillStyle = halo;
-
   context.beginPath();
-  context.arc(
-    position.x,
-    position.y,
-    radius * 1.72,
-    0,
-    Math.PI * 2
-  );
+  context.arc(position.x, position.y, radius * 1.76, 0, Math.PI * 2);
   context.fill();
 
-  /* Světelné kruhy pod Zemí */
-  for (let ring = 0; ring < 3; ring += 1) {
-    context.beginPath();
-
-    context.ellipse(
-      position.x,
-      position.y + radius * 1.08,
-      radius * (1.02 + ring * .18),
-      radius * (.15 + ring * .025),
-      0,
-      0,
-      Math.PI * 2
-    );
-
-    context.strokeStyle =
-      `rgba(255,190,68,${.35 - ring * .09})`;
-
-    context.lineWidth =
-      ring === 0 ? 1.2 : .7;
-
-    context.stroke();
-  }
-
-  /* Samotná planeta */
+  /* Dva datové oběhy spojují zlatou písmennou kouli se signálovou planetou. */
   context.save();
-
+  context.translate(position.x, position.y);
+  context.rotate(surfaceTilt * .22);
+  context.lineWidth = active ? 1.35 : .88;
+  context.strokeStyle = "rgba(255,212,132," + (active ? ".74" : ".42") + ")";
   context.beginPath();
-  context.arc(
-    position.x,
-    position.y,
-    radius,
-    0,
-    Math.PI * 2
-  );
-  context.clip();
-
-  const globe = context.createRadialGradient(
-    position.x - radius * .28,
-    position.y - radius * .32,
-    radius * .05,
-    position.x,
-    position.y,
-    radius * 1.08
-  );
-
-  globe.addColorStop(0, "#ffd978");
-  globe.addColorStop(.18, "#a95b19");
-  globe.addColorStop(.52, "#32180a");
-  globe.addColorStop(.82, "#130b06");
-  globe.addColorStop(1, "#050403");
-
-  context.fillStyle = globe;
-
-  context.fillRect(
-    position.x - radius,
-    position.y - radius,
-    radius * 2,
-    radius * 2
-  );
-
-  /* Zeměpisné šířky */
-  context.strokeStyle =
-    "rgba(255,207,113,.20)";
-
-  context.lineWidth = .65;
-
-  for (
-    let latitude = -3;
-    latitude <= 3;
-    latitude += 1
-  ) {
-    const ratio = latitude / 4;
-
-    const yy =
-      position.y +
-      ratio * radius;
-
-    const rx =
-      Math.sqrt(
-        Math.max(0, 1 - ratio * ratio)
-      ) * radius;
-
-    context.beginPath();
-
-    context.ellipse(
-      position.x,
-      yy,
-      rx,
-      Math.max(2, rx * .12),
-      0,
-      0,
-      Math.PI * 2
-    );
-
-    context.stroke();
-  }
-
-  /* Rotující poledníky */
-  for (
-    let longitude = 0;
-    longitude < 7;
-    longitude += 1
-  ) {
-    const phase =
-      longitude / 7 * Math.PI +
-      spin;
-
-    const rx = Math.max(
-      radius * .07,
-      Math.abs(Math.cos(phase)) * radius
-    );
-
-    context.beginPath();
-
-    context.ellipse(
-      position.x,
-      position.y,
-      rx,
-      radius,
-      0,
-      0,
-      Math.PI * 2
-    );
-
-    context.strokeStyle =
-      "rgba(255,218,139,.17)";
-
-    context.stroke();
-  }
-
-  drawDigitalEarthLand(
-    position.x,
-    position.y,
-    radius,
-    spin
-  );
-
-  context.restore();
-
-  /* Žhavá atmosféra */
-  context.shadowColor = active
-    ? "rgba(255,211,116,.95)"
-    : "rgba(255,165,45,.82)";
-
-  context.shadowBlur = active
-    ? radius * .34
-    : radius * .22;
-
-  context.strokeStyle = active
-    ? "rgba(255,238,184,.96)"
-    : "rgba(255,187,69,.88)";
-
-  context.lineWidth =
-    active ? 2.2 : 1.5;
-
-  context.beginPath();
-  context.arc(
-    position.x,
-    position.y,
-    radius,
-    0,
-    Math.PI * 2
-  );
+  context.ellipse(0, 0, radius * 1.29, radius * .53, 0, 0, Math.PI * 2);
   context.stroke();
-
-  context.shadowBlur = 0;
-
-  /* Digitální prstence */
-  context.strokeStyle =
-    "rgba(255,211,119,.30)";
-
-  context.lineWidth = .8;
-
+  context.setLineDash([2.5, 4]);
+  context.strokeStyle = "rgba(124,194,211," + (active ? ".64" : ".34") + ")";
   context.beginPath();
-
-  context.ellipse(
-    position.x,
-    position.y,
-    radius * 1.20,
-    radius * .29,
-    -.18,
-    0,
-    Math.PI * 2
-  );
-
+  context.ellipse(0, 0, radius * 1.12, radius * .79, -.37, 0, Math.PI * 2);
   context.stroke();
+  context.setLineDash([]);
 
-  context.beginPath();
-
-  context.ellipse(
-    position.x,
-    position.y,
-    radius * 1.28,
-    radius * .34,
-    .26,
-    0,
-    Math.PI * 2
-  );
-
-  context.stroke();
-
-  /* Název + původní počítadlo slotů */
-  const stats = getCoreStats(core.id);
-
+  const ringCode = "010110010111001001101011";
+  context.fillStyle = "rgba(255,220,150,.76)";
+  context.font = "700 " + Math.max(5, Math.round(radius * .105)) + "px ui-monospace, SFMono-Regular, monospace";
   context.textAlign = "center";
   context.textBaseline = "middle";
 
-  context.fillStyle =
-    "rgba(255,244,211,.94)";
+  for (let index = 0; index < ringCode.length; index += 1) {
+    const angle =
+      index / ringCode.length * Math.PI * 2 -
+      surfaceSpin * .56;
+    const x = Math.cos(angle) * radius * 1.3;
+    const y = Math.sin(angle) * radius * .54;
 
-  context.font =
-    "900 " +
-    Math.max(7, Math.round(radius * .16)) +
-    "px system-ui";
-
-  context.fillText(
-    "ZEMĚ",
-    position.x,
-    position.y + radius * .47
-  );
-
-  context.fillStyle =
-    "rgba(255,226,168,.76)";
-
-  context.font =
-    "700 " +
-    Math.max(6, Math.round(radius * .12)) +
-    "px system-ui";
-
-  context.fillText(
-    stats.used + "/70",
-    position.x,
-    position.y + radius * .67
-  );
-
-  /* Po kliknutí na Zemi se objeví 6 Glyphů. */
-  if (active) {
-    drawDigitalEarthGlyphs(
-      position,
-      radius,
-      time
-    );
+    context.globalAlpha = .22 + (Math.sin(angle) + 1) * .22;
+    context.fillText(ringCode[index], x, y);
   }
 
   context.restore();
 
-  /*
-   * DŮLEŽITÉ:
-   * Zachovává původní klikací plochu Země.
-   * Díky tomu zůstávají sloty, zámky a openCore().
-   */
+  context.save();
+  context.translate(position.x, position.y);
+  context.beginPath();
+  context.arc(0, 0, radius, 0, Math.PI * 2);
+  context.clip();
+
+  const surface = context.createRadialGradient(
+    -radius * .34,
+    -radius * .40,
+    radius * .06,
+    0,
+    0,
+    radius * 1.12
+  );
+  surface.addColorStop(0, "rgba(255,226,165,.30)");
+  surface.addColorStop(.32, "rgba(72,53,31,.94)");
+  surface.addColorStop(.72, "rgba(14,15,20,.98)");
+  surface.addColorStop(1, "rgba(2,4,8,1)");
+  context.fillStyle = surface;
+  context.fillRect(-radius, -radius, radius * 2, radius * 2);
+
+  /* Jemné rovnoběžky ponechávají kouli čitelnou, i když se znaky otáčejí. */
+  for (let band = -3; band <= 3; band += 1) {
+    const ratio = band / 4.15;
+    const halfWidth = Math.sqrt(Math.max(0, 1 - ratio * ratio)) * radius;
+
+    context.beginPath();
+    context.ellipse(
+      0,
+      ratio * radius,
+      halfWidth,
+      Math.max(1, halfWidth * .085),
+      0,
+      0,
+      Math.PI * 2
+    );
+    context.strokeStyle = band === 0
+      ? "rgba(255,208,119,.30)"
+      : "rgba(255,212,142,.14)";
+    context.lineWidth = band === 0 ? 1 : .64;
+    context.stroke();
+  }
+
+  const drawLink = (from, to) => {
+    if (!from || !to || Math.min(from.z, to.z) < -.08) {
+      return;
+    }
+
+    const depth = (from.z + to.z + 2) / 4;
+    context.beginPath();
+    context.moveTo(from.x, from.y);
+    context.lineTo(to.x, to.y);
+    context.strokeStyle = "rgba(255,191,84," + (.08 + depth * .20) + ")";
+    context.lineWidth = .42 + depth * .35;
+    context.stroke();
+  };
+
+  for (let row = 0; row < LANGUAGE_SPHERE_LATITUDES; row += 1) {
+    for (let column = 0; column < LANGUAGE_SPHERE_LONGITUDES; column += 1) {
+      const point = nodeAt(row, column);
+      drawLink(point, nodeAt(row, column + 1));
+
+      if (row < LANGUAGE_SPHERE_LATITUDES - 1) {
+        drawLink(point, nodeAt(row + 1, column));
+      }
+    }
+  }
+
+  projectedNodes
+    .slice()
+    .sort((first, second) => first.z - second.z)
+    .forEach(point => {
+      if (point.z < -.16) {
+        return;
+      }
+
+      const depth = (point.z + 1) / 2;
+      const size = Math.max(5, Math.round(radius * (.082 + depth * .035)));
+
+      context.globalAlpha = .22 + depth * (active ? .74 : .56);
+      context.fillStyle = point.z > .56
+        ? "#fff0c8"
+        : "#f7bf68";
+      context.font = "800 " + size + "px ui-monospace, SFMono-Regular, monospace";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(point.glyph, point.x, point.y);
+
+      if (point.z > .42) {
+        context.beginPath();
+        context.arc(point.x, point.y + size * .68, Math.max(.55, size * .075), 0, Math.PI * 2);
+        context.fillStyle = "rgba(255,229,173,.84)";
+        context.fill();
+      }
+    });
+
+  const reflection = context.createLinearGradient(0, -radius, 0, radius);
+  reflection.addColorStop(0, "rgba(255,250,226,.14)");
+  reflection.addColorStop(.42, "rgba(255,222,165,.025)");
+  reflection.addColorStop(1, "rgba(0,0,0,.22)");
+  context.fillStyle = reflection;
+  context.fillRect(-radius, -radius, radius * 2, radius * 2);
+  context.restore();
+
+  context.globalAlpha = 1;
+  context.beginPath();
+  context.arc(position.x, position.y, radius, 0, Math.PI * 2);
+  context.strokeStyle = active
+    ? "rgba(255,247,215,.98)"
+    : "rgba(255,218,143,.78)";
+  context.lineWidth = active ? 2 : 1.35;
+  context.stroke();
+
+  const signalAngle = surfaceSpin * 1.38;
+  const signalX = position.x + Math.cos(signalAngle) * radius * 1.23;
+  const signalY = position.y + Math.sin(signalAngle) * radius * .52;
+  context.beginPath();
+  context.arc(signalX, signalY, active ? 2.25 : 1.6, 0, Math.PI * 2);
+  context.fillStyle = "rgba(214,244,255,.94)";
+  context.shadowColor = "rgba(108,198,220,.86)";
+  context.shadowBlur = 9;
+  context.fill();
+  context.shadowColor = "transparent";
+  context.shadowBlur = 0;
+
+  context.fillStyle = "#fff0cf";
+  drawCipherCoreTitle(
+    core.title,
+    position.x,
+    position.y - 4,
+    scale,
+    time,
+    active,
+    core.id
+  );
+
+  const stats = getCoreStats(core.id);
+  context.fillStyle = "rgba(255,240,210,.78)";
+  context.font = Math.max(8, Math.round(9 * scale)) + "px system-ui";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(stats.used + "/70", position.x, position.y + 13);
+
+  context.restore();
+
   core.position = position;
   core.drawRadius = radius;
 }
 
 function drawCore(core, time) {
-  if (core.id === "earth") {
-    drawDigitalEarthCore(core, time);
-    return;
-  }
-
   if (core.type === "iphone14") {
     drawIPhoneCore(core, time);
     return;
   }
+
+  if (core.id === "language") {
+    drawLanguageCore(core, time);
+    return;
+  }
+
   const position = getCorePosition(core);
   const scale =
     (.72 + position.depth * .40) *
