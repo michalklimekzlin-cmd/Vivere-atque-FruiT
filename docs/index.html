@@ -435,14 +435,27 @@
   </aside>
 
   <div class="root">
-    <main class="stage" aria-label="CHT 360 stupňů — Paměť">
-      <canvas id="globe-canvas"></canvas>
+  <main class="stage" aria-label="CHT 360 stupňů — Paměť">
 
-      <div class="hud-right">CHT 360°‰.</div>
+    <canvas id="globe-canvas"></canvas>
 
-      <div class="hud-center">
-        {*(˚.•).•)//CHT 360°‰.\\(•.(•.)ア)
-      </div>
+    <div
+  data-cht360-zeme
+  style="
+    position:absolute;
+    left:50%;
+    top:50%;
+    z-index:2;
+    transform:translate(-50%,-50%);
+  "
+></div>
+
+    <div class="hud-right">CHT 360°‰.</div>
+
+    <div class="hud-center">
+      {*(˚.•).•)//CHT 360°‰.\\(•.(•.)ア)
+    </div>
+
 
       <div class="hud" aria-label="Ovládání">
         <span>1 prst: 3D otáčení</span>
