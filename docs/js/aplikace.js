@@ -2515,6 +2515,22 @@ function openCore(core) {
   updateStatus();
 }
 
+window.addEventListener(
+  "cht360:open-earth",
+  () => {
+
+    const earth =
+      cores.find(
+        core =>
+          core.id === "earth"
+      );
+
+    if (earth) {
+      openCore(earth);
+    }
+  }
+);
+
 function renderSlots() {
   if (!selectedCore) {
     return;
