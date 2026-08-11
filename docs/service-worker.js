@@ -1,7 +1,7 @@
 "use strict";
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v6-deset-bubinku`;
+const CACHE_NAME = `${CACHE_PREFIX}v7-predstava`;
 const OFFLINE_PAGE = "./index.html";
 
 const CORE_FILES = [
