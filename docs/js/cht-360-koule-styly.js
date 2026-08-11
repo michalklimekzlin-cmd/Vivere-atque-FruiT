@@ -3,7 +3,7 @@
 /*
   CHT 360°‰. — samostatná vrstva vzhledů koulí.
   Tento soubor nevlastní Paměť, sloty, dotyk ani oběh. Pouze kreslí
-  Země a Jazyk do canvasu, který mu bezpečně předá aplikace.js.
+  Země/Představa a Jazyk do canvasu, který mu bezpečně předá aplikace.js.
 */
 (() => {
   const EARTH_ORBIT_GLYPHS = Object.freeze([
@@ -51,7 +51,7 @@
     return nodes;
   }
 
-  function drawCzechRepublic(context, position, radius, scene, spin) {
+  function drawPredstavaLand(context, position, radius, scene, spin) {
     context.save();
     context.translate(
       position.x + Math.sin(spin) * radius * .055,
@@ -65,44 +65,87 @@
       radius * .72,
       radius * .48
     );
-    land.addColorStop(0, "rgba(255,247,201,.98)");
-    land.addColorStop(.34, "rgba(255,202,88,.96)");
-    land.addColorStop(.72, "rgba(193,103,26,.92)");
-    land.addColorStop(1, "rgba(104,47,12,.90)");
+    land.addColorStop(0, "rgba(255,240,197,.98)");
+    land.addColorStop(.34, "rgba(255,226,173,.96)");
+    land.addColorStop(.72, "rgba(199,155,51,.92)");
+    land.addColorStop(1, "rgba(72,47,22,.90)");
     context.fillStyle = land;
-    context.shadowColor = "rgba(255,179,55,.82)";
+    context.shadowColor = "rgba(199,155,51,.82)";
     context.shadowBlur = radius * .12;
 
-    /* Stylizovaná silueta České republiky. */
+    /*
+      Představa není mapa žádné skutečné země. Je to vlastní, zářivý
+      tvar uvnitř původního jádra Země, takže Paměť a její sloty zůstávají
+      přesně na svém místě.
+    */
     context.beginPath();
-    context.moveTo(-radius * .78, -radius * .04);
-    context.lineTo(-radius * .68, -radius * .28);
-    context.lineTo(-radius * .49, -radius * .38);
-    context.lineTo(-radius * .30, -radius * .30);
-    context.lineTo(-radius * .16, -radius * .40);
-    context.lineTo(radius * .01, -radius * .32);
-    context.lineTo(radius * .17, -radius * .42);
-    context.lineTo(radius * .36, -radius * .29);
-    context.lineTo(radius * .58, -radius * .31);
-    context.lineTo(radius * .76, -radius * .12);
-    context.lineTo(radius * .70, radius * .08);
-    context.lineTo(radius * .54, radius * .17);
-    context.lineTo(radius * .42, radius * .32);
-    context.lineTo(radius * .21, radius * .27);
-    context.lineTo(radius * .06, radius * .41);
-    context.lineTo(-radius * .11, radius * .30);
-    context.lineTo(-radius * .29, radius * .34);
-    context.lineTo(-radius * .46, radius * .20);
-    context.lineTo(-radius * .66, radius * .18);
-    context.lineTo(-radius * .81, radius * .05);
+    context.moveTo(-radius * .68, -radius * .06);
+    context.bezierCurveTo(
+      -radius * .63,
+      -radius * .36,
+      -radius * .34,
+      -radius * .52,
+      -radius * .13,
+      -radius * .35
+    );
+    context.bezierCurveTo(
+      radius * .05,
+      -radius * .55,
+      radius * .30,
+      -radius * .42,
+      radius * .40,
+      -radius * .19
+    );
+    context.bezierCurveTo(
+      radius * .70,
+      -radius * .15,
+      radius * .72,
+      radius * .14,
+      radius * .47,
+      radius * .22
+    );
+    context.bezierCurveTo(
+      radius * .34,
+      radius * .46,
+      radius * .08,
+      radius * .43,
+      -radius * .08,
+      radius * .31
+    );
+    context.bezierCurveTo(
+      -radius * .33,
+      radius * .45,
+      -radius * .61,
+      radius * .30,
+      -radius * .70,
+      radius * .10
+    );
     context.closePath();
     context.fill();
 
-    [
-      [-.40, -.04],
-      [.03, -.10],
-      [.42, .04]
-    ].forEach(([x, y]) => {
+    const thoughtNodes = [
+      [-.39, -.08],
+      [-.02, -.20],
+      [.30, -.02],
+      [.08, .22]
+    ];
+
+    context.strokeStyle = "rgba(255,226,173,.62)";
+    context.lineWidth = Math.max(.55, radius * .012);
+    context.beginPath();
+    thoughtNodes.forEach(([x, y], index) => {
+      const pointX = x * radius;
+      const pointY = y * radius;
+
+      if (index === 0) {
+        context.moveTo(pointX, pointY);
+      } else {
+        context.lineTo(pointX, pointY);
+      }
+    });
+    context.stroke();
+
+    thoughtNodes.forEach(([x, y]) => {
       context.beginPath();
       context.arc(
         x * radius,
@@ -115,6 +158,22 @@
       context.fill();
     });
 
+    context.shadowColor = "rgba(255,232,171,.96)";
+    context.shadowBlur = radius * .13;
+    context.fillStyle = "rgba(255,247,215,.99)";
+    context.font =
+      "900 " + Math.max(11, Math.round(radius * .38)) +
+      "px 'Noto Sans', 'Segoe UI Symbol', system-ui";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText("𞋒", 0, radius * .01);
+    context.shadowBlur = 0;
+
+    context.fillStyle = "rgba(255,241,199,.94)";
+    context.font =
+      "800 " + Math.max(5, Math.round(radius * .095)) + "px system-ui";
+    context.fillText("PŘEDSTAVA", 0, radius * .25);
+
     context.restore();
   }
 
@@ -124,11 +183,13 @@
       position,
       radius,
       scene,
-      time
+      time,
+      active
     } = api;
     const orbitRadius = radius * 1.43;
     const nodeRadius = Math.max(7, radius * .17);
     const turn = time * .00018 + scene.yaw * .22;
+    const visibleAlpha = active ? 1 : .72;
 
     EARTH_ORBIT_GLYPHS.forEach((glyph, index) => {
       const angle = turn + index / EARTH_ORBIT_GLYPHS.length * Math.PI * 2;
@@ -136,7 +197,7 @@
       const y = position.y + Math.sin(angle) * orbitRadius * .74;
 
       context.save();
-      context.globalAlpha = .72;
+      context.globalAlpha = .72 * visibleAlpha;
       context.strokeStyle = "rgba(255,203,100,.34)";
       context.lineWidth = .7;
       context.beginPath();
@@ -157,7 +218,7 @@
       glow.addColorStop(.48, "rgba(44,27,12,.98)");
       glow.addColorStop(1, "rgba(255,171,43,0)");
 
-      context.globalAlpha = 1;
+      context.globalAlpha = visibleAlpha;
       context.fillStyle = glow;
       context.beginPath();
       context.arc(x, y, nodeRadius * 1.8, 0, Math.PI * 2);
@@ -207,12 +268,12 @@
       position.y,
       radius * 1.72
     );
-    halo.addColorStop(0, "rgba(255,235,170,.34)");
+    halo.addColorStop(0, "rgba(255,240,197,.34)");
     halo.addColorStop(
       .44,
-      active ? "rgba(255,167,43,.38)" : "rgba(255,167,43,.22)"
+      active ? "rgba(199,155,51,.38)" : "rgba(199,155,51,.22)"
     );
-    halo.addColorStop(1, "rgba(255,155,35,0)");
+    halo.addColorStop(1, "rgba(199,155,51,0)");
     context.fillStyle = halo;
     context.beginPath();
     context.arc(position.x, position.y, radius * 1.72, 0, Math.PI * 2);
@@ -230,7 +291,7 @@
         Math.PI * 2
       );
       context.strokeStyle =
-        "rgba(255,190,68," + (.35 - ring * .09) + ")";
+        "rgba(255,226,173," + (.35 - ring * .09) + ")";
       context.lineWidth = ring === 0 ? 1.2 : .7;
       context.stroke();
     }
@@ -248,10 +309,10 @@
       position.y,
       radius * 1.08
     );
-    globe.addColorStop(0, "#ffd978");
-    globe.addColorStop(.18, "#a95b19");
-    globe.addColorStop(.52, "#32180a");
-    globe.addColorStop(.82, "#130b06");
+    globe.addColorStop(0, "#fff0c5");
+    globe.addColorStop(.18, "#c79b33");
+    globe.addColorStop(.52, "#2d1b0e");
+    globe.addColorStop(.82, "#120d09");
     globe.addColorStop(1, "#050403");
     context.fillStyle = globe;
     context.fillRect(
@@ -261,7 +322,7 @@
       radius * 2
     );
 
-    context.strokeStyle = "rgba(255,207,113,.20)";
+    context.strokeStyle = "rgba(255,226,173,.20)";
     context.lineWidth = .65;
     for (let latitude = -3; latitude <= 3; latitude += 1) {
       const ratio = latitude / 4;
@@ -285,27 +346,27 @@
       const rx = Math.max(radius * .07, Math.abs(Math.cos(phase)) * radius);
       context.beginPath();
       context.ellipse(position.x, position.y, rx, radius, 0, 0, Math.PI * 2);
-      context.strokeStyle = "rgba(255,218,139,.17)";
+      context.strokeStyle = "rgba(255,226,173,.17)";
       context.stroke();
     }
 
-    drawCzechRepublic(context, position, radius, scene, spin);
+    drawPredstavaLand(context, position, radius, scene, spin);
     context.restore();
 
     context.shadowColor = active
-      ? "rgba(255,211,116,.95)"
-      : "rgba(255,165,45,.82)";
+      ? "rgba(255,226,173,.95)"
+      : "rgba(199,155,51,.82)";
     context.shadowBlur = active ? radius * .34 : radius * .22;
     context.strokeStyle = active
-      ? "rgba(255,238,184,.96)"
-      : "rgba(255,187,69,.88)";
+      ? "rgba(255,240,197,.96)"
+      : "rgba(255,226,173,.88)";
     context.lineWidth = active ? 2.2 : 1.5;
     context.beginPath();
     context.arc(position.x, position.y, radius, 0, Math.PI * 2);
     context.stroke();
     context.shadowBlur = 0;
 
-    context.strokeStyle = "rgba(255,211,119,.30)";
+    context.strokeStyle = "rgba(255,226,173,.30)";
     context.lineWidth = .8;
     context.beginPath();
     context.ellipse(
@@ -342,9 +403,8 @@
       "700 " + Math.max(6, Math.round(radius * .12)) + "px system-ui";
     context.fillText(stats.used + "/70", position.x, position.y + radius * .67);
 
-    if (active) {
-      drawEarthGlyphs(api);
-    }
+    /* Šest Glyphů zůstává okolo Představy viditelných i bez otevření panelu. */
+    drawEarthGlyphs(api);
 
     context.restore();
     return { position, drawRadius: radius };
