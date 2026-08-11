@@ -624,16 +624,17 @@ function formatBytes(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
-function updatePills() {
-  for (const core of cores) {
-    const pill = document.getElementById(`pill-${core.id}`);
+function updatePills(){
+  for(const core of cores){
+    const stats=getCoreStats(core.id);
+    const pill=document.getElementById(`pill-${core.id}`);
 
-    if (!pill) {
-      continue;
-    }
+    // Staré HUD pill prvky už nemusí být v současném CHT.
+    // Jejich nepřítomnost nesmí zastavit canvas ani Paměť.
+    if(!pill) continue;
 
-    const stats = getCoreStats(core.id);
-    pill.textContent = `${core.title.toUpperCase()} · ${stats.used}/70`;
+    pill.textContent =
+      `${core.title.toUpperCase()} · ${stats.used}/70`;
   }
 }
 
