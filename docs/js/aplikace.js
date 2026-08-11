@@ -2441,14 +2441,45 @@ function render(time) {
   drawTerraAxis(time);
   drawTrojkaTrack(time);
 
-  const ordered = [...cores].sort((first, second) => {
-    return getCorePosition(first).depth - getCorePosition(second).depth;
-  });
-
   for (const core of ordered) {
-    drawCore(core, time);
+
+  if (core.id === "earth") {
+
+    const p = getCorePosition(core);
+
+    const scale =
+      .72 +
+      p.depth * .40;
+
+    const r =
+      core.radius *
+      scale;
+
+    core.position = p;
+    core.drawRadius = r;
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "cht360:earth-position",
+        {
+          detail: {
+            x: p.x,
+            y: p.y,
+            radius: r,
+            depth: p.depth,
+            active:
+              selectedCore &&
+              selectedCore.id === "earth"
+          }
+        }
+      )
+    );
+
+    continue;
   }
 
+  drawCore(core,time);
+}
   requestAnimationFrame(render);
 }
 
