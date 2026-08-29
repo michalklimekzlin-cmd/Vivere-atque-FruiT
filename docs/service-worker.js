@@ -2,7 +2,7 @@
 
 /*
  * CHT 360°‰.
- * Offline vrstva v8
+ * Offline vrstva v9
  *
  * Oprava:
  * - podporuje současný název offline-cashe-assets.json
@@ -12,7 +12,7 @@
  */
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v8-offline-cht360`;
+const CACHE_NAME = `${CACHE_PREFIX}v9-scene-recovery`;
 
 const OFFLINE_PAGE = "./index.html";
 
@@ -33,7 +33,7 @@ const CORE_FILES = [
   "./batole-core.css",
   "./batole-core.js",
 
-  "./js/aplikace.js",
+  "./js/cht-360-aplikace-2.js",
 
   "./js/cht-chybozrout.js",
   "./js/cht-chybozrout-domov.js",
@@ -61,14 +61,8 @@ const CORE_FILES = [
 
   "./js/cht-ui-components.js",
 
-  /*
-   * POZOR:
-   * V repozitáři se soubor opravdu jmenuje
-   * offline-cashe-assets.json
-   */
   "./offline-cashe-assets.json"
 ];
-
 
 /* ─────────────────────────────────────
    OFFLINE SEZNAM
@@ -102,14 +96,9 @@ async function offlineFileList() {
       error
     );
 
-    /*
-     * CHT přesto nezůstane bez offline vrstvy.
-     * CORE_FILES se uloží samostatně.
-     */
     return [];
   }
 }
-
 
 /* ─────────────────────────────────────
    BEZPEČNÉ ULOŽENÍ JEDNOHO SOUBORU
@@ -157,7 +146,6 @@ async function cacheOne(cache, file) {
     };
   }
 }
-
 
 /* ─────────────────────────────────────
    PŘÍPRAVA CELÉHO OFFLINE CHT
@@ -208,7 +196,6 @@ async function precacheAll() {
   };
 }
 
-
 /* ─────────────────────────────────────
    INSTALL
 ───────────────────────────────────── */
@@ -222,7 +209,6 @@ self.addEventListener(
     );
   }
 );
-
 
 /* ─────────────────────────────────────
    ACTIVATE
@@ -254,7 +240,6 @@ self.addEventListener(
   }
 );
 
-
 /* ─────────────────────────────────────
    NETWORK FIRST
    HTML / JS / CSS / JSON
@@ -267,7 +252,6 @@ function isFreshAsset(url, request) {
       .test(url.pathname)
   );
 }
-
 
 async function networkFirst(request) {
   const cache =
@@ -319,7 +303,6 @@ async function networkFirst(request) {
   }
 }
 
-
 /* ─────────────────────────────────────
    CACHE FIRST + OBNOVA
 ───────────────────────────────────── */
@@ -369,7 +352,6 @@ async function staleWhileRevalidate(
   return Response.error();
 }
 
-
 /* ─────────────────────────────────────
    FETCH
 ───────────────────────────────────── */
@@ -407,7 +389,6 @@ self.addEventListener(
   }
 );
 
-
 /* ─────────────────────────────────────
    CHYBOŽROUT — CACHE
 ───────────────────────────────────── */
@@ -427,7 +408,6 @@ async function clearOwnCaches() {
       )
   );
 }
-
 
 async function refreshUrls(
   urls = []
@@ -471,7 +451,6 @@ async function refreshUrls(
   );
 }
 
-
 /* ─────────────────────────────────────
    ZPRÁVY CHT / CHYBOŽROUT
 ───────────────────────────────────── */
@@ -487,7 +466,6 @@ self.addEventListener(
         event.ports?.[0]
           ?.postMessage(payload);
 
-
     if (
       data.type ===
       "SKIP_WAITING"
@@ -495,7 +473,6 @@ self.addEventListener(
       self.skipWaiting();
       return;
     }
-
 
     if (
       data.type ===
@@ -523,7 +500,6 @@ self.addEventListener(
 
       return;
     }
-
 
     if (
       data.type ===
@@ -554,7 +530,6 @@ self.addEventListener(
 
       return;
     }
-
 
     if (
       data.type ===
@@ -589,7 +564,6 @@ self.addEventListener(
 
       return;
     }
-
 
     if (
       data.type ===
