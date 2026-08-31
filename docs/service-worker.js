@@ -1,28 +1,36 @@
 "use strict";
 
 /*
- * CHT 360°‰.
- * Offline vrstva v9
+ * ╔══════════════════════════════════════════════════════════╗
+ * ║                 CHT 360°‰. OFFLINE                     ║
+ * ║                    Service Worker v10                   ║
+ * ╚══════════════════════════════════════════════════════════╝
  *
- * Oprava:
+ * CÍL:
+ * - CHT 360°‰. funguje po prvním online načtení i bez internetu
+ * - lokální HTML / JS / CSS / JSON / SVG se drží v cache
+ * - při návratu internetu se cache sama obnovuje
+ * - stará cache se odstraní až po aktivaci nové
+ * - ChyboŽrout může cache kontrolovat a obnovovat
  * - podporuje současný název offline-cashe-assets.json
- * - drží hlavní CHT soubory offline
- * - doplňuje nové moduly Země, bubínků a CHT
- * - starou cache odstraní až po aktivaci nové
  */
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v9-scene-recovery`;
+const CACHE_NAME = `${CACHE_PREFIX}v10-full-offline`;
 
 const OFFLINE_PAGE = "./index.html";
+const OFFLINE_MANIFEST = "./offline-cashe-assets.json";
 
 /*
- * Tyto soubory musí být dostupné i tehdy,
- * když se nepodaří načíst celý offline manifest.
+ * KRITICKÉ SOUBORY
+ *
+ * Pokud některý doplňkový modul neexistuje, instalace kvůli
+ * němu nespadne. index.html je ale povinný.
  */
 const CORE_FILES = [
   "./",
   "./index.html",
+
   "./manifest.json",
   "./icon.svg",
 
@@ -39,7 +47,6 @@ const CORE_FILES = [
   "./js/cht-chybozrout-domov.js",
 
   "./js/revia-dock.js",
-
   "./js/prstenec-pokojicku.js",
 
   "./js/bubinky-pevne.js",
@@ -61,38 +68,74 @@ const CORE_FILES = [
 
   "./js/cht-ui-components.js",
 
-  "./offline-cashe-assets.json"
+  OFFLINE_MANIFEST
 ];
 
-/* ─────────────────────────────────────
-   OFFLINE SEZNAM
-───────────────────────────────────── */
 
-async function offlineFileList() {
+/* ==========================================================
+   POMOCNÉ FUNKCE
+========================================================== */
+
+function absoluteURL(path) {
+  return new URL(path, self.registration.scope).href;
+}
+
+
+function isSameOrigin(url) {
+  return url.origin === self.location.origin;
+}
+
+
+function isCacheableResponse(response) {
+  return (
+    response &&
+    (
+      response.ok ||
+      response.type === "opaque"
+    )
+  );
+}
+
+
+/* ==========================================================
+   OFFLINE MANIFEST
+========================================================== */
+
+async function readOfflineManifest() {
   try {
     const response = await fetch(
-      "./offline-cashe-assets.json",
-      { cache: "no-store" }
+      absoluteURL(OFFLINE_MANIFEST),
+      {
+        cache: "no-store"
+      }
     );
 
     if (!response.ok) {
       throw new Error(
-        `offline manifest HTTP ${response.status}`
+        `HTTP ${response.status}`
       );
     }
 
-    const manifest = await response.json();
+    const data = await response.json();
 
-    if (!Array.isArray(manifest.files)) {
+    if (!Array.isArray(data.files)) {
       throw new Error(
-        "offline manifest nemá pole files"
+        "Manifest neobsahuje pole files."
       );
     }
 
-    return manifest.files;
+    return data.files
+      .filter(
+        file =>
+          typeof file === "string" &&
+          file.trim()
+      )
+      .map(file => file.trim());
+
   } catch (error) {
+
     console.warn(
-      "[CHT 360°‰.] Offline seznam se nepodařilo načíst.",
+      "[CHT 360°‰.] Offline manifest není dostupný.",
       error
     );
 
@@ -100,63 +143,92 @@ async function offlineFileList() {
   }
 }
 
-/* ─────────────────────────────────────
-   BEZPEČNÉ ULOŽENÍ JEDNOHO SOUBORU
-───────────────────────────────────── */
 
-async function cacheOne(cache, file) {
+/* ==========================================================
+   ULOŽENÍ JEDNOHO SOUBORU
+========================================================== */
+
+async function cacheOne(cache, path) {
+
+  const url = absoluteURL(path);
+
   try {
+
     const response = await fetch(
-      file,
-      { cache: "no-store" }
+      url,
+      {
+        cache: "no-store"
+      }
     );
 
-    if (!response || !response.ok) {
+    if (!isCacheableResponse(response)) {
+
       console.warn(
-        "[CHT 360°‰.] Přeskakuji offline soubor:",
-        file,
-        response?.status || "bez odpovědi"
+        "[CHT 360°‰.] Offline soubor přeskočen:",
+        path,
+        response?.status
       );
 
       return {
-        file,
+        file: path,
         ok: false
       };
     }
 
     await cache.put(
-      file,
+      url,
       response.clone()
     );
 
     return {
-      file,
+      file: path,
       ok: true
     };
+
   } catch (error) {
+
+    /*
+     * Pokud už soubor v cache máme,
+     * necháme jej tam.
+     */
+
+    const existing =
+      await cache.match(url);
+
+    if (existing) {
+
+      return {
+        file: path,
+        ok: true,
+        existing: true
+      };
+    }
+
     console.warn(
-      "[CHT 360°‰.] Soubor se nepodařilo uložit:",
-      file,
+      "[CHT 360°‰.] Nelze uložit:",
+      path,
       error
     );
 
     return {
-      file,
+      file: path,
       ok: false
     };
   }
 }
 
-/* ─────────────────────────────────────
-   PŘÍPRAVA CELÉHO OFFLINE CHT
-───────────────────────────────────── */
+
+/* ==========================================================
+   PLNÁ OFFLINE PŘÍPRAVA
+========================================================== */
 
 async function precacheAll() {
+
   const cache =
     await caches.open(CACHE_NAME);
 
   const manifestFiles =
-    await offlineFileList();
+    await readOfflineManifest();
 
   const files = [
     ...new Set([
@@ -165,62 +237,128 @@ async function precacheAll() {
     ])
   ];
 
-  const results =
-    await Promise.all(
-      files.map(
-        file => cacheOne(cache, file)
-      )
-    );
+  const results = [];
 
-  const successful =
-    results.filter(item => item.ok);
+  /*
+   * Ukládáme postupně.
+   *
+   * Na mobilním Safari je to stabilnější než odpálit
+   * velké množství fetchů současně.
+   */
+  for (const file of files) {
 
-  const failed =
-    results.filter(item => !item.ok);
+    const result =
+      await cacheOne(
+        cache,
+        file
+      );
 
-  console.info(
-    `[CHT 360°‰.] Offline připraveno: ${successful.length}/${results.length}`
-  );
+    results.push(result);
+  }
 
-  if (failed.length) {
-    console.warn(
-      "[CHT 360°‰.] Některé nepovinné soubory nebyly nalezeny:",
-      failed.map(item => item.file)
+
+  /*
+   * index.html MUSÍ být uložen.
+   */
+
+  const indexURL =
+    absoluteURL(OFFLINE_PAGE);
+
+  const index =
+    await cache.match(indexURL);
+
+  if (!index) {
+
+    throw new Error(
+      "CHT 360°‰.: index.html se nepodařilo uložit do offline cache."
     );
   }
+
+
+  const successful =
+    results.filter(
+      item => item.ok
+    );
+
+  const failed =
+    results.filter(
+      item => !item.ok
+    );
+
+
+  console.info(
+    `[CHT 360°‰.] OFFLINE READY ${successful.length}/${results.length}`
+  );
+
+
+  if (failed.length) {
+
+    console.warn(
+      "[CHT 360°‰.] Chybějící offline soubory:",
+      failed.map(
+        item => item.file
+      )
+    );
+  }
+
 
   return {
     total: results.length,
     cached: successful.length,
-    failed: failed.length
+    failed: failed.length,
+    failedFiles:
+      failed.map(
+        item => item.file
+      )
   };
 }
 
-/* ─────────────────────────────────────
+
+/* ==========================================================
    INSTALL
-───────────────────────────────────── */
+========================================================== */
 
 self.addEventListener(
   "install",
   event => {
+
+    console.info(
+      "[CHT 360°‰.] Instaluji offline vrstvu v10."
+    );
+
     event.waitUntil(
       precacheAll()
-        .then(() => self.skipWaiting())
+        .then(() => {
+
+          console.info(
+            "[CHT 360°‰.] Offline vrstva nainstalována."
+          );
+
+          return self.skipWaiting();
+        })
     );
   }
 );
 
-/* ─────────────────────────────────────
+
+/* ==========================================================
    ACTIVATE
-───────────────────────────────────── */
+========================================================== */
 
 self.addEventListener(
   "activate",
   event => {
+
     event.waitUntil(
       (async () => {
+
         const keys =
           await caches.keys();
+
+
+        /*
+         * Teprve nyní odstraníme staré CHT cache.
+         */
 
         await Promise.all(
           keys
@@ -234,133 +372,165 @@ self.addEventListener(
             )
         );
 
+
+        if (
+          self.registration.navigationPreload
+        ) {
+
+          try {
+
+            await self.registration
+              .navigationPreload
+              .disable();
+
+          } catch (_) {}
+        }
+
+
         await self.clients.claim();
+
+
+        console.info(
+          "[CHT 360°‰.] Offline vrstva v10 aktivní."
+        );
+
       })()
     );
   }
 );
 
-/* ─────────────────────────────────────
-   NETWORK FIRST
-   HTML / JS / CSS / JSON
-───────────────────────────────────── */
 
-function isFreshAsset(url, request) {
-  return (
-    request.mode === "navigate" ||
-    /\.(?:html|css|js|json|webmanifest)$/i
-      .test(url.pathname)
-  );
-}
+/* ==========================================================
+   CACHE FIRST
+   HLAVNÍ OFFLINE STRATEGIE CHT
+========================================================== */
 
-async function networkFirst(request) {
+async function cacheFirst(request) {
+
   const cache =
     await caches.open(CACHE_NAME);
 
+
+  /*
+   * 1. Nejprve cache.
+   */
+
+  const cached =
+    await cache.match(
+      request,
+      {
+        ignoreSearch: true
+      }
+    );
+
+
+  if (cached) {
+
+    /*
+     * Máme soubor offline.
+     *
+     * Pokud internet existuje,
+     * zkusíme jej nenápadně obnovit.
+     */
+
+    fetch(
+      request,
+      {
+        cache: "no-store"
+      }
+    )
+      .then(
+        async response => {
+
+          if (
+            isCacheableResponse(response)
+          ) {
+
+            await cache.put(
+              request,
+              response.clone()
+            );
+          }
+        }
+      )
+      .catch(() => {});
+
+
+    return cached;
+  }
+
+
+  /*
+   * 2. Cache soubor nemá.
+   * Zkusíme internet.
+   */
+
   try {
+
     const response =
       await fetch(
         request,
-        { cache: "no-store" }
+        {
+          cache: "no-store"
+        }
       );
 
+
     if (
-      response &&
-      response.ok
+      isCacheableResponse(response)
     ) {
+
       await cache.put(
         request,
         response.clone()
       );
     }
 
-    return response;
-  } catch (error) {
-    const cached =
-      await cache.match(
-        request,
-        { ignoreSearch: true }
-      );
 
-    if (cached) {
-      return cached;
-    }
+    return response;
+
+  } catch (error) {
+
+
+    /*
+     * Navigace bez internetu:
+     * vracíme CHT index.
+     */
 
     if (
       request.mode === "navigate"
     ) {
+
       const fallback =
         await cache.match(
-          OFFLINE_PAGE
+          absoluteURL(
+            OFFLINE_PAGE
+          )
         );
+
 
       if (fallback) {
         return fallback;
       }
     }
 
+
     throw error;
   }
 }
 
-/* ─────────────────────────────────────
-   CACHE FIRST + OBNOVA
-───────────────────────────────────── */
 
-async function staleWhileRevalidate(
-  request
-) {
-  const cache =
-    await caches.open(CACHE_NAME);
-
-  const cached =
-    await cache.match(
-      request,
-      { ignoreSearch: true }
-    );
-
-  const fresh =
-    fetch(
-      request,
-      { cache: "no-store" }
-    )
-      .then(
-        async response => {
-          if (
-            response &&
-            response.ok
-          ) {
-            await cache.put(
-              request,
-              response.clone()
-            );
-          }
-
-          return response;
-        }
-      )
-      .catch(() => null);
-
-  if (cached) {
-    return cached;
-  }
-
-  if (fresh) {
-    return fresh;
-  }
-
-  return Response.error();
-}
-
-/* ─────────────────────────────────────
+/* ==========================================================
    FETCH
-───────────────────────────────────── */
+========================================================== */
 
 self.addEventListener(
   "fetch",
   event => {
+
     const request =
       event.request;
+
 
     if (
       request.method !== "GET"
@@ -368,116 +538,187 @@ self.addEventListener(
       return;
     }
 
+
     const url =
-      new URL(request.url);
+      new URL(
+        request.url
+      );
+
 
     /*
-     * Cizí domény necháváme síti.
-     * Offline CHT pracuje se svými soubory.
+     * Externí služby necháváme být.
+     *
+     * Offline CHT stojí pouze na vlastních
+     * lokálních souborech.
      */
+
     if (
-      url.origin !== self.location.origin
+      !isSameOrigin(url)
     ) {
       return;
     }
 
+
     event.respondWith(
-      isFreshAsset(url, request)
-        ? networkFirst(request)
-        : staleWhileRevalidate(request)
+      cacheFirst(request)
     );
   }
 );
 
-/* ─────────────────────────────────────
-   CHYBOŽROUT — CACHE
-───────────────────────────────────── */
+
+/* ==========================================================
+   SMAZÁNÍ CHT CACHE
+========================================================== */
 
 async function clearOwnCaches() {
+
   const keys =
     await caches.keys();
+
 
   await Promise.all(
     keys
       .filter(
         key =>
-          key.startsWith(CACHE_PREFIX)
+          key.startsWith(
+            CACHE_PREFIX
+          )
       )
       .map(
-        key => caches.delete(key)
+        key =>
+          caches.delete(key)
       )
   );
 }
+
+
+/* ==========================================================
+   RUČNÍ OBNOVA URL
+========================================================== */
 
 async function refreshUrls(
   urls = []
 ) {
+
   const cache =
-    await caches.open(CACHE_NAME);
-
-  const results =
-    await Promise.allSettled(
-      urls.map(
-        async url => {
-          const response =
-            await fetch(
-              url,
-              { cache: "no-store" }
-            );
-
-          if (!response.ok) {
-            throw new Error(
-              `${url}: ${response.status}`
-            );
-          }
-
-          await cache.put(
-            url,
-            response.clone()
-          );
-
-          return url;
-        }
-      )
+    await caches.open(
+      CACHE_NAME
     );
 
-  return results.map(
-    (result, index) => ({
-      url: urls[index],
-      ok:
-        result.status ===
-        "fulfilled"
-    })
-  );
+
+  const results = [];
+
+
+  for (
+    const path of urls
+  ) {
+
+    try {
+
+      const url =
+        absoluteURL(path);
+
+
+      const response =
+        await fetch(
+          url,
+          {
+            cache: "no-store"
+          }
+        );
+
+
+      if (
+        !isCacheableResponse(response)
+      ) {
+
+        throw new Error(
+          `HTTP ${response.status}`
+        );
+      }
+
+
+      await cache.put(
+        url,
+        response.clone()
+      );
+
+
+      results.push({
+        url: path,
+        ok: true
+      });
+
+
+    } catch (error) {
+
+
+      results.push({
+        url: path,
+        ok: false,
+        error:
+          String(error)
+      });
+    }
+  }
+
+
+  return results;
 }
 
-/* ─────────────────────────────────────
+
+/* ==========================================================
    ZPRÁVY CHT / CHYBOŽROUT
-───────────────────────────────────── */
+========================================================== */
 
 self.addEventListener(
   "message",
   event => {
+
     const data =
       event.data || {};
 
+
     const reply =
-      payload =>
-        event.ports?.[0]
-          ?.postMessage(payload);
+      payload => {
+
+        if (
+          event.ports &&
+          event.ports[0]
+        ) {
+
+          event.ports[0]
+            .postMessage(
+              payload
+            );
+        }
+      };
+
+
+    /* ------------------------------------------------------
+       NOVÝ WORKER OKAMŽITĚ AKTIVOVAT
+    ------------------------------------------------------ */
 
     if (
       data.type ===
       "SKIP_WAITING"
     ) {
+
       self.skipWaiting();
+
       return;
     }
+
+
+    /* ------------------------------------------------------
+       SMAZAT CHT CACHE
+    ------------------------------------------------------ */
 
     if (
       data.type ===
       "CHYBOZROUT_CLEAR_CACHE"
     ) {
+
       event.waitUntil(
         clearOwnCaches()
           .then(
@@ -501,13 +742,21 @@ self.addEventListener(
       return;
     }
 
+
+    /* ------------------------------------------------------
+       OBNOVIT KONKRÉTNÍ SOUBORY
+    ------------------------------------------------------ */
+
     if (
       data.type ===
       "CHYBOZROUT_REFRESH_URLS"
     ) {
+
       event.waitUntil(
         refreshUrls(
-          Array.isArray(data.urls)
+          Array.isArray(
+            data.urls
+          )
             ? data.urls
             : []
         )
@@ -531,13 +780,21 @@ self.addEventListener(
       return;
     }
 
+
+    /* ------------------------------------------------------
+       STAV CACHE
+    ------------------------------------------------------ */
+
     if (
       data.type ===
       "CHYBOZROUT_STATUS"
     ) {
+
       event.waitUntil(
         caches
-          .open(CACHE_NAME)
+          .open(
+            CACHE_NAME
+          )
           .then(
             cache =>
               cache.keys()
@@ -549,7 +806,9 @@ self.addEventListener(
                 cacheName:
                   CACHE_NAME,
                 entries:
-                  keys.length
+                  keys.length,
+                offline:
+                  true
               })
           )
           .catch(
@@ -565,10 +824,16 @@ self.addEventListener(
       return;
     }
 
+
+    /* ------------------------------------------------------
+       PŘIPRAVIT CELÉ CHT OFFLINE
+    ------------------------------------------------------ */
+
     if (
       data.type ===
       "CHT360_PREPARE_OFFLINE"
     ) {
+
       event.waitUntil(
         precacheAll()
           .then(
@@ -577,6 +842,8 @@ self.addEventListener(
                 ok: true,
                 action:
                   "offline-complete",
+                cacheName:
+                  CACHE_NAME,
                 ...result
               })
           )
@@ -584,6 +851,8 @@ self.addEventListener(
             error =>
               reply({
                 ok: false,
+                action:
+                  "offline-failed",
                 error:
                   String(error)
               })
@@ -592,3 +861,9 @@ self.addEventListener(
     }
   }
 );
+
+
+/* ==========================================================
+   CHT 360°‰.
+   OFFLINE VRSTVA PŘIPRAVENA
+========================================================== */
