@@ -1,6 +1,6 @@
 const CACHE_NAME = 'oblak-pwa-v1';
 const OFFLINE_URL = './index.html';
-const PRECACHE_URLS = ['./', './index.html', './manifest.json', './style.css'];
+const PRECACHE_URLS = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)).then(() => self.skipWaiting()));
