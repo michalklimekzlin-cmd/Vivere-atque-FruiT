@@ -1,17 +1,55 @@
 "use strict";
 
-const CHYBOZROUT_STATE_KEY = "cht360_chybozrout_v2";
-const CHYBOZROUT_BACKUP_KEY = "cht360_samoopravovna_backup_v1";
+const CHYBOZROUT_STATE_KEY = "cht360_chybozrout_v3";
+const CHYBOZROUT_LEGACY_KEY = "cht360_chybozrout_v2";
+const CHYBOZROUT_BACKUP_KEY = "cht360_samoopravovna_backup_v2";
 const BACKUP_KEYS = [
   "vaft_pamet_v1",
   "cht360_pamet_v1",
-  "vaft_pamet_scene_v2"
+  "vaft_pamet_scene_v2",
+  "cht360_pamet_snapshots_v1",
+  "cht360_glyph_workshop_v1",
+  "cht360_glyph_context_v1",
+  "cht360_glyph_transfer_v1",
+  "cht360_glyph_transfer_applied_v1",
+  "cht360_glyph_rooms_v2",
+  "cht360_slot_locks_v1",
+  "cht360_slot_unlocks_v1",
+  "cht360_bubinky_values_v1",
+  "cht360_mluva_history_v1",
+  "cht360_mluva_lessons_v1",
+  "cht360_network_modules_v1"
+];
+const STORAGE_CHECKS = [
+  { key: "cht360_pamet_v1", label: "Paměť CHT", required: false },
+  { key: "vaft_pamet_v1", label: "záložní Paměť (legacy)", required: false },
+  { key: "cht360_pamet_snapshots_v1", label: "snímky Paměti", required: false },
+  { key: "cht360_glyph_workshop_v1", label: "dílna Glyphů", required: false },
+  { key: "cht360_glyph_context_v1", label: "kontext mostu Glyphů", required: false },
+  { key: "cht360_glyph_transfer_v1", label: "čekající přenos Glyphu", required: false },
+  { key: "cht360_glyph_transfer_applied_v1", label: "aplikovaný přenos Glyphu", required: false },
+  { key: "cht360_glyph_rooms_v2", label: "pokojíčky Glyphů", required: false },
+  { key: "cht360_slot_locks_v1", label: "zámky Bubínků", required: false },
+  { key: "cht360_slot_unlocks_v1", label: "odemčené zámky Bubínků", required: false },
+  { key: "cht360_bubinky_values_v1", label: "hodnoty Bubínků", required: false },
+  { key: "cht360_mluva_history_v1", label: "historie Mluvy CHT", required: false },
+  { key: "cht360_mluva_lessons_v1", label: "lekce Mluvy CHT", required: false },
+  { key: "cht360_network_modules_v1", label: "společná síť CHT", required: false },
+  { key: "cht360_revia_v1", label: "stav Revie", required: false },
+  { key: "cht360_revia_state_v1", label: "paměť Revie", required: false },
+  { key: "cht360_revia_signals_v1", label: "signály Revie", required: false },
+  { key: "cht360_batole_v1", label: "Batole hub", required: false },
+  { key: "cht360_jadra_pracovni_deska_v1", label: "pracovní deska jader", required: false }
 ];
 const REQUIRED_FILES = [
   { label: "hlavní stránka", url: "./index.html" },
   { label: "styl Paměti", url: "./css/pamet.css" },
   { label: "jádra Paměti", url: "./js/aplikace.js" },
   { label: "Chybožrout", url: "./js/cht-chybozrout.js" },
+  { label: "společná síť CHT", url: "./js/cht-360-network.js" },
+  { label: "Glyph dílna", url: "./glyph-cht-360/index.html" },
+  { label: "Mluva CHT", url: "./mluva-cht-360/index.html" },
+  { label: "Bubínky", url: "./bubinky/index.html" },
   { label: "manifest", url: "./manifest.json" },
   { label: "offline vrstva", url: "./service-worker.js" }
 ];
@@ -38,7 +76,7 @@ const ui = {
 
 function createInitialState() {
   return {
-    version: 2,
+    version: 3,
     queue: [],
     lastReport: null,
     lastBackupAt: null,
@@ -48,9 +86,19 @@ function createInitialState() {
 
 function readState() {
   try {
-    const saved = JSON.parse(
+    let saved = JSON.parse(
       localStorage.getItem(CHYBOZROUT_STATE_KEY) || "null"
     );
+
+    /* Migrate from v2 if v3 not yet present. */
+    if (!saved) {
+      const legacy = JSON.parse(
+        localStorage.getItem(CHYBOZROUT_LEGACY_KEY) || "null"
+      );
+      if (legacy && typeof legacy === "object") {
+        saved = { ...legacy, version: 3 };
+      }
+    }
 
     if (!saved || typeof saved !== "object") {
       return createInitialState();
@@ -300,6 +348,115 @@ async function inspectServiceWorker() {
   }
 }
 
+function inspectStoredData() {
+  const entries = [];
+
+  STORAGE_CHECKS.forEach(check => {
+    let raw = null;
+
+    try {
+      raw = localStorage.getItem(check.key);
+    } catch (error) {
+      entries.push({
+        ...check,
+        state: "unavailable",
+        ok: false,
+        message: "Prohlížeč nepovolil čtení lokální paměti."
+      });
+      return;
+    }
+
+    if (raw === null) {
+      entries.push({
+        ...check,
+        state: "missing",
+        ok: !check.required,
+        message: "Zatím nemá uložená data."
+      });
+      return;
+    }
+
+    try {
+      JSON.parse(raw);
+      entries.push({
+        ...check,
+        state: "valid",
+        ok: true,
+        bytes: raw.length
+      });
+    } catch (error) {
+      entries.push({
+        ...check,
+        state: "invalid",
+        ok: false,
+        message: "Uložená hodnota není platný JSON."
+      });
+    }
+  });
+
+  return {
+    entries,
+    failures: entries.filter(entry => !entry.ok).length
+  };
+}
+
+async function inspectNetwork() {
+  if (!window.CHT360Network || typeof window.CHT360Network.inspect !== "function") {
+    return {
+      available: false,
+      failures: 0,
+      findings: []
+    };
+  }
+
+  try {
+    const result = await window.CHT360Network.inspect();
+    const findings = Array.isArray(result?.findings) ? result.findings : [];
+
+    return {
+      available: true,
+      failures: Number(result?.failures || 0),
+      findings,
+      health: result?.health || null
+    };
+  } catch (error) {
+    return {
+      available: true,
+      failures: 0,
+      findings: [{
+        level: "warn",
+        message: "Společná síť CHT se nepodařila přečíst: " +
+          String(error?.message || error)
+      }]
+    };
+  }
+}
+
+async function refreshNetworkSnapshot() {
+  if (!window.CHT360Network || typeof window.CHT360Network.repair !== "function") {
+    return {
+      ok: false,
+      message: "Společná síť CHT zatím není načtená."
+    };
+  }
+
+  try {
+    const result = await window.CHT360Network.repair();
+
+    return {
+      ok: Boolean(result?.backup?.ok),
+      message: result?.backup?.ok
+        ? "Společná síť vytvořila vlastní bezpečnou zálohu a zkontrolovala moduly."
+        : "Společná síť se zkontrolovala, ale její zálohu se nepodařilo uložit."
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: String(error?.message || error)
+    };
+  }
+}
+
 async function runScan() {
   const startedAt = Date.now();
   setPanelState("skenuji", "working");
@@ -340,7 +497,43 @@ async function runScan() {
     );
   }
 
-  const failures = files.filter(file => !file.ok).length;
+  const storage = inspectStoredData();
+
+  storage.entries.forEach(entry => {
+    if (entry.state === "invalid" || entry.state === "unavailable") {
+      addEntry(
+        "error",
+        "Poškozené nebo nedostupné údaje: " + entry.label + ".",
+        entry.key
+      );
+    }
+  });
+
+  const network = await inspectNetwork();
+
+  if (network.available) {
+    if (network.findings.length) {
+      network.findings.slice(0, 8).forEach(finding => {
+        addEntry(
+          finding.level === "error" ? "error" : "warn",
+          "Síť CHT: " + String(finding.message || "vyžaduje pozornost."),
+          finding.moduleId || ""
+        );
+      });
+    } else {
+      addEntry("ok", "Společná síť CHT je čitelná.");
+    }
+  } else {
+    addEntry(
+      "warn",
+      "Společná síť CHT zatím není načtená; dílčí PWA dál pracují samostatně."
+    );
+  }
+
+  const failures =
+    files.filter(file => !file.ok).length +
+    storage.failures +
+    network.failures;
 
   const report = {
     system: "CHT 360°‰.",
@@ -350,7 +543,9 @@ async function runScan() {
     durationMs: Date.now() - startedAt,
     failures,
     files,
-    serviceWorker
+    serviceWorker,
+    storage,
+    network
   };
 
   state.lastReport = report;
@@ -488,6 +683,14 @@ async function runSafeRepair() {
     addEntry("warn", "Offline vrstvu se nepodařilo obnovit: " + serviceWorker.message);
   }
 
+  const network = await refreshNetworkSnapshot();
+
+  if (network.ok) {
+    addEntry("ok", network.message);
+  } else {
+    addEntry("warn", network.message);
+  }
+
   window.dispatchEvent(new Event("resize"));
 
   const report = await runScan();
@@ -599,6 +802,8 @@ window.CHTChybozrout = {
   },
   backup: createBackup,
   restore: restoreBackup,
+  inspectStorage: inspectStoredData,
+  inspectNetwork,
   getLastReport() {
     return state.lastReport;
   }

@@ -93,13 +93,13 @@
     </section>
 
     <section class="control-card" aria-label="Ovládání zámku">
-      <button id="setLock" class="button button-primary" type="button">
+      <button id="setLock" class="button button-primary" type="button" data-cht-loading-label="Zamykám…">
         Zamknout vybraný slot <span aria-hidden="true">⌁</span>
       </button>
-      <button id="unlockSlot" class="button button-quiet" type="button">
+      <button id="unlockSlot" class="button button-quiet" type="button" data-cht-loading-label="Ověřuji…">
         Odemknout na 15 minut
       </button>
-      <button id="removeLock" class="button button-danger" type="button">
+      <button id="removeLock" class="button button-danger" type="button" data-cht-confirm="Opravdu chceš zrušit zámek tohoto slotu?" data-cht-loading-label="Ruším…">
         Zrušit zámek
       </button>
 
@@ -127,8 +127,8 @@
       </div>
 
       <div class="backup-actions">
-        <button id="exportLocks" class="button button-quiet" type="button">Export</button>
-        <button id="importLocks" class="button button-quiet" type="button">Import</button>
+        <button id="exportLocks" class="button button-quiet" type="button" data-cht-loading-label="Připravuji…">Export</button>
+        <button id="importLocks" class="button button-quiet" type="button" data-cht-loading-label="Načítám…">Import</button>
         <input id="importInput" type="file" accept="application/json,.json" hidden>
       </div>
     </section>
@@ -150,5 +150,10 @@
   data-cht-storage-keys="cht360_bubinky_values_v1,cht360_slot_locks_v1,cht360_slot_unlocks_v1"
 ></script>
   <script type="module" src="./app.js"></script>
+  <script src="../js/cht-360-config.js"></script>
+  <script src="../js/cht-360-navigation.js"></script>
+  <script src="../js/cht-360-logger.js"></script>
+  <script src="../js/cht-360-performance.js"></script>
+  <script src="../js/cht-ui-components.js"></script>
 </body>
 </html>

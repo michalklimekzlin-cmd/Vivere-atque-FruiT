@@ -1,1205 +1,619 @@
-/**
- * Batolete – Hlavní aplikace / Main App
- * Vivere atque Frui'T → dětská edice
- * 
- * Hry: Abeceda, Čísla, Barvy, Tvary, Zvířátka, Příběhy, Pohyb, Galerie
- */
+/*
+  Batolete – app.js
+  8 základních her: Abeceda, Čísla, Barvy, Tvary, Zvířátka, Příběhy, Pohyb, Galerie
+  Reward systém (hvězdičky) + audio feedback (Web Audio API)
+*/
 
-'use strict';
+"use strict";
 
-/* ============================================================
-   AUDIO ENGINE (Web Audio API – bez externích zdrojů)
-   ============================================================ */
-const Audio = (() => {
+/* ── REWARD SYSTEM ── */
+const Reward = (() => {
+  const KEY = "batolete_stars_v1";
+  let count = parseInt(localStorage.getItem(KEY) || "0", 10);
+
+  function save() {
+    localStorage.setItem(KEY, String(count));
+    document.getElementById("starCount").textContent = count;
+  }
+
+  function add(n = 1) {
+    count += n;
+    save();
+    playSound("reward");
+    Hub.showToast("⭐ +" + n + " hvězdička!");
+  }
+
+  function get() { return count; }
+
+  save(); // init display
+  return { add, get };
+})();
+
+/* ── AUDIO (Web Audio API) ── */
+const Audio$ = (() => {
   let ctx = null;
 
-  function getCtx() {
-    if (!ctx) {
-      try { ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { /* silent */ }
-    }
+  function ctx$() {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
     return ctx;
   }
 
-  function tone(freq, dur = 0.15, type = 'sine', vol = 0.3) {
-    const c = getCtx();
-    if (!c) return;
-    const osc  = c.createOscillator();
-    const gain = c.createGain();
-    osc.connect(gain);
-    gain.connect(c.destination);
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, c.currentTime);
-    gain.gain.setValueAtTime(vol, c.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
-    osc.start(c.currentTime);
-    osc.stop(c.currentTime + dur);
+  function tone(freq, dur = 0.15, type = "sine", vol = 0.3) {
+    try {
+      const c = ctx$();
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.connect(g);
+      g.connect(c.destination);
+      o.frequency.value = freq;
+      o.type = type;
+      g.gain.setValueAtTime(vol, c.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+      o.start(c.currentTime);
+      o.stop(c.currentTime + dur);
+    } catch (_) { /* silent */ }
   }
 
   return {
-    click()   { tone(880, 0.08, 'sine', 0.2); },
-    correct() { tone(523, 0.1, 'sine', 0.25); setTimeout(() => tone(659, 0.1, 'sine', 0.25), 100); setTimeout(() => tone(784, 0.2, 'sine', 0.3), 200); },
-    wrong()   { tone(220, 0.2, 'sawtooth', 0.2); setTimeout(() => tone(196, 0.2, 'sawtooth', 0.2), 220); },
-    reward()  { [523,659,784,1047].forEach((f,i) => setTimeout(() => tone(f, 0.15, 'sine', 0.25), i * 120)); },
-    pop()     { tone(660, 0.06, 'sine', 0.18); },
-    start()   { [440, 550, 660].forEach((f,i) => setTimeout(() => tone(f, 0.12, 'sine', 0.2), i * 100)); }
+    reward() { tone(660, 0.12); setTimeout(() => tone(880, 0.15), 120); },
+    correct() { tone(523, 0.1); setTimeout(() => tone(659, 0.12), 100); },
+    wrong()   { tone(220, 0.2, "sawtooth", 0.2); },
+    tap()     { tone(440, 0.08, "square", 0.15); }
   };
 })();
 
-/* ============================================================
-   REWARDS SYSTEM
-   ============================================================ */
-const Rewards = (() => {
-  const KEY = 'BATOLETE_STARS';
-  let stars = parseInt(localStorage.getItem(KEY) || '0', 10);
+function playSound(name) { Audio$[name] && Audio$[name](); }
 
-  function save() { localStorage.setItem(KEY, String(stars)); }
+/* ── HUB CONTROLLER ── */
+const Hub = (() => {
+  const hubMain   = document.getElementById("hubMain");
+  const gameScreen= document.getElementById("gameScreen");
+  const gameContent = document.getElementById("gameContent");
+  const backBtn   = document.getElementById("backBtn");
+  const toast     = document.getElementById("hubToast");
+  let toastTimer  = null;
 
-  function update() {
-    const el = document.getElementById('starCount');
-    if (el) el.textContent = '⭐ ' + stars;
+  function openGame(name) {
+    const def = GAMES[name];
+    if (!def) return;
+    gameContent.innerHTML = "";
+    def.render(gameContent);
+    gameScreen.hidden = false;
+    gameScreen.removeAttribute("aria-hidden");
+    hubMain.hidden = true;
+    document.title = def.title + " – Batolete";
+    backBtn.focus();
   }
 
-  return {
-    get stars() { return stars; },
-    add(n = 1) {
-      stars += n;
-      save();
-      update();
-      showReward();
-    },
-    init() { update(); }
-  };
-
-  function showReward() {
-    const popup  = document.getElementById('rewardPopup');
-    const emoji  = document.getElementById('rewardEmoji');
-    const text   = document.getElementById('rewardText');
-    const emojis = ['⭐','🌟','🎉','🏆','🎈','💎','🌈','🎊'];
-    const texts  = [
-      'Skvěle! Získal jsi hvězdičku!',
-      'Výborně! Jsi šampión!',
-      'Bravo! Pokračuj dál!',
-      'Super! Jsi hvězda!'
-    ];
-    if (emoji) emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    if (text)  text.textContent  = CharacterManager.getCurrentChar().speak('reward') || texts[Math.floor(Math.random() * texts.length)];
-    if (popup) popup.classList.remove('hidden');
-    Audio.reward();
-    startConfetti();
+  function closeGame() {
+    gameScreen.hidden = true;
+    gameScreen.setAttribute("aria-hidden", "true");
+    hubMain.hidden = false;
+    document.title = "🌟 Batolete – Centrální Hub";
+    gameContent.innerHTML = "";
   }
-})();
 
-/* ============================================================
-   CONFETTI
-   ============================================================ */
-function startConfetti() {
-  const canvas = document.getElementById('confettiCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width  = window.innerWidth;
-  canvas.height = window.innerHeight;
+  function showToast(msg, dur = 2200) {
+    if (toastTimer) clearTimeout(toastTimer);
+    toast.textContent = msg;
+    toast.classList.add("show");
+    toastTimer = setTimeout(() => toast.classList.remove("show"), dur);
+  }
 
-  const colors  = ['#ff6fb4','#6fb4ff','#ffb46f','#6fffb4','#d4b4ff','#fff06f'];
-  const pieces  = Array.from({ length: 80 }, () => ({
-    x:    Math.random() * canvas.width,
-    y:    Math.random() * canvas.height - canvas.height,
-    w:    Math.random() * 10 + 5,
-    h:    Math.random() * 6 + 3,
-    color: colors[Math.floor(Math.random() * colors.length)],
-    r:    Math.random() * Math.PI * 2,
-    vx:   (Math.random() - 0.5) * 4,
-    vy:   Math.random() * 4 + 2,
-    vr:   (Math.random() - 0.5) * 0.2
-  }));
-
-  let frame = 0;
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    pieces.forEach(p => {
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.r);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-      ctx.restore();
-      p.x += p.vx; p.y += p.vy; p.r += p.vr;
+  // Wire hub card clicks (games only – mini-apps handled by hub-loader.js)
+  document.querySelectorAll(".hub-card[data-game]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      playSound("tap");
+      openGame(btn.dataset.game);
     });
-    frame++;
-    if (frame < 90) requestAnimationFrame(draw);
-    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  backBtn.addEventListener("click", closeGame);
+
+  return { openGame, closeGame, showToast };
+})();
+
+/* ═══════════════════════════════════════════════════════
+   GAMES REGISTRY
+═══════════════════════════════════════════════════════ */
+const GAMES = {};
+
+/* ── HELPERS ── */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
-  draw();
+  return a;
 }
 
-/* ============================================================
-   NAVIGATION
-   ============================================================ */
-const Nav = (() => {
-  const screens = {};
-  let current = 'home';
+function gameHeader(title, score) {
+  return `<div class="game-header"><span class="game-title">${title}</span><span class="game-score">⭐ ${score}</span></div>`;
+}
 
-  function show(id) {
-    Object.values(screens).forEach(s => s.classList.remove('active'));
-    const target = screens[id];
-    if (target) { target.classList.add('active'); current = id; }
-    const titles = {
-      home:      '🌈 Batolete',
-      abeceda:   '🔤 Abeceda',
-      cisla:     '🔢 Čísla',
-      barvy:     '🎨 Barvy',
-      tvary:     '🔷 Tvary',
-      zviratka:  '🐾 Zvířátka',
-      pribehy:   '📖 Příběhy',
-      pohyb:     '🏃 Pohyb',
-      galerie:   '🖼️ Galerie'
+/* ── 1. ABECEDA ── */
+GAMES.abeceda = {
+  title: "🔤 Abeceda",
+  render(container) {
+    const letters = "ABCDEFGHIJKLMNOPRSTUVZ".split("");
+    const words = {
+      A:"Auto",B:"Babička",C:"Cesta",D:"Dům",E:"Elf",F:"Fena",
+      G:"Glyph",H:"Hora",I:"Iskra",J:"Jablko",K:"Kůň",L:"Louka",
+      M:"Medvěd",N:"Nebe",O:"Obloha",P:"Pes",R:"Ryba",S:"Slunce",
+      T:"Táta",U:"Ucho",V:"Vlak",Z:"Zahrada"
     };
-    const titleEl = document.getElementById('pageTitle');
-    if (titleEl) titleEl.textContent = titles[id] || '🌈 Batolete';
-    speak(id);
-    if (id !== 'home') initScreen(id);
-  }
+    let score = 0;
+    let current = null;
 
-  function speak(id) {
-    const el = document.getElementById('speechText');
-    if (el) {
-      el.textContent = CharacterManager.speak(id);
-      const bubble = document.getElementById('speechBubble');
-      if (bubble) { bubble.style.animation = 'none'; void bubble.offsetWidth; bubble.style.animation = ''; }
-    }
-  }
-
-  return {
-    init() {
-      ['home','abeceda','cisla','barvy','tvary','zviratka','pribehy','pohyb','galerie']
-        .forEach(id => {
-          const el = document.getElementById('screen' + id.charAt(0).toUpperCase() + id.slice(1));
-          if (el) screens[id] = el;
-        });
-
-      document.querySelectorAll('.game-card').forEach(btn => {
-        btn.addEventListener('click', () => {
-          Audio.click();
-          show(btn.dataset.game);
-        });
-      });
-
-      document.getElementById('homeBtn')?.addEventListener('click', () => {
-        Audio.click();
-        show('home');
-      });
-    },
-    show,
-    get current() { return current; }
-  };
-})();
-
-/* ============================================================
-   ALPHABET GAME / ABECEDA
-   ============================================================ */
-const AbecedaGame = (() => {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZČĎĚŇŘŠŤŮŽ'.split('');
-  const words = {
-    A:'Autíčko 🚗', B:'Banán 🍌', C:'Cukr 🍬', Č:'Čokoláda 🍫',
-    D:'Dům 🏠',    Ď:'Ďábel 😈', E:'Elefant 🐘', F:'Fialka 💜',
-    G:'Gitara 🎸', H:'Hvězda ⭐', I:'Ježek 🦔',  J:'Jahoda 🍓',
-    K:'Kočka 🐱',  L:'Lev 🦁',   M:'Motýl 🦋',  N:'Nebe 🌤️',
-    Ň:'Ňadra ❤️',  O:'Orel 🦅',  P:'Pes 🐶',    Q:'Qu.. 🤔',
-    R:'Ryba 🐟',   Ř:'Řeka 🌊',  S:'Slunce ☀️', Š:'Šnek 🐌',
-    T:'Tygr 🐯',   Ť:'Ťapka 🐾', U:'Ucho 👂',   Ú:'Úsměv 😊',
-    Ů:'Ůůů 🌟',   V:'Vítr 💨',  W:'Wau 🐶',    X:'Xylofon 🎵',
-    Y:'Yak 🐂',    Z:'Zebra 🦓', Ž:'Žirafa 🦒'
-  };
-  const colors = ['#ff6fb4','#6fb4ff','#ffb46f','#6fffb4','#d4b4ff','#fff06f','#ff9f6f','#6fe8ff'];
-
-  let selected = 'A';
-
-  function drawLetter(canvas, letter) {
-    const ctx  = canvas.getContext('2d');
-    const w    = canvas.width;
-    const h    = canvas.height;
-    const col  = colors[letter.charCodeAt(0) % colors.length];
-    ctx.clearRect(0, 0, w, h);
-
-    // Background circle
-    ctx.beginPath();
-    ctx.arc(w/2, h/2, w/2 - 4, 0, Math.PI * 2);
-    ctx.fillStyle = col + '33';
-    ctx.fill();
-
-    // Letter
-    ctx.font = `bold ${Math.floor(w * 0.55)}px ui-rounded, system-ui`;
-    ctx.fillStyle = col;
-    ctx.textAlign  = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(letter, w/2, h/2 + 4);
-
-    // Decorative dots
-    for (let i = 0; i < 6; i++) {
-      const angle = (i / 6) * Math.PI * 2;
-      const r     = w/2 - 10;
-      ctx.beginPath();
-      ctx.arc(w/2 + r * Math.cos(angle), h/2 + r * Math.sin(angle), 4, 0, Math.PI * 2);
-      ctx.fillStyle = col + '88';
-      ctx.fill();
-    }
-  }
-
-  function select(letter) {
-    selected = letter;
-    document.getElementById('bigLetter').textContent = letter;
-    document.getElementById('letterWord').textContent = words[letter] || letter + '...';
-    document.querySelectorAll('.letter-btn').forEach(b => b.classList.toggle('active', b.dataset.letter === letter));
-    const canvas = document.getElementById('letterCanvas');
-    if (canvas) drawLetter(canvas, letter);
-    Audio.pop();
-    if (Math.random() < 0.4) Rewards.add(1);
-  }
-
-  return {
-    init() {
-      const grid = document.getElementById('letterGrid');
-      if (!grid || grid.dataset.init) return;
-      grid.dataset.init = '1';
-      letters.forEach(l => {
-        const btn = document.createElement('button');
-        btn.className = 'letter-btn';
-        btn.dataset.letter = l;
+    function render() {
+      current = shuffle(letters)[0];
+      container.innerHTML = gameHeader("🔤 Abeceda", score) + `
+        <div class="game-body">
+          <div style="font-size:6rem;font-weight:900;color:#ffd700;text-shadow:0 0 20px rgba(255,215,0,.5)">${current}</div>
+          <div style="font-size:1.5rem;color:#ccc;">${words[current] || ""}</div>
+          <div class="answer-grid" id="letterGrid"></div>
+        </div>`;
+      const options = shuffle([current, ...shuffle(letters.filter(l => l !== current)).slice(0,3)]);
+      const grid = container.querySelector("#letterGrid");
+      options.forEach(l => {
+        const btn = document.createElement("button");
+        btn.className = "btn-big btn-info";
         btn.textContent = l;
-        btn.addEventListener('click', () => select(l));
-        grid.appendChild(btn);
-      });
-      select('A');
-    }
-  };
-})();
-
-/* ============================================================
-   NUMBERS GAME / ČÍSLA
-   ============================================================ */
-const CislaGame = (() => {
-  let target = 1;
-  let score  = 0;
-
-  function newRound() {
-    target = Math.floor(Math.random() * 10) + 1;
-    const task = document.getElementById('numberTask');
-    if (task) task.textContent = `Kolik je teček? (1–10)`;
-
-    const dots = document.getElementById('numberDots');
-    if (dots) {
-      dots.innerHTML = '';
-      for (let i = 0; i < target; i++) {
-        const d = document.createElement('div');
-        d.className = 'number-dot';
-        d.style.animationDelay = i * 0.05 + 's';
-        d.style.background = ['#ff6fb4','#6fb4ff','#ffb46f','#6fffb4','#d4b4ff'][i % 5];
-        dots.appendChild(d);
-      }
-    }
-
-    const btns = document.getElementById('numberBtns');
-    if (btns) {
-      btns.innerHTML = '';
-      const choices = shuffle([target, ...getWrong(target, 3)]);
-      choices.forEach(n => {
-        const btn = document.createElement('button');
-        btn.className = 'number-choice';
-        btn.textContent = n;
-        btn.addEventListener('click', () => checkAnswer(btn, n));
-        btns.appendChild(btn);
-      });
-    }
-  }
-
-  function getWrong(correct, count) {
-    const pool = [];
-    for (let i = 1; i <= 10; i++) if (i !== correct) pool.push(i);
-    return shuffle(pool).slice(0, count);
-  }
-
-  function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
-
-  function checkAnswer(btn, n) {
-    document.querySelectorAll('.number-choice').forEach(b => b.disabled = true);
-    if (n === target) {
-      btn.classList.add('correct');
-      Audio.correct();
-      score++;
-      speak('correct');
-      setTimeout(() => { Rewards.add(1); newRound(); }, 1200);
-    } else {
-      btn.classList.add('wrong');
-      Audio.wrong();
-      speak('wrong');
-      document.querySelectorAll('.number-choice').forEach(b => {
-        if (parseInt(b.textContent) === target) b.classList.add('correct');
-      });
-      setTimeout(newRound, 1600);
-    }
-  }
-
-  function speak(ctx) {
-    const el = document.getElementById('speechText');
-    if (el) el.textContent = CharacterManager.speak(ctx);
-  }
-
-  return {
-    init() {
-      const game = document.getElementById('numberGame');
-      if (!game || game.dataset.init) { if (game) newRound(); return; }
-      game.dataset.init = '1';
-      newRound();
-    }
-  };
-})();
-
-/* ============================================================
-   COLORS GAME / BARVY
-   ============================================================ */
-const BarvyGame = (() => {
-  const colorData = [
-    { name: 'Červená',   hex: '#e74c3c', cs: 'červená' },
-    { name: 'Modrá',     hex: '#3498db', cs: 'modrá' },
-    { name: 'Zelená',    hex: '#2ecc71', cs: 'zelená' },
-    { name: 'Žlutá',     hex: '#f1c40f', cs: 'žlutá' },
-    { name: 'Oranžová',  hex: '#e67e22', cs: 'oranžová' },
-    { name: 'Fialová',   hex: '#9b59b6', cs: 'fialová' },
-    { name: 'Růžová',    hex: '#ff6fb4', cs: 'růžová' },
-    { name: 'Hnědá',     hex: '#8b5e3c', cs: 'hnědá' },
-    { name: 'Černá',     hex: '#2c3e50', cs: 'černá' },
-    { name: 'Bílá',      hex: '#ecf0f1', cs: 'bílá' }
-  ];
-
-  let target = null;
-
-  function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
-
-  function newRound() {
-    const shuffled = shuffle(colorData);
-    target = shuffled[0];
-    const wrongs = shuffled.slice(1, 3);
-    const all    = shuffle([target, ...wrongs]);
-
-    const blob = document.getElementById('colorBlob');
-    if (blob) { blob.style.background = target.hex; blob.style.animation = 'none'; void blob.offsetWidth; blob.style.animation = ''; }
-
-    const q = document.getElementById('colorQuestion');
-    if (q) q.textContent = 'Jaká je to barva?';
-
-    const answers = document.getElementById('colorAnswers');
-    if (answers) {
-      answers.innerHTML = '';
-      all.forEach(c => {
-        const btn = document.createElement('button');
-        btn.className = 'color-choice';
-        btn.textContent = c.name;
-        btn.style.borderColor = c.hex + '99';
-        btn.addEventListener('click', () => checkAnswer(btn, c));
-        answers.appendChild(btn);
-      });
-    }
-  }
-
-  function checkAnswer(btn, color) {
-    document.querySelectorAll('.color-choice').forEach(b => b.disabled = true);
-    if (color.name === target.name) {
-      btn.classList.add('correct');
-      Audio.correct();
-      speak('correct');
-      setTimeout(() => { Rewards.add(1); newRound(); }, 1200);
-    } else {
-      btn.classList.add('wrong');
-      Audio.wrong();
-      speak('wrong');
-      document.querySelectorAll('.color-choice').forEach(b => {
-        if (b.textContent === target.name) b.classList.add('correct');
-      });
-      setTimeout(newRound, 1600);
-    }
-  }
-
-  function speak(ctx) {
-    const el = document.getElementById('speechText');
-    if (el) el.textContent = CharacterManager.speak(ctx);
-  }
-
-  return {
-    init() {
-      const game = document.getElementById('colorGame');
-      if (!game || game.dataset.init) { newRound(); return; }
-      game.dataset.init = '1';
-      newRound();
-    }
-  };
-})();
-
-/* ============================================================
-   SHAPES GAME / TVARY
-   ============================================================ */
-const TvaryGame = (() => {
-  const shapes = [
-    { name: 'Kruh',          emoji: '⭕', draw: drawCircle },
-    { name: 'Čtverec',       emoji: '⬛', draw: drawSquare },
-    { name: 'Trojúhelník',   emoji: '🔺', draw: drawTriangle },
-    { name: 'Hvězda',        emoji: '⭐', draw: drawStar },
-    { name: 'Srdce',         emoji: '❤️', draw: drawHeart },
-    { name: 'Obdélník',      emoji: '▬', draw: drawRect }
-  ];
-
-  let current = 0;
-
-  function drawCircle(ctx, w, h, col) {
-    ctx.beginPath();
-    ctx.arc(w/2, h/2, Math.min(w,h)/2 - 20, 0, Math.PI*2);
-    ctx.fillStyle = col + '55';
-    ctx.fill();
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 6;
-    ctx.stroke();
-  }
-
-  function drawSquare(ctx, w, h, col) {
-    const s = Math.min(w,h) - 60;
-    ctx.beginPath();
-    ctx.rect((w-s)/2, (h-s)/2, s, s);
-    ctx.fillStyle = col + '55';
-    ctx.fill();
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 6;
-    ctx.stroke();
-  }
-
-  function drawTriangle(ctx, w, h, col) {
-    const m = Math.min(w,h);
-    ctx.beginPath();
-    ctx.moveTo(w/2, (h-m)/2 + 20);
-    ctx.lineTo((w-m)/2 + 20, (h+m)/2 - 20);
-    ctx.lineTo((w+m)/2 - 20, (h+m)/2 - 20);
-    ctx.closePath();
-    ctx.fillStyle = col + '55';
-    ctx.fill();
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 6;
-    ctx.stroke();
-  }
-
-  function drawStar(ctx, w, h, col) {
-    const cx = w/2, cy = h/2;
-    const outerR = Math.min(w,h)/2 - 20;
-    const innerR = outerR * 0.4;
-    const points = 5;
-    ctx.beginPath();
-    for (let i = 0; i < points * 2; i++) {
-      const r     = i % 2 === 0 ? outerR : innerR;
-      const angle = (i * Math.PI) / points - Math.PI/2;
-      if (i === 0) ctx.moveTo(cx + r*Math.cos(angle), cy + r*Math.sin(angle));
-      else         ctx.lineTo(cx + r*Math.cos(angle), cy + r*Math.sin(angle));
-    }
-    ctx.closePath();
-    ctx.fillStyle = col + '55';
-    ctx.fill();
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 5;
-    ctx.stroke();
-  }
-
-  function drawHeart(ctx, w, h, col) {
-    const x = w/2, y = h/2 - 10, s = Math.min(w,h) * 0.38;
-    ctx.beginPath();
-    ctx.moveTo(x, y + s*0.4);
-    ctx.bezierCurveTo(x, y, x - s, y, x - s, y + s*0.4);
-    ctx.bezierCurveTo(x - s, y + s*0.85, x, y + s*1.2, x, y + s*1.3);
-    ctx.bezierCurveTo(x, y + s*1.2, x + s, y + s*0.85, x + s, y + s*0.4);
-    ctx.bezierCurveTo(x + s, y, x, y, x, y + s*0.4);
-    ctx.fillStyle = col + '55';
-    ctx.fill();
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 5;
-    ctx.stroke();
-  }
-
-  function drawRect(ctx, w, h, col) {
-    const rw = w - 60, rh = (h - 60) * 0.6;
-    ctx.beginPath();
-    ctx.rect((w-rw)/2, (h-rh)/2, rw, rh);
-    ctx.fillStyle = col + '55';
-    ctx.fill();
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 6;
-    ctx.stroke();
-  }
-
-  const colors = ['#ff6fb4','#6fb4ff','#ffb46f','#6fffb4','#d4b4ff'];
-
-  function render() {
-    const canvas = document.getElementById('shapeCanvas');
-    if (!canvas) return;
-    const ctx  = canvas.getContext('2d');
-    const s    = shapes[current];
-    const col  = colors[current % colors.length];
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    s.draw(ctx, canvas.width, canvas.height, col);
-
-    // Name label
-    ctx.font = 'bold 22px ui-rounded, system-ui';
-    ctx.fillStyle = col;
-    ctx.textAlign  = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(s.name, canvas.width/2, canvas.height - 8);
-  }
-
-  function makeButtons() {
-    const container = document.getElementById('shapeBtns');
-    if (!container || container.dataset.init) return;
-    container.dataset.init = '1';
-    shapes.forEach((s, i) => {
-      const btn = document.createElement('button');
-      btn.className  = 'shape-btn' + (i === 0 ? ' active' : '');
-      btn.textContent = s.emoji + ' ' + s.name;
-      btn.addEventListener('click', () => {
-        current = i;
-        document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        render();
-        Audio.pop();
-      });
-      container.appendChild(btn);
-    });
-  }
-
-  return {
-    init() {
-      const canvas = document.getElementById('shapeCanvas');
-      if (canvas) { canvas.width = Math.min(400, window.innerWidth - 40); canvas.height = 300; }
-      makeButtons();
-      render();
-      document.getElementById('shapeNext')?.addEventListener('click', () => {
-        current = (current + 1) % shapes.length;
-        document.querySelectorAll('.shape-btn').forEach((b, i) => b.classList.toggle('active', i === current));
-        render();
-        Audio.pop();
-        if (Math.random() < 0.5) Rewards.add(1);
-      });
-    }
-  };
-})();
-
-/* ============================================================
-   ANIMALS GAME / ZVÍŘÁTKA
-   ============================================================ */
-const ZviratkuGame = (() => {
-  const animals = [
-    { emoji:'🐶', name:'Pejsek',    sound:'Haf haf! 🐕' },
-    { emoji:'🐱', name:'Kočička',   sound:'Mňau mňau! 🐈' },
-    { emoji:'🐮', name:'Kravička',  sound:'Mú mú! 🐄' },
-    { emoji:'🐷', name:'Prasátko',  sound:'Chro chro! 🐷' },
-    { emoji:'🐔', name:'Slepička',  sound:'Kokokoko! 🐓' },
-    { emoji:'🐸', name:'Žabka',     sound:'Kvak kvak! 🐸' },
-    { emoji:'🦆', name:'Kačenka',   sound:'Kváká kváká! 🦆' },
-    { emoji:'🐑', name:'Ovečka',    sound:'Bé bé! 🐑' },
-    { emoji:'🐴', name:'Koník',     sound:'Ihaha! 🐴' },
-    { emoji:'🐘', name:'Sloník',    sound:'Tůůů! 🐘' },
-    { emoji:'🦁', name:'Lvíček',    sound:'Rárárá! 🦁' },
-    { emoji:'🐯', name:'Tygřík',    sound:'Grrr! 🐯' },
-    { emoji:'🐰', name:'Králíček',  sound:'Čvachta čvachta! 🐇' },
-    { emoji:'🦊', name:'Lišticka',  sound:'Víp víp! 🦊' },
-    { emoji:'🐻', name:'Medvídek',  sound:'Brumm! 🐻' },
-    { emoji:'🦋', name:'Motýlek',   sound:'Ššš (letí tiše) 🦋' },
-    { emoji:'🐝', name:'Včelička',  sound:'Bzzz bzz! 🐝' },
-    { emoji:'🐠', name:'Rybička',   sound:'Bublina! 🫧' },
-    { emoji:'🦜', name:'Papoušek', sound:'Ahoj ahoj! 🦜' },
-    { emoji:'🦒', name:'Žirafa',    sound:'Mmm mmm! 🦒' }
-  ];
-
-  function select(a) {
-    document.getElementById('animalBig').textContent  = a.emoji;
-    document.getElementById('animalName').textContent = a.name;
-    document.getElementById('animalSound').textContent = a.sound;
-    document.querySelectorAll('.animal-btn').forEach(b => b.classList.toggle('active', b.dataset.name === a.name));
-    Audio.pop();
-    if (Math.random() < 0.3) Rewards.add(1);
-  }
-
-  return {
-    init() {
-      const grid = document.getElementById('animalGrid');
-      if (!grid || grid.dataset.init) { return; }
-      grid.dataset.init = '1';
-      animals.forEach(a => {
-        const btn = document.createElement('button');
-        btn.className = 'animal-btn';
-        btn.dataset.name = a.name;
-        btn.innerHTML = `<span class="animal-emoji">${a.emoji}</span><span class="animal-label">${a.name}</span>`;
-        btn.addEventListener('click', () => select(a));
-        grid.appendChild(btn);
-      });
-      select(animals[0]);
-    }
-  };
-})();
-
-/* ============================================================
-   STORIES / PŘÍBĚHY
-   ============================================================ */
-const PribehyGame = (() => {
-  const stories = [
-    {
-      id: 'iskron',
-      title: 'Iskroň a hvězdičky',
-      icon: '✨',
-      pages: [
-        { scene: '✨🌙', text: 'Byl jednou jeden Iskroň – malá zářivá jiskřička, která žila na obloze. Každou noc rozsvěcel hvězdičky.' },
-        { scene: '🌟⭐🌟', text: 'Iskroň měl velký sen: osvítit celý svět! Ale byl malý a bál se tmy.' },
-        { scene: '👶✨', text: 'Jednoho dne potkal malého Pikoše, který mu řekl: "Nevadí, že jsi malý! I malá jiskřička může svítit velice jasně!"' },
-        { scene: '🌈✨🌟', text: 'Iskroň se rozhořel celý! A od té doby osvětluje cestu všem, kdo se bojí tmy. 🌟' }
-      ]
-    },
-    {
-      id: 'revia',
-      title: 'Svět Revia',
-      icon: '🌍',
-      pages: [
-        { scene: '🏰🌈', text: 'Daleko daleko leží svět Revia – místo plné barev a kouzel, kde vládne vždy klid a harmonie.' },
-        { scene: '🧠💖👶💪', text: 'V Revii žijí čtyři přátelé: Hlavoun myslí, Viri vypráví, Pikoš se dívá a Bičák se pohybuje!' },
-        { scene: '🎮🎨📚', text: 'Spolu tvoří hry, příběhy a dobrodružství. Každý den je v Revii nový výdobytek!' },
-        { scene: '🌟🏆🎊', text: 'A ty? Ty jsi teď součástí Revie! Vítej ve světě Vivere atque Frui\'T! 🌈' }
-      ]
-    },
-    {
-      id: 'abeceda',
-      title: 'Dobrodružství písmenek',
-      icon: '🔤',
-      pages: [
-        { scene: '🔤🌸', text: 'Bylo jednou 26 písmenek, která žila v malé vesničce zvané Abeceda. Každé mělo své jméno a svůj zvuk.' },
-        { scene: 'Á🍎', text: '"Á" říkalo: "Ahoj! Mě to začíná!" a ukázalo na červené jablko. "A jako Autíčko! A jako Anděl!"' },
-        { scene: 'B🐝', text: '"B" přiletělo jako včelička: "Bzzz! B jako Bublina! B jako Brouk!" A Bublina odletěla do světa.' },
-        { scene: '🔤🌈', text: 'A tak každé písmenku dostalo svou roli. Dohromady tvoří slova, příběhy a celý náš svět! 📖' }
-      ]
-    },
-    {
-      id: 'bicak',
-      title: 'Bičák a pohybový svět',
-      icon: '💪',
-      pages: [
-        { scene: '💪🏃', text: 'Bičák byl největší milovník pohybu na světě. Každé ráno vstával a hned začal cvičit: skoky, dřepy, běhání!' },
-        { scene: '🤸🦵', text: '"Pohyb je zdraví!" křičel Bičák a zatřásl rukama. "Každý skok tě dělá silnějším! Každý krok je radost!"' },
-        { scene: '🌳🏃👶', text: 'Jednoho dne přišel malý Pikoš: "Já neumím skákat jako ty." Bičák se usmál: "Nevadí! Začneme pomalu."' },
-        { scene: '💪🏆⭐', text: 'Spolu cvičili každý den. A Pikoš byl brzy silnější než si myslel! "Každý pohyb se počítá!" řekl Bičák. 💪' }
-      ]
-    }
-  ];
-
-  let currentStory = null;
-  let currentPage  = 0;
-
-  function openStory(story) {
-    currentStory = story;
-    currentPage  = 0;
-    document.querySelectorAll('.story-card').forEach(c => c.classList.toggle('active', c.dataset.story === story.id));
-    document.getElementById('storyList').style.display = 'none';
-    const reader = document.getElementById('storyReader');
-    reader.classList.add('active');
-    renderPage();
-  }
-
-  function renderPage() {
-    if (!currentStory) return;
-    const p = currentStory.pages[currentPage];
-    document.getElementById('storyScene').textContent = p.scene;
-    document.getElementById('storyText').textContent  = p.text;
-    document.getElementById('storyPage').textContent  = `${currentPage + 1} / ${currentStory.pages.length}`;
-    Audio.pop();
-  }
-
-  return {
-    init() {
-      const list = document.getElementById('storyList');
-      if (!list || list.dataset.init) { return; }
-      list.dataset.init = '1';
-
-      stories.forEach(s => {
-        const card = document.createElement('button');
-        card.className = 'story-card';
-        card.dataset.story = s.id;
-        card.innerHTML = `<span class="story-icon">${s.icon}</span><span class="story-title">${s.title}</span>`;
-        card.addEventListener('click', () => { Audio.click(); openStory(s); });
-        list.appendChild(card);
-      });
-
-      document.getElementById('storyNext')?.addEventListener('click', () => {
-        if (!currentStory) return;
-        if (currentPage < currentStory.pages.length - 1) {
-          currentPage++;
-          renderPage();
-        } else {
-          Rewards.add(1);
-          document.getElementById('storyList').style.display = '';
-          document.getElementById('storyReader').classList.remove('active');
-          currentStory = null;
-        }
-      });
-
-      document.getElementById('storyPrev')?.addEventListener('click', () => {
-        if (!currentStory) return;
-        if (currentPage > 0) { currentPage--; renderPage(); }
-        else {
-          document.getElementById('storyList').style.display = '';
-          document.getElementById('storyReader').classList.remove('active');
-          currentStory = null;
-        }
-      });
-    }
-  };
-})();
-
-/* ============================================================
-   POHYB / BICAK GAME
-   ============================================================ */
-const PohybGame = (() => {
-  let score    = 0;
-  let activity = null;
-  let animFrame = null;
-
-  function drawBicak(canvas) {
-    const ctx = canvas.getContext('2d');
-    const w = canvas.width, h = canvas.height;
-    const t = Date.now() / 500;
-
-    ctx.clearRect(0, 0, w, h);
-
-    // Body
-    const by = h/2 + Math.sin(t) * 15;
-    ctx.beginPath();
-    ctx.ellipse(w/2, by, 30, 40, 0, 0, Math.PI*2);
-    ctx.fillStyle = '#ffb46f';
-    ctx.fill();
-
-    // Head
-    ctx.beginPath();
-    ctx.arc(w/2, by - 55, 28, 0, Math.PI*2);
-    ctx.fillStyle = '#ffd4a0';
-    ctx.fill();
-
-    // Eyes
-    ctx.fillStyle = '#333';
-    ctx.beginPath(); ctx.arc(w/2-10, by-58, 5, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(w/2+10, by-58, 5, 0, Math.PI*2); ctx.fill();
-
-    // Smile
-    ctx.beginPath();
-    ctx.arc(w/2, by-50, 14, 0.2, Math.PI-0.2);
-    ctx.strokeStyle = '#333';
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-
-    // Arms animation
-    const armAngle = Math.sin(t * 2) * 0.6;
-    ctx.strokeStyle = '#ffb46f';
-    ctx.lineWidth = 6;
-    ctx.lineCap = 'round';
-    // Left arm
-    ctx.beginPath();
-    ctx.moveTo(w/2 - 28, by - 10);
-    ctx.lineTo(w/2 - 28 - Math.cos(armAngle)*35, by - 10 + Math.sin(armAngle)*35);
-    ctx.stroke();
-    // Right arm
-    ctx.beginPath();
-    ctx.moveTo(w/2 + 28, by - 10);
-    ctx.lineTo(w/2 + 28 + Math.cos(-armAngle)*35, by - 10 + Math.sin(-armAngle)*35);
-    ctx.stroke();
-
-    // Legs
-    const legAngle = Math.sin(t * 2) * 0.4;
-    ctx.strokeStyle = '#e67e22';
-    // Left leg
-    ctx.beginPath();
-    ctx.moveTo(w/2 - 15, by + 38);
-    ctx.lineTo(w/2 - 15 - Math.sin(legAngle)*20, by + 80);
-    ctx.stroke();
-    // Right leg
-    ctx.beginPath();
-    ctx.moveTo(w/2 + 15, by + 38);
-    ctx.lineTo(w/2 + 15 + Math.sin(legAngle)*20, by + 80);
-    ctx.stroke();
-
-    // Stars
-    ctx.fillStyle = '#fff06f';
-    ctx.font = '20px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('💪', w/2, by - 95);
-  }
-
-  function startAnim(canvas) {
-    if (animFrame) cancelAnimationFrame(animFrame);
-    function loop() { drawBicak(canvas); animFrame = requestAnimationFrame(loop); }
-    loop();
-  }
-
-  function newActivity() {
-    activity = Bicak.randomActivity();
-    const task = document.getElementById('pohybTask');
-    if (task) task.textContent = activity.emoji + ' ' + activity.desc;
-
-    const btns = document.getElementById('pohybBtns');
-    if (btns) {
-      btns.innerHTML = '';
-      const btn = document.createElement('button');
-      btn.className = 'pohyb-btn';
-      btn.textContent = '✅ Hotovo! (' + activity.count + ' ' + activity.unit + ')';
-      btn.addEventListener('click', () => {
-        score++;
-        document.getElementById('pohybCounter').textContent = '💪 Skóre: ' + score;
-        Audio.correct();
-        speak('correct');
-        if (score % 3 === 0) Rewards.add(1);
-        setTimeout(newActivity, 800);
-      });
-      btns.appendChild(btn);
-    }
-  }
-
-  function speak(ctx) {
-    const el = document.getElementById('speechText');
-    if (el) el.textContent = CharacterManager.speak(ctx);
-  }
-
-  return {
-    init() {
-      const canvas = document.getElementById('bicakCanvas');
-      if (canvas) { startAnim(canvas); }
-      const game = document.getElementById('pohybGame');
-      if (!game || game.dataset.init) { if (game) newActivity(); return; }
-      game.dataset.init = '1';
-      newActivity();
-    }
-  };
-})();
-
-/* ============================================================
-   GALLERY / GALERIE
-   ============================================================ */
-const GalerieGame = (() => {
-  const worlds = [
-    {
-      name: 'Revia',
-      desc: 'Svět harmonie a barev, kde žijí Hlavoun, Viri, Pikoš a Bičák.',
-      draw(ctx, w, h) {
-        // Sky gradient
-        const g = ctx.createLinearGradient(0,0,0,h);
-        g.addColorStop(0, '#1a0a3a');
-        g.addColorStop(1, '#3a1a6a');
-        ctx.fillStyle = g;
-        ctx.fillRect(0,0,w,h);
-        // Stars
-        ctx.fillStyle = '#fff';
-        for (let i = 0; i < 40; i++) {
-          const x = (i*37+i*i) % w, y = (i*23+i*17) % (h*0.6);
-          ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI*2); ctx.fill();
-        }
-        // Castle
-        ctx.fillStyle = '#6b3fa0';
-        ctx.fillRect(w*0.3, h*0.5, w*0.4, h*0.35);
-        ctx.fillRect(w*0.28, h*0.42, w*0.1, h*0.15);
-        ctx.fillRect(w*0.62, h*0.42, w*0.1, h*0.15);
-        ctx.fillStyle = '#ff6fb4';
-        ctx.fillRect(w*0.44, h*0.32, w*0.12, h*0.18);
-        // Rainbow
-        const colors = ['#ff0000','#ff8c00','#ffff00','#00ff00','#0000ff','#8b00ff'];
-        colors.forEach((c, i) => {
-          ctx.beginPath(); ctx.arc(w*0.1, h, (w*0.5) - i*12, Math.PI, 0);
-          ctx.strokeStyle = c; ctx.lineWidth = 8; ctx.stroke();
-        });
-      }
-    },
-    {
-      name: 'Písmenková planeta',
-      desc: 'Planeta kde všechna písmenka žijí a každý den se učí nová slova.',
-      draw(ctx, w, h) {
-        ctx.fillStyle = '#050815';
-        ctx.fillRect(0,0,w,h);
-        // Planet
-        const gr = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,h*0.38);
-        gr.addColorStop(0, '#5a3080'); gr.addColorStop(1, '#1a0838');
-        ctx.beginPath(); ctx.arc(w/2,h/2,h*0.38,0,Math.PI*2);
-        ctx.fillStyle = gr; ctx.fill();
-        ctx.strokeStyle = '#d4b4ff'; ctx.lineWidth = 2; ctx.stroke();
-        // Letters on planet
-        ctx.fillStyle = '#fff'; ctx.font = 'bold 18px system-ui'; ctx.textAlign = 'center';
-        ['A','B','C','D','E'].forEach((l,i) => {
-          const a = (i/5)*Math.PI*2 - Math.PI/2;
-          ctx.fillText(l, w/2 + Math.cos(a)*h*0.28, h/2 + Math.sin(a)*h*0.28 + 6);
-        });
-        // Stars
-        ctx.fillStyle = '#fff'; ctx.font = '10px sans-serif';
-        for (let i = 0; i < 20; i++) { ctx.fillText('·', (i*53+17)%w, (i*37+11)%h); }
-      }
-    },
-    {
-      name: 'Kytičkový svět',
-      desc: 'Svět plný kvetoucích květin a motýlků. Každá kytička má svou barvu.',
-      draw(ctx, w, h) {
-        // Sky
-        ctx.fillStyle = '#87ceeb'; ctx.fillRect(0,0,w,h);
-        // Ground
-        ctx.fillStyle = '#5a9a2a'; ctx.fillRect(0, h*0.65, w, h*0.35);
-        // Flowers
-        const flowers = [
-          {x:0.15,c:'#ff6fb4'},{x:0.35,c:'#ffb46f'},{x:0.55,c:'#fff06f'},{x:0.75,c:'#d4b4ff'},{x:0.9,c:'#6fffb4'}
-        ];
-        flowers.forEach(f => {
-          const fx = w*f.x, fy = h*0.62;
-          // Stem
-          ctx.strokeStyle = '#3a7a10'; ctx.lineWidth = 3;
-          ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx, fy - 50); ctx.stroke();
-          // Petals
-          for (let i = 0; i < 6; i++) {
-            const a = (i/6)*Math.PI*2;
-            ctx.beginPath();
-            ctx.ellipse(fx+Math.cos(a)*14, (fy-50)+Math.sin(a)*14, 10, 7, a, 0, Math.PI*2);
-            ctx.fillStyle = f.c; ctx.fill();
+        btn.addEventListener("click", () => {
+          if (l === current) {
+            playSound("correct");
+            score++;
+            Reward.add(1);
+            btn.style.background = "#4caf50";
+            setTimeout(render, 700);
+          } else {
+            playSound("wrong");
+            btn.style.background = "#e94560";
+            setTimeout(() => btn.style.background = "", 400);
           }
-          // Center
-          ctx.beginPath(); ctx.arc(fx, fy-50, 8, 0, Math.PI*2);
-          ctx.fillStyle = '#ffe066'; ctx.fill();
         });
-        // Sun
-        ctx.beginPath(); ctx.arc(w*0.85, h*0.15, 30, 0, Math.PI*2);
-        ctx.fillStyle = '#ffe566'; ctx.fill();
-        // Butterflies
-        ctx.fillStyle = '#ff6fb4'; ctx.font = '22px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('🦋', w*0.3, h*0.35);
-        ctx.fillText('🦋', w*0.65, h*0.28);
-      }
-    },
-    {
-      name: 'VaFiT Centrum',
-      desc: '3D centrum VaFiT – střed celého vesmíru Vivere atque Frui\'T.',
-      draw(ctx, w, h) {
-        ctx.fillStyle = '#05070a'; ctx.fillRect(0,0,w,h);
-        // Grid
-        ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1;
-        for (let x = 0; x < w; x += 30) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
-        for (let y = 0; y < h; y += 30) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
-        // Core sphere
-        const gr = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,70);
-        gr.addColorStop(0,'#19d6ff'); gr.addColorStop(0.5,'#0066cc'); gr.addColorStop(1,'rgba(0,40,80,0)');
-        ctx.beginPath(); ctx.arc(w/2,h/2,70,0,Math.PI*2);
-        ctx.fillStyle = gr; ctx.fill();
-        // Rings
-        ctx.strokeStyle = 'rgba(25,214,255,0.4)'; ctx.lineWidth = 2;
-        [90, 110, 130].forEach(r => {
-          ctx.beginPath(); ctx.arc(w/2,h/2,r,0,Math.PI*2); ctx.stroke();
-        });
-        // Nodes
-        ctx.fillStyle = '#19d6ff'; ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center';
-        ['Hlavoun','Pikoš','Viri','Bičák'].forEach((n,i) => {
-          const a = (i/4)*Math.PI*2 - Math.PI/2;
-          const nx = w/2 + Math.cos(a)*110, ny = h/2 + Math.sin(a)*110;
-          ctx.beginPath(); ctx.arc(nx, ny, 8, 0, Math.PI*2);
-          ctx.fillStyle = ['#6fb4ff','#ff6fb4','#d4b4ff','#ffb46f'][i]; ctx.fill();
-          ctx.fillStyle = '#fff'; ctx.fillText(n, nx, ny - 14);
-        });
-        // Label
-        ctx.fillStyle = '#19d6ff'; ctx.font = 'bold 14px system-ui';
-        ctx.fillText('VAFT CENTER 3D', w/2, h - 12);
-      }
-    },
-    {
-      name: 'Glyph Planet',
-      desc: 'Planeta tajemných glyfů a symbolů. Každý glyf má svůj příběh.',
-      draw(ctx, w, h) {
-        ctx.fillStyle = '#080616'; ctx.fillRect(0,0,w,h);
-        // Planet
-        const g = ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,h*0.4);
-        g.addColorStop(0,'#2a1a4a'); g.addColorStop(1,'#0a0820');
-        ctx.beginPath(); ctx.arc(w/2,h/2,h*0.4,0,Math.PI*2);
-        ctx.fillStyle = g; ctx.fill();
-        ctx.strokeStyle = '#a06bff'; ctx.lineWidth = 1.5; ctx.stroke();
-        // Glyphs
-        ctx.fillStyle = '#d4b4ff'; ctx.font = '24px monospace'; ctx.textAlign = 'center';
-        const glyphs = ['Λ','Ω','Σ','Δ','Φ','Ψ','Θ','Ξ'];
-        glyphs.forEach((g,i) => {
-          const a = (i/8)*Math.PI*2;
-          const r = h*0.28;
-          ctx.fillText(g, w/2+Math.cos(a)*r, h/2+Math.sin(a)*r+8);
-        });
-        // Stars
-        ctx.fillStyle = '#fff'; ctx.font = '8px sans-serif';
-        for (let i = 0; i < 30; i++) { ctx.fillText('*', (i*71+23)%w, (i*43+17)%(h*0.4)); }
-      }
-    },
-    {
-      name: 'Oblak',
-      desc: 'Svět mraků kde cestujeme po nebi a snítíme sny.',
-      draw(ctx, w, h) {
-        // Sky gradient
-        const g = ctx.createLinearGradient(0,0,0,h);
-        g.addColorStop(0,'#1a6ab4'); g.addColorStop(1,'#6ab4ff');
-        ctx.fillStyle = g; ctx.fillRect(0,0,w,h);
-        // Clouds
-        function cloud(x, y, s) {
-          ctx.fillStyle = 'rgba(255,255,255,0.92)';
-          [0,s*0.5,-s*0.5,s,s*0.8].forEach((ox,i) => {
-            ctx.beginPath(); ctx.arc(x+ox, y+[0,-s*0.3,-s*0.2,0,-s*0.25][i]*0.8, s*0.5-i*2, 0, Math.PI*2);
-            ctx.fill();
-          });
-        }
-        cloud(w*0.15, h*0.2, 40); cloud(w*0.55, h*0.15, 55); cloud(w*0.8, h*0.3, 35); cloud(w*0.4, h*0.45, 45);
-        // Sun
-        ctx.beginPath(); ctx.arc(w*0.9, h*0.08, 28, 0, Math.PI*2);
-        ctx.fillStyle = '#ffe566'; ctx.fill();
-        // Birds
-        ctx.strokeStyle = '#1a2a4a'; ctx.lineWidth = 2;
-        [[w*0.3,h*0.1],[w*0.35,h*0.08],[w*0.65,h*0.2]].forEach(([bx,by]) => {
-          ctx.beginPath(); ctx.moveTo(bx-8,by); ctx.quadraticCurveTo(bx,by-8,bx+8,by); ctx.stroke();
-        });
-        // Characters on clouds
-        ctx.font = '22px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText('☁️', w*0.5, h*0.55); ctx.fillText('🌤️', w*0.2, h*0.55);
-      }
-    }
-  ];
-
-  let currentWorld = null;
-
-  function thumbDraw(canvas, world) {
-    const ctx = canvas.getContext('2d');
-    ctx.save();
-    ctx.scale(canvas.width/400, canvas.height/300);
-    world.draw(ctx, 400, 300);
-    ctx.restore();
-  }
-
-  function showWorld(world) {
-    currentWorld = world;
-    document.querySelectorAll('.gallery-card').forEach(c => c.classList.toggle('active', c.dataset.world === world.name));
-    document.getElementById('galleryTitle').textContent = world.name;
-    document.getElementById('galleryDesc').textContent  = world.desc;
-    const canvas = document.getElementById('galleryCanvas');
-    if (canvas) {
-      canvas.width  = Math.min(400, window.innerWidth - 40);
-      canvas.height = Math.round(canvas.width * 3/4);
-      world.draw(canvas.getContext('2d'), canvas.width, canvas.height);
-    }
-    Audio.pop();
-    if (Math.random() < 0.25) Rewards.add(1);
-  }
-
-  return {
-    init() {
-      const grid = document.getElementById('galleryGrid');
-      if (!grid || grid.dataset.init) { if (currentWorld) showWorld(currentWorld); return; }
-      grid.dataset.init = '1';
-      worlds.forEach(world => {
-        const card = document.createElement('button');
-        card.className = 'gallery-card';
-        card.dataset.world = world.name;
-        const thumbCanvas = document.createElement('canvas');
-        thumbCanvas.width = 120; thumbCanvas.height = 90;
-        const title = document.createElement('span');
-        title.className = 'gallery-card-title';
-        title.textContent = world.name;
-        const thumb = document.createElement('div');
-        thumb.className = 'gallery-thumb';
-        thumb.appendChild(thumbCanvas);
-        card.appendChild(thumb);
-        card.appendChild(title);
-        card.addEventListener('click', () => { Audio.click(); showWorld(world); });
-        grid.appendChild(card);
-        // Delay thumb drawing to avoid blocking
-        setTimeout(() => thumbDraw(thumbCanvas, world), 50);
+        grid.appendChild(btn);
       });
-      showWorld(worlds[0]);
     }
-  };
-})();
 
-/* ============================================================
-   SCREEN INITIALIZERS
-   ============================================================ */
-function initScreen(id) {
-  switch(id) {
-    case 'abeceda':  AbecedaGame.init();  break;
-    case 'cisla':    CislaGame.init();    break;
-    case 'barvy':    BarvyGame.init();    break;
-    case 'tvary':    TvaryGame.init();    break;
-    case 'zviratka': ZviratkuGame.init(); break;
-    case 'pribehy':  PribehyGame.init();  break;
-    case 'pohyb':    PohybGame.init();    break;
-    case 'galerie':  GalerieGame.init();  break;
+    render();
   }
-}
+};
 
-/* ============================================================
-   CHARACTER SWITCHER
-   ============================================================ */
-function initCharacterSwitcher() {
-  document.querySelectorAll('.char-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.char;
-      CharacterManager.setCurrent(id);
-      document.querySelectorAll('.char-btn').forEach(b => b.classList.toggle('active', b.dataset.char === id));
-      const el = document.getElementById('speechText');
-      if (el) el.textContent = CharacterManager.speak(Nav.current);
-      Audio.pop();
+/* ── 2. ČÍSLA ── */
+GAMES.cisla = {
+  title: "🔢 Čísla",
+  render(container) {
+    let score = 0;
+    let num = 0;
+
+    function render() {
+      num = Math.floor(Math.random() * 10) + 1;
+      const dots = "●".repeat(num);
+      const options = shuffle([num, ...new Set([
+        Math.max(1, num - 2), Math.max(1, num - 1),
+        Math.min(10, num + 1), Math.min(10, num + 2)
+      ].filter(n => n !== num))].slice(0, 3)).concat([num]);
+      const shuffled = shuffle([...new Set([num, ...options.slice(0,3)])].slice(0,4));
+
+      container.innerHTML = gameHeader("🔢 Čísla", score) + `
+        <div class="game-body">
+          <div style="font-size:2.5rem;letter-spacing:.15em;color:#7fffd4;word-break:break-all;text-align:center;max-width:220px">${dots}</div>
+          <div style="font-size:1.1rem;color:#aaa;margin-top:-.5rem">Kolik je tečiček?</div>
+          <div class="answer-grid" id="numGrid"></div>
+        </div>`;
+      const grid = container.querySelector("#numGrid");
+      shuffled.forEach(n => {
+        const btn = document.createElement("button");
+        btn.className = "btn-big btn-info";
+        btn.style.fontSize = "1.8rem";
+        btn.textContent = n;
+        btn.addEventListener("click", () => {
+          if (n === num) {
+            playSound("correct");
+            score++;
+            Reward.add(1);
+            btn.style.background = "#4caf50";
+            setTimeout(render, 700);
+          } else {
+            playSound("wrong");
+            btn.style.background = "#e94560";
+            setTimeout(() => btn.style.background = "", 400);
+          }
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    render();
+  }
+};
+
+/* ── 3. BARVY ── */
+GAMES.barvy = {
+  title: "🎨 Barvy",
+  render(container) {
+    const colors = [
+      { name: "Červená", hex: "#e94560" },
+      { name: "Modrá",   hex: "#2196f3" },
+      { name: "Zelená",  hex: "#4caf50" },
+      { name: "Žlutá",   hex: "#ffd700" },
+      { name: "Fialová", hex: "#9c27b0" },
+      { name: "Oranžová",hex: "#ff9800" },
+      { name: "Růžová",  hex: "#e91e8c" },
+      { name: "Tyrkysová",hex:"#00bcd4" },
+      { name: "Hnědá",   hex: "#795548" },
+      { name: "Bílá",    hex: "#f0f0f0" }
+    ];
+    let score = 0;
+    let target = null;
+
+    function render() {
+      target = shuffle(colors)[0];
+      const options = shuffle([target, ...shuffle(colors.filter(c => c.name !== target.name)).slice(0,3)]);
+      container.innerHTML = gameHeader("🎨 Barvy", score) + `
+        <div class="game-body">
+          <div style="width:160px;height:160px;border-radius:50%;background:${target.hex};box-shadow:0 0 30px ${target.hex}88"></div>
+          <div style="font-size:1.1rem;color:#aaa">Jaká je tato barva?</div>
+          <div class="answer-grid" id="colorGrid"></div>
+        </div>`;
+      const grid = container.querySelector("#colorGrid");
+      options.forEach(c => {
+        const btn = document.createElement("button");
+        btn.className = "btn-big";
+        btn.style.cssText = `background:${c.hex};color:${c.hex === "#f0f0f0" ? "#222" : "#fff"};font-size:1rem`;
+        btn.textContent = c.name;
+        btn.addEventListener("click", () => {
+          if (c.name === target.name) {
+            playSound("correct");
+            score++;
+            Reward.add(1);
+            setTimeout(render, 700);
+          } else {
+            playSound("wrong");
+            btn.style.opacity = "0.4";
+            setTimeout(() => btn.style.opacity = "", 400);
+          }
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    render();
+  }
+};
+
+/* ── 4. TVARY ── */
+GAMES.tvary = {
+  title: "🔵 Tvary",
+  render(container) {
+    const shapes = [
+      { name: "Kruh",       draw: ctx => { ctx.arc(100,100,70,0,Math.PI*2); } },
+      { name: "Čtverec",    draw: ctx => { ctx.rect(30,30,140,140); } },
+      { name: "Trojúhelník",draw: ctx => { ctx.moveTo(100,20); ctx.lineTo(180,180); ctx.lineTo(20,180); ctx.closePath(); } },
+      { name: "Hvězda",     draw: ctx => {
+        const r1=80, r2=35, c=100;
+        for (let i=0;i<10;i++){
+          const a=(Math.PI/5)*i - Math.PI/2;
+          const r=i%2===0?r1:r2;
+          i===0 ? ctx.moveTo(c+r*Math.cos(a),c+r*Math.sin(a))
+                : ctx.lineTo(c+r*Math.cos(a),c+r*Math.sin(a));
+        }
+        ctx.closePath();
+      }},
+      { name: "Obdélník",   draw: ctx => { ctx.rect(20,50,160,100); } },
+      { name: "Ovál",       draw: ctx => { ctx.ellipse(100,100,90,55,0,0,Math.PI*2); } }
+    ];
+    let score = 0;
+    let target = null;
+
+    function render() {
+      target = shuffle(shapes)[0];
+      const options = shuffle([target, ...shuffle(shapes.filter(s => s.name !== target.name)).slice(0,3)]);
+      container.innerHTML = gameHeader("🔵 Tvary", score) + `
+        <div class="game-body">
+          <canvas id="shapeCanvas" width="200" height="200" style="border-radius:1rem;background:#0f3460"></canvas>
+          <div style="font-size:1.1rem;color:#aaa">Jak se jmenuje tento tvar?</div>
+          <div class="answer-grid" id="shapeGrid"></div>
+        </div>`;
+      const canvas = container.querySelector("#shapeCanvas");
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#7fffd4";
+      ctx.beginPath();
+      target.draw(ctx);
+      ctx.fill();
+      const grid = container.querySelector("#shapeGrid");
+      options.forEach(s => {
+        const btn = document.createElement("button");
+        btn.className = "btn-big btn-info";
+        btn.textContent = s.name;
+        btn.addEventListener("click", () => {
+          if (s.name === target.name) {
+            playSound("correct");
+            score++;
+            Reward.add(1);
+            btn.style.background = "#4caf50";
+            setTimeout(render, 700);
+          } else {
+            playSound("wrong");
+            btn.style.background = "#e94560";
+            setTimeout(() => btn.style.background = "", 400);
+          }
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    render();
+  }
+};
+
+/* ── 5. ZVÍŘÁTKA ── */
+GAMES.zviratka = {
+  title: "🐾 Zvířátka",
+  render(container) {
+    const animals = [
+      { name:"Pes",       emoji:"🐕", sound:"Haf haf!" },
+      { name:"Kočka",     emoji:"🐈", sound:"Mňau!" },
+      { name:"Kráva",     emoji:"🐄", sound:"Mů!" },
+      { name:"Koň",       emoji:"🐴", sound:"Hihihi!" },
+      { name:"Ovce",      emoji:"🐑", sound:"Bé!" },
+      { name:"Prase",     emoji:"🐷", sound:"Chro chro!" },
+      { name:"Slepice",   emoji:"🐔", sound:"Ko ko!" },
+      { name:"Kachna",    emoji:"🦆", sound:"Quak!" },
+      { name:"Medvěd",    emoji:"🐻", sound:"Rrr!" },
+      { name:"Liška",     emoji:"🦊", sound:"Haf haf!" },
+      { name:"Vlk",       emoji:"🐺", sound:"Vůůů!" },
+      { name:"Slon",      emoji:"🐘", sound:"Trúúú!" },
+      { name:"Lev",       emoji:"🦁", sound:"Řvů!" },
+      { name:"Tygr",      emoji:"🐯", sound:"Grrr!" },
+      { name:"Žirafa",    emoji:"🦒", sound:"Šššš!" },
+      { name:"Opice",     emoji:"🐒", sound:"Ú ú ú!" },
+      { name:"Žába",      emoji:"🐸", sound:"Kvak kvak!" },
+      { name:"Pták",      emoji:"🐦", sound:"Číp číp!" },
+      { name:"Ryba",      emoji:"🐟", sound:"Blub blub!" },
+      { name:"Motýl",     emoji:"🦋", sound:"..." }
+    ];
+    let score = 0;
+    let target = null;
+
+    function render() {
+      target = shuffle(animals)[0];
+      const options = shuffle([target, ...shuffle(animals.filter(a => a.name !== target.name)).slice(0,3)]);
+      container.innerHTML = gameHeader("🐾 Zvířátka", score) + `
+        <div class="game-body">
+          <div style="font-size:7rem;line-height:1">${target.emoji}</div>
+          <div style="font-size:1.3rem;color:#ffd700;font-weight:700">${target.sound}</div>
+          <div style="font-size:1rem;color:#aaa">Jaké je to zvíře?</div>
+          <div class="answer-grid" id="animalGrid"></div>
+        </div>`;
+      const grid = container.querySelector("#animalGrid");
+      options.forEach(a => {
+        const btn = document.createElement("button");
+        btn.className = "btn-big btn-info";
+        btn.innerHTML = `${a.emoji} ${a.name}`;
+        btn.style.fontSize = "1rem";
+        btn.addEventListener("click", () => {
+          if (a.name === target.name) {
+            playSound("correct");
+            score++;
+            Reward.add(1);
+            btn.style.background = "#4caf50";
+            setTimeout(render, 800);
+          } else {
+            playSound("wrong");
+            btn.style.background = "#e94560";
+            setTimeout(() => btn.style.background = "", 400);
+          }
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    render();
+  }
+};
+
+/* ── 6. PŘÍBĚHY ── */
+GAMES.pribehy = {
+  title: "📖 Příběhy",
+  render(container) {
+    const stories = [
+      {
+        title: "Iskroň a hvězdičky",
+        emoji: "🌟",
+        pages: [
+          "Byl jednou jeden malý drak jménem Iskroň. Žil v modré hoře a snil o hvězdičkách.",
+          "Každou noc létával vysoko, kde hvězdičky tancovaly. Chytil jednu do drápků.",
+          "Hvězdička řekla: „Přines mi ranní rosu a budeš mít přítele navždy!“",
+          "Iskroň přinesl rosu. Od té doby hvězdičky svítily jenom pro něj. 🌟"
+        ]
+      },
+      {
+        title: "Malý Glyph",
+        emoji: "✨",
+        pages: [
+          "V zemi symbolů žil malý Glyph. Byl jiný než ostatní – měl tvar hvězdičky.",
+          "Ostatní glyphi mu říkali: „Jsi moc zvláštní!“ Ale Glyph se neurazil.",
+          "Jednoho dne přišel velký déšť. Hvězdičkový Glyph záříl a ukazoval cestu domů.",
+          "„Každý symbol je důležitý,“ řekla moudrá Abeceda. „I ty, malý Glyph!“ ✨"
+        ]
+      },
+      {
+        title: "Bičák a pohyb",
+        emoji: "🏃",
+        pages: [
+          "Bičák byl nejrychlejší chlapec v celé vesnici. Miloval běhání a skákání.",
+          "Jednoho rána Bičák zjistil, že ztratil svůj červený míč.",
+          "Běžel přes les, přes louku, přes řeku – a tam u studny uviděl míč.",
+          "„Pohyb je radost!“ zvolal Bičák. „Kdybych nespadl, nikdy bych ho nenašel!“ 🏃"
+        ]
+      },
+      {
+        title: "Pikoš hledá domov",
+        emoji: "🏠",
+        pages: [
+          "Malý Pikoš byl kulička světla. Cestoval od okna k oknu a hledal teplo.",
+          "V první domácnosti bylo příliš hlasitě. V druhé příliš tmavě.",
+          "V třetím domku seděla rodina u stolu a smála se spolu.",
+          "Pikoš vlétl dovnitř a zůstal. Domov je tam, kde se lidé mají rádi. 🏠"
+        ]
+      }
+    ];
+
+    let storyIdx = 0;
+    let pageIdx = 0;
+
+    function render() {
+      const story = stories[storyIdx % stories.length];
+      const page = story.pages[pageIdx];
+      const isLast = pageIdx === story.pages.length - 1;
+      container.innerHTML = gameHeader("📖 " + story.title, storyIdx) + `
+        <div class="game-body">
+          <div style="font-size:4rem">${story.emoji}</div>
+          <div style="max-width:420px;font-size:1.15rem;line-height:1.7;text-align:center;color:#e0e0e0;padding:0 0.5rem">${page}</div>
+          <div style="display:flex;gap:1rem">
+            ${pageIdx > 0 ? '<button class="btn-big btn-info" id="prevPage">← Zpět</button>' : ""}
+            <button class="btn-big ${isLast ? "btn-success" : "btn-primary"}" id="nextPage">
+              ${isLast ? "Další příběh 🎉" : "Dál →"}
+            </button>
+          </div>
+          <div style="font-size:0.85rem;color:#666">${pageIdx + 1} / ${story.pages.length}</div>
+        </div>`;
+      container.querySelector("#nextPage").addEventListener("click", () => {
+        playSound("tap");
+        if (isLast) {
+          Reward.add(2);
+          storyIdx++;
+          pageIdx = 0;
+        } else {
+          pageIdx++;
+        }
+        render();
+      });
+      const prev = container.querySelector("#prevPage");
+      if (prev) prev.addEventListener("click", () => { playSound("tap"); pageIdx--; render(); });
+    }
+
+    render();
+  }
+};
+
+/* ── 7. POHYB ── */
+GAMES.pohyb = {
+  title: "🏃 Pohyb",
+  render(container) {
+    const moves = [
+      { name:"Poskakuj!",     emoji:"🦘", desc:"Poskoč 5× na místě!", count:5 },
+      { name:"Tleskej!",      emoji:"👏", desc:"Tleskni 3× rukama!", count:3 },
+      { name:"Krouž rukama!", emoji:"🔄", desc:"2× krouž oběma rukama!", count:2 },
+      { name:"Dřep!",         emoji:"🏋️", desc:"Udělej 3 dřepy!", count:3 },
+      { name:"Otočení!",      emoji:"🔃", desc:"1× se otoč dokola!", count:1 },
+      { name:"Hvězda!",       emoji:"⭐", desc:"Roztáhni ruce i nohy – udělej hvězdu!", count:1 },
+      { name:"Vlnění!",       emoji:"🌊", desc:"Pohybuj rukama jako vlny 5×!", count:5 },
+      { name:"Dech!",         emoji:"🌬️", desc:"3× se zhluboka nadechni!", count:3 }
+    ];
+    let score = 0;
+    let current = null;
+
+    function render() {
+      current = shuffle(moves)[0];
+      container.innerHTML = gameHeader("🏃 Pohyb", score) + `
+        <div class="game-body" style="text-align:center">
+          <div style="font-size:6rem">${current.emoji}</div>
+          <div style="font-size:1.8rem;font-weight:900;color:#ffd700">${current.name}</div>
+          <div style="font-size:1.2rem;color:#ccc;max-width:300px">${current.desc}</div>
+          <button class="btn-big btn-success" id="doneBtn" style="margin-top:1rem">✅ Hotovo!</button>
+        </div>`;
+      container.querySelector("#doneBtn").addEventListener("click", () => {
+        playSound("correct");
+        score++;
+        Reward.add(1);
+        Hub.showToast("🎉 Skvěle! Pohyb je zdraví!");
+        render();
+      });
+    }
+
+    render();
+  }
+};
+
+/* ── 8. GALERIE SVĚTŮ ── */
+GAMES.galerie = {
+  title: "🌍 Galerie světů",
+  render(container) {
+    const worlds = [
+      {
+        name: "Revia",
+        emoji: "✨",
+        desc: "Svět světel a příběhů. Angelic a Dark mód. Tady žije Revia.",
+        colors: ["#0a0e1f", "#7e6ee0"],
+        link: "../Revia/index.html"
+      },
+      {
+        name: "Glyph Planeta",
+        emoji: "🌐",
+        desc: "Planeta plná písmenek a Glyphů. Každé písmeno má svou osobnost.",
+        colors: ["#050815", "#7fffd4"],
+        link: "../Glyph-Planet/index.html"
+      },
+      {
+        name: "1O1R RPG",
+        emoji: "⚔️",
+        desc: "Mini RPG dobrodružství s rámeči. Prozkoumej 4 světy!",
+        colors: ["#05060a", "#f4d7a1"],
+        link: "../1O1R/index.html"
+      },
+      {
+        name: "3D Rámeček",
+        emoji: "🧊",
+        desc: "Interaktivní 3D Glyph rámeček. Otáčej a zkoumej!",
+        colors: ["#0a0014", "#ff6bff"],
+        link: "../3D ramecek/index.html"
+      },
+      {
+        name: "Hlavoun",
+        emoji: "🤖",
+        desc: "AI agent Hlavoun. Průvodce a pomocník v digitálním světě.",
+        colors: ["#001020", "#00bcd4"],
+        link: "../Hlavoun/index.html"
+      },
+      {
+        name: "Oblak",
+        emoji: "☁️",
+        desc: "Cloud PWA aplikace. Ukládej a sdílej své výtvory.",
+        colors: ["#0a1520", "#87ceeb"],
+        link: "../Oblak/index.html"
+      }
+    ];
+
+    container.innerHTML = gameHeader("🌍 Galerie světů", "") + `
+      <div class="game-body">
+        <div style="font-size:1rem;color:#aaa;text-align:center">Vyber svět a vydej se na cestu!</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;width:100%;max-width:500px" id="worldGrid"></div>
+      </div>`;
+
+    const grid = container.querySelector("#worldGrid");
+    worlds.forEach(w => {
+      const btn = document.createElement("button");
+      btn.style.cssText = `
+        display:flex;flex-direction:column;align-items:center;gap:.4rem;
+        padding:1rem;border:2px solid rgba(255,255,255,.12);border-radius:1rem;
+        background:linear-gradient(135deg,${w.colors[0]},${w.colors[1]}44);
+        cursor:pointer;color:#fff;font-family:inherit;
+        transition:transform .15s ease,border-color .15s ease;
+      `;
+      btn.innerHTML = `<span style="font-size:2rem">${w.emoji}</span>
+        <span style="font-size:.9rem;font-weight:800">${w.name}</span>
+        <span style="font-size:.72rem;color:#bbb;text-align:center;line-height:1.3">${w.desc.substring(0,50)}…</span>`;
+      btn.addEventListener("click", () => {
+        playSound("tap");
+        Hub.showToast("Spouštím " + w.name + "…");
+        // Open in mini-app viewer via hub-loader
+        if (window.HubLoader) HubLoader.openByUrl(w.link, w.name);
+      });
+      grid.appendChild(btn);
     });
-  });
-}
-
-/* ============================================================
-   REWARD POPUP CLOSE
-   ============================================================ */
-function initRewardPopup() {
-  document.getElementById('rewardClose')?.addEventListener('click', () => {
-    document.getElementById('rewardPopup').classList.add('hidden');
-    Audio.click();
-  });
-}
-
-/* ============================================================
-   SPLASH SCREEN
-   ============================================================ */
-function initSplash() {
-  const splash = document.getElementById('splash');
-  const app    = document.getElementById('app');
-
-  document.getElementById('splashStart')?.addEventListener('click', () => {
-    Audio.start();
-    splash.style.transition = 'opacity 0.4s, transform 0.4s';
-    splash.style.opacity    = '0';
-    splash.style.transform  = 'scale(1.05)';
-    setTimeout(() => {
-      splash.classList.add('hidden');
-      app.classList.remove('hidden');
-    }, 400);
-  });
-}
-
-/* ============================================================
-   SERVICE WORKER REGISTRATION
-   ============================================================ */
-function registerSW() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
   }
-}
-
-/* ============================================================
-   BOOT
-   ============================================================ */
-document.addEventListener('DOMContentLoaded', () => {
-  initSplash();
-  Nav.init();
-  Rewards.init();
-  initCharacterSwitcher();
-  initRewardPopup();
-  registerSW();
-
-  // Random Pikos message every 30s
-  setInterval(() => {
-    if (CharacterManager.current === 'pikos') {
-      const el = document.getElementById('speechText');
-      if (el) el.textContent = Pikos.randomLine();
-    }
-  }, 30000);
-});
+};

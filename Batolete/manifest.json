@@ -1,45 +1,32 @@
 {
-  "name": "Batolete – Dětský svět",
+  "name": "Batolete – Centrální Hub",
   "short_name": "Batolete",
-  "description": "Dětská vzdělávací aplikace s hrami, příběhy, zvířátky a postavičkami. Abeceda, čísla, barvy, tvary – vše pro malé průzkumníky!",
-  "lang": "cs",
-  "start_url": "./",
-  "scope": "./",
+  "description": "Centrální herní hub pro děti, rodiče i prarodiče. 8 základních her + 12 mini-aplikací.",
+  "start_url": "./index.html",
   "display": "standalone",
-  "orientation": "any",
-  "background_color": "#fff8f0",
-  "theme_color": "#ff6fb4",
-  "categories": ["education", "kids", "games"],
+  "orientation": "portrait-primary",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "lang": "cs",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%23ff6fb4'/><text y='.9em' font-size='420' x='50%' text-anchor='middle' dominant-baseline='auto'>🌈</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌟</text></svg>",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [],
+  "categories": ["education", "games", "kids"],
   "shortcuts": [
     {
       "name": "Abeceda",
-      "short_name": "Abeceda",
-      "description": "Hra s písmenky",
-      "url": "./#abeceda",
-      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='.9em' font-size='72'>🔤</text></svg>", "sizes": "any" }]
+      "url": "./index.html?game=abeceda",
+      "description": "Česká abeceda"
     },
     {
-      "name": "Zvířátka",
-      "short_name": "Zvířátka",
-      "description": "Poznáváme zvířátka",
-      "url": "./#zviratka",
-      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='.9em' font-size='72'>🐾</text></svg>", "sizes": "any" }]
-    },
-    {
-      "name": "Příběhy",
-      "short_name": "Příběhy",
-      "description": "Pohádky a příběhy",
-      "url": "./#pribehy",
-      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='.9em' font-size='72'>📖</text></svg>", "sizes": "any" }]
+      "name": "Čísla",
+      "url": "./index.html?game=cisla",
+      "description": "Počítání čísel"
     }
   ]
 }

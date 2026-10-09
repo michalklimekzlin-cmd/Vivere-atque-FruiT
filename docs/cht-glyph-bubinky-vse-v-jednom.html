@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#120b05">
+  <title>CHT 360°‰. — Glyph bubínky</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: max(18px, env(safe-area-inset-top)) 16px max(18px, env(safe-area-inset-bottom)); color: #f9e9bc; background: radial-gradient(circle at 50% 20%, #36220c, #090604 68%); font: 16px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    main { width: min(100%, 680px); }
+    .preview-title { margin: 0 0 14px; text-align: center; color: rgba(249,233,188,.8); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+    .planet-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 14px; }
+    .planet { width: 72px; min-height: 72px; border: 1px solid rgba(247,220,152,.65); border-radius: 50%; color: #ffedbd; background: radial-gradient(circle at 31% 25%, #86631e, #1a1108 64%); box-shadow: inset 0 0 0 6px rgba(252,219,139,.09), 0 8px 16px rgba(0,0,0,.35); font: inherit; font-weight: 800; cursor: pointer; touch-action: manipulation; }
+    .planet:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+    .hint { margin: 12px 0 0; text-align: center; color: rgba(249,233,188,.65); font-size: 12px; }
+
+    .cht-glyph-bubinky { --cht-ink: #f9e9bc; --cht-gold: #d4a442; --cht-shadow: rgba(0, 0, 0, .56); color: var(--cht-ink); position: relative; width: min(100%, 680px); min-height: 265px; margin: 0 auto; overflow: hidden; border: 1px solid rgba(252, 220, 143, .35); border-radius: 26px; background: radial-gradient(circle at 50% 0, rgba(180, 128, 32, .20), transparent 42%), linear-gradient(145deg, #1b120a, #090604 72%); box-shadow: inset 0 1px rgba(255, 239, 188, .12), 0 18px 38px var(--cht-shadow); isolation: isolate; }
+    .cht-glyph-bubinky::before, .cht-glyph-bubinky::after { content: ""; position: absolute; pointer-events: none; z-index: -1; }
+    .cht-glyph-bubinky::before { inset: 11% -9% auto; height: 112px; border-top: 1px solid rgba(251, 218, 144, .28); border-radius: 50%; transform: rotate(-6deg); }
+    .cht-glyph-bubinky::after { width: 190px; height: 190px; left: 41%; top: 24px; border: 1px solid rgba(251, 218, 144, .14); border-radius: 50%; box-shadow: 0 0 0 26px rgba(251, 218, 144, .04), 0 0 0 54px rgba(251, 218, 144, .025); }
+    .cht-bubinky-head { position: relative; z-index: 2; padding: 18px 20px 0; max-width: 82%; }
+    .cht-bubinky-head p { margin: 0; color: rgba(249, 233, 188, .75); font-size: 12px; letter-spacing: .045em; }
+    .cht-bubinky-head .cht-bubinky-kicker { color: var(--cht-gold); font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    .cht-bubinky-head h2 { margin: 4px 0 3px; font-size: clamp(17px, 4.7vw, 25px); line-height: 1.08; letter-spacing: .02em; }
+    .cht-bubinky-stage { position: absolute; inset: 0; pointer-events: none; }
+    .cht-glyph-drum { --user-x: 0px; --user-y: 0px; position: absolute; width: 52px; height: 52px; padding: 0; display: grid; place-items: center; pointer-events: auto; border: 1px solid rgba(255, 225, 151, .7); border-radius: 16px; color: #1c1207; background: radial-gradient(circle at 35% 27%, #fff1bd, #d5a64d 43%, #4e2c09 100%); box-shadow: inset 0 2px 3px rgba(255,255,255,.65), inset 0 -5px 7px rgba(58, 27, 1, .45), 0 8px 17px rgba(0,0,0,.52); cursor: grab; touch-action: none; transform: translate3d(var(--user-x), var(--user-y), 0); transition: transform .28s cubic-bezier(.2,.8,.2,1), filter .2s ease; }
+    .cht-glyph-drum:focus-visible { outline: 3px solid #fff2bc; outline-offset: 3px; }
+    .cht-glyph-drum:active { cursor: grabbing; filter: brightness(1.13); }
+    .cht-glyph-drum.is-dragging { cursor: grabbing; transition: filter .2s ease; filter: brightness(1.13); }
+    .cht-glyph-drum.is-selected { border-color: #fff8db; box-shadow: 0 0 0 3px rgba(230, 181, 69, .4), inset 0 2px 3px rgba(255,255,255,.65), 0 8px 17px rgba(0,0,0,.52); }
+    .cht-drum-face { font-size: 24px; font-weight: 900; line-height: 1; text-shadow: 0 1px 0 rgba(255,255,255,.7); }
+    .cht-drum-mark { position: absolute; right: 4px; bottom: 3px; color: rgba(41, 24, 8, .8); font-size: 7px; font-weight: 900; }
+    .cht-bubinky-card { position: absolute; z-index: 5; right: 15px; bottom: 13px; width: min(45%, 210px); min-height: 47px; padding: 8px 9px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(251, 218, 144, .28); border-radius: 14px; background: rgba(8, 5, 2, .77); box-shadow: 0 6px 15px rgba(0,0,0,.28); font-size: 10px; }
+    .cht-bubinky-card p { margin: 2px 0 0; color: rgba(249, 233, 188, .72); line-height: 1.25; }
+    .cht-card-glyph { flex: 0 0 29px; width: 29px; height: 29px; display: grid; place-items: center; border: 1px solid rgba(255, 220, 139, .5); border-radius: 9px; color: #241602; background: #e2b459; font-size: 17px; font-weight: 900; }
+
+    .is-earth .cht-glyph-drum:nth-child(1) { left: 11%; bottom: 70px; }
+    .is-earth .cht-glyph-drum:nth-child(2) { left: 23%; bottom: 58px; }
+    .is-earth .cht-glyph-drum:nth-child(3) { left: 35%; bottom: 48px; }
+    .is-earth .cht-glyph-drum:nth-child(4) { left: 47%; bottom: 57px; }
+    .is-earth .cht-glyph-drum:nth-child(5) { left: 62%; bottom: 77px; }
+    .is-earth .cht-glyph-drum:nth-child(6) { left: 74%; bottom: 60px; }
+
+    .is-game .cht-glyph-drum { bottom: -4px; }
+    .is-game .cht-glyph-drum:nth-child(1) { left: 14%; transform: translate3d(var(--user-x), calc(var(--user-y) - 35px), 0) rotate(-16deg); }
+    .is-game .cht-glyph-drum:nth-child(2) { left: 29%; transform: translate3d(var(--user-x), calc(var(--user-y) - 13px), 0) rotate(-7deg); }
+    .is-game .cht-glyph-drum:nth-child(3) { left: 44%; transform: translate3d(var(--user-x), calc(var(--user-y) - 3px), 0); }
+    .is-game .cht-glyph-drum:nth-child(4) { left: 59%; transform: translate3d(var(--user-x), calc(var(--user-y) - 13px), 0) rotate(7deg); }
+    .is-game .cht-glyph-drum:nth-child(5) { left: 74%; transform: translate3d(var(--user-x), calc(var(--user-y) - 35px), 0) rotate(16deg); }
+    .is-game .cht-bubinky-card { bottom: 84px; }
+
+    .is-language .cht-glyph-drum { bottom: 8px; border-radius: 50%; width: 48px; height: 48px; }
+    .is-language .cht-glyph-drum:nth-child(1) { left: 16%; transform: translate3d(var(--user-x), calc(var(--user-y) - 31px), 0); }
+    .is-language .cht-glyph-drum:nth-child(2) { left: 31%; transform: translate3d(var(--user-x), calc(var(--user-y) - 12px), 0); }
+    .is-language .cht-glyph-drum:nth-child(3) { left: 46%; transform: translate3d(var(--user-x), calc(var(--user-y) + 1px), 0); }
+    .is-language .cht-glyph-drum:nth-child(4) { left: 61%; transform: translate3d(var(--user-x), calc(var(--user-y) - 12px), 0); }
+    .is-language .cht-glyph-drum:nth-child(5) { left: 76%; transform: translate3d(var(--user-x), calc(var(--user-y) - 31px), 0); }
+    .is-language .cht-bubinky-card { bottom: 78px; }
+
+    @media (max-width: 420px) {
+      .cht-glyph-bubinky { min-height: 290px; border-radius: 22px; }
+      .cht-bubinky-head { max-width: 65%; padding-left: 16px; }
+      .cht-bubinky-card { width: 46%; right: 10px; bottom: 12px; }
+      .cht-glyph-drum { width: 47px; height: 47px; }
+      .is-earth .cht-glyph-drum:nth-child(1) { left: 3%; }
+      .is-earth .cht-glyph-drum:nth-child(2) { left: 17%; }
+      .is-earth .cht-glyph-drum:nth-child(3) { left: 31%; }
+      .is-earth .cht-glyph-drum:nth-child(4) { left: 45%; }
+      .is-earth .cht-glyph-drum:nth-child(5) { left: 60%; }
+      .is-earth .cht-glyph-drum:nth-child(6) { left: 74%; }
+      .is-game .cht-glyph-drum:nth-child(1) { left: 7%; }
+      .is-game .cht-glyph-drum:nth-child(2) { left: 25%; }
+      .is-game .cht-glyph-drum:nth-child(3) { left: 43%; }
+      .is-game .cht-glyph-drum:nth-child(4) { left: 61%; }
+      .is-game .cht-glyph-drum:nth-child(5) { left: 79%; }
+      .is-language .cht-glyph-drum:nth-child(1) { left: 12%; }
+      .is-language .cht-glyph-drum:nth-child(2) { left: 29%; }
+      .is-language .cht-glyph-drum:nth-child(3) { left: 46%; }
+      .is-language .cht-glyph-drum:nth-child(4) { left: 63%; }
+      .is-language .cht-glyph-drum:nth-child(5) { left: 80%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cht-glyph-drum { transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="preview-title">CHT 360°‰. • tři živé způsoby bubínků</p>
+
+    <nav class="planet-row" aria-label="Vyber zeměkouli">
+      <button class="planet" type="button" data-cht-world="hra">Hra</button>
+      <button class="planet" type="button" data-cht-world="zeme">Země</button>
+      <button class="planet" type="button" data-cht-world="jazyk">Jazyk</button>
+    </nav>
+
+    <div data-cht-glyph-bubinky></div>
+
+    <p class="hint">
+      Klepnutí otevře připravenou kartu • bubínek chyť prstem, táhni a po puštění zůstane na nové pozici •ア
+    </p>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const WORLDS = {
+        zeme: {
+          title: "Kde je to ovoce",
+          subtitle: "Země • 4 + 2 bubínky z levého kraje",
+          layout: "earth",
+          drums: ["🍎", "🍐", "🍊", "🍇", "🌱", "🧺"]
+        },
+        hra: {
+          title: "Od teď až do někdy jindy •ア",
+          subtitle: "Hra • oblouk pěti bubínků od spodního okraje",
+          layout: "game",
+          drums: ["▶", "✦", "⚑", "♟", "∞"]
+        },
+        jazyk: {
+          title: "Aktualizuj a ulož si paměť •ア",
+          subtitle: "Jazyk • přívěsek Glyphů v dolním oblouku",
+          layout: "language",
+          drums: ["A", "á", "Č", "?", "…"]
+        }
+      };
+
+      const CARDS = {
+        zeme: [
+          ["jablko", "🍎", "Jablko", "Otevře kartu ovoce"],
+          ["hruska", "🍐", "Hruška", "Otevře kartu ovoce"],
+          ["pomeranc", "🍊", "Pomeranč", "Otevře kartu ovoce"],
+          ["hrozny", "🍇", "Hrozny", "Otevře kartu ovoce"],
+          ["semeno", "🌱", "Semínko", "Otevře kartu růstu"],
+          ["kosik", "🧺", "Košík", "Otevře kartu sbírky"]
+        ],
+        hra: [
+          ["start", "▶", "Začít", "Spustí herní kartu"],
+          ["glyph", "✦", "Glyph", "Otevře Glyph kartu"],
+          ["ukol", "⚑", "Úkol", "Otevře kartu úkolu"],
+          ["figurka", "♟", "Figurka", "Otevře kartu postavy"],
+          ["cas", "∞", "Někdy jindy", "Otevře kartu času"]
+        ],
+        jazyk: [
+          ["slovo", "A", "Slovo", "Otevře slovní kartu"],
+          ["hlas", "á", "Hlas", "Otevře zvukovou kartu"],
+          ["cesky", "Č", "Čeština", "Otevře jazykovou kartu"],
+          ["otazka", "?", "Otázka", "Otevře kartu otázky"],
+          ["pauza", "…", "Pauza", "Otevře kartu pokračování"]
+        ]
+      };
+
+      const STORAGE_KEY = "cht360.glyph-bubinky.v1";
+      const root = document.querySelector("[data-cht-glyph-bubinky]");
+
+      if (!root) return;
+
+      const getState = () => {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          return saved && WORLDS[saved.world] ? saved : {};
+        } catch (_) {
+          return {};
+        }
+      };
+
+      const saved = getState();
+      const state = {
+        world: saved.world || "zeme",
+        selected: saved.selected || null,
+        positions: saved.positions && typeof saved.positions === "object" ? saved.positions : {}
+      };
+
+      let drag = null;
+      let ignoreClickUntil = 0;
+
+      const save = () => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            ...state,
+            updatedAt: new Date().toISOString()
+          }));
+        } catch (_) {}
+      };
+
+      const positionFor = (index) =>
+        state.positions[state.world]?.[index] || { x: 0, y: 0 };
+
+      const cardFor = (index) => {
+        const [id, glyph, title, description] = CARDS[state.world][index];
+        return { id, glyph, title, description, world: state.world };
+      };
+
+      const cardMarkup = (card) => !card
+        ? "<p><b>Karta připravená.</b> Klepni na bubínek; jeho Glyph se pošle do karty i do CHT.</p>"
+        : `<span class="cht-card-glyph">${card.glyph}</span><div><b>${card.title}</b><p>${card.description}</p></div>`;
+
+      const emit = (name, detail) =>
+        document.dispatchEvent(new CustomEvent(name, { detail }));
+
+      function selectDrum(index) {
+        const card = cardFor(index);
+        state.selected = card;
+        save();
+
+        root.querySelector("[data-card-panel]").innerHTML = cardMarkup(card);
+
+        root.querySelectorAll("[data-drum]").forEach((drum) => {
+          drum.classList.toggle("is-selected", drum.dataset.cardId === card.id);
+        });
+
+        emit("cht:glyph-bubinky-select", {
+          world: state.world,
+          drum: index,
+          card
+        });
+      }
+
+      function bindDrum(drum) {
+        drum.addEventListener("pointerdown", (event) => {
+          if (event.pointerType === "mouse" && event.button !== 0) return;
+
+          const stage = root.querySelector(".cht-bubinky-stage");
+          const drumRect = drum.getBoundingClientRect();
+          const stageRect = stage.getBoundingClientRect();
+          const index = Number(drum.dataset.index);
+          const position = positionFor(index);
+
+          drag = {
+            id: event.pointerId,
+            x: event.clientX,
+            y: event.clientY,
+            moved: false,
+            drum,
+            index,
+            startPosition: position,
+            bounds: {
+              minX: position.x - (drumRect.left - stageRect.left),
+              maxX: position.x + (stageRect.right - drumRect.right),
+              minY: position.y - (drumRect.top - stageRect.top),
+              maxY: position.y + (stageRect.bottom - drumRect.bottom)
+            }
+          };
+
+          drum.setPointerCapture?.(event.pointerId);
+          drum.classList.add("is-dragging");
+        });
+
+        drum.addEventListener("pointermove", (event) => {
+          if (!drag || drag.id !== event.pointerId) return;
+
+          const deltaX = event.clientX - drag.x;
+          const deltaY = event.clientY - drag.y;
+
+          if (Math.abs(deltaX) + Math.abs(deltaY) > 5) {
+            drag.moved = true;
+          }
+
+          const x = Math.max(
+            drag.bounds.minX,
+            Math.min(drag.bounds.maxX, drag.startPosition.x + deltaX)
+          );
+
+          const y = Math.max(
+            drag.bounds.minY,
+            Math.min(drag.bounds.maxY, drag.startPosition.y + deltaY)
+          );
+
+          if (!state.positions[state.world]) {
+            state.positions[state.world] = {};
+          }
+
+          state.positions[state.world][drag.index] = {
+            x: Math.round(x),
+            y: Math.round(y)
+          };
+
+          drum.style.setProperty("--user-x", `${Math.round(x)}px`);
+          drum.style.setProperty("--user-y", `${Math.round(y)}px`);
+        });
+
+        const release = (event) => {
+          if (!drag || drag.id !== event.pointerId) return;
+
+          const wasMoved = drag.moved;
+          const index = drag.index;
+
+          drag = null;
+          drum.classList.remove("is-dragging");
+          save();
+
+          if (!wasMoved) {
+            selectDrum(index);
+          }
+
+          ignoreClickUntil = Date.now() + 350;
+        };
+
+        drum.addEventListener("pointerup", release);
+        drum.addEventListener("pointercancel", release);
+
+        drum.addEventListener("click", (event) => {
+          if (Date.now() < ignoreClickUntil) {
+            event.preventDefault();
+            return;
+          }
+
+          selectDrum(Number(drum.dataset.index));
+        });
+      }
+
+      function render() {
+        const world = WORLDS[state.world];
+        const cards = CARDS[state.world];
+
+        root.className = `cht-glyph-bubinky is-${world.layout}`;
+        root.dataset.world = state.world;
+
+        root.innerHTML = `
+          <div class="cht-bubinky-head">
+            <p class="cht-bubinky-kicker">Glyph bubínky</p>
+            <h2>${world.title}</h2>
+            <p>${world.subtitle}</p>
+          </div>
+
+          <div class="cht-bubinky-stage" aria-label="Bubínky pro ${world.title}. Bubínek uchop prstem a posuň.">
+            ${world.drums.map((glyph, index) => {
+              const card = cards[index];
+              const position = positionFor(index);
+              const selected = state.selected?.id === card[0];
+
+              return `
+                <button
+                  class="cht-glyph-drum ${selected ? "is-selected" : ""}"
+                  type="button"
+                  data-drum
+                  data-index="${index}"
+                  data-card-id="${card[0]}"
+                  style="--user-x:${position.x}px;--user-y:${position.y}px"
+                  aria-label="${card[2]}: ${card[3]}"
+                >
+                  <span class="cht-drum-face">${glyph}</span>
+                  <span class="cht-drum-mark" aria-hidden="true">•ア</span>
+                </button>`;
+            }).join("")}
+          </div>
+
+          <section class="cht-bubinky-card" aria-live="polite" data-card-panel>
+            ${cardMarkup(state.selected)}
+          </section>`;
+
+        root.querySelectorAll("[data-drum]").forEach(bindDrum);
+      }
+
+      document.querySelectorAll("[data-cht-world]").forEach((planet) => {
+        planet.addEventListener("click", () => {
+          const world = planet.dataset.chtWorld;
+          if (!WORLDS[world]) return;
+
+          state.world = world;
+          state.selected = null;
+          save();
+          render();
+
+          emit("cht:glyph-bubinky-world", { world });
+        });
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

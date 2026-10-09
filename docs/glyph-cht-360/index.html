@@ -29,8 +29,8 @@
       </div>
 
       <nav class="header-actions" aria-label="Práce s Glyphy">
-        <button id="undoAction" class="icon-button" type="button" title="Vrátit poslední změnu" aria-label="Vrátit poslední změnu">↶</button>
-        <button id="exportAction" class="icon-button" type="button" title="Exportovat Glyphy" aria-label="Exportovat Glyphy">↓</button>
+        <button id="undoAction" class="icon-button" type="button" title="Vrátit poslední změnu" aria-label="Vrátit poslední změnu" data-cht-loading-label="Vrácení…">↶</button>
+        <button id="exportAction" class="icon-button" type="button" title="Exportovat Glyphy" aria-label="Exportovat Glyphy" data-cht-loading-label="Export…">↓</button>
 
         <label class="icon-button import-label" title="Načíst Glyphy" aria-label="Načíst Glyphy">
           ↑
@@ -283,5 +283,10 @@
   </main>
 
   <script src="./app.js" defer></script>
+  <script src="../js/cht-360-config.js"></script>
+  <script src="../js/cht-360-navigation.js"></script>
+  <script src="../js/cht-360-logger.js"></script>
+  <script src="../js/cht-360-performance.js"></script>
+  <script src="../js/cht-ui-components.js"></script>
 </body>
 </html>

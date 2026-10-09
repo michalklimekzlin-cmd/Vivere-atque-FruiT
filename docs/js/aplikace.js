@@ -59,6 +59,39 @@ const CORE_CIPHER_TOKENS = Object.freeze([
   "&", "(", ")", "*", "Ï", "}", "{", "N", "₹", "ア"
 ]);
 
+/*
+  Jazyk není obyčejná drátěná koule. Je to lehká datová planeta:
+  její povrch tvoří písmena a čísla, spoje mezi nimi a tři pomalé
+  oběžné prstence. Vše se kreslí přímo do již existujícího canvasu,
+  aby se neměnila Paměť ani se nenačítal cizí obrázek.
+*/
+const LANGUAGE_SPHERE_LATITUDES = 9;
+const LANGUAGE_SPHERE_LONGITUDES = 14;
+const LANGUAGE_SPHERE_NODES = Object.freeze(createLanguageSphereNodes());
+
+function createLanguageSphereNodes() {
+  const nodes = [];
+
+  for (let row = 0; row < LANGUAGE_SPHERE_LATITUDES; row += 1) {
+    const latitude =
+      ((row / (LANGUAGE_SPHERE_LATITUDES - 1)) - .5) * Math.PI * .88;
+
+    for (let column = 0; column < LANGUAGE_SPHERE_LONGITUDES; column += 1) {
+      nodes.push(Object.freeze({
+        row,
+        column,
+        latitude,
+        longitude: column / LANGUAGE_SPHERE_LONGITUDES * Math.PI * 2,
+        glyph: CORE_CIPHER_TOKENS[
+          positiveModulo(row * 11 + column * 7, CORE_CIPHER_TOKENS.length)
+        ]
+      }));
+    }
+  }
+
+  return nodes;
+}
+
 const TROJKA_PROFILE = [
   { id: "leva-hrana", label: "Levá hrana", x: -1.28, z: .76, depth: 1 },
   { id: "levy-propad", label: "Levý propad", x: -.64, z: -.58, depth: .2 },
@@ -591,16 +624,17 @@ function formatBytes(bytes) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
-function updatePills() {
-  for (const core of cores) {
-    const pill = document.getElementById(`pill-${core.id}`);
+function updatePills(){
+  for(const core of cores){
+    const stats=getCoreStats(core.id);
+    const pill=document.getElementById(`pill-${core.id}`);
 
-    if (!pill) {
-      continue;
-    }
+    // Staré HUD pill prvky už nemusí být v současném CHT.
+    // Jejich nepřítomnost nesmí zastavit canvas ani Paměť.
+    if(!pill) continue;
 
-    const stats = getCoreStats(core.id);
-    pill.textContent = `${core.title.toUpperCase()} · ${stats.used}/70`;
+    pill.textContent =
+      `${core.title.toUpperCase()} · ${stats.used}/70`;
   }
 }
 
@@ -1921,11 +1955,287 @@ function drawIPhoneCore(core, time) {
   core.drawRadius = Math.max(phoneWidth, phoneHeight) * .56;
 }
 
+function projectLanguageSphereNode(node, spin, tilt) {
+  const longitude = node.longitude + spin;
+  const latitudeRadius = Math.cos(node.latitude);
+  const x = latitudeRadius * Math.cos(longitude);
+  const y = Math.sin(node.latitude);
+  const z = latitudeRadius * Math.sin(longitude);
+  const tiltCos = Math.cos(tilt);
+  const tiltSin = Math.sin(tilt);
+
+  return {
+    x,
+    y: y * tiltCos - z * tiltSin,
+    z: y * tiltSin + z * tiltCos
+  };
+}
+
+function drawLanguageCore(core, time) {
+  const position = getCorePosition(core);
+  const scale =
+    (.72 + position.depth * .40) *
+    position.perspective;
+  const radius = core.radius * scale;
+  const active = selectedCore && selectedCore.id === core.id;
+  const surfaceSpin =
+    scene.yaw * .84 +
+    scene.roll * .28 +
+    time * .000085;
+  const surfaceTilt =
+    scene.pitch * .48 +
+    Math.sin(time * .00031) * .075;
+  const projectedNodes = LANGUAGE_SPHERE_NODES.map(node => {
+    const projected = projectLanguageSphereNode(
+      node,
+      surfaceSpin,
+      surfaceTilt
+    );
+    const perspective = .78 + (projected.z + 1) * .14;
+
+    return {
+      ...node,
+      x: projected.x * radius * perspective,
+      y: projected.y * radius * perspective,
+      z: projected.z,
+      perspective
+    };
+  });
+
+  const nodeAt = (row, column) => {
+    const safeColumn = positiveModulo(column, LANGUAGE_SPHERE_LONGITUDES);
+    return projectedNodes[row * LANGUAGE_SPHERE_LONGITUDES + safeColumn];
+  };
+
+  context.save();
+  context.globalAlpha = .58 + position.depth * .36;
+
+  /* Stín drží kouli ve scéně, podobně jako na referenční Signálové sféře. */
+  context.beginPath();
+  context.ellipse(
+    position.x,
+    position.y + radius * 1.09,
+    radius * 1.12,
+    radius * .23,
+    0,
+    0,
+    Math.PI * 2
+  );
+  context.fillStyle = "rgba(0,0,0,.48)";
+  context.fill();
+
+  const halo = context.createRadialGradient(
+    position.x,
+    position.y,
+    radius * .15,
+    position.x,
+    position.y,
+    radius * 1.76
+  );
+  halo.addColorStop(0, active ? "rgba(255,238,192,.92)" : "rgba(255,207,112,.48)");
+  halo.addColorStop(.34, "rgba(247,167,60,.25)");
+  halo.addColorStop(.72, "rgba(126,192,210,.09)");
+  halo.addColorStop(1, "rgba(255,174,72,0)");
+  context.fillStyle = halo;
+  context.beginPath();
+  context.arc(position.x, position.y, radius * 1.76, 0, Math.PI * 2);
+  context.fill();
+
+  /* Dva datové oběhy spojují zlatou písmennou kouli se signálovou planetou. */
+  context.save();
+  context.translate(position.x, position.y);
+  context.rotate(surfaceTilt * .22);
+  context.lineWidth = active ? 1.35 : .88;
+  context.strokeStyle = "rgba(255,212,132," + (active ? ".74" : ".42") + ")";
+  context.beginPath();
+  context.ellipse(0, 0, radius * 1.29, radius * .53, 0, 0, Math.PI * 2);
+  context.stroke();
+  context.setLineDash([2.5, 4]);
+  context.strokeStyle = "rgba(124,194,211," + (active ? ".64" : ".34") + ")";
+  context.beginPath();
+  context.ellipse(0, 0, radius * 1.12, radius * .79, -.37, 0, Math.PI * 2);
+  context.stroke();
+  context.setLineDash([]);
+
+  const ringCode = "010110010111001001101011";
+  context.fillStyle = "rgba(255,220,150,.76)";
+  context.font = "700 " + Math.max(5, Math.round(radius * .105)) + "px ui-monospace, SFMono-Regular, monospace";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+
+  for (let index = 0; index < ringCode.length; index += 1) {
+    const angle =
+      index / ringCode.length * Math.PI * 2 -
+      surfaceSpin * .56;
+    const x = Math.cos(angle) * radius * 1.3;
+    const y = Math.sin(angle) * radius * .54;
+
+    context.globalAlpha = .22 + (Math.sin(angle) + 1) * .22;
+    context.fillText(ringCode[index], x, y);
+  }
+
+  context.restore();
+
+  context.save();
+  context.translate(position.x, position.y);
+  context.beginPath();
+  context.arc(0, 0, radius, 0, Math.PI * 2);
+  context.clip();
+
+  const surface = context.createRadialGradient(
+    -radius * .34,
+    -radius * .40,
+    radius * .06,
+    0,
+    0,
+    radius * 1.12
+  );
+  surface.addColorStop(0, "rgba(255,226,165,.30)");
+  surface.addColorStop(.32, "rgba(72,53,31,.94)");
+  surface.addColorStop(.72, "rgba(14,15,20,.98)");
+  surface.addColorStop(1, "rgba(2,4,8,1)");
+  context.fillStyle = surface;
+  context.fillRect(-radius, -radius, radius * 2, radius * 2);
+
+  /* Jemné rovnoběžky ponechávají kouli čitelnou, i když se znaky otáčejí. */
+  for (let band = -3; band <= 3; band += 1) {
+    const ratio = band / 4.15;
+    const halfWidth = Math.sqrt(Math.max(0, 1 - ratio * ratio)) * radius;
+
+    context.beginPath();
+    context.ellipse(
+      0,
+      ratio * radius,
+      halfWidth,
+      Math.max(1, halfWidth * .085),
+      0,
+      0,
+      Math.PI * 2
+    );
+    context.strokeStyle = band === 0
+      ? "rgba(255,208,119,.30)"
+      : "rgba(255,212,142,.14)";
+    context.lineWidth = band === 0 ? 1 : .64;
+    context.stroke();
+  }
+
+  const drawLink = (from, to) => {
+    if (!from || !to || Math.min(from.z, to.z) < -.08) {
+      return;
+    }
+
+    const depth = (from.z + to.z + 2) / 4;
+    context.beginPath();
+    context.moveTo(from.x, from.y);
+    context.lineTo(to.x, to.y);
+    context.strokeStyle = "rgba(255,191,84," + (.08 + depth * .20) + ")";
+    context.lineWidth = .42 + depth * .35;
+    context.stroke();
+  };
+
+  for (let row = 0; row < LANGUAGE_SPHERE_LATITUDES; row += 1) {
+    for (let column = 0; column < LANGUAGE_SPHERE_LONGITUDES; column += 1) {
+      const point = nodeAt(row, column);
+      drawLink(point, nodeAt(row, column + 1));
+
+      if (row < LANGUAGE_SPHERE_LATITUDES - 1) {
+        drawLink(point, nodeAt(row + 1, column));
+      }
+    }
+  }
+
+  projectedNodes
+    .slice()
+    .sort((first, second) => first.z - second.z)
+    .forEach(point => {
+      if (point.z < -.16) {
+        return;
+      }
+
+      const depth = (point.z + 1) / 2;
+      const size = Math.max(5, Math.round(radius * (.082 + depth * .035)));
+
+      context.globalAlpha = .22 + depth * (active ? .74 : .56);
+      context.fillStyle = point.z > .56
+        ? "#fff0c8"
+        : "#f7bf68";
+      context.font = "800 " + size + "px ui-monospace, SFMono-Regular, monospace";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(point.glyph, point.x, point.y);
+
+      if (point.z > .42) {
+        context.beginPath();
+        context.arc(point.x, point.y + size * .68, Math.max(.55, size * .075), 0, Math.PI * 2);
+        context.fillStyle = "rgba(255,229,173,.84)";
+        context.fill();
+      }
+    });
+
+  const reflection = context.createLinearGradient(0, -radius, 0, radius);
+  reflection.addColorStop(0, "rgba(255,250,226,.14)");
+  reflection.addColorStop(.42, "rgba(255,222,165,.025)");
+  reflection.addColorStop(1, "rgba(0,0,0,.22)");
+  context.fillStyle = reflection;
+  context.fillRect(-radius, -radius, radius * 2, radius * 2);
+  context.restore();
+
+  context.globalAlpha = 1;
+  context.beginPath();
+  context.arc(position.x, position.y, radius, 0, Math.PI * 2);
+  context.strokeStyle = active
+    ? "rgba(255,247,215,.98)"
+    : "rgba(255,218,143,.78)";
+  context.lineWidth = active ? 2 : 1.35;
+  context.stroke();
+
+  const signalAngle = surfaceSpin * 1.38;
+  const signalX = position.x + Math.cos(signalAngle) * radius * 1.23;
+  const signalY = position.y + Math.sin(signalAngle) * radius * .52;
+  context.beginPath();
+  context.arc(signalX, signalY, active ? 2.25 : 1.6, 0, Math.PI * 2);
+  context.fillStyle = "rgba(214,244,255,.94)";
+  context.shadowColor = "rgba(108,198,220,.86)";
+  context.shadowBlur = 9;
+  context.fill();
+  context.shadowColor = "transparent";
+  context.shadowBlur = 0;
+
+  context.fillStyle = "#fff0cf";
+  drawCipherCoreTitle(
+    core.title,
+    position.x,
+    position.y - 4,
+    scale,
+    time,
+    active,
+    core.id
+  );
+
+  const stats = getCoreStats(core.id);
+  context.fillStyle = "rgba(255,240,210,.78)";
+  context.font = Math.max(8, Math.round(9 * scale)) + "px system-ui";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillText(stats.used + "/70", position.x, position.y + 13);
+
+  context.restore();
+
+  core.position = position;
+  core.drawRadius = radius;
+}
+
 function drawCore(core, time) {
   if (core.type === "iphone14") {
     drawIPhoneCore(core, time);
     return;
   }
+
+  if (core.id === "language") {
+    drawLanguageCore(core, time);
+    return;
+  }
+
   const position = getCorePosition(core);
   const scale =
     (.72 + position.depth * .40) *
@@ -2132,14 +2442,45 @@ function render(time) {
   drawTerraAxis(time);
   drawTrojkaTrack(time);
 
-  const ordered = [...cores].sort((first, second) => {
-    return getCorePosition(first).depth - getCorePosition(second).depth;
-  });
-
   for (const core of ordered) {
-    drawCore(core, time);
+
+  if (core.id === "earth") {
+
+    const p = getCorePosition(core);
+
+    const scale =
+      .72 +
+      p.depth * .40;
+
+    const r =
+      core.radius *
+      scale;
+
+    core.position = p;
+    core.drawRadius = r;
+
+    window.dispatchEvent(
+      new CustomEvent(
+        "cht360:earth-position",
+        {
+          detail: {
+            x: p.x,
+            y: p.y,
+            radius: r,
+            depth: p.depth,
+            active:
+              selectedCore &&
+              selectedCore.id === "earth"
+          }
+        }
+      )
+    );
+
+    continue;
   }
 
+  drawCore(core,time);
+}
   requestAnimationFrame(render);
 }
 
@@ -2174,6 +2515,22 @@ function openCore(core) {
   renderSlots();
   updateStatus();
 }
+
+window.addEventListener(
+  "cht360:open-earth",
+  () => {
+
+    const earth =
+      cores.find(
+        core =>
+          core.id === "earth"
+      );
+
+    if (earth) {
+      openCore(earth);
+    }
+  }
+);
 
 function renderSlots() {
   if (!selectedCore) {

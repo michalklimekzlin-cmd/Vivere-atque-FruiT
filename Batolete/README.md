@@ -1,115 +1,137 @@
-# 🌈 Batolete – Dětský svět
+# 🌟 Batolete – Centrální Hub
 
-**Batolete** je kompletní dětská vzdělávací PWA aplikace vytvořená transformací repozitáře **Vivere atque Frui'T** do dětské edice.
+> **Vzdělávací platforma pro celou rodinu** – děti, rodiče i prarodiče.  
+> Vše v jednom místě, offline-first, bez reklam, bez účtu.
 
 ---
 
-## 🚀 Rychlý start
-
-Otevři `Batolete/index.html` v prohlížeči nebo navštiv nasazenou URL.
+## 🗂️ Struktura
 
 ```
 Batolete/
-├── index.html       ← Hlavní vstupní stránka
-├── style.css        ← Dětský design (velká tlačítka, jasné barvy)
-├── app.js           ← Všechny hry a interaktivní prvky
-├── characters.js    ← Postavičky: Hlavoun, Pikoš, Viri, Bičák
-├── manifest.json    ← PWA manifest pro instalaci
-├── service-worker.js ← Offline-first podpora
-└── README.md        ← Tento soubor
+├── index.html          # Centrální Hub – vstupní bod
+├── hub-menu.css        # Hub styling (velká tlačítka, ikony, responsivní)
+├── hub-loader.js       # Loader pro mini-aplikace (iframe + postMessage)
+├── app.js              # 8 základních her + reward systém + Web Audio
+├── style.css           # Základní design (kompatibilní s app.js)
+├── service-worker.js   # Offline-first PWA (cache strategie)
+├── manifest.json       # PWA manifest
+│
+├── mini-apps/          # Wrappery pro mini-aplikace
+│   ├── 1o1r.html       # 1O1R RPG
+│   ├── revia.html      # Revia storytelling
+│   ├── revia-master.html # Revia Master
+│   ├── 3d-ramecek.html # 3D Glyph rámeček
+│   ├── glyph-planet.html   # Glyph Planeta
+│   ├── glyph-planet-3d.html # Glyph Planeta 3D
+│   ├── glyph-editor.html   # Glyph Editor (Michal-AI-Al-Klimek)
+│   ├── hlavoun.html    # Hlavoun AI agent
+│   ├── oblak.html      # Oblak Cloud
+│   ├── vaft-girls.html # VaFT Girls
+│   ├── vaft-bearhead.html # VaFT BearHead
+│   ├── vaft-comet.html # VaFT Comet
+│   └── chybozrout.html # Chybožrout Opravář
+│
+└── worlds/             # Světy VaFiT
+    ├── index.html      # Přehled světů
+    └── worlds.js       # World manager
 ```
 
 ---
 
-## 🎮 Co umí Batolete
+## 🎮 8 Základních her
 
-### Hry a aktivity
-
-| Hra | Popis |
-|-----|-------|
-| 🔤 **Abeceda** | Celá česká abeceda – klepni a uč se písmenka, slova a kresby |
-| 🔢 **Čísla** | Počítání do 10 – hádej počet teček, interaktivní kvíz |
-| 🎨 **Barvy** | Poznávání 10 barev – klepni na správnou odpověď |
-| 🔷 **Tvary** | Kruh, čtverec, trojúhelník, hvězda, srdce, obdélník |
-| 🐾 **Zvířátka** | 20 zvířátek s jejich hlasy (textové zvuky) |
-| 📖 **Příběhy** | 4 pohádky: Iskroň, Svět Revia, Dobrodružství písmenek, Bičák |
-| 🏃 **Pohyb s Bičákem** | Pohybové aktivity s animovanou postavičkou |
-| 🖼️ **Galerie světů** | 6 canvas-animovaných světů z VaFiT univerza |
-
-### Postavičky
-
-| Postavička | Role |
-|-----------|------|
-| 🧠 **Hlavoun** | Mozek systému – myšlení, logika, rady |
-| 👶 **Pikoš** | Dětský pozorovatel – hravost, zvídavost |
-| 💖 **Viri** | Vypravěčka – příběhy, hudba, emoce |
-| 💪 **Bičák** | Pohyb a zdraví – cvičení, aktivity |
-
-### Technické vlastnosti
-
-- ✅ **Offline-first** – Service Worker, vše funguje bez internetu
-- ✅ **PWA** – Instalovatelná na mobil/tablet/desktop
-- ✅ **Responsive** – Mobil, tablet, desktop
-- ✅ **Velká tlačítka** – Min. 52px touch targets
-- ✅ **Jasné barvy** – WCAG AA kontrast
-- ✅ **Zvuky** – Web Audio API (bez externích souborů)
-- ✅ **Animace** – Canvas, CSS animations
-- ✅ **Odměňovací systém** – Hvězdičky + confetti
-- ✅ **Bez externích odkazů** – Kompletně offline/bezpečné
-- ✅ **Čeština** – Celý obsah v češtině
+| Hra | Popis | Typ |
+|-----|-------|-----|
+| 🔤 **Abeceda** | Česká abeceda, rozpoznávání písmen | Quiz |
+| 🔢 **Čísla** | Počítání teček 1–10 | Quiz |
+| 🎨 **Barvy** | Rozpoznávání 10 barev | Quiz |
+| 🔵 **Tvary** | Kruh, čtverec, trojúhelník, hvězda… | Quiz |
+| 🐾 **Zvířátka** | 20 zvířat se zvuky | Quiz |
+| 📖 **Příběhy** | 4 české pohádky (stránkování) | Příběh |
+| 🏃 **Pohyb** | Pohybové aktivity (Bičákův program) | Aktivity |
+| 🌍 **Galerie světů** | 6 VaFiT světů k prozkoumání | Galerie |
 
 ---
 
-## 🌍 Světy v galerii
+## 🚀 Mini-Aplikace
 
-1. **Revia** – Svět harmonie s hradem a duhou
-2. **Písmenková planeta** – Planeta s českou abecedou
-3. **Kytičkový svět** – Louka s kytičkami a motýlky
-4. **VaFiT Centrum 3D** – 3D centrum celého vesmíru VaFiT
-5. **Glyph Planet** – Planeta tajemných glyfů a symbolů
-6. **Oblak** – Svět mraků a snů
-
----
-
-## 📦 Původ komponent
-
-Batolete vzniklo transformací těchto částí repozitáře **Vivere atque Frui'T**:
-
-| Původní komponenta | Batolete verze |
-|-------------------|----------------|
-| `hlavoun.js` + `components/Hlavoun/` | `characters.js` → Hlavoun |
-| `pikos.js` + `components/Pikos/` | `characters.js` → Pikoš |
-| `viri.js` + `components/Viri/` | `characters.js` → Viri |
-| `components/Bicak/` | `characters.js` → Bičák + Pohyb hra |
-| `vaft-letter-planet.html`, `VAFT-LetterLab/` | Abeceda hra |
-| `worlds/Revia/`, `worlds/Revia-Master/` | Galerie → Revia svět |
-| `worlds/VAFT-Center3D/` | Galerie → VaFiT Centrum |
-| `vaft-boy-flower.html` | Galerie → Kytičkový svět |
-| `Glyph-Planet/`, `Glyph-Planet-3D/` | Galerie → Glyph Planet |
-| `Oblak/` | Galerie → Oblak svět |
-| `cht360-batole/` + `batole-core.css` | Základ Batolete |
-| `service-worker.js`, `vaft-sw.js` | `service-worker.js` |
-| `manifest.json` | `manifest.json` |
-| `fruiT_learning_engine.js` | Vzdělávací herní logika |
-| `agents.js`, `vaft.agents.js` | `characters.js` agenti |
+| App | Popis | Složka |
+|-----|-------|--------|
+| ⚔️ **1O1R RPG** | Mini RPG s rámeči a pohybem | `1O1R/` |
+| ✨ **Revia** | Storytelling, Angel/Dark mód | `Revia/` |
+| 🌑 **Revia Master** | Pokročilá Revia | `Revia-Master/` |
+| 🧊 **3D Rámeček** | Interaktivní 3D Glyph | `3D ramecek/` |
+| 🌐 **Glyph Planeta** | Písmenková planeta | `Glyph-Planet/` |
+| 🪐 **Glyph Planeta 3D** | 3D planeta se znaky | `Glyph-Planet-3D/` |
+| 🖊️ **Glyph Editor** | Kreativní glyph editor | `Michal-AI-Al-Klimek/` |
+| 🤖 **Hlavoun** | AI agent průvodce | `Hlavoun/` |
+| ☁️ **Oblak** | Cloud PWA | `Oblak/` |
+| 👧 **VaFT Girls** | Speciální postava | `VAFT-Girls/` |
+| 🐻 **VaFT BearHead** | Medvědí hlava | `VAFT-BearHead/` |
+| ☄️ **VaFT Comet** | Vesmírná kometa | `VAFT-Comet/` |
+| 🔧 **Chybožrout** | Diagnostika & opravy | `chybozrout-opravar/` |
 
 ---
 
-## 🛠️ Instalace jako PWA
+## ⭐ Reward Systém
 
-1. Otevři `index.html` v Chrome/Safari/Firefox
-2. Klikni na "Přidat na plochu" / "Install"
-3. Aplikace se nainstaluje a funguje offline
-
----
-
-## 👨‍💻 Autor
-
-**Michal Klímeek** – Vivere atque Frui'T repozitář  
-Transformace do Batolete provedena GitHub Copilot Coding Agentem.
+- Každá správná odpověď ve hrách = **+1 hvězdička**
+- Dokončení příběhu = **+2 hvězdičky**
+- Hvězdičky jsou uloženy v `localStorage` (přetrvají i po zavření)
+- Mini-aplikace mohou posílat hvězdičky přes `postMessage`:
+  ```js
+  window.parent.postMessage({ type: 'batolete:reward', stars: 1 }, '*');
+  ```
 
 ---
 
-## 📄 Licence
+## 🔄 Navigace z Mini-Aplikace
 
-Viz hlavní `LICENSE` soubor v kořeni repozitáře.
+Pro návrat do Hubu z mini-app:
+```js
+window.parent.postMessage({ type: 'batolete:back' }, '*');
+```
+
+---
+
+## 📱 PWA Instalace
+
+1. Otevři `Batolete/index.html` v prohlížeči
+2. V Chrome/Edge: **"Přidat na plochu"** nebo **"Nainstalovat aplikaci"**
+3. Na iOS Safari: **Sdílet → Přidat na Plochu**
+4. Funguje **offline** po první návštěvě
+
+---
+
+## 🎨 Design Přizpůsobení
+
+Všechny CSS proměnné jsou v `hub-menu.css`:
+
+```css
+:root {
+  --hub-bg:      #1a1a2e;   /* pozadí */
+  --hub-accent:  #e94560;   /* akcent / hover */
+  --hub-gold:    #ffd700;   /* hvězdičky, logo */
+  --hub-card:    #0f3460;   /* barva karet */
+  --hub-radius:  1.2rem;    /* zaoblení rohů */
+}
+```
+
+Přizpůsob dle libosti! 🎨
+
+---
+
+## 🧠 Technické Poznámky
+
+- **Zero externích závislostí** – vše čisté HTML/CSS/JS
+- **Web Audio API** – zvuky bez souborů
+- **Canvas** – kreslení tvarů bez obrázků
+- **localStorage** – hvězdičky a postup
+- **iframe sandbox** – mini-apps jsou izolované, ale bezpečné
+- **postMessage** – komunikace hub ↔ mini-app
+
+---
+
+*Batolete × VaFiT × Vivere atque Frui'T*  
+*Tvoříme pro českou rodinu, pro každou generaci* 💚🇨🇿

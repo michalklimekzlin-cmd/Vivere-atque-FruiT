@@ -50,7 +50,7 @@
           <p class="eyebrow">CO VIDÍ OFFLINE</p>
           <h2 id="overviewTitle">Stav společné Paměti</h2>
         </div>
-        <button id="refreshContext" class="quiet-button" type="button">Obnovit stav</button>
+        <button id="refreshContext" class="quiet-button" type="button" data-cht-loading-label="Obnovuji…">Obnovit stav</button>
       </div>
 
       <div id="memoryOverview" class="memory-overview" aria-live="polite"></div>
@@ -83,7 +83,7 @@
           placeholder="Například: Jaký je stav Paměti? nebo Dej mi tři nápady."
           enterkeyhint="send"
         ></textarea>
-        <button class="primary-button" type="submit">Poslat</button>
+        <button class="primary-button" type="submit" data-cht-loading-label="Posílám…">Poslat</button>
       </form>
     </section>
 
@@ -114,5 +114,10 @@
     data-cht-capture-mode="full"
   ></script>
   <script src="./app.js" defer></script>
+  <script src="../js/cht-360-config.js"></script>
+  <script src="../js/cht-360-navigation.js"></script>
+  <script src="../js/cht-360-logger.js"></script>
+  <script src="../js/cht-360-performance.js"></script>
+  <script src="../js/cht-ui-components.js"></script>
 </body>
 </html>

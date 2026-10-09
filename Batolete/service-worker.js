@@ -1,87 +1,65 @@
-/**
- * Batolete – Service Worker
- * Offline-first PWA pro dětskou aplikaci
- * Vivere atque Frui'T → Batolete
- */
+/*
+  Batolete – service-worker.js
+  Offline-first PWA service worker
+*/
 
-'use strict';
+"use strict";
 
-const CACHE_NAME    = 'batolete-v1';
-const OFFLINE_PAGE  = './';
-const CORE_FILES    = [
-  './',
-  './index.html',
-  './style.css',
-  './app.js',
-  './characters.js',
-  './manifest.json'
+const CACHE = "batolete-hub-v1";
+
+const PRECACHE = [
+  "./",
+  "./index.html",
+  "./style.css",
+  "./hub-menu.css",
+  "./app.js",
+  "./hub-loader.js",
+  "./manifest.json",
+  /* mini-app wrappers */
+  "./mini-apps/1o1r.html",
+  "./mini-apps/revia.html",
+  "./mini-apps/revia-master.html",
+  "./mini-apps/3d-ramecek.html",
+  "./mini-apps/glyph-planet.html",
+  "./mini-apps/glyph-planet-3d.html",
+  "./mini-apps/glyph-editor.html",
+  "./mini-apps/hlavoun.html",
+  "./mini-apps/oblak.html",
+  "./mini-apps/vaft-girls.html",
+  "./mini-apps/vaft-bearhead.html",
+  "./mini-apps/vaft-comet.html",
+  "./mini-apps/chybozrout.html"
 ];
 
-/* ── INSTALL: Cache all core files ── */
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(async cache => {
-      await Promise.allSettled(
-        CORE_FILES.map(async file => {
-          try {
-            const response = await fetch(file, { cache: 'no-store' });
-            if (response.ok) await cache.put(file, response);
-          } catch (e) {
-            // ignore individual fetch errors during install
-          }
-        })
-      );
-    }).then(() => self.skipWaiting())
+self.addEventListener("install", e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting())
   );
 });
 
-/* ── ACTIVATE: Remove old caches ── */
-self.addEventListener('activate', event => {
-  event.waitUntil(
+self.addEventListener("activate", e => {
+  e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
 
-/* ── FETCH: Cache-first for assets, network-first for navigation ── */
-self.addEventListener('fetch', event => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Only handle same-origin requests
-  if (url.origin !== self.location.origin) return;
-
-  // Navigation requests: network-first with offline fallback
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-          return response;
-        })
-        .catch(() => caches.match(OFFLINE_PAGE))
-    );
-    return;
-  }
-
-  // Static assets: cache-first
-  event.respondWith(
-    caches.match(request).then(cached => {
+self.addEventListener("fetch", e => {
+  if (e.request.method !== "GET") return;
+  e.respondWith(
+    caches.match(e.request).then(cached => {
       if (cached) return cached;
-      return fetch(request).then(response => {
-        if (response && response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+      return fetch(e.request).then(res => {
+        if (!res || res.status !== 200 || res.type === "opaque") return res;
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return res;
+      }).catch(() => {
+        if (e.request.destination === "document") {
+          return caches.match("./index.html");
         }
-        return response;
-      }).catch(() => null);
+      });
     })
   );
-});
-
-/* ── MESSAGE: Force update ── */
-self.addEventListener('message', event => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
