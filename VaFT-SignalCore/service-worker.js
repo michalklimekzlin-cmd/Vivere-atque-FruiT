@@ -1,6 +1,6 @@
 const CACHE_NAME = 'vaft-signalcore-pwa-v1';
 const OFFLINE_URL = './index.html';
-const PRECACHE_URLS = ['./', './index.html', './manifest.json', './style.css'];
+const PRECACHE_URLS = ['./', './index.html', './manifest.json'];
 self.addEventListener('install', (e) => {e.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(PRECACHE_URLS)).then(() => self.skipWaiting()))});
 self.addEventListener('activate', (e) => {e.waitUntil(caches.keys().then((k) => Promise.all(k.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))));self.clients.claim();});
 self.addEventListener('fetch', (e) => {if (e.request.method !== 'GET') return;
