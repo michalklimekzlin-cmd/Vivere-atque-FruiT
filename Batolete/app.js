@@ -426,7 +426,7 @@ GAMES.pribehy = {
         pages: [
           "Byl jednou jeden malý drak jménem Iskroň. Žil v modré hoře a snil o hvězdičkách.",
           "Každou noc létával vysoko, kde hvězdičky tancovaly. Chytil jednu do drápků.",
-          "Hvězdička řekla: „Přines mi ranní rosu a budeš mít přítele navždy!"",
+          "Hvězdička řekla: „Přines mi ranní rosu a budeš mít přítele navždy!“",
           "Iskroň přinesl rosu. Od té doby hvězdičky svítily jenom pro něj. 🌟"
         ]
       },
@@ -435,9 +435,9 @@ GAMES.pribehy = {
         emoji: "✨",
         pages: [
           "V zemi symbolů žil malý Glyph. Byl jiný než ostatní – měl tvar hvězdičky.",
-          "Ostatní glyphi mu říkali: „Jsi moc zvláštní!" Ale Glyph se neurazil.",
+          "Ostatní glyphi mu říkali: „Jsi moc zvláštní!“ Ale Glyph se neurazil.",
           "Jednoho dne přišel velký déšť. Hvězdičkový Glyph záříl a ukazoval cestu domů.",
-          "„Každý symbol je důležitý," řekla moudrá Abeceda. „I ty, malý Glyph!" ✨"
+          "„Každý symbol je důležitý,“ řekla moudrá Abeceda. „I ty, malý Glyph!“ ✨"
         ]
       },
       {
@@ -447,7 +447,7 @@ GAMES.pribehy = {
           "Bičák byl nejrychlejší chlapec v celé vesnici. Miloval běhání a skákání.",
           "Jednoho rána Bičák zjistil, že ztratil svůj červený míč.",
           "Běžel přes les, přes louku, přes řeku – a tam u studny uviděl míč.",
-          "„Pohyb je radost!" zvolal Bičák. „Kdybych nespadl, nikdy bych ho nenašel!" 🏃"
+          "„Pohyb je radost!“ zvolal Bičák. „Kdybych nespadl, nikdy bych ho nenašel!“ 🏃"
         ]
       },
       {
