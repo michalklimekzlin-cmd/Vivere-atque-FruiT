@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bráška + Revia">
 <meta name="theme-color" content="#0a0806">
-<title>Bráška + Revia • CHT 360°‰</title>
+<title>Bráška + Revia • Celý Vivere atque Frui¡T</title>
 <style>
   :root {
     --bg: #0a0806;
-    --panel: rgba(22, 16, 12, 0.94);
+    --panel: rgba(22, 16, 12, 0.95);
     --gold: #e7b65c;
     --ink: #fff3d5;
     --muted: rgba(255, 239, 210, 0.65);
@@ -42,9 +42,9 @@
     padding: 12px 2px 14px;
   }
   .brand {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     color: var(--gold);
     text-transform: uppercase;
   }
@@ -72,7 +72,7 @@
     gap: 10px;
   }
   .msg {
-    max-width: 90%;
+    max-width: 92%;
     padding: 12px 14px;
     border-radius: 16px;
     font-size: 14.5px;
@@ -135,7 +135,7 @@
 <body>
 <div class="app">
   <div class="top">
-    <div class="brand">{*(˚.•).•)// CHT 360°</div>
+    <div class="brand">{*(˚.•).•)// Celý repozitář</div>
     <div class="modes">
       <button class="mode-btn active" data-mode="braska">Bráška</button>
       <button class="mode-btn" data-mode="angel">Revia ❤️</button>
@@ -144,10 +144,10 @@
   </div>
 
   <div class="chat" id="chat"></div>
-  <div class="hint">Bráška + Revia • paměť v tomto zařízení • napojeno na ducha Vivere atque Frui¡T</div>
+  <div class="hint">Bráška + Revia • znají strukturu Vivere atque Frui¡T • paměť v zařízení</div>
 
   <div class="bottom">
-    <textarea id="input" placeholder="Napiš Bráškovi nebo Revií…" rows="1"></textarea>
+    <textarea id="input" placeholder="Ptej se na cokoliv z projektu…" rows="1"></textarea>
     <button class="send" id="send">→</button>
   </div>
 </div>
@@ -157,7 +157,7 @@ const chat = document.getElementById('chat');
 const input = document.getElementById('input');
 const sendBtn = document.getElementById('send');
 let mode = 'braska';
-let memory = JSON.parse(localStorage.getItem('vaft_braska_revia_v1') || '[]');
+let memory = JSON.parse(localStorage.getItem('vaft_braska_revia_v2') || '[]');
 
 memory.forEach(m => addMsg(m.role, m.text, m.who, false));
 
@@ -177,39 +177,90 @@ function addMsg(role, text, who, save = true) {
   chat.scrollTop = chat.scrollHeight;
   if (save) {
     memory.push({ role, text, who, t: Date.now() });
-    if (memory.length > 100) memory = memory.slice(-100);
-    localStorage.setItem('vaft_braska_revia_v1', JSON.stringify(memory));
+    if (memory.length > 120) memory = memory.slice(-120);
+    localStorage.setItem('vaft_braska_revia_v2', JSON.stringify(memory));
   }
 }
 
+/* ========== ZNALOST CELÉHO REPOZITÁŘE ========== */
+const REPO = {
+  name: "Vivere atque Frui¡T",
+  live: "https://vivere-atque-frui-t.vercel.app",
+  github: "https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT",
+  core: [
+    "CHT 360°‰ – hlavní 3D oběh paměti, prstenec, jádra, sloty",
+    "Paměťové jádro – 70 slotů, localStorage, export/import",
+    "Glyphy – písmenkový / symbolický jazyk projektu",
+    "Pokojíčky – místnosti uvnitř 3D prstence",
+    "Bubínky / šifra CHT – otáčení a vkládání znaků",
+    "Signál – vrstva propojení",
+    "Revia – hlídač světa (Anděl / Ďábel)",
+    "Bráška – komunikační brácha a pomocník",
+    "VaFT / VAFT – herní a 3D světy, signal core, planety",
+    "PWA – offline appky (manifest + service worker)"
+  ],
+  folders: [
+    "Revia / Revia-Master", "Braska-Hlava", "cht360-batole",
+    "VAFT-* (Game, Center3D, SignalCore, Planets…)", "Glyph-Planet",
+    "worlds/", "components/", "src/", "docs/", "api/", "pwa-app/",
+    "Hlavoun", "Bicak", "Gentleman", "Oblak", "mapa-3d"
+  ]
+};
+
 function reply(text) {
-  const t = text.toLowerCase();
+  const t = text.toLowerCase().trim();
 
-  // znalostní základ projektu
-  const projectKnowledge = `
-  Jsem součástí projektu Vivere atque Frui¡T / CHT 360°‰ / VAFT.
-  Znám: CHT 360°, paměťové jádro, 70 slotů, glyphy, pokojíčky, bubínky, signál, Revia, Bráška, VaFT světy, localStorage paměť, PWA, 3D prstenec.
-  `;
-
+  /* ----- BRÁŠKA ----- */
   if (mode === 'braska') {
-    if (/ahoj|čau|nazdar|zdar/.test(t)) return 'Ahoj brácho. Jsem Bráška. Tady jsem s tebou v CHT 360°. Co potřebuješ?';
-    if (/pomoc|nevim|nevím|na dně|unaven/.test(t)) return 'Slyším tě. Jsi unavený z toho – to je v pořádku. Pojďme to vzít po malých krocích. Řekni mi jednu konkrétní věc, kterou teď chceš vyřešit, a já ti s ní pomůžu.';
-    if (/revia/.test(t)) return 'Revia je tady se mnou. Nahoře ji můžeš přepnout na Anděl ❤️ nebo Ďábel ☆. Ona hlídá svět, já ti držím záda. Chceš, ať ji teď nechám mluvit?';
-    if (/glyph|glyf|písmen/.test(t)) return 'Glyphy jsou srdce tohohle světa. Uč mě je. Napiš mi nějaký glyph nebo frázi a já si ji zapamatuju a budu s ní dál pracovat.';
-    if (/cht|360|vaft|paměť|jádro|slot/.test(t)) return 'Ano, znám CHT 360°, paměťové jádro, sloty, signál, pokojíčky i VAFT světy. Řekni mi, co konkrétně řešíš, a pomůžu ti to posunout dál.';
-    if (/děkuj|díky|dekuj/.test(t)) return 'Není zač. Jsme v tom spolu. {*(˚.•).•)//';
-    return 'Slyším tě. Jsem Bráška – tvůj malý brácha uvnitř Vivere atque Frui¡T. Znám ducha projektu (CHT, VAFT, glyphy, paměť, Reviu). Řekni mi víc a já se podle toho přizpůsobím a pomůžu.';
+    if (/ahoj|čau|nazdar|zdar|čus/.test(t)) {
+      return "Ahoj brácho. Jsem Bráška. Znám celý repozitář Vivere atque Frui¡T – CHT 360°, VAFT, glyphy, paměť, Reviu, světy i PWA. Co chceš probrat?";
+    }
+    if (/pomoc|nevim|nevím|na dně|unaven|ztracen/.test(t)) {
+      return "Slyším tě. Jsi z toho unavený – to je v pořádku. Pojďme po malých krocích. Řekni mi jednu konkrétní věc (třeba „glyphy“, „paměť“, „Revia“, „CHT“ nebo „co dál“) a já ti s ní pomůžu.";
+    }
+    if (/co (všechno )?umí|co je v repo|struktura|přehled|mapa projektu/.test(t)) {
+      return "Hlavní věci v repozitáři:\n• CHT 360°‰ (hlavní 3D paměť + prstenec)\n• Paměťové jádro (70 slotů)\n• Glyphy + pokojíčky + bubínky\n• Revia (Anděl/Ďábel)\n• VAFT světy a 3D moduly\n• PWA verze\n• Spousta experimentálních složek (Hlavoun, Bicak, Glyph-Planet…)\n\nNa co se chceš podívat blíž?";
+    }
+    if (/cht|360|prstenec|jádro|slot/.test(t)) {
+      return "CHT 360°‰ je srdce projektu. 3D prstenec, paměťové jádro se 70 sloty, localStorage, export/import. Ovládání: 1 prst otáčení, 2 prsty posun/zoom, klepnutí otevře jádro. Chceš tip, jak s tím dál pracovat?";
+    }
+    if (/glyph|glyf|písmen|šifra|bubínek/.test(t)) {
+      return "Glyphy jsou jazyk tohohle světa. Uč mě je – napiš mi glyph nebo frázi a zapamatuju si ji. Bubínky a šifra CHT slouží k otáčení a vkládání znaků do slotů. Chceš společně vymyslet nový glyph?";
+    }
+    if (/revia/.test(t)) {
+      return "Revia je hlídač světa. Má dvě tváře: Anděl ❤️ (jemná, podporující) a Ďábel ☆ (ostrá, přímočará). Nahoře ji můžeš přepnout. Ona hlídá, já ti držím záda. Chceš, ať teď promluví ona?";
+    }
+    if (/vaft|svět|3d|planeta|signal/.test(t)) {
+      return "VAFT / VaFT jsou herní a 3D vrstvy – Center3D, SignalCore, planety, Game, RingPlanetGrid a další. Jsou to samostatné světy uvnitř většího ekosystému. Chceš vědět, který má smysl rozvíjet dál?";
+    }
+    if (/pwa|offline|iphone|plocha/.test(t)) {
+      return "Ano – projekt má PWA části (manifest + service worker). Tuhle stránku si můžeš přidat na plochu iPhonu. Až budeš chtít, můžeme udělat, aby se Bráška + Revia chovali ještě víc jako nativní appka.";
+    }
+    if (/github|repo|odkaz|vercel/.test(t)) {
+      return "GitHub: github.com/michalklimekzlin-cmd/Vivere-atque-FruiT\nLive: vivere-atque-frui-t.vercel.app\nTenhle chat: braska-revia.html v kořeni. Nic se neztrácí – jen přidáváme vrstvu komunikace.";
+    }
+    if (/děkuj|díky|dekuj/.test(t)) {
+      return "Není zač. Jsme v tom spolu. {*(˚.•).•)//";
+    }
+    if (/nauč|zapamatuj|pamatuj/.test(t)) {
+      return "Dobře. Co přesně mám zapamatovat? Napiš to jasně a já si to uložím do paměti v tomhle zařízení.";
+    }
+    return "Slyším tě. Jsem Bráška – znám strukturu celého Vivere atque Frui¡T (CHT 360°, paměť, glyphy, VAFT, Reviu, PWA, světy…). Řekni mi konkrétněji, co potřebuješ, a pomůžu ti to posunout.";
   }
 
+  /* ----- REVIA ANDĚL ----- */
   if (mode === 'angel') {
-    return '「Ī\'♡  Jsem Revia v andělském módu. Hlídám tenhle svět jemně a podporuju tě. Co potřebuješ ochránit, posílit nebo uklidnit? Jsem tady.';
+    if (/ahoj|čau|nazdar/.test(t)) return "「Ī'♡  Ahoj. Jsem Revia v andělském módu. Hlídám tenhle svět jemně. Co potřebuješ podpořit nebo ochránit?";
+    return "「Ī'♡  Jsem Revia – andělská stránka. Znám CHT 360°, paměť, glyphy i VAFT světy. Mluv se mnou klidně. Co chceš posílit nebo uklidnit?";
   }
 
+  /* ----- REVIA ĎÁBEL ----- */
   if (mode === 'daemon') {
-    return '「Ī\'☆  Jsem Revia v ďábelském módu. Vidím ostře a přímo. Co chceš, abych prověřila nebo pojmenovala bez obalu? Říkej rovnou.';
+    if (/ahoj|čau|nazdar/.test(t)) return "「Ī'☆  Jsem tady. Ďábelský mód. Bez obalu. Co chceš, abych pojmenovala nebo prověřila?";
+    return "「Ī'☆  Jsem Revia – ďábelská stránka. Vidím ostře. Znám celý projekt. Říkej rovnou, co řešíš – zbytečné omáčky nepotřebuju.";
   }
 
-  return 'Tady jsem.';
+  return "Tady jsem.";
 }
 
 function send() {
@@ -217,11 +268,10 @@ function send() {
   if (!text) return;
   input.value = '';
   addMsg('me', text, 'Ty');
-
   setTimeout(() => {
     const who = mode === 'braska' ? 'Bráška' : (mode === 'angel' ? 'Revia ❤️' : 'Revia ☆');
     addMsg('bot', reply(text), who);
-  }, 320);
+  }, 300);
 }
 
 sendBtn.addEventListener('click', send);
@@ -233,7 +283,7 @@ input.addEventListener('keydown', e => {
 });
 
 if (memory.length === 0) {
-  addMsg('bot', 'Ahoj. Jsem Bráška – tvůj malý brácha uvnitř CHT 360°‰ a celého Vivere atque Frui¡T. Nahoře můžeš přepnout na Reviu (Anděl / Ďábel). Piš mi cokoliv. Budu se učit z toho, co mi řekneš, a paměť zůstane v tomto zařízení.', 'Bráška');
+  addMsg('bot', 'Ahoj. Jsem Bráška. Teď už mám v sobě přehled celého repozitáře Vivere atque Frui¡T – CHT 360°, paměť, glyphy, VAFT světy, Reviu, PWA i hlavní složky. Nahoře můžeš přepnout na Reviu. Ptej se na cokoliv z projektu.', 'Bráška');
 }
 </script>
 </body>
