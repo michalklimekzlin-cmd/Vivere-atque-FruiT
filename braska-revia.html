@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bráška + Revia">
+<meta name="theme-color" content="#0a0806">
+<title>Bráška + Revia • CHT 360°‰</title>
+<style>
+  :root {
+    --bg: #0a0806;
+    --panel: rgba(22, 16, 12, 0.94);
+    --gold: #e7b65c;
+    --ink: #fff3d5;
+    --muted: rgba(255, 239, 210, 0.65);
+    --line: rgba(231, 182, 92, 0.28);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: radial-gradient(circle at 50% -8%, rgba(199,155,51,0.2), transparent 42%),
+                linear-gradient(160deg, #130f0c, var(--bg) 55%);
+    color: var(--ink);
+    font-family: -apple-system, system-ui, sans-serif;
+    overflow: hidden;
+  }
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    max-width: 540px;
+    margin: 0 auto;
+    padding: env(safe-area-inset-top) 12px env(safe-area-inset-bottom);
+  }
+  .top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 2px 14px;
+  }
+  .brand {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .modes { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end; }
+  .mode-btn {
+    border: 1px solid var(--line);
+    background: rgba(255,226,173,0.06);
+    color: var(--gold);
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .mode-btn.active {
+    background: linear-gradient(135deg, #ffecc3, #d69f40);
+    color: #241706;
+    border-color: var(--gold);
+  }
+  .chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 2px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .msg {
+    max-width: 90%;
+    padding: 12px 14px;
+    border-radius: 16px;
+    font-size: 14.5px;
+    line-height: 1.45;
+  }
+  .msg.me {
+    align-self: flex-end;
+    background: rgba(231,182,92,0.14);
+    border: 1px solid var(--line);
+  }
+  .msg.bot {
+    align-self: flex-start;
+    background: var(--panel);
+    border: 1px solid var(--line);
+  }
+  .msg .who {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .bottom {
+    display: flex;
+    gap: 8px;
+    padding: 6px 0 10px;
+  }
+  textarea {
+    flex: 1;
+    min-height: 46px;
+    max-height: 110px;
+    resize: none;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: rgba(0,0,0,0.35);
+    color: var(--ink);
+    padding: 12px 13px;
+    font-size: 16px;
+    outline: none;
+  }
+  .send {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #ffecc3, #d69f40);
+    color: #241706;
+    font-size: 18px;
+    font-weight: 800;
+  }
+  .hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    padding-bottom: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand">{*(˚.•).•)// CHT 360°</div>
+    <div class="modes">
+      <button class="mode-btn active" data-mode="braska">Bráška</button>
+      <button class="mode-btn" data-mode="angel">Revia ❤️</button>
+      <button class="mode-btn" data-mode="daemon">Revia ☆</button>
+    </div>
+  </div>
+
+  <div class="chat" id="chat"></div>
+  <div class="hint">Bráška + Revia • paměť v tomto zařízení • napojeno na ducha Vivere atque Frui¡T</div>
+
+  <div class="bottom">
+    <textarea id="input" placeholder="Napiš Bráškovi nebo Revií…" rows="1"></textarea>
+    <button class="send" id="send">→</button>
+  </div>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+let mode = 'braska';
+let memory = JSON.parse(localStorage.getItem('vaft_braska_revia_v1') || '[]');
+
+memory.forEach(m => addMsg(m.role, m.text, m.who, false));
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
+  });
+});
+
+function addMsg(role, text, who, save = true) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + (role === 'me' ? 'me' : 'bot');
+  div.innerHTML = `<div class="who">${who}</div>${text}`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  if (save) {
+    memory.push({ role, text, who, t: Date.now() });
+    if (memory.length > 100) memory = memory.slice(-100);
+    localStorage.setItem('vaft_braska_revia_v1', JSON.stringify(memory));
+  }
+}
+
+function reply(text) {
+  const t = text.toLowerCase();
+
+  // znalostní základ projektu
+  const projectKnowledge = `
+  Jsem součástí projektu Vivere atque Frui¡T / CHT 360°‰ / VAFT.
+  Znám: CHT 360°, paměťové jádro, 70 slotů, glyphy, pokojíčky, bubínky, signál, Revia, Bráška, VaFT světy, localStorage paměť, PWA, 3D prstenec.
+  `;
+
+  if (mode === 'braska') {
+    if (/ahoj|čau|nazdar|zdar/.test(t)) return 'Ahoj brácho. Jsem Bráška. Tady jsem s tebou v CHT 360°. Co potřebuješ?';
+    if (/pomoc|nevim|nevím|na dně|unaven/.test(t)) return 'Slyším tě. Jsi unavený z toho – to je v pořádku. Pojďme to vzít po malých krocích. Řekni mi jednu konkrétní věc, kterou teď chceš vyřešit, a já ti s ní pomůžu.';
+    if (/revia/.test(t)) return 'Revia je tady se mnou. Nahoře ji můžeš přepnout na Anděl ❤️ nebo Ďábel ☆. Ona hlídá svět, já ti držím záda. Chceš, ať ji teď nechám mluvit?';
+    if (/glyph|glyf|písmen/.test(t)) return 'Glyphy jsou srdce tohohle světa. Uč mě je. Napiš mi nějaký glyph nebo frázi a já si ji zapamatuju a budu s ní dál pracovat.';
+    if (/cht|360|vaft|paměť|jádro|slot/.test(t)) return 'Ano, znám CHT 360°, paměťové jádro, sloty, signál, pokojíčky i VAFT světy. Řekni mi, co konkrétně řešíš, a pomůžu ti to posunout dál.';
+    if (/děkuj|díky|dekuj/.test(t)) return 'Není zač. Jsme v tom spolu. {*(˚.•).•)//';
+    return 'Slyším tě. Jsem Bráška – tvůj malý brácha uvnitř Vivere atque Frui¡T. Znám ducha projektu (CHT, VAFT, glyphy, paměť, Reviu). Řekni mi víc a já se podle toho přizpůsobím a pomůžu.';
+  }
+
+  if (mode === 'angel') {
+    return '「Ī\'♡  Jsem Revia v andělském módu. Hlídám tenhle svět jemně a podporuju tě. Co potřebuješ ochránit, posílit nebo uklidnit? Jsem tady.';
+  }
+
+  if (mode === 'daemon') {
+    return '「Ī\'☆  Jsem Revia v ďábelském módu. Vidím ostře a přímo. Co chceš, abych prověřila nebo pojmenovala bez obalu? Říkej rovnou.';
+  }
+
+  return 'Tady jsem.';
+}
+
+function send() {
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addMsg('me', text, 'Ty');
+
+  setTimeout(() => {
+    const who = mode === 'braska' ? 'Bráška' : (mode === 'angel' ? 'Revia ❤️' : 'Revia ☆');
+    addMsg('bot', reply(text), who);
+  }, 320);
+}
+
+sendBtn.addEventListener('click', send);
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    send();
+  }
+});
+
+if (memory.length === 0) {
+  addMsg('bot', 'Ahoj. Jsem Bráška – tvůj malý brácha uvnitř CHT 360°‰ a celého Vivere atque Frui¡T. Nahoře můžeš přepnout na Reviu (Anděl / Ďábel). Piš mi cokoliv. Budu se učit z toho, co mi řekneš, a paměť zůstane v tomto zařízení.', 'Bráška');
+}
+</script>
+</body>
+</html>
