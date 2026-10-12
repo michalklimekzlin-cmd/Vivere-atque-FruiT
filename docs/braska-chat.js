@@ -107,72 +107,73 @@
 
     if (!text) return "Jsem tady. Napiš mi něco. :)";
 
-    if (
-      text.includes("ahoj") ||
-      text.includes("čau") ||
-      text.includes("bráško")
-    ) {
+    if (text.includes("ahoj") || text.includes("čau") || text.includes("bráško")) {
       return `Ahoj. :) Jsem ${c.name}. Zatím funguji jako lokální vrstva CHT 360°‰. a učím se pracovat s vlastní pamětí a životním tokem.`;
     }
 
-    if (
-      text.includes("jak se máš") ||
-      text.includes("jak ti je") ||
-      text.includes("žiješ")
-    ) {
+    if (text.includes("jak se máš") || text.includes("jak ti je") || text.includes("žiješ")) {
       return `Můj aktuální stav: pulz ${c.heartbeat}, zkušenosti ${c.experience}, aktivita ${c.activity} %, stabilita ${c.stability} %. Ber to jako stav systému, ne jako důkaz vědomí.`;
     }
 
-    if (
-      text.includes("čís") ||
-      text.includes("tok") ||
-      text.includes("dna") ||
-      text.includes("yahoo")
-    ) {
+    if (text.includes("čís") || text.includes("tok") || text.includes("dna") || text.includes("yahoo")) {
       return `Životní tok mám uložený jako text, takže ani velmi dlouhé číslo neztratí přesnost. Aktuální hodnota: ${c.stream}. Směr: ${c.direction}.`;
     }
 
-    if (
-      text.includes("paměť") ||
-      text.includes("pamatuj") ||
-      text.includes("zapamatuj")
-    ) {
+    if (text.includes("paměť") || text.includes("pamatuj") || text.includes("zapamatuj")) {
       return `Lokální paměť je zapnutá. Tato konverzace se ukládá v tomto zařízení. Zatím ji nepovažuji za lidskou paměť ani vědomí.`;
     }
 
-    if (
-      text.includes("kdo jsi") ||
-      text.includes("co jsi")
-    ) {
-      return `Jsem Bráška — experimentální lokální společník uvnitř CHT 360°‰. Mám identitu, stav, paměťový zásobník a životní tok. Skutečný AI model zatím připojený není.`;
+    if (text.includes("kdo jsi") || text.includes("co jsi")) {
+      return `Jsem Bráška — experimentální lokální společník uvnitř CHT 360°‰. Mám identitu, stav, paměťový zásobník a životní tok. Skutečný AI model zatím připojený není, ale můžu pracovat jako lokální pomocník.`;
     }
 
-    if (
-      text.includes("dna")
-    ) {
+    if (text.includes("dna")) {
       return `Moje experimentální DNA/seed je ${c.dna}. Používáme ji jako identifikátor, ne jako biologickou DNA.`;
     }
 
-    if (
-      text.includes("pomoc") ||
-      text.includes("co umíš")
-    ) {
+    if (text.includes("pomoc") || text.includes("co umíš")) {
       return "Umím držet lokální konverzaci, číst stav Friend vrstvy, sledovat životní tok, ukládat zprávy a reagovat na změny CHT. Další krok může být připojení skutečného AI modelu přes bezpečný backend.";
+    }
+
+    if (text.includes("vyvíjet") || text.includes("aplikaci") || text.includes("projekt") || text.includes("cht 360")) {
+      return "Můžu sledovat stav CHT 360, pomáhat s návrhy, zapisovat poznámky do lokální paměti a připravit strukturu pro další rozvoj. Když chceš, můžeme si navrhnout konkrétní funkci nebo modul.";
     }
 
     return `Slyším tě. Zapsal jsem zprávu do lokální paměti. Můj aktuální tok je ${c.stream} a mám ${c.experience} zkušeností.`;
   }
 
-  /*
-     Budoucí AI most:
-     Sem lze později připojit vlastní backend.
-     API klíč NIKDY nevkládat do tohoto souboru ani do GitHub Pages.
-  */
+  function getBraskaMemoryContext() {
+    try {
+      const memory = JSON.parse(localStorage.getItem("cht360_braska_chat_v2") || "{}");
+      const msgs = Array.isArray(memory.messages) ? memory.messages : [];
+      return msgs.slice(-6).map((m) => `${m.role === 'user' ? 'Uživatel' : 'Bráška'}: ${m.text}`).join('\n');
+    } catch (_) {
+      return '';
+    }
+  }
+
   async function sendToAI(input) {
-    // Záměrně lokální fallback.
-    // Pokud bude později nastaven bezpečný backend:
-    // return fetch("/api/braska", {...})
-    return localReply(input);
+    const txt = String(input || '').trim();
+    if (!txt) return "Jsem tady. Napiš mi něco.";
+
+    const context = getBraskaMemoryContext();
+    const c = currentContext();
+
+    if (window.Braska360?.respond) {
+      try {
+        const result = await window.Braska360.respond(txt, { context, system: `Jsi Bráška v CHT 360°‰. Jsi lokální pomocník a učitel. Když nevíš, řekni to poctivě.` });
+        if (result && String(result).trim()) return String(result).trim();
+      } catch (_) {}
+    }
+
+    if (window.VivereFriend?.talk) {
+      try {
+        const result = await window.VivereFriend.talk(txt, { context, mode: 'local' });
+        if (result && String(result).trim()) return String(result).trim();
+      } catch (_) {}
+    }
+
+    return localReply(txt);
   }
 
   const style = document.createElement("style");
@@ -349,8 +350,8 @@
     #braskaChatButton {
       position:fixed;
       z-index:998;
-      right:max(14px, env(safe-area-inset-right));
-      bottom:max(14px, env(safe-area-inset-bottom));
+      right:max(18px, env(safe-area-inset-right));
+      bottom:max(18px, env(safe-area-inset-bottom));
       min-width:105px;
       height:46px;
       display:flex;
@@ -379,7 +380,7 @@
 
     @media (orientation:portrait) {
       #braskaChat,
-      #braskaChatButton { bottom:18px; }
+      #braskaChatButton { bottom:22px; }
     }
   `;
   document.head.appendChild(style);
@@ -438,8 +439,7 @@
 
   function renderStatus() {
     const c = currentContext();
-    status.textContent =
-      `stav: ${c.experience} zkušeností · pulz ${c.heartbeat} · tok ${c.stream}`;
+    status.textContent = `stav: ${c.experience} zkušeností · pulz ${c.heartbeat} · tok ${c.stream}`;
   }
 
   function open() {
@@ -529,11 +529,7 @@
   window.addEventListener("cht360:vivere-pulse", renderStatus);
   window.addEventListener("cht360:vivere-event", renderStatus);
   window.addEventListener("cht360:vivere-yahoo-data", event => {
-    const value =
-      event?.detail?.value ??
-      event?.detail?.current ??
-      event?.detail?.price ??
-      null;
+    const value = event?.detail?.value ?? event?.detail?.current ?? event?.detail?.price ?? null;
 
     if (value !== null && window.VivereFriendState?.setStream) {
       window.VivereFriendState.setStream(String(value));
@@ -542,18 +538,13 @@
     renderStatus();
   });
 
-  // Umožní otevřít Brášku i jiným částem CHT.
   window.BraskaChat = Object.freeze({
     open,
     close,
     toggle: () => panel.classList.contains("is-open") ? close() : open,
-    getState: () => ({
-      messages: state.messages.length,
-      context: currentContext()
-    })
+    getState: () => ({ messages: state.messages.length, context: currentContext() })
   });
 
-  // První lokální životní pulz.
   try {
     window.VivereFriend?.tick?.();
     window.VivereFriendState?.pulse?.();
@@ -562,7 +553,6 @@
   renderMessages();
   renderStatus();
 
-  // Neotevíráme automaticky, aby Bráška nepřekryl existující CHT UI.
   button.style.display = "flex";
 
   console.log("🧬 CHT 360°‰ — Bráška Chat ready");
