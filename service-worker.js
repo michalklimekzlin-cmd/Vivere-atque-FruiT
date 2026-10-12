@@ -6,7 +6,9 @@ const APP_SHELL = [
   './manifest.json',
   './VIVERE_atque_FruiT_CORE.js',
   './fruiT_learning_engine.js',
-  './fruiT_memory_system.js'
+  './fruiT_memory_system.js',
+  './vivere-ai.html',
+  './vivere-ai-manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
@@ -25,6 +27,19 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+
+  if (url.pathname.includes('vivere-ai')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => response)
+        .catch(() => caches.match('./vivere-ai.html'))
+    );
+    return;
+  }
+
+  if (url.origin !== self.location.origin) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
