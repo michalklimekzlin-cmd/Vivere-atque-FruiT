@@ -1,0 +1,19 @@
+{
+  "name": "Vivere AI",
+  "short_name": "VivereAI",
+  "description": "Osobní AI vrstva pro Vivere atque FruiT",
+  "start_url": "./vivere-ai.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0d18",
+  "theme_color": "#0a0d18",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%230a0d18'/%3E%3Ccircle cx='96' cy='76' r='34' fill='%23f6d98b'/%3E%3Ccircle cx='76' cy='62' r='7' fill='%230a0d18'/%3E%3Ccircle cx='116' cy='62' r='7' fill='%230a0d18'/%3E%3Cpath d='M76 94 Q96 110 116 94' stroke='%230a0d18' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
