@@ -1,0 +1,150 @@
+/**
+ * AI Vivere Core - Hlavní mozek aplikace
+ */
+
+class VivereAI {
+    constructor() {
+        this.name = 'Vivere atque FruiT';
+        this.version = '1.0.0';
+        this.knowledge = this.loadKnowledge();
+        this.init();
+    }
+
+    init() {
+        document.getElementById('status-text').textContent = 'Připraveno';
+        this.addSystemMessage('Ahoj! Jsem AI Vivere Core. Jsem tady abych ti pomohla. Napiš cokoliv.');
+        aiMemory.log('SYSTEM', 'Vivere AI initialized successfully');
+    }
+
+    loadKnowledge() {
+        return {
+            name: 'Vivere atque FruiT',
+            description: 'Osobní AI trénovaná z repozitáře',
+            capabilities: ['chat', 'learning', 'audit', 'memory'],
+            version: '1.0.0',
+            knowledge_base: [
+                'Interaktivní 3D světy',
+                'AI studio pro českou rodinu',
+                'Etické digitální experimentování',
+                'Společné vytváření s umělou inteligencí',
+                'PWA technologie',
+                'Offline-first přístup'
+            ]
+        };
+    }
+
+    async chat(userMessage) {
+        // Zpracuj uživatelskou zprávu
+        agentTeam.process(userMessage, 'user');
+        aiMemory.addConversation('user', userMessage);
+
+        // Vygeneruj odpověď
+        const response = this.generateResponse(userMessage);
+
+        // Zpracuj AI odpověď
+        agentTeam.process(response, 'ai');
+        aiMemory.addConversation('ai', response);
+
+        return response;
+    }
+
+    generateResponse(input) {
+        const lower = input.toLowerCase();
+        const responses = {};
+
+        // Jednoduché odpovědi na základě klíčových slov
+        if (lower.includes('ahoj') || lower.includes('zdravím')) {
+            return 'Ahoj! 👋 Jak se máš? Čím ti mohu pomoci?';
+        } else if (lower.includes('co jsi')) {
+            return `Jsem ${this.knowledge.name} - osobní AI asistentka trénovaná z tohoto repozitáře. Umím chatovat, učit se a hlídat správnost informací. Mám tří agenty, kteří mi pomáhají.`;
+        } else if (lower.includes('co umíš')) {
+            return `Umím:\n- 💬 Chatovat s tebou\n- 📚 Učit se z konverzací\n- 📋 Vést audit log\n- 👥 Pracovat s agenty\n- 🔑 Rotovat API klíč\n- 💾 Pamatovat si v localStorage`;
+        } else if (lower.includes('jaké agenty')) {
+            return `Mám tři agenty:\n👮 Validátor - hlídá správnost dat\n📝 Strážce - vede informace\n🎓 Učitel - učí se z interakcí`;
+        } else if (lower.includes('co je localStorage')) {
+            return `localStorage je soukromé úložiště v TVÉM prohlížeči/telefonu. Nikdo ho nemůže číst. Ukládám tam:\n- Historii chatu\n- API klíč (rotovaný)\n- Audit log\n- Parametry učení`;
+        } else if (lower.includes('jak funguje')) {
+            return `1️⃣ Napíšeš zprávu\n2️⃣ Agenti ji zpracují\n3️⃣ Já na ni odpovím\n4️⃣ Vše se uloží v localStorage\n5️⃣ API klíč se občas rotuje pro bezpečnost`;
+        } else {
+            return `Zajímavá otázka! 🤔 Zatím se učím odpovídat. Dám ti odpověď na základě svých znalostí...\n\nVedím o: ${this.knowledge.knowledge_base.join(', ')}\n\nChceš vědět víc o něčem konkrétním?`;
+        }
+    }
+
+    addSystemMessage(text) {
+        const container = document.getElementById('chat-container');
+        const msg = document.createElement('div');
+        msg.className = 'message ai';
+        msg.innerHTML = `<strong>Vivere:</strong> ${text}`;
+        container.appendChild(msg);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    addUserMessage(text) {
+        const container = document.getElementById('chat-container');
+        const msg = document.createElement('div');
+        msg.className = 'message user';
+        msg.textContent = text;
+        container.appendChild(msg);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    addAIMessage(text) {
+        const container = document.getElementById('chat-container');
+        const msg = document.createElement('div');
+        msg.className = 'message ai';
+        msg.innerHTML = `<strong>Vivere:</strong> ${text}`;
+        container.appendChild(msg);
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
+const vivereAI = new VivereAI();
+
+// Event listeners
+document.getElementById('message-input').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+});
+
+async function sendMessage() {
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    vivereAI.addUserMessage(message);
+    input.value = '';
+
+    const response = await vivereAI.chat(message);
+    vivereAI.addAIMessage(response);
+}
+
+function showAuditLog() {
+    const stats = aiMemory.getStats();
+    const log = aiMemory.get('audit_log');
+    const lastEntries = log.slice(-5).map(e =>
+        `[${new Date(e.timestamp).toLocaleTimeString()}] ${e.type}: ${e.message}`
+    ).join('\n');
+
+    alert(`📋 AUDIT LOG\n\nPosledních 5 záznamů:\n${lastEntries}\n\nCelkem: ${stats.auditEntries} záznamů`);
+}
+
+function showAgents() {
+    const status = agentTeam.getStatus();
+    const info = status.map(a => `👤 ${a.name} (${a.role}): ${a.active ? '✅ Aktivní' : '❌ Neaktivní'}`).join('\n');
+    alert(`👥 AGENTI\n\n${info}`);
+}
+
+function rotateApiKey() {
+    const newKey = aiMemory.rotateApiKey();
+    alert(`🔑 API Key rotován!\n\nNový klíč (prvních 20 znaků):\n${newKey.substring(0, 20)}...`);
+    vivereAI.addSystemMessage('API klíč byl bezpečně rotován!');
+}
+
+function clearMemory() {
+    if (confirm('⚠️ Opravdu chceš vymazat veškerou paměť? Tuto akci nelze vrátit!')) {
+        aiMemory.reset();
+        document.getElementById('chat-container').innerHTML = '';
+        vivereAI.init();
+        alert('✅ Paměť byla vymazána a aplikace resetována.');
+    }
+}
