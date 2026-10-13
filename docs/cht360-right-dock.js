@@ -1,75 +1,71 @@
 /* =========================================================
-   CHT 360°‰ — RIGHT DOCK
+   CHT 360°‰ — RIGHT DOCK (oprava)
    Oběh · Bráška · Revia
    ---------------------------------------------------------
-   - 3 tlačítka nad sebou vpravo dole
-   - zachovává původní vzhled
-   - vylepšuje a stabilizuje funkčnost
-   - nepřepisuje celý systém, jen most + pozice
-   Verze: 1.0.0
+   - jen 3 tlačítka vpravo dole
+   - nepřepisuje původní funkce
+   - neskryvá tlačítka po kliknutí
+   - odstraňuje duplicity
+   Verze: 1.1.0
    ========================================================= */
 
 (() => {
   "use strict";
 
-  if (window.__CHT360_RIGHT_DOCK__) return;
-  window.__CHT360_RIGHT_DOCK__ = true;
+  if (window.__CHT360_RIGHT_DOCK_V11__) return;
+  window.__CHT360_RIGHT_DOCK_V11__ = true;
 
-  const STYLE_ID = "cht360-right-dock-style";
+  const STYLE_ID = "cht360-right-dock-style-v11";
 
-  /* -------------------------------------------------------
-     1) CSS — pozice tří tlačítek vpravo dole
-     ------------------------------------------------------- */
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
 
     const css = `
-/* === CHT 360 Right Dock === */
+/* CHT 360 Right Dock v1.1 */
 #openLifePanel,
 .openLifePanel,
+#openReviaPanel,
+.openReviaPanel,
 #openBraskaPanel,
 .openBraskaPanel,
-#openReviaPanel,
-.openReviaPanel {
+button[aria-label*="Bráška"],
+button[aria-label*="Braska"] {
   position: fixed !important;
-  right: 10px !important;
+  right: 12px !important;
   left: auto !important;
-  z-index: 40 !important;
+  z-index: 42 !important;
   margin: 0 !important;
+  transform: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  display: inline-flex !important;
 }
 
-/* Oběh (nejvýš) */
+/* Oběh — nejvýš */
 #openLifePanel,
 .openLifePanel {
-  bottom: calc(118px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-/* Bráška (uprostřed) */
+/* Bráška — uprostřed */
 #openBraskaPanel,
-.openBraskaPanel {
-  bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+.openBraskaPanel,
+button[aria-label*="Bráška"],
+button[aria-label*="Braska"] {
+  bottom: calc(66px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-/* Revia (nejníž) */
+/* Revia — nejníž */
 #openReviaPanel,
 .openReviaPanel {
   bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-/* když je landscape a málo výšky */
-@media (orientation: landscape) and (max-height: 430px) {
-  #openLifePanel,
-  .openLifePanel {
-    bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-  #openBraskaPanel,
-  .openBraskaPanel {
-    bottom: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-  #openReviaPanel,
-  .openReviaPanel {
-    bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
-  }
+/* Skrýt jasné duplicity, které vznikly dřív */
+body > button.openBraskaPanel:nth-of-type(n+2),
+body > #openBraskaPanel:nth-of-type(n+2) {
+  display: none !important;
 }
 `;
     const style = document.createElement("style");
@@ -78,207 +74,65 @@
     document.head.appendChild(style);
   }
 
-  /* -------------------------------------------------------
-     2) Pomocné funkce
-     ------------------------------------------------------- */
-  const $ = (sel) => document.querySelector(sel);
-
-  function ensureButton({ id, className, html, title }) {
-    let btn = document.getElementById(id) || document.querySelector("." + className);
-    if (btn) return btn;
-
-    btn = document.createElement("button");
-    btn.id = id;
-    btn.className = className;
-    btn.type = "button";
-    btn.title = title || "";
-    btn.innerHTML = html;
-    document.body.appendChild(btn);
-    return btn;
-  }
-
-  function openPanel(el) {
-    if (!el) return;
-    el.classList.add("open", "is-open");
-    el.setAttribute("aria-hidden", "false");
-    el.style.display = el.style.display === "none" ? "" : el.style.display;
-  }
-
-  function closePanel(el) {
-    if (!el) return;
-    el.classList.remove("open", "is-open");
-    el.setAttribute("aria-hidden", "true");
-  }
-
-  function togglePanel(el) {
-    if (!el) return;
-    const isOpen = el.classList.contains("open") || el.classList.contains("is-open") || el.getAttribute("aria-hidden") === "false";
-    if (isOpen) closePanel(el);
-    else openPanel(el);
-  }
-
-  /* -------------------------------------------------------
-     3) Najít / vytvořit tři tlačítka
-     ------------------------------------------------------- */
-  function setupButtons() {
-    // Oběh (Chybožrout) — už existuje
-    const btnOběh = ensureButton({
-      id: "openLifePanel",
-      className: "openLifePanel",
-      title: "Oběh · Chybožrout",
-      html: `[◉_◉]<span>Oběh</span>`
+  function hideDuplicates() {
+    // Nech jen jedno tlačítko Bráška vpravo
+    const braskaCandidates = Array.from(document.querySelectorAll(
+      '#openBraskaPanel, .openBraskaPanel, button[aria-label*="Bráška"], button[aria-label*="Braska"]'
+    )).filter(el => {
+      const r = el.getBoundingClientRect();
+      return r.right > window.innerWidth * 0.6; // jen pravá strana
     });
 
-    // Bráška — pokud neexistuje, vytvoříme kompatibilní tlačítko
-    const btnBraska = ensureButton({
-      id: "openBraskaPanel",
-      className: "openBraskaPanel",
-      title: "Bráška",
-      html: `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ffe2ad;margin-right:6px;box-shadow:0 0 10px rgba(255,226,173,.8)"></span>Bráška`
+    braskaCandidates.forEach((el, i) => {
+      if (i > 0) {
+        el.style.display = "none";
+        el.setAttribute("data-dock-hidden", "1");
+      }
     });
+  }
 
-    // Revia — už existuje
-    const btnRevia = ensureButton({
-      id: "openReviaPanel",
-      className: "openReviaPanel",
-      title: "Revia",
-      html: `<span class="reviaOrb" aria-hidden="true">R</span><span>Revia</span>`
-    });
-
-    // Základní vzhled Brášky, ať sedí k ostatním
-    if (btnBraska && !btnBraska.dataset.styled) {
-      Object.assign(btnBraska.style, {
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "6px",
-        minWidth: "74px",
-        minHeight: "48px",
-        padding: "7px 11px",
-        border: "1px solid rgba(255,220,160,.4)",
-        borderRadius: "18px",
-        background: "rgba(5,5,8,.94)",
-        color: "#ffe2ad",
-        boxShadow: "0 12px 32px rgba(0,0,0,.58)",
-        backdropFilter: "blur(14px)",
-        WebkitBackdropFilter: "blur(14px)",
-        fontSize: "12px",
-        fontWeight: "800",
-        cursor: "pointer",
-        WebkitTapHighlightColor: "transparent"
-      });
-      btnBraska.dataset.styled = "1";
+  function ensureVisible(selList) {
+    for (const sel of selList) {
+      const el = document.querySelector(sel);
+      if (el) {
+        el.style.display = "";
+        el.style.opacity = "1";
+        el.style.visibility = "visible";
+        el.style.pointerEvents = "auto";
+        el.removeAttribute("aria-hidden");
+        return el;
+      }
     }
-
-    return { btnOběh, btnBraska, btnRevia };
+    return null;
   }
 
-  /* -------------------------------------------------------
-     4) Vylepšené napojení funkcí
-     ------------------------------------------------------- */
-  function wireFunctions({ btnOběh, btnBraska, btnRevia }) {
-    // --- Oběh / Chybožrout ---
-    const repairPanel = $("#repairPanel");
-    const lifePanel = $(".lifePanel");
-
-    btnOběh.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      // Preferuj repairPanel (Chybožrout), jinak lifePanel
-      if (repairPanel) {
-        togglePanel(repairPanel);
-        // zavři ostatní, ať se nepřekrývají
-        if (lifePanel) closePanel(lifePanel);
-        const revia = $("#reviaPanel");
-        if (revia) closePanel(revia);
-        return;
-      }
-
-      if (lifePanel) {
-        togglePanel(lifePanel);
-        return;
-      }
-
-      // Fallback — vyvolej existující event, pokud něco poslouchá
-      window.dispatchEvent(new CustomEvent("cht360:open-oběh"));
-    });
-
-    // --- Revia ---
-    const reviaPanel = $("#reviaPanel");
-
-    btnRevia.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (reviaPanel) {
-        togglePanel(reviaPanel);
-        if (repairPanel) closePanel(repairPanel);
-        if (lifePanel) closePanel(lifePanel);
-        return;
-      }
-
-      // Kompatibilita se starším kódem
-      window.dispatchEvent(new CustomEvent("cht360:open-revia"));
-      if (typeof window.openRevia === "function") {
-        try { window.openRevia(); } catch (_) {}
-      }
-    });
-
-    // Zavírací tlačítka, pokud existují
-    const closeRevia = $("#closeReviaPanel");
-    if (closeRevia) {
-      closeRevia.addEventListener("click", () => closePanel(reviaPanel));
-    }
-    const closeRepair = $("#closeRepairPanel");
-    if (closeRepair) {
-      closeRepair.addEventListener("click", () => closePanel(repairPanel));
-    }
-
-    // --- Bráška ---
-    btnBraska.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      // 1) Pokud existuje VivereFruit / Braska360 respond
-      if (window.VivereFruit && typeof window.VivereFruit.respond === "function") {
-        // otevři / zaměř chat, pokud je panel
-        const braskaPanel = $("#braskaPanel") || $(".braska-panel") || $("#vivere-friend-root");
-        if (braskaPanel) {
-          togglePanel(braskaPanel);
-        }
-
-        // jemný signál do systému
-        window.dispatchEvent(new CustomEvent("cht360:braska-activate", {
-          detail: { source: "right-dock" }
-        }));
-
-        // volitelně krátká odpověď do konzole / statusu
-        try {
-          window.VivereFruit.respond("Jsem tady.");
-        } catch (_) {}
-        return;
-      }
-
-      // 2) Klasická Braska360
-      if (window.Braska360 && typeof window.Braska360.respond === "function") {
-        window.dispatchEvent(new CustomEvent("cht360:braska-activate"));
-        try { window.Braska360.respond("Jsem tady."); } catch (_) {}
-        return;
-      }
-
-      // 3) Fallback
-      window.dispatchEvent(new CustomEvent("cht360:open-braska"));
-    });
-  }
-
-  /* -------------------------------------------------------
-     5) Start
-     ------------------------------------------------------- */
   function start() {
     injectStyles();
-    const buttons = setupButtons();
-    wireFunctions(buttons);
-    console.log("🌱 CHT 360 Right Dock ready — Oběh · Bráška · Revia");
+
+    // Jen zajisti, že existující tlačítka jsou vidět — nevytvářej nová
+    ensureVisible(["#openLifePanel", ".openLifePanel"]);
+    ensureVisible(["#openReviaPanel", ".openReviaPanel"]);
+    ensureVisible([
+      "#openBraskaPanel",
+      ".openBraskaPanel",
+      'button[aria-label*="Bráška"]',
+      'button[aria-label*="Braska"]'
+    ]);
+
+    hideDuplicates();
+
+    // Po krátké chvíli znovu (když se DOM ještě mění)
+    setTimeout(() => {
+      injectStyles();
+      hideDuplicates();
+    }, 600);
+
+    setTimeout(() => {
+      injectStyles();
+      hideDuplicates();
+    }, 1800);
+
+    console.log("🌱 CHT 360 Right Dock v1.1 — 3 tlačítka, bez rozbití funkcí");
   }
 
   if (document.readyState === "loading") {
@@ -287,9 +141,5 @@
     start();
   }
 
-  // pro jistotu ještě po načtení všech skriptů
-  window.addEventListener("load", () => {
-    injectStyles();
-    setupButtons();
-  });
+  window.addEventListener("load", start);
 })();
