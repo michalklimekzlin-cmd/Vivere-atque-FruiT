@@ -1,252 +1,269 @@
 /**
  * CHT 360°‰. — živé glyphové pozadí ze slotů Paměti
- *
- * Čte obsah z localStorage klíče "cht360_pamet_v1".
- * Pokud je Paměť prázdná, zobrazí náhradní glyphy.
- * Vytváří jemnou, pomalu se otáčející mřížku přes celou obrazovku.
- *
- * Použití v docs/index.html:
- * <script src="./js/cht-360-glyph-grid-bg.js" defer></script>
+ * Soubor: docs/js/cht-360-glyph-grid-bg.js
+ * Zachované veřejné funkce: refresh(), rebuild()
  */
 (function (window, document) {
   "use strict";
 
+  if (window.CHT360GlyphGridBackground?.__ready) {
+    window.CHT360GlyphGridBackground.refresh();
+    return;
+  }
+
   const MEMORY_KEY = "cht360_pamet_v1";
   const GRID_MM = 3.5;
   const ROTATION_DURATION = 48;
-  const MAX_GLYPHS = 280;
-
-  const FALLBACK_GLYPHS = [
-    "˚&", "'i'", "7¡", "`९נֶ", "•ア", "7i_",
-    "°&", "j’", "i’", "¿", ",!,", ",_."
-  ];
-
-  const CORES = ["earth", "language", "game", "control"];
-  const STYLE_ID = "cht360-glyph-grid-style";
-  const LAYER_ID = "cht360-glyph-grid-layer";
+  const MAX_GLYPHS = 700;
+  const CORES = ["earth", "game", "language", "control"];
+  const FALLBACK_GLYPHS = ["˚&", "'i'", "7¡", "`९נֶ", "•ア", "7i_", "°&", "j’", "i’", "¿", ",!,", ",_."];
 
   let layer = null;
-  let resizeFrame = 0;
-  let refreshFrame = 0;
+  let resizeTimer = 0;
+  let lastSignature = "";
 
   function mmToPx(mm) {
-    return mm * 3.779527559;
+    // Přibližný převod; skutečné fyzické mm se na telefonech liší.
+    return mm * 96 / 25.4;
   }
 
-  /* ---------- čtení Paměti ---------- */
   function readMemory() {
     try {
       const raw = window.localStorage.getItem(MEMORY_KEY);
       if (!raw) return null;
-
       const data = JSON.parse(raw);
       return data && typeof data === "object" ? data : null;
     } catch (error) {
-      console.warn("[CHT 360°‰.] Paměť se nepodařilo přečíst.", error);
+      console.warn("[CHT 360°‰.] Paměť nelze přečíst:", error);
       return null;
     }
+  }
+
+  function extractText(slot) {
+    if (slot == null) return "";
+    if (typeof slot === "string" || typeof slot === "number") return String(slot).trim();
+    if (typeof slot !== "object") return "";
+    for (const key of ["glyph", "text", "content", "value", "note", "name", "label"]) {
+      if (slot[key] != null && String(slot[key]).trim()) return String(slot[key]).trim();
+    }
+    return "";
   }
 
   function collectSlotContents(memory) {
     const items = [];
     if (!memory) return items;
+    const roots = memory.cores || memory.jadra || memory;
+    const aliases = {
+      earth: ["earth", "zeme", "země", "slot1", "slot_1"],
+      game: ["game", "hra", "slot2", "slot_2"],
+      language: ["language", "jazyk", "mluva", "slot3", "slot_3"],
+      control: ["control", "ovladani", "ovládání", "system"]
+    };
 
-    const cores = memory.cores || memory;
+    for (const coreId of CORES) {
+      let core = null;
+      for (const alias of aliases[coreId]) {
+        if (roots && roots[alias] != null) { core = roots[alias]; break; }
+      }
+      if (core == null) continue;
 
-    CORES.forEach((coreId) => {
-      const core = cores[coreId];
-      if (!core) return;
+      let slots = Array.isArray(core) ? core :
+        (Array.isArray(core.slots) ? core.slots :
+        (Array.isArray(core.items) ? core.items :
+        (Array.isArray(core.sloty) ? core.sloty : null)));
 
-      const slots = Array.isArray(core.slots) ? core.slots
-        : Array.isArray(core.items) ? core.items
-        : Array.isArray(core) ? core
-        : [];
+      if (!slots && typeof core === "object") {
+        slots = [];
+        for (let i = 1; i <= 70; i++) slots.push(core["slot" + i] ?? core["slot_" + i] ?? null);
+      }
+      if (!slots) continue;
 
       slots.forEach((slot, index) => {
-        if (slot == null || slot === "") return;
-
-        let text = "";
-
-        if (typeof slot === "string") {
-          text = slot.trim();
-        } else if (typeof slot === "object") {
-          text = String(
-            slot.glyph || slot.text || slot.note ||
-            slot.value || slot.content || ""
-          ).trim();
-        }
-
-        if (text) {
-          items.push({
-            coreId,
-            slotId: index + 1,
-            text: text.slice(0, 24)
-          });
-        }
+        const text = extractText(slot);
+        if (text) items.push({
+          coreId,
+          slotId: Number(slot && slot.id) || index + 1,
+          text: text.slice(0, 48)
+        });
       });
-    });
+    }
 
+    if (!items.length) {
+      const flat = memory.slots || memory.sloty || memory.items;
+      if (Array.isArray(flat)) flat.forEach((slot, index) => {
+        const text = extractText(slot);
+        if (text) items.push({
+          coreId: String(slot && (slot.coreId || slot.core || slot.jadro) || "memory"),
+          slotId: Number(slot && slot.id) || index + 1,
+          text: text.slice(0, 48)
+        });
+      });
+    }
     return items.slice(0, MAX_GLYPHS);
   }
 
-  /* ---------- CSS pozadí ---------- */
   function ensureStyle() {
-    if (document.getElementById(STYLE_ID)) return;
-
+    if (document.getElementById("cht360-glyph-grid-style")) return;
     const style = document.createElement("style");
-    style.id = STYLE_ID;
+    style.id = "cht360-glyph-grid-style";
     style.textContent = `
-      #${LAYER_ID} {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        pointer-events: none;
-        overflow: hidden;
-        background: transparent;
-        contain: strict;
-        user-select: none;
-        -webkit-user-select: none;
+      #cht360-glyph-grid-layer {
+        position: fixed; inset: 0; z-index: 1; pointer-events: none;
+        overflow: hidden; contain: layout paint style; background: transparent;
+        opacity: .76;
       }
-
-      #${LAYER_ID} .cht360-glyph-cell {
-        position: absolute;
-        width: ${mmToPx(GRID_MM)}px;
-        height: ${mmToPx(GRID_MM)}px;
-        display: grid;
-        place-items: center;
-        overflow: visible;
-        color: rgba(196, 220, 177, 0.24);
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        font-size: clamp(9px, 1.8vw, 13px);
-        line-height: 1;
-        white-space: nowrap;
-        text-shadow: 0 0 5px rgba(120, 180, 125, 0.10);
+      #cht360-glyph-grid-layer .cht360-trace {
+        position: absolute; display: block; pointer-events: none;
         transform-origin: center;
+        background: linear-gradient(90deg, transparent, rgba(255,220,155,.10), transparent);
+      }
+      #cht360-glyph-grid-layer .cht360-trace.vertical {
+        width: 1px; height: 140%; top: -20%;
+        background: linear-gradient(180deg, transparent, rgba(255,220,155,.12), transparent);
+      }
+      #cht360-glyph-grid-layer .cht360-trace.horizontal {
+        height: 1px; width: 140%; left: -20%;
+      }
+      #cht360-glyph-grid-layer .cht360-glyph-cell {
+        position: absolute; display: grid; place-items: center;
+        width: ${mmToPx(GRID_MM)}px; height: ${mmToPx(GRID_MM)}px;
+        overflow: visible; color: rgba(255,226,173,.56);
+        font: 600 clamp(7px, 1.5vw, 11px)/1 system-ui, sans-serif;
+        text-shadow: 0 0 5px rgba(255,198,95,.24);
+        white-space: nowrap; transform-origin: center;
         animation: cht360GlyphDrift ${ROTATION_DURATION}s linear infinite;
-        will-change: transform;
       }
-
-      @keyframes cht360GlyphDrift {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(-360deg); }
+      #cht360-glyph-grid-layer .cht360-glyph-cell[data-core="earth"] { color: rgba(175,224,169,.72); }
+      #cht360-glyph-grid-layer .cht360-glyph-cell[data-core="game"] { color: rgba(255,206,125,.74); }
+      #cht360-glyph-grid-layer .cht360-glyph-cell[data-core="language"] { color: rgba(192,211,255,.72); }
+      #cht360-glyph-grid-layer .cht360-glyph-cell[data-user-content="true"] {
+        font-weight: 800; text-shadow: 0 0 7px rgba(255,220,150,.52);
       }
-
+      @keyframes cht360GlyphDrift { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
       @media (prefers-reduced-motion: reduce) {
-        #${LAYER_ID} .cht360-glyph-cell {
-          animation: none;
-        }
+        #cht360-glyph-grid-layer .cht360-glyph-cell { animation: none; }
       }
     `;
-
     (document.head || document.documentElement).appendChild(style);
   }
 
   function ensureLayer() {
-    layer = document.getElementById(LAYER_ID);
-    if (layer) return;
-
-    layer = document.createElement("div");
-    layer.id = LAYER_ID;
-    layer.setAttribute("aria-hidden", "true");
-
-    // Vložit na začátek body, aby se vrstva chovala jako pozadí.
-    const parent = document.body || document.documentElement;
-    parent.insertBefore(layer, parent.firstChild);
+    layer = document.getElementById("cht360-glyph-grid-layer");
+    if (!layer) {
+      layer = document.createElement("div");
+      layer.id = "cht360-glyph-grid-layer";
+      layer.setAttribute("aria-hidden", "true");
+      (document.body || document.documentElement).appendChild(layer);
+    }
+    const stage = document.querySelector(".stage");
+    if (stage && stage.parentNode && layer.parentNode !== stage.parentNode) {
+      stage.parentNode.insertBefore(layer, stage);
+    }
   }
 
-  /* ---------- vykreslení mřížky ---------- */
   function buildGrid() {
     if (!layer) return;
+    const items = collectSlotContents(readMemory());
+    const fallback = items.length === 0;
+    const contents = fallback ? FALLBACK_GLYPHS.map((text, i) => ({
+      coreId: CORES[i % CORES.length], slotId: i + 1, text
+    })) : items;
 
-    const memory = readMemory();
-    let contents = collectSlotContents(memory);
-
-    if (contents.length === 0) {
-      contents = FALLBACK_GLYPHS.map((glyph, index) => ({
-        coreId: CORES[index % CORES.length],
-        slotId: index + 1,
-        text: glyph
-      }));
-    }
-
+    const width = Math.max(window.innerWidth || 320, 320);
+    const height = Math.max(window.innerHeight || 568, 568);
     const gap = mmToPx(GRID_MM);
-    const width = Math.max(window.innerWidth, 1);
-    const height = Math.max(window.innerHeight, 1);
-    const cols = Math.ceil(width / gap) + 2;
-    const rows = Math.ceil(height / gap) + 2;
+    const signature = JSON.stringify(contents) + "|" + width + "x" + height;
+    if (signature === lastSignature && layer.childElementCount) return;
+    lastSignature = signature;
+    layer.replaceChildren();
 
-    // Omezíme počet prvků na mobilu, aby animace zbytečně nezatěžovala Safari.
-    const total = Math.min(cols * rows, MAX_GLYPHS);
-    const fragment = document.createDocumentFragment();
-
-    for (let index = 0; index < total; index++) {
-      const row = Math.floor(index / cols);
-      const col = index % cols;
-      const item = contents[index % contents.length];
-
-      const cell = document.createElement("span");
-      cell.className = "cht360-glyph-cell";
-      cell.textContent = item.text;
-      cell.title = `${item.coreId} · slot ${item.slotId}`;
-      cell.style.left = `${col * gap - gap}px`;
-      cell.style.top = `${row * gap - gap}px`;
-      cell.style.animationDelay =
-        `${-(index % 17) * (ROTATION_DURATION / 17)}s`;
-
-      fragment.appendChild(cell);
+    // Jemná doplňková síť. Lehké úhly připomínají trajektorie původního rozhraní.
+    const traces = document.createDocumentFragment();
+    const traceGap = gap * 4;
+    for (let x = traceGap; x < width; x += traceGap) {
+      const line = document.createElement("i");
+      line.className = "cht360-trace vertical";
+      line.style.left = x + "px";
+      line.style.transform = "rotate(" + (Math.sin(x / 145) * 1.8) + "deg)";
+      traces.appendChild(line);
     }
+    for (let y = traceGap; y < height; y += traceGap) {
+      const line = document.createElement("i");
+      line.className = "cht360-trace horizontal";
+      line.style.top = y + "px";
+      line.style.transform = "rotate(" + (Math.sin(y / 125) * .8) + "deg)";
+      traces.appendChild(line);
+    }
+    layer.appendChild(traces);
 
-    layer.replaceChildren(fragment);
+    // Rozumný limit prvků pro iPhone; pozice zůstávají v pravidelné síti.
+    const rawCols = Math.ceil(width / gap) + 1;
+    const rawRows = Math.ceil(height / gap) + 1;
+    const stride = Math.max(1, Math.ceil(Math.sqrt((rawCols * rawRows) / MAX_GLYPHS)));
+    const cellGap = gap * stride;
+    const cols = Math.ceil(width / cellGap) + 1;
+    const rows = Math.ceil(height / cellGap) + 1;
+    const fragment = document.createDocumentFragment();
+    let index = 0;
+
+    for (let row = 0; row < rows && index < MAX_GLYPHS; row++) {
+      for (let col = 0; col < cols && index < MAX_GLYPHS; col++) {
+        const item = contents[index % contents.length];
+        const el = document.createElement("span");
+        el.className = "cht360-glyph-cell";
+        el.textContent = item.text;
+        el.title = item.coreId + " · Slot " + item.slotId;
+        el.dataset.core = String(item.coreId || "memory").toLowerCase();
+        el.dataset.userContent = fallback ? "false" : "true";
+        el.style.left = (col * cellGap) + "px";
+        el.style.top = (row * cellGap) + "px";
+        el.style.animationDelay = (-(index % 17) * (ROTATION_DURATION / 17)) + "s";
+        fragment.appendChild(el);
+        index++;
+      }
+    }
+    layer.appendChild(fragment);
   }
 
-  function scheduleBuild() {
-    if (refreshFrame) window.cancelAnimationFrame(refreshFrame);
-    refreshFrame = window.requestAnimationFrame(() => {
-      refreshFrame = 0;
-      buildGrid();
-    });
-  }
-
-  function scheduleResize() {
-    if (resizeFrame) window.cancelAnimationFrame(resizeFrame);
-    resizeFrame = window.requestAnimationFrame(() => {
-      resizeFrame = 0;
-      scheduleBuild();
-    });
-  }
-
-  function init() {
+  function refresh() {
     ensureStyle();
     ensureLayer();
     buildGrid();
-
-    window.addEventListener("resize", scheduleResize, { passive: true });
-    window.addEventListener("orientationchange", scheduleResize, { passive: true });
-    window.addEventListener("storage", (event) => {
-      if (!event.key || event.key === MEMORY_KEY) scheduleBuild();
-    });
-
-    // Vlastní události používané částmi CHT/Paměti.
-    [
-      "cht.memory.changed",
-      "cht.slot.saved",
-      "cht360:memory-changed",
-      "cht360:slot-saved"
-    ].forEach((eventName) => {
-      window.addEventListener(eventName, scheduleBuild);
-      document.addEventListener(eventName, scheduleBuild);
-    });
-
-    // Veřejná funkce pro ruční obnovení po uložení slotu.
-    window.CHT360GlyphGridBackground = Object.freeze({
-      refresh: scheduleBuild,
-      rebuild: buildGrid
-    });
   }
 
+  function rebuild() {
+    lastSignature = "";
+    refresh();
+  }
+
+  window.CHT360GlyphGridBackground = {
+    __ready: true,
+    refresh,
+    rebuild,
+    gridMillimeters: GRID_MM
+  };
+
+  function scheduleRebuild() {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(rebuild, 120);
+  }
+  function onMemoryEvent() { lastSignature = ""; refresh(); }
+
+  window.addEventListener("resize", scheduleRebuild, { passive: true });
+  window.addEventListener("orientationchange", scheduleRebuild, { passive: true });
+  window.addEventListener("storage", function (event) {
+    if (!event || !event.key || event.key === MEMORY_KEY) onMemoryEvent();
+  });
+
+  [
+    "cht.memory.changed", "cht.slot.saved",
+    "cht360:memory-changed", "cht360:slot-saved",
+    "cht360:braska-live-ready"
+  ].forEach(name => document.addEventListener(name, onMemoryEvent));
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init, { once: true });
+    document.addEventListener("DOMContentLoaded", refresh, { once: true });
   } else {
-    init();
+    refresh();
   }
 })(window, document);
