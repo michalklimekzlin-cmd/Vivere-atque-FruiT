@@ -1,73 +1,134 @@
 // MICHAL-AI-AL-KLIMEK / app.js
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", () => {
   const STORAGE_KEY = "michal-ai-al-klimek-glyphs";
 
-  // horní přepínací glyphy
   const GOOD_GLYPH = "'Īง";
   const BAD_GLYPH = "(ؔ•۵•ؔ)ؤ";
+  const DEFAULT_TEXT = {
+    "left-1": GOOD_GLYPH,
+    "left-2": "Vivere",
+    "left-3": "FruiT",
+    "left-4": "AI",
+    "br-1": "I ❤️"
+  };
 
-  // načti uložené glyphy
-  let savedGlyphs = {};
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      savedGlyphs = JSON.parse(raw);
-    }
-  } catch (e) {
-    console.warn("Nemůžu načíst uložené glyphy:", e);
+  const backgroundEl = document.getElementById("glyphBackground");
+  const transformBtn = document.getElementById("transformBtn");
+  const slots = Array.from(document.querySelectorAll(".glyph-slot"));
+
+  function normalizeValue(value, fallback = "") {
+    const safe = String(value ?? "").replace(/\s+/g, " ").trim();
+    return safe || fallback;
   }
 
-  const slots = document.querySelectorAll(".glyph-slot");
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { ...DEFAULT_TEXT };
+      const parsed = JSON.parse(raw);
+      return { ...DEFAULT_TEXT, ...parsed };
+    } catch (error) {
+      console.warn("Nemůžu načíst uložené glyphy:", error);
+      return { ...DEFAULT_TEXT };
+    }
+  }
 
-  slots.forEach(slot => {
+  function saveState(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function renderBackground() {
+    if (!backgroundEl) return;
+
+    const state = loadState();
+    const values = slots
+      .map((slot) => {
+        const slotId = slot.dataset.slot;
+        const value = normalizeValue(
+          slot.querySelector(".glyph-text")?.textContent,
+          state[slotId] || DEFAULT_TEXT[slotId] || ""
+        );
+        return value;
+      })
+      .filter(Boolean);
+
+    const glyphPool = values.length ? values : Object.values(DEFAULT_TEXT).filter(Boolean);
+    const total = 24;
+    backgroundEl.innerHTML = "";
+
+    for (let i = 0; i < total; i += 1) {
+      const glyph = document.createElement("span");
+      const value = glyphPool[i % glyphPool.length];
+      glyph.className = "glyph-bg-item";
+      glyph.textContent = value;
+      glyph.style.left = `${(i % 6) * 20 + ((i * 7) % 11)}%`;
+      glyph.style.top = `${(Math.floor(i / 6) * 20 + ((i * 13) % 17))}%`;
+      glyph.style.opacity = String(0.16 + ((i % 5) * 0.08));
+      glyph.style.transform = `rotate(${(i % 8) * 18 - 45}deg) scale(${0.8 + (i % 3) * 0.25})`;
+      backgroundEl.appendChild(glyph);
+    }
+  }
+
+  function syncSlot(slot) {
+    const slotId = slot.dataset.slot;
+    const textEl = slot.querySelector(".glyph-text");
+    if (!textEl) return;
+
+    const state = loadState();
+    const value = normalizeValue(state[slotId], DEFAULT_TEXT[slotId] || "");
+    textEl.textContent = value;
+    renderBackground();
+  }
+
+  slots.forEach((slot) => {
     const slotId = slot.dataset.slot;
     const textEl = slot.querySelector(".glyph-text");
     if (!slotId || !textEl) return;
 
-    // horní přepínací slot
+    const state = loadState();
+    const startValue = normalizeValue(state[slotId], DEFAULT_TEXT[slotId] || "");
+    textEl.textContent = startValue;
+
     if (slotId === "left-1") {
-      const current = savedGlyphs[slotId] || GOOD_GLYPH;
-      textEl.textContent = current;
-
       slot.addEventListener("click", () => {
-        const now = textEl.textContent.trim();
-        const next = now === GOOD_GLYPH ? BAD_GLYPH : GOOD_GLYPH;
+        const next = textEl.textContent.trim() === GOOD_GLYPH ? BAD_GLYPH : GOOD_GLYPH;
         textEl.textContent = next;
-        savedGlyphs[slotId] = next;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedGlyphs));
+        const updated = loadState();
+        updated[slotId] = next;
+        saveState(updated);
+        renderBackground();
       });
-
-      return; // dál už na tenhle slot nic
+      return;
     }
 
-    // ostatní sloty = psací
-    if (savedGlyphs[slotId]) {
-      textEl.textContent = savedGlyphs[slotId];
-    }
+    textEl.addEventListener("input", () => {
+      const nextValue = normalizeValue(textEl.textContent, DEFAULT_TEXT[slotId] || "");
+      const updated = loadState();
+      updated[slotId] = nextValue;
+      saveState(updated);
+      renderBackground();
+    });
 
-    const save = () => {
-      const value = textEl.textContent.trim();
-      savedGlyphs[slotId] = value;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedGlyphs));
-    };
+    textEl.addEventListener("blur", () => {
+      const value = normalizeValue(textEl.textContent, DEFAULT_TEXT[slotId] || "");
+      textEl.textContent = value;
+      const updated = loadState();
+      updated[slotId] = value;
+      saveState(updated);
+      renderBackground();
+    });
 
-    textEl.addEventListener("input", save);
-    textEl.addEventListener("blur", save);
-
-    // klik = focus dovnitř
     slot.addEventListener("click", () => {
       textEl.focus();
       const range = document.createRange();
       range.selectNodeContents(textEl);
       range.collapse(false);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
     });
   });
 
-  // tlačítko – přepíná pozadí
-  const transformBtn = document.getElementById("transformBtn");
   if (transformBtn) {
     transformBtn.addEventListener("click", () => {
       document.body.classList.toggle("alt-bg");
@@ -75,4 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => (transformBtn.style.transform = "scale(1)"), 180);
     });
   }
+
+  renderBackground();
 });
