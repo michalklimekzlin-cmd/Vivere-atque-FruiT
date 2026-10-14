@@ -1,6 +1,4 @@
-from pathlib import Path
-
-html = r'''<!doctype html>
+<!doctype html>
 <html lang="cs">
 <head>
   <meta charset="utf-8">
@@ -622,7 +620,7 @@ html = r'''<!doctype html>
   <script src="./vivere-friend-state.js" defer></script>
   <script src="./vivere-friend-bridge.js" defer></script>
   <script src="./vivere-friend-yahoo.js" defer></script>
-  <script src="./vivere-friend-live.js" defer></script>
+  <script src="./vive-friend-live.js." defer></script>
   <script src="./vivere-friend-ui.js" defer></script>
   <script src="./braska-360.js"></script>
   <script src="./braska-memory-link.js" defer></script>
@@ -864,9 +862,3 @@ html = r'''<!doctype html>
   <script src="./js/cht-ui-components.js"></script>
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/index-braska.txt")
-path.write_text(html, encoding="utf-8")
-print(f"Hotovo: {path}")
-print(f"Velikost: {path.stat().st_size} B")
