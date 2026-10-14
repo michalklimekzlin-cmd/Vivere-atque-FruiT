@@ -1,172 +1,160 @@
 /**
- * CHT 360°‰. — živé glyphové pozadí ze slotů Paměti
- * Zachovává existující scénu a ovládání; vrstva je dekorativní a neblokuje dotyky.
+ * CHT 360°‰ — jemné glyphové pozadí Regálu
+ * Přidává průhlednou mřížku a jemné glyphy. Neodstraňuje ani nemění existující UI.
+ * Vložit jako docs/js/cht-360-glyph-grid-bg.js a načíst ze stránky index.html.
  */
 (function (window, document) {
   "use strict";
   if (window.__CHT360_GLYPH_GRID_BG__) return;
   window.__CHT360_GLYPH_GRID_BG__ = true;
 
-  const MEMORY_KEYS = ["cht360_pamet_v1", "cht360_vivere_fruit_core_v1_slots", "vivere_ai_memory"];
-  const GRID_MM = 3.5;
-  const ROTATION_DURATION = 48;
-  const MAX_GLYPHS = 280;
-  const FALLBACK = ["˚&", "'i'", "7¡", "`९נֶ", "•ア", "7i_", "°&", "j’", "i’", "¿", ",!,", ",_."];
+  const STYLE_ID = "cht360-glyph-grid-bg-style";
+  const LAYER_ID = "cht360-glyph-grid-bg-layer";
+  const STORAGE_KEYS = [
+    "cht360_pamet_v1",
+    "cht360_vivere_fruit_core_v1_slots",
+    "vivere_ai_memory"
+  ];
+  const FALLBACK = ["˚", "•ア", "7i_", "i’", "°&", "९נֶ", "CHT", "‰", "∴", "⟡", "◌", "T"];
+  const MAX_GLYPHS = 220;
+  let layer;
+  let rebuildFrame = 0;
 
-  function readStored(key) {
-    try {
-      const value = localStorage.getItem(key);
-      return value ? JSON.parse(value) : null;
-    } catch (_) {
-      return null;
-    }
+  function safeRead(key) {
+    try { return JSON.parse(window.localStorage.getItem(key) || "null"); }
+    catch (_) { return null; }
   }
 
-  function collect(value, output, coreName) {
-    if (!value || output.length >= MAX_GLYPHS) return;
+  function extract(value, out, slotName) {
+    if (out.length >= MAX_GLYPHS || value == null) return;
     if (typeof value === "string" || typeof value === "number") {
       const text = String(value).trim();
-      if (text) output.push({ coreId: coreName || "memory", slotId: output.length + 1, text: text.slice(0, 24) });
+      if (text) out.push({ text: text.slice(0, 18), slot: slotName || "Regál" });
       return;
     }
     if (Array.isArray(value)) {
-      value.forEach((item, index) => {
-        if (output.length < MAX_GLYPHS) collect(item, output, coreName || ("slot-" + (index + 1)));
-      });
+      value.forEach((v, i) => extract(v, out, slotName || ("Slot " + (i + 1))));
       return;
     }
     if (typeof value === "object") {
-      const direct = value.glyph ?? value.text ?? value.note ?? value.value ?? value.content;
-      if (direct != null && String(direct).trim()) {
-        output.push({
-          coreId: coreName || value.coreId || value.id || "memory",
-          slotId: value.slotId || value.id || output.length + 1,
-          text: String(direct).trim().slice(0, 24)
-        });
+      const text = value.glyph ?? value.text ?? value.note ?? value.value ?? value.content ?? value.label;
+      if (text != null && String(text).trim()) {
+        out.push({ text: String(text).trim().slice(0, 18), slot: String(value.slot || value.slotId || value.coreId || slotName || "Regál") });
         return;
       }
-      const nested = value.cores || value.slots || value.items || value.notes || value;
-      Object.keys(nested).forEach(key => {
-        if (output.length < MAX_GLYPHS && !["createdAt", "updatedAt", "version", "deviceId"].includes(key)) {
-          collect(nested[key], output, key);
-        }
+      ["slots", "items", "notes", "cores", "memory", "data"].forEach(k => {
+        if (value[k] != null && out.length < MAX_GLYPHS) extract(value[k], out, k);
       });
     }
   }
 
-  function getContents() {
-    const output = [];
-    MEMORY_KEYS.forEach(key => collect(readStored(key), output, key));
+  function getGlyphs() {
+    const found = [];
+    STORAGE_KEYS.forEach(key => extract(safeRead(key), found, key));
     try {
-      const state = window.VivereFruit && window.VivereFruit.getState && window.VivereFruit.getState();
-      if (state && state.slots) collect(state.slots, output, "slot");
+      const state = window.VivereFruit && typeof window.VivereFruit.getState === "function" && window.VivereFruit.getState();
+      if (state && state.slots) extract(state.slots, found, "Slot");
     } catch (_) {}
     const unique = [];
     const seen = new Set();
-    output.forEach(item => {
-      const key = item.coreId + "|" + item.slotId + "|" + item.text;
-      if (!seen.has(key) && unique.length < MAX_GLYPHS) {
-        seen.add(key);
-        unique.push(item);
-      }
+    found.forEach(item => {
+      const key = item.slot + "|" + item.text;
+      if (!seen.has(key) && unique.length < MAX_GLYPHS) { seen.add(key); unique.push(item); }
     });
-    return unique.length ? unique : FALLBACK.map((text, i) => ({ coreId: "CHT", slotId: i + 1, text }));
+    return unique.length ? unique : FALLBACK.map((text, i) => ({ text, slot: "CHT " + (i + 1) }));
   }
 
-  function mmToPx(mm) { return mm * 96 / 25.4; }
-
-  function ensureStyle() {
-    if (document.getElementById("cht360-glyph-grid-style")) return;
+  function installStyle() {
+    if (document.getElementById(STYLE_ID)) return;
     const style = document.createElement("style");
-    style.id = "cht360-glyph-grid-style";
+    style.id = STYLE_ID;
     style.textContent = `
-      #cht360-glyph-grid-layer {
-        position: absolute; inset: 0; z-index: 1; pointer-events: none;
-        overflow: hidden; background: transparent; contain: layout paint;
+      #${LAYER_ID} {
+        position: absolute; inset: 0; z-index: 0; pointer-events: none;
+        overflow: hidden; opacity: .88; contain: layout paint;
+        background-image:
+          linear-gradient(to right, rgba(229,190,112,.12) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(229,190,112,.12) 1px, transparent 1px),
+          radial-gradient(ellipse at center, rgba(99,66,22,.12), transparent 72%);
+        background-size: 3.5mm 3.5mm, 3.5mm 3.5mm, 100% 100%;
+        background-position: 0 0, 0 0, center;
       }
-      .cht360-glyph-cell {
-        position: absolute; width: ${mmToPx(GRID_MM)}px; height: ${mmToPx(GRID_MM)}px;
-        display: grid; place-items: center; overflow: visible;
-        color: rgba(244, 204, 125, .38);
-        font: 500 clamp(8px, 1.8vw, 12px)/1 ui-monospace, monospace;
-        text-shadow: 0 0 5px rgba(220, 169, 75, .25);
-        transform-origin: center; animation: cht360-glyph-turn ${ROTATION_DURATION}s linear infinite;
-        white-space: nowrap;
+      #${LAYER_ID} .cht360-glyph {
+        position: absolute; display: block; white-space: nowrap;
+        color: rgba(246,211,146,.37); font: 500 10px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+        text-shadow: 0 0 5px rgba(220,168,78,.23);
+        transform-origin: center; animation: cht360GlyphDrift 46s linear infinite;
       }
-      @keyframes cht360-glyph-turn { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
-      @media (prefers-reduced-motion: reduce) { .cht360-glyph-cell { animation: none; } }
+      @keyframes cht360GlyphDrift {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @media (prefers-reduced-motion: reduce) { #${LAYER_ID} .cht360-glyph { animation: none; } }
     `;
     document.head.appendChild(style);
   }
 
-  let layer = null;
-  let resizeFrame = 0;
-
-  function buildGrid() {
+  function build() {
     if (!layer || !layer.isConnected) return;
-    const contents = getContents();
-    const gap = mmToPx(GRID_MM);
-    const width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-    const height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
-    const cols = Math.ceil(width / gap) + 2;
-    const rows = Math.ceil(height / gap) + 2;
+    const glyphs = getGlyphs();
+    const w = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    const h = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+    // Glyphy rozmístíme řidčeji než samotnou mřížku, aby stránka zůstala plynulá na iPhonu.
+    const stepX = 42;
+    const stepY = 34;
+    const cols = Math.ceil(w / stepX) + 1;
+    const rows = Math.ceil(h / stepY) + 1;
     const fragment = document.createDocumentFragment();
-    let idx = 0;
-
+    let index = 0;
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const item = contents[idx % contents.length];
-        const el = document.createElement("span");
-        el.className = "cht360-glyph-cell";
-        el.textContent = item.text;
-        el.title = String(item.coreId) + " · slot " + item.slotId;
-        el.style.left = (c * gap - gap) + "px";
-        el.style.top = (r * gap - gap) + "px";
-        el.style.animationDelay = (-(idx % 17) * (ROTATION_DURATION / 17)) + "s";
-        fragment.appendChild(el);
-        idx++;
+        // Vzdušnější rozložení: každý druhý průsečík zůstane jen součástí mřížky.
+        if ((r + c) % 2 !== 0) continue;
+        const item = glyphs[index % glyphs.length];
+        const node = document.createElement("span");
+        node.className = "cht360-glyph";
+        node.textContent = item.text;
+        node.title = item.slot;
+        node.style.left = (c * stepX + ((r % 3) * 7)) + "px";
+        node.style.top = (r * stepY) + "px";
+        node.style.animationDelay = (-((index % 23) * 2)) + "s";
+        fragment.appendChild(node);
+        index++;
       }
     }
     layer.replaceChildren(fragment);
   }
 
   function mount() {
-    ensureStyle();
+    installStyle();
     const host = document.querySelector(".stage") || document.querySelector(".root") || document.body;
     if (!host) return;
-
     if (!layer) {
       layer = document.createElement("div");
-      layer.id = "cht360-glyph-grid-layer";
+      layer.id = LAYER_ID;
       layer.setAttribute("aria-hidden", "true");
     }
     if (layer.parentElement !== host) host.prepend(layer);
-    if (host !== document.body && getComputedStyle(host).position === "static") {
-      host.style.position = "relative";
-    }
-    buildGrid();
+    const position = window.getComputedStyle(host).position;
+    if (position === "static") host.style.position = "relative";
+    // Zajisti, že obsah scény zůstane nad dekorativním pozadím.
+    Array.from(host.children).forEach(child => {
+      if (child !== layer && window.getComputedStyle(child).position === "static") {
+        child.style.position = "relative";
+      }
+    });
+    build();
   }
 
   function refresh() { mount(); }
-  function rebuild() { mount(); }
-  window.CHT360GlyphGrid = Object.freeze({ refresh, rebuild });
-
-  window.addEventListener("resize", () => {
-    cancelAnimationFrame(resizeFrame);
-    resizeFrame = requestAnimationFrame(buildGrid);
-  }, { passive: true });
-
-  window.addEventListener("storage", event => {
-    if (!event.key || MEMORY_KEYS.includes(event.key)) refresh();
-  });
-
-  ["cht.memory.changed", "cht.slot.saved", "cht360:vivere"].forEach(name => {
-    window.addEventListener(name, refresh);
-  });
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", mount, { once: true });
-  } else {
-    mount();
+  function scheduleBuild() {
+    window.cancelAnimationFrame(rebuildFrame);
+    rebuildFrame = window.requestAnimationFrame(build);
   }
+  window.CHT360GlyphGrid = Object.freeze({ refresh, rebuild: refresh });
+  window.addEventListener("resize", scheduleBuild, { passive: true });
+  window.addEventListener("storage", event => { if (!event.key || STORAGE_KEYS.includes(event.key)) refresh(); });
+  ["cht.memory.changed", "cht.slot.saved", "cht360:vivere"].forEach(name => window.addEventListener(name, refresh));
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount, { once: true });
+  else mount();
 })(window, document);
