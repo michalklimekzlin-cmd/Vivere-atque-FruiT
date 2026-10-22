@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="./css/prstenec-pokojicku.css">
   <link rel="stylesheet" href="./css/revia-dock.css">
   <link rel="stylesheet" href="./batole-core.css">
+<link rel="stylesheet" href="css/cht360-glyph-stena.css">
 
   <!-- Bráška -->
   <link rel="stylesheet" href="./vivere-friend-ui.css">
@@ -431,6 +432,17 @@
       <span>CHT 360° nezpřístupní celý oběh Paměti bez otočení.</span>
     </div>
   </aside>
+  
+  <!-- Holá stěna Glyphů – nová tapeta -->
+<div id="cht360-stena-wall"></div>
+
+<!-- volitelně toolbar pro ladění -->
+<div id="cht360-stena-toolbar">
+  <button id="btn-scatter" class="active" type="button">Sypaná</button>
+  <button id="btn-grid" type="button">Mřížka</button>
+  <button id="btn-clear" type="button">Vymazat</button>
+  <span id="cht360-stena-status">0 / 112</span>
+</div>
 
   <div class="root">
     <main class="stage" aria-label="CHT 360 stupňů — Paměť">
@@ -617,6 +629,7 @@
        ====================================================== -->
   <script src="./vivere-friend-core.js" defer></script>
   <script src="./vivere-friend-memory.js" defer></script>
+  
   <script src="./vivere-friend-state.js" defer></script>
   <script src="./vivere-friend-bridge.js" defer></script>
   <script src="./vivere-friend-yahoo.js" defer></script>
@@ -629,6 +642,7 @@
   <script src="./vivere-atque-fruit-core.js"></script>
   <script src="./cht360-right-dock.js"></script>
   <script src="js/cht-360-glyph-grid-bg.js"></script>
+  <script src="./js/cht360-glyph-stena.js"></script>
   
   <script>
     (() => {
