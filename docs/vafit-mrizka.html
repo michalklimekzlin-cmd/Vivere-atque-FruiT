@@ -21,8 +21,13 @@ header{display:flex;align-items:center;justify-content:space-between;gap:8px;min
 .drum{position:relative;min-width:0;min-height:0;padding:0;border:1px solid rgba(255,226,173,.24);border-radius:13px;background:linear-gradient(145deg,rgba(255,226,173,.07),rgba(0,0,0,.48) 55%,rgba(199,155,51,.05));box-shadow:inset 0 1px rgba(255,240,197,.08),0 4px 9px #0004;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;perspective:500px}
 .drum:before,.drum:after{content:"";position:absolute;left:8%;right:8%;height:1px;background:rgba(255,226,173,.2);pointer-events:none;z-index:3}.drum:before{top:22%}.drum:after{bottom:22%}
 .cylinder{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform;transition:transform .28s cubic-bezier(.2,.7,.25,1)}
+/* Dva VaF'i'T se střídají kolem vodorovné osy do hloubky, bez svislého překlápění. */
+.drum.is-paired .cylinder{animation:paired-turn 5.6s linear infinite}
+@keyframes paired-turn{0%{transform:rotateY(0deg)}50%{transform:rotateY(-180deg)}100%{transform:rotateY(-360deg)}}
+.drum.is-dragging .cylinder{animation:none!important;transition:none}
+@media(prefers-reduced-motion:reduce){.drum.is-paired .cylinder{animation:none}}
 .face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:3px;color:var(--light);font-size:clamp(13px,3.2vw,24px);font-weight:600;letter-spacing:-.045em;text-shadow:0 0 10px rgba(255,226,173,.18);backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;white-space:nowrap}
-.face.back{transform:rotateY(180deg);color:#e4c98f;font-size:clamp(11px,2.7vw,20px);opacity:.94}
+.face{transform:translateZ(1px)}.face.back{transform:rotateY(180deg) translateZ(1px);color:#e4c98f;font-size:clamp(11px,2.7vw,20px);opacity:.94}
 .drum.selected{border-color:rgba(255,226,173,.72);box-shadow:0 0 0 1px rgba(199,155,51,.2),0 0 15px rgba(199,155,51,.12),inset 0 0 18px rgba(255,226,173,.08)}
 .drum.editing .face{color:#fff0c5}
 .drum.is-dragging{border-color:var(--light);box-shadow:0 0 18px rgba(199,155,51,.28);transition:none}
@@ -34,7 +39,7 @@ footer{display:flex;justify-content:space-between;gap:8px;color:#aaa292;font-siz
 <body><main id="app">
 <header><div class="brand">VaF'i'T · bubínková síť</div><div id="status" class="status" aria-live="polite">48 bubínků · lokální paměť</div></header>
 <nav class="toolbar" aria-label="Nástroje mřížky"><button class="tool" id="add" type="button">＋ Bubínek</button><button class="tool" id="edit" type="button">Upravit vybraný</button><button class="tool" id="export" type="button">Záloha ↓</button><button class="tool" id="import" type="button">Obnovit ↑</button><button class="tool" id="reset" type="button">Výchozí pořadí</button><input id="file" type="file" accept="application/json,.json" hidden></nav>
-<p class="help">Každý bubínek má dva VaF'i'T za sebou. Táhni prstem zleva doprava nebo zprava doleva a vyměň je jako váleček. Klepnutím upravíš oba znaky.</p>
+<p class="help">Jsou-li vyplněné oba znaky, bubínek je plynule střídá do hloubky. Táhni prstem vodorovně a převezmi řízení; klepnutím upravíš oba VaF'i'T.</p>
 <section id="field" aria-label="Bubínková síť VaF'i'T"><div id="grid"></div></section>
 <footer><span>Vodorovné otáčení · žádné svislé salto</span><span>CHT 360°‰. · VaF'i'T</span></footer>
 </main>
@@ -48,7 +53,7 @@ function defaults(){return seed.slice(0,COUNT).map((value,i)=>({id:'vf-'+String(
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&Array.isArray(d.items)&&d.items.length){items=d.items.slice(0,120).map((it,i)=>({id:String(it.id||'vf-'+i),value:String(it.value||'·').slice(0,24),back:String(it.back||it.mate||'').slice(0,24),turn:Number.isFinite(it.turn)?mod(it.turn,2):0,custom:Boolean(it.custom)}));}else items=defaults();}catch(_){items=defaults();}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify({version:2,updatedAt:new Date().toISOString(),items}));status.textContent=items.length+' bubínků · uloženo';}catch(_){status.textContent='Úložiště plné — exportuj zálohu';}}
 function makeFace(cls,text){const el=document.createElement('span');el.className=cls;el.textContent=text||'＋';return el;}
-function render(){grid.textContent='';items.forEach((it,i)=>{const p=document.createElement('button');p.type='button';p.className='drum'+(it.id===selected?' selected':'');p.dataset.id=it.id;p.setAttribute('aria-label','Bubínek '+(i+1)+': '+it.value+' / '+(it.back||'prázdné místo')+'. Táhni vodorovně pro otočení, klepni pro úpravu.');
+function render(){grid.textContent='';items.forEach((it,i)=>{const p=document.createElement('button');p.type='button';p.className='drum'+(it.id===selected?' selected':'')+(it.back?' is-paired':'');p.dataset.id=it.id;p.setAttribute('aria-label','Bubínek '+(i+1)+': '+it.value+' / '+(it.back||'prázdné místo')+'. Táhni vodorovně pro otočení, klepni pro úpravu.');
 const cyl=document.createElement('span');cyl.className='cylinder';cyl.style.transform='rotateY('+(it.turn*180)+'deg)';cyl.append(makeFace('face',it.value),makeFace('face back',it.back));p.append(cyl);
 p.addEventListener('pointerdown',e=>start(e,it,p));p.addEventListener('pointermove',move);p.addEventListener('pointerup',end);p.addEventListener('pointercancel',cancel);p.addEventListener('click',()=>{if(suppressClickId===it.id){suppressClickId=null;return;}if(drag?.moved)return;selected=it.id;renderSelection();editItem(it);});grid.append(p);});status.textContent=items.length+' bubínků · lokální paměť';}
 function renderSelection(){grid.querySelectorAll('.drum').forEach(el=>el.classList.toggle('selected',el.dataset.id===selected));}
