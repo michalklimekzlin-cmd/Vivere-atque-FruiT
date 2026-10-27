@@ -140,7 +140,14 @@
 
       event.preventDefault();
       event.stopPropagation();
-      drag = { id: event.pointerId, startY: event.clientY, step: 0, moved: false };
+      drag = {
+        id: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        step: 0,
+        mode: null,
+        moved: false
+      };
       lock.setPointerCapture?.(event.pointerId);
       lock.classList.add("is-dragging");
     });
@@ -148,12 +155,27 @@
     lock.addEventListener("pointermove", event => {
       if (!drag || drag.id !== event.pointerId) return;
 
-      const step = Math.trunc((drag.startY - event.clientY) / STEP_PX);
-      if (step === drag.step) return;
+      const dx = event.clientX - drag.startX;
+      const dy = event.clientY - drag.startY;
 
-      rotate(index, step - drag.step);
-      drag.step = step;
-      drag.moved = true;
+      if (!drag.mode && Math.max(Math.abs(dx), Math.abs(dy)) >= 8) {
+        drag.mode = Math.abs(dx) > Math.abs(dy) ? "train" : "glyph";
+      }
+
+      if (drag.mode === "train") {
+        drag.moved = true;
+        moveDrumTrain(dx);
+        return;
+      }
+
+      if (drag.mode === "glyph") {
+        const step = Math.trunc((drag.startY - event.clientY) / STEP_PX);
+        if (step === drag.step) return;
+
+        rotate(index, step - drag.step);
+        drag.step = step;
+        drag.moved = true;
+      }
     });
 
     const finish = event => {
@@ -164,9 +186,11 @@
       }
 
       const wasMoved = drag.moved;
+      const wasTrain = drag.mode === "train";
       drag = null;
       lock.classList.remove("is-dragging");
 
+      if (wasTrain) settleDrumTrain();
       if (!wasMoved) openAction(action);
     };
 
@@ -183,6 +207,27 @@
         event.preventDefault();
         openAction(action);
       }
+    });
+  }
+
+  function moveDrumTrain(distance) {
+    if (!root) return;
+    const limited = Math.max(-112, Math.min(112, distance));
+    root.classList.add("is-train-dragging");
+    root.style.setProperty("--cht360-train-x", limited + "px");
+
+    root.querySelectorAll("[data-lock-index]").forEach((lock, index) => {
+      const wave = Math.sin((limited / 26) - index * 1.05) * 10;
+      lock.style.setProperty("--cht360-wave-y", wave.toFixed(2) + "px");
+    });
+  }
+
+  function settleDrumTrain() {
+    if (!root) return;
+    root.classList.remove("is-train-dragging");
+    root.style.setProperty("--cht360-train-x", "0px");
+    root.querySelectorAll("[data-lock-index]").forEach(lock => {
+      lock.style.setProperty("--cht360-wave-y", "0px");
     });
   }
 
@@ -387,8 +432,10 @@
         gap: clamp(3px, .55vw, 7px);
         width: min(54vw, 460px);
         min-width: 320px;
-        transform: translateX(-50%);
+        transform: translateX(calc(-50% + var(--cht360-train-x, 0px)));
+        transition: transform .38s cubic-bezier(.2,.85,.25,1);
         pointer-events: auto;
+        will-change: transform;
       }
 
       .cht360OsmZamku::before {
@@ -420,7 +467,9 @@
         border-radius: 10px;
         color: #fff0c5;
         cursor: pointer;
-        transform: translateY(var(--smile-y));
+        transform: translateY(calc(var(--smile-y) + var(--cht360-wave-y, 0px)));
+        transition: transform .13s ease-out;
+        will-change: transform;
         background:
           radial-gradient(circle at 50% 50%, rgba(255, 224, 164, .19), transparent 56%),
           rgba(4, 5, 10, .92);
@@ -431,6 +480,14 @@
         user-select: none;
         -webkit-user-select: none;
         -webkit-tap-highlight-color: transparent;
+      }
+
+      .cht360OsmZamku.is-train-dragging {
+        transition: none;
+      }
+
+      .cht360OsmZamku.is-train-dragging .cht360OsmZamek {
+        transition: none;
       }
 
       .cht360OsmZamek::before,
