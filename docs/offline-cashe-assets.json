@@ -137,7 +137,8 @@
     "./revia-spubislost.js",
     "./vercel.json",
 
-    "./offline-cashe-assets.json"
-    "./js/cht-360-glyph-grid-bg.js"
+    "./offline-cashe-assets.json",
+    "./js/cht-360-glyph-grid-bg.js",
+    "./vafit-mrizka.html"
     ]
 }
