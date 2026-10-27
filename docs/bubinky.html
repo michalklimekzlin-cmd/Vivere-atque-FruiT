@@ -4,82 +4,72 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#100d08">
-<title>Bubínky</title>
+<title>VaF'i'T · 25 otočných bubínků</title>
 <style>
-:root{color-scheme:dark;--bg:#100d08;--gold:#f0d49a;--gold-dim:rgba(255,226,173,.32);--paper:#fff0c5}
+:root{color-scheme:dark;--gold:#f0d49a;--paper:#fff0c5}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% 30%,#292012 0,#151008 48%,#090806 100%);color:var(--paper);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-body{padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);min-height:100svh}
-main{width:min(100%,780px);margin:0 auto;padding:20px 0 30px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 2px 22px}
-h1{margin:0;font-size:13px;letter-spacing:.2em;font-weight:750;color:var(--gold)}
-#count{font-size:11px;color:rgba(255,240,197,.5)}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.drum{position:relative;min-width:0;aspect-ratio: .82;display:grid;grid-template-rows:25px minmax(0,1fr) 22px;place-items:center;padding:0 4px;overflow:hidden;color:var(--paper);border:1px solid rgba(255,226,173,.42);border-radius:15px;background:radial-gradient(circle at 50% 48%,rgba(255,226,173,.17),transparent 55%),rgba(2,2,1,.76);box-shadow:inset 0 0 20px rgba(255,226,173,.07),0 4px 18px rgba(0,0,0,.2);cursor:pointer;touch-action:manipulation;user-select:none}
-.drum:before,.drum:after{position:absolute;z-index:1;right:8px;left:8px;height:1px;content:"";background:rgba(255,226,173,.17);pointer-events:none}
-.drum:before{top:29px}.drum:after{bottom:29px}
-.drum span,.drum strong{position:relative;z-index:2;width:100%;text-align:center;pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.drum span{color:rgba(255,240,197,.48);font-size:10px;letter-spacing:.08em}
-.drum strong{color:var(--gold);font-size:clamp(20px,5vw,32px);font-weight:550;line-height:1;text-shadow:0 0 13px rgba(255,226,173,.42)}
-.drum small{font-size:9px;color:rgba(255,240,197,.35);letter-spacing:.04em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.add{margin:18px auto 0;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,226,173,.42);background:rgba(2,2,1,.55);color:var(--gold);font-size:26px;cursor:pointer}
-footer{text-align:center;margin:20px 0 0;font-size:10px;color:rgba(255,240,197,.32)}
-dialog{width:min(440px,calc(100% - 28px));padding:22px;border:1px solid rgba(255,226,173,.4);border-radius:18px;background:#171108;color:var(--paper);box-shadow:0 20px 70px #000}
-dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}
-dialog h2{margin:0 0 18px;font-size:12px;letter-spacing:.18em;color:var(--gold)}
-label{display:block;margin:12px 0 6px;font-size:11px;color:rgba(255,240,197,.65)}
-input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,226,173,.25);background:#090805;color:var(--paper);font:inherit;font-size:16px;outline:none}
-input:focus{border-color:var(--gold)}
-.actions{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
-.actions button{flex:1;min-width:80px;padding:11px 10px;border:1px solid rgba(255,226,173,.32);border-radius:10px;background:#251b0d;color:var(--paper);font:inherit;font-size:12px}
-.actions .save{background:#e4c17a;color:#1a1207;border-color:#e4c17a;font-weight:700}
-.actions .delete{color:#f2a6a0}
-@media(min-width:560px){.grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}.drum{aspect-ratio:.9}}
-@media(max-width:360px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}}
+body{padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);min-height:100svh}
+main{width:min(100%,900px);margin:0 auto;padding:20px 0 30px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 2px 16px}
+h1{margin:0;font-size:12px;letter-spacing:.19em;font-weight:800;color:var(--gold)}
+#count{font-size:10px;color:rgba(255,240,197,.5);text-align:right}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}
+.toolbar button{border:1px solid rgba(255,226,173,.34);border-radius:999px;background:rgba(4,3,2,.4);color:#e9d7b0;padding:8px 11px;font-size:11px}
+.intro{font-size:12px;line-height:1.5;color:rgba(255,240,197,.57);margin:0 2px 18px}
+.drum-field{position:relative;padding:8px 0 18px}
+.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px 8px;align-items:start}
+.drum{position:relative;min-width:0;width:100%;aspect-ratio:.88;display:grid;grid-template-rows:19px minmax(0,1fr) 18px;place-items:center;padding:0 3px;overflow:hidden;color:var(--paper);border:1px solid rgba(255,226,173,.42);border-radius:14px;background:radial-gradient(circle at 50% 48%,rgba(255,226,173,.17),transparent 55%),rgba(2,2,1,.76);box-shadow:inset 0 0 20px rgba(255,226,173,.07),0 4px 18px rgba(0,0,0,.2);cursor:ns-resize;touch-action:none;user-select:none;-webkit-user-select:none}
+.drum:before,.drum:after{position:absolute;z-index:1;right:7px;left:7px;height:1px;content:"";background:rgba(255,226,173,.17);pointer-events:none}
+.drum:before{top:23px}.drum:after{bottom:23px}
+.drum span,.drum strong,.drum small{position:relative;z-index:2;width:100%;text-align:center;pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drum span{color:rgba(255,240,197,.35);font-size:8px;letter-spacing:.03em}
+.drum strong{color:var(--gold);font-size:clamp(16px,4.8vw,26px);font-weight:600;line-height:1;text-shadow:0 0 13px rgba(255,226,173,.52)}
+.drum small{font-size:8px;color:rgba(255,240,197,.35)}
+.drum.dragging{border-color:rgba(255,226,173,.8);background:radial-gradient(circle at 50% 48%,rgba(255,226,173,.26),transparent 55%),rgba(2,2,1,.9)}
+/* Každý sloupec klesá směrem ke středu, aby síť kreslila úsměv. */
+.drum:nth-child(5n+1){transform:translateY(0)}
+.drum:nth-child(5n+2){transform:translateY(9px)}
+.drum:nth-child(5n+3){transform:translateY(16px)}
+.drum:nth-child(5n+4){transform:translateY(9px)}
+.drum:nth-child(5n){transform:translateY(0)}
+footer{display:flex;justify-content:space-between;gap:12px;margin:20px 2px 0;font-size:10px;line-height:1.4;color:rgba(255,240,197,.35)}
+@media(min-width:600px){.grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:13px 12px}.drum{aspect-ratio:1.05}.drum span{font-size:10px}.drum small{font-size:9px}.drum strong{font-size:30px}.drum:nth-child(5n+2){transform:translateY(13px)}.drum:nth-child(5n+3){transform:translateY(23px)}.drum:nth-child(5n+4){transform:translateY(13px)}}
 </style>
 </head>
 <body>
 <main>
-<header><h1>BUBÍNKY</h1><div id="count">12 bubínků</div></header>
-<section class="grid" id="grid" aria-label="Síť bubínků"></section>
-<button class="add" id="add" type="button" aria-label="Přidat bubínek" title="Přidat bubínek">+</button>
-<footer>Klepni na bubínek a napiš do něj vlastní obsah.</footer>
+<header><h1>VaF'i'T · SÍŤ BUBÍNKŮ</h1><div id="count">25 bubínků</div></header>
+<nav class="toolbar">
+<button id="backup" type="button">Záloha ↓</button>
+<button id="restore" type="button">Obnovit ↑</button>
+<button id="reset" type="button">Výchozí síť</button>
+<input id="file" type="file" accept="application/json" hidden>
+</nav>
+<p class="intro">Polož prst na bubínek a táhni nahoru nebo dolů. Tím otáčíš jeho VaF'i'T. Každý bubínek se ovládá samostatně a síť se ukládá v tomto zařízení.</p>
+<section class="drum-field"><div class="grid" id="grid" aria-label="25 otočných bubínků"></div></section>
+<footer><span>Táhni nahoru / dolů · přepínej VaF'i'T</span><span>25 bubínků · rozložení do úsměvu</span></footer>
 </main>
-<dialog id="editor">
-<form id="editForm" method="dialog">
-<h2>UPRAVIT BUBÍNEK</h2>
-<label for="name">Horní nápis</label><input id="name" maxlength="24" placeholder="Název">
-<label for="value">Obsah bubínku</label><input id="value" maxlength="80" placeholder="Napiš sem…" autocomplete="off">
-<label for="note">Spodní nápis</label><input id="note" maxlength="24" placeholder="Poznámka">
-<div class="actions"><button type="button" class="delete" id="remove">Odebrat</button><button type="button" id="cancel">Zavřít</button><button type="submit" class="save">Uložit</button></div>
-</form>
-</dialog>
 <script>
-(function(){
-const KEY='vivere-bubinky-only-v1';
-const initial=Array.from({length:12},(_,i)=>({id:i+1,name:'BUBÍNEK '+String(i+1).padStart(2,'0'),value:'·',note:''}));
-let drums=initial;
-try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(Array.isArray(saved)&&saved.length)drums=saved}catch(_){}
-const grid=document.getElementById('grid'),count=document.getElementById('count'),dlg=document.getElementById('editor');
-const nameEl=document.getElementById('name'),valueEl=document.getElementById('value'),noteEl=document.getElementById('note');
-let activeId=null;
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(drums))}catch(_){}}
-function render(){
- grid.replaceChildren();
- drums.forEach(d=>{
-  const b=document.createElement('button');b.type='button';b.className='drum';b.setAttribute('aria-label',(d.name||'Bubínek')+': '+(d.value||'prázdný'));
-  const top=document.createElement('span');top.textContent=d.name||' ';
-  const val=document.createElement('strong');val.textContent=d.value||'·';
-  const bottom=document.createElement('small');bottom.textContent=d.note||' ';
-  b.append(top,val,bottom);b.addEventListener('click',()=>openEditor(d.id));grid.append(b);
- });
- count.textContent=drums.length+' '+(drums.length===1?'bubínek':drums.length>=2&&drums.length<=4?'bubínky':'bubínků');
-}
-function openEditor(id){const d=drums.find(x=>x.id===id);if(!d)return;activeId=id;nameEl.value=d.name||'';valueEl.value=d.value||'';noteEl.value=d.note||'';dlg.showModal();setTimeout(()=>valueEl.focus(),100)}
-document.getElementById('editForm').addEventListener('submit',e=>{e.preventDefault();const d=drums.find(x=>x.id===activeId);if(!d)return;d.name=nameEl.value.trim();d.value=valueEl.value.trim()||'·';d.note=noteEl.value.trim();persist();render();dlg.close()});
-document.getElementById('cancel').addEventListener('click',()=>dlg.close());
-document.getElementById('remove').addEventListener('click',()=>{if(drums.length<=1){drums[0]={...drums[0],name:'BUBÍNEK 01',value:'·',note:''}}else{drums=drums.filter(x=>x.id!==activeId)}persist();render();dlg.close()});
-document.getElementById('add').addEventListener('click',()=>{const id=drums.reduce((m,d)=>Math.max(m,d.id),0)+1;drums.push({id,name:'BUBÍNEK '+String(id).padStart(2,'0'),value:'·',note:''});persist();render();openEditor(id)});
+(()=> {
+const KEY='vafit-25-rotating-drums-v2';
+const symbols=['♧','Ⅲ','♫','7i_','¡','>°|°<','—;’/','•ア','(•.•)','LOL','CHT','V','E','R','·','°','%∞','()ア','D','Love',"VaF’i’T",'§}','O<','╪','Ž','ʒʃ','Я','Ø','(°.•).•)','∴','T','Glyph','Vive','Batole','Revia','∞','Ƨ','☼','♧','Ⅰ','¡','·','♙','(•.•)','(Λ)','ↄ',';ˣ','•','•ア'];
+const defaults=Array.from({length:25},(_,i)=>({id:i+1,slot:0,name:'VaF’i’T'}));
+let drums=defaults.map(d=>({...d})),nextId=26;
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&Array.isArray(saved.drums)&&saved.drums.length){drums=saved.drums.slice(0,25).map((d,i)=>({id:Number(d.id)||i+1,slot:Math.abs(Number(d.slot)||0)%symbols.length,name:String(d.name||'VaF’i’T')}));nextId=Math.max(26,...drums.map(d=>d.id+1))}}catch(_){}
+const grid=document.getElementById('grid'),count=document.getElementById('count'),file=document.getElementById('file');
+let gesture=null;
+function save(){try{localStorage.setItem(KEY,JSON.stringify({version:2,drums}))}catch(_){}}
+function drawValue(d){return symbols[((d.slot%symbols.length)+symbols.length)%symbols.length]}
+function updateDrum(el,d){el.querySelector('strong').textContent=drawValue(d);el.querySelector('small').textContent=(d.slot+symbols.length)%symbols.length+1+'/'+symbols.length}
+function render(){grid.replaceChildren();drums.slice(0,25).forEach((d,i)=>{const b=document.createElement('button');b.type='button';b.className='drum';b.dataset.id=d.id;b.setAttribute('aria-label','Bubínek '+(i+1)+', '+drawValue(d)+'. Táhni nahoru nebo dolů pro změnu.');const top=document.createElement('span');top.textContent='VaF’i’T';const val=document.createElement('strong');val.textContent=drawValue(d);const bottom=document.createElement('small');bottom.textContent=((d.slot%symbols.length)+symbols.length)%symbols.length+1+'/'+symbols.length;b.append(top,val,bottom);b.addEventListener('pointerdown',startDrag);b.addEventListener('pointermove',moveDrag);b.addEventListener('pointerup',endDrag);b.addEventListener('pointercancel',endDrag);grid.append(b)});count.textContent=drums.length+' / 25 bubínků';}
+function startDrag(e){e.preventDefault();const d=drums.find(x=>x.id===Number(e.currentTarget.dataset.id));if(!d)return;gesture={id:d.id,startY:e.clientY,lastY:e.clientY,carry:0,el:e.currentTarget,moved:false};gesture.el.classList.add('dragging');try{gesture.el.setPointerCapture(e.pointerId)}catch(_){}}
+function moveDrag(e){if(!gesture||gesture.id!==Number(e.currentTarget.dataset.id))return;e.preventDefault();const dy=gesture.lastY-e.clientY;gesture.lastY=e.clientY;gesture.carry+=dy;let steps=0;while(Math.abs(gesture.carry)>=18){const dir=gesture.carry>0?1:-1;steps+=dir;gesture.carry-=dir*18}if(steps){const d=drums.find(x=>x.id===gesture.id);if(d){d.slot=(d.slot+steps+symbols.length*10)%symbols.length;gesture.moved=true;updateDrum(gesture.el,d);save()}}}
+function endDrag(e){if(!gesture||gesture.id!==Number(e.currentTarget.dataset.id))return;gesture.el.classList.remove('dragging');gesture=null}
+document.getElementById('backup').onclick=()=>{const blob=new Blob([JSON.stringify({version:2,drums},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='vafit-25-bubinku.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+document.getElementById('restore').onclick=()=>file.click();
+file.onchange=()=>{const f=file.files&&file.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);const incoming=Array.isArray(data)?data:data.drums;if(!Array.isArray(incoming))throw Error();drums=incoming.slice(0,25).map((d,i)=>({id:Number(d.id)||i+1,slot:Math.abs(Number(d.slot)||0)%symbols.length,name:String(d.name||'VaF’i’T')}));while(drums.length<25)drums.push({id:nextId++,slot:0,name:'VaF’i’T'});save();render()}catch(_){alert('Soubor zálohy se nepodařilo načíst.')}file.value=''};reader.readAsText(f)};
+document.getElementById('reset').onclick=()=>{if(confirm('Obnovit výchozích 25 bubínků? Aktuální nastavení se přepíše.')){drums=defaults.map(d=>({...d}));save();render()}};
 render();
 })();
 </script>
