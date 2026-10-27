@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#100d08">
+<title>VaF'i'T · Záložní síť glyphů</title>
+<style>
+:root{color-scheme:dark;--gold:#f1d59b;--line:rgba(255,226,173,.12)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% 38%,#261d10 0,#120e08 58%,#090806 100%);color:#fff0c5;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom)}
+main{max-width:900px;margin:auto;padding:22px 0 34px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 3px 18px}
+h1{font-size:12px;letter-spacing:.18em;color:var(--gold);margin:0;font-weight:800}
+#status{font-size:10px;color:#9f9275;text-align:right}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+button{font:inherit;cursor:pointer;touch-action:manipulation}
+.toolbar button{border:1px solid rgba(255,226,173,.34);border-radius:999px;background:rgba(4,3,2,.4);color:#e9d7b0;padding:9px 12px;font-size:11px}
+.grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.glyph{aspect-ratio:.92;min-width:0;border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:transparent;color:var(--gold);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:4px}
+.glyph span{display:block;font-size:clamp(15px,4.8vw,28px);line-height:1.1;text-shadow:0 0 15px rgba(255,220,155,.35);max-width:100%;overflow-wrap:anywhere}
+.glyph:active{background:rgba(255,226,173,.08)}
+.glyph em{position:absolute;bottom:4px;right:5px;font-style:normal;font-size:8px;color:rgba(255,240,197,.28)}
+footer{font-size:10px;color:#7e7259;margin:20px 4px 0;display:flex;justify-content:space-between;gap:10px}
+dialog{width:min(420px,calc(100% - 24px));padding:20px;border:1px solid rgba(255,226,173,.4);border-radius:16px;background:#171108;color:#fff0c5}
+dialog::backdrop{background:rgba(0,0,0,.75);backdrop-filter:blur(4px)}
+h2{font-size:12px;letter-spacing:.16em;color:var(--gold);margin:0 0 16px}
+label{display:block;font-size:11px;color:#b9a77f;margin:12px 0 5px}
+input{width:100%;padding:12px;border:1px solid rgba(255,226,173,.25);border-radius:9px;background:#090805;color:#fff0c5;font:inherit;font-size:16px}
+.actions{display:flex;gap:7px;margin-top:18px}.actions button{flex:1;padding:10px 8px;border-radius:9px;border:1px solid rgba(255,226,173,.3);background:#241a0c;color:#fff0c5;font-size:12px}.actions .save{background:#e4c17a;color:#1a1207;font-weight:700}
+@media(max-width:380px){.grid{grid-template-columns:repeat(5,minmax(0,1fr))}.glyph{aspect-ratio:.85}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>VaF'i'T · ZÁLOŽNÍ SÍŤ GLYPHŮ</h1><div id="status">uloženo v zařízení</div></header>
+<nav class="toolbar">
+<button id="add">＋ Glyph</button><button id="edit">Upravit vybraný</button><button id="backup">Záloha ↓</button><button id="restore">Obnovit ↑</button><button id="rotate">Otočit síť</button><button id="reset">Výchozí síť</button>
+<input id="file" type="file" accept="application/json" hidden>
+</nav>
+<section class="grid" id="grid" aria-label="Záložní síť glyphů"></section>
+<footer><span>Klepni na glyph pro úpravu · dlouhý stisk není potřeba</span><span>Samostatná záložní síť</span></footer>
+</main>
+<dialog id="editor"><form id="form" method="dialog"><h2>UPRAVIT GLYPH</h2>
+<label for="symbol">Symbol / text</label><input id="symbol" maxlength="40" autocomplete="off">
+<label for="angle">Otočení ve stupních</label><input id="angle" type="number" min="-360" max="360" step="15">
+<label for="label">Poznámka (nepovinná)</label><input id="label" maxlength="60">
+<div class="actions"><button type="button" id="delete">Odebrat</button><button type="button" id="close">Zavřít</button><button type="submit" class="save">Uložit</button></div></form></dialog>
+<script>
+(()=> {
+const KEY='vafit-glyph-backup-network-v1';
+const symbols=['♧','¡i','♫','↗—','i','>°|°<','·cu·','⌘','༄༅','LOL','CHT','V','E','R','·','°','%∞','()ア','D:','Love',"VaF’i’T",'§}','O<','╪','Ž','ʒʃ','Я','Ø','(°.•).•)','∴','T','Glyph','Vive','Batole','Revia','∞','Ƨ','☼','♧','Ⅰ','¡','·','♙','(•.•)','(Λ)','ↄ',';ˣ','•','•ア'];
+const defaults=symbols.map((symbol,i)=>({id:i+1,symbol,angle:((i%7)-3)*15,label:''}));
+let items=defaults.map(x=>({...x})),selected=null,globalRotation=0;
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(Array.isArray(s)&&s.length)items=s}catch(_){}
+const grid=document.getElementById('grid'),status=document.getElementById('status'),dlg=document.getElementById('editor'),symbol=document.getElementById('symbol'),angle=document.getElementById('angle'),label=document.getElementById('label'),file=document.getElementById('file');
+function save(){try{localStorage.setItem(KEY,JSON.stringify(items));status.textContent='uloženo · '+items.length+' glyphů'}catch(_){status.textContent='nelze uložit místně'}}
+function render(){grid.replaceChildren();items.forEach(item=>{const b=document.createElement('button');b.className='glyph';b.type='button';b.setAttribute('aria-label','Upravit '+item.symbol);const s=document.createElement('span');s.textContent=item.symbol;s.style.transform='rotate('+(item.angle+globalRotation)+'deg)';b.append(s);if(item.label){const e=document.createElement('em');e.textContent=item.label;b.append(e)}b.addEventListener('click',()=>open(item.id));grid.append(b)});status.textContent='uloženo · '+items.length+' glyphů'}
+function open(id){const item=items.find(x=>x.id===id);if(!item)return;selected=id;symbol.value=item.symbol;angle.value=item.angle;label.value=item.label||'';dlg.showModal()}
+document.getElementById('form').addEventListener('submit',e=>{e.preventDefault();const x=items.find(i=>i.id===selected);if(!x)return;x.symbol=symbol.value||'·';x.angle=Math.max(-360,Math.min(360,Number(angle.value)||0));x.label=label.value;save();render();dlg.close()});
+document.getElementById('close').onclick=()=>dlg.close();
+document.getElementById('delete').onclick=()=>{items=items.filter(x=>x.id!==selected);save();render();dlg.close()};
+document.getElementById('add').onclick=()=>{const id=items.reduce((m,x)=>Math.max(m,x.id),0)+1;items.push({id,symbol:'VaF’i’T',angle:0,label:''});save();render();open(id)};
+document.getElementById('edit').onclick=()=>{if(selected!==null)open(selected);else if(items.length)open(items[0].id)};
+document.getElementById('rotate').onclick=()=>{globalRotation=(globalRotation+15)%360;render()};
+document.getElementById('reset').onclick=()=>{if(confirm('Obnovit výchozí glyphy? Aktuální místní síť se přepíše.')){items=defaults.map(x=>({...x}));globalRotation=0;save();render()}};
+document.getElementById('backup').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,items},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='vafit-zalozni-sit.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+document.getElementById('restore').onclick=()=>file.click();
+file.onchange=()=>{const f=file.files&&file.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);const incoming=Array.isArray(data)?data:data.items;if(!Array.isArray(incoming))throw Error();items=incoming.filter(x=>x&&typeof x.symbol==='string').map((x,i)=>({id:Number(x.id)||i+1,symbol:x.symbol,angle:Number(x.angle)||0,label:String(x.label||'')}));if(!items.length)throw Error();save();render()}catch(_){alert('Soubor zálohy se nepodařilo načíst.')}file.value=''};reader.readAsText(f)};
+render();
+})();
+</script>
+</body>
+</html>
