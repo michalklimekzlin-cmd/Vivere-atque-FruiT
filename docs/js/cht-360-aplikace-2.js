@@ -1942,9 +1942,12 @@ function drawBubinkyPlanetCore(core, time) {
   context.font = "900 " + Math.max(12, Math.round(radius * .28)) + "px system-ui";
   context.fillText("♧", position.x, position.y + radius * .01);
 
-  // 25 bubínků jako oběžný vláček.
-  for (let i = 0; i < 25; i += 1) {
+  // Bubínky se kreslí podle hloubky: zadní půlkruh před planetou,
+  // přední půlkruh až po vykreslení jejího jádra.
+  function drawOrbitDrum(i, isFront) {
     const angle = spin + i / 25 * Math.PI * 2;
+    const sideIsFront = Math.sin(angle) >= 0;
+    if (sideIsFront !== isFront) return;
     const orbitX = radius * 1.31;
     const orbitY = radius * .73;
     const x = position.x + Math.cos(angle) * orbitX;
@@ -1952,9 +1955,9 @@ function drawBubinkyPlanetCore(core, time) {
     const depth = (Math.sin(angle) + 1) / 2;
     const drumR = radius * (.105 + depth * .025);
     const isDrumSelected = selected && selectedDrumIndex === i;
-    drumPositions.push({ x, y, r: drumR, index: i });
-
+    drumPositions.push({ x, y, r: drumR, index: i, depth });
     context.save();
+    context.globalAlpha = isFront ? 1 : .82;
     context.shadowColor = isDrumSelected ? "rgba(255,224,143,.95)" : "rgba(255,174,56,.35)";
     context.shadowBlur = isDrumSelected ? drumR * 1.1 : drumR * .35;
     const drum = context.createRadialGradient(x - drumR * .3, y - drumR * .35, 1, x, y, drumR);
@@ -1976,6 +1979,10 @@ function drawBubinkyPlanetCore(core, time) {
     context.fillText(glyphs[i], x, y);
     context.restore();
   }
+  for (let i = 0; i < 25; i += 1) drawOrbitDrum(i, false);
+
+  // Přední bubínky překreslí planetu a vytvoří dojem oběhu za ní i před ní.
+  for (let i = 0; i < 25; i += 1) drawOrbitDrum(i, true);
 
   core._drumPositions = drumPositions;
   context.fillStyle = "#fff0cf";
