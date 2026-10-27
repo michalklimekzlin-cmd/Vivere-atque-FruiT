@@ -2563,8 +2563,8 @@ function drawExternalCoreStyle(core, time) {
 }
 
 function drawCore(core, time) {
-  if (core.type === "iphone14") {
-    drawIPhoneCore(core, time);
+  if (core.type === "bubinkyPlanet") {
+    drawBubinkyPlanetCore(core, time);
     return;
   }
 
