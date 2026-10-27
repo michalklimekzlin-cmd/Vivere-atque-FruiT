@@ -60,8 +60,9 @@ const CORE_FILES = [
   "./js/cht-360-navigation.js",
   "./js/cht-360-logger.js",
   "./js/cht-360-performance.js",
-  "./js/cht-ui-components.js"
-  "./js/cht-360-glyph-grid-bg.js"
+  "./js/cht-ui-components.js",
+  "./js/cht-360-glyph-grid-bg.js",
+  "./vafit-mrizka.html"
 ];
 
 
