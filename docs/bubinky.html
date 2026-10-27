@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#100d08">
+<title>Bubínky</title>
+<style>
+:root{color-scheme:dark;--bg:#100d08;--gold:#f0d49a;--gold-dim:rgba(255,226,173,.32);--paper:#fff0c5}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% 30%,#292012 0,#151008 48%,#090806 100%);color:var(--paper);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);min-height:100svh}
+main{width:min(100%,780px);margin:0 auto;padding:20px 0 30px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 2px 22px}
+h1{margin:0;font-size:13px;letter-spacing:.2em;font-weight:750;color:var(--gold)}
+#count{font-size:11px;color:rgba(255,240,197,.5)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.drum{position:relative;min-width:0;aspect-ratio: .82;display:grid;grid-template-rows:25px minmax(0,1fr) 22px;place-items:center;padding:0 4px;overflow:hidden;color:var(--paper);border:1px solid rgba(255,226,173,.42);border-radius:15px;background:radial-gradient(circle at 50% 48%,rgba(255,226,173,.17),transparent 55%),rgba(2,2,1,.76);box-shadow:inset 0 0 20px rgba(255,226,173,.07),0 4px 18px rgba(0,0,0,.2);cursor:pointer;touch-action:manipulation;user-select:none}
+.drum:before,.drum:after{position:absolute;z-index:1;right:8px;left:8px;height:1px;content:"";background:rgba(255,226,173,.17);pointer-events:none}
+.drum:before{top:29px}.drum:after{bottom:29px}
+.drum span,.drum strong{position:relative;z-index:2;width:100%;text-align:center;pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drum span{color:rgba(255,240,197,.48);font-size:10px;letter-spacing:.08em}
+.drum strong{color:var(--gold);font-size:clamp(20px,5vw,32px);font-weight:550;line-height:1;text-shadow:0 0 13px rgba(255,226,173,.42)}
+.drum small{font-size:9px;color:rgba(255,240,197,.35);letter-spacing:.04em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.add{margin:18px auto 0;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,226,173,.42);background:rgba(2,2,1,.55);color:var(--gold);font-size:26px;cursor:pointer}
+footer{text-align:center;margin:20px 0 0;font-size:10px;color:rgba(255,240,197,.32)}
+dialog{width:min(440px,calc(100% - 28px));padding:22px;border:1px solid rgba(255,226,173,.4);border-radius:18px;background:#171108;color:var(--paper);box-shadow:0 20px 70px #000}
+dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}
+dialog h2{margin:0 0 18px;font-size:12px;letter-spacing:.18em;color:var(--gold)}
+label{display:block;margin:12px 0 6px;font-size:11px;color:rgba(255,240,197,.65)}
+input{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,226,173,.25);background:#090805;color:var(--paper);font:inherit;font-size:16px;outline:none}
+input:focus{border-color:var(--gold)}
+.actions{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.actions button{flex:1;min-width:80px;padding:11px 10px;border:1px solid rgba(255,226,173,.32);border-radius:10px;background:#251b0d;color:var(--paper);font:inherit;font-size:12px}
+.actions .save{background:#e4c17a;color:#1a1207;border-color:#e4c17a;font-weight:700}
+.actions .delete{color:#f2a6a0}
+@media(min-width:560px){.grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}.drum{aspect-ratio:.9}}
+@media(max-width:360px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>BUBÍNKY</h1><div id="count">12 bubínků</div></header>
+<section class="grid" id="grid" aria-label="Síť bubínků"></section>
+<button class="add" id="add" type="button" aria-label="Přidat bubínek" title="Přidat bubínek">+</button>
+<footer>Klepni na bubínek a napiš do něj vlastní obsah.</footer>
+</main>
+<dialog id="editor">
+<form id="editForm" method="dialog">
+<h2>UPRAVIT BUBÍNEK</h2>
+<label for="name">Horní nápis</label><input id="name" maxlength="24" placeholder="Název">
+<label for="value">Obsah bubínku</label><input id="value" maxlength="80" placeholder="Napiš sem…" autocomplete="off">
+<label for="note">Spodní nápis</label><input id="note" maxlength="24" placeholder="Poznámka">
+<div class="actions"><button type="button" class="delete" id="remove">Odebrat</button><button type="button" id="cancel">Zavřít</button><button type="submit" class="save">Uložit</button></div>
+</form>
+</dialog>
+<script>
+(function(){
+const KEY='vivere-bubinky-only-v1';
+const initial=Array.from({length:12},(_,i)=>({id:i+1,name:'BUBÍNEK '+String(i+1).padStart(2,'0'),value:'·',note:''}));
+let drums=initial;
+try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(Array.isArray(saved)&&saved.length)drums=saved}catch(_){}
+const grid=document.getElementById('grid'),count=document.getElementById('count'),dlg=document.getElementById('editor');
+const nameEl=document.getElementById('name'),valueEl=document.getElementById('value'),noteEl=document.getElementById('note');
+let activeId=null;
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(drums))}catch(_){}}
+function render(){
+ grid.replaceChildren();
+ drums.forEach(d=>{
+  const b=document.createElement('button');b.type='button';b.className='drum';b.setAttribute('aria-label',(d.name||'Bubínek')+': '+(d.value||'prázdný'));
+  const top=document.createElement('span');top.textContent=d.name||' ';
+  const val=document.createElement('strong');val.textContent=d.value||'·';
+  const bottom=document.createElement('small');bottom.textContent=d.note||' ';
+  b.append(top,val,bottom);b.addEventListener('click',()=>openEditor(d.id));grid.append(b);
+ });
+ count.textContent=drums.length+' '+(drums.length===1?'bubínek':drums.length>=2&&drums.length<=4?'bubínky':'bubínků');
+}
+function openEditor(id){const d=drums.find(x=>x.id===id);if(!d)return;activeId=id;nameEl.value=d.name||'';valueEl.value=d.value||'';noteEl.value=d.note||'';dlg.showModal();setTimeout(()=>valueEl.focus(),100)}
+document.getElementById('editForm').addEventListener('submit',e=>{e.preventDefault();const d=drums.find(x=>x.id===activeId);if(!d)return;d.name=nameEl.value.trim();d.value=valueEl.value.trim()||'·';d.note=noteEl.value.trim();persist();render();dlg.close()});
+document.getElementById('cancel').addEventListener('click',()=>dlg.close());
+document.getElementById('remove').addEventListener('click',()=>{if(drums.length<=1){drums[0]={...drums[0],name:'BUBÍNEK 01',value:'·',note:''}}else{drums=drums.filter(x=>x.id!==activeId)}persist();render();dlg.close()});
+document.getElementById('add').addEventListener('click',()=>{const id=drums.reduce((m,d)=>Math.max(m,d.id),0)+1;drums.push({id,name:'BUBÍNEK '+String(id).padStart(2,'0'),value:'·',note:''});persist();render();openEditor(id)});
+render();
+})();
+</script>
+</body>
+</html>
