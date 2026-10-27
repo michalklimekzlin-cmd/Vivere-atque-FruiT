@@ -212,12 +212,12 @@
 
   function moveDrumTrain(distance) {
     if (!root) return;
-    const limited = Math.max(-112, Math.min(112, distance));
+    const limited = Math.max(-240, Math.min(240, distance));
     root.classList.add("is-train-dragging");
     root.style.setProperty("--cht360-train-x", limited + "px");
 
     root.querySelectorAll("[data-lock-index]").forEach((lock, index) => {
-      const wave = Math.sin((limited / 26) - index * 1.05) * 10;
+      const wave = Math.sin((limited / 42) - index * .82) * 13;
       lock.style.setProperty("--cht360-wave-y", wave.toFixed(2) + "px");
     });
   }
@@ -397,7 +397,7 @@
   }
 
   function smileOffset(index) {
-    return [0, 5, 10, 14, 14, 10, 5, 0][index] || 0;
+    return [0, 8, 17, 24, 24, 17, 8, 0][index] || 0;
   }
 
   function modulo(value, divisor) {
@@ -429,7 +429,7 @@
         display: flex;
         align-items: flex-start;
         justify-content: center;
-        gap: clamp(3px, .55vw, 7px);
+        gap: clamp(5px, .9vw, 13px);
         width: min(54vw, 460px);
         min-width: 320px;
         transform: translateX(calc(-50% + var(--cht360-train-x, 0px)));
