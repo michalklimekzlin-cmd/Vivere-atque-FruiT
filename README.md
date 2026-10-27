@@ -1,58 +1,12 @@
-# Vivere atque Fru’i¡'T
+# VaF'ii'T · Glyph Grid (prototype)
 
-Vivere atque Fru’i¡'T je rostoucí statický webový projekt o budování světů, spolupráci člověka a umělé inteligence a etickém digitálním experimentování.
+A single-file, mobile-first prototype for the VaF'ii'T wallpaper/network concept.
 
-Repozitář nyní udržuje přehlednější strukturu projektu a zároveň zachovává původní soubory z dílny.
+## Use
+- Open `index.html` in a browser. For iPhone testing, serve the folder over HTTPS or use a static host.
+- Tap a dot to edit its place; each place accepts up to 9 characters.
+- Values are saved in the browser's localStorage.
+- Make a circular finger gesture over the grid to rotate all glyphs together counter-clockwise. The lattice remains fixed.
+- The reset control clears the 120 entries.
 
-## Struktura projektu
-
-```text
-.
-|-- README.md
-|-- ARCHITECTURE.md
-|-- SETUP.md
-|-- CONTRIBUTING.md
-|-- LICENSE
-|-- src/
-|   |-- index.html
-|   |-- agents_v3.js
-|   `-- styles/
-|-- components/
-|   |-- Hlavoun/
-|   |-- Viri/
-|   |-- Pikos/
-|   `-- Bicak/
-|-- worlds/
-|   |-- Revia/
-|   |-- VAFT-Center3D/
-|   `-- others/
-|-- docs/
-|   |-- PHILOSOPHY.md
-|   |-- COMPONENTS.md
-|   `-- API.md
-`-- assets/
-```
-
-## Co je součástí
-
-- `src/` obsahuje nový uzel repozitáře a explicitní soubor `agents_v3.js` vyžádaný pro uspořádané rozložení.
-- `components/` sdružuje základní rodinné moduly a jejich aktuální soubory pro prohlížeč.
-- `worlds/` obsahuje uspořádané kopie hlavních herních světů.
-- `docs/` obsahuje jednoduchou a přehlednou dokumentaci projektu.
-- `assets/` sdružuje volné mediální soubory a archivy z kořene repozitáře.
-
-## Hlavní vstupní body
-
-- Zdrojový uzel: `src/index.html`
-- Hlavní svět: `worlds/VAFT-Center3D/index.html`
-- Svět Revia: `worlds/Revia/index.html`
-
-## Zpětná kompatibilita
-
-Původní soubory a složky v kořeni repozitáře zůstávají dostupné, aby stávající odkazy nebyly odstraněny při tomto čištění. Nová struktura je postupný migrační plán pro budoucí práci.
-
-## Pravidla pro jazyk a formátování
-
-- Dokumentace v tomto repozitáři by měla být psána v čistě českém jazyce.
-- Vyhýbejte se dekorativním unicode znakům, textu v azbuce a emoji v dokumentaci.
-- Příklady a diagramy udržujte ve formátu kompatibilním s ASCII.
+This is a functional prototype, not yet integrated into the main Signal Tower Engine or installed as an iOS wallpaper. Browser localStorage is local to the browser/device.
