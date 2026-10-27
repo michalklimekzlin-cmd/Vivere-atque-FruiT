@@ -139,10 +139,10 @@ const cores = [
   },
   {
     id: "control",
-    title: "iPhone 14",
-    subtitle: "Červený uzel CHT · lokální PWA",
-    radius: 54,
-    type: "iphone14"
+    title: "Bubínky",
+    subtitle: "Planeta Glyphů · 25 bubínků v oběhu",
+    radius: 70,
+    type: "bubinkyPlanet"
   }
 ];
 
@@ -154,6 +154,7 @@ let height = 0;
 let pixelRatio = 1;
 let lastFrameTime = 0;
 let selectedCore = null;
+let selectedDrumIndex = null;
 let selectedSlotIndex = null;
 let activePointers = new Map();
 let gesture = null;
@@ -1840,127 +1841,157 @@ window.addEventListener("cht.memory.open", () => {
   if (firstCore) openCore(firstCore);
 });
 
-function drawIPhoneCore(core, time) {
+function drawBubinkyPlanetCore(core, time) {
   const position = getCorePosition(core);
-  const scale = (.72 + position.depth * .40) * position.perspective;
+  const selected = selectedCore?.id === core.id && selectedDrumIndex !== null;
+  const zoomFactor = selected ? 1.8 : 1;
+  const scale = (.72 + position.depth * .40) * position.perspective * zoomFactor;
   const radius = core.radius * scale;
-  const phoneWidth = radius * 1.02;
-  const phoneHeight = radius * 1.72;
-  const phoneX = position.x - phoneWidth / 2;
-  const phoneY = position.y - phoneHeight / 2;
-  const pulse = .5 + (Math.sin(time * .0032) + 1) * .25;
-  const online = navigator.onLine;
-  const deviceStatus = phoneSettings.apps.length
-    ? "AI · " + phoneSettings.apps.length
-    : online ? "PWA · PŘIPOJENO" : "PWA · BEZ PŘIPOJENÍ";
-  const anchor = getSceneAnchor();
-  const hubX = anchor.centerX + scene.panX;
-  const hubY = anchor.centerY + scene.panY;
+  const active = selectedCore?.id === core.id;
+  const spin = time * .00016 + scene.yaw + scene.roll * .25;
+  const glyphs = ["♧", "Y", "Ж", "•", "7", "ア", "¿", "∴", "X", "∿", "Я", "∅", "⌘", "i", "°", "‰", "T", "∩", "⌁", "∷", "V", "Ψ", "⊙", "Ƶ", "✧"];
+  const drumPositions = [];
 
   context.save();
-  context.globalAlpha = .50 + position.depth * .50;
+  context.globalAlpha = .88 + position.depth * .12;
 
-  const link = context.createLinearGradient(position.x, position.y, hubX, hubY);
-  link.addColorStop(0, "rgba(244,50,58,.58)");
-  link.addColorStop(.45, "rgba(238,238,238,.26)");
-  link.addColorStop(1, "rgba(130,130,136,0)");
+  const link = context.createLinearGradient(position.x - radius, position.y, position.x + radius, position.y);
+  link.addColorStop(0, "rgba(255,179,55,0)");
+  link.addColorStop(.5, "rgba(255,194,87,.42)");
+  link.addColorStop(1, "rgba(255,179,55,0)");
   context.strokeStyle = link;
-  context.lineWidth = 1;
-  context.setLineDash([3, 8]);
+  context.lineWidth = 1.2;
   context.beginPath();
-  context.moveTo(position.x, position.y);
-  context.lineTo(hubX, hubY);
-  context.stroke();
-  context.setLineDash([]);
-
-  context.beginPath();
-  context.arc(position.x, position.y, radius * 1.42 + Math.sin(time * .0024) * 2, 0, Math.PI * 2);
-  context.strokeStyle = "rgba(242,56,64," + (.22 + pulse * .24) + ")";
-  context.lineWidth = 1.25;
+  context.moveTo(position.x - radius * 1.7, position.y);
+  context.lineTo(position.x + radius * 1.7, position.y);
   context.stroke();
 
-  const glow = context.createRadialGradient(position.x, position.y, 4, position.x, position.y, radius * 1.45);
-  glow.addColorStop(0, "rgba(255,255,255,.16)");
-  glow.addColorStop(.38, "rgba(237,43,53,.22)");
-  glow.addColorStop(1, "rgba(237,43,53,0)");
+  const glow = context.createRadialGradient(position.x, position.y, radius * .12, position.x, position.y, radius * 1.8);
+  glow.addColorStop(0, active ? "rgba(255,216,128,.38)" : "rgba(255,182,62,.22)");
+  glow.addColorStop(.48, "rgba(173,83,17,.16)");
+  glow.addColorStop(1, "rgba(255,166,37,0)");
   context.fillStyle = glow;
   context.beginPath();
-  context.arc(position.x, position.y, radius * 1.45, 0, Math.PI * 2);
+  context.arc(position.x, position.y, radius * 1.8, 0, Math.PI * 2);
   context.fill();
 
+  // Oběžné dráhy planety.
+  for (let ring = 0; ring < 4; ring += 1) {
+    context.save();
+    context.translate(position.x, position.y);
+    context.rotate(spin * (ring % 2 ? -1 : 1) + ring * .28);
+    context.beginPath();
+    context.ellipse(0, 0, radius * (1.08 + ring * .18), radius * (.31 + ring * .045), 0, 0, Math.PI * 2);
+    context.strokeStyle = ring === 1 ? "rgba(255,219,143,.62)" : "rgba(255,185,72,.28)";
+    context.lineWidth = ring === 1 ? 1.25 : .75;
+    context.stroke();
+    context.restore();
+  }
+
+  // Tmavé kovové jádro se zlatou sítí.
+  const sphere = context.createRadialGradient(
+    position.x - radius * .28, position.y - radius * .35, radius * .04,
+    position.x, position.y, radius
+  );
+  sphere.addColorStop(0, "#6e4a24");
+  sphere.addColorStop(.32, "#24180d");
+  sphere.addColorStop(.72, "#090705");
+  sphere.addColorStop(1, "#020202");
+  context.fillStyle = sphere;
+  context.beginPath();
+  context.arc(position.x, position.y, radius, 0, Math.PI * 2);
+  context.fill();
   context.save();
-  context.translate(position.x, position.y);
-  context.rotate(phoneSettings.angle);
-  context.translate(-position.x, -position.y);
+  context.beginPath();
+  context.arc(position.x, position.y, radius * .98, 0, Math.PI * 2);
+  context.clip();
 
-  context.shadowColor = "rgba(0,0,0,.68)";
-  context.shadowBlur = radius * .34;
-  context.shadowOffsetY = radius * .14;
-  roundedRectPath(phoneX, phoneY, phoneWidth, phoneHeight, radius * .19);
-  context.fillStyle = "#d61f2b";
-  context.fill();
-  context.shadowColor = "transparent";
+  for (let i = -5; i <= 5; i += 1) {
+    context.beginPath();
+    context.ellipse(position.x, position.y, radius * .98, Math.max(2, radius * Math.abs(i) / 7), spin + i * .09, 0, Math.PI * 2);
+    context.strokeStyle = "rgba(255,211,133,.22)";
+    context.lineWidth = .7;
+    context.stroke();
+  }
+  for (let i = 0; i < 9; i += 1) {
+    context.beginPath();
+    context.ellipse(position.x, position.y, Math.max(radius * .08, Math.abs(Math.cos(spin + i * Math.PI / 9)) * radius), radius, 0, 0, Math.PI * 2);
+    context.strokeStyle = "rgba(255,211,133,.2)";
+    context.lineWidth = .65;
+    context.stroke();
+  }
+  context.restore();
 
-  roundedRectPath(phoneX + radius * .045, phoneY + radius * .045, phoneWidth - radius * .09, phoneHeight - radius * .09, radius * .16);
-  const frame = context.createLinearGradient(phoneX, phoneY, phoneX + phoneWidth, phoneY + phoneHeight);
-  frame.addColorStop(0, "#f24952");
-  frame.addColorStop(.45, "#8e1018");
-  frame.addColorStop(1, "#e82f3a");
-  context.fillStyle = frame;
+  // Jádro VaF'i'T.
+  const coreGlow = context.createRadialGradient(position.x, position.y, 1, position.x, position.y, radius * .48);
+  coreGlow.addColorStop(0, "rgba(255,240,194,.98)");
+  coreGlow.addColorStop(.24, "rgba(255,183,61,.62)");
+  coreGlow.addColorStop(1, "rgba(255,165,36,0)");
+  context.fillStyle = coreGlow;
+  context.beginPath();
+  context.arc(position.x, position.y, radius * .48, 0, Math.PI * 2);
   context.fill();
-
-  const screenInset = radius * .105;
-  const screenX = phoneX + screenInset;
-  const screenY = phoneY + screenInset;
-  const screenWidth = phoneWidth - screenInset * 2;
-  const screenHeight = phoneHeight - screenInset * 2;
-  roundedRectPath(screenX, screenY, screenWidth, screenHeight, radius * .125);
-  const screen = context.createLinearGradient(screenX, screenY, screenX, screenY + screenHeight);
-  screen.addColorStop(0, "#25262a");
-  screen.addColorStop(.48, "#070708");
-  screen.addColorStop(1, "#17181b");
-  context.fillStyle = screen;
-  context.fill();
-  context.strokeStyle = "rgba(255,255,255,.24)";
-  context.lineWidth = .8;
+  context.strokeStyle = "rgba(255,220,146,.85)";
+  context.lineWidth = Math.max(1, radius * .018);
+  context.beginPath();
+  context.arc(position.x, position.y, radius * .29, 0, Math.PI * 2);
   context.stroke();
-
-  const notchWidth = screenWidth * .42;
-  const notchHeight = radius * .095;
-  roundedRectPath(position.x - notchWidth / 2, screenY + radius * .045, notchWidth, notchHeight, notchHeight / 2);
-  context.fillStyle = "#050506";
-  context.fill();
-  context.fillStyle = "rgba(194,194,198,.72)";
-  context.fillRect(position.x - notchWidth * .12, screenY + radius * .082, notchWidth * .24, 1);
-
-  drawAppleMark(position.x, position.y - radius * .06, radius * .25);
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillStyle = "#ffffff";
-  context.font = "900 " + Math.max(7, Math.round(radius * .18)) + "px system-ui";
-  context.fillText("CHT", position.x, position.y + radius * .29);
-  context.fillStyle = "rgba(214,214,218,.84)";
-  context.font = "700 " + Math.max(6, Math.round(radius * .11)) + "px system-ui";
-  context.fillText("360°‰.", position.x, position.y + radius * .45);
-  context.fillStyle = online ? "#f4f4f5" : "#a3a3a8";
-  context.font = "700 " + Math.max(5, Math.round(radius * .085)) + "px system-ui";
-  context.fillText(deviceStatus, position.x, phoneY + phoneHeight - radius * .20);
+  context.fillStyle = "#ffe5a6";
+  context.font = "900 " + Math.max(12, Math.round(radius * .28)) + "px system-ui";
+  context.fillText("♧", position.x, position.y + radius * .01);
 
-  context.fillStyle = "rgba(255,255,255,.68)";
-  roundedRectPath(position.x - screenWidth * .16, phoneY + phoneHeight - radius * .12, screenWidth * .32, radius * .025, radius * .02);
-  context.fill();
+  // 25 bubínků jako oběžný vláček.
+  for (let i = 0; i < 25; i += 1) {
+    const angle = spin + i / 25 * Math.PI * 2;
+    const orbitX = radius * 1.31;
+    const orbitY = radius * .73;
+    const x = position.x + Math.cos(angle) * orbitX;
+    const y = position.y + Math.sin(angle) * orbitY;
+    const depth = (Math.sin(angle) + 1) / 2;
+    const drumR = radius * (.105 + depth * .025);
+    const isDrumSelected = selected && selectedDrumIndex === i;
+    drumPositions.push({ x, y, r: drumR, index: i });
 
-  context.restore();
-  context.fillStyle = "#ffffff";
-  context.font = "900 " + Math.max(8, Math.round(radius * .19)) + "px system-ui";
+    context.save();
+    context.shadowColor = isDrumSelected ? "rgba(255,224,143,.95)" : "rgba(255,174,56,.35)";
+    context.shadowBlur = isDrumSelected ? drumR * 1.1 : drumR * .35;
+    const drum = context.createRadialGradient(x - drumR * .3, y - drumR * .35, 1, x, y, drumR);
+    drum.addColorStop(0, isDrumSelected ? "#765323" : "#382719");
+    drum.addColorStop(.6, "#0c0906");
+    drum.addColorStop(1, "#020202");
+    context.fillStyle = drum;
+    context.beginPath();
+    context.arc(x, y, drumR, 0, Math.PI * 2);
+    context.fill();
+    context.shadowBlur = 0;
+    context.strokeStyle = isDrumSelected ? "#fff0bd" : "rgba(255,210,131,.78)";
+    context.lineWidth = isDrumSelected ? 2 : 1;
+    context.stroke();
+    context.fillStyle = "#ffe2a0";
+    context.font = "800 " + Math.max(7, Math.round(drumR * .68)) + "px system-ui";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(glyphs[i], x, y);
+    context.restore();
+  }
+
+  core._drumPositions = drumPositions;
+  context.fillStyle = "#fff0cf";
+  context.font = "900 " + Math.max(9, Math.round(radius * .15)) + "px system-ui";
   context.textAlign = "center";
   context.textBaseline = "middle";
-  context.fillText("iPhone 14", position.x, phoneY + phoneHeight + radius * .20);
-  context.restore();
+  context.fillText(selected ? "BUBÍNEK " + String(selectedDrumIndex + 1).padStart(2, "0") : "BUBÍNKY · 25", position.x, position.y + radius * .53);
+  context.fillStyle = "rgba(255,228,178,.72)";
+  context.font = Math.max(7, Math.round(radius * .105)) + "px system-ui";
+  context.fillText(selected ? "klepnutím zrušit výběr" : "VaF'i'T · oběžná dráha", position.x, position.y + radius * .67);
 
+  context.restore();
   core.position = position;
-  core.drawRadius = Math.max(phoneWidth, phoneHeight) * .56;
+  core.drawRadius = radius * (selected ? 1.72 : 1.55);
 }
+
 
 function drawDigitalEarthLand(x, y, radius, spin) {
   context.save();
@@ -3420,9 +3451,29 @@ function finishPointerGesture(event, cancelled) {
       event.clientY - bounds.top
     );
 
-    if (core?.type === "iphone14") {
-      openIPhoneSettings();
+    if (core?.type === "bubinkyPlanet") {
+      const drum = (core._drumPositions || [])
+        .map(item => ({ ...item, distance: Math.hypot(
+          item.x - (event.clientX - bounds.left),
+          item.y - (event.clientY - bounds.top)
+        ) }))
+        .sort((a, b) => a.distance - b.distance)[0];
+
+      if (drum && drum.distance <= drum.r + 18) {
+        if (selectedCore?.id === core.id && selectedDrumIndex === drum.index) {
+          selectedDrumIndex = null;
+        } else {
+          selectedCore = core;
+          selectedDrumIndex = drum.index;
+        }
+      } else if (selectedCore?.id === core.id && selectedDrumIndex !== null) {
+        selectedDrumIndex = null;
+      } else {
+        selectedDrumIndex = null;
+        openCore(core);
+      }
     } else if (core) {
+      selectedDrumIndex = null;
       openCore(core);
     }
   }
