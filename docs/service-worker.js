@@ -15,7 +15,7 @@
 */
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v11-iphone-offline`;
+const CACHE_NAME = `${CACHE_PREFIX}v12-iphone-offline`;
 
 const OFFLINE_PAGE = "./index.html";
 const OFFLINE_MANIFEST = "./offline-cashe-assets.json";
@@ -31,6 +31,7 @@ const CORE_FILES = [
   "./manifest.json",
   "./icon.svg",
   "./offline-cashe-assets.json",
+  "./vafit-mrizka.html",
 
   "./css/pamet.css",
   "./css/prstenec-pokojicku.css",
