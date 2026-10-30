@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-30T22:48:21.524Z",
+  "generatedAt": "2026-10-30T23:52:38.726Z",
   "description": "CHT 360°‰. — úplný offline seznam souborů publikovaných z docs/.",
   "files": [
     "./index.html",
@@ -127,6 +127,7 @@
     "./braska-knowledge.js",
     "./braska-360.js",
     "./braska-memory-link.js",
+    "./braska-learning.js",
     "./braska-chat.js"
   ]
 }
