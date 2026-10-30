@@ -177,9 +177,35 @@
     location.href=url.href;
     return true;
   }
+  const REPO_SKILLS = [
+    {id:"cht-memory",title:"Paměť CHT",path:"index.html",about:"Čtyři jádra, 70 slotů v každém, čtení a ukládání poznatků."},
+    {id:"signal-tower",title:"Signal Tower",path:"signal-360/",about:"Čtyři světy, jejich sloty, orientace a signální věž."},
+    {id:"glyph-workshop",title:"Glyph dílna",path:"glyph-cht-360/",about:"Tvorba, úprava a přenos Glyphů."},
+    {id:"glyph-rooms",title:"Glyph pokojíčky",path:"glyph-pokojicku-cht-360/",about:"Místnosti a vazby uložených Glyphů."},
+    {id:"glyph-drums",title:"Bubínky",path:"bubinky/",about:"Zámky slotů a práce se znaky."},
+    {id:"mluva",title:"Mluva CHT",path:"mluva-cht-360/",about:"Lokální jazyková vrstva a propojení Glyphů."},
+    {id:"puls",title:"Puls CHT",path:"cht-puls-360/",about:"Puls, paměťové události a přenosové cesty."},
+    {id:"revia",title:"Revia",path:"index.html#revia",about:"Průvodcovská a paměťová vrstva."},
+    {id:"chybozrout",title:"ChyboŽrout",path:"index.html#repair",about:"Kontrola a bezpečné opravy."},
+    {id:"jadrа",title:"Jádra – pracovní deska",path:"cht360-jadra-pracovni-deska/",about:"Pracovní přehled čtyř jader CHT."}
+  ];
+  function capabilities(){
+    const configured=window.CHT360Config?.modules||[];
+    const merged=new Map(REPO_SKILLS.map(x=>[x.id,{...x,available:true}]));
+    configured.forEach(item=>{
+      const key=String(item.id||"");
+      if(!merged.has(key)) merged.set(key,{id:key,title:item.longTitle||item.title||key,path:item.path||"index.html",about:item.description||"",available:true});
+    });
+    return [...merged.values()];
+  }
+  async function openCapability(id){
+    const item=capabilities().find(x=>x.id===String(id));
+    if(!item) throw new Error("Tuhle dovednost zatím v registru neznám.");
+    return openSource(item.path);
+  }
   window.BraskaLearning=Object.freeze({
     version:"1.0.0",storage:DB_NAME,
-    learnFromSlots,search,list,stats,exportBackup,downloadBackup,openSource,
+    learnFromSlots,search,list,stats,exportBackup,downloadBackup,openSource,capabilities,openCapability,
     getState:()=>({...state})
   });
 })();
