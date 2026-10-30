@@ -147,7 +147,7 @@
       pieces.push("Z vlastní lokální paměti CHT:");
       memories.slice(0, 3).forEach((item, i) => {
         pieces.push((i + 1) + ". " + String(item.text || "").slice(0, 700) +
-          (item.source ? "\\nZdroj: " + item.source : ""));
+          (item.source ? "\nZdroj: " + item.source : ""));
       });
     }
     if (knowledge.length) {
@@ -155,7 +155,7 @@
       knowledge.slice(0, 3).forEach((item, i) => {
         pieces.push((i + 1) + ". " + String(item.title || item.path || "Poznatek") +
           "\\n" + String(item.text || "").slice(0, 700) +
-          "\\nZdroj: " + String(item.source || item.path || "lokální index"));
+          "\nZdroj: " + String(item.source || item.path || "lokální index"));
       });
     }
 
@@ -166,8 +166,31 @@
     }
 
     if (pieces.length) {
-      return pieces.join("\\n\\n") +
-        "\\n\\nTohle jsou podklady, které jsem skutečně našel. Umím je propojit a vysvětlit, ale bez připojeného jazykového modelu si nemohu domýšlet odpověď nad rámec těchto záznamů.";
+      // U pojmových dotazů odpovídej přímo z ověřeného slovníku, ne výpisem indexu.
+    const concept = knowledge.find(item =>
+      /^(glyph|˚°‰•\\.)$/i.test(String(item.title || "").trim())
+    );
+    if (concept && /glyph|˚°‰•\\./i.test(txt)) {
+      return String(concept.text || "").trim() +
+        (concept.source ? "\n\nOpírám se o: " + concept.source + "." : "");
+    }
+
+    if (pieces.length) {
+      const useful = knowledge.filter(item =>
+        !/\\.(?:js|html|css|json)$/i.test(String(item.path || ""))
+      );
+      if (useful.length) {
+        return "Našel jsem k tomu v našich poznámkách toto:\n\n" +
+          useful.slice(0, 2).map(item =>
+            String(item.text || "").trim().slice(0, 650) +
+            (item.source ? "\nZdroj: " + item.source : "")
+          ).join("\n\n");
+      }
+      if (memories.length) {
+        return "V naší paměti jsem našel:\n\n" +
+          memories.slice(0, 2).map(item => String(item.text || "").trim().slice(0, 500)).join("\n\n");
+      }
+    }
     }
 
     return "Tohle zatím nemám v lokální paměti ani v načtené dokumentaci doložené. Nechci ti dát připravenou odpověď, která by jen zněla přesvědčivě. Můžeš mi doplnit poznatek a uložíme ho do paměti CHT.";
