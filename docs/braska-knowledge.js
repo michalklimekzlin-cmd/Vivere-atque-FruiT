@@ -41,8 +41,10 @@
   function score(hay,q,raw){const h=norm(hay);let n=norm(raw).length>2&&h.includes(norm(raw))?8:0;q.forEach(t=>{if(h.includes(t))n+=t.length>5?3:1;});return n;}
   async function search(query,limit=6){
     const q=[...new Set(toks(query))],raw=String(query||"").trim();if(!raw)return[];
-    const docs=await all(),seed=SEEDS.map(x=>({...x,score:score(x.title+" "+x.text+" "+x.tags.join(" "),q,raw)}));
-    const files=docs.map(d=>{const sc=score(d.title+" "+d.path+" "+d.text,q,raw);if(!sc)return null;const at=norm(d.text).indexOf(norm(raw));const start=at>=0?at:Math.max(0,norm(d.text).indexOf(q[0]||""));return{id:"file:"+d.path,title:d.title,path:d.path,source:d.path,text:d.text.slice(Math.max(0,start-250),Math.min(d.text.length,start+1000)),score:sc};}).filter(Boolean);
+    const docs=await all();
+    const wantsTechnical=/kod|kód|javascript|html|css|json|funkce|chyba|bug|soubor|skript|service worker|api|technick|program/i.test(raw);
+    const seed=SEEDS.map(x=>({...x,score:score(x.title+" "+x.text+" "+x.tags.join(" "),q,raw)+(/glyph|˚°‰•/i.test(raw)&&x.id==="concept:glyph"?18:0)}));
+    const files=docs.filter(d=>wantsTechnical||! /\.(js|html|css|json)$/i.test(String(d.path||""))).map(d=>{const sc=score(d.title+" "+d.path+" "+d.text,q,raw);if(!sc)return null;const at=norm(d.text).indexOf(norm(raw));const start=at>=0?at:Math.max(0,norm(d.text).indexOf(q[0]||""));return{id:"file:"+d.path,title:d.title,path:d.path,source:d.path,text:d.text.slice(Math.max(0,start-180),Math.min(d.text.length,start+750)),score:sc};}).filter(Boolean);
     return[...seed,...files].filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,Math.max(1,Math.min(10,limit)));
   }
   async function respond(query){
