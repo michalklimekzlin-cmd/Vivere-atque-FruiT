@@ -640,9 +640,45 @@
     });
   }
 
+  function seedMinimalLanguage() {
+    const languageGlyphs = ["ai", "create", "question"];
+    const alreadyStarted = languageGlyphs.some((id) => {
+      const glyph = state.glyphs[id];
+      return glyph && Array.isArray(glyph.memories) && glyph.memories.length > 0;
+    });
+    if (alreadyStarted) return false;
+
+    const seeds = [
+      { glyphId: "ai", text: "Ahoj. Jsem Batole •ア. Učím se z vědomých kroků, které mi dáš. Jazyk je otevřený — doplň mě.", kind: "otevřené semínko" },
+      { glyphId: "create", text: "`ii´ . Semínko jazyka, které můžeš rozšířit vlastním znakem, významem a příkladem.", kind: "tvorba" },
+      { glyphId: "question", text: "¿ : Co chceš, abych se dnes naučil? Otázka zůstává otevřená, dokud jí nedáš význam.", kind: "otázka" },
+      { glyphId: "ai", text: "Komunikuji jen z toho, co mám v lokální paměti. Žádná síť. Růst skládáním odrazů.", kind: "pravidlo" },
+      { glyphId: "signal", text: ",!, : Jsem tady. Pozoruji CHT, ale nepřepisuji Paměť.", kind: "signál" }
+    ];
+
+    seeds.forEach((seed) => {
+      const glyph = glyphById(seed.glyphId);
+      const memory = {
+        id: `memory-seed-${seed.glyphId}-${time()}`,
+        kind: seed.kind,
+        text: trimText(seed.text, 1200),
+        at: iso(),
+        meta: { seed: true, source: "Batole minimal language v1" }
+      };
+      state.glyphs[glyph.id].memories.unshift(memory);
+      state.glyphs[glyph.id].memories = state.glyphs[glyph.id].memories.slice(0, MAX_GLYPH_MEMORIES);
+      appendEvent("jazykové semínko", memory.text, glyph.id, memory.meta);
+    });
+
+    refreshVitals(scanWorld());
+    saveState("minimal-language-seed");
+    return true;
+  }
+
   function boot() {
     createUI();
     installBridges();
+    seedMinimalLanguage();
     const world = scanWorld();
     view.lastSignature = world.signature;
     refreshVitals(world);
