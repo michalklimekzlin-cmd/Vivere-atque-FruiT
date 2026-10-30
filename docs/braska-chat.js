@@ -447,6 +447,14 @@
     try {
       const reply = await sendToAI(value);
       addMessage("braska", reply);
+      try {
+        window.Braska360?.remember?.(reply, {
+          type: "odpověď Brášky",
+          importance: 45,
+          source: "braska-chat",
+          tags: ["braska", "odpověď", "lokální"]
+        });
+      } catch (error) { console.warn("[Bráška memory write]", error); }
 
       if (window.VivereFriend?.record) {
         window.VivereFriend.record(
