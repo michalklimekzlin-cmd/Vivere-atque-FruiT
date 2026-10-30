@@ -173,6 +173,13 @@
       } catch (_) {}
     }
 
+    if (window.BraskaKnowledge?.respond) {
+      try {
+        const result = await window.BraskaKnowledge.respond(txt);
+        if (result && String(result).trim()) return String(result).trim();
+      } catch (error) { console.warn("[Bráška Knowledge]", error); }
+    }
+
     return localReply(txt);
   }
 
