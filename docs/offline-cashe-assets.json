@@ -124,6 +124,9 @@
     "./offline-cashe-assets.json",
     "./js/cht-360-glyph-grid-bg.js",
     "./vafit-mrizka.html",
-    "./braska-knowledge.js"
+    "./braska-knowledge.js",
+    "./braska-360.js",
+    "./braska-memory-link.js",
+    "./braska-chat.js"
   ]
 }
