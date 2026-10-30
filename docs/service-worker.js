@@ -15,7 +15,7 @@
 */
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v13-batole-language`;
+const CACHE_NAME = `${CACHE_PREFIX}v14-batole-dock-clear`;
 
 const OFFLINE_PAGE = "./index.html";
 const OFFLINE_MANIFEST = "./offline-cashe-assets.json";
