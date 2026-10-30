@@ -11,7 +11,7 @@
   function db(){return new Promise((ok,no)=>{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(STORE))r.result.createObjectStore(STORE,{keyPath:"path"});};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error);});}
   async function all(){const d=await db();return new Promise((ok,no)=>{const r=d.transaction(STORE).objectStore(STORE).getAll();r.onsuccess=()=>{d.close();ok(r.result||[]);};r.onerror=()=>{d.close();no(r.error);};});}
   async function put(items){if(!items.length)return;const d=await db();return new Promise((ok,no)=>{const t=d.transaction(STORE,"readwrite");items.forEach(x=>t.objectStore(STORE).put(x));t.oncomplete=()=>{d.close();ok(true);};t.onerror=()=>{d.close();no(t.error);};});}
-  async function prune(paths){const keep=new Set(paths),old=(await all()).filter(x=>!keep.has(x.path)).map(x=>x.path);if(!old.length)return;const d=await db();await new Promise((ok,no)=>{const t=d.transaction(STORE,"readwrite");old.forEach(p=>t.objectStore(STORE).delete(p));t.oncomplete=ok;t.onerror=()=>no(t.error);});d.close();}
+  async function prune(paths){const keep=new Set(paths),old=(await all()).filter(x=>!keep.has(x.path) && !x.path.startsWith("user:/")).map(x=>x.path);if(!old.length)return;const d=await db();await new Promise((ok,no)=>{const t=d.transaction(STORE,"readwrite");old.forEach(p=>t.objectStore(STORE).delete(p));t.oncomplete=ok;t.onerror=()=>no(t.error);});d.close();}
   function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(16);}
   function meta(v){try{if(v){localStorage.setItem(META,JSON.stringify(v));return;}return JSON.parse(localStorage.getItem(META)||"{}");}catch(_){return{};}}
   const SEEDS=[
