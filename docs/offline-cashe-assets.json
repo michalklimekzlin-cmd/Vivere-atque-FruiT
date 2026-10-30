@@ -1,21 +1,18 @@
 {
-  "generatedAt": "2026-08-31T00:00:00.000Z",
+  "generatedAt": "2026-10-30T22:48:21.524Z",
   "description": "CHT 360°‰. — úplný offline seznam souborů publikovaných z docs/.",
   "files": [
     "./index.html",
     "./manifest.json",
     "./icon.svg",
-
     "./style.css",
     "./css/glyph-engine.css",
     "./css/mluva-cht-dock.css",
     "./css/pamet.css",
     "./css/prstenec-pokojicku.css",
     "./css/revia-dock.css",
-
     "./batole-core.css",
     "./batole-core.js",
-
     "./js/aplikace.js",
     "./js/app.js",
     "./js/bubinky-petka.js",
@@ -44,7 +41,6 @@
     "./js/revia-zakladni-znalosti.js",
     "./js/sloty.js",
     "./js/uloziste.js",
-
     "./js/cht-360-aplikace-2.js",
     "./js/cht-360-zamky-spojnice.js",
     "./js/cht-360-oblouk-osmi-zamku.js",
@@ -55,23 +51,19 @@
     "./js/cht-360-logger.js",
     "./js/cht-360-performance.js",
     "./js/cht-ui-components.js",
-
     "./data/schema-pameti.json",
-
     "./36O°‰./app.js",
     "./36O°‰./icon.svg",
     "./36O°‰./index.html",
     "./36O°‰./manifest.webmanifest",
     "./36O°‰./styles.css",
     "./36O°‰./sw.js",
-
     "./bubinky/app.js",
     "./bubinky/index.html",
     "./bubinky/manifest.json",
     "./bubinky/slot-locks.js",
     "./bubinky/styles.css",
     "./bubinky/sw.js",
-
     "./glyph-cht-360/app.js",
     "./glyph-cht-360/icon.svg",
     "./glyph-cht-360/index.html",
@@ -79,7 +71,6 @@
     "./glyph-cht-360/style.css",
     "./glyph-cht-360/styles.css",
     "./glyph-cht-360/sw.js",
-
     "./glyph-pokojicku-cht-360/app.js",
     "./glyph-pokojicku-cht-360/glyph-dvirka-4.css",
     "./glyph-pokojicku-cht-360/glyph-dvirka-4.js",
@@ -88,7 +79,6 @@
     "./glyph-pokojicku-cht-360/manifest.webmanifest",
     "./glyph-pokojicku-cht-360/styles.css",
     "./glyph-pokojicku-cht-360/sw.js",
-
     "./cht-puls-360/app.js",
     "./cht-puls-360/attachments.js",
     "./cht-puls-360/index.html",
@@ -98,11 +88,9 @@
     "./cht-puls-360/sw.js",
     "./cht-puls-360/vendor/fflate-0.8.2.min.js",
     "./cht-puls-360/vendor/FFLATE-LICENSE.txt",
-
     "./cht360-jadra-pracovni-deska/app.js",
     "./cht360-jadra-pracovni-deska/index.html",
     "./cht360-jadra-pracovni-deska/style.css",
-
     "./mluva-cht-360/app.js",
     "./mluva-cht-360/cht-glyph-bridge.js",
     "./mluva-cht-360/icon.svg",
@@ -110,7 +98,6 @@
     "./mluva-cht-360/manifest.webmanifest",
     "./mluva-cht-360/styles.css",
     "./mluva-cht-360/sw.js",
-
     "./offline-dilna/app.js",
     "./offline-dilna/index.html",
     "./offline-dilna/manifest.webmanifest",
@@ -118,7 +105,6 @@
     "./offline-dilna/sw.js",
     "./offline-dilna/vendor/fflate-0.8.2.min.js",
     "./offline-dilna/vendor/FFLATE-LICENSE.txt",
-
     "./signal-360/index.html",
     "./signal-360/js/app.js",
     "./signal-360/js/pamet-store.js",
@@ -127,7 +113,6 @@
     "./signal-360/manifest.json",
     "./signal-360/styles.css",
     "./signal-360/sw.js",
-
     "./API.md",
     "./CHT-360-STORAGE-SCHEMA.md",
     "./COMPONENTS.md",
@@ -136,9 +121,9 @@
     "./README.md",
     "./revia-spubislost.js",
     "./vercel.json",
-
     "./offline-cashe-assets.json",
     "./js/cht-360-glyph-grid-bg.js",
-    "./vafit-mrizka.html"
-    ]
+    "./vafit-mrizka.html",
+    "./braska-knowledge.js"
+  ]
 }
