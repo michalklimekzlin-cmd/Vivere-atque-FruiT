@@ -585,6 +585,7 @@
     view.open = Boolean(open);
     if (!view.ui.root) return;
     view.ui.root.dataset.open = String(view.open);
+    document.body.classList.toggle("batole-panel-open", view.open);
     view.ui.button.setAttribute("aria-expanded", String(view.open));
     if (view.open) {
       syncWorld("panel-open");
