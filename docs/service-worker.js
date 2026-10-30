@@ -15,7 +15,7 @@
 */
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v15-braska-knowledge`;
+const CACHE_NAME = `${CACHE_PREFIX}v16-braska-memory-chat`;
 
 const OFFLINE_PAGE = "./index.html";
 const OFFLINE_MANIFEST = "./offline-cashe-assets.json";
@@ -40,6 +40,9 @@ const CORE_FILES = [
   "./batole-core.css",
   "./batole-core.js",
   "./braska-knowledge.js",
+  "./braska-360.js",
+  "./braska-memory-link.js",
+  "./braska-chat.js",
 
   "./js/cht-chybozrout.js",
   "./js/cht-chybozrout-domov.js",
