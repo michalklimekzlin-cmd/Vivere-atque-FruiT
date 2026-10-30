@@ -16,12 +16,7 @@
 
 name: Zscaler IaC Scan
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  schedule:
-    - cron: '36 9 * * 0'
+  workflow_dispatch:
 
 permissions:
   contents: read
