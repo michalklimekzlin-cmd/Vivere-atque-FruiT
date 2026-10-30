@@ -105,6 +105,27 @@
     const txt = String(input || "").trim();
     if (!txt) return "Jsem tady. Napiš mi něco. :)";
 
+    // Výslovný příkaz pro uložení poznatku do dlouhodobé lokální znalostní paměti.
+    const teachMatch = txt.match(/^zapamatuj si\s*:\s*([\s\S]{3,})$/i);
+    if (teachMatch) {
+      const note = teachMatch[1].trim();
+      const title = note.split(/[.!?\\n]/)[0].trim().slice(0, 80) || "Poznatek od uživatele";
+      let saved = false;
+      try {
+        if (window.BraskaKnowledge?.teach) {
+          await window.BraskaKnowledge.teach(title, note, { source: "uživatel / výslovné zapamatování", tags: ["uživatelské-učení", "cht360"] });
+          saved = true;
+        }
+      } catch (error) { console.warn("[Bráška teach]", error); }
+      try {
+        window.Braska360?.remember?.(note, { type: "výslovně uložený poznatek", importance: 90, source: "uživatel", tags: ["zapamatovat", "cht360"] });
+        window.Braska360?.userMessage?.(txt);
+      } catch (error) { console.warn("[Bráška memory write]", error); }
+      return saved
+        ? "Uložil jsem tento poznatek do dlouhodobé lokální znalostní paměti i do paměťového zásobníku CHT.\\n\\n" + note
+        : "Dlouhodobá znalostní paměť teď není dostupná. Nechci tvrdit, že se něco uložilo.";
+    }
+
     // Nejdřív hledáme ve starších záznamech, až potom ukládáme nový vstup.
     const memories = [];
     try {
