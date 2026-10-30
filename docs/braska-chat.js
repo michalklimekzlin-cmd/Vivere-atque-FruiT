@@ -137,6 +137,14 @@
       console.warn("[Bráška memory write]", error);
     }
 
+    // Nejprve bezpečně zkopíruj aktuální planetární Sloty do vlastní knihovny.
+    // Zdrojové Sloty se pouze čtou; nic v planetách se nepřepisuje.
+    let learned = [];
+    try {
+      if (window.BraskaLearning?.learnFromSlots) await window.BraskaLearning.learnFromSlots();
+      learned = await window.BraskaLearning?.search?.(txt, 4) || [];
+    } catch (error) { console.warn("[Bráška learning vault]", error); }
+
     let knowledge = [];
     try {
       knowledge = await window.BraskaKnowledge?.search?.(txt, 4) || [];
@@ -148,6 +156,13 @@
       memories.slice(0, 3).forEach((item, i) => {
         pieces.push((i + 1) + ". " + String(item.text || "").slice(0, 700) +
           (item.source ? "\nZdroj: " + item.source : ""));
+      });
+    }
+    if (learned.length) {
+      pieces.push("Z toho, co jsem si dříve bezpečně uložil ze Slotů CHT:");
+      learned.slice(0, 2).forEach((item, i) => {
+        pieces.push((i + 1) + ". " + String(item.title || "Poznatek").slice(0, 100) +
+          "\n" + String(item.content || "").slice(0, 650));
       });
     }
     if (knowledge.length) {
