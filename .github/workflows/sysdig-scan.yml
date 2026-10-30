@@ -6,12 +6,7 @@
 name: Sysdig - Build, scan, push and upload sarif report
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  schedule:
-    - cron: '31 12 * * 1'
+  workflow_dispatch:
 
 permissions:
   contents: read
