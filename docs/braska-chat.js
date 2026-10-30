@@ -105,16 +105,16 @@
     const txt = String(input || "").trim();
     if (!txt) return "Jsem tady. Napiš mi něco. :)";
 
-    // Zapisujeme skutečný vstup do lokální paměti CHT, pokud je dostupná.
-    try { window.Braska360?.userMessage?.(txt); } catch (error) {
-      console.warn("[Bráška memory]", error);
-    }
-
+    // Nejdřív hledáme ve starších záznamech, až potom ukládáme nový vstup.
     const memories = [];
     try {
       const found = window.Braska360?.searchMemory?.(txt, 4) || [];
       if (Array.isArray(found)) memories.push(...found);
     } catch (error) { console.warn("[Bráška memory search]", error); }
+
+    try { window.Braska360?.userMessage?.(txt); } catch (error) {
+      console.warn("[Bráška memory write]", error);
+    }
 
     let knowledge = [];
     try {
