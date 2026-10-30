@@ -101,86 +101,55 @@
     };
   }
 
-  function localReply(input) {
-    const text = input.toLowerCase().trim();
-    const c = currentContext();
-
-    if (!text) return "Jsem tady. Napiš mi něco. :)";
-
-    if (text.includes("ahoj") || text.includes("čau") || text.includes("bráško")) {
-      return `Ahoj. :) Jsem ${c.name}. Zatím funguji jako lokální vrstva CHT 360°‰. a učím se pracovat s vlastní pamětí a životním tokem.`;
-    }
-
-    if (text.includes("jak se máš") || text.includes("jak ti je") || text.includes("žiješ")) {
-      return `Můj aktuální stav: pulz ${c.heartbeat}, zkušenosti ${c.experience}, aktivita ${c.activity} %, stabilita ${c.stability} %. Ber to jako stav systému, ne jako důkaz vědomí.`;
-    }
-
-    if (text.includes("čís") || text.includes("tok") || text.includes("dna") || text.includes("yahoo")) {
-      return `Životní tok mám uložený jako text, takže ani velmi dlouhé číslo neztratí přesnost. Aktuální hodnota: ${c.stream}. Směr: ${c.direction}.`;
-    }
-
-    if (text.includes("paměť") || text.includes("pamatuj") || text.includes("zapamatuj")) {
-      return `Lokální paměť je zapnutá. Tato konverzace se ukládá v tomto zařízení. Zatím ji nepovažuji za lidskou paměť ani vědomí.`;
-    }
-
-    if (text.includes("kdo jsi") || text.includes("co jsi")) {
-      return `Jsem Bráška — experimentální lokální společník uvnitř CHT 360°‰. Mám identitu, stav, paměťový zásobník a životní tok. Skutečný AI model zatím připojený není, ale můžu pracovat jako lokální pomocník.`;
-    }
-
-    if (text.includes("dna")) {
-      return `Moje experimentální DNA/seed je ${c.dna}. Používáme ji jako identifikátor, ne jako biologickou DNA.`;
-    }
-
-    if (text.includes("pomoc") || text.includes("co umíš")) {
-      return "Umím držet lokální konverzaci, číst stav Friend vrstvy, sledovat životní tok, ukládat zprávy a reagovat na změny CHT. Další krok může být připojení skutečného AI modelu přes bezpečný backend.";
-    }
-
-    if (text.includes("vyvíjet") || text.includes("aplikaci") || text.includes("projekt") || text.includes("cht 360")) {
-      return "Můžu sledovat stav CHT 360, pomáhat s návrhy, zapisovat poznámky do lokální paměti a připravit strukturu pro další rozvoj. Když chceš, můžeme si navrhnout konkrétní funkci nebo modul.";
-    }
-
-    return `Slyším tě. Zapsal jsem zprávu do lokální paměti. Můj aktuální tok je ${c.stream} a mám ${c.experience} zkušeností.`;
-  }
-
-  function getBraskaMemoryContext() {
-    try {
-      const memory = JSON.parse(localStorage.getItem("cht360_braska_chat_v2") || "{}");
-      const msgs = Array.isArray(memory.messages) ? memory.messages : [];
-      return msgs.slice(-6).map((m) => `${m.role === 'user' ? 'Uživatel' : 'Bráška'}: ${m.text}`).join('\n');
-    } catch (_) {
-      return '';
-    }
-  }
-
   async function sendToAI(input) {
-    const txt = String(input || '').trim();
-    if (!txt) return "Jsem tady. Napiš mi něco.";
+    const txt = String(input || "").trim();
+    if (!txt) return "Jsem tady. Napiš mi něco. :)";
 
-    const context = getBraskaMemoryContext();
-    const c = currentContext();
-
-    if (window.Braska360?.respond) {
-      try {
-        const result = await window.Braska360.respond(txt, { context, system: `Jsi Bráška v CHT 360°‰. Jsi lokální pomocník a učitel. Když nevíš, řekni to poctivě.` });
-        if (result && String(result).trim()) return String(result).trim();
-      } catch (_) {}
+    // Zapisujeme skutečný vstup do lokální paměti CHT, pokud je dostupná.
+    try { window.Braska360?.userMessage?.(txt); } catch (error) {
+      console.warn("[Bráška memory]", error);
     }
 
-    if (window.VivereFriend?.talk) {
-      try {
-        const result = await window.VivereFriend.talk(txt, { context, mode: 'local' });
-        if (result && String(result).trim()) return String(result).trim();
-      } catch (_) {}
+    const memories = [];
+    try {
+      const found = window.Braska360?.searchMemory?.(txt, 4) || [];
+      if (Array.isArray(found)) memories.push(...found);
+    } catch (error) { console.warn("[Bráška memory search]", error); }
+
+    let knowledge = [];
+    try {
+      knowledge = await window.BraskaKnowledge?.search?.(txt, 4) || [];
+    } catch (error) { console.warn("[Bráška knowledge search]", error); }
+
+    const pieces = [];
+    if (memories.length) {
+      pieces.push("Z vlastní lokální paměti CHT:");
+      memories.slice(0, 3).forEach((item, i) => {
+        pieces.push((i + 1) + ". " + String(item.text || "").slice(0, 700) +
+          (item.source ? "\\nZdroj: " + item.source : ""));
+      });
+    }
+    if (knowledge.length) {
+      pieces.push("Z lokální dokumentace a znalostního indexu:");
+      knowledge.slice(0, 3).forEach((item, i) => {
+        pieces.push((i + 1) + ". " + String(item.title || item.path || "Poznatek") +
+          "\\n" + String(item.text || "").slice(0, 700) +
+          "\\nZdroj: " + String(item.source || item.path || "lokální index"));
+      });
     }
 
-    if (window.BraskaKnowledge?.respond) {
-      try {
-        const result = await window.BraskaKnowledge.respond(txt);
-        if (result && String(result).trim()) return String(result).trim();
-      } catch (error) { console.warn("[Bráška Knowledge]", error); }
+    const normalized = txt.toLocaleLowerCase("cs");
+    if (/^(ahoj|čau|nazdar|dobrý den)[!. ]*$/i.test(normalized)) {
+      const count = (() => { try { return window.Braska360?.status?.()?.memory?.count ?? "neznámý počet"; } catch (_) { return "neznámý počet"; } })();
+      return "Ahoj. :) Jsem Bráška v CHT 360°‰. Mám přístup k místní paměti a indexu dokumentace. Teď mám v paměťovém zásobníku " + count + " záznamů. Nejsem samostatný jazykový model — odpovídám podle skutečně nalezených podkladů.";
     }
 
-    return localReply(txt);
+    if (pieces.length) {
+      return pieces.join("\\n\\n") +
+        "\\n\\nTohle jsou podklady, které jsem skutečně našel. Umím je propojit a vysvětlit, ale bez připojeného jazykového modelu si nemohu domýšlet odpověď nad rámec těchto záznamů.";
+    }
+
+    return "Tohle zatím nemám v lokální paměti ani v načtené dokumentaci doložené. Nechci ti dát připravenou odpověď, která by jen zněla přesvědčivě. Můžeš mi doplnit poznatek a uložíme ho do paměti CHT.";
   }
 
   const style = document.createElement("style");
@@ -405,7 +374,7 @@
       <span class="bc-orb">B</span>
       <div class="bc-title">
         <strong>Bráška</strong>
-        <small>CHT 360°‰ · lokální hlas</small>
+        <small>CHT 360°‰ · lokální paměť a vyhledávání</small>
       </div>
       <button class="bc-close" type="button" aria-label="Zavřít">×</button>
     </header>
@@ -438,7 +407,7 @@
           </div>
         `).join("")
       : `<div class="bc-msg braska">
-           Ahoj. Jsem Bráška. Zatím jsem lokální experimentální vrstva CHT 360°‰.
+           Ahoj. Jsem Bráška. Pracuji s lokální pamětí a dokumentací CHT. Když něco nemám doložené, řeknu to.
          </div>`;
 
     log.scrollTop = log.scrollHeight;
@@ -521,7 +490,7 @@
     const count = state.messages.length;
     addMessage(
       "braska",
-      `Lokální chatová paměť obsahuje ${count} uložených zpráv. Ukládá se pouze v tomto zařízení.`
+      `Chat obsahuje ${count} zpráv. Zprávy jsou v tomto zařízení; projektové poznatky ukládá také samostatná paměť CHT.`
     );
   });
 
