@@ -354,6 +354,13 @@
   .batole-panel { right: -1px; }
 }
 
+/* Uvolni prostor pro panel Batolete; dock se po zavření vrátí. */
+body.batole-panel-open #openLifePanel,
+body.batole-panel-open #openReviaPanel,
+body.batole-panel-open #braskaChatButton {
+  display: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .batole-orbit,
   .batole-orbit-halo::before,
