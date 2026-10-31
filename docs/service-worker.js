@@ -15,7 +15,7 @@
 */
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v24-bubinky-fullscreen`;
+const CACHE_NAME = `${CACHE_PREFIX}v25-bubinky-network-first`;
 
 const OFFLINE_PAGE = "./index.html";
 const OFFLINE_MANIFEST = "./offline-cashe-assets.json";
@@ -514,6 +514,19 @@ async function handleNavigation(
 
   const request =
     event.request;
+
+  /*
+    Síť bubínků dostane při otevření přednostně
+    čerstvou verzi z GitHub Pages. Při offline
+    režimu se použije uložená kopie.
+  */
+  if (new URL(request.url).pathname.endsWith("/bubinky.html")) {
+    const freshBeads = await updateFromNetwork(request);
+    if (freshBeads) return freshBeads;
+
+    const offlineBeads = await findCached(request);
+    if (offlineBeads) return offlineBeads;
+  }
 
 
   /*
