@@ -3,83 +3,73 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#100d08">
-<title>VaF'i'T · 25 otočných bubínků</title>
+<meta name="theme-color" content="#0b0906">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>VaF'i'T</title>
 <style>
-:root{color-scheme:dark;--gold:#f0d49a;--paper:#fff0c5}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% 30%,#292012 0,#151008 48%,#090806 100%);color:var(--paper);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-body{padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);min-height:100svh}
-main{width:min(100%,900px);margin:0 auto;padding:20px 0 30px}
-header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 2px 16px}
-h1{margin:0;font-size:12px;letter-spacing:.19em;font-weight:800;color:var(--gold)}
-#count{font-size:10px;color:rgba(255,240,197,.5);text-align:right}
-.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 12px}
-.toolbar button{border:1px solid rgba(255,226,173,.34);border-radius:999px;background:rgba(4,3,2,.4);color:#e9d7b0;padding:8px 11px;font-size:11px}
-.intro{font-size:12px;line-height:1.5;color:rgba(255,240,197,.57);margin:0 2px 18px}
-.drum-field{position:relative;width:min(100%,700px);margin:0 auto;padding:8px 0 18px}
-.grid{display:grid;width:100%;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:start;justify-items:stretch}
-.drum{position:relative;min-width:0;width:100%;aspect-ratio:.82;display:grid;grid-template-rows:15px 17px minmax(0,1fr) 17px;place-items:center;gap:0;padding:3px 4px;overflow:hidden;color:var(--paper);border:1px solid rgba(255,226,173,.48);border-radius:16px;background:radial-gradient(ellipse at 50% 34%,rgba(255,226,173,.14),transparent 48%),linear-gradient(155deg,rgba(22,19,13,.98),rgba(2,2,1,.94) 65%);box-shadow:inset 0 1px 0 rgba(255,226,173,.09),inset 0 0 20px rgba(255,226,173,.055),0 4px 18px rgba(0,0,0,.24);user-select:none;-webkit-user-select:none}
-.drum.rotatable{cursor:ns-resize;touch-action:none}
-.drum-input{position:relative;z-index:3;width:100%;min-width:0;height:100%;align-self:stretch;resize:none;border:0;border-radius:7px;outline:none;background:transparent;color:var(--gold);font:600 clamp(10px,2.1vw,16px)/1.25 system-ui,-apple-system,sans-serif;text-align:center;padding:5px 2px;overflow-wrap:anywhere;}
-.drum-input::placeholder{color:rgba(255,226,173,.42);font-weight:450;font-size:clamp(9px,1.8vw,13px)}
-.drum-input:focus{background:rgba(255,226,173,.045);box-shadow:inset 0 0 0 1px rgba(255,226,173,.28)}
-.drum.preserved{cursor:ns-resize;touch-action:none}
-.drum:before,.drum:after{position:absolute;z-index:1;right:8px;left:8px;height:1px;content:"";background:rgba(255,226,173,.2);pointer-events:none}
-.drum:before{top:35px}.drum:after{bottom:25px}
-.drum span,.drum strong,.drum small{position:relative;z-index:2;width:100%;text-align:center;pointer-events:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.drum .cap{color:rgba(255,240,197,.72);font-size:9px;font-weight:750;letter-spacing:.06em}
-.drum .neighbor{color:rgba(255,240,197,.32);font-size:10px;line-height:1}
-.drum strong{color:var(--gold);font-size:clamp(18px,5vw,29px);font-weight:650;line-height:1;text-shadow:0 0 13px rgba(255,226,173,.52)}
-.drum small{font-size:10px;color:rgba(255,240,197,.3)}
-.drum.dragging{border-color:rgba(255,226,173,.8);background:radial-gradient(circle at 50% 48%,rgba(255,226,173,.22),transparent 55%),rgba(2,2,1,.94)}
-/* Každý sloupec klesá směrem ke středu, aby síť kreslila úsměv. */
-.drum:nth-child(5n+1){transform:translateY(0)}
-.drum:nth-child(5n+2){transform:translateY(9px)}
-.drum:nth-child(5n+3){transform:translateY(16px)}
-.drum:nth-child(5n+4){transform:translateY(9px)}
-.drum:nth-child(5n){transform:translateY(0)}
-footer{display:flex;justify-content:space-between;gap:12px;margin:20px 2px 0;font-size:10px;line-height:1.4;color:rgba(255,240,197,.35)}
-@media(min-width:600px){.grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.drum{aspect-ratio:.9}.drum .cap{font-size:10px}.drum .neighbor{font-size:11px}.drum small{font-size:10px}.drum strong{font-size:32px}.drum-input{font-size:15px}}
+:root{color-scheme:dark;--gold:#f0d49a;--paper:#fff0c5;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090806;color:var(--paper);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{background:radial-gradient(ellipse at 50% 45%,rgba(159,112,35,.16),transparent 58%),radial-gradient(ellipse at 50% 100%,#171008 0,#090806 72%)}
+main{width:100%;height:100vh;height:100dvh;padding:calc(var(--safe-top) + 5px) 8px calc(var(--safe-bottom) + 5px);overflow:hidden}
+.grid{width:100%;height:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:repeat(5,minmax(0,1fr));gap:clamp(5px,1.8vw,9px);align-items:stretch;justify-items:stretch}
+.drum{position:relative;min-width:0;min-height:0;width:100%;height:100%;display:grid;place-items:center;padding:3px;border:1px solid rgba(255,226,173,.43);border-radius:999px;background:radial-gradient(ellipse at 50% 38%,rgba(255,226,173,.18),transparent 54%),linear-gradient(155deg,rgba(22,19,13,.98),rgba(2,2,1,.94) 68%);box-shadow:inset 0 1px 0 rgba(255,226,173,.10),inset 0 0 22px rgba(255,226,173,.07),0 4px 16px rgba(0,0,0,.28);color:var(--gold);touch-action:none;user-select:none;-webkit-user-select:none;cursor:ns-resize;overflow:hidden}
+.drum:before,.drum:after{content:"";position:absolute;left:18%;right:18%;height:1px;background:rgba(255,226,173,.17);pointer-events:none}
+.drum:before{top:22%}.drum:after{bottom:22%}
+.drum strong{position:relative;z-index:2;display:block;max-width:100%;max-height:58%;overflow:hidden;padding:0 2px;color:var(--gold);font-size:clamp(20px,7vw,34px);font-weight:650;line-height:1;text-align:center;text-shadow:0 0 13px rgba(255,226,173,.5);overflow-wrap:anywhere;pointer-events:none}
+.drum.dragging{border-color:rgba(255,226,173,.9);background:radial-gradient(circle at 50% 48%,rgba(255,226,173,.25),transparent 58%),rgba(2,2,1,.96);box-shadow:inset 0 0 24px rgba(255,226,173,.12),0 0 18px rgba(255,226,173,.12)}
+/* Jemný oblouk korálků – střední sloupce klesají níže. */
+.drum:nth-child(5n+1),.drum:nth-child(5n){transform:translateY(0)}
+.drum:nth-child(5n+2),.drum:nth-child(5n+4){transform:translateY(4px)}
+.drum:nth-child(5n+3){transform:translateY(8px)}
+@media(max-height:700px){.drum strong{font-size:clamp(17px,6vw,28px)}}
+@media(prefers-reduced-motion:no-preference){.drum{transition:filter .12s ease,border-color .12s ease,background .12s ease}.drum:active{filter:brightness(1.12)}}
 </style>
 </head>
 <body>
-<main>
-<header><h1>VaF'i'T · SÍŤ BUBÍNKŮ</h1><div id="count">25 bubínků</div></header>
-<nav class="toolbar">
-<button id="backup" type="button">Záloha ↓</button>
-<button id="restore" type="button">Obnovit ↑</button>
-<button id="reset" type="button">Výchozí síť</button>
-<input id="file" type="file" accept="application/json" hidden>
-</nav>
-<p class="intro">Polož prst na bubínek a táhni nahoru nebo dolů. Tím otáčíš jeho VaF'¡¡'T. Každý bubínek se ovládá samostatně a síť se ukládá v tomto zařízení.</p>
-<section class="drum-field"><div class="grid" id="grid" aria-label="25 otočných bubínků"></div></section>
-<footer><span>Táhni nahoru / dolů · přepínej VaF'i'T</span><span>25 bubínků · rozložení do úsměvu</span></footer>
+<main aria-label="Síť 25 otočných VaF'i'T korálků">
+  <section class="grid" id="grid" aria-label="25 otočných korálků"></section>
 </main>
 <script>
-(()=> {
+(()=>{'use strict';
 const KEY='vafit-25-rotating-drums-v2';
-const symbols=['♧','Ⅲ','♫','7i_','¡','>°|°<','—;’/','•ア','(•.•)','LOL','CHT','V','E','R','·','°','%∞','()ア','D','Love',"VaF'¡¡'T",'§}','O<','╪','Ž','ʒʃ','Я','Ø','(°.•).•)','∴','T','Glyph','Vive','Batole','Revia','∞','Ƨ','☼','♧','Ⅰ','¡','·','♙','(•.•)','(Λ)','ↄ',';ˣ','•','•ア'];
-const defaults=Array.from({length:25},(_,i)=>({id:i+1,slot:0,name:'VaF'¡¡'T',text:''}));
-let drums=defaults.map(d=>({...d})),nextId=26,preservedId=1,isInitialized=false;
-try{const saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&Array.isArray(saved.drums)&&saved.drums.length){drums=saved.drums.slice(0,25).map((d,i)=>({id:Number(d.id)||i+1,slot:Math.abs(Number(d.slot)||0)%symbols.length,name:String(d.name||'VaF'¡¡'T'),text:String(d.text||'')}));nextId=Math.max(26,...drums.map(d=>d.id+1));if(saved.layout==='editable-v1'){preservedId=Number(saved.preservedId)||drums[0].id;isInitialized=true}}}catch(_){}
-const grid=document.getElementById('grid'),count=document.getElementById('count'),file=document.getElementById('file');
-// Ponecháme jeden původní otočný bubínek v jeho aktuálním stavu; ostatní vyčistíme.
-function prepareNetwork(){if(isInitialized)return;const keep=drums.find(d=>d.slot!==0)||drums[0];preservedId=keep?keep.id:1;drums=Array.from({length:25},(_,i)=>{const d=drums[i]||{id:i+1,slot:0,name:'VaF'¡¡'T',text:''};if(d.id===preservedId)return {...d,text:''};return {...d,slot:0,text:''}});isInitialized=true}
-prepareNetwork();
+const symbols=['♧','Ⅲ','♫','7i_','¡','>°|°<','—;’/','•ア','(•.•)','LOL','CHT','V','E','R','·','°','%∞','()ア','D','Love',"VaF’i’T",'§}','O<','╪','Ž','ʒʃ','Я','Ø','(°.•).•)','∴','T','Glyph','Vive','Batole','Revia','∞','Ƨ','☼','♧','Ⅰ','¡','·','♙','(•.•)','(Λ)','ↄ',';ˣ','•','•ア'];
+const grid=document.getElementById('grid');
+const defaults=Array.from({length:25},(_,i)=>({id:i+1,slot:0,name:'VaF’i’T'}));
+let drums=defaults.map(d=>({...d}));
+try{
+ const saved=JSON.parse(localStorage.getItem(KEV)||'null');
+ if(saved&&Array.isArray(saved.drums)&&saved.drums.length){
+  drums=saved.drums.slice(0,25).map((d,i)=>({id:Number(d.id)||i+1,slot:Math.abs(Number(d.slot)||0)%symbols.length,name:String(d.name||'VaF’i’T')}));
+  while(drums.length<25)drums.push({id:drums.length+1,slot:0,name:'VaF’i’T'});
+ }
+}catch(_){/* Při poškozeném úložišti bezpečně použijeme výchozí síť. */}
 let gesture=null;
-function save(){try{localStorage.setItem(KEY,JSON.stringify({version:3,layout:'editable-v1',preservedId,drums}))}catch(_){}}
-function drawValue(d){return symbols[((d.slot%symbols.length)+symbols.length)%symbols.length]}
-function updateDrum(el,d){el.querySelector('.neighbor').textContent=symbols[(d.slot-1+symbols.length)%symbols.length];el.querySelector('strong').textContent=drawValue(d);el.querySelector('small').textContent=symbols[(d.slot+1)%symbols.length]}
-function render(){grid.replaceChildren();drums.slice(0,25).forEach((d,i)=>{const b=document.createElement('div');b.className='drum'+(d.id===preservedId?' preserved rotatable':'');b.dataset.id=d.id;const cap=document.createElement('span');cap.className='cap';cap.textContent='VaF'¡¡'T';const top=document.createElement('span');top.className='neighbor';top.textContent=symbols[(d.slot-1+symbols.length)%symbols.length];const bottom=document.createElement('small');bottom.textContent=d.id===preservedId?symbols[(d.slot+1)%symbols.length]:'VaF'¡¡'T';if(d.id===preservedId){const val=document.createElement('strong');val.textContent=drawValue(d);b.setAttribute('aria-label','Původní otočný bubínek. Táhni nahoru nebo dolů pro změnu.');b.append(cap,top,val,bottom);b.addEventListener('pointerdown',startDrag);b.addEventListener('pointermove',moveDrag);b.addEventListener('pointerup',endDrag);b.addEventListener('pointercancel',endDrag)}else{const input=document.createElement('textarea');input.className='drum-input';input.maxLength=160;input.rows=2;input.value=d.text||'';input.placeholder='Napiš…';input.setAttribute('aria-label','Text bubínku '+(i+1));input.addEventListener('input',()=>{d.text=input.value;save()});b.append(cap,top,input,bottom)}grid.append(b)});count.textContent='25 / 25 bubínků · 1 původní · 24 volných';}
-function startDrag(e){e.preventDefault();const d=drums.find(x=>x.id===Number(e.currentTarget.dataset.id));if(!d)return;gesture={id:d.id,startY:e.clientY,lastY:e.clientY,carry:0,el:e.currentTarget,moved:false};gesture.el.classList.add('dragging');try{gesture.el.setPointerCapture(e.pointerId)}catch(_){}}
-function moveDrag(e){if(!gesture||gesture.id!==Number(e.currentTarget.dataset.id))return;e.preventDefault();const dy=gesture.lastY-e.clientY;gesture.lastY=e.clientY;gesture.carry+=dy;let steps=0;while(Math.abs(gesture.carry)>=18){const dir=gesture.carry>0?1:-1;steps+=dir;gesture.carry-=dir*18}if(steps){const d=drums.find(x=>x.id===gesture.id);if(d){d.slot=(d.slot+steps+symbols.length*10)%symbols.length;gesture.moved=true;updateDrum(gesture.el,d);save()}}}
-function endDrag(e){if(!gesture||gesture.id!==Number(e.currentTarget.dataset.id))return;gesture.el.classList.remove('dragging');gesture=null}
-document.getElementById('backup').onclick=()=>{const blob=new Blob([JSON.stringify({version:2,drums},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='vafit-25-bubinku.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
-document.getElementById('restore').onclick=()=>file.click();
-file.onchange=()=>{const f=file.files&&file.files[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const data=JSON.parse(reader.result);const incoming=Array.isArray(data)?data:data.drums;if(!Array.isArray(incoming))throw Error();drums=incoming.slice(0,25).map((d,i)=>({id:Number(d.id)||i+1,slot:Math.abs(Number(d.slot)||0)%symbols.length,name:String(d.name||'VaF'¡¡'T'),text:String(d.text||'')}));while(drums.length<25)drums.push({id:nextId++,slot:0,name:'VaF'¡¡'T',text:''});isInitialized=false;prepareNetwork();save();render()}catch(_){alert('Soubor zálohy se nepodařilo načíst.')}file.value=''};reader.readAsText(f)};
-document.getElementById('reset').onclick=()=>{if(confirm('Obnovit výchozích 25 bubínků? Aktuální nastavení se přepíše.')){drums=defaults.map(d=>({...d}));preservedId=1;isInitialized=true;save();render()}};
-save();
+function save(){try{localStorage.setItem(KEY,JSON.stringify({version:2,drums}))}catch(_){}}
+function valueOf(d){return symbols[((d.slot%symbols.length)+symbols.length)%symbols.length]}
+function render(){
+ grid.replaceChildren();
+ drums.slice(0,25).forEach((d,i)=>{
+  const b=document.createElement('button');b.type='button';b.className='drum';b.dataset.id=String(d.id);
+  b.setAttribute('aria-label','Korálek '+(i+1)+': '+valueOf(d)+'. Tažením nahoru nebo dolů otočíš symbolem.');
+  const value=document.createElement('strong');value.textContent=valueOf(d);b.append(value);
+  b.addEventListener('pointerdown',startDrag);b.addEventListener('pointermove',moveDrag);b.addEventListener('pointerup',endDrag);b.addEventListener('pointercancel',endDrag);b.addEventListener('lostpointercapture',endDrag);
+  grid.append(b);
+ });
+}
+function startDrag(e){
+ e.preventDefault();const d=drums.find(x=>x.id===Number(e.currentTarget.dataset.id));if(!d)return;
+ gesture={id:d.id,lastY:e.clientY,carry:0,el:e.currentTarget,pointerId:e.pointerId};gesture.el.classList.add('dragging');
+ try{gesture.el.setPointerCapture(e.pointerId)}catch(_){}
+}
+function moveDrag(e){
+ if(!gesture||gesture.id!==Number(e.currentTarget.dataset.id)||gesture.pointerId!==e.pointerId)return;
+ e.preventDefault();const dy=gesture.lastY-e.clientY;gesture.lastY=e.clientY;gesture.carry+=dy;let steps=0;
+ while(Math.abs(gesture.carry)>=18){const dir=gesture.carry>0?1:-1;steps+=dir;gesture.carry-=dir*18}
+ if(steps){const d=drums.find(x=>x.id===gesture.id);if(d){d.slot=(d.slot+steps+symbols.length*10)%symbols.length;const strong=gesture.el.querySelector('strong');strong.textContent=valueOf(d);gesture.el.setAttribute('aria-label','Otočný korálek: '+valueOf(d));save()}}
+}
+function endDrag(e){if(!gesture||gesture.id!==Number(e.currentTarget.dataset.id)||gesture.pointerId!==e.pointerId)return;gesture.el.classList.remove('dragging');gesture=null}
 render();
 })();
 </script>
