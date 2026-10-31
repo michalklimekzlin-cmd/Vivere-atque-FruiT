@@ -187,7 +187,7 @@
 
   // GitHub repository bridge: source is live; learned copies are immutable history.
   const REPO = { owner:"michalklimekzlin-cmd", name:"Vivere-atque-FruiT", branch:null };
-  const REPO_TEXT = /\\.(?:js|mjs|cjs|ts|tsx|jsx|html|css|json|md|txt|svg|yml|yaml|xml|webmanifest|py|sh)$/i;
+  const REPO_TEXT = /\.(?:js|mjs|cjs|ts|tsx|jsx|html|css|json|md|mdx|txt|svg|yml|yaml|xml|webmanifest|py|sh|toml|ini|cfg|conf|sql|graphql|gql|csv|tsv|lock|gradle|properties|kt|java|go|rs|c|h|cpp|hpp|swift|rb|php|vue|svelte|astro)$/i;
   const REPO_ROOT_DOCS = new Set(["README.md","API.md","COMPONENTS.md","PHILOSOPHY.md","CHT-360-STORAGE-SCHEMA.md"]);
   const repoState = { syncing:false, lastSync:null, branch:null, commit:null, files:0, changed:0, deleted:0, status:"čeká na GitHub" };
 
@@ -246,7 +246,7 @@
         const commitRes=await fetch(api+"/commits/"+encodeURIComponent(branch),{headers,cache:"no-store"});
         if(commitRes.ok) commitSha=(await commitRes.json()).sha||null;
       } catch(_) { /* tree SHA zůstává použitelný pro kontrolu souborů */ }
-      const candidates=tree.tree.filter(x=>x.type==="blob" && REPO_TEXT.test(x.path) && Number(x.size||0)<=500000 && !/(^|\\/)(?:node_modules|vendor|\.git|dist|build|coverage)\\//i.test(x.path));
+      const candidates=tree.tree.filter(x=>x.type==="blob" && REPO_TEXT.test(x.path) && Number(x.size||0)<=500000 && !/(^|\/)(?:node_modules|vendor|\.git|dist|build|coverage)\//i.test(x.path));
       const livePaths=new Set(candidates.map(x=>x.path));
       const completeListing=!tree.truncated && processed===candidates.length;
       let changed=0, processed=0;
