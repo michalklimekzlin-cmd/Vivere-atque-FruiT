@@ -15,7 +15,7 @@
 */
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v23-braska-architecture-map`;
+const CACHE_NAME = `${CACHE_PREFIX}v24-bubinky-fullscreen`;
 
 const OFFLINE_PAGE = "./index.html";
 const OFFLINE_MANIFEST = "./offline-cashe-assets.json";
@@ -32,6 +32,7 @@ const CORE_FILES = [
   "./icon.svg",
   "./offline-cashe-assets.json",
   "./vafit-mrizka.html",
+  "./bubinky.html",
 
   "./css/pamet.css",
   "./css/prstenec-pokojicku.css",
