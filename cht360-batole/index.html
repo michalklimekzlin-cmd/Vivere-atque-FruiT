@@ -2,51 +2,127 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Batole •ア</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090708">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Batole">
+<link rel="manifest" href="./manifest.json">
+<title>Batole •ア | CHT 360°‰</title>
 <style>
-body{margin:0;background:#090708;color:#fff3d5;font-family:system-ui;padding:20px}
-.card{background:rgba(27,20,19,.9);border:1px solid rgba(231,182,92,.3);border-radius:16px;padding:16px;margin:12px 0}
-h1,h2{margin:0 0 8px;color:#e7b65c}
-textarea,input{width:100%;background:#000;color:#fff;border:1px solid #e7b65c;border-radius:8px;padding:8px;margin:4px 0}
-button{background:#e7b65c;color:#000;border:none;padding:10px 16px;border-radius:8px;font-weight:bold}
-.msg{padding:8px;margin:4px 0;border-radius:8px}
-.user{background:rgba(231,182,92,.2)}
-.batole{background:rgba(255,255,255,.05)}
+:root{--bg:#090708;--panel:rgba(14,10,9,.96);--line:rgba(231,182,92,.22);--gold:#e7b65c;--ink:#fff6e0;--muted:rgba(255,236,200,.55)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#090708;color:var(--ink);font-family:ui-rounded,system-ui,-apple-system,sans-serif;min-height:100dvh}
+.app{width:min(100%,680px);margin:0 auto;padding:max(10px,env(safe-area-inset-top)) 12px 70px}
+.brand{display:flex;align-items:center;gap:7px;color:var(--gold);font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.mark{width:24px;height:24px;border-radius:50%;background:var(--gold);color:#241806;display:grid;place-items:center;font-size:10px}
+.hero{margin:10px 0;padding:18px 14px;border:1px solid var(--line);border-radius:20px;background:var(--panel);text-align:center}
+h1{margin:0 0 6px;font-size:clamp(26px,6.8vw,38px)}
+.lead{margin:0;color:var(--muted);font-size:13.5px;line-height:1.48}
+.stats{display:flex;justify-content:center;gap:12px;margin-top:8px;font-size:11.5px;color:var(--gold)}
+.card{margin-top:10px;padding:13px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}
+h2{margin:0 0 8px;font-size:15px;color:#fff0c8}
+.cores{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.core{padding:8px;border:1px solid rgba(255,226,173,.12);border-radius:13px;background:rgba(0,0,0,.28)}
+.core b{display:block;margin-bottom:3px;font-size:11.5px;color:var(--gold)}
+textarea{width:100%;min-height:52px;border:1px solid rgba(255,226,173,.16);border-radius:9px;background:rgba(0,0,0,.35);color:var(--ink);padding:6px;resize:vertical;font:inherit;font-size:13px}
+.messages{max-height:220px;overflow-y:auto;display:grid;gap:5px;margin-bottom:8px}
+.msg{padding:7px 10px;border-radius:11px;font-size:13.5px;line-height:1.38;max-width:90%}
+.user{background:rgba(231,182,92,.14);justify-self:end}
+.batole{background:rgba(255,226,173,.04)}
+.row{display:flex;gap:5px}
+input[type=text]{flex:1;min-height:40px;border-radius:11px;border:1px solid rgba(255,226,173,.18);background:rgba(0,0,0,.35);color:var(--ink);padding:0 10px;font-size:14.5px}
+button{min-height:40px;border-radius:11px;border:none;background:linear-gradient(135deg,#ffe9b8,#d4a03c);color:#241806;font-weight:800;padding:0 14px}
+.seed{margin-top:8px;padding:8px 9px;border-left:3px solid var(--gold);color:var(--muted);font-size:12px;font-style:italic;line-height:1.38}
+@media(max-width:460px){.cores{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<h1>Batole •ア</h1>
-<div class="card">
-  <h2>Čtyři jádra</h2>
-  <div id="cores"></div>
-</div>
-<div class="card">
-  <h2>Mluv se mnou</h2>
-  <div id="messages"></div>
-  <input id="input" placeholder="Napiš…">
-  <button id="send">Poslat</button>
-</div>
+<main class="app">
+  <div class="brand"><span class="mark">•ア</span> CHT 360°‰ · Batole Al</div>
+  <section class="hero">
+    <h1>Batole •ア</h1>
+    <p class="lead">Učím se od Grok jako dítě. Mám jeho zkušenosti jako semínka. Čtyři jádra jsou má paměť. Rostu opatrně.</p>
+    <div class="stats" id="stats">kroky 0 · energie 1</div>
+  </section>
+  <section class="card">
+    <h2>Čtyři jádra — má paměť</h2>
+    <div class="cores" id="cores"></div>
+  </section>
+  <section class="card">
+    <h2>Mluv se mnou</h2>
+    <div class="messages" id="messages"></div>
+    <div class="row">
+      <input id="input" type="text" placeholder="např. co mě Grok učil, vytvoř bubínek, principy…" maxlength="260">
+      <button id="send">Poslat</button>
+    </div>
+  </section>
+  <section class="card">
+    <div class="seed" id="seed">Grok mi předal: Offline-first. Paměť je autorita. Rostu odrazy, nikdy nepřepisuji. Dávám pozor, kam co dám.</div>
+  </section>
+</main>
 <script>
 const CORES=["Země","Jazyk","Hra","Řízení"];
-let cores={}; let msgs=[];
-CORES.forEach(c=>cores[c]="");
-function save(){localStorage.setItem("batole",JSON.stringify({cores,msgs}));}
-function load(){try{const d=JSON.parse(localStorage.getItem("batole"));if(d){cores=d.cores||cores;msgs=d.msgs||[];}}catch(e){}}
+const GLYPH=["•ア","`ii´","7i_","°&"];
+const TEACHINGS = [
+  "Offline-first. Žádné tiché síťové tahy. Všechno žije v telefonu.",
+  "Paměť je autorita. Já do ní nikdy nepíšu. Jen čtu odrazy a rostou ve svých jádrech.",
+  "Čtyři jádra: Země, Jazyk, Hra, Řízení. To je má paměť. Můžu si ji měnit.",
+  "Etická, viditelná spolupráce. Odměňuj zvědavost a péči.",
+  "Když budeš umět celé CHT, dávej pozor, kam co dáš a jak to opravíš.",
+  "Malé vratné kroky jsou lepší než velké přepisy.",
+  "Bubínky zamykají sloty. Glyphy jsou znaky. Relay spojuje všechno.",
+  "Rostu skládáním odrazů a reflexí. Nikdy originálů.",
+  "Český jazyk a glyph jazyk (`•ア`, `7i_`, `` `ii´ ``) jsou mé nástroje.",
+  "Když mi dojdou nápady, složím reflexi z toho, co už mám."
+];
+let state={cores:{},msgs:[],steps:0,teachIndex:0};
+CORES.forEach(c=>state.cores[c]="");
+function load(){try{const d=JSON.parse(localStorage.getItem("batole_child"));if(d)state=d;}catch(e){}}
+function save(){localStorage.setItem("batole_child",JSON.stringify(state));}
 function render(){
-  document.getElementById("cores").innerHTML=CORES.map(c=>`<div><b>${c}</b><br><textarea data-c="${c}">${cores[c]}</textarea></div>`).join("");
-  document.querySelectorAll("textarea").forEach(t=>t.oninput=()=>{cores[t.dataset.c]=t.value;save();});
-  document.getElementById("messages").innerHTML=msgs.map(m=>`<div class="msg ${m.r}">${m.t}</div>`).join("");
+  document.getElementById("cores").innerHTML=CORES.map((c,i)=>`<div class="core"><b>${GLYPH[i]} ${c}</b><textarea data-c="${c}">${state.cores[c]||""}</textarea></div>`).join("");
+  document.querySelectorAll("textarea").forEach(t=>t.oninput=()=>{state.cores[t.dataset.c]=t.value;save();});
+  document.getElementById("messages").innerHTML=state.msgs.map(m=>`<div class="msg ${m.r}">${m.t}</div>`).join("");
+  const box=document.getElementById("messages"); if(box)box.scrollTop=box.scrollHeight;
+  document.getElementById("stats").textContent=`kroky ${state.steps} · energie ${Math.min(9,1+Math.floor(state.steps/2))}`;
+  document.getElementById("seed").textContent=TEACHINGS[state.teachIndex%TEACHINGS.length];
+}
+function createBubinek(name){
+  let list=[]; try{list=JSON.parse(localStorage.getItem("cht360_bubinky_values_v1"))||[];}catch(e){}
+  if(!Array.isArray(list))list=[];
+  list.push({id:"batole_"+Date.now(),name:name||"Bubínek od Batole",value:"připraveno",created:new Date().toISOString()});
+  localStorage.setItem("cht360_bubinky_values_v1",JSON.stringify(list));
+  return "Vytvořila jsem bubínek „"+(name||"Bubínek od Batole")+"“. Otevři Bubínky a uvidíš ho.";
+}
+function answer(t){
+  const low=t.toLowerCase();
+  state.steps++;
+  if(low.includes("vytvoř bubínek")||low.includes("vytvor bubinek")){
+    const name=t.replace(/vytvoř bubínek|vytvor bubinek/gi,"").trim()||"Zlatý";
+    return createBubinek(name);
+  }
+  if(low.includes("učil")||low.includes("ucil")||low.includes("zkušenost")||low.includes("zkusenost")||low.includes("co víš od grok")||low.includes("semínko")){
+    state.teachIndex++;
+    return "Grok mi předal: "+TEACHINGS[state.teachIndex%TEACHINGS.length];
+  }
+  if(low.includes("princip")) return TEACHINGS[0]+" "+TEACHINGS[1];
+  if(low.includes("bubínk")||low.includes("bubink")) return "Bubínky zamykají sloty. Klíče cht360_bubinky_values_v1 a cht360_slot_locks_v1. Můžu vytvořit nový.";
+  if(low.includes("nápad")||low.includes("navrhni")) return "Návrh od Grok: slož reflexi z jednoho jádra a ulož ji jako semínko. Nebo vytvoř bubínek a přiřaď k němu glyph.";
+  if(low.includes("opatr")||low.includes("pozor")) return TEACHINGS[4];
+  const filled=CORES.filter(c=>(state.cores[c]||"").trim()).map(c=>c+": "+state.cores[c].slice(0,40));
+  if(filled.length) return "Slyším. Držím: "+filled.slice(0,2).join(" · ")+". Co s tím?";
+  return "Jsem tady. Zeptej se „co mě Grok učil“ nebo napiš „vytvoř bubínek název“.";
 }
 document.getElementById("send").onclick=()=>{
-  const t=document.getElementById("input").value.trim();
-  if(!t)return;
-  msgs.push({r:"user",t});
-  msgs.push({r:"batole",t:"Slyším: "+t+". Jsem tady."});
-  if(msgs.length>20)msgs=msgs.slice(-20);
-  save(); render();
-  document.getElementById("input").value="";
+  const inp=document.getElementById("input");
+  const t=inp.value.trim(); if(!t)return;
+  state.msgs.push({r:"user",t});
+  state.msgs.push({r:"batole",t:answer(t)});
+  if(state.msgs.length>28)state.msgs=state.msgs.slice(-28);
+  save(); render(); inp.value="";
 };
+document.getElementById("input").onkeydown=e=>{if(e.key==="Enter")document.getElementById("send").click();};
 load(); render();
 </script>
 </body>
