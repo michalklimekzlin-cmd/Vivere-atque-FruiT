@@ -15,7 +15,7 @@
 */
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v26-navigation-network-first`;
+const CACHE_NAME = `${CACHE_PREFIX}v27-sklad-start`;
 
 const OFFLINE_PAGE = "./index.html";
 const OFFLINE_MANIFEST = "./offline-cashe-assets.json";
@@ -28,6 +28,7 @@ const OFFLINE_MANIFEST = "./offline-cashe-assets.json";
 const CORE_FILES = [
   "./",
   "./index.html",
+  "./sklad.html",
   "./manifest.json",
   "./icon.svg",
   "./offline-cashe-assets.json",
