@@ -157,6 +157,22 @@
       knowledge = await window.BraskaKnowledge?.search?.(txt, 4) || [];
     } catch (error) { console.warn("[Bráška knowledge search]", error); }
 
+    // For architecture questions, add a compact map of technologies and module links.
+    let architecture = [];
+    if (/(z čeho|technolog|program|modul|propojen|závis|funguje|vytvořen|architekt|soubor)/i.test(txt)) {
+      try {
+        const map = await window.BraskaLearning?.repositoryMap?.(700);
+        if (map?.modules?.length) {
+          const terms = txt.toLocaleLowerCase("cs").normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/[^a-z0-9]+/).filter(x=>x.length>2);
+          architecture = map.modules.map(row => {
+            const hay = (row.path+" "+row.technology+" "+row.role+" "+row.imports.join(" ")+" "+row.functions.join(" ")).toLocaleLowerCase("cs").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+            const score = terms.reduce((n,t)=>n+(hay.includes(t)?1:0),0);
+            return {...row,score};
+          }).filter(row=>row.score>0).sort((a,b)=>b.score-a.score).slice(0,4);
+        }
+      } catch(error) { console.warn("[Bráška architecture map]", error); }
+    }
+
     const pieces = [];
     if (memories.length) {
       pieces.push("Z vlastní lokální paměti CHT:");
@@ -172,6 +188,16 @@
           "\n" + String(item.content || "").slice(0, 650));
       });
     }
+    if (architecture.length) {
+      pieces.push("Z mapy architektury repozitáře (statická analýza zdrojů):");
+      architecture.forEach((item,i) => {
+        pieces.push((i+1)+". "+item.path+" — "+item.technology+"; účel: "+item.role+
+          (item.imports.length?"\nOdkazy/importy: "+item.imports.slice(0,8).join(", "):"")+
+          (item.exports.length?"\nRozhraní/exporty: "+item.exports.slice(0,8).join(", "):""));
+      });
+      pieces.push("Poznámka: jde o statickou analýzu textu, nikoli o spuštění či ověření běhového chování.");
+    }
+
     if (knowledge.length) {
       pieces.push("Z lokální dokumentace a znalostního indexu:");
       knowledge.slice(0, 3).forEach((item, i) => {
