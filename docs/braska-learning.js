@@ -241,8 +241,14 @@
       if(!treeRes.ok) throw new Error("GitHub tree HTTP "+treeRes.status);
       const tree=await treeRes.json();
       if(!Array.isArray(tree.tree)) throw new Error("GitHub nevrátil seznam souborů.");
+      let commitSha=null;
+      try {
+        const commitRes=await fetch(api+"/commits/"+encodeURIComponent(branch),{headers,cache:"no-store"});
+        if(commitRes.ok) commitSha=(await commitRes.json()).sha||null;
+      } catch(_) { /* tree SHA zůstává použitelný pro kontrolu souborů */ }
       const candidates=tree.tree.filter(x=>x.type==="blob" && (x.path.startsWith("docs/") || REPO_ROOT_DOCS.has(x.path)) && REPO_TEXT.test(x.path) && Number(x.size||0)<=350000).slice(0,600);
       const livePaths=new Set(candidates.map(x=>x.path));
+      const completeListing=candidates.length<600;
       let changed=0, processed=0;
       const concurrency=5;
       for(let i=0;i<candidates.length;i+=concurrency){
@@ -253,13 +259,13 @@
           if(!response.ok) throw new Error("Nelze stáhnout "+entry.path+" (HTTP "+response.status+")");
           const content=await response.text();
           if(content.length>400000) return false;
-          const saved=await putRepoFile({path:entry.path,sha:entry.sha,size:entry.size||content.length,content,branch,commit:tree.sha||null});
+          const saved=await putRepoFile({path:entry.path,sha:entry.sha,size:entry.size||content.length,content,branch,commit:commitSha,tree:tree.sha||null});
           processed++; if(saved) changed++; return true;
         }));
         if(results.some(x=>x===false)) continue;
       }
-      const deleted=await markRepoDeletions(livePaths);
-      repoState.lastSync=new Date().toISOString(); repoState.branch=branch; repoState.commit=tree.sha||null;
+      const deleted=completeListing?await markRepoDeletions(livePaths):0;
+      repoState.lastSync=new Date().toISOString(); repoState.branch=branch; repoState.commit=commitSha;
       repoState.files=processed; repoState.changed=changed; repoState.deleted=deleted;
       repoState.status="GitHub synchronizován; historie zachována";
       await transact(META,"readwrite",st=>st.put({key:"githubSync",value:{...repoState,repo:REPO.owner+"/"+REPO.name}}));
