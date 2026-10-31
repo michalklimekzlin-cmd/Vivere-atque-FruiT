@@ -39,7 +39,7 @@ const grid=document.getElementById('grid');
 const defaults=Array.from({length:25},(_,i)=>({id:i+1,slot:0,name:'VaF’i’T'}));
 let drums=defaults.map(d=>({...d}));
 try{
- const saved=JSON.parse(localStorage.getItem(KEV)||'null');
+ const saved=JSON.parse(localStorage.getItem(KEY)||'null');
  if(saved&&Array.isArray(saved.drums)&&saved.drums.length){
   drums=saved.drums.slice(0,25).map((d,i)=>({id:Number(d.id)||i+1,slot:Math.abs(Number(d.slot)||0)%symbols.length,name:String(d.name||'VaF’i’T')}));
   while(drums.length<25)drums.push({id:drums.length+1,slot:0,name:'VaF’i’T'});
