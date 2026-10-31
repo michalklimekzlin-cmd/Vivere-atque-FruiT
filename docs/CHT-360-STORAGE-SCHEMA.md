@@ -1,7 +1,7 @@
 # CHT 360°‰. — Centralizovaný registr úložiště (localStorage)
 
 > **Kanonická verze:** `docs/CHT-360-STORAGE-SCHEMA.md`  
-> **Stav:** v souladu s `docs/js/cht-chybozrout.js` (v3) a `docs/js/cht-360-network.js`
+> **Stav:** v souladu s `docs/js/cht-chybozrout.js` (v3) a `docs/js/cht-360-network.js` + Batole růst
 
 ---
 
@@ -70,11 +70,12 @@
 | `cht360_revia_signals_v1` | Signály Revie | Revia |
 | `revia_memory_v1` | Legacy paměť Revie | Legacy |
 
-### 🍼 Batole (hub)
+### 🍼 Batole (hub + růst)
 
 | Klíč | Popis | Modul |
 |------|-------|-------|
 | `cht360_batole_v1` | Stav Batole hubu (inbox, oběh, glyphs) | batole-core |
+| `cht360_batole_rust_v1` | Růst Batole (odrazy, reflexe, semínka z pozorování — nikdy originály Paměti) | Batole / batole-core |
 
 ### 🗂 Jádra — pracovní deska
 
