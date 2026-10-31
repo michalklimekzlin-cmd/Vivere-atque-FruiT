@@ -248,7 +248,7 @@
       } catch(_) { /* tree SHA zůstává použitelný pro kontrolu souborů */ }
       const candidates=tree.tree.filter(x=>x.type==="blob" && (x.path.startsWith("docs/") || REPO_ROOT_DOCS.has(x.path)) && REPO_TEXT.test(x.path) && Number(x.size||0)<=350000).slice(0,600);
       const livePaths=new Set(candidates.map(x=>x.path));
-      const completeListing=candidates.length<600;
+      const completeListing=!tree.truncated && candidates.length<600;
       let changed=0, processed=0;
       const concurrency=5;
       for(let i=0;i<candidates.length;i+=concurrency){
