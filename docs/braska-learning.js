@@ -248,7 +248,6 @@
       } catch(_) { /* tree SHA zůstává použitelný pro kontrolu souborů */ }
       const candidates=tree.tree.filter(x=>x.type==="blob" && REPO_TEXT.test(x.path) && Number(x.size||0)<=500000 && !/(^|\/)(?:node_modules|vendor|\.git|dist|build|coverage)\//i.test(x.path));
       const livePaths=new Set(candidates.map(x=>x.path));
-      const completeListing=!tree.truncated && processed===candidates.length;
       let changed=0, processed=0;
       const concurrency=5;
       for(let i=0;i<candidates.length;i+=concurrency){
@@ -264,6 +263,7 @@
         }));
         if(results.some(x=>x===false)) continue;
       }
+      const completeListing=!tree.truncated && processed===candidates.length;
       const deleted=completeListing?await markRepoDeletions(livePaths):0;
       repoState.lastSync=new Date().toISOString(); repoState.branch=branch; repoState.commit=commitSha;
       repoState.files=processed; repoState.changed=changed; repoState.deleted=deleted;
@@ -284,7 +284,7 @@
   async function searchRepository(query,limit=8,includeHistory=true) {
     const q=text(query).toLocaleLowerCase("cs");
     if(!q) return [];
-    const normalize=v=>String(v||"").toLocaleLowerCase("cs").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
+    const normalize=v=>String(v||"").toLocaleLowerCase("cs").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
     const [files,history]=await Promise.all([getAll(REPO_FILES),includeHistory?getAll(REPO_HISTORY):Promise.resolve([])]);
     const rows=[...files,...history];
     return rows.map(row=>{
@@ -298,6 +298,69 @@
   async function repositoryHistory(path,limit=20) {
     const rows=await getAll(REPO_HISTORY);
     return rows.filter(x=>!path||x.path===path).sort((a,b)=>String(b.archivedAt).localeCompare(String(a.archivedAt))).slice(0,limit);
+  }
+
+
+  // Static code cartography: describes technologies, entry points and file-to-file links.
+  // This is evidence-based source analysis, not execution of repository code.
+  function technologyFor(path) {
+    const ext=(String(path).split(".").pop()||"").toLowerCase();
+    const map={js:"JavaScript",mjs:"JavaScript modules",cjs:"CommonJS JavaScript",ts:"TypeScript",tsx:"TypeScript + JSX",jsx:"JavaScript + JSX",html:"HTML",css:"CSS",json:"JSON",md:"Markdown",mdx:"Markdown + JSX",svg:"SVG",yml:"YAML",yaml:"YAML",py:"Python",sh:"Shell",sql:"SQL",vue:"Vue SFC",svelte:"Svelte",astro:"Astro",go:"Go",rs:"Rust",java:"Java",kt:"Kotlin",swift:"Swift",php:"PHP",rb:"Ruby"};
+    return map[ext]||ext.toUpperCase()||"neznámý formát";
+  }
+  function inferRole(path, source) {
+    const p=String(path).toLowerCase(), s=String(source||"").slice(0,50000).toLowerCase();
+    if(/(^|\/)(readme|docs?|documentation)(\/|\.|$)/.test(p)||/\.md$/.test(p)) return "dokumentace a vysvětlení projektu";
+    if(/service.?worker|service-worker/.test(p)||/addEventListener\(['"]fetch/.test(s)) return "offline provoz, cache a síťové požadavky";
+    if(/manifest/.test(p)||/"display"\s*:\s*"standalone"/.test(s)) return "nastavení instalovatelné PWA";
+    if(/test|spec/.test(p)) return "automatické testy";
+    if(/worker/.test(p)) return "běh práce mimo hlavní UI vlákno";
+    if(/\.css$/.test(p)) return "vzhled a rozvržení uživatelského rozhraní";
+    if(/\.html$/.test(p)) return "struktura stránky a vstupní bod rozhraní";
+    if(/memory|pamet|slot/.test(p)) return "paměť, ukládání nebo práce se Sloty";
+    if(/glyph/.test(p)) return "tvorba, zobrazení nebo správa Glyphů";
+    if(/chat|braska/.test(p)) return "komunikace a lokální vrstva Brášky";
+    if(/revia/.test(p)) return "průvodcovská a paměťová vrstva Revia";
+    if(/repair|chybo/.test(p)) return "diagnostika a opravy";
+    if(/canvas|getcontext\(['"]2d/.test(s)) return "vykreslování grafiky nebo interaktivní scény";
+    return "aplikační modul — účel ověřit podle vazeb a volání";
+  }
+  function analyzeSource(path, source) {
+    const code=String(source||"");
+    const imports=new Set();
+    const patterns=[
+      /(?:import|export)\\s+(?:[^"'\\n]*?\\s+from\\s+)?["']([^"']+)["']/g,
+      /require\\(\\s*["']([^"']+)["']\\s*\\)/g,
+      /(?:src|href)\\s*=\\s*["']([^"'#?]+)["']/gi,
+      /importScripts\\(\\s*["']([^"']+)["']\\s*\\)/g
+    ];
+    for(const re of patterns){let m;while((m=re.exec(code))!==null){const ref=m[1];if(ref&&!/^(https?:|data:|#|\/\/)/i.test(ref))imports.add(ref);}}
+    const functions=[...code.matchAll(/(?:async\\s+)?function\\s+([A-Za-z_$][\\w$]*)\\s*\\(|(?:const|let|var)\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*(?:async\\s*)?\\([^)]*\\)\\s*=>/g)].map(m=>m[1]||m[2]).slice(0,80);
+    const events=[...code.matchAll(/addEventListener\\(\\s*["']([^"']+)["']/g)].map(m=>m[1]);
+    const exports=[...code.matchAll(/(?:window\\.|globalThis\\.)([A-Za-z_$][\\w$]*)\\s*=|export\\s+(?:const|function|class)\\s+([A-Za-z_$][\\w$]*)/g)].map(m=>m[1]||m[2]).slice(0,40);
+    return {path,technology:technologyFor(path),role:inferRole(path,code),imports:[...imports].slice(0,100),functions:[...new Set(functions)],events:[...new Set(events)].slice(0,40),exports:[...new Set(exports)]};
+  }
+  async function analyzeRepositoryFile(path) {
+    const matches=await searchRepository(path,30,true);
+    const file=matches.find(x=>x.path===path)||matches.find(x=>x.path===path&&x.content);
+    if(!file) return null;
+    return analyzeSource(file.path,file.content);
+  }
+  async function repositoryMap(limit=500) {
+    const files=await getAll(REPO_FILES);
+    const rows=files.filter(x=>!x.deleted).slice(0,Math.max(1,Math.min(2000,limit))).map(x=>analyzeSource(x.path,x.content));
+    const paths=new Set(files.filter(x=>!x.deleted).map(x=>x.path));
+    const edges=[];
+    for(const row of rows) for(const ref of row.imports){
+      const clean=ref.replace(/^\\.\\//,"");
+      const base=row.path.includes("/")?row.path.slice(0,row.path.lastIndexOf("/")+1):"";
+      const candidates=[clean,base+clean,base+clean+".js",base+clean+".ts",base+clean+"/index.js",base+clean+"/index.html"];
+      const target=candidates.find(x=>paths.has(x));
+      if(target) edges.push({from:row.path,to:target});
+    }
+    const byTechnology={};
+    for(const row of rows) byTechnology[row.technology]=(byTechnology[row.technology]||0)+1;
+    return {count:rows.length,byTechnology,modules:rows,edges,generatedAt:new Date().toISOString(),note:"Statická analýza textových souborů; neprovádí kód a neprokazuje běhové chování."};
   }
 
   const REPO_SKILLS = [
@@ -329,7 +392,7 @@
   window.BraskaLearning=Object.freeze({
     version:"1.1.0",storage:DB_NAME,
     learnFromSlots,search,list,stats,exportBackup,downloadBackup,openSource,capabilities,openCapability,
-    repositorySync,repositoryStatus,searchRepository,repositoryHistory,
+    repositorySync,repositoryStatus,searchRepository,repositoryHistory,analyzeRepositoryFile,repositoryMap,
     getState:()=>({...state})
   });
 })();
