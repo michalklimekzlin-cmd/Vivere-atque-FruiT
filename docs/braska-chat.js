@@ -159,16 +159,21 @@
 
     // For architecture questions, add a compact map of technologies and module links.
     let architecture = [];
+    let architectureEdges = [];
+    let architectureOverview = null;
     if (/(z čeho|technolog|program|modul|propojen|závis|funguje|vytvořen|architekt|soubor)/i.test(txt)) {
       try {
-        const map = await window.BraskaLearning?.repositoryMap?.(700);
+        const map = await window.BraskaLearning?.repositoryMap?.(2000);
+        architectureOverview = await window.BraskaLearning?.repositoryOverview?.();
         if (map?.modules?.length) {
           const terms = txt.toLocaleLowerCase("cs").normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/[^a-z0-9]+/).filter(x=>x.length>2);
           architecture = map.modules.map(row => {
             const hay = (row.path+" "+row.technology+" "+row.role+" "+row.imports.join(" ")+" "+row.functions.join(" ")).toLocaleLowerCase("cs").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
             const score = terms.reduce((n,t)=>n+(hay.includes(t)?1:0),0);
             return {...row,score};
-          }).filter(row=>row.score>0).sort((a,b)=>b.score-a.score).slice(0,4);
+          }).filter(row=>row.score>0).sort((a,b)=>b.score-a.score).slice(0,6);
+          const selected = new Set(architecture.map(row=>row.path));
+          architectureEdges = map.edges.filter(edge=>selected.has(edge.from)||selected.has(edge.to)).slice(0,16);
         }
       } catch(error) { console.warn("[Bráška architecture map]", error); }
     }
@@ -205,6 +210,23 @@
           "\\n" + String(item.text || "").slice(0, 700) +
           "\nZdroj: " + String(item.source || item.path || "lokální index"));
       });
+    }
+
+    if (architecture.length) {
+      const lines = architecture.map(row =>
+        "• "+row.path+"\n  Technologie: "+row.technology+"\n  Úloha: "+row.role+
+        (row.imports.length?"\n  Odkazy: "+row.imports.slice(0,6).join(", "):"")+
+        (row.exports.length?"\n  Rozhraní: "+row.exports.slice(0,6).join(", "):"")+
+        (row.events.length?"\n  Události: "+row.events.slice(0,6).join(", "):"")
+      );
+      if (architectureEdges.length) lines.push("Vazby mezi soubory:\n"+architectureEdges.map(e=>"• "+e.from+" → "+e.to+" ("+e.kind+")").join("\n"));
+      if (architectureOverview) {
+        const tech=Object.entries(architectureOverview.technologies||{}).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>k+": "+v).join(", ");
+        lines.push("Přehled repozitáře: analyzováno "+architectureOverview.filesAnalyzed+" z "+architectureOverview.totalIndexedFiles+" zaindexovaných souborů; technologie: "+tech+".");
+      }
+      return "Podíval jsem se do naučené mapy repozitáře. Tohle mám doložené ze zdrojových souborů:\n\n"+
+        lines.join("\n\n")+
+        "\n\nPozor: jde o statickou analýzu zdrojů. Vazby odvozené z importů a veřejných rozhraní jsou indicie; skutečné chování musí potvrdit test nebo běh aplikace.";
     }
 
     const normalized = txt.toLocaleLowerCase("cs");
