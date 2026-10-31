@@ -353,7 +353,7 @@
     const paths=new Set(live.map(x=>x.path));
     const edges=[];
     const addEdge=(from,ref,kind)=>{
-      const clean=String(ref||"").split(/[?#]/)[0].replace(/^\\.\\//,"");
+      const clean=String(ref||"").split(/[?#]/)[0].replace(/^\.\//,"");
       const base=from.includes("/")?from.slice(0,from.lastIndexOf("/")+1):"";
       const candidates=[clean,base+clean,base+clean+".js",base+clean+".mjs",base+clean+".css",base+clean+".json",base+clean+".ts",base+clean+"/index.js",base+clean+"/index.html"];
       const target=candidates.find(x=>paths.has(x));
@@ -370,7 +370,7 @@
       const source=allText.get(row.path)||"";
       for(const [name,owners] of publicNames){
         if(owners.includes(row.path)) continue;
-        if(new RegExp("(?:window|globalThis)\\\\."+name+"\\\\b").test(source))
+        if(new RegExp("(?:window|globalThis)\\."+name+"\\b").test(source))
           for(const owner of owners) edges.push({from:row.path,to:owner,kind:"používá globální rozhraní "+name});
       }
     }
