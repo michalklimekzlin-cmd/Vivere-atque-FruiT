@@ -348,19 +348,57 @@
   }
   async function repositoryMap(limit=500) {
     const files=await getAll(REPO_FILES);
-    const rows=files.filter(x=>!x.deleted).slice(0,Math.max(1,Math.min(2000,limit))).map(x=>analyzeSource(x.path,x.content));
-    const paths=new Set(files.filter(x=>!x.deleted).map(x=>x.path));
+    const live=files.filter(x=>!x.deleted).sort((a,b)=>a.path.localeCompare(b.path));
+    const rows=live.slice(0,Math.max(1,Math.min(2000,limit))).map(x=>analyzeSource(x.path,x.content));
+    const paths=new Set(live.map(x=>x.path));
     const edges=[];
-    for(const row of rows) for(const ref of row.imports){
-      const clean=ref.replace(/^\\.\\//,"");
-      const base=row.path.includes("/")?row.path.slice(0,row.path.lastIndexOf("/")+1):"";
-      const candidates=[clean,base+clean,base+clean+".js",base+clean+".ts",base+clean+"/index.js",base+clean+"/index.html"];
+    const addEdge=(from,ref,kind)=>{
+      const clean=String(ref||"").split(/[?#]/)[0].replace(/^\\.\\//,"");
+      const base=from.includes("/")?from.slice(0,from.lastIndexOf("/")+1):"";
+      const candidates=[clean,base+clean,base+clean+".js",base+clean+".mjs",base+clean+".css",base+clean+".json",base+clean+".ts",base+clean+"/index.js",base+clean+"/index.html"];
       const target=candidates.find(x=>paths.has(x));
-      if(target) edges.push({from:row.path,to:target});
+      if(target && target!==from && !edges.some(e=>e.from===from&&e.to===target&&e.kind===kind)) edges.push({from,to:target,kind});
+    };
+    for(const row of rows) for(const ref of row.imports) addEdge(row.path,ref,"souborový odkaz/import");
+    const allText=new Map(live.map(x=>[x.path,x.content]));
+    const publicNames=new Map();
+    for(const row of rows) for(const name of row.exports) {
+      if(!publicNames.has(name)) publicNames.set(name,[]);
+      publicNames.get(name).push(row.path);
     }
-    const byTechnology={};
-    for(const row of rows) byTechnology[row.technology]=(byTechnology[row.technology]||0)+1;
-    return {count:rows.length,byTechnology,modules:rows,edges,generatedAt:new Date().toISOString(),note:"Statická analýza textových souborů; neprovádí kód a neprokazuje běhové chování."};
+    for(const row of rows){
+      const source=allText.get(row.path)||"";
+      for(const [name,owners] of publicNames){
+        if(owners.includes(row.path)) continue;
+        if(new RegExp("(?:window|globalThis)\\\\."+name+"\\\\b").test(source))
+          for(const owner of owners) edges.push({from:row.path,to:owner,kind:"používá globální rozhraní "+name});
+      }
+    }
+    const byTechnology={},byRole={};
+    for(const row of rows){
+      byTechnology[row.technology]=(byTechnology[row.technology]||0)+1;
+      byRole[row.role]=(byRole[row.role]||0)+1;
+    }
+    const complete=rows.length===live.length;
+    return {count:rows.length,totalFiles:live.length,byTechnology,byRole,modules:rows,edges,complete,generatedAt:new Date().toISOString(),note:"Statická analýza textových souborů; neprovádí kód a neprokazuje běhové chování."};
+  }
+
+
+  async function repositoryOverview() {
+    const map=await repositoryMap(2000);
+    const keyFiles=map.modules.filter(x=>/^(docs\/)?(?:index\\.html|.*(?:config|service.?worker|manifest|braska|memory|pamet|revia|glyph).*\\.(?:js|html|json|css))$/i.test(x.path));
+    return {
+      repository:REPO.owner+"/"+REPO.name,
+      filesAnalyzed:map.count,
+      totalIndexedFiles:map.totalFiles,
+      complete:map.complete,
+      technologies:map.byTechnology,
+      responsibilities:map.byRole,
+      relationshipCount:map.edges.length,
+      keyFiles:keyFiles.slice(0,100),
+      generatedAt:map.generatedAt,
+      limitation:map.note
+    };
   }
 
   const REPO_SKILLS = [
@@ -392,7 +430,7 @@
   window.BraskaLearning=Object.freeze({
     version:"1.1.0",storage:DB_NAME,
     learnFromSlots,search,list,stats,exportBackup,downloadBackup,openSource,capabilities,openCapability,
-    repositorySync,repositoryStatus,searchRepository,repositoryHistory,analyzeRepositoryFile,repositoryMap,
+    repositorySync,repositoryStatus,searchRepository,repositoryHistory,analyzeRepositoryFile,repositoryMap,repositoryOverview,
     getState:()=>({...state})
   });
 })();
