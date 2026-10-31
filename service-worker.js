@@ -31,6 +31,15 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin) return;
 
+  if (url.pathname.includes('vivere-ai')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => response)
+        .catch(() => caches.match('./vivere-ai.html'))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
