@@ -143,6 +143,13 @@
     try {
       if (window.BraskaLearning?.learnFromSlots) await window.BraskaLearning.learnFromSlots();
       learned = await window.BraskaLearning?.search?.(txt, 4) || [];
+      const repoMatches = await window.BraskaLearning?.searchRepository?.(txt, 4, true) || [];
+      learned.push(...repoMatches.map(item => ({
+        title:item.path,
+        content:item.content,
+        sourceKey:"GitHub: "+item.path+(item.deleted?" (odstraněno z aktuálního repozitáře)":""),
+        sourcePath:item.path
+      })));
     } catch (error) { console.warn("[Bráška learning vault]", error); }
 
     let knowledge = [];
@@ -159,7 +166,7 @@
       });
     }
     if (learned.length) {
-      pieces.push("Z toho, co jsem si dříve bezpečně uložil ze Slotů CHT:");
+      pieces.push("Z vlastní knihovny — Sloty CHT a zachované verze GitHub repozitáře:");
       learned.slice(0, 2).forEach((item, i) => {
         pieces.push((i + 1) + ". " + String(item.title || "Poznatek").slice(0, 100) +
           "\n" + String(item.content || "").slice(0, 650));
