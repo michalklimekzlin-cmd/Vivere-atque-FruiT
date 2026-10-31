@@ -329,15 +329,15 @@
     const code=String(source||"");
     const imports=new Set();
     const patterns=[
-      /(?:import|export)\\s+(?:[^"'\\n]*?\\s+from\\s+)?["']([^"']+)["']/g,
-      /require\\(\\s*["']([^"']+)["']\\s*\\)/g,
-      /(?:src|href)\\s*=\\s*["']([^"'#?]+)["']/gi,
-      /importScripts\\(\\s*["']([^"']+)["']\\s*\\)/g
+      /(?:import|export)\s+(?:[^"'\n]*?\s+from\s+)?["']([^"']+)["']/g,
+      /require\(\s*["']([^"']+)["']\s*\)/g,
+      /(?:src|href)\s*=\s*["']([^"'#?]+)["']/gi,
+      /importScripts\(\s*["']([^"']+)["']\s*\)/g
     ];
     for(const re of patterns){let m;while((m=re.exec(code))!==null){const ref=m[1];if(ref&&!/^(https?:|data:|#|\/\/)/i.test(ref))imports.add(ref);}}
-    const functions=[...code.matchAll(/(?:async\\s+)?function\\s+([A-Za-z_$][\\w$]*)\\s*\\(|(?:const|let|var)\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*(?:async\\s*)?\\([^)]*\\)\\s*=>/g)].map(m=>m[1]||m[2]).slice(0,80);
-    const events=[...code.matchAll(/addEventListener\\(\\s*["']([^"']+)["']/g)].map(m=>m[1]);
-    const exports=[...code.matchAll(/(?:window\\.|globalThis\\.)([A-Za-z_$][\\w$]*)\\s*=|export\\s+(?:const|function|class)\\s+([A-Za-z_$][\\w$]*)/g)].map(m=>m[1]||m[2]).slice(0,40);
+    const functions=[...code.matchAll(/(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(|(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>/g)].map(m=>m[1]||m[2]).slice(0,80);
+    const events=[...code.matchAll(/addEventListener\(\s*["']([^"']+)["']/g)].map(m=>m[1]);
+    const exports=[...code.matchAll(/(?:window\.|globalThis\.)([A-Za-z_$][\w$]*)\s*=|export\s+(?:const|function|class)\s+([A-Za-z_$][\w$]*)/g)].map(m=>m[1]||m[2]).slice(0,40);
     return {path,technology:technologyFor(path),role:inferRole(path,code),imports:[...imports].slice(0,100),functions:[...new Set(functions)],events:[...new Set(events)].slice(0,40),exports:[...new Set(exports)]};
   }
   async function analyzeRepositoryFile(path) {
