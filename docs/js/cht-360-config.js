@@ -110,6 +110,15 @@
       badge: "Revia",
       description: "Průvodce, nápověda a projektová paměť uvnitř CHT.",
       storageKeys: ["cht360_revia_v1", "cht360_revia_state_v1"]
+    },
+    {
+      id: "cht360-batole",
+      title: "Batole",
+      longTitle: "Batole •ア | CHT 360°‰",
+      path: "../cht360-batole/",
+      badge: "Batole",
+      description: "První uzel zkušenosti. Pozoruje, přijímá vědomé kroky a roste skládáním odrazů — nikdy nepřepisuje Paměť.",
+      storageKeys: ["cht360_batole_v1", "cht360_batole_rust_v1"]
     }
   ].map(function (item) {
     return Object.freeze({
@@ -125,7 +134,7 @@
   });
 
   var config = {
-    version: "2026.08-ui-shell",
+    version: "2026.10-batole",
     docsBase: getDocsBase(),
     repoBase: getDocsBase().replace(/docs\/$/, ""),
     breakpoints: Object.freeze({ mobile: 320, phone: 375, tablet: 768, desktop: 1024 }),
