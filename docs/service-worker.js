@@ -508,122 +508,25 @@ async function updateFromNetwork(request) {
    NAVIGACE
    ========================================================= */
 
-async function handleNavigation(
-  event
-) {
+async function handleNavigation(event) {
+  const request = event.request;
 
-  const request =
-    event.request;
-
-  /*
-    Všechny HTML navigace zkusíme nejprve ze sítě.
-    Tím se aktualizuje i vstupní stránka PWA, ne
-    pouze přímá adresa bubinků. Bez internetu
-    zůstává zachována offline kopie.
-  */
+  // Network-first: aktualizuje stránky PWA při každé online navigaci.
   const freshPage = await updateFromNetwork(request);
   if (freshPage) return freshPage;
 
+  // Offline fallback: přesná uložená stránka, potom hlavní index.
   const offlinePage = await findCached(request);
   if (offlinePage) return offlinePage;
 
-  /*
-    3. Bez internetu vrátíme hlavní index CHT.
-  */
-
-  const cached =
-    await findCached(
-      request
-    );
-
-  if (cached) {
-
-    /*
-      Jsme-li online, na pozadí ji
-      aktualizujeme.
-
-      waitUntil zabrání ukončení workeru
-      před dokončením aktualizace.
-    */
-
-    event.waitUntil(
-      updateFromNetwork(
-        request
-      )
-    );
-
-    return cached;
-  }
-
-
-  /*
-    2. Když přesná cesta není v cache,
-       zkusíme síť.
-  */
-
-  const network =
-    await updateFromNetwork(
-      request
-    );
-
-  if (network) {
-    return network;
-  }
-
-
-  /*
-    3. Bez internetu vrátíme hlavní
-       index CHT.
-  */
-
-  const fallback =
-    await cachedIndex();
-
-  if (fallback) {
-    return fallback;
-  }
-
-
-  /*
-    Sem bychom se při správné instalaci
-    vůbec neměli dostat.
-  */
+  const fallback = await cachedIndex();
+  if (fallback) return fallback;
 
   return new Response(
-    `<!doctype html>
-     <html lang="cs">
-       <head>
-         <meta charset="utf-8">
-         <meta name="viewport"
-               content="width=device-width,initial-scale=1">
-         <title>CHT 360°‰.</title>
-       </head>
-       <body style="
-         margin:0;
-         min-height:100vh;
-         display:grid;
-         place-items:center;
-         background:#090705;
-         color:#ffe2ad;
-         font-family:system-ui;
-         text-align:center;
-       ">
-         <main>
-           <h1>CHT 360°‰.</h1>
-           <p>Offline start nebyl dokončen.</p>
-         </main>
-       </body>
-     </html>`,
-    {
-      status: 503,
-      headers: {
-        "Content-Type":
-          "text/html; charset=utf-8"
-      }
-    }
+    "<!doctype html><html lang=\"cs\"><meta charset=\"utf-8\"><title>CHT 360°‰.</title><body style=\"background:#090705;color:#ffe2ad;font-family:system-ui\"><h1>CHT 360°‰.</h1><p>Offline stránka není dostupná.</p></body></html>",
+    { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } }
   );
 }
-
 
 /* =========================================================
    LOKÁLNÍ SOUBORY
