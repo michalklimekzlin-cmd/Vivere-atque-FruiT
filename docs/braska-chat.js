@@ -164,7 +164,7 @@
     if (/(z čeho|technolog|program|modul|propojen|závis|funguje|vytvořen|architekt|soubor)/i.test(txt)) {
       try {
         const map = await window.BraskaLearning?.repositoryMap?.(2000);
-        architectureOverview = await window.BraskaLearning?.repositoryOverview?.();
+        architectureOverview = await window.BraskaLearning?.repositoryOverview?.(map);
         if (map?.modules?.length) {
           const terms = txt.toLocaleLowerCase("cs").normalize("NFD").replace(/[\u0300-\u036f]/g,"").split(/[^a-z0-9]+/).filter(x=>x.length>2);
           architecture = map.modules.map(row => {
