@@ -1,12 +1,12 @@
 {
-  "name": "Vivere atque Fru'i¡'T",
-  "short_name": "Fru'i¡'T",
-  "description": "Teacher-directed Czech AI studio with persistent semantic learning.",
-  "start_url": "./TEACHER_STUDIO.html",
+  "name": "Vivere atque Fru'¡¡'T",
+  "short_name": "Vivere",
+  "description": "Vivere atque Fru'¡¡'T — projektový sklad.",
+  "start_url": "./sklad.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#111827",
+  "background_color": "#090806",
+  "theme_color": "#0b0906",
   "lang": "cs",
   "icons": [
     {
