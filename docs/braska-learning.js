@@ -7,10 +7,12 @@
   if (window.BraskaLearning) return;
 
   const DB_NAME = "cht360_braska_self_library";
-  const DB_VERSION = 1;
+  const DB_VERSION = 2;
   const RECORDS = "learned";
   const REVISIONS = "revisions";
   const META = "meta";
+  const REPO_FILES = "repoFiles";
+  const REPO_HISTORY = "repoHistory";
   const SOURCE_KEYS = [
     "cht360_pamet_v1", "vaft_pamet_v1",
     "cht360_repository_atlas_v1",
@@ -37,6 +39,11 @@
         store.createIndex("sourceId","sourceId",{unique:false});
       }
       if(!db.objectStoreNames.contains(META)) db.createObjectStore(META,{keyPath:"key"});
+      if(!db.objectStoreNames.contains(REPO_FILES)) db.createObjectStore(REPO_FILES,{keyPath:"path"});
+      if(!db.objectStoreNames.contains(REPO_HISTORY)) {
+        const history=db.createObjectStore(REPO_HISTORY,{keyPath:"revisionId"});
+        history.createIndex("path","path",{unique:false});
+      }
     };
     req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error);
   });
@@ -177,6 +184,116 @@
     location.href=url.href;
     return true;
   }
+
+  // GitHub repository bridge: source is live; learned copies are immutable history.
+  const REPO = { owner:"michalklimekzlin-cmd", name:"Vivere-atque-FruiT", branch:null };
+  const REPO_TEXT = /\\.(?:js|mjs|cjs|ts|tsx|jsx|html|css|json|md|txt|svg|yml|yaml|xml|webmanifest|py|sh)$/i;
+  const REPO_ROOT_DOCS = new Set(["README.md","API.md","COMPONENTS.md","PHILOSOPHY.md","CHT-360-STORAGE-SCHEMA.md"]);
+  const repoState = { syncing:false, lastSync:null, branch:null, commit:null, files:0, changed:0, deleted:0, status:"čeká na GitHub" };
+
+  async function putRepoFile(file) {
+    const db=await openDB();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction([REPO_FILES,REPO_HISTORY],"readwrite");
+      const current=tx.objectStore(REPO_FILES), history=tx.objectStore(REPO_HISTORY);
+      const req=current.get(file.path);
+      req.onsuccess=()=>{
+        const old=req.result;
+        if(old && old.sha===file.sha && !old.deleted) { resolve(false); return; }
+        if(old && old.content) {
+          history.put({...old,revisionId:old.path+"::"+old.sha,archivedAt:new Date().toISOString(),reason:old.deleted?"předchozí uložená verze":"změna v GitHubu"});
+        }
+        current.put({...file,deleted:false,learnedAt:old?.learnedAt||new Date().toISOString(),refreshedAt:new Date().toISOString()});
+        resolve(true);
+      };
+      req.onerror=()=>reject(req.error);
+      tx.oncomplete=()=>db.close();
+      tx.onerror=()=>{db.close();reject(tx.error);};
+    });
+  }
+  async function markRepoDeletions(livePaths) {
+    const db=await openDB();
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction(REPO_FILES,"readwrite"),store=tx.objectStore(REPO_FILES),req=store.getAll();
+      let count=0;
+      req.onsuccess=()=>{
+        for(const old of req.result||[]) if(!livePaths.has(old.path) && !old.deleted) {
+          old.deleted=true; old.deletedAt=new Date().toISOString(); old.deletionNote="Soubor zmizel z aktuálního GitHubu; naučená kopie zůstává.";
+          store.put(old); count++;
+        }
+      };
+      tx.oncomplete=()=>{db.close();resolve(count);};
+      tx.onerror=()=>{db.close();reject(tx.error);};
+    });
+  }
+  async function repositorySync(options={}) {
+    if(repoState.syncing) return {...repoState,status:"synchronizace už běží"};
+    if(!navigator.onLine) return {...repoState,status:"offline — používám vlastní archiv"};
+    repoState.syncing=true; repoState.status="kontroluji GitHub";
+    try {
+      const api="https://api.github.com/repos/"+REPO.owner+"/"+REPO.name;
+      const headers={Accept:"application/vnd.github+json"};
+      const metaRes=await fetch(api,{headers,cache:"no-store"});
+      if(!metaRes.ok) throw new Error("GitHub repository API HTTP "+metaRes.status);
+      const meta=await metaRes.json();
+      const branch=meta.default_branch;
+      const treeRes=await fetch(api+"/git/trees/"+encodeURIComponent(branch)+"?recursive=1",{headers,cache:"no-store"});
+      if(!treeRes.ok) throw new Error("GitHub tree HTTP "+treeRes.status);
+      const tree=await treeRes.json();
+      if(!Array.isArray(tree.tree)) throw new Error("GitHub nevrátil seznam souborů.");
+      const candidates=tree.tree.filter(x=>x.type==="blob" && (x.path.startsWith("docs/") || REPO_ROOT_DOCS.has(x.path)) && REPO_TEXT.test(x.path) && Number(x.size||0)<=350000).slice(0,600);
+      const livePaths=new Set(candidates.map(x=>x.path));
+      let changed=0, processed=0;
+      const concurrency=5;
+      for(let i=0;i<candidates.length;i+=concurrency){
+        const batch=candidates.slice(i,i+concurrency);
+        const results=await Promise.all(batch.map(async entry=>{
+          const url="https://raw.githubusercontent.com/"+REPO.owner+"/"+REPO.name+"/"+encodeURIComponent(branch)+"/"+entry.path.split("/").map(encodeURIComponent).join("/");
+          const response=await fetch(url,{cache:"no-store"});
+          if(!response.ok) throw new Error("Nelze stáhnout "+entry.path+" (HTTP "+response.status+")");
+          const content=await response.text();
+          if(content.length>400000) return false;
+          const saved=await putRepoFile({path:entry.path,sha:entry.sha,size:entry.size||content.length,content,branch,commit:tree.sha||null});
+          processed++; if(saved) changed++; return true;
+        }));
+        if(results.some(x=>x===false)) continue;
+      }
+      const deleted=await markRepoDeletions(livePaths);
+      repoState.lastSync=new Date().toISOString(); repoState.branch=branch; repoState.commit=tree.sha||null;
+      repoState.files=processed; repoState.changed=changed; repoState.deleted=deleted;
+      repoState.status="GitHub synchronizován; historie zachována";
+      await transact(META,"readwrite",st=>st.put({key:"githubSync",value:{...repoState,repo:REPO.owner+"/"+REPO.name}}));
+      window.dispatchEvent(new CustomEvent("cht360:braska-repository-synced",{detail:{...repoState}}));
+      return {...repoState};
+    } catch(error) {
+      repoState.status="GitHub nedostupný — archiv zůstává zachován";
+      repoState.error=String(error?.message||error);
+      return {...repoState};
+    } finally { repoState.syncing=false; }
+  }
+  async function repositoryStatus() {
+    const [files,history]=await Promise.all([getAll(REPO_FILES),getAll(REPO_HISTORY)]);
+    return {...repoState,files:files.length,deleted:files.filter(x=>x.deleted).length,protectedRevisions:history.length,repository:REPO.owner+"/"+REPO.name};
+  }
+  async function searchRepository(query,limit=8,includeHistory=true) {
+    const q=text(query).toLocaleLowerCase("cs");
+    if(!q) return [];
+    const normalize=v=>String(v||"").toLocaleLowerCase("cs").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
+    const [files,history]=await Promise.all([getAll(REPO_FILES),includeHistory?getAll(REPO_HISTORY):Promise.resolve([])]);
+    const rows=[...files,...history];
+    return rows.map(row=>{
+      const hay=normalize(row.path+" "+row.content);
+      const needle=normalize(q);
+      let score=hay.includes(needle)?10:0;
+      for(const term of needle.split(/[^a-z0-9]+/).filter(x=>x.length>1)) if(hay.includes(term)) score+=term.length>5?3:1;
+      return {...row,score};
+    }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,Math.max(1,Math.min(20,limit)));
+  }
+  async function repositoryHistory(path,limit=20) {
+    const rows=await getAll(REPO_HISTORY);
+    return rows.filter(x=>!path||x.path===path).sort((a,b)=>String(b.archivedAt).localeCompare(String(a.archivedAt))).slice(0,limit);
+  }
+
   const REPO_SKILLS = [
     {id:"cht-memory",title:"Paměť CHT",path:"index.html",about:"Čtyři jádra, 70 slotů v každém, čtení a ukládání poznatků."},
     {id:"signal-tower",title:"Signal Tower",path:"signal-360/",about:"Čtyři světy, jejich sloty, orientace a signální věž."},
@@ -204,8 +321,9 @@
     return openSource(item.path);
   }
   window.BraskaLearning=Object.freeze({
-    version:"1.0.0",storage:DB_NAME,
+    version:"1.1.0",storage:DB_NAME,
     learnFromSlots,search,list,stats,exportBackup,downloadBackup,openSource,capabilities,openCapability,
+    repositorySync,repositoryStatus,searchRepository,repositoryHistory,
     getState:()=>({...state})
   });
 })();
