@@ -246,9 +246,9 @@
         const commitRes=await fetch(api+"/commits/"+encodeURIComponent(branch),{headers,cache:"no-store"});
         if(commitRes.ok) commitSha=(await commitRes.json()).sha||null;
       } catch(_) { /* tree SHA zůstává použitelný pro kontrolu souborů */ }
-      const candidates=tree.tree.filter(x=>x.type==="blob" && (x.path.startsWith("docs/") || REPO_ROOT_DOCS.has(x.path)) && REPO_TEXT.test(x.path) && Number(x.size||0)<=350000).slice(0,600);
+      const candidates=tree.tree.filter(x=>x.type==="blob" && REPO_TEXT.test(x.path) && Number(x.size||0)<=500000 && !/(^|\\/)(?:node_modules|vendor|\.git|dist|build|coverage)\\//i.test(x.path));
       const livePaths=new Set(candidates.map(x=>x.path));
-      const completeListing=!tree.truncated && candidates.length<600;
+      const completeListing=!tree.truncated && processed===candidates.length;
       let changed=0, processed=0;
       const concurrency=5;
       for(let i=0;i<candidates.length;i+=concurrency){
