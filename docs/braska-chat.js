@@ -478,6 +478,10 @@
   }
 
   function open() {
+    try {
+      window.BraskaLearning?.learnFromSlots?.().catch(error => console.warn("[Braska slots]", error));
+      window.BraskaLearning?.repositorySync?.().then(result => { status.textContent = result?.status || "lokální archiv připraven"; }).catch(error => console.warn("[Braska GitHub]", error));
+    } catch(error) { console.warn("[Braska sync]", error); }
     state.opened = true;
     panel.classList.add("is-open");
     button.style.display = "none";
