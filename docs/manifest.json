@@ -2,10 +2,10 @@
   "name": "CHT 360°‰.",
   "short_name": "CHT 360°‰.",
   "lang": "cs",
-  "start_url": "./",
+  "start_url": "./sklad.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#050403",
   "theme_color": "#17100b",
-  "orientation": "landscape"
+  "orientation": "portrait"
 }
