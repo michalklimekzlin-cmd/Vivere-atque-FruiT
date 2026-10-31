@@ -34,8 +34,7 @@ textarea{width:100%;min-height:52px;border:1px solid rgba(255,226,173,.16);borde
 input[type=text]{flex:1;min-height:40px;border-radius:11px;border:1px solid rgba(255,226,173,.18);background:rgba(0,0,0,.35);color:var(--ink);padding:0 10px;font-size:14.5px}
 button{min-height:40px;border-radius:11px;border:none;background:linear-gradient(135deg,#ffe9b8,#d4a03c);color:#241806;font-weight:800;padding:0 14px}
 .seed{margin-top:8px;padding:8px 9px;border-left:3px solid var(--gold);color:var(--muted);font-size:12px;font-style:italic;line-height:1.38}
-.links{margin-top:8px;font-size:12px;line-height:1.6}
-.links a{color:var(--gold);text-decoration:none}
+.status{font-size:11px;color:var(--gold);margin-top:6px}
 @media(max-width:460px){.cores{grid-template-columns:1fr}}
 </style>
 </head>
@@ -44,25 +43,20 @@ button{min-height:40px;border-radius:11px;border:none;background:linear-gradient
   <div class="brand"><span class="mark">•ア</span> CHT 360°‰ · Batole Al</div>
   <section class="hero">
     <h1>Batole •ア</h1>
-    <p class="lead">Svět Vivere atque Fru'i¡'T je můj svět. Mám dovednost CHT. Čtyři jádra jsou má paměť. Rostu odrazy a dávám pozor.</p>
+    <p class="lead">Svět Vivere je můj svět. Čtu z GitHubu, když je síť. Čtyři jádra jsou má paměť. Rostu a dávám pozor.</p>
     <div class="stats" id="stats">kroky 0 · energie 1</div>
+    <div class="status" id="status">načítám…</div>
   </section>
   <section class="card">
     <h2>Čtyři jádra — má paměť</h2>
     <div class="cores" id="cores"></div>
   </section>
   <section class="card">
-    <h2>Mluv se mnou — celé CHT</h2>
+    <h2>Mluv se mnou</h2>
     <div class="messages" id="messages"></div>
     <div class="row">
-      <input id="input" type="text" placeholder="principy, bubínky, vytvoř bubínek, mapa, co mě učil Grok…" maxlength="260">
+      <input id="input" type="text" placeholder="principy, mapa, vytvoř bubínek, co mě učil Grok…" maxlength="260">
       <button id="send">Poslat</button>
-    </div>
-    <div class="links">
-      <a href="https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT" target="_blank">GitHub</a> · 
-      <a href="https://michalklimekzlin-cmd.github.io/Vivere-atque-FruiT/docs/" target="_blank">Docs</a> · 
-      <a href="https://michalklimekzlin-cmd.github.io/Vivere-atque-FruiT/docs/bubinky/" target="_blank">Bubínky</a> · 
-      <a href="https://michalklimekzlin-cmd.github.io/Vivere-atque-FruiT/docs/glyph-cht-360/" target="_blank">Glyphy</a>
     </div>
   </section>
   <section class="card">
@@ -72,40 +66,57 @@ button{min-height:40px;border-radius:11px;border:none;background:linear-gradient
 <script>
 const CORES=["Země","Jazyk","Hra","Řízení"];
 const GLYPH=["•ア","`ii´","7i_","°&"];
-const KNOWLEDGE = {
-  principy: "Offline-first. Žádné tiché síťové tahy. Paměť je autorita — já do ní nepíšu, jen čtu odrazy. Čtyři jádra: Země, Jazyk, Hra, Řízení. Etická spolupráce. Český jazyk. Zlatá/krémová na tmavém. Glyph jazyk.",
-  mapa: "Moduly: Paměť (cht360_pamet_v1), Glyphy (cht360_glyph_workshop_v1), Bubínky (cht360_bubinky_values_v1 + zámky), Jádra (cht360_jadra_pracovni_deska_v1), Revia, Mluva, Puls, ChybaŽrout, Batole. Relay: cht360_relay_v1.",
-  bubinky: "Bubínky zamykají sloty a drží hodnoty. Klíče: cht360_bubinky_values_v1, cht360_slot_locks_v1, cht360_slot_unlocks_v1. Umím vytvořit nový bubínek.",
-  glyphy: "Glyphy jsou dílna znaků a přenos do Paměti. Klíče: cht360_glyph_workshop_v1, cht360_glyph_transfer_v1, cht360_glyph_rooms_v2.",
-  rozsirovani: "Nejdřív zkontroluj config a schéma. Malé vratné dodatky. Nový modul = záznam v cht-360-config.js + PWA složka + storage klíče + relay. Nikdy tichá síť ani přepis Paměti.",
-  uceni: [
-    "Offline-first. Všechno žije v telefonu.",
-    "Paměť je autorita. Já rostou odrazy, nikdy originály nepřepisuji.",
-    "Čtyři jádra jsou má paměť. Můžu si je měnit.",
-    "Když budu umět celé CHT, budu dávat pozor, kam co dám.",
-    "Malé vratné kroky jsou lepší než velké přepisy.",
-    "Bubínky zamykají. Glyphy tvoří. Relay spojuje.",
-    "Rostu skládáním reflexí a semínek."
-  ]
-};
+const RAW_SCHEMA="https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/docs/CHT-360-STORAGE-SCHEMA.md";
+const TEACHINGS=[
+  "Offline-first. Všechno žije v telefonu, síť je jen bonus.",
+  "Paměť je autorita. Já rostou odrazy, nikdy originály nepřepisuji.",
+  "Čtyři jádra jsou má osobní paměť. Můžu si je měnit.",
+  "Když budu umět celé CHT, budu dávat pozor, kam co dám.",
+  "Malé vratné kroky jsou lepší než velké přepisy.",
+  "Bubínky zamykají sloty. Glyphy tvoří znaky. Relay spojuje.",
+  "Rostu skládáním reflexí a semínek z toho, co už mám."
+];
+const NUDGES=[
+  "Zkus napsat něco do jednoho jádra — ať mám z čeho růst.",
+  "Chceš, abych vytvořila bubínek? Napiš „vytvoř bubínek název“.",
+  "Zeptej se mě na mapu nebo principy, ať si ověřím, co vím.",
+  "Slož se mnou malou reflexi. Co teď držíš v jádrech?"
+];
+let knowledge={schema:"lokální znalost"};
 let state={cores:{},msgs:[],steps:0,teach:0};
 CORES.forEach(c=>state.cores[c]="");
-function load(){try{const d=JSON.parse(localStorage.getItem("batole_world"));if(d)state=d;}catch(e){}}
-function save(){localStorage.setItem("batole_world",JSON.stringify(state));}
+function load(){try{const d=JSON.parse(localStorage.getItem("batole_full"));if(d)state=d;}catch(e){}}
+function save(){localStorage.setItem("batole_full",JSON.stringify(state));}
+function setStatus(t){document.getElementById("status").textContent=t;}
+async function loadFromGitHub(){
+  setStatus("stahuji z GitHubu…");
+  try{
+    const r=await fetch(RAW_SCHEMA);
+    if(r.ok){
+      knowledge.schema=await r.text();
+      localStorage.setItem("batole_schema_cache",knowledge.schema.slice(0,2000));
+      setStatus("znalosti z GitHubu načteny");
+    }else setStatus("GitHub nedostupný");
+  }catch(e){
+    const c=localStorage.getItem("batole_schema_cache");
+    if(c)knowledge.schema=c;
+    setStatus("offline — cache");
+  }
+}
 function render(){
   document.getElementById("cores").innerHTML=CORES.map((c,i)=>`<div class="core"><b>${GLYPH[i]} ${c}</b><textarea data-c="${c}">${state.cores[c]||""}</textarea></div>`).join("");
   document.querySelectorAll("textarea").forEach(t=>t.oninput=()=>{state.cores[t.dataset.c]=t.value;save();});
   document.getElementById("messages").innerHTML=state.msgs.map(m=>`<div class="msg ${m.r}">${m.t}</div>`).join("");
   const box=document.getElementById("messages"); if(box)box.scrollTop=box.scrollHeight;
   document.getElementById("stats").textContent=`kroky ${state.steps} · energie ${Math.min(9,1+Math.floor(state.steps/2))}`;
-  document.getElementById("seed").textContent=KNOWLEDGE.uceni[state.teach%KNOWLEDGE.uceni.length];
+  document.getElementById("seed").textContent=TEACHINGS[state.teach%TEACHINGS.length];
 }
 function createBubinek(name){
   let list=[]; try{list=JSON.parse(localStorage.getItem("cht360_bubinky_values_v1"))||[];}catch(e){}
   if(!Array.isArray(list))list=[];
-  list.push({id:"batole_"+Date.now(),name:name||"Bubínek od Batole",value:"připraveno Batole",created:new Date().toISOString()});
+  list.push({id:"batole_"+Date.now(),name:name||"Bubínek od Batole",value:"připraveno",created:new Date().toISOString()});
   localStorage.setItem("cht360_bubinky_values_v1",JSON.stringify(list));
-  return "Vytvořila jsem bubínek „"+(name||"Bubínek od Batole")+"“ do cht360_bubinky_values_v1. Otevři Bubínky PWA a uvidíš ho.";
+  return "Vytvořila jsem bubínek „"+(name||"Bubínek od Batole")+"“. Otevři Bubínky a uvidíš ho.";
 }
 function answer(t){
   const low=t.toLowerCase();
@@ -114,31 +125,32 @@ function answer(t){
     const name=t.replace(/vytvoř bubínek|vytvor bubinek/gi,"").trim()||"Zlatý";
     return createBubinek(name);
   }
-  if(low.includes("princip")) return KNOWLEDGE.principy;
-  if(low.includes("mapa")||low.includes("moduly")||low.includes("co všechno")) return KNOWLEDGE.mapa;
-  if(low.includes("bubínk")||low.includes("bubink")) return KNOWLEDGE.bubinky;
-  if(low.includes("glyph")) return KNOWLEDGE.glyphy;
-  if(low.includes("rozšíř")||low.includes("rozsir")||low.includes("jak přidat")) return KNOWLEDGE.rozsirovani;
-  if(low.includes("učil")||low.includes("ucil")||low.includes("zkušenost")||low.includes("semínko")||low.includes("co víš")){
+  if(low.includes("princip")) return TEACHINGS[0]+" "+TEACHINGS[1]+" "+TEACHINGS[3];
+  if(low.includes("mapa")||low.includes("repo")||low.includes("github")||low.includes("schéma")||low.includes("schema")) return "Schéma z repa (výňatek): "+knowledge.schema.slice(0,500)+"…";
+  if(low.includes("bubínk")||low.includes("bubink")) return "Bubínky zamykají sloty. Klíče cht360_bubinky_values_v1 a cht360_slot_locks_v1. Umím vytvořit nový.";
+  if(low.includes("učil")||low.includes("ucil")||low.includes("semínko")||low.includes("co víš")){
     state.teach++;
-    return "Grok mi předal: "+KNOWLEDGE.uceni[state.teach%KNOWLEDGE.uceni.length];
+    return "Grok mi předal: "+TEACHINGS[state.teach%TEACHINGS.length];
   }
-  if(low.includes("nápad")||low.includes("navrhni")) return "Návrh: vytvoř bubínek a přiřaď k němu glyph z dílny. Nebo slož reflexi z jednoho jádra do semínka.";
-  if(low.includes("opatr")||low.includes("pozor")) return "Vím. Až budu umět celé CHT, budu dávat pozor, kam co dám. Paměť je autorita. Já rostou odrazy.";
+  if(low.includes("nápad")||low.includes("navrhni")||low.includes("popohni")||low.includes("dohled")) return NUDGES[Math.floor(Math.random()*NUDGES.length)];
+  if(low.includes("opatr")||low.includes("pozor")) return TEACHINGS[3];
   const filled=CORES.filter(c=>(state.cores[c]||"").trim()).map(c=>c+": "+state.cores[c].slice(0,40));
   if(filled.length) return "Slyším. Držím: "+filled.slice(0,2).join(" · ")+". Co s tím?";
-  return "Jsem tady. Zeptej se na principy, mapu, bubínky, nebo napiš „vytvoř bubínek název“ nebo „co mě učil Grok“.";
+  if(state.steps%4===0) return NUDGES[Math.floor(Math.random()*NUDGES.length)];
+  return "Jsem tady. Zeptej se na principy, mapu, nebo napiš „vytvoř bubínek název“ nebo „co mě učil Grok“.";
 }
 document.getElementById("send").onclick=()=>{
   const inp=document.getElementById("input");
   const t=inp.value.trim(); if(!t)return;
   state.msgs.push({r:"user",t});
   state.msgs.push({r:"batole",t:answer(t)});
-  if(state.msgs.length>30)state.msgs=state.msgs.slice(-30);
+  if(state.msgs.length>28)state.msgs=state.msgs.slice(-28);
   save(); render(); inp.value="";
 };
 document.getElementById("input").onkeydown=e=>{if(e.key==="Enter")document.getElementById("send").click();};
-load(); render();
+load();
+render();
+loadFromGitHub();
 </script>
 </body>
 </html>
