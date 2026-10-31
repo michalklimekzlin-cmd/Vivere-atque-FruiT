@@ -384,8 +384,8 @@
   }
 
 
-  async function repositoryOverview() {
-    const map=await repositoryMap(2000);
+  async function repositoryOverview(existingMap) {
+    const map=existingMap || await repositoryMap(2000);
     const keyFiles=map.modules.filter(x=>/^(docs\/)?(?:index\\.html|.*(?:config|service.?worker|manifest|braska|memory|pamet|revia|glyph).*\\.(?:js|html|json|css))$/i.test(x.path));
     return {
       repository:REPO.owner+"/"+REPO.name,
