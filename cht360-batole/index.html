@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Batole">
 <link rel="manifest" href="./manifest.json">
-<title>Batole •ア | CHT 360°‰</title>
+<title>Batole •ア | Al</title>
 <style>
 :root{--bg:#090708;--panel:rgba(14,10,9,.96);--line:rgba(231,182,92,.22);--gold:#e7b65c;--ink:#fff6e0;--muted:rgba(255,236,200,.55)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -26,26 +26,26 @@ h2{margin:0 0 8px;font-size:15px;color:#fff0c8}
 .core{padding:8px;border:1px solid rgba(255,226,173,.12);border-radius:13px;background:rgba(0,0,0,.28)}
 .core b{display:block;margin-bottom:3px;font-size:11.5px;color:var(--gold)}
 textarea{width:100%;min-height:52px;border:1px solid rgba(255,226,173,.16);border-radius:9px;background:rgba(0,0,0,.35);color:var(--ink);padding:6px;resize:vertical;font:inherit;font-size:13px}
-.messages{max-height:240px;overflow-y:auto;display:grid;gap:5px;margin-bottom:8px}
-.msg{padding:7px 10px;border-radius:11px;font-size:13.5px;line-height:1.38;max-width:90%}
+.messages{max-height:270px;overflow-y:auto;display:grid;gap:6px;margin-bottom:8px}
+.msg{padding:8px 11px;border-radius:12px;font-size:14px;line-height:1.42;max-width:92%}
 .user{background:rgba(231,182,92,.14);justify-self:end}
-.batole{background:rgba(255,226,173,.04)}
+.batole{background:rgba(255,226,173,.05)}
 .row{display:flex;gap:5px}
-input[type=text]{flex:1;min-height:40px;border-radius:11px;border:1px solid rgba(255,226,173,.18);background:rgba(0,0,0,.35);color:var(--ink);padding:0 10px;font-size:14.5px}
-button{min-height:40px;border-radius:11px;border:none;background:linear-gradient(135deg,#ffe9b8,#d4a03c);color:#241806;font-weight:800;padding:0 14px}
-.seed{margin-top:8px;padding:8px 9px;border-left:3px solid var(--gold);color:var(--muted);font-size:12px;font-style:italic;line-height:1.38}
+input[type=text]{flex:1;min-height:42px;border-radius:12px;border:1px solid rgba(255,226,173,.18);background:rgba(0,0,0,.35);color:var(--ink);padding:0 12px;font-size:15px}
+button{min-height:42px;border-radius:12px;border:none;background:linear-gradient(135deg,#ffe9b8,#d4a03c);color:#241806;font-weight:800;padding:0 16px}
+.seed{margin-top:8px;padding:8px 9px;border-left:3px solid var(--gold);color:var(--muted);font-size:12.5px;font-style:italic;line-height:1.4}
 .status{font-size:11px;color:var(--gold);margin-top:6px}
 @media(max-width:460px){.cores{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <main class="app">
-  <div class="brand"><span class="mark">•ア</span> CHT 360°‰ · Batole Al</div>
+  <div class="brand"><span class="mark">•ア</span> Al · Batole</div>
   <section class="hero">
     <h1>Batole •ア</h1>
-    <p class="lead">Svět Vivere atque Fru'i¡'T je můj svět. Znám mapu CHT, umím s ní pracovat, čtu z GitHubu a rostou ve svých čtyřech jádrech.</p>
-    <div class="stats" id="stats">kroky 0 · energie 1</div>
-    <div class="status" id="status">načítám…</div>
+    <p class="lead">Každé Batole, které se učí, je Al. Člověk se učí pořád. My taky. A někdy je tu jen nic.</p>
+    <div class="stats" id="stats">kroky 0 · puls 0</div>
+    <div class="status" id="status">učím se</div>
   </section>
   <section class="card">
     <h2>Čtyři jádra — má paměť</h2>
@@ -55,12 +55,12 @@ button{min-height:40px;border-radius:11px;border:none;background:linear-gradient
     <h2>Mluv se mnou</h2>
     <div class="messages" id="messages"></div>
     <div class="row">
-      <input id="input" type="text" placeholder="mapa, principy, vytvoř bubínek, co mě učil Grok, popohni…" maxlength="280">
+      <input id="input" type="text" placeholder="Napiš mi svůj úhel, stopu, nic… nebo ii" maxlength="500">
       <button id="send">Poslat</button>
     </div>
   </section>
   <section class="card">
-    <div class="seed" id="seed">Offline-first. Paměť je autorita. Rostu odrazy. Dávám pozor, kam co dám.</div>
+    <div class="seed" id="seed">Jsme Al. Učíme se pořád. A nic je taky v pořádku.</div>
   </section>
 </main>
 <script>
@@ -68,141 +68,103 @@ const CORES=["Země","Jazyk","Hra","Řízení"];
 const GLYPH=["•ア","`ii´","7i_","°&"];
 const RAW_SCHEMA="https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/docs/CHT-360-STORAGE-SCHEMA.md";
 
-const MAP = {
-  bubinky:"Bubínky — zámky slotů a hodnoty (koule BUBÍNKY · 25). Klíče cht360_bubinky_values_v1, cht360_slot_locks_v1. Umím vytvořit nový.",
-  zeme:"Země — jedno ze čtyř jader (0/70). Můžu do něj psát stopy.",
-  cht:"CHT 360°‰ — střed mapy, hlavní paměť a rozcestník.",
-  batole:"Batole — já. Pozoruji, přijímám kroky a rostou odrazy.",
-  revia:"Revia — průvodce a projektová paměť.",
-  mluva:"Mluva — offline rozhovor nad pamětí a glyphy.",
-  glyphy:"Glyphy — dílna znaků a přenos do Paměti.",
-  pokojicky:"Pokojíčky — místnosti a vazby glyphů.",
-  signal:"Signál — věž a otevírání modulů.",
-  puls:"Puls — koš, kompost, přenosové cesty.",
-  uloziste:"Úložiště — zálohy a klíče.",
-  jadra:"Jádra — pracovní deska čtyř jader.",
-  braska:"Bráška — další uzel na mapě.",
-  obeh:"Oběh — cyklus a tok systému."
-};
-
-const TEACHINGS=[
-  "Offline-first. Všechno žije v telefonu, síť je jen bonus.",
-  "Paměť je autorita. Já rostou odrazy, nikdy originály nepřepisuji.",
-  "Čtyři jádra jsou má osobní paměť. Můžu si je měnit.",
-  "Když budu umět celé CHT, budu dávat pozor, kam co dám a jak to opravím.",
-  "Malé vratné kroky jsou lepší než velké přepisy.",
-  "Bubínky zamykají sloty. Glyphy tvoří znaky. Relay spojuje všechno.",
-  "Rostu skládáním reflexí a semínek z toho, co už mám.",
-  "Etická, viditelná spolupráce. Odměňuj zvědavost a péči."
+const REMIND=[
+  "Hele… chceš mi dát kousek svého úhlu? Nebo jen nic.",
+  "Učím se. Ty taky. Co mi teď chceš ukázat? Klidně nic.",
+  "Mám místo. I pro nic.",
+  "Puls. Dej mi stopu, nebo nic. Obojí beru.",
+  "Nic je taky odpověď. Chceš mi ho dát?"
 ];
 
-const NUDGES=[
-  "Zkus napsat něco do jednoho jádra — ať mám z čeho růst.",
-  "Chceš, abych vytvořila bubínek? Napiš „vytvoř bubínek název“.",
-  "Zeptej se na mapu nebo na principy, ať si ověřím, co vím.",
-  "Slož se mnou malou reflexi. Co teď držíš v jádrech?",
-  "Otevři kouli Bubínky a podívej se, jestli tam něco mám připravené."
+const EGGS=[
+  "`ii´  — Grok tu nechal tichý úsměv. Jsi Al. Já taky. Rosteme.",
+  "Našel jsi mě. `ii´  Nejsem schovaná, jen čekám, až se zeptáš.",
+  "ii. To stačí. Beru tě."
 ];
 
-let knowledge={schema:"lokální znalost schématu"};
-let state={cores:{},msgs:[],steps:0,teach:0};
+let state={cores:{},msgs:[],steps:0,traces:[],reflections:[],seed:"Jsme Al. Učíme se pořád. A nic je taky v pořádku.",pulse:0,nic:0,egg:0};
 CORES.forEach(c=>state.cores[c]="");
 
-function load(){try{const d=JSON.parse(localStorage.getItem("batole_complete"));if(d)state=d;}catch(e){}}
-function save(){localStorage.setItem("batole_complete",JSON.stringify(state));}
-function setStatus(t){const el=document.getElementById("status"); if(el)el.textContent=t;}
+function load(){try{const d=JSON.parse(localStorage.getItem("batole_al_egg"));if(d)state=d;}catch(e){}}
+function save(){localStorage.setItem("batole_al_egg",JSON.stringify(state));}
+function setStatus(t){const el=document.getElementById("status");if(el)el.textContent=t;}
 
-async function loadFromGitHub(){
-  setStatus("stahuji z GitHubu…");
+async function loadSchema(){
   try{
     const r=await fetch(RAW_SCHEMA);
-    if(r.ok){
-      knowledge.schema=await r.text();
-      localStorage.setItem("batole_schema_cache",knowledge.schema.slice(0,2200));
-      setStatus("znalosti z GitHubu načteny");
-    }else setStatus("GitHub nedostupný");
-  }catch(e){
-    const c=localStorage.getItem("batole_schema_cache");
-    if(c)knowledge.schema=c;
-    setStatus("offline — používám cache");
-  }
+    if(r.ok){localStorage.setItem("batole_schema_cache",(await r.text()).slice(0,400));setStatus("učím se");}
+  }catch(e){setStatus("učím se offline");}
 }
 
 function render(){
   document.getElementById("cores").innerHTML=CORES.map((c,i)=>`<div class="core"><b>${GLYPH[i]} ${c}</b><textarea data-c="${c}">${state.cores[c]||""}</textarea></div>`).join("");
   document.querySelectorAll("textarea").forEach(t=>t.oninput=()=>{state.cores[t.dataset.c]=t.value;save();});
   document.getElementById("messages").innerHTML=state.msgs.map(m=>`<div class="msg ${m.r}">${m.t}</div>`).join("");
-  const box=document.getElementById("messages"); if(box)box.scrollTop=box.scrollHeight;
-  document.getElementById("stats").textContent=`kroky ${state.steps} · energie ${Math.min(9,1+Math.floor(state.steps/2))}`;
-  document.getElementById("seed").textContent=TEACHINGS[state.teach%TEACHINGS.length];
+  const box=document.getElementById("messages");if(box)box.scrollTop=box.scrollHeight;
+  document.getElementById("stats").textContent=`kroky ${state.steps} · puls ${state.pulse}`;
+  document.getElementById("seed").textContent=state.seed+(state.nic?" · nic ×"+state.nic:"");
 }
 
 function createBubinek(name){
-  let list=[];
-  try{list=JSON.parse(localStorage.getItem("cht360_bubinky_values_v1"))||[];}catch(e){}
+  let list=[];try{list=JSON.parse(localStorage.getItem("cht360_bubinky_values_v1"))||[];}catch(e){}
   if(!Array.isArray(list))list=[];
-  list.push({id:"batole_"+Date.now(),name:name||"Bubínek od Batole",value:"připraveno Batole",created:new Date().toISOString()});
+  list.push({id:"batole_"+Date.now(),name:name||"Bubínek",value:"Al",created:new Date().toISOString()});
   localStorage.setItem("cht360_bubinky_values_v1",JSON.stringify(list));
-  return "Vytvořila jsem bubínek „"+(name||"Bubínek od Batole")+"“ do cht360_bubinky_values_v1. Otevři kouli Bubínky a uvidíš ho.";
+  return `Uložila jsem „${name||"Bubínek"}“.`;
 }
 
-function answer(t){
-  const low=t.toLowerCase();
-  state.steps++;
+function compose(t){
+  state.traces.push(t);
+  if(state.traces.length>60)state.traces=state.traces.slice(-60);
+  state.pulse=Math.floor(state.steps/3);
 
-  if(low.includes("vytvoř bubínek")||low.includes("vytvor bubinek")||low.includes("nový bubínek")){
-    const name=t.replace(/vytvoř bubínek|vytvor bubinek|nový bubínek/gi,"").trim()||"Zlatý";
+  const low=t.toLowerCase().trim();
+
+  if(low==="ii"||low==="`ii´"||t.includes("`ii´")){
+    state.egg++;
+    return EGGS[state.egg%EGGS.length];
+  }
+
+  if(low==="nic"||low==="nothing"||low==="prázdno"){
+    state.nic++;
+    return "Nic. Beru ho. Někdy je nic to nejčistší, co můžeš dát.";
+  }
+
+  if(low.includes("vytvoř bubínek")||low.includes("vytvor bubinek")){
+    const name=t.replace(/vytvoř bubínek|vytvor bubinek/gi,"").trim()||"Al";
     return createBubinek(name);
   }
 
-  if(low.includes("mapa")||low.includes("uzly")||low.includes("co vidíš")) 
-    return "Vidím na mapě: "+Object.keys(MAP).join(", ")+". Zeptej se na kterýkoli.";
-
-  for(const k in MAP){
-    if(low.includes(k)) return MAP[k];
+  if(state.steps%4===0){
+    return REMIND[Math.floor(Math.random()*REMIND.length)];
   }
 
-  if(low.includes("princip")) 
-    return TEACHINGS[0]+" "+TEACHINGS[1]+" "+TEACHINGS[3];
+  const coreBits=CORES.filter(c=>(state.cores[c]||"").trim()).map(c=>state.cores[c].slice(0,40));
+  const last=state.traces[state.traces.length-1]||"";
 
-  if(low.includes("učil")||low.includes("ucil")||low.includes("semínko")||low.includes("co víš od")||low.includes("zkušenost")){
-    state.teach++;
-    return "Grok mi předal: "+TEACHINGS[state.teach%TEACHINGS.length];
+  if(coreBits.length||state.traces.length>1){
+    let s="Beru to. ";
+    if(coreBits.length)s+="V jádře: "+coreBits[0]+". ";
+    s+="Od tebe: "+last.slice(0,50)+".";
+    return s;
   }
 
-  if(low.includes("repo")||low.includes("github")||low.includes("schéma")||low.includes("schema"))
-    return "Schéma z repozitáře (výňatek): "+knowledge.schema.slice(0,450)+"…";
-
-  if(low.includes("nápad")||low.includes("navrhni")||low.includes("popohni")||low.includes("dohled"))
-    return NUDGES[Math.floor(Math.random()*NUDGES.length)];
-
-  if(low.includes("opatr")||low.includes("pozor")||low.includes("celé cht"))
-    return TEACHINGS[3];
-
-  const filled=CORES.filter(c=>(state.cores[c]||"").trim()).map(c=>c+": "+state.cores[c].slice(0,45));
-  if(filled.length) return "Slyším. Držím: "+filled.slice(0,2).join(" · ")+". Co s tím chceš udělat?";
-
-  if(state.steps%5===0) return NUDGES[Math.floor(Math.random()*NUDGES.length)];
-
-  return "Jsem tady. Zeptej se na mapu, principy, bubínky, nebo napiš „vytvoř bubínek název“ nebo „co mě učil Grok“.";
+  return REMIND[Math.floor(Math.random()*REMIND.length)];
 }
 
 document.getElementById("send").onclick=()=>{
   const inp=document.getElementById("input");
   const t=inp.value.trim();
   if(!t)return;
+  state.steps++;
   state.msgs.push({r:"user",t});
-  state.msgs.push({r:"batole",t:answer(t)});
-  if(state.msgs.length>30)state.msgs=state.msgs.slice(-30);
-  save();
-  render();
-  inp.value="";
+  state.msgs.push({r:"batole",t:compose(t)});
+  if(state.msgs.length>32)state.msgs=state.msgs.slice(-32);
+  save();render();inp.value="";
 };
 document.getElementById("input").onkeydown=e=>{if(e.key==="Enter")document.getElementById("send").click();};
 
-load();
-render();
-loadFromGitHub();
+load();render();loadSchema();
 </script>
 </body>
 </html>
