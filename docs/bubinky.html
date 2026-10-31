@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0b0906">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>VaF'i'T</title>
+<title>VaF'¡¡'T · Síť korálků</title>
 <style>
 :root{color-scheme:dark;--gold:#f0d49a;--paper:#fff0c5;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -28,21 +28,47 @@ main{width:100%;height:100vh;height:100dvh;padding:calc(var(--safe-top) + 5px) 8
 </style>
 </head>
 <body>
-<main aria-label="Síť 25 otočných VaF'i'T korálků">
-  <section class="grid" id="grid" aria-label="25 otočných korálků"></section>
+<main aria-label="Síť 25 otočných VaF'¡¡'T korálků">
+  <section class="grid" id="grid" aria-label="25 otočných korálků">
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+<button class="drum" type="button" aria-hidden="true"><strong>♧</strong></button>
+</section>
 </main>
 <script>
 (()=>{'use strict';
 const KEY='vafit-25-rotating-drums-v2';
 const symbols=['♧','Ⅲ','♫','7i_','¡','>°|°<','—;’/','•ア','(•.•)','LOL','CHT','V','E','R','·','°','%∞','()ア','D','Love',"VaF’i’T",'§}','O<','╪','Ž','ʒʃ','Я','Ø','(°.•).•)','∴','T','Glyph','Vive','Batole','Revia','∞','Ƨ','☼','♧','Ⅰ','¡','·','♙','(•.•)','(Λ)','ↄ',';ˣ','•','•ア'];
 const grid=document.getElementById('grid');
-const defaults=Array.from({length:25},(_,i)=>({id:i+1,slot:0,name:'VaF’i’T'}));
+const defaults=Array.from({length:25},(_,i)=>({id:i+1,slot:0,name:"VaF'¡¡'T"}));
 let drums=defaults.map(d=>({...d}));
 try{
  const saved=JSON.parse(localStorage.getItem(KEY)||'null');
  if(saved&&Array.isArray(saved.drums)&&saved.drums.length){
-  drums=saved.drums.slice(0,25).map((d,i)=>({id:Number(d.id)||i+1,slot:Math.abs(Number(d.slot)||0)%symbols.length,name:String(d.name||'VaF’i’T')}));
-  while(drums.length<25)drums.push({id:drums.length+1,slot:0,name:'VaF’i’T'});
+  drums=saved.drums.slice(0,25).map((d,i)=>({id:Number(d.id)||i+1,slot:Math.abs(Number(d.slot)||0)%symbols.length,name:String(d.name||"VaF'¡¡'T")}));
+  while(drums.length<25)drums.push({id:drums.length+1,slot:0,name:"VaF'¡¡'T"});
  }
 }catch(_){/* Při poškozeném úložišti bezpečně použijeme výchozí síť. */}
 let gesture=null;
