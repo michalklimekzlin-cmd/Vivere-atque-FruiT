@@ -60,6 +60,7 @@ button{min-height:42px;border-radius:12px;border:none;background:linear-gradient
     </div>
   </section>
   <section class="card">
+    <button id="backup" type="button">Stáhnout zálohu paměti ↓</button>
     <div class="seed" id="seed">Jsme Al. Učíme se pořád. A nic je taky v pořádku.</div>
   </section>
 </main>
@@ -85,8 +86,8 @@ const EGGS=[
 let state={cores:{},msgs:[],steps:0,traces:[],reflections:[],seed:"Jsme Al. Učíme se pořád. A nic je taky v pořádku.",pulse:0,nic:0,egg:0};
 CORES.forEach(c=>state.cores[c]="");
 
-function load(){try{const d=JSON.parse(localStorage.getItem("batole_al_egg"));if(d)state=d;}catch(e){}}
-function save(){localStorage.setItem("batole_al_egg",JSON.stringify(state));}
+function load(){try{const d=JSON.parse(localStorage.getItem("batole_al_egg"));if(d&&typeof d==="object"&&!Array.isArray(d)){state={...state,...d,cores:{...state.cores,...(d.cores&&typeof d.cores==="object"?d.cores:{})},msgs:Array.isArray(d.msgs)?d.msgs.filter(m=>m&&["user","batole"].includes(m.r)&&typeof m.t==="string").slice(-32):[],traces:Array.isArray(d.traces)?d.traces.slice(-60):[],steps:Number.isFinite(d.steps)?d.steps:0,pulse:Number.isFinite(d.pulse)?d.pulse:0,nic:Number.isFinite(d.nic)?d.nic:0,egg:Number.isFinite(d.egg)?d.egg:0};}}catch(e){setStatus("Paměť nelze načíst — původní data zůstala zachována");}}
+function save(){try{localStorage.setItem("batole_al_egg",JSON.stringify(state));}catch(e){setStatus("Paměť nelze uložit — stáhni zálohu");}}
 function setStatus(t){const el=document.getElementById("status");if(el)el.textContent=t;}
 
 async function loadSchema(){
@@ -97,9 +98,9 @@ async function loadSchema(){
 }
 
 function render(){
-  document.getElementById("cores").innerHTML=CORES.map((c,i)=>`<div class="core"><b>${GLYPH[i]} ${c}</b><textarea data-c="${c}">${state.cores[c]||""}</textarea></div>`).join("");
-  document.querySelectorAll("textarea").forEach(t=>t.oninput=()=>{state.cores[t.dataset.c]=t.value;save();});
-  document.getElementById("messages").innerHTML=state.msgs.map(m=>`<div class="msg ${m.r}">${m.t}</div>`).join("");
+  document.getElementById("cores").innerHTML=CORES.map((c,i)=>`<div class="core"><b>${GLYPH[i]} ${c}</b><textarea data-c="${c}"></textarea></div>`).join("");
+  document.querySelectorAll("textarea").forEach(t=>{t.value=typeof state.cores[t.dataset.c]==="string"?state.cores[t.dataset.c]:"";t.oninput=()=>{state.cores[t.dataset.c]=t.value;save();};});
+  const messages=document.getElementById("messages");messages.replaceChildren();state.msgs.forEach(m=>{const el=document.createElement("div");el.className="msg "+(m.r==="user"?"user":"batole");el.textContent=m.t;messages.appendChild(el);});
   const box=document.getElementById("messages");if(box)box.scrollTop=box.scrollHeight;
   document.getElementById("stats").textContent=`kroky ${state.steps} · puls ${state.pulse}`;
   document.getElementById("seed").textContent=state.seed+(state.nic?" · nic ×"+state.nic:"");
@@ -164,6 +165,8 @@ document.getElementById("send").onclick=()=>{
 };
 document.getElementById("input").onkeydown=e=>{if(e.key==="Enter")document.getElementById("send").click();};
 
+document.getElementById("backup").onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),state},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="batole-pamet-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>setStatus("Offline instalace není dostupná")));}
 load();render();loadSchema();
 </script>
 </body>
