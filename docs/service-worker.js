@@ -15,7 +15,7 @@
 */
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v25-bubinky-network-first`;
+const CACHE_NAME = `${CACHE_PREFIX}v26-navigation-network-first`;
 
 const OFFLINE_PAGE = "./index.html";
 const OFFLINE_MANIFEST = "./offline-cashe-assets.json";
@@ -516,21 +516,19 @@ async function handleNavigation(
     event.request;
 
   /*
-    Síť bubínků dostane při otevření přednostně
-    čerstvou verzi z GitHub Pages. Při offline
-    režimu se použije uložená kopie.
+    Všechny HTML navigace zkusíme nejprve ze sítě.
+    Tím se aktualizuje i vstupní stránka PWA, ne
+    pouze přímá adresa bubinků. Bez internetu
+    zůstává zachována offline kopie.
   */
-  if (new URL(request.url).pathname.endsWith("/bubinky.html")) {
-    const freshBeads = await updateFromNetwork(request);
-    if (freshBeads) return freshBeads;
+  const freshPage = await updateFromNetwork(request);
+  if (freshPage) return freshPage;
 
-    const offlineBeads = await findCached(request);
-    if (offlineBeads) return offlineBeads;
-  }
-
+  const offlinePage = await findCached(request);
+  if (offlinePage) return offlinePage;
 
   /*
-    1. Zkusíme přesnou stránku z cache.
+    3. Bez internetu vrátíme hlavní index CHT.
   */
 
   const cached =
