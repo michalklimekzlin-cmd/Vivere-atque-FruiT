@@ -1,7 +1,8 @@
-const CACHE_NAME = 'fruit-cache-v1';
+const CACHE_NAME = 'fruit-sklad-v2';
 const APP_SHELL = [
   './',
   './index.html',
+  './sklad.html',
   './TEACHER_STUDIO.html',
   './manifest.json',
   './VIVERE_atque_FruiT_CORE.js',
@@ -27,18 +28,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-
   const url = new URL(event.request.url);
-
-  if (url.pathname.includes('vivere-ai')) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => response)
-        .catch(() => caches.match('./vivere-ai.html'))
-    );
-    return;
-  }
-
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
@@ -46,11 +36,13 @@ self.addEventListener('fetch', (event) => {
       if (cached) return cached;
       return fetch(event.request)
         .then((response) => {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
           return response;
         })
-        .catch(() => caches.match('./TEACHER_STUDIO.html'));
+        .catch(() => caches.match('./sklad.html'));
     })
   );
 });
