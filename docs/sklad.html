@@ -65,5 +65,47 @@ body{color:var(--gold);font-family:ui-rounded,-apple-system,BlinkMacSystemFont,"
 <script>
 (()=>{'use strict';const KEY='vafit-sklad-mista-v1',root=document.getElementById('beads');let saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(_){saved={}}const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(_){}};root.querySelectorAll('.bead').forEach(button=>{const id=button.dataset.slot,label=button.querySelector('span');if(saved[id]){label.textContent=saved[id];button.classList.add('filled')}button.addEventListener('click',()=>{if(button.querySelector('input'))return;const input=document.createElement('input');input.type='text';input.maxLength=32;input.autocomplete='off';input.spellcheck=false;input.setAttribute('aria-label','Název místa');input.value=saved[id]||'';input.placeholder="VaF'¡¡'T";button.replaceChildren(input);input.focus();input.select();const finish=()=>{const value=input.value.trim();if(value)saved[id]=value;else delete saved[id];persist();button.replaceChildren();const span=document.createElement('span');span.textContent=value||"VaF'¡¡'T";button.append(span);button.classList.toggle('filled',!!value)};input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();input.blur()}if(e.key==='Escape'){input.value=saved[id]||'';input.blur()}});input.addEventListener('blur',finish,{once:true})})});if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}))})();
 </script>
+
+<!-- VaF backup bridge: no changes to beads or existing storage keys -->
+<style>
+.vaf-safe-tools{position:fixed;z-index:30;bottom:max(7px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);display:flex;gap:7px;align-items:center;justify-content:center;padding:5px 8px;border:1px solid rgba(239,212,154,.24);border-radius:30px;background:rgba(13,10,7,.93);font:11px system-ui,-apple-system,sans-serif;white-space:nowrap}
+.vaf-safe-tools button,.vaf-safe-tools a{font:inherit;color:#efd49a;border:1px solid rgba(239,212,154,.35);border-radius:15px;background:#211a11;padding:6px 10px;text-decoration:none;cursor:pointer}
+</style>
+<nav class="vaf-safe-tools" aria-label="Záloha bubínků a propojení">
+  
+  <button type="button" id="vaf-export">Záloha</button>
+  <button type="button" id="vaf-import">Obnovit</button>
+  <input id="vaf-import-file" type="file" accept="application/json,.json" hidden>
+</nav>
+<script>
+(() => {
+  "use strict";
+  const KEY="vafit-sklad-mista-v1";
+  const getData=()=>{try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");return x&&typeof x==="object"&&!Array.isArray(x)?x:{}}catch{return {}}};
+  document.getElementById("vaf-export").addEventListener("click",()=>{
+    const data=getData();
+    const payload={format:"vafit-sklad-backup",version:1,exportedAt:new Date().toISOString(),slots:data};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="vafit-bubinky-zaloha-"+new Date().toISOString().slice(0,10)+".json";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);
+    if(!Object.keys(data).length)alert("Záloha vytvořena, ale zde nejsou vyplněné žádné bubínky. Zkus také původní ikonu PWA.");
+  });
+  const file=document.getElementById("vaf-import-file");
+  document.getElementById("vaf-import").addEventListener("click",()=>file.click());
+  file.addEventListener("change",async()=>{
+    const item=file.files&&file.files[0];if(!item)return;
+    try{
+      const raw=JSON.parse(await item.text());
+      if(!raw||raw.format!=="vafit-sklad-backup"||raw.version!==1||!raw.slots||typeof raw.slots!=="object"||Array.isArray(raw.slots))throw Error("Neplatný soubor zálohy.");
+      const incoming=Object.fromEntries(Object.entries(raw.slots).filter(([k,v])=>/^\d+-\d+$/.test(k)&&typeof v==="string"&&v.length<=32));
+      if(!Object.keys(incoming).length){alert("V souboru nejsou uložené vyplněné bubínky.");return;}
+      const current=getData();const conflicts=Object.keys(incoming).filter(k=>current[k]&&current[k]!==incoming[k]);
+      if(!confirm("Obnovit "+Object.keys(incoming).length+" bubínků? Existující údaje zůstanou zachovány"+(conflicts.length?"; "+conflicts.length+" rozdílných míst nebude přepsáno":"")+". Pokračovat?"))return;
+      const merged={...incoming,...current}; // existing slots always win; no deletes
+      localStorage.setItem(KEY,JSON.stringify(merged));alert("Obnoveno. Původní vyplněné bubínky zůstaly zachovány.");location.reload();
+    }catch(e){alert("Obnovení se nezdařilo: "+(e.message||String(e)))}finally{file.value=""}
+  });
+})();
+</script>
+
 </body>
 </html>
