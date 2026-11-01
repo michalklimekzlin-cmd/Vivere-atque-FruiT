@@ -1,0 +1,19 @@
+{
+  "name": "VaF'¡¡'T · Síť bubínků",
+  "short_name": "VaF'¡¡'T",
+  "lang": "cs",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#090806",
+  "theme_color": "#0b0906",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "../docs/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
