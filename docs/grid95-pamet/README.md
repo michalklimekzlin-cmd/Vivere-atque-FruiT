@@ -26,3 +26,6 @@ Klikni **Export Obsidian .md** a vlož stažený soubor do vlastní offline slo�
 
 ## Cíl
 Dlouhodobá přenositelná projektová paměť: Grid95 + Grid96, čtyři jádra, CHT 360°‰., Batole, Mluva, Glyphy, Revia, bubínky a 101–7O7.
+
+## Oprava staré cache
+Pokud se na iPhonu zobrazuje pouze starý archiv 64 záznamů bez panelu Obsidian, otevři online `obsidian-v2.html` ze stejné složky. Používá nové názvy souborů a tutéž lokální IndexedDB (stejná doména), takže záznamy nepřepisuje ani nemaže. Po prvním načtení SW v3 uloží novou stránku pro offline použití.
