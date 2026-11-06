@@ -129,6 +129,10 @@
     "./braska-memory-link.js",
     "./braska-learning.js",
     "./braska-chat.js",
-    "./js/cht360-message-archive.js"
+    "./js/cht360-message-archive.js",
+    "./grid95-pamet/obsidian-v2.html",
+    "./grid95-pamet/app-obsidian-v2.js",
+    "./grid95-pamet/seed-obsidian-v2.json",
+    "./grid95-pamet/sw.js"
   ]
 }
