@@ -15,7 +15,7 @@
 */
 
 const CACHE_PREFIX = "cht360-shared-";
-const CACHE_NAME = `${CACHE_PREFIX}v29-cht-message-archive`;
+const CACHE_NAME = `${CACHE_PREFIX}v30-vaf7-journal`;
 
 const OFFLINE_PAGE = "./index.html";
 const OFFLINE_MANIFEST = "./offline-cashe-assets.json";
@@ -38,6 +38,7 @@ const CORE_FILES = [
   "./css/pamet.css",
   "./css/prstenec-pokojicku.css",
   "./css/revia-dock.css",
+  "./css/cht360-vaf7.css",
 
   "./batole-core.css",
   "./batole-core.js",
@@ -46,6 +47,8 @@ const CORE_FILES = [
   "./braska-memory-link.js",
   "./braska-chat.js",
   "./js/cht360-message-archive.js",
+  "./js/cht360-vaf7-dock.js",
+  "./js/cht360-vaf7-game.js",
   "./braska-learning.js",
 
   "./js/cht-chybozrout.js",
