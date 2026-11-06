@@ -821,6 +821,21 @@
       "status": "z rozhovorů",
       "source": "souhrn společných rozhovorů / projektová dokumentace",
       "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-065",
+      "core": "ŘÍZENÍ",
+      "title": "Povel: Ulož to do CHT 360°‰.",
+      "text": "V rozhovorech grid95 a grid96 tento výslovný pokyn znamená bez zbytečného doptávání zapsat bezpečný projektový poznatek do veřejného projektového seed.json na GitHubu, pokud je dostupný zápis. Citlivé či osobní informace nikdy nezveřejnit: ty mají zůstat lokálně, přes přenosnou zálohu. U každé operace oznámit skutečný výsledek a respektovat požadavek 'doplnit, nepřepisovat'. Příkaz v místním chatu Brášky uloží větu za dvojtečkou, nebo poslední předchozí uživatelskou zprávu, do jeho lokální znalostní paměti. Změny veřejného se dostanou do místní PWA při dalším online načtení.",
+      "tags": [
+        "pravidla",
+        "spolupráce",
+        "povel",
+        "automatické-uložení"
+      ],
+      "status": "schválené pravidlo spolupráce",
+      "source": "požadavek uživatele 2026-11-06",
+      "updated": "2026-11-06"
     }
   ]
 }
