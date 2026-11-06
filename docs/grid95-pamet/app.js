@@ -31,6 +31,58 @@ async function putIfNew(entry){
 }
 function status(t){$("status").textContent=t;}
 function valid(x){return x&&typeof x.id==="string"&&typeof x.title==="string"&&typeof x.text==="string"&&["ZEMĚ","JAZYK","HRA","ŘÍZENÍ"].includes(x.core);}
+const OBSIDIAN_VAULT_KEY = "vaf_grid95_obsidian_local_vault_v1";
+function getVaultName(){
+  const typed = $("obsidianVault")?.value?.trim();
+  if (typed) return typed;
+  try { return localStorage.getItem(OBSIDIAN_VAULT_KEY)?.trim() || ""; }
+  catch { return ""; }
+}
+function saveVault(){
+  const name = $("obsidianVault").value.trim();
+  if (!name) { status("Nejdřív zadej přesný název vaultu."); $("obsidianVault").focus(); return false; }
+  try { localStorage.setItem(OBSIDIAN_VAULT_KEY, name); }
+  catch { status("Název vaultu nelze trvale uložit do tohoto prohlížeče."); return false; }
+  status("Název místního vaultu je uložen pouze v tomto zařízení.");
+  return true;
+}
+function obsidianMarkdown(entry){
+  return "# " + entry.title + "\n\n" + entry.text + "\n\n"
+    + "**Jádro:** " + entry.core + "\n"
+    + "**Štítky:** " + (entry.tags || []).join(", ") + "\n"
+    + "**Zdroj:** CHT 360°‰. / VaF’i’T Paměť\n"
+    + "**ID:** " + entry.id + "\n";
+}
+async function handoffToObsidian(entry){
+  const vault = getVaultName();
+  if (!vault) {
+    status("Vyplň název svého místního Obsidian vaultu a ulož ho.");
+    $("obsidianVault").focus();
+    return;
+  }
+  const markdown = obsidianMarkdown(entry);
+  const title = ("CHT " + entry.title + " " + entry.id).replace(/[\\/:*?"<>|]/g, "-").slice(0, 130);
+  const filename = title + ".md";
+  const url = "obsidian://new?vault=" + encodeURIComponent(vault)
+    + "&name=" + encodeURIComponent(title) + "&content=" + encodeURIComponent(markdown);
+  if (url.length < 5500) {
+    status("Otevírám Obsidian. Zkontroluj v aplikaci, že se poznámka opravdu uložila.");
+    window.location.href = url;
+    return;
+  }
+  const file = new File([markdown], filename, { type: "text/markdown;charset=utf-8" });
+  try {
+    if (navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))) {
+      await navigator.share({files:[file], title:entry.title});
+      status("Soubor byl předán nabídce Sdílet. Vyber Obsidian a potvrď uložení.");
+      return;
+    }
+  } catch (error) {
+    if (error?.name === "AbortError") { status("Sdílení bylo zrušeno; poznatek zůstává v CHT."); return; }
+  }
+  download(markdown, filename, "text/markdown;charset=utf-8");
+  status("Dlouhá poznámka je stažená jako Markdown. Přesuň ji do Obsidianu přes aplikaci Soubory.");
+}
 function download(content,name,type){
  const url=URL.createObjectURL(new Blob([content],{type}));
  const a=document.createElement("a");a.href=url;a.download=name;document.body.append(a);a.click();a.remove();
@@ -46,7 +98,11 @@ async function refresh(){
   const core=document.createElement("div");core.className="tag";core.textContent=entry.core+" · "+(entry.tags||[]).join(" · ");
   const p=document.createElement("p");p.textContent=entry.text;
   const m=document.createElement("div");m.className="meta";m.textContent=entry.status||"lokální záznam";
-  box.append(core,h,p,m);$("entries").append(box);
+  const actions=document.createElement("div");actions.className="entryActions";
+  const obsidian=document.createElement("button");obsidian.type="button";obsidian.textContent="Do Obsidianu";
+  obsidian.addEventListener("click",()=>handoffToObsidian(entry).catch(error=>status("Předání do Obsidianu neproběhlo: "+error.message)));
+  actions.append(obsidian);
+  box.append(core,h,p,m,actions);$("entries").append(box);
  }
 }
 async function seed(){
@@ -99,5 +155,12 @@ $("backupCHT").addEventListener("click",()=>{
  download(JSON.stringify(data,null,2),"CHT360-soukroma-zaloha-localStorage.json","application/json;charset=utf-8");
  status("Záloha původní Paměti stažena. Nic se nepřepisovalo.");
 });
+$("obsidianSaveVault").addEventListener("click",saveVault);
+$("obsidianTestVault").addEventListener("click",()=>{
+  if(!getVaultName()){status("Nejdřív zadej název vaultu.");$("obsidianVault").focus();return;}
+  window.location.href="obsidian://open?vault="+encodeURIComponent(getVaultName());
+  status("Otevírám místní vault v Obsidianu; ověř jeho název.");
+});
+try{$("obsidianVault").value=localStorage.getItem(OBSIDIAN_VAULT_KEY)||"";}catch{}
 if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
 seed();
