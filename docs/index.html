@@ -470,6 +470,7 @@
           <input id="searchInput" type="search" placeholder="Hledat ve slotech...">
           <button id="exportCore" type="button">Export</button>
           <button id="importCore" type="button">Import</button>
+          <button id="openCHTMessageArchive" type="button">Archiv zpráv</button>
           <a class="necesstinaShortcut" href="./necesstina-cht-360/">NeČEŠTINA</a>
         <a class="necesstinaShortcut" href="./grid95-pamet/" title="Offline projektová paměť grid95 a grid96">Paměť grid95 × grid96</a>
         </div>
@@ -564,6 +565,7 @@
 
     <div class="reviaShortcuts" aria-label="Rychlé propojení">
       <button type="button" data-revia-action="history">Historie</button>
+      <button type="button" id="openReviaArchive">Archiv zpráv</button>
       <button type="button" data-revia-action="mluva">Mluva</button>
       <button type="button" data-revia-action="map">Atlas</button>
       <button type="button" data-revia-action="plans">Plány</button>
@@ -600,7 +602,7 @@
 
     <form id="reviaForm" class="reviaForm">
       <label class="srOnly" for="reviaInput">Zpráva pro Revia</label>
-      <textarea id="reviaInput" rows="2" maxlength="1200" placeholder="Napiš Revii…"></textarea>
+      <textarea id="reviaInput" rows="3" maxlength="4000" placeholder="Napiš Revii…"></textarea>
       <button type="button" data-revia-action="repository">Repo</button>
       <button type="submit" aria-label="Odeslat zprávu Revii">↗</button>
     </form>
@@ -641,6 +643,7 @@
   <script src="./braska-yahoo-life.js" defer></script>
   <script src="./braska-knowledge.js?v=1.0.0" defer></script>
   <script src="./braska-learning.js?v=1.0.0" defer></script>
+  <script src="./js/cht360-message-archive.js" defer></script>
   <script src="./braska-chat.js" defer></script>
   <script src="./vivere-atque-fruit-core.js"></script>
   <script src="./cht360-right-dock.js"></script>
