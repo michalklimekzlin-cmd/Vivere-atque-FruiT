@@ -1,0 +1,60 @@
+/* VaFiT extension: isolated visual styles; does not modify the existing CHT canvas. */
+#vafit-extension-btn,#vafit-extension-panel,#vafit-extension-panel *{box-sizing:border-box}
+#vafit-extension-btn{position:fixed;left:max(12px,env(safe-area-inset-left));top:calc(56px + env(safe-area-inset-top));z-index:2147483000;border:1px solid #b99150;border-radius:999px;padding:10px 13px;background:#171118;color:#ffe2ad;font-size:13px;font-weight:750;letter-spacing:.03em;box-shadow:0 4px 19px #0008;cursor:pointer;touch-action:manipulation}
+#vafit-extension-panel[hidden]{display:none!important}
+#vafit-extension-panel{color:#fff0d0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;position:fixed;inset:max(6px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));z-index:2147483001;display:flex;flex-direction:column;min-height:0;max-width:760px;margin:auto;background:linear-gradient(145deg,#101521,#090912);border:1px solid #806338;border-radius:18px;box-shadow:0 12px 45px #000c;overflow:hidden;isolation:isolate}
+#vafit-extension-panel button,#vafit-extension-panel input,#vafit-extension-panel select,#vafit-extension-panel textarea{font:inherit}
+#vafit-extension-panel button{color:#ffe2ad;background:#1a2230;border:1px solid #634d2c;border-radius:9px;padding:8px 12px;min-height:36px;cursor:pointer;touch-action:manipulation}
+#vafit-extension-panel button:focus-visible,#vafit-extension-btn:focus-visible{outline:3px solid #f2c674;outline-offset:2px}
+#vafit-extension-panel button:active{transform:translateY(1px)}
+#vafit-extension-panel button.active,#vafit-extension-panel button.vfx-primary{background:#6d4d1b;color:#fff1d1;border-color:#b89150}
+#vafit-extension-panel .vfx-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;background:#0d0b12;border-bottom:1px solid #534126}
+#vafit-extension-panel .vfx-head strong{font-size:16px;letter-spacing:.03em;display:block}
+#vafit-extension-panel .vfx-head small{display:block;font-size:11px;color:#c5a77a;margin-top:3px}
+#vafit-extension-panel #vfx-close{font-size:23px;padding:0;width:34px;height:34px;min-height:34px;flex:0 0 auto}
+#vafit-extension-panel .vfx-nav{display:flex;overflow-x:auto;gap:7px;padding:9px 12px;border-bottom:1px solid #41382f;flex:0 0 auto;scrollbar-width:thin}
+#vafit-extension-panel .vfx-nav button{white-space:nowrap;font-size:12px;padding:7px 9px;min-height:33px}
+#vafit-extension-panel .vfx-view{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:15px;overscroll-behavior:contain;touch-action:pan-y}
+#vafit-extension-panel .vfx-footer{flex:0 0 auto;border-top:1px solid #4b3823;padding:9px 13px;font-size:11px;color:#bdc3ce;background:#0b101a}
+#vafit-extension-panel #vfx-status[data-error=true]{color:#ff9d86}
+#vafit-extension-panel h2{margin:0 0 5px;font-size:19px;color:#f0cd88}
+#vafit-extension-panel h3{font-size:15px;color:#f7d69a;margin:14px 0 9px}
+#vafit-extension-panel h4{font-size:14px;color:#ffe6b6;margin:5px 0}
+#vafit-extension-panel p{font-size:13px;line-height:1.45;color:#c5cad3;margin:7px 0 12px;overflow-wrap:anywhere}
+#vafit-extension-panel .vfx-intro{margin-bottom:12px}
+#vafit-extension-panel .vfx-hint{font-size:11px;color:#a3afbf;margin-top:13px}
+#vafit-extension-panel .vfx-drums{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;justify-items:center;margin:14px auto;max-width:500px}
+#vafit-extension-panel button.vfx-drum{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border-radius:50%;width:100%;max-width:84px;aspect-ratio:1/1;padding:4px;border:2px solid #a37c3b;background:radial-gradient(circle at 35% 22%,#554c39,#121624 75%);box-shadow:inset 0 2px 6px #ffffff17,0 3px 8px #0009;min-height:0;min-width:0;overflow:hidden}
+#vafit-extension-panel button.vfx-drum.filled{background:radial-gradient(circle at 28% 18%,#aa853e,#45321e 55%,#12131d 90%);border-color:#e7be70}
+#vafit-extension-panel .vfx-drum span{align-self:flex-start;margin-left:8px;font-size:9px;opacity:.7}
+#vafit-extension-panel .vfx-drum b{font-size:16px;line-height:1.2}
+#vafit-extension-panel .vfx-drum small{font-size:9px;max-width:85%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#vafit-extension-panel label{display:block;color:#e9d7b7;font-size:12px;font-weight:650;margin:9px 0}
+#vafit-extension-panel input:not([type=file]),#vafit-extension-panel select,#vafit-extension-panel textarea{display:block;width:100%;border:1px solid #665438;background:#0a1220;border-radius:8px;padding:10px;color:#fff1d1;margin-top:5px;outline-offset:1px}
+#vafit-extension-panel textarea{resize:vertical;min-height:75px}
+#vafit-extension-panel .vfx-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#vafit-extension-panel .vfx-actions{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+#vafit-extension-panel #vfx-editor{padding:12px;border:1px solid #5c482b;border-radius:12px;background:#101927;margin-bottom:18px}
+#vafit-extension-panel #vfx-list{display:grid;gap:9px}
+#vafit-extension-panel .vfx-record{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid #384357;border-radius:10px;background:#141b29;overflow:hidden}
+#vafit-extension-panel .vfx-record>div:first-child{min-width:0;flex:1}
+#vafit-extension-panel .vfx-kicker{font-size:11px;color:#d1a96e}
+#vafit-extension-panel .vfx-record p{white-space:pre-wrap;margin:4px 0}
+#vafit-extension-panel .vfx-record-buttons{display:flex;flex-direction:column;gap:5px;flex:0 0 auto}
+#vafit-extension-panel .vfx-record-buttons button{font-size:11px;padding:5px 8px;min-height:29px}
+#vafit-extension-panel .vfx-letter-grid{display:flex;flex-wrap:wrap;gap:6px}
+#vafit-extension-panel .vfx-letter-grid button{min-width:39px;min-height:39px;font-size:16px}
+#vafit-extension-panel .vfx-lessons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#vafit-extension-panel .vfx-lessons article{background:#141c2c;border:1px solid #514733;border-radius:10px;padding:10px}
+#vafit-extension-panel .vfx-lessons b{font-size:13px}
+#vafit-extension-panel .vfx-lessons p{margin:6px 0}
+#vafit-extension-panel .vfx-lessons button{font-size:11px;padding:5px 8px}
+#vafit-extension-panel .vfx-cores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:14px}
+#vafit-extension-panel .vfx-cores>div{display:flex;flex-direction:column;gap:4px;background:#121c2c;border:1px solid #59472d;border-radius:11px;padding:12px}
+#vafit-extension-panel .vfx-cores b{font-size:12px;color:#d8ad70}
+#vafit-extension-panel .vfx-cores strong{font-size:18px}
+#vafit-extension-panel .vfx-trash>div{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #42372e;font-size:12px}
+@media (max-width:520px){#vafit-extension-panel .vfx-head{padding:9px 11px}#vafit-extension-panel .vfx-view{padding:11px}#vafit-extension-panel .vfx-lessons{grid-template-columns:1fr}#vafit-extension-panel button.vfx-drum{max-width:62px}#vafit-extension-panel .vfx-drum b{font-size:13px}#vafit-extension-panel .vfx-drum small{font-size:8px}#vafit-extension-panel .vfx-drum span{font-size:8px}#vafit-extension-panel .vfx-drums{gap:6px}#vafit-extension-panel .vfx-record{flex-direction:column}#vafit-extension-panel .vfx-record-buttons{flex-direction:row;flex-wrap:wrap}}
+@media (prefers-reduced-motion:reduce){#vafit-extension-panel *{scroll-behavior:auto!important}}
+
+#vafit-extension-panel .vfx-record[hidden]{display:none!important}
