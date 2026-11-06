@@ -1,0 +1,7 @@
+GLYPH · PAMĚŤ V PÍSMENKÁCH — SAMOSTATNÁ KOPIE
+
+Tento ZIP obsahuje pouze samostatnou komoru GLYPH, nikoliv CHT 360°‰.
+Po rozbalení na webový server s HTTPS otevři index.html. V Safari na iPhonu lze pak zkusit Přidat na plochu. Otevření přímo z aplikace Soubory nezaručuje PWA ani trvalou paměť.
+Prohlížečové zkoušky na skutečném iPhonu nejsou provedeny.
+Přenos do skutečných paměťových jader a Batolete potřebuje připojené hlavní CHT.
+Před reálným používáním zkontroluj export JSON a zálohu. Nic se samo neposílá do externích služeb.
