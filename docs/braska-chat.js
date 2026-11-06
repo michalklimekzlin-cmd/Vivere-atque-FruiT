@@ -78,6 +78,7 @@
     };
 
     state.messages.push(item);
+    window.dispatchEvent(new CustomEvent("cht360:message-created", { detail: { channel: "braska", message: item } }));
     save();
     renderMessages();
     return item;
@@ -107,8 +108,11 @@
 
     // Výslovný příkaz pro uložení poznatku do dlouhodobé lokální znalostní paměti.
     const teachMatch = txt.match(/^zapamatuj si\s*:\s*([\s\S]{3,})$/i);
-    if (teachMatch) {
-      const note = teachMatch[1].trim();
+    const chtSaveMatch = txt.match(/^\s*ulo[žz]\s+to\s+do\s+CHT\s*360°‰\.?\s*:?\s*([\s\S]*)$/i);
+    if (teachMatch || chtSaveMatch) {
+      const previous = state.messages.slice(0, -1).reverse().find(item => item.role === "user");
+      const note = (teachMatch?.[1] || chtSaveMatch?.[1] || previous?.text || "").trim();
+      if (!note) return "Není co uložit. Napiš text poznatku za dvojtečku.";
       const title = note.split(/[.!?\\n]/)[0].trim().slice(0, 80) || "Poznatek od uživatele";
       let saved = false;
       try {
@@ -273,7 +277,7 @@
       z-index: 999;
       right: max(14px, env(safe-area-inset-right));
       bottom: max(14px, env(safe-area-inset-bottom));
-      width: min(380px, calc(100vw - 28px));
+      width: min(430px, calc(100vw - 28px));
       max-height: min(610px, calc(100dvh - 28px));
       display: none;
       flex-direction: column;
@@ -350,7 +354,7 @@
 
     #braskaChat .bc-log {
       min-height:160px;
-      max-height:340px;
+      max-height:min(440px, 56dvh);
       overflow:auto;
       padding:12px;
     }
@@ -495,13 +499,14 @@
     <div class="bc-status" id="bcStatus">Načítám stav…</div>
     <div class="bc-log" id="bcLog"></div>
     <form class="bc-form" id="bcForm">
-      <textarea id="bcInput" rows="2" maxlength="1200"
+      <textarea id="bcInput" rows="2" maxlength="4000"
         placeholder="Napiš Bráškovi…"></textarea>
       <button class="bc-send" type="submit" aria-label="Odeslat">↗</button>
     </form>
     <div class="bc-actions">
       <button id="bcState" type="button">Stav</button>
       <button id="bcMemory" type="button">Paměť</button>
+      <button id="bcArchive" type="button">Archiv zpráv</button>
       <button id="bcClear" type="button">Vyčistit chat</button>
     </div>
   `;
@@ -514,7 +519,7 @@
 
   function renderMessages() {
     log.innerHTML = state.messages.length
-      ? state.messages.map(m => `
+      ? state.messages.slice(-80).map(m => `
           <div class="bc-msg ${m.role === "user" ? "user" : "braska"}">
             ${esc(m.text)}
             <span class="bc-time">${esc(new Date(m.at).toLocaleTimeString("cs-CZ"))}</span>
@@ -618,6 +623,10 @@
       "braska",
       `Chat obsahuje ${count} zpráv. Zprávy jsou v tomto zařízení; projektové poznatky ukládá také samostatná paměť CHT.`
     );
+  });
+
+  panel.querySelector("#bcArchive").addEventListener("click", () => {
+    window.CHT360MessageArchive?.openPanel?.().catch(error => console.warn("[CHT Archiv]", error));
   });
 
   panel.querySelector("#bcClear").addEventListener("click", () => {
