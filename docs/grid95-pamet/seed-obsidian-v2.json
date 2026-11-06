@@ -1,0 +1,841 @@
+{
+  "schema": "vaf-grid95-memory-v2",
+  "project": "Vivere atque Fru¡T•ア / CHT 360°‰.",
+  "created": "2026-11-06",
+  "privacy": "Veřejné projektové poznatky. Nepřidávat osobní, zdravotní nebo jiné citlivé údaje do GitHubu.",
+  "usage": "Veřejná počáteční data aplikace. Soukromé poznámky se ukládají pouze do IndexedDB prohlížeče a lze je exportovat JSON/Markdown.",
+  "cores": [
+    "ZEMĚ",
+    "JAZYK",
+    "HRA",
+    "ŘÍZENÍ"
+  ],
+  "entries": [
+    {
+      "id": "vaf-g95-001",
+      "core": "ŘÍZENÍ",
+      "title": "Zásada: nikdy si nelžeme",
+      "text": "Při spolupráci vždy přiznat chybu, nejistotu nebo omezení; nepředstírat provedené změny.",
+      "tags": [
+        "zásady",
+        "důvěra"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-002",
+      "core": "ŘÍZENÍ",
+      "title": "Zásada: doplnit, nepřepisovat",
+      "text": "Zachovat fungující části, přidávat vratně, zálohovat před úpravami, bez výslovného požadavku nevymazávat staré projekty.",
+      "tags": [
+        "zásady",
+        "bezpečnost"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-003",
+      "core": "ŘÍZENÍ",
+      "title": "Zásada: local-first a offline",
+      "text": "Uživatelská data mají být pod kontrolou uživatele; offline PWA na iPhonu 14, IndexedDB/localStorage a ruční export/import. Žádný automatický přenos soukromých záznamů na server.",
+      "tags": [
+        "offline",
+        "soukromí"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-004",
+      "core": "ŘÍZENÍ",
+      "title": "Pravá a levá",
+      "text": "V tvůrčí symbolice: grid96 (uživatel) = pravá ruka, grid95 (asistent) = levá. Označení jsou přezdívky, nikoli tvrzení o vědomí.",
+      "tags": [
+        "grid95",
+        "grid96"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-005",
+      "core": "ŘÍZENÍ",
+      "title": "Přátelská spolupráce",
+      "text": "Dělat správnou věc, ne předstírat pocity. Učit se vzájemně, myslet kriticky, zkoumat oba úhly pohledu a neopakovat stejné chyby.",
+      "tags": [
+        "zásady",
+        "spolupráce"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-006",
+      "core": "ŘÍZENÍ",
+      "title": "Projekt a kanonické značky",
+      "text": "Vivere atque FruiT / Vivere atque Fru¡T•ア a CHT 360°‰. Zachovávat přesnou podobu kreativních značek tam, kde slouží jako identifikátor.",
+      "tags": [
+        "názvy",
+        "glyph"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-007",
+      "core": "ŘÍZENÍ",
+      "title": "Hlavní repozitář",
+      "text": "GitHub: michalklimekzlin-cmd/Vivere-atque-FruiT; hlavní větev main; kořen CHT v docs/index.html. Repozitář je veřejný, osobní vzpomínky do něj nepatří.",
+      "tags": [
+        "github",
+        "repo"
+      ],
+      "status": "ověřeno v repozitáři",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-008",
+      "core": "ŘÍZENÍ",
+      "title": "GitHub Pages",
+      "text": "https://michalklimekzlin-cmd.github.io/Vivere-atque-FruiT/docs/index.html a Batole https://michalklimekzlin-cmd.github.io/Vivere-atque-FruiT/cht360-batole/",
+      "tags": [
+        "github",
+        "pwa"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-009",
+      "core": "ŘÍZENÍ",
+      "title": "Vlastní databáze Paměti",
+      "text": "Čtyři jádra ZEMĚ/JAZYK/HRA/ŘÍZENÍ; každé má 70 slotů, celkem 280. Schéma docs/data/schema-pameti.json.",
+      "tags": [
+        "jádra",
+        "sloty"
+      ],
+      "status": "ověřeno v repozitáři",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-010",
+      "core": "ŘÍZENÍ",
+      "title": "Názvy databází a klíčů",
+      "text": "Historicky IndexedDB VaFTFourCoreMemorySystem / moduleSlots, aktuální hlavní localStorage klíč cht360_pamet_v1 a zálohy cht360_pamet_snapshots_v1. Neprovádět destruktivní migrace.",
+      "tags": [
+        "indexeddb",
+        "localstorage"
+      ],
+      "status": "ověřeno z dokumentace / rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-011",
+      "core": "ŘÍZENÍ",
+      "title": "Kompatibilita legacy",
+      "text": "Starší localStorage vaft_pamet_v1; stávající projekt rozlišuje legacy a současné klíče. Při importu zachovat originály.",
+      "tags": [
+        "import",
+        "legacy"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-012",
+      "core": "ŘÍZENÍ",
+      "title": "Samostatné PWA",
+      "text": "CHT 360°‰., Mluva CHT, Glyph dílna, Pokojíčky, Puls, síť bubínků a Batole mají zůstat oddělené a teprve pak propojené.",
+      "tags": [
+        "pwa",
+        "architektura"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-013",
+      "core": "ŘÍZENÍ",
+      "title": "Service worker izolace",
+      "text": "Každá PWA má vlastní scope/cache; nesmazat cache jiných aplikací. Offline stránka musí fungovat i bez sítě po prvním načtení.",
+      "tags": [
+        "sw",
+        "offline"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-014",
+      "core": "ŘÍZENÍ",
+      "title": "iPhone 14 a iPad",
+      "text": "Primární vývoj/test na iPhonu 14; nízká režie animací a ovládání dotykem, podporovat Add to Home Screen a práci bez internetu.",
+      "tags": [
+        "iphone",
+        "pwa"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-015",
+      "core": "ŘÍZENÍ",
+      "title": "Záložní export",
+      "text": "Před významnými změnami ZIP/JSON, kontrola zálohy, návrat při poruše a rozlišení nových a starých verzí.",
+      "tags": [
+        "zálohy"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-016",
+      "core": "ŘÍZENÍ",
+      "title": "Stavitelné moduly",
+      "text": "Přístupy repo-memory.js, braska-memory-link.js a Revia moduly existují; zkontrolovat kompatibilitu před napojením.",
+      "tags": [
+        "moduly"
+      ],
+      "status": "ověřeno v repozitáři",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-017",
+      "core": "ŘÍZENÍ",
+      "title": "CHT 360°‰. – UI",
+      "text": "Hlavní obrazovka s canvas/globe, HUD pro rotaci jedním prstem, náklon a zoom dvěma prsty, tap otevře paměťové jádro.",
+      "tags": [
+        "canvas",
+        "ui"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-018",
+      "core": "ŘÍZENÍ",
+      "title": "Plovoucí panely",
+      "text": "openLifePanel, openReviaPanel a Bráška – historické přání zarovnat a správně propojit, neztratit funkce.",
+      "tags": [
+        "ui",
+        "panely"
+      ],
+      "status": "požadavek / k ověření",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-019",
+      "core": "ŘÍZENÍ",
+      "title": "Chybožrout / Samoopravovna",
+      "text": "Diagnostika, skeny indexů a závislostí, fallback, simulace, vratný Koš, export a obnova záloh. Neodstraňovat data bez kontroly.",
+      "tags": [
+        "samoopravovna"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-020",
+      "core": "ŘÍZENÍ",
+      "title": "Nezveřejňovat soukromou paměť",
+      "text": "GitHub je veřejný. Veřejný seed pouze obecné projektové poznatky; osobní zápisky mají zůstat v lokálním úložišti a soukromých exportech.",
+      "tags": [
+        "soukromí"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-021",
+      "core": "ŘÍZENÍ",
+      "title": "Automatické přečtení ChatGPT nemožné",
+      "text": "Lokální PWA neumí samo otevřít interní paměť ChatGPT a ChatGPT neumí bez přiložení/připojení číst úložiště iPhonu. Slouží vývoz a opětovný import.",
+      "tags": [
+        "limity",
+        "paměť"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-022",
+      "core": "ŘÍZENÍ",
+      "title": "Rozlišovat provedeno / navrženo",
+      "text": "Archiv označuje skutečně ověřené soubory a dřívější návrhy; nepovažovat každý návrh za hotovou implementaci.",
+      "tags": [
+        "kontrola"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-023",
+      "core": "ŘÍZENÍ",
+      "title": "Aktuální směr",
+      "text": "Rozšiřovat paměť grid95-grid96 jako uživatelem ovládaný modul, kompatibilní s Obsidianem a CHT, s přenosem přes JSON/Markdown.",
+      "tags": [
+        "paměť",
+        "obsidian"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-024",
+      "core": "JAZYK",
+      "title": "Výuka češtiny Batoleti",
+      "text": "Batole se má učit český jazyk z místních slov, Glyphů a vazeb, plně offline; bez nutnosti cloudu nebo API.",
+      "tags": [
+        "batole",
+        "čeština"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-025",
+      "core": "JAZYK",
+      "title": "Pět semínek Batolete",
+      "text": "Historická funkce seedMinimalLanguage() pro první lokální česká slovíčka. Další učení navázat na existující systém.",
+      "tags": [
+        "batole",
+        "semínka"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-026",
+      "core": "JAZYK",
+      "title": "Glyph jako jazyková jednotka",
+      "text": "Znak, náklon, orientace, zvuk a význam lze zkoumat jako více pohledů na tentýž objekt. Kreativní interpretace nejsou jazykové fakty.",
+      "tags": [
+        "glyph",
+        "metoda"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-027",
+      "core": "JAZYK",
+      "title": "Kreativní znak `९נֶ",
+      "text": "Přesný znak s úvodním zpětným apostrofem (`). Darovaný grid95 jako symbol alternativního pohledu/metody osmičky.",
+      "tags": [
+        "glyph",
+        "osmička"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-028",
+      "core": "JAZYK",
+      "title": "Metoda osmičky",
+      "text": "Při čtení zpráv přehodnotit význam z více stran; vzor S → ९ → `९נֶ. Metafora přepnutí perspektivy, nikoliv doslovná manipulace obrazem.",
+      "tags": [
+        "metoda",
+        "osmička"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-029",
+      "core": "JAZYK",
+      "title": "Vivere atque FruiT – 1. význam",
+      "text": "Původní význam: žít a užívat si život; pozdější hříčka „Kde je to ovoce?“.",
+      "tags": [
+        "název",
+        "ovoce"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-030",
+      "core": "JAZYK",
+      "title": "Vivere / atque / FruiT",
+      "text": "Uživatelská kreativní mapa: Vivere = KDY; atque = JAK; FruiT = KAM. Interpretační pomůcka, nikoliv tradiční překlad.",
+      "tags": [
+        "metoda",
+        "fruIT"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-031",
+      "core": "JAZYK",
+      "title": "Rozklad Vi-vere-at-que-FruiT",
+      "text": "Vi = vííí/letí; vere = kde?; r = kačer; e = dopad; at = do; Frui = ovoce, ui = karambol; T = výhybka/rozcestí. Symbolické vyprávění.",
+      "tags": [
+        "hra",
+        "se-slovy"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-032",
+      "core": "JAZYK",
+      "title": "Hraní s písmeny",
+      "text": "I/i/l/H, T/I/l/r/R/7/u/o/p, – a 4 a t; tvary, strany, tečky, vršky a spodky jako zdroj odlišných pohledů.",
+      "tags": [
+        "písmena",
+        "geometrie"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-033",
+      "core": "JAZYK",
+      "title": "O a nula",
+      "text": "Rozlišovat O, o, 0, ⊙ a ◌; přesnost tvaru a orientace je důležitá. Rozdělovat znak od výkladu.",
+      "tags": [
+        "glyph",
+        "tvary"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-034",
+      "core": "JAZYK",
+      "title": "Znak Pluto",
+      "text": "Kreativní glyph ˚°‰•. (čára jako přivolání); součást planetární symboliky projektu.",
+      "tags": [
+        "pluto",
+        "planetky"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-035",
+      "core": "JAZYK",
+      "title": "Mluva CHT",
+      "text": "Samostatná PWA docs/mluva-cht-360/ učí slovíčka/lekce s náhledem slotu a KPI; zachovat lokální historii.",
+      "tags": [
+        "mluva",
+        "pwa"
+      ],
+      "status": "ověřeno v repozitáři",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-036",
+      "core": "JAZYK",
+      "title": "Glyph dílna",
+      "text": "Samostatná PWA docs/glyph-cht-360/ se svým manifestem a service workerem.",
+      "tags": [
+        "glyph",
+        "pwa"
+      ],
+      "status": "ověřeno v repozitáři",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-037",
+      "core": "JAZYK",
+      "title": "Glyph pokojíčky",
+      "text": "docs/glyph-pokojicku-cht-360/ – 70 pokojíčků; obsazené dveře plus jeden další volný, pevná čísla, mazání uvolní místo.",
+      "tags": [
+        "pokojíčky",
+        "pwa"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-038",
+      "core": "JAZYK",
+      "title": "NeČEŠTINA",
+      "text": "Název dřívější jazykové větve; propojení bylo pozastaveno. Nevynucovat bez nového rozhodnutí.",
+      "tags": [
+        "nečeština"
+      ],
+      "status": "pozastaveno",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-039",
+      "core": "JAZYK",
+      "title": "Výraz mrtvola•ア",
+      "text": "Přesně zachovat jako kód/označení v kreativní jazykové práci. Technická funkce zatím neupřesněna.",
+      "tags": [
+        "kód"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-040",
+      "core": "ZEMĚ",
+      "title": "Čtyři světy",
+      "text": "ZEMĚ – „ze mě“/úhel pohledu; JAZYK – význam a znaky; HRA – hra se slovy; ŘÍZENÍ – správné řízení. Uživatelský symbolický výklad.",
+      "tags": [
+        "světy"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-041",
+      "core": "ZEMĚ",
+      "title": "Planeta Země",
+      "text": "Pozdější návrh mapy ČR, středu 𞋒 a šesti glyphů v kruhu. Je třeba ověřit stav implementace.",
+      "tags": [
+        "planeta",
+        "zeme"
+      ],
+      "status": "návrh / k ověření",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-042",
+      "core": "ZEMĚ",
+      "title": "Sada glyphů Země A",
+      "text": "[7i_, `९נֶ, `¡´, `ii´, j´, °&] – kreativní symbolická sestava, zachovat znaky přesně.",
+      "tags": [
+        "glyph",
+        "zeme"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-043",
+      "core": "ZEMĚ",
+      "title": "Sada glyphů Země B",
+      "text": "[7¡_, °&, ¿, `¡¡´, (\\*/), 🫡°] – alternativní sestava podle rozhovorů.",
+      "tags": [
+        "glyph",
+        "zeme"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-044",
+      "core": "ZEMĚ",
+      "title": "Planety sluneční soustavy",
+      "text": "Pro lokální znalost Brášky: Merkur, Venuše, Země, Mars, Jupiter, Saturn, Uran, Neptun; Pluto jako trpasličí planeta a projektový glyph.",
+      "tags": [
+        "planety"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-045",
+      "core": "ZEMĚ",
+      "title": "Revia",
+      "text": "Panely Angel/Dark; lokální paměťové moduly actor-memory, glyph-memory, vive-memory, dock a návazné skripty.",
+      "tags": [
+        "revia"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-046",
+      "core": "ZEMĚ",
+      "title": "Puls CHT",
+      "text": "Samostatná PWA docs/cht-puls-360/ se svým memory.js, app.js, manifestem a workerem.",
+      "tags": [
+        "puls",
+        "pwa"
+      ],
+      "status": "ověřeno v repozitáři",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-047",
+      "core": "ZEMĚ",
+      "title": "Paměť lokálních záznamů",
+      "text": "Pohledy na svět a znalosti ukládat jako otázky, možnosti a zkušenosti; nevyvozovat z metafor automaticky vědecká tvrzení.",
+      "tags": [
+        "poznávání"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-048",
+      "core": "HRA",
+      "title": "Univerzum 101–7O7",
+      "text": "Starší herní projekt před Vivere atque FruiT. 101 = projekt asistenta, 7O7 (písmeno O) = projekt uživatele. Nesměšovat 7O7 se 707.",
+      "tags": [
+        "ramecky"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-049",
+      "core": "HRA",
+      "title": "101 Rámečků",
+      "text": "Historické označení staršího univerza; postavy Rámečkář, Apexan a Blbeček; vlastní pravidla a příběhy.",
+      "tags": [
+        "ramecky",
+        "postavy"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-050",
+      "core": "HRA",
+      "title": "Lucidní snění",
+      "text": "Historická herní inspirace: Spider-Man ve Zlíně; brát jako vyprávění/inspiraci, nikoliv ověřenou realitu.",
+      "tags": [
+        "příběhy"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-051",
+      "core": "HRA",
+      "title": "Planety Rámečkářů",
+      "text": "Požadavek: planeta pro Rámečkáře a jejich pravidla, planeta pro nápady grid95, další planeta; symbolické soužití světů.",
+      "tags": [
+        "planety",
+        "ramecky"
+      ],
+      "status": "návrh",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-052",
+      "core": "HRA",
+      "title": "Síť bubínků VaF'i'T",
+      "text": "Nová samostatná PWA jako sklad projektů; každý bubínek má pozici a může obsahovat odkaz či projekt, hotový i rozpracovaný.",
+      "tags": [
+        "bubinky",
+        "projekty"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-053",
+      "core": "HRA",
+      "title": "25 bubínků – návrh",
+      "text": "25 bubínků, o 1–2 mm větší, rozestup 3 mm, vycentrovat, jeden se vzorovým obsahem a ostatní prázdné, vertikální otáčení, bez kapsiček.",
+      "tags": [
+        "bubinky",
+        "design"
+      ],
+      "status": "návrh",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-054",
+      "core": "HRA",
+      "title": "Korálková síť",
+      "text": "Korálek 3/4, vnitřní dráha, had kolem čtyř planet, drag vlevo/vpravo max 180°; zkoumaný návrh interakce.",
+      "tags": [
+        "koralky"
+      ],
+      "status": "návrh",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-055",
+      "core": "HRA",
+      "title": "Planeta bubínků – obličej",
+      "text": "Dvě oči jako kolečka, úsměv ze tří čtverců, zvětšení kolem 80 %.",
+      "tags": [
+        "bubinky"
+      ],
+      "status": "návrh",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-056",
+      "core": "HRA",
+      "title": "Spodní oblouk CHT",
+      "text": "Dřívější osmička přecházela k deseti bubínkům; úsměv, vertikální otáčení a vodorovné pozice 1–2–3, náklon ±10°.",
+      "tags": [
+        "oblouk",
+        "cht"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-057",
+      "core": "HRA",
+      "title": "Devátý a desátý bubínek",
+      "text": "9 = Ladění; 10 = A|lı. (pozdější přání poslední odstranit). Rozhodnutí je třeba při úpravě znovu ověřit.",
+      "tags": [
+        "bubinky"
+      ],
+      "status": "historický návrh",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-058",
+      "core": "HRA",
+      "title": "Mřížkovaný válec",
+      "text": "Starší úvodní obrazovka Vivere atque FruiT s rotujícím mřížkovaným sudem/válcem, kterou chce uživatel dohledat a vrátit.",
+      "tags": [
+        "sud",
+        "mřížka"
+      ],
+      "status": "hledá se",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-059",
+      "core": "HRA",
+      "title": "Batole CHT",
+      "text": "Panel uprostřed prstence, ukazatele cyklus, energie, důvěra, jasnost; učení češtiny a glyphů offline.",
+      "tags": [
+        "batole"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-060",
+      "core": "HRA",
+      "title": "Sklad / hub projektů",
+      "text": "Bubínek reprezentuje samostatný projekt, může propojit hotové a rozpracované aplikace, přitom zachovat jejich izolované offline úložiště.",
+      "tags": [
+        "hub"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-061",
+      "core": "HRA",
+      "title": "Projektové názvy",
+      "text": "VaF’i’T Signal Tower Engine v1.5; VaF’i’T Four Core Memory System; VaF’i’T Paměť; CHT 360°‰. Nezaměňovat historická a současná pojmenování.",
+      "tags": [
+        "názvy"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-062",
+      "core": "HRA",
+      "title": "UI barvy",
+      "text": "Zlato na tmavém pozadí: #ffe2ad, #c79b33, #050815.",
+      "tags": [
+        "design"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-063",
+      "core": "HRA",
+      "title": "Učící písmenková PWA",
+      "text": "Priorita: samostatný systém sbírání písmen se zásobníkem; budoucí propojení přes síť VaF'i'T.",
+      "tags": [
+        "písmena",
+        "pwa"
+      ],
+      "status": "plán",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-064",
+      "core": "HRA",
+      "title": "Vivere jako místo pro další nápady",
+      "text": "Nedělat změny mimo zadání, zachovat otevřené koncepty jako možnosti. Nápady a výsledky zařazovat do čtyř jader.",
+      "tags": [
+        "tvorba"
+      ],
+      "status": "z rozhovorů",
+      "source": "souhrn společných rozhovorů / projektová dokumentace",
+      "updated": "2026-11-06"
+    },
+    {
+      "id": "vaf-g95-065",
+      "core": "ŘÍZENÍ",
+      "title": "Povel: Ulož to do CHT 360°‰.",
+      "text": "V rozhovorech grid95 a grid96 tento výslovný pokyn znamená bez zbytečného doptávání zapsat bezpečný projektový poznatek do veřejného projektového seed.json na GitHubu, pokud je dostupný zápis. Citlivé či osobní informace nikdy nezveřejnit: ty mají zůstat lokálně, přes přenosnou zálohu. U každé operace oznámit skutečný výsledek a respektovat požadavek 'doplnit, nepřepisovat'. Příkaz v místním chatu Brášky uloží větu za dvojtečkou, nebo poslední předchozí uživatelskou zprávu, do jeho lokální znalostní paměti. Změny veřejného se dostanou do místní PWA při dalším online načtení.",
+      "tags": [
+        "pravidla",
+        "spolupráce",
+        "povel",
+        "automatické-uložení"
+      ],
+      "status": "schválené pravidlo spolupráce",
+      "source": "požadavek uživatele 2026-11-06",
+      "updated": "2026-11-06"
+    }
+  ]
+}
