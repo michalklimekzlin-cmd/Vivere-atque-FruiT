@@ -1,0 +1,78 @@
+
+/* VaF7 – samostatná přídavná vrstva. Nepřepisuje původní CHT UI. */
+#cht360VaF7Open{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-height:42px; padding:7px 12px;
+  border:1px solid rgba(255,226,173,.7); border-radius:22px;
+  color:#050815; background:#ffe2ad; font:800 13px/1 system-ui,sans-serif;
+  box-shadow:0 0 16px rgba(255,214,127,.22);
+  cursor:pointer; touch-action:manipulation;
+}
+#cht360VaF7Open:focus-visible{outline:3px solid #fff;outline-offset:3px}
+#cht360VaF7Layer[hidden]{display:none !important}
+#cht360VaF7Layer{
+  position:fixed; inset:0; z-index:2147480000;
+  display:flex; justify-content:center; align-items:center;
+  padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));
+  background:rgba(2,4,13,.83);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  color:#ffe2ad; font:15px/1.45 system-ui,-apple-system,sans-serif;
+}
+#cht360VaF7Layer *{box-sizing:border-box}
+#cht360VaF7Window{
+  position:relative; width:min(760px,100%); max-height:94dvh; overflow:auto;
+  overscroll-behavior:contain; -webkit-overflow-scrolling:touch;
+  border:1px solid #ac823b; border-radius:18px;
+  background:linear-gradient(150deg,#111a2d,#050815 68%);
+  box-shadow:0 20px 80px #000e, 0 0 28px #c79b3325;
+  padding:0 14px 14px;
+}
+#cht360VaF7Layer .vf-top{
+  position:sticky; top:0; z-index:2;
+  padding:10px 0; display:flex; align-items:center; justify-content:space-between;
+  gap:12px; border-bottom:1px solid #50442e;
+  background:#0b1121;
+}
+#cht360VaF7Layer .vf-top strong{font-size:18px;letter-spacing:.02em}
+#cht360VaF7Close{
+  min-width:66px; min-height:42px; padding:7px 12px;
+  color:#ffe2ad; background:#302716; border:1px solid #c79b33;
+  border-radius:12px; font:700 14px system-ui; cursor:pointer;
+}
+#cht360VaF7Layer #vaf7{display:block; padding-bottom:8px}
+#cht360VaF7Layer .panel{
+  display:block !important; position:static !important;
+  max-width:none !important; width:100% !important; height:auto !important;
+  visibility:visible !important; overflow:visible !important;
+  margin:12px 0 !important; padding:14px !important;
+  border:1px solid #6c5a38; border-radius:14px;
+  background:rgba(10,17,33,.96); color:#ffe2ad;
+  box-shadow:none !important; transform:none !important;
+}
+#cht360VaF7Layer h2{font:800 20px system-ui;margin:0 0 10px}
+#cht360VaF7Layer h3{font:800 17px system-ui;margin:0 0 10px}
+#cht360VaF7Layer .sub,#cht360VaF7Layer .vf-meta{color:#b3bacb;font-size:12px}
+#cht360VaF7Layer label{display:block;color:#ffe2ad;font-size:13px;margin:10px 0 4px}
+#cht360VaF7Layer textarea,#cht360VaF7Layer select{
+  display:block !important;width:100% !important;min-height:40px;
+  max-width:100% !important;
+  color:#fff3d4; background:#080d18; border:1px solid #8e6e39;
+  border-radius:9px; font:16px/1.4 system-ui; padding:10px;
+}
+#cht360VaF7Layer textarea{min-height:65px;resize:vertical}
+#cht360VaF7Layer .action,#cht360VaF7Layer .vf-import{
+  display:inline-block; min-height:42px; margin:5px 5px 5px 0;
+  padding:10px 12px; border:1px solid #c79b33; border-radius:10px;
+  color:#ffe2ad; background:#35280f; font:700 13px/1.4 system-ui;
+  cursor:pointer;
+}
+#cht360VaF7Layer .vf-import input{display:none}
+#cht360VaF7Layer .vf-entry{padding:12px 0;border-top:1px solid #51472f}
+#cht360VaF7Layer .vf-word{font-size:18px;font-weight:800;overflow-wrap:anywhere}
+#cht360VaF7Layer .vf-entry p{overflow-wrap:anywhere;margin:7px 0}
+#cht360VaF7Layer #vf-hints{padding-left:10px;border-left:2px solid #c79b33}
+@media(max-width:640px){
+  #cht360VaF7Layer #cht360VaF7Window{max-height:96dvh;padding:0 9px 9px}
+  #cht360VaF7Layer .panel{padding:10px !important}
+  #cht360VaF7Layer h2{font-size:17px}
+}
