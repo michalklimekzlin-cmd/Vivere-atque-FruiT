@@ -122,7 +122,7 @@
   function buildPanel() {
     if (overlay) return;
     const css = document.createElement("style");
-    css.textContent = \`
+    css.textContent = `
     #chtArchiveOverlay{position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.83);display:grid;place-items:center;padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));font:14px system-ui,-apple-system,sans-serif;color:#ffe2ad}
     #chtArchiveOverlay[hidden]{display:none}
     #chtArchivePanel{width:min(840px,100%);height:min(720px,92dvh);display:flex;flex-direction:column;overflow:hidden;border:1px solid #9b7137;border-radius:16px;background:#070d1d;box-shadow:0 15px 65px #000}
@@ -135,12 +135,12 @@
     #chtArchiveList article{border:1px solid #383e45;border-radius:10px;margin-bottom:8px;padding:10px;background:#101729}
     #chtArchiveList .archMeta{font-size:11px;color:#c29a61;margin-bottom:4px}#chtArchiveList p{margin:0;color:#f5e9d5;white-space:pre-wrap;overflow-wrap:anywhere}
     #chtArchivePanel footer{display:flex;justify-content:center;border-top:1px solid #57432f;padding:8px}
-    \`;
+    `;
     document.head.append(css);
     overlay = document.createElement("div");
     overlay.id = "chtArchiveOverlay";
     overlay.hidden = true;
-    overlay.innerHTML = \`
+    overlay.innerHTML = `
       <section id="chtArchivePanel" role="dialog" aria-modal="true" aria-label="Archiv zpráv CHT">
         <header><h2>CHT 360°‰. · Archiv zpráv</h2><button id="chtArchiveClose" type="button">Zavřít</button></header>
         <div class="archActions">
@@ -152,7 +152,7 @@
         </div>
         <div id="chtArchiveCount"></div><div id="chtArchiveStatus"></div>
         <div id="chtArchiveList"></div><footer><button id="chtArchiveMore" type="button">Starší zprávy</button></footer>
-      </section>\`;
+      </section>`;
     document.body.append(overlay);
     $("chtArchiveClose").addEventListener("click", () => { overlay.hidden = true; });
     overlay.addEventListener("click", e => { if (e.target === overlay) overlay.hidden = true; });
