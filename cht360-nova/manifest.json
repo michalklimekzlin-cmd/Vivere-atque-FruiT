@@ -1,0 +1,17 @@
+{
+  "name": "CHT 360°‰. – VaF'¡¡'T test",
+  "short_name": "CHT 360 test",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050815",
+  "theme_color": "#050815",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
