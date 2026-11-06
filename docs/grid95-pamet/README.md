@@ -12,6 +12,8 @@ Nový samostatný **offline-first** modul pro Vivere atque FruiT / CHT 360°‰.
 Otevři `https://michalklimekzlin-cmd.github.io/Vivere-atque-FruiT/docs/grid95-pamet/` v Safari. Při první návštěvě online se data a stránka nacachují. Poté můžeš psát offline. Nové zápisy se automaticky NEpublikují na GitHub.
 
 ## Obsidian
+Zvol **název místního vaultu** přímo na stránce a ulož jej v zařízení. U každého záznamu je tlačítko **Do Obsidianu**, které na iPhonu použije `obsidian://new` (jen po výslovném klepnutí). Obsidian pak poznámku vytvoří ve zvoleném vaultu; ověř její uložení v aplikaci. Dlouhé poznámky předá přes iOS Sdílet / soubor `.md`. **Nejde o automatickou dvousměrnou synchronizaci:** CHT neumí číst obsah vaultu, ChatGPT nemá přístup k lokálním souborům iPhonu. Vault název se ukládá jen do localStorage.
+
 Klikni **Export Obsidian .md** a vlož stažený soubor do vlastní offline složky vaultu. Je to obyčejný Markdown, bez potřeby pluginu. Pro původní projekty můžeš použít export JSON.
 
 ## Důležitá omezení
