@@ -49,7 +49,7 @@ if(add({source:$("vf-source").value,kind:$("vf-kind").value,core:$("vf-core").va
 };
 $("vf-scan").onclick=function(){
 var s=$("vf-text").value,h=[];
-if(/[a-zá-ž]I[a-zá-ž]/iu.test(s))h.push("Velké I uvnitř slova může připomínat l.");
+if(/[a-zá-ž]I[a-zá-ž]/u.test(s))h.push("Velké I uvnitř slova může připomínat l.");
 if(/ī/u.test(s))h.push("ī může být záměna písmene i.");
 if(/hd/i.test(s))h.push("„hd“ může být například obrazová kvalita.");
 if(/7\/[•˚°]/u.test(s))h.push("Našel jsem značku 7/•, 7/˚ nebo 7/°.");
