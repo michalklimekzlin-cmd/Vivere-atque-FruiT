@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+      <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>VaFT • Oblak / Oblek</title>
+    <style>
+      :root {
+        --bg: #02030a;
+        --mrizka: rgba(255, 220, 140, 0.08);
+        --zlata: #ffd977;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: radial-gradient(circle at top, #05081a 0, #02030a 55%, #000 100%);
+        color: #f5f5f5;
+      }
+
+      body::before {
+        /* jemná mřížka na pozadí */
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: linear-gradient(
+            to right,
+            var(--mrizka) 1px,
+            transparent 1px
+          ),
+          linear-gradient(to bottom, var(--mrizka) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        mix-blend-mode: screen;
+      }
+
+      .obal {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      canvas {
+        display: block;
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      .popisek {
+        position: fixed;
+        left: 10px;
+        bottom: 8px;
+        font-size: 11px;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.5);
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="obal">
+      <canvas id="oblek-platno"></canvas>
+    </div>
+    <div class="popisek">
+      1 prst / myš = otáčení • 2 prsty = posun + zoom • kolečko = zoom • VaFT Oblak
+      \\{*(°•.)(.•°)*}//
+    </div>
+
+    <script>
+      // *(°•.)(.•°)*}// VaFT • Oblak / Oblek – drátěný obal, uvnitř prázdný prostor pro motor
+
+      const platno = document.getElementById("oblek-platno");
+      const ctx = platno.getContext("2d");
+
+      let rotX = 0.2; // náklon nahoru/dolů
+      let rotY = 0.6; // rotace kolem svislé osy
+      let zoom = 1.0; // přiblížení
+      let posunX = 0;
+      let posunY = 0;
+
+      let jeTah = false;
+      let posledniX = 0;
+      let posledniY = 0;
+
+      const aktivniPointery = new Map();
+      let pinchVzdalenost = null;
+      let pinchStred = null;
+
+      function nastavPlatnoNaOkno() {
+        const sirkaOkna = window.innerWidth;
+        const vyskaOkna = window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+
+        platno.width = sirkaOkna * dpr;
+        platno.height = vyskaOkna * dpr;
+        platno.style.width = sirkaOkna + "px";
+        platno.style.height = vyskaOkna + "px";
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function proj3D(x, y, z, stredX, stredY, baseScale) {
+        // rotace kolem Y
+        const cosY = Math.cos(rotY);
+        const sinY = Math.sin(rotY);
+        let x1 = x * cosY + z * sinY;
+        let z1 = -x * sinY + z * cosY;
+
+        // rotace kolem X
+        const cosX = Math.cos(rotX);
+        const sinX = Math.sin(rotX);
+        let y1 = y * cosX - z1 * sinX;
+        let z2 = y * sinX + z1 * cosX;
+
+        // jednoduchá perspektiva
+        const k = 0.9;
+        const scale = baseScale * zoom * (1 / (1 + z2 * k));
+
+        const x2d = stredX + x1 * scale + posunX;
+        const y2d = stredY + y1 * scale + posunY;
+
+        return { x: x2d, y: y2d, z: z2 };
+      }
+
+      function kresliOblek() {
+        const w = platno.clientWidth;
+        const h = platno.clientHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        const stredX = w / 2;
+        const stredY = h / 2;
+        const baseScale = Math.min(w, h) * 0.25;
+
+        // jemné světelné pozadí
+        const grd = ctx.createRadialGradient(
+          stredX,
+          stredY,
+          baseScale * 0.2,
+          stredX,
+          stredY,
+          baseScale * 2.4
+        );
+        grd.addColorStop(0, "rgba(255, 217, 119, 0.16)");
+        grd.addColorStop(0.4, "rgba(255, 217, 119, 0.06)");
+        grd.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.lineWidth = 1.1;
+        ctx.strokeStyle = "#ffd977";
+        ctx.shadowColor = "rgba(255, 220, 150, 0.55)";
+        ctx.shadowBlur = 10;
+
+        // tvar střely / oblaku: u = výška (-1..1), v = úhel kolem dokola
+        function tvarOblaku(u, v) {
+          // základní poloměr
+          const baseR = 1 - 0.1 * Math.abs(u);
+          // zúžení ke špičkám
+          const taper = 0.35 + 0.65 * (1 - Math.abs(u));
+          const r = baseR * taper;
+
+          const x = r * Math.cos(v);
+          const z = r * Math.sin(v);
+          const y = u * 1.4; // výška – protáhlé nahoru/dolů
+
+          return { x, y, z };
+        }
+
+        const latSteps = 16; // horizontální pruhy
+        const lonSteps = 24; // meridiány
+
+        // horizontální pruhy (šířka)
+        for (let j = 0; j <= latSteps; j++) {
+          const u = -1 + (2 * j) / latSteps;
+
+          ctx.beginPath();
+          for (let i = 0; i <= lonSteps; i++) {
+            const v = (i / lonSteps) * Math.PI * 2;
+            const p3 = tvarOblaku(u, v);
+            const p2 = proj3D(p3.x, p3.y, p3.z, stredX, stredY, baseScale);
+
+            if (i === 0) ctx.moveTo(p2.x, p2.y);
+            else ctx.lineTo(p2.x, p2.y);
+          }
+          ctx.stroke();
+        }
+
+        // vertikální "meridiány"
+        for (let k = 0; k < lonSteps; k++) {
+          const v = (k / lonSteps) * Math.PI * 2;
+
+          ctx.beginPath();
+          for (let i = 0; i <= latSteps * 2; i++) {
+            const u = -1 + (2 * i) / (latSteps * 2);
+            const p3 = tvarOblaku(u, v);
+            const p2 = proj3D(p3.x, p3.y, p3.z, stredX, stredY, baseScale);
+
+            if (i === 0) ctx.moveTo(p2.x, p2.y);
+            else ctx.lineTo(p2.x, p2.y);
+          }
+          ctx.stroke();
+        }
+
+        ctx.shadowBlur = 0;
+      }
+
+      function prekresli() {
+        nastavPlatnoNaOkno();
+        kresliOblek();
+      }
+
+      window.addEventListener("resize", prekresli);
+
+      // --- OVLÁDÁNÍ MYŠ / DOTYKŮ ---
+
+      platno.addEventListener("pointerdown", (e) => {
+        platno.setPointerCapture(e.pointerId);
+        aktivniPointery.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (aktivniPointery.size === 1) {
+          // rotace
+          jeTah = true;
+          posledniX = e.clientX;
+          posledniY = e.clientY;
+        } else if (aktivniPointery.size === 2) {
+          // pinch + pan
+          const body = Array.from(aktivniPointery.values());
+          const dx = body[1].x - body[0].x;
+          const dy = body[1].y - body[0].y;
+          pinchVzdalenost = Math.hypot(dx, dy);
+          pinchStred = {
+            x: (body[0].x + body[1].x) / 2,
+            y: (body[0].y + body[1].y) / 2,
+          };
+        }
+      });
+
+      platno.addEventListener("pointermove", (e) => {
+        if (!aktivniPointery.has(e.pointerId)) return;
+        aktivniPointery.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+        if (aktivniPointery.size === 1 && jeTah) {
+          // rotace 1 prstem / myší
+          const dx = e.clientX - posledniX;
+          const dy = e.clientY - posledniY;
+          posledniX = e.clientX;
+          posledniY = e.clientY;
+
+          rotY += dx * 0.01;
+          rotX += dy * 0.01;
+          const maxTilt = Math.PI / 2 - 0.1;
+          rotX = Math.max(-maxTilt, Math.min(maxTilt, rotX));
+
+          kresliOblek();
+        } else if (aktivniPointery.size === 2) {
+          // pinch + pan
+          const body = Array.from(aktivniPointery.values());
+          const dx = body[1].x - body[0].x;
+          const dy = body[1].y - body[0].y;
+          const dist = Math.hypot(dx, dy);
+          const stred = {
+            x: (body[0].x + body[1].x) / 2,
+            y: (body[0].y + body[1].y) / 2,
+          };
+
+          if (pinchVzdalenost != null) {
+            const pomer = dist / pinchVzdalenost;
+            zoom *= pomer;
+            zoom = Math.max(0.3, Math.min(3.5, zoom));
+
+            posunX += stred.x - pinchStred.x;
+            posunY += stred.y - pinchStred.y;
+          }
+
+          pinchVzdalenost = dist;
+          pinchStred = stred;
+
+          kresliOblek();
+        }
+      });
+
+      function konecPointeru(e) {
+        aktivniPointery.delete(e.pointerId);
+        jeTah = false;
+        pinchVzdalenost = null;
+        pinchStred = null;
+      }
+
+      platno.addEventListener("pointerup", konecPointeru);
+      platno.addEventListener("pointercancel", konecPointeru);
+      platno.addEventListener("pointerout", konecPointeru);
+
+      // kolečko myši = zoom
+      platno.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const delta = -e.deltaY || e.wheelDelta;
+        const faktor = delta > 0 ? 1.1 : 0.9;
+        zoom *= faktor;
+        zoom = Math.max(0.3, Math.min(3.5, zoom));
+        kresliOblek();
+      }, { passive: false });
+
+      // inicializace
+      prekresli();
+    </script>
+  
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

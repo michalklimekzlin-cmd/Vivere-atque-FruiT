@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="cs">
+<head>
+    <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+  <title>Vivere atque Frui¡'T • hlava</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body{margin:0;background:#0b0f14;color:#e2e8f0;font-family:system-ui,sans-serif;}
+    header{padding:1rem;border-bottom:1px solid #111827;}
+    #materials{display:flex;flex-wrap:wrap;gap:.6rem;padding:1rem;}
+    .card{background:#111827;border:1px solid #1f2937;border-radius:.6rem;padding:.5rem .6rem;flex:1 1 calc(50% - .6rem);min-width:140px;}
+    .card small{display:block;opacity:.5;font-size:.6rem;margin-bottom:.25rem;}
+    .card strong{font-size:.8rem;}
+    #corePulse{padding:0 1rem 1rem 1rem;font-size:.65rem;opacity:.6;}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Vivere atque Frui¡'T</h1>
+  <small>projekce ze všech bytostí</small>
+</header>
+<main id="materials"></main>
+<div id="corePulse"></div>
+
+<script>
+  // všechny klíče, které budeme sbírat
+  const FEEDS = [
+    "meziprostor_feed_v1",
+    "vaft_girls_feed",
+    "vaft_lilies_feed",
+    "vaft_lady_feed",
+    "vaft_doll_feed",
+    "vaft_star_feed",
+    "vaft_ghost_feed",
+    "vaft_bear_feed"
+  ];
+
+  function loadFeed(key){
+    try { return JSON.parse(localStorage.getItem(key)||"[]"); }
+    catch(e){ return []; }
+  }
+
+  function render(){
+    const main = document.getElementById('materials');
+    const pulse = document.getElementById('corePulse');
+    main.innerHTML = "";
+    let all = [];
+    FEEDS.forEach(k=>{
+      const items = loadFeed(k);
+      all = all.concat(items.map(it => ({...it, _src:k})));
+    });
+
+    if (!all.length){
+      main.innerHTML = "<p style='opacity:.6'>zatím nic nevytvořily…</p>";
+      pulse.textContent = "";
+      return;
+    }
+
+    all.sort((a,b)=>b.ts - a.ts);
+    all.slice(0,80).forEach(item=>{
+      const div = document.createElement('div');
+      div.className = "card";
+      const text = item.txt || item.text || "(prázdné)";
+      div.innerHTML = `<small>${item._src} • ${new Date(item.ts).toLocaleTimeString()}</small><strong>${text}</strong>`;
+      main.appendChild(div);
+    });
+
+    // malé info
+    const counts = FEEDS.map(k => `${k}: ${loadFeed(k).length}`).join(" • ");
+    pulse.textContent = "svět: " + counts;
+  }
+
+  render();
+  setInterval(render, 5000);
+<script src="../vaft.loader.js"></script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

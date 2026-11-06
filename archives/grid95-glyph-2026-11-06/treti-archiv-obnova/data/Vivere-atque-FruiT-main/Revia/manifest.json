@@ -1,0 +1,22 @@
+{
+  "name": "Revia",
+  "short_name": "Revia",
+  "description": "Revia progressive web app in the Vivere-atque-FruiT repository.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#0a0e1f",
+  "background_color": "#0a0e1f",
+  "icons": [
+    {
+      "src": "./revia-bg-angel.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "./revia-bg-daemon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

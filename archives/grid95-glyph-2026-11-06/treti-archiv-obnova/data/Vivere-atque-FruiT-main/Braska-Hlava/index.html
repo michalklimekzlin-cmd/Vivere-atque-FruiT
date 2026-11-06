@@ -1,0 +1,892 @@
+<!doctype html>
+<html lang="cs">
+
+<head>
+   <meta name="viewport"
+content="width=device-width,
+initial-scale=1,
+maximum-scale=1,
+viewport-fit=cover,
+user-scalable=no">
+
+<meta
+name="apple-mobile-web-app-capable"
+content="yes">
+
+<meta
+name="apple-mobile-web-app-status-bar-style"
+content="black-translucent">
+
+<meta
+name="apple-mobile-web-app-title"
+content="Bráška Hlava">
+
+<meta charset="utf-8">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1,viewport-fit=cover"
+>
+
+<meta
+name="theme-color"
+content="#020617"
+>
+
+<meta
+name="apple-mobile-web-app-capable"
+content="yes"
+>
+
+<meta
+name="apple-mobile-web-app-status-bar-style"
+content="black-translucent"
+>
+
+<link
+rel="manifest"
+href="./manifest.json"
+>
+
+<title>
+Bráška Hlava • VAFT
+</title>
+
+<link
+rel="stylesheet"
+href="style.css"
+>
+
+<link
+rel="stylesheet"
+href="glyph/glyph.css"
+>
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<div class="topLayout">
+
+<!-- ======================================
+     LEVÁ STRANA
+====================================== -->
+
+<div class="hero">
+
+<div id="sphere">
+🧠 Bráška Hlava
+</div>
+
+<div id="log">
+Inicializuji systém...
+</div>
+
+</div>
+
+<!-- ======================================
+     PRAVÁ STRANA
+====================================== -->
+
+<div class="signalSphere">
+
+<canvas id="globe-canvas"></canvas>
+
+<div class="sphereOverlay">
+
+<div class="sphereName">
+Signal Sphere
+</div>
+
+<div class="sphereState">
+🟢 Online
+</div>
+
+<div class="spherePulse">
+Synchronizuji...
+</div>
+
+</div>
+
+<div class="sphereTitle">
+VAFT Signal Core
+</div>
+
+<div
+id="status"
+class="hud-center"
+>
+
+režim: mesh
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ======================================
+     DASHBOARD
+====================================== -->
+
+<div class="dashboard">
+
+<!-- ======================================
+     📦 VaF`i¡´T SKLAD
+====================================== -->
+
+<div class="card">
+
+<h2>VaF`i¡´T Sklad ᕕ(◕‿◕)ᕗ 📦</h2>
+
+<div class="stat">
+    <span>Místní paměť</span>
+    <span id="localSize">0 KB</span>
+</div>
+
+<div class="stat">
+    <span>Vyrovnávací paměť</span>
+    <span id="cacheSize">0 položek</span>
+</div>
+
+<div class="stat">
+    <span>Stav jádra</span>
+    <span id="kernelState">Spouštím...</span>
+</div>
+
+<div class="stat">
+    <span>Registry</span>
+    <span id="registryCount">0</span>
+</div>
+
+<div class="stat">
+    <span>Materiály</span>
+    <span id="materialCount">0</span>
+</div>
+
+<!-- Hlavní vstup do skladu -->
+<input
+    type="file"
+    id="skladInput"
+    multiple
+    hidden
+    onchange="vlozitDoSkladu(event)"
+>
+
+<button onclick="document.getElementById('skladInput').click()">
+ᕕ(◕‿◕)ᕗ 📦 Vivere atque FruiT
+</button>
+
+<hr>
+
+<!-- Soubor -->
+<input
+    type="file"
+    id="souborInput"
+    hidden
+    onchange="vlozitSoubor(event)"
+>
+
+<button onclick="document.getElementById('souborInput').click()">
+( •_•)つ📄 Soubor
+</button>
+
+<!-- Obrázek -->
+<input
+    type="file"
+    accept="image/*"
+    id="obrazekInput"
+    hidden
+    onchange="vlozitObrazek(event)"
+>
+
+<button onclick="document.getElementById('obrazekInput').click()">
+(∩^O^)⊃━☆ﾟ.*･｡ 🖼️ Obrázek
+</button>
+
+<div
+    id="seznamSouboru"
+    style="margin-top:12px;font-size:.85rem;"
+>
+    Zatím nejsou vloženy žádné soubory.
+</div>
+
+<img
+    id="nahledObrazku"
+    style="
+        display:none;
+        max-width:100%;
+        margin-top:12px;
+        border-radius:12px;
+    "
+>
+
+</div>
+<!-- ======================================
+     🦆 CybaŽrouT
+====================================== -->
+
+<div class="card">
+
+<h2>🦆 ChybaŽrouT</h2>
+
+<p>Diagnostika systému VAFT.</p>
+
+<button onclick="prohledatSystem()">
+{宇(°.)°.)// \\[◉_◉]// \\(.°(.°)ア }
+</button>
+
+<hr>
+
+<pre id="diagnosticOutput">
+
+Připraven k hledání.
+
+</pre>
+
+<div class="stat">
+<span>Poslední kontrola</span>
+<span id="lastScan">Nikdy</span>
+</div>
+
+<div class="stat">
+<span>Nalezené položky</span>
+<span id="scanItems">0</span>
+</div>
+
+<div class="stat">
+<span>Stav</span>
+<span id="scanState">🟢 Připraven</span>
+</div>
+
+</div>
+
+<!-- ======================================
+     ☁️ PŘENOS DAT
+====================================== -->
+
+<div class="card">
+
+<h2>☁️ Přenos dat</h2>
+
+<p>Připraveno pro propojení dalších modulů VAFT.</p>
+
+<div class="stat">
+<span>GitHub</span>
+<span>⚪ Nepřipojeno</span>
+</div>
+
+<div class="stat">
+<span>Cloud</span>
+<span>⚪ Nepřipojeno</span>
+</div>
+
+<div class="stat">
+<span>Synchronizace</span>
+<span id="syncState">Připraveno</span>
+</div>
+
+<hr>
+
+<button disabled>📦 GitHub sklad</button>
+
+<button disabled>☁️ Cloud sklad</button>
+
+<button disabled>🔄 Synchronizovat</button>
+
+</div>
+
+<!-- ======================================
+     📜 LOG SYSTÉMU
+====================================== -->
+
+<div class="card">
+
+<h2>📜  VaF`i¡´Toviny </h2>
+
+<pre id="systemLog">
+
+[VAFT]
+Inicializuji...
+
+Signal Sphere...
+čekám...
+
+Bráška Hlava...
+online...
+
+</pre>
+
+<button id="clearSystemLog">
+
+🧹 VaF`i¡´Toviny
+
+</button>
+
+</div>
+</div>
+
+<!-- konec dashboardu -->
+
+<!-- ======================================
+     🧠 BRÁŠKA HLAVA
+====================================== -->
+
+<section class="card">
+
+<h2>🧠 Bráška Hlava</h2>
+
+<div class="stat">
+<span>Stav AI</span>
+<span id="brainState">🟢 Online</span>
+</div>
+
+<div class="stat">
+<span>Aktivní modul</span>
+<span id="brainModule">Signal Sphere</span>
+</div>
+
+<div class="stat">
+<span>Poslední akce</span>
+<span id="brainAction">Inicializace...</span>
+</div>
+
+<hr>
+
+<pre id="brainConsole">
+
+VAFT Boot...
+
+Kontrola modulů...
+
+Signal Sphere připojena.
+
+Čekám na příkaz...
+
+</pre>
+
+<div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+
+<button id="restartBrain">
+♻ Restart AI
+</button>
+
+<button id="clearBrainLog">
+🧹 Vyčistit
+</button>
+
+</div>
+
+</section>
+
+</div>
+
+<!-- ======================================
+     VAFT MODULY
+====================================== -->
+
+<script src="../vaft.loader.js"></script>
+<script src="../vaft-core.js"></script>
+<script src="../vaft.heartbeat.js"></script>
+
+<script>
+/* ======================================
+   ZÁKLADNÍ PRVKY
+====================================== */
+
+const log =
+document.getElementById("log");
+
+const kernelState =
+document.getElementById("kernelState");
+
+const registryCount =
+document.getElementById("registryCount");
+
+const materialCount =
+document.getElementById("materialCount");
+
+const brainState =
+document.getElementById("brainState");
+
+const brainModule =
+document.getElementById("brainModule");
+
+const brainAction =
+document.getElementById("brainAction");
+
+const brainConsole =
+document.getElementById("brainConsole");
+
+const systemLog =
+document.getElementById("systemLog");
+
+/* ======================================
+   SIGNAL CORE
+====================================== */
+
+const canvas =
+document.getElementById("globe-canvas");
+
+const ctx =
+canvas.getContext("2d");
+
+const statusEl =
+document.getElementById("status");
+
+const dpr =
+window.devicePixelRatio || 1;
+
+let width = 0;
+let height = 0;
+
+let viewScale = 1;
+let targetViewScale = 1;
+
+let viewOffsetX = 0;
+let viewOffsetY = 0;
+
+let targetViewOffsetX = 0;
+let targetViewOffsetY = 0;
+
+let globalTiltX = -0.7;
+let globalTiltY = 0;
+
+let targetTiltX = globalTiltX;
+let targetTiltY = globalTiltY;
+
+let orbitRotation = 0;
+let orbitVelocity = 0.12;
+
+const orbitDamping = 0.96;
+const orbitBaseDrift = 0.04;
+/* ======================================
+   SIGNAL CORE
+====================================== */
+
+const glyphs = [
+    "{*(°.)}",
+    "ً&’」",
+    "¡(*)(%)¡",
+    "{°. .}",
+    "(•.°)"
+];
+
+const letters =
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+const signalCore = {
+
+    points: [],
+
+    rings: 12,
+
+    segments: 18,
+
+    pulse: 0,
+
+    baseRadius: 120,
+
+    coneHeight: 200,
+
+    mode: "mesh",
+
+    offsetY: 0
+
+};
+
+/* ======================================
+   RESIZE
+====================================== */
+
+function resizeCanvas(){
+
+    const rect =
+    canvas.getBoundingClientRect();
+
+    width =
+    rect.width;
+
+    height =
+    rect.height;
+
+    canvas.width =
+    width * dpr;
+
+    canvas.height =
+    height * dpr;
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+}
+
+    signalCore.baseRadius =
+        Math.min(width,height) * 0.19;
+
+    signalCore.coneHeight =
+        signalCore.baseRadius * 1.6;
+
+}
+
+resizeCanvas();
+
+window.addEventListener(
+    "resize",
+    resizeCanvas
+);
+/* ======================================
+   GENEROVÁNÍ SIGNAL SPHERE
+====================================== */
+
+function generateSignalPoints(){
+
+    signalCore.points = [];
+
+    const rings =
+    signalCore.rings;
+
+    const segments =
+    signalCore.segments;
+
+    const coneHeight =
+    signalCore.coneHeight;
+
+    const baseRadius =
+    signalCore.baseRadius;
+
+    for(let i=0;i<=rings;i++){
+
+        const t =
+        i / rings;
+
+        const y =
+        coneHeight/2 - t*coneHeight;
+
+        const r =
+        baseRadius * (1 - 0.75*t);
+
+        for(let j=0;j<segments;j++){
+
+            const a =
+            (j/segments) * Math.PI * 2;
+
+            signalCore.points.push({
+
+                baseX:
+                Math.cos(a)*r,
+
+                baseY:
+                y,
+
+                baseZ:
+                Math.sin(a)*r,
+
+                screenX:0,
+
+                screenY:0,
+
+                ring:i,
+
+                seg:j,
+
+                phase:
+                Math.random()*Math.PI*2
+
+            });
+
+        }
+
+    }
+
+}
+
+generateSignalPoints();
+/* ======================================
+   PROJEKCE 3D → 2D
+====================================== */
+
+function updateSignalProjection(){
+
+    const sinX = Math.sin(globalTiltX);
+    const cosX = Math.cos(globalTiltX);
+
+    const sinY = Math.sin(globalTiltY);
+    const cosY = Math.cos(globalTiltY);
+
+    for(const p of signalCore.points){
+
+        let x = p.baseX;
+        let y = p.baseY;
+        let z = p.baseZ;
+
+        /* Rotace kolem X */
+
+        let y1 =
+        y * cosX -
+        z * sinX;
+
+        let z1 =
+        y * sinX +
+        z * cosX;
+
+        /* Rotace kolem Y */
+
+        let x2 =
+        x * cosY +
+        z1 * sinY;
+
+        let z2 =
+        -x * sinY +
+        z1 * cosY;
+
+        p.screenX =
+            width / 2 +
+            viewOffsetX +
+            x2 * viewScale;
+
+        p.screenY =
+            height / 2 +
+            viewOffsetY +
+            (y1 + signalCore.offsetY) *
+            viewScale;
+
+        p.depth = z2;
+
+    }
+
+}
+/* ======================================
+   VYKRESLENÍ SIGNAL SPHERE
+====================================== */
+
+function drawSignalCore(){
+
+    updateSignalProjection();
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+    /* Jemná záře */
+
+    const glow =
+    ctx.createRadialGradient(
+
+        width/2,
+        height/2,
+
+        0,
+
+        width/2,
+        height/2,
+
+        signalCore.baseRadius*3
+
+    );
+
+    glow.addColorStop(
+        0,
+        "rgba(255,210,160,.22)"
+    );
+
+    glow.addColorStop(
+        1,
+        "rgba(0,0,0,0)"
+    );
+
+    ctx.fillStyle = glow;
+
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+    /* Mřížka */
+
+    ctx.lineWidth = 0.8;
+
+    ctx.strokeStyle =
+    "rgba(255,215,150,.35)";
+
+    for(let i=0;i<=signalCore.rings;i++){
+
+        ctx.beginPath();
+
+        let started=false;
+
+        for(const p of signalCore.points){
+
+            if(p.ring!==i) continue;
+
+            if(!started){
+
+                ctx.moveTo(
+                    p.screenX,
+                    p.screenY
+                );
+
+                started=true;
+
+            }else{
+
+                ctx.lineTo(
+                    p.screenX,
+                    p.screenY
+                );
+
+            }
+
+        }
+
+        if(started){
+
+            ctx.closePath();
+
+            ctx.stroke();
+
+        }
+
+    }
+
+    /* Body */
+
+    for(const p of signalCore.points){
+
+        ctx.beginPath();
+
+        ctx.arc(
+
+            p.screenX,
+
+            p.screenY,
+
+            2,
+
+            0,
+
+            Math.PI*2
+
+        );
+
+        ctx.fillStyle =
+        "#ffd98d";
+
+        ctx.shadowColor =
+        "#ffcb70";
+
+        ctx.shadowBlur = 8;
+
+        ctx.fill();
+
+    }
+
+    ctx.shadowBlur = 0;
+
+}
+/* ======================================
+   ANIMACE
+====================================== */
+
+let lastTime = 0;
+
+function animate(timestamp){
+
+    if(!timestamp)
+        timestamp = 0;
+
+    const dt =
+    (timestamp-lastTime)/1000;
+
+    lastTime = timestamp;
+
+    signalCore.pulse += dt;
+
+    orbitRotation += orbitVelocity * dt;
+
+    const drift =
+    orbitBaseDrift * dt;
+
+    orbitVelocity +=
+        orbitVelocity >= 0
+        ? drift
+        : -drift;
+
+    orbitVelocity *=
+        Math.pow(
+            orbitDamping,
+            dt * 60
+        );
+
+    const k =
+    Math.min(1,6*dt);
+
+    viewScale +=
+        (targetViewScale-viewScale)
+        * k;
+
+    viewOffsetX +=
+        (targetViewOffsetX-viewOffsetX)
+        * k;
+
+    viewOffsetY +=
+        (targetViewOffsetY-viewOffsetY)
+        * k;
+
+    globalTiltX +=
+        (targetTiltX-globalTiltX)
+        * k;
+
+    globalTiltY +=
+        (targetTiltY-globalTiltY)
+        * k;
+
+    drawSignalCore();
+
+    requestAnimationFrame(
+        animate
+    );
+   
+}
+
+requestAnimationFrame(
+    animate
+);
+
+/* ======================================
+   SERVICE WORKER
+====================================== */
+
+if("serviceWorker" in navigator){
+
+    window.addEventListener(
+        "load",
+        ()=>{
+
+            navigator
+            .serviceWorker
+            .register("./service-worker.js")
+            .catch(()=>{});
+
+        }
+
+    );
+
+}
+
+</script>
+
+</body>
+</html>

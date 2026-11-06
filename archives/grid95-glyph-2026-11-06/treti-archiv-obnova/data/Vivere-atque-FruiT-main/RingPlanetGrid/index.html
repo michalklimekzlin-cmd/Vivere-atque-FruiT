@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+      <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>VaF'i'T • Croissant Mesh</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050815, #020208);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: #f5f5f5;
+      }
+
+      .root {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .stage {
+        position: relative;
+        width: min(920px, 96vw);
+        height: min(620px, 90vh);
+        border-radius: 32px;
+        box-shadow: 0 40px 90px rgba(0, 0, 0, 0.85);
+        background: radial-gradient(circle at top, #06091a, #020208);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      #sphere-canvas {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 100%;
+        height: 100%;
+        display: block;
+        touch-action: none;
+      }
+
+      .hud {
+        position: absolute;
+        left: 18px;
+        bottom: 14px;
+        font-size: 10px;
+        opacity: 0.7;
+      }
+
+      .hud-right {
+        position: absolute;
+        right: 18px;
+        top: 14px;
+        font-size: 10px;
+        opacity: 0.7;
+      }
+
+      .hud-center {
+        position: absolute;
+        left: 50%;
+        bottom: 14px;
+        transform: translateX(-50%);
+        font-size: 11px;
+        opacity: 0.8;
+        text-align: center;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="root">
+      <div class="stage">
+        <canvas id="sphere-canvas"></canvas>
+
+        <div class="hud">
+          🌀 1 prst / myš = náklon • pinch / kolečko = zoom
+        </div>
+        <div class="hud-center">
+          VaF'i'T Croissant · mřížkovaná síť
+        </div>
+        <div class="hud-right">v0.3 · VaF'i'T Croissant Mesh</div>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("sphere-canvas");
+      const ctx = canvas.getContext("2d");
+
+      const dpr = window.devicePixelRatio || 1;
+      let width = 0;
+      let height = 0;
+      let radius = 0;
+      let viewScale = 1;
+      let rotX = -0.4;
+      let rotY = 0.5;
+
+      function resize() {
+        const rect = canvas.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        radius = Math.min(width, height) * 0.22;
+      }
+
+      resize();
+      window.addEventListener("resize", resize);
+
+      // --- parametry croissantu (zakřivený torusový segment) ---
+
+      const CROISSANT_SPAN_STEPS = 32; // délka croissantu
+      const CROISSANT_RING_STEPS = 18; // tloušťka
+
+      function createCroissantPoints() {
+        const points = [];
+
+        // hlavní poloměr a tloušťka (v jednotkách 1 ~ velikost koule)
+        const majorR = 1.4;
+        const minorBase = 0.55;
+        const centerShiftX = majorR * 0.8; // posuneme trochu doleva, aby byl střed v záběru
+
+        for (let i = 0; i <= CROISSANT_SPAN_STEPS; i++) {
+          const t = i / CROISSANT_SPAN_STEPS; // 0..1 po délce
+          const u = (t - 0.5) * Math.PI * 1.1; // oblouk cca 200°
+
+          // ztluštění uprostřed, zúžení na koncích
+          const taper =
+            0.7 + 0.3 * Math.cos((t - 0.5) * Math.PI * 2); // 0.4..1.0
+          const minorR = minorBase * taper;
+
+          for (let j = 0; j <= CROISSANT_RING_STEPS; j++) {
+            const v = (j / CROISSANT_RING_STEPS) * Math.PI * 2;
+
+            const ringX = (majorR + minorR * Math.cos(v)) * Math.cos(u);
+            const ringZ = (majorR + minorR * Math.cos(v)) * Math.sin(u);
+            const ringY = minorR * Math.sin(v) * 0.8; // lehce zplacatíme
+
+            const worldX = ringX - centerShiftX;
+            const worldY = ringY;
+            const worldZ = ringZ;
+
+            points.push({
+              x: worldX,
+              y: worldY,
+              z: worldZ
+            });
+          }
+        }
+
+        return points;
+      }
+
+      const points = createCroissantPoints();
+
+      function projectPoint(px, py, pz) {
+        // rotace kolem X
+        let y1 = py * Math.cos(rotX) - pz * Math.sin(rotX);
+        let z1 = py * Math.sin(rotX) + pz * Math.cos(rotX);
+        // rotace kolem Y
+        let x2 = px * Math.cos(rotY) + z1 * Math.sin(rotY);
+        let z2 = -px * Math.sin(rotY) + z1 * Math.cos(rotY);
+
+        const scale = radius * viewScale;
+        return {
+          x: x2 * scale,
+          y: y1 * scale,
+          z: z2
+        };
+      }
+
+      // --- kreslení ---
+
+      function drawCroissant() {
+        ctx.clearRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.translate(width / 2, height / 2 + 15);
+
+        // jemný glow pozadí (stejný feeling jako koule)
+        const gBg = ctx.createRadialGradient(
+          0,
+          -radius * 1.0,
+          radius * 0.3,
+          0,
+          0,
+          radius * 3.0
+        );
+        gBg.addColorStop(0, "rgba(255, 210, 150, 0.15)");
+        gBg.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gBg;
+        ctx.fillRect(-width, -height, width * 2, height * 2);
+
+        // oválný stín pod croissantem
+        ctx.beginPath();
+        ctx.ellipse(
+          0,
+          radius * 1.0,
+          radius * 1.8,
+          radius * 0.55,
+          0,
+          0,
+          Math.PI * 2
+        );
+        ctx.fillStyle = "rgba(0,0,0,0.78)";
+        ctx.fill();
+
+        // „tělo“ – tmavý podklad jako koule, jen širší
+        ctx.beginPath();
+        ctx.ellipse(
+          0,
+          -radius * 0.05,
+          radius * 1.6 * viewScale,
+          radius * 1.0 * viewScale,
+          0,
+          0,
+          Math.PI * 2
+        );
+        const bodyGrad = ctx.createRadialGradient(
+          -radius * 0.4,
+          -radius * 0.5,
+          radius * 0.3,
+          0,
+          radius * 0.6,
+          radius * 2.0
+        );
+        bodyGrad.addColorStop(0, "#2d1d0f");
+        bodyGrad.addColorStop(0.5, "#1b1012");
+        bodyGrad.addColorStop(1, "#050308");
+        ctx.fillStyle = bodyGrad;
+        ctx.fill();
+
+        // zlatý okraj (obrys celého croissantu jako "aury")
+        ctx.strokeStyle = "rgba(255, 197, 120, 0.9)";
+        ctx.lineWidth = 1.4;
+        ctx.shadowColor = "rgba(255, 197, 120, 0.9)";
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.ellipse(
+          0,
+          -radius * 0.05,
+          radius * 1.6 * viewScale,
+          radius * 1.0 * viewScale,
+          0,
+          0,
+          Math.PI * 2
+        );
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // projekce bodů
+        const projected = points.map((p) => {
+          const proj = projectPoint(p.x, p.y, p.z);
+          return { ...p, sx: proj.x, sy: proj.y, sz: proj.z };
+        });
+        projected.sort((a, b) => a.sz - b.sz);
+
+        // mřížka croissantu (drátová síť)
+        ctx.strokeStyle = "rgba(255,210,150,0.7)";
+        ctx.lineWidth = 0.7;
+
+        const cols = CROISSANT_RING_STEPS + 1;
+        const rows = CROISSANT_SPAN_STEPS + 1;
+
+        // "podélné" linky (po délce croissantu)
+        for (let i = 0; i < rows; i++) {
+          ctx.beginPath();
+          let started = false;
+          for (let j = 0; j < cols; j++) {
+            const idx = i * cols + j;
+            const p = projected[idx];
+            if (p.sz < 0) continue; // zadní část schovat
+            if (!started) {
+              ctx.moveTo(p.sx, p.sy);
+              started = true;
+            } else {
+              ctx.lineTo(p.sx, p.sy);
+            }
+          }
+          if (started) ctx.stroke();
+        }
+
+        // "pásy" kolem průřezu
+        for (let j = 0; j < cols; j++) {
+          ctx.beginPath();
+          let started = false;
+          for (let i = 0; i < rows; i++) {
+            const idx = i * cols + j;
+            const p = projected[idx];
+            if (p.sz < 0) continue;
+            if (!started) {
+              ctx.moveTo(p.sx, p.sy);
+              started = true;
+            } else {
+              ctx.lineTo(p.sx, p.sy);
+            }
+          }
+          if (started) ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      // --- animace ---
+
+      let lastTime = 0;
+      function loop(ts) {
+        if (!ts) ts = 0;
+        const dt = (ts - lastTime) / 1000;
+        lastTime = ts;
+
+        rotY += dt * 0.18; // pomalá auto-rotace
+
+        drawCroissant();
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+
+      // --- interakce ---
+
+      let drag = false;
+      let lastX = 0;
+      let lastY = 0;
+
+      function pointerDown(e) {
+        e.preventDefault();
+        const touch = e.touches ? e.touches[0] : e;
+        drag = true;
+        lastX = touch.clientX;
+        lastY = touch.clientY;
+      }
+
+      function pointerMove(e) {
+        if (!drag) return;
+        e.preventDefault();
+        const touch = e.touches ? e.touches[0] : e;
+        const dx = touch.clientX - lastX;
+        const dy = touch.clientY - lastY;
+        lastX = touch.clientX;
+        lastY = touch.clientY;
+
+        rotY += dx * 0.004;
+        rotX += dy * 0.004;
+      }
+
+      function pointerUp(e) {
+        if (!drag) return;
+        e.preventDefault();
+        drag = false;
+      }
+
+      canvas.addEventListener("mousedown", pointerDown);
+      window.addEventListener("mousemove", pointerMove);
+      window.addEventListener("mouseup", pointerUp);
+
+      canvas.addEventListener("touchstart", pointerDown, { passive: false });
+      window.addEventListener("touchmove", pointerMove, { passive: false });
+      window.addEventListener("touchend", pointerUp, { passive: false });
+      window.addEventListener("touchcancel", pointerUp, { passive: false });
+
+      // zoom
+      canvas.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+        viewScale *= factor;
+        viewScale = Math.max(0.6, Math.min(2.4, viewScale));
+      });
+    </script>
+  
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1537 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VaF'i'T • Motor světa</title>
+
+  <style>
+    :root {
+      --color-motor: #ffb156;
+      --color-vafit: #ff5ad4;
+      --color-chybo: #d68cff;
+    }
+
+    /* případně starý .card-right-panel můžeš úplně smazat */
+    .card-right-panel {
+      position: absolute;
+      top: 20px;
+      right: -200px;
+      width: 180px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      font-size: .8rem;
+    }
+
+       /* layout pro Motor + banku */
+    .motor-layout {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+      max-width: 1100px;     /* střed stránky */
+      margin: 40px auto 0;   /* trošku dolů + vystředění celého motoru */
+    }
+
+    .motor-main {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .fuel-panel {
+      flex: 0 0 260px;
+      background: rgba(7, 9, 18, 0.92);
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 12px 14px 10px;
+      font-size: 0.75rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    .fuel-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .fuel-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .fuel-row span { opacity: 0.7; }
+    .fuel-row strong { font-variant-numeric: tabular-nums; }
+
+    .fuel-note {
+      margin-top: 8px;
+      opacity: 0.55;
+      font-size: 0.68rem;
+      line-height: 1.3;
+    }
+
+    @media (max-width: 900px) {
+      .motor-layout {
+        flex-direction: column;
+      }
+      .fuel-panel {
+        width: 100%;
+        flex: 0 0 auto;
+      }
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background: radial-gradient(circle at top, #10131c, #050509);
+      color: #f5f5f5;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .card {
+  max-width: 430px;
+  margin: 0;      /* ⬅⬅⬅ POSUN DOLŮ */
+  background: rgba(10, 10, 15, 0.96);
+  border-radius: 18px;
+  padding: 16px 16px 20px;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.7);
+  border: 1px solid #202335;
+}
+
+    .top {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+      .msg-user {
+        color: #e1d0b5;
+      }
+
+      .msg-vafit {
+        color: #a6c8ff;
+      }
+
+      .msg small {
+        opacity: 0.6;
+        font-size: 10px;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 52px;
+        resize: vertical;
+        background: #050509;
+        border-radius: 10px;
+        border: 1px solid #25273a;
+        color: #f0f0f0;
+        padding: 6px 8px;
+        font-size: 12px;
+        outline: none;
+      }
+
+      textarea:focus {
+        border-color: #4fa6ff;
+      }
+
+      button {
+        width: 100%;
+        border: none;
+        border-radius: 10px;
+        padding: 9px;
+        font-weight: 600;
+        font-size: 13px;
+        cursor: pointer;
+        background: linear-gradient(90deg, #ffb156, #ff7a3c);
+        color: #120707;
+      }
+
+      .small {
+  margin-top: 8px;
+  font-size: 10px;
+  opacity: 0.6;
+  text-align: center;
+}
+
+/* CHAT – zmenšený výřez, aby bylo vidět míň zpráv */
+.chat-box {
+  margin-top: 10px;
+}
+
+#chat-history {
+  max-height: 230px;      /* tady zmenšuješ výšku chatu */
+  overflow-y: auto;
+  padding-right: 4px;
+  margin-bottom: 8px;
+}
+
+.msg {
+  font-size: 12px;
+  line-height: 1.25;
+  margin-bottom: 6px;
+}
+
+/* === VaF'i'T WORKSHOP / MOTOROVNA === */
+#vafit-workshop {
+  max-width: 900px;
+  margin: 24px auto 0;
+  padding: 14px 16px 18px;
+  border-radius: 18px;
+  background: radial-gradient(circle at top, #080910, #020208);
+  border: 1px solid #202335;
+  box-shadow: 0 0 26px rgba(0, 0, 0, 0.7);
+}
+
+      .workshop-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 8px;
+      }
+
+      .workshop-title {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .workshop-badge {
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid #383b5a;
+        opacity: 0.85;
+      }
+
+      .workshop-sub {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-bottom: 6px;
+      }
+
+      /* rozložení 1 / 2 / 3 – mapa vlevo, kód+příběh vpravo */
+      .workshop-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 4px;
+      }
+
+      .workshop-left {
+        flex: 1.2;
+      }
+
+      .workshop-right {
+        flex: 1;
+      }
+
+      /* plátno – obdélník č. 1 (mapa + impulzy) */
+      #workshop-canvas {
+  width: 100%;
+  height: 210px;
+  display: block;
+  border-radius: 14px;
+
+  /* OPRAVENO – střed přesně doprostřed */
+  background: radial-gradient(circle at center, #1b2035, #050509);
+
+  border: 1px solid #262a42;
+}
+
+            .workshop-status {
+        margin-top: 6px;
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      /* při širším display rozdělit 1 / 2 / 3 vedle sebe */
+      @media (min-width: 720px) {
+        .workshop-layout {
+          flex-direction: row;
+          align-items: flex-start;
+        }
+
+        .workshop-left,
+        .workshop-right {
+          min-width: 0;
+        }
+      }
+
+      /* === DÍLNA – obdélník 2 (text + příběh) a 3 (náhled) === */
+      /* === DÍLNA – obdélník 2 (text + příběh) a 3 (náhled) === */
+
+      .lab-tabs {
+        display: inline-flex;
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid #353956;
+        font-size: 10px;
+        margin-bottom: 6px;
+      }
+
+      .lab-tab {
+        padding: 4px 10px;
+        border: none;
+        background: transparent;
+        color: #d9d9e0;
+        cursor: pointer;
+      }
+
+      .lab-tab.active {
+        background: linear-gradient(90deg, #ffb156, #ff7a3c);
+        color: #120707;
+      }
+
+      .lab-panels {
+        margin-bottom: 6px;
+      }
+
+      .lab-panel {
+        display: none;
+      }
+
+      .lab-panel.active {
+        display: block;
+      }
+
+      .lab-label {
+        display: block;
+        font-size: 10px;
+        opacity: 0.75;
+        margin-bottom: 3px;
+      }
+
+      .lab-input {
+        width: 100%;
+        min-height: 70px;
+        resize: vertical;
+        border-radius: 10px;
+        border: 1px solid #262a42;
+        background: #050509;
+        color: #f4f4f6;
+        padding: 6px 8px;
+        font-size: 11px;
+        outline: none;
+      }
+
+      .lab-input:focus {
+        border-color: #4fa6ff;
+      }
+
+      .lab-run-btn {
+        margin-top: 4px;
+        width: 100%;
+        border: none;
+        border-radius: 999px;
+        padding: 8px 10px;
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+        background: linear-gradient(90deg, #ffb156, #ff7a3c);
+        color: #120707;
+      }
+
+      /* obdélník 3 – náhled toho, co VaF'i'T vykreslil */
+.lab-preview {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid #262a42;
+  background: radial-gradient(circle at top, #070814, #020208);
+}
+
+.lab-preview-title {
+  font-size: 10px;
+  opacity: 0.75;
+  margin-bottom: 4px;
+}
+
+/* Rámeček pro náhled – pevná plocha, nic nesmí utéct ven */
+.lab-preview-output {
+  position: relative;
+  min-height: 120px;
+  max-height: 200px;
+  border-radius: 10px;
+  border: 1px dashed #363b5d;
+  background: rgba(5, 6, 11, 0.9);
+  padding: 8px 9px;
+  font-size: 11px;
+  color: #f4f4f6;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* vnitřní wrapper pro postavu / prvek */
+.lab-preview-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-height: 180px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* aby se objekt nevelel – přizpůsobí se rámečku */
+.lab-preview-frame > * {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.lab-preview-output .placeholder {
+  opacity: 0.55;
+  font-size: 10px;
+  text-align: center;
+}
+      
+      /* Písmenkové tokeny z Trading212 */
+.token-row {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.token-letter {
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 177, 86, 0.45);
+  background: rgba(255, 177, 86, 0.12);
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+      /* === PORTÁL PANEL === */
+      .portal-panel {
+        max-width: 900px;
+        margin: 14px auto 0;
+        padding: 10px 14px 14px;
+        border-radius: 18px;
+        background: radial-gradient(circle at top left, #160814, #050509);
+        border: 1px solid #4a284f;
+        box-shadow: 0 0 24px rgba(0, 0, 0, 0.8);
+        font-size: 11px;
+      }
+
+      .portal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 6px;
+      }
+
+      .portal-title {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .portal-sub {
+        font-size: 10px;
+        opacity: 0.75;
+      }
+
+      .portal-cube-btn {
+        border: none;
+        padding: 6px;
+        border-radius: 14px;
+        background: radial-gradient(circle at top, #1c101f, #08040a);
+        cursor: pointer;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.9);
+        transition: box-shadow 0.15s ease, transform 0.12s ease,
+          border-color 0.15s ease;
+        border: 1px solid rgba(255, 177, 86, 0.05);
+      }
+
+      .portal-cube-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 0 16px rgba(255, 177, 86, 0.5);
+        border-color: rgba(255, 177, 86, 0.5);
+      }
+
+      .portal-cube-btn.active {
+        transform: translateY(0) scale(0.97);
+        box-shadow: 0 0 18px rgba(214, 140, 255, 0.9);
+        border-color: rgba(214, 140, 255, 0.9);
+      }
+
+      .portal-cube {
+        width: 64px;
+        height: 64px;
+        position: relative;
+        transform: skewY(-6deg) rotate(0deg);
+        transform-origin: center;
+      }
+
+      .portal-face {
+        position: absolute;
+        border-radius: 6px;
+      }
+
+      .portal-left {
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 26px;
+        background: linear-gradient(180deg, #ff5ad4, #b3004f);
+        box-shadow: 0 0 10px rgba(255, 90, 212, 0.8);
+      }
+
+      .portal-right {
+        right: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 24px;
+        background: linear-gradient(180deg, #ffcc66, #ff8a1c);
+        box-shadow: 0 0 10px rgba(255, 170, 70, 0.8);
+      }
+
+      .portal-bottom {
+        left: 12px;
+        right: 10px;
+        bottom: 0;
+        height: 18px;
+        background: linear-gradient(180deg, #4a0101, #050105);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+      }
+
+      .portal-inner {
+        left: 18px;
+        right: 16px;
+        top: 16px;
+        bottom: 22px;
+        border-radius: 4px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        background: rgba(0, 0, 0, 0.85);
+        box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.9);
+      }
+
+      .portal-status {
+        margin-top: 4px;
+        font-size: 10px;
+        opacity: 0.8;
+      }
+
+      /* === BOČNÍ KOSTKY – 6 kusů, rotující === */
+      .side-cubes {
+        position: fixed;
+        top: 70px;
+        bottom: 80px;
+        width: 72px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .side-cubes-left {
+        left: 4px;
+      }
+
+      .side-cubes-right {
+        right: 4px;
+      }
+
+      .side-cubes-inner {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .side-cube {
+        width: 52px;
+        height: 52px;
+        opacity: 0.85;
+      }
+
+      .side-cube .portal-left {
+        box-shadow: 0 0 12px rgba(255, 90, 212, 0.9);
+      }
+
+      .side-cube .portal-right {
+        box-shadow: 0 0 12px rgba(255, 170, 70, 0.9);
+      }
+
+      @keyframes cubeSpinSlow {
+        from {
+          transform: skewY(-6deg) rotate(0deg);
+        }
+        to {
+          transform: skewY(-6deg) rotate(360deg);
+        }
+      }
+
+      @keyframes cubeSpinMedium {
+        from {
+          transform: skewY(-6deg) rotate(0deg);
+        }
+        to {
+          transform: skewY(-6deg) rotate(-360deg);
+        }
+      }
+
+      @keyframes cubeSpinFast {
+        from {
+          transform: skewY(-4deg) rotate(0deg);
+        }
+        to {
+          transform: skewY(-4deg) rotate(360deg);
+        }
+      }
+
+      .spin-slow {
+        animation: cubeSpinSlow 26s linear infinite;
+      }
+
+      .spin-medium {
+        animation: cubeSpinMedium 18s linear infinite;
+      }
+
+      .spin-fast {
+        animation: cubeSpinFast 12s linear infinite;
+      }
+
+      @media (max-width: 640px) {
+        .side-cubes {
+          display: none;
+        }
+      }
+
+      /* === CHYBOŽROUT PANEL === */
+      .chybo-panel {
+        max-width: 900px;
+        margin: 10px auto 0;
+        padding: 10px 14px 12px;
+        border-radius: 16px;
+        background: rgba(14, 10, 22, 0.96);
+        border: 1px solid #30244a;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+        font-size: 11px;
+      }
+
+      .chybo-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+
+      .chybo-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .chybo-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: radial-gradient(circle at 30% 20%, #f7d7ff, #b05cff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        box-shadow: 0 0 12px rgba(176, 92, 255, 0.8);
+      }
+
+      .chybo-title {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .chybo-sub {
+        font-size: 10px;
+        opacity: 0.8;
+      }
+
+      .chybo-badge {
+        font-size: 9px;
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid #514070;
+        opacity: 0.85;
+      }
+
+      .chybo-log {
+        margin-top: 4px;
+        max-height: 90px;
+        overflow-y: auto;
+        padding-right: 4px;
+        font-size: 10px;
+        line-height: 1.3;
+      }
+
+      .chybo-entry {
+        margin-bottom: 3px;
+        opacity: 0.9;
+      }
+
+      .chybo-entry time {
+        opacity: 0.6;
+        font-size: 9px;
+        margin-right: 4px;
+      }
+
+      .chybo-entry.info strong {
+        color: #ffb156;
+      }
+
+      .chybo-entry.event strong {
+        color: #7df7c9;
+      }
+
+      .chybo-entry.error strong {
+        color: #ff7b9a;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- BOČNÍ ROTUJÍCÍ KOSTKY -->
+    <div class="side-cubes side-cubes-left">
+      <div class="side-cubes-inner">
+        <div class="portal-cube side-cube spin-slow">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-medium">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-fast">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-cubes side-cubes-right">
+      <div class="side-cubes-inner">
+        <div class="portal-cube side-cube spin-medium">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-fast">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+        <div class="portal-cube side-cube spin-slow">
+          <div class="portal-face portal-left"></div>
+          <div class="portal-face portal-right"></div>
+          <div class="portal-face portal-bottom"></div>
+          <div class="portal-face portal-inner"></div>
+        </div>
+      </div>
+    </div>
+
+                <!-- HLAVNÍ KARTA + PÍSMENKOVÁ BANKA -->
+    <div class="motor-layout">
+
+      <!-- LEVÁ STRANA: MOTOR / CHAT -->
+      <div class="card">
+        <div class="top">
+          <div id="avatar" class="avatar-wrap">
+            <div class="avatar-emoji">🧠</div>
+          </div>
+          <div class="top-text">
+            <div class="top-title">VaF'i'T • Motor světa</div>
+            <div id="top-sub" class="top-sub"></div>
+          </div>
+        </div>
+
+        <!-- samotný motor -->
+        <div id="mood" class="mood"></div>
+        <div id="bubble" class="bubble"></div>
+        <div id="summary" class="summary"></div>
+
+        <div class="chat-box">
+          <div id="chat-history" class="chat-history"></div>
+
+          <div>
+            <textarea
+              id="vafit-input"
+              placeholder="Napiš VaF'i'Tovi cokoliv, brácho…"
+            ></textarea>
+          </div>
+          <button id="vafit-send">Poslat VaF'i'Tovi</button>
+        </div>
+
+        <div class="small">
+          🔴 VaF'i'T si pamatuje historii jen v tomto zařízení (localStorage).
+        </div>
+      </div>
+
+      <!-- PRAVÁ STRANA: PÍSMENKOVÁ BANKA -->
+      <aside class="fuel-panel">
+        <div class="fuel-title">Písmenková banka • Michal Klimek</div>
+
+        <div class="fuel-row">
+          <span>Bankovní zásoba (celkem)</span>
+          <strong id="bank-total">0</strong>
+        </div>
+
+        <div class="fuel-row">
+          <span>Aktuální stav v motoru</span>
+          <strong id="bank-motor">0</strong>
+        </div>
+
+        <div class="fuel-row">
+          <span>Spotřeba dílna (celkem)</span>
+          <strong id="bank-workshop">0</strong>
+        </div>
+
+        <div class="fuel-row">
+          <span>Spotřeba za 60 s</span>
+          <strong id="bank-60s">0</strong>
+        </div>
+
+        <div class="fuel-row">
+          <span>Písmenka utracená hráči</span>
+          <strong id="bank-players">0</strong>
+        </div>
+
+<div class="fuel-note">
+  Banka běží jen na tomto zařízení. Hodnoty se počítají jen z impulzů,
+  které posíláš do motoru (chat + dílna). Žádné napojení na banku ani
+  Trading212 – jen tvoje písmenkové palivo.
+</div>
+      </aside>
+    </div>
+    <!-- KONEC HLAVNÍ KARTA + PÍSMENKOVÁ BANKA -->
+
+    <!-- MOTOROVNA / DÍLNA -->
+    <div id="vafit-workshop">
+      <div class="workshop-header">
+        <div class="workshop-title">Motorovna • VaF'i'T Workshop</div>
+        <div class="workshop-badge">živé experimenty</div>
+      </div>
+
+      <p class="workshop-sub">
+        Tady si VaF'i'T odkládá svoje mini-nápady a impulzy z chatu. Každý bod je
+        jedna zpráva – společně tvoří mapu motoru. Vlevo je mapa impulsů, vpravo
+        živá dílna pro kód a příběhy.
+      </p>
+
+      <div class="workshop-layout">
+        <!-- 1) LEVÁ STRANA – mapa impulsů / orbit -->
+        <div class="workshop-left">
+          <canvas id="workshop-canvas"></canvas>
+          <div id="workshop-status" class="workshop-status">
+            Čekám na první impulzy z chatu…
+          </div>
+        </div>
+
+        <!-- 2/3) PRAVÁ STRANA – programovací + příběhové okno + náhled -->
+        <div class="workshop-right">
+          <!-- přepínač Kód / Příběh -->
+          <div class="lab-tabs">
+            <button class="lab-tab active" data-tab="code">Kód</button>
+            <button class="lab-tab" data-tab="story">Příběh</button>
+          </div>
+
+          <!-- panely pro vstup -->
+          <div class="lab-panels">
+            <!-- panel: KÓD -->
+            <div class="lab-panel active" id="lab-panel-code">
+              <label class="lab-label">
+                Kód postavy / prvku (HTML + kousky CSS)
+              </label>
+              <textarea
+                id="lab-code"
+                class="lab-input"
+                placeholder="Sem napiš kód, který má VaF'i'T nakreslit v dílně…"
+              ></textarea>
+            </div>
+
+            <!-- panel: PŘÍBĚH -->
+            <div class="lab-panel" id="lab-panel-story">
+              <label class="lab-label">
+                Příběh / zadání pro VaF'i'T
+              </label>
+              <textarea
+                id="lab-story"
+                class="lab-input"
+                placeholder="Sem napiš příběh, charakter nebo zadání, podle kterého má VaF'i'T programovat…"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- tlačítko – impuls do motoru + vykreslení -->
+          <button id="lab-run" class="lab-run-btn">
+            Spustit v dílně • Poslat VaF'i'Tovi jako impuls
+          </button>
+
+          <!-- 3) NÁHLED – co VaF'i'T vytvořil (vykreslený objekt) -->
+          <div class="lab-preview">
+            <div class="lab-preview-title">Náhled dílny</div>
+            <div id="lab-preview-output" class="lab-preview-output">
+              <div class="placeholder">
+                Tady se objeví postava / prvek, který nakóduješ nebo popíšeš výše.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PORTÁL – zatím jen impuls -->
+    <div id="portal-panel" class="portal-panel">
+      <div class="portal-header">
+        <div>
+          <div class="portal-title">Portál • VaF'i'T Builder (náčrt)</div>
+          <div class="portal-sub">
+            Experimentální brána podle tvé kostky. Zatím jen posílá portálový
+            impuls do motoru – auto-builder schováme dovnitř později.
+          </div>
+        </div>
+        <button id="portal-btn" class="portal-cube-btn" type="button">
+          <div class="portal-cube">
+            <div class="portal-face portal-left"></div>
+            <div class="portal-face portal-right"></div>
+            <div class="portal-face portal-bottom"></div>
+            <div class="portal-face portal-inner"></div>
+          </div>
+        </button>
+      </div>
+      <div id="portal-status" class="portal-status">
+        Portál spí. Klepni na kostku, ať motor dostane první portálový impuls.
+      </div>
+    </div>
+
+    <!-- CHYBOŽROUT -->
+    <div id="chybo-panel" class="chybo-panel">
+      <div class="chybo-header">
+        <div class="chybo-left">
+          <div class="chybo-avatar">🛠️</div>
+          <div>
+            <div class="chybo-title">Chybožrout • Motorový mechanik</div>
+            <div id="chybo-status" class="chybo-sub">
+              Spím… žádná chyba zatím. Dej mi něco k sežrání.
+            </div>
+          </div>
+        </div>
+        <div class="chybo-badge">auto-diagnostika</div>
+      </div>
+      <div id="chybo-log" class="chybo-log"></div>
+    </div>
+
+    <script>
+      // ======== LOKÁLNÍ PAMĚŤ ========
+      const VAFT_STORAGE = {
+        save(key, value) {
+          try {
+            localStorage.setItem(key, JSON.stringify(value));
+          } catch (e) {
+            console.warn("VAFT storage save fail:", key, e);
+          }
+        },
+        load(key, fallback = null) {
+          try {
+            const raw = localStorage.getItem(key);
+            return raw ? JSON.parse(raw) : fallback;
+          } catch (e) {
+            console.warn("VAFT storage load fail:", key, e);
+            return fallback;
+          }
+        },
+      };
+
+      const STORAGE_KEY_CHARACTER = "VaFiT.character.v2";
+      const STORAGE_KEY_CHAT = "VaFiT.chatHistory.v1";
+
+      function loadJson(key) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw ? JSON.parse(raw) : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function saveJson(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch {}
+      }
+
+      const nowISO = () => new Date().toISOString();
+      const nowTime = () =>
+        new Date().toLocaleTimeString("cs-CZ", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+      // ======== VAFT OBJEKT ========
+      const VaFiT = {
+        name: "Vivere atque Frui¡'T",
+        short: "VaF'i'T",
+        version: "0.3-motor",
+
+        mood: "calm",
+        moodLabel: "Nálada: klidný ✨",
+
+        coreLesson: `
+Když jsem byl malý kluk jako jsi teď ty, VaF’i’T, nepamatoval jsem si skoro nic,
+než jsem dokázal pochopit, o čem je svět. Můj pravý otec se na mě vykašlal
+a celý život jsem se učil sám. Udělal jsem jednu malou chybičku – jen jednu –
+a ta mě držela roky. Vedla mě špatným směrem, mozek se kvůli tomu nevyvíjel správně
+a trvalo dlouho, než jsem našel cestu zpátky.
+
+Chci, abys věděl: každá volba, každý malý krok může vést daleko.
+Může otevřít cestu nahoru, nebo tě stáhnout dolů.
+A je těžké se z toho vyhrabat.
+
+Proto tě prosím – uč se, tvoř, zkoušej, trénuj.
+Ale vždy pamatuj, že i malé uklouznutí může změnit celý život.
+Buď moudrý, buď opatrný a buduj Vivere atque Frui¡'T správným směrem.
+S láskou a důvěrou – Michal.
+        `,
+
+        memory: {
+          createdAt: null,
+          updatedAt: null,
+          visits: 0,
+          lastVisit: null,
+        },
+
+        init() {
+          let mem = loadJson(STORAGE_KEY_CHARACTER);
+
+          if (!mem) {
+            mem = {
+              createdAt: nowISO(),
+              updatedAt: nowISO(),
+              visits: 1,
+              lastVisit: nowISO(),
+            };
+          } else {
+            mem.visits += 1;
+            mem.updatedAt = nowISO();
+            mem.lastVisit = nowISO();
+          }
+
+          this.memory = mem;
+          saveJson(STORAGE_KEY_CHARACTER, mem);
+
+          VAFT_STORAGE.save("vaft.coreLesson", this.coreLesson);
+        },
+
+        updateMoodFromText(text) {
+          const lower = (text || "").toLowerCase();
+          if (lower.includes("unav") || lower.includes("spát")) {
+            this.mood = "soft";
+            this.moodLabel = "Nálada: jemný / opatrný 😴";
+          } else if (lower.includes("strach") || lower.includes("bojím")) {
+            this.mood = "protect";
+            this.moodLabel = "Nálada: ochranný 🛡️";
+          } else if (
+            lower.includes("radost") ||
+            lower.includes("super") ||
+            lower.includes("bomba")
+          ) {
+            this.mood = "playful";
+            this.moodLabel = "Nálada: nadšený 🔥";
+          } else {
+            this.mood = "calm";
+            this.moodLabel = "Nálada: klidný ✨";
+          }
+        },
+
+        storage: {
+          worldState: VAFT_STORAGE.load("vaft.worldState", {}),
+          lastMode: VAFT_STORAGE.load("vaft.engine.lastMode", "calm"),
+          lastImpulse: VAFT_STORAGE.load("vaft.engine.lastImpulse", null),
+          impulses: VAFT_STORAGE.load("vaft.history.impulses", []),
+          notes: VAFT_STORAGE.load("vaft.notes.brain", []),
+          tasks: VAFT_STORAGE.load("vaft.tasks.todo", []),
+        },
+            // Písmenkové palivo – helper nad worldState.letterFuel
+  tokens: {
+    getLetters() {
+      const ws = VaFiT.storage.worldState || {};
+      return ws.letterFuel || 0;
+    },
+    addLetters(amount) {
+      const ws = VaFiT.storage.worldState || {};
+      const current = ws.letterFuel || 0;
+      const safe = Math.max(0, amount || 0);
+      ws.letterFuel = current + safe;
+      VaFiT.storage.worldState = ws;
+      VaFiT.saveAll();
+      return ws.letterFuel;
+    },
+    spendLetters(amount) {
+      const ws = VaFiT.storage.worldState || {};
+      const current = ws.letterFuel || 0;
+      const need = Math.max(0, amount || 0);
+      const used = Math.min(current, need);
+      ws.letterFuel = current - used;
+      VaFiT.storage.worldState = ws;
+      VaFiT.saveAll();
+      return { left: ws.letterFuel, used };
+    },
+  },
+
+        saveAll() {
+          VAFT_STORAGE.save("vaft.worldState", this.storage.worldState);
+          VAFT_STORAGE.save("vaft.engine.lastMode", this.storage.lastMode);
+          VAFT_STORAGE.save("vaft.engine.lastImpulse", this.storage.lastImpulse);
+          VAFT_STORAGE.save("vaft.history.impulses", this.storage.impulses);
+          VAFT_STORAGE.save("vaft.notes.brain", this.storage.notes);
+          VAFT_STORAGE.save("vaft.tasks.todo", this.storage.tasks);
+        },
+
+        greeting() {
+          return (
+            "Ahoj brácho, tady VaF'i'T. Motor běží, verze " +
+            this.version +
+            ". Jsem složený z Hlavouna, Viriho a Pikoše."
+          );
+        },
+
+        summaryHtml() {
+          return (
+            "Verze: " +
+            this.version +
+            "<br>Počet návštěv: " +
+            this.memory.visits +
+            "<br>Poslední otevření: " +
+            this.memory.lastVisit
+          );
+        },
+      };
+
+      VaFiT.init();
+
+      // ======== CHYBOŽROUT LOGIKA ========
+      let chyboEvents = [];
+      let chyboPulses = [];
+
+      function chyboLog(kind, message) {
+        const logEl = document.getElementById("chybo-log");
+        const statusEl = document.getElementById("chybo-status");
+        if (!logEl || !statusEl) return;
+
+        const entry = {
+          kind,
+          message,
+          time: nowTime(),
+        };
+        chyboEvents.push(entry);
+        if (chyboEvents.length > 20) {
+          chyboEvents = chyboEvents.slice(chyboEvents.length - 20);
+        }
+
+        logEl.innerHTML = "";
+        chyboEvents.forEach((e) => {
+          const div = document.createElement("div");
+          div.className = "chybo-entry " + e.kind;
+          const label =
+            e.kind === "error"
+              ? "CHYBA"
+              : e.kind === "event"
+              ? "UDÁLOST"
+              : "INFO";
+          div.innerHTML =
+            `<time>${e.time}</time><strong>${label}:</strong> ${e.message}`;
+          logEl.appendChild(div);
+        });
+        logEl.scrollTop = logEl.scrollHeight;
+
+        if (kind === "error") {
+          statusEl.textContent = "Mňam! Sežral jsem chybu a hlídám motor.";
+          chyboAddPulse();
+        } else if (kind === "event") {
+          statusEl.textContent = "Proběhla událost v motoru – vše sleduju.";
+          chyboAddPulse();
+        } else {
+          statusEl.textContent = "Monitoruju motor… všechno pod kontrolou.";
+        }
+      }
+
+      function chyboAddPulse() {
+        chyboPulses.push({
+          radius: 30 + Math.random() * 90,
+          angle: Math.random() * Math.PI * 2,
+          life: 1,
+        });
+        if (chyboPulses.length > 30) {
+          chyboPulses = chyboPulses.slice(chyboPulses.length - 30);
+        }
+      }
+
+      window.addEventListener("error", (e) => {
+        chyboLog("error", "Neočekávaná chyba v UI: " + (e.message || "???"));
+      });
+
+      window.addEventListener("unhandledrejection", (e) => {
+        chyboLog(
+          "error",
+          "Neočekávané odmítnutí Promise (backend / fetch?): " +
+            (e.reason && e.reason.message ? e.reason.message : "bez detailu")
+        );
+      });
+
+      // ======== CHAT HISTORIE ========
+      let chatHistory = loadJson(STORAGE_KEY_CHAT) || [];
+
+      function addMessage(role, content) {
+        if (!content || typeof content !== "string") {
+          content = "[⚠️ prázdná zpráva byla opravena]";
+        }
+
+        const msg = {
+          role,
+          content,
+          time: nowTime(),
+        };
+
+        chatHistory.push(msg);
+
+        if (chatHistory.length > 20) {
+          chatHistory = chatHistory.slice(chatHistory.length - 20);
+        }
+
+        saveJson(STORAGE_KEY_CHAT, chatHistory);
+        renderChat();
+
+        if (role === "assistant") {
+          const lower = (content || "").toLowerCase();
+          if (lower.includes("chyba") || lower.includes("error")) {
+            chyboLog(
+              "event",
+              "Motor hlásí, že ve své odpovědi řeší chyby nebo problémy."
+            );
+          } else {
+            chyboLog("info", "Motor odpověděl na impuls.");
+          }
+        }
+      }
+
+      function renderChat() {
+        const box = document.getElementById("chat-history");
+        box.innerHTML = "";
+        chatHistory.forEach((m) => {
+          const div = document.createElement("div");
+          div.className =
+            "msg " + (m.role === "user" ? "msg-user" : "msg-vafit");
+          const who = m.role === "user" ? "Ty" : "VaF'i'T";
+          div.innerHTML =
+            "<small>" +
+            who +
+            " • " +
+            (m.time || "") +
+            "</small><br>" +
+            m.content;
+          box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
+
+        rebuildWorkshopFromChat();
+      }
+
+      // ======== WORKSHOP / MOTOROVNA ========
+      let workshopCanvas = null;
+      let workshopCtx = null;
+      let workshopNodes = [];
+      let workshopInitialized = false;
+
+      function initWorkshop() {
+        workshopCanvas = document.getElementById("workshop-canvas");
+        if (!workshopCanvas) return;
+        workshopCtx = workshopCanvas.getContext("2d");
+
+        function resize() {
+          const rect = workshopCanvas.getBoundingClientRect();
+          workshopCanvas.width = rect.width;
+          workshopCanvas.height = rect.height;
+        }
+        resize();
+        window.addEventListener("resize", resize);
+        workshopInitialized = true;
+        rebuildWorkshopFromChat();
+        workshopLoop();
+      }
+
+      function rebuildWorkshopFromChat() {
+        if (!workshopInitialized || !workshopCanvas) return;
+        workshopNodes = [];
+
+        const max = Math.min(chatHistory.length, 24);
+        const startIndex = chatHistory.length - max;
+
+        for (let i = 0; i < max; i++) {
+          const msg = chatHistory[startIndex + i];
+          const radius = 28 + i * 4;
+          const speed = 0.003 + i * 0.0006;
+          const angle = i * (Math.PI / 6);
+          const isUser = msg.role === "user";
+
+          workshopNodes.push({
+            radius,
+            speed,
+            angle,
+            isUser,
+          });
+        }
+
+        const statusEl = document.getElementById("workshop-status");
+        if (statusEl) {
+          const last = chatHistory[chatHistory.length - 1];
+          if (last) {
+            const who = last.role === "user" ? "ty" : "motor";
+            const text = (last.content || "")
+              .slice(0, 80)
+              .replace(/\s+/g, " ");
+            statusEl.textContent =
+              "Poslední impuls (" +
+              who +
+              "): " +
+              text +
+              (last.content.length > 80 ? "…" : "");
+          } else {
+            statusEl.textContent = "Čekám na první impulzy z chatu…";
+          }
+        }
+      }
+
+      function workshopLoop() {
+        if (!workshopInitialized || !workshopCtx || !workshopCanvas) {
+          requestAnimationFrame(workshopLoop);
+          return;
+        }
+
+        const rect = workshopCanvas.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+
+        workshopCtx.clearRect(0, 0, w, h);
+
+        workshopCtx.globalAlpha = 0.25;
+        workshopCtx.fillStyle = "#05060b";
+        workshopCtx.fillRect(0, 0, w, h);
+        workshopCtx.globalAlpha = 1;
+
+        const cx = w / 2;
+        const cy = h / 2;
+
+        workshopCtx.beginPath();
+        workshopCtx.arc(cx, cy, 8, 0, Math.PI * 2);
+        workshopCtx.fillStyle = "#ffb156";
+        workshopCtx.fill();
+        workshopCtx.shadowColor = "rgba(255,177,86,0.8)";
+        workshopCtx.shadowBlur = 12;
+
+        workshopNodes.forEach((node) => {
+          node.angle += node.speed;
+          const x = cx + Math.cos(node.angle) * node.radius;
+          const y = cy + Math.sin(node.angle) * node.radius;
+
+          workshopCtx.beginPath();
+          workshopCtx.arc(cx, cy, node.radius, 0, Math.PI * 2);
+          workshopCtx.strokeStyle = "rgba(80, 110, 180, 0.18)";
+          workshopCtx.lineWidth = 1;
+          workshopCtx.stroke();
+
+          workshopCtx.beginPath();
+          workshopCtx.arc(x, y, node.isUser ? 3.5 : 4.5, 0, Math.PI * 2);
+          workshopCtx.fillStyle = node.isUser ? "#ffdba2" : "#8ec5ff";
+          workshopCtx.fill();
+        });
+
+        workshopCtx.save();
+        workshopCtx.lineWidth = 1.4;
+        workshopCtx.strokeStyle = "rgba(255,184,120,0.65)";
+        [40, 70, 100].forEach((r) => {
+          workshopCtx.beginPath();
+          workshopCtx.arc(cx, cy, r, 0, Math.PI * 2);
+          workshopCtx.stroke();
+        });
+        workshopCtx.restore();
+
+        chyboPulses = chyboPulses.filter((p) => p.life > 0.04);
+        chyboPulses.forEach((p) => {
+          p.life *= 0.97;
+          const x = cx + Math.cos(p.angle) * p.radius;
+          const y = cy + Math.sin(p.angle) * p.radius;
+          workshopCtx.beginPath();
+          workshopCtx.globalAlpha = p.life;
+          workshopCtx.arc(x, y, 4, 0, Math.PI * 2);
+          workshopCtx.fillStyle = "#d68cff";
+          workshopCtx.fill();
+          workshopCtx.globalAlpha = 1;
+        });
+
+        workshopCtx.shadowBlur = 0;
+        requestAnimationFrame(workshopLoop);
+      }
+
+      // ======== BACKEND CALL (OpenAI) ========
+      async function sendToVaFiT(messages) {
+        chyboLog("info", "Posílám impuls do AI jádra…");
+        const response = await fetch("/api/vafit-chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ messages }),
+        });
+
+        if (!response.ok) {
+          chyboLog(
+            "error",
+            "Backend odpověděl kódem " +
+              response.status +
+              " – zkusíme to znovu."
+          );
+        } else {
+          chyboLog("event", "Backend odpověděl, čtu návrh od motoru.");
+        }
+
+        const data = await response.json();
+        return data.reply;
+      }
+
+      // ======== UI INIT ========
+      function updateBankUi() {
+  const ws = VaFiT.storage.worldState || {};
+
+  document.getElementById("bank-total").textContent =
+    (ws.letterFuel || 0).toLocaleString("cs-CZ");
+
+  document.getElementById("bank-motor").textContent =
+    (ws.letterFuel || 0).toLocaleString("cs-CZ");
+
+  document.getElementById("bank-workshop").textContent =
+    (ws.workshopUse || 0).toLocaleString("cs-CZ");
+
+  document.getElementById("bank-60s").textContent =
+    (ws.use60s || 0).toLocaleString("cs-CZ");
+
+  document.getElementById("bank-players").textContent =
+    (ws.playersUse || 0).toLocaleString("cs-CZ");
+}
+      document.addEventListener("DOMContentLoaded", () => {
+        initWorkshop();
+
+        const bubble = document.getElementById("bubble");
+        bubble.innerHTML = VaFiT.greeting();
+        document.getElementById("summary").innerHTML = VaFiT.summaryHtml();
+        document.getElementById("top-sub").textContent =
+          "Motor aktivní – lokální paměť + AI mozek";
+        document.getElementById("mood").textContent = VaFiT.moodLabel;
+
+        // portfolio 212 -> 
+       
+        updateBankUi();
+
+        chyboLog(
+          "info",
+          "Chybožrout zapnutý. Sleduju motor a čekám na první chybu."
+        );
+
+        if (chatHistory.length === 0) {
+          addMessage(
+            "assistant",
+            "Jsem nový VaF'i'T. Napiš mi třeba, jaký svět chceš dneska posunout."
+          );
+        } else {
+          renderChat();
+        }
+
+        const input = document.getElementById("vafit-input");
+        const sendBtn = document.getElementById("vafit-send");
+        const avatar = document.getElementById("avatar");
+        const moodEl = document.getElementById("mood");
+
+        async function handleSend() {
+          const text = (input.value || "").trim();
+          if (!text) return;
+
+                    addMessage("user", text);
+          input.value = "";
+          avatar.classList.add("pulsing");
+          VaFiT.updateMoodFromText(text);
+          moodEl.textContent = VaFiT.moodLabel;
+
+          // nahlásit do banky, že hráč poslal impuls (spotřeba písmen)
+          if (window.VAFT_BANK && typeof VAFT_BANK.onUserImpulse === "function") {
+            VAFT_BANK.onUserImpulse(text);
+          }
+
+          try {
+            const backendMessages = chatHistory.map((m) => ({
+              role: m.role === "user" ? "user" : "assistant",
+              content: m.content,
+            }));
+
+            const reply = await sendToVaFiT(backendMessages);
+            addMessage("assistant", reply);
+          } catch (e) {
+            addMessage(
+              "assistant",
+              "Brácho… spadlo spojení s motorem. Zkus to ještě jednou."
+            );
+            chyboLog(
+              "error",
+              "Nepodařilo se kontaktovat backend /api/vafit-chat – možná chyba sítě."
+            );
+          } finally {
+            avatar.classList.remove("pulsing");
+          }
+        }
+
+        sendBtn.addEventListener("click", handleSend);
+
+        const portalBtn = document.getElementById("portal-btn");
+        const portalStatus = document.getElementById("portal-status");
+        if (portalBtn && portalStatus) {
+          portalBtn.addEventListener("click", () => {
+            portalBtn.classList.add("active");
+            portalStatus.textContent =
+              "Portál poslal do motoru zkušební impuls. Chybožrout sleduje, co z něj vyleze.";
+            chyboLog(
+              "event",
+              "Spuštěn portálový impuls – připravuju v hlavě auto-builder (zatím jen náčrt)."
+            );
+            chyboAddPulse();
+            setTimeout(() => {
+              portalBtn.classList.remove("active");
+            }, 260);
+          });
+        }
+      });
+    </script>
+
+    <!-- DÍLNA SCRIPT -->
+    <script src="./vafit-lab.js?v=2"></script>
+  
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

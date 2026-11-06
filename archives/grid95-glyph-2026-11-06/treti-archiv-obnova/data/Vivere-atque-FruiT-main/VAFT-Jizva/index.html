@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+      <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VAFT • Jizva 🐻</title>
+
+    <link rel="stylesheet" href="./jizva.css?v=0.2">
+  </head>
+  <body data-jizva-mode="dark">
+    <header class="topbar">
+      <h1>VAFT – Jizva 🐻</h1>
+      <div class="mode-switch">
+        <button id="btn-soft" onclick="setJizvaMode('soft')">Hodný</button>
+        <button id="btn-dark" class="active" onclick="setJizvaMode('dark')">Temný</button>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="panel">
+        <p class="status">
+          Režim: <span id="modeStatus">temný</span>
+        </p>
+        <label for="inputBox" class="lbl">Napiš Jizvovi</label>
+        <textarea id="inputBox" placeholder="Napiš Jizvovi, co se děje..."></textarea>
+        <button class="primary" onclick="sendToJizva()">Poslat Jizvovi</button>
+        <p id="sendStatus" class="hint"></p>
+      </section>
+
+      <section class="panel">
+        <h2>Charakter</h2>
+        <p class="hint">Tohle je tvoje část – sem si doplníš popis Jizvy.</p>
+        <textarea id="charBox" rows="4" placeholder="např. ochránce rodiny, robotický medvěd, paměť Vivere..."></textarea>
+        <button class="secondary" onclick="saveChar()">Uložit charakter</button>
+        <p id="charStatus" class="hint"></p>
+      </section>
+
+      <section class="panel">
+        <h2>Dovednosti</h2>
+        <p class="hint">Sem si můžeš psát, co Jizva umí (kódování, filtr halucinací, hlídání pravidel...)</p>
+        <textarea id="skillsBox" rows="4" placeholder="např. filtr reality, ochrana dětské sekce, komunikace s Hlavounem..."></textarea>
+        <button class="secondary" onclick="saveSkills()">Uložit dovednosti</button>
+        <p id="skillsStatus" class="hint"></p>
+      </section>
+    </main>
+
+    <script src="./jizva.js?v=0.2"></script>
+  
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

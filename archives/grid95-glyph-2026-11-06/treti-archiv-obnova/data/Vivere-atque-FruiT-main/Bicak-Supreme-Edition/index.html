@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="cs">
+<head>
+    <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bicák Supreme Edition • VAFT</title>
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+      padding: 20px;
+    }
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      opacity: 0.7;
+      margin-bottom: 20px;
+    }
+    .box {
+      padding: 15px;
+      border: 1px solid #444;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="title">Bicák Supreme Edition</div>
+  <div class="subtitle">Vivere atque Frui¡'T • budoucí legenda</div>
+
+  <div class="box">
+    <strong>Popis postavy:</strong><br>
+    Budoucí hrdina, který se náhodně objevuje na mapě a dává hráčům vtipnou motivaci se hýbat, 
+    zvednout zadek a nebýt závislí na telefonu. Přináší buffy za reálný pohyb.
+  </div>
+
+  <div class="box">
+    <strong>Plánované funkce:</strong>
+    <ul>
+      <li>Náhodný spawn na mapě</li>
+      <li>Vtipné motivační slogany</li>
+      <li>Iskry za drobné úkoly (kroky, postavení, protažení)</li>
+      <li>Supreme póza při příchodu</li>
+      <li>AI+fitness vizuální styl</li>
+    </ul>
+  </div>
+
+  <div class="box">
+    <strong>Draft slogany:</strong>
+    <ul>
+      <li>„Zvedni se… nebo to zvedne Bicák za tebe.“</li>
+      <li>„Tvůj iPhone váží 200 g. Ty můžeš zvednout víc.“</li>
+      <li>„Bicák Supreme buff se aktivuje jen když NESEDÍŠ!“</li>
+      <li>„Scrollování nenahradí krok. Jdi ven.“</li>
+    </ul>
+  </div>
+
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

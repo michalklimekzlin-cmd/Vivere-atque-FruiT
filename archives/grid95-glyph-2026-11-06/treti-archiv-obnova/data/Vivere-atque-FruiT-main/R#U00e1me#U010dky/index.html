@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+      <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Vivere atque Frui¡'T • Rámečky 4×</title>
+
+    <style>
+      :root {
+        --barva-pozadi: #020308;
+        --barva-mrizka: #14151c;
+        --barva-hrana: #202020;
+        --barva-hrana-svetlejsi: #404040;
+        --barva-stit: #cccccc;
+        --barva-text: #f5f5f5;
+        --barva-text-slabsi: #b2b2c7;
+        --font-zaklad: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at top, #050818, var(--barva-pozadi));
+        color: var(--barva-text);
+        font-family: var(--font-zaklad);
+      }
+
+      .vrstva-koren {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: stretch;
+        justify-content: stretch;
+      }
+
+      canvas#platno-ramecek {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .vrstva-horni-panel {
+        position: fixed;
+        inset: 0 auto auto 0;
+        padding: 10px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        pointer-events: none;
+      }
+
+      .znacka-aplikace {
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--barva-text-slabsi);
+      }
+
+      .radek-stav {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        font-size: 12px;
+        color: var(--barva-text-slabsi);
+      }
+
+      .odznak-zivy {
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: rgba(248, 248, 248, 0.04);
+        border: 1px solid rgba(248, 248, 248, 0.28);
+        color: #ffffff;
+        font-size: 11px;
+      }
+
+      .vrstva-spodni-panel {
+        position: fixed;
+        inset: auto 0 0 0;
+        padding: 10px 16px 14px;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.65),
+          rgba(0, 0, 0, 0)
+        );
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        pointer-events: none;
+      }
+
+      .radek-informace-ramecek {
+        font-size: 11px;
+        color: var(--barva-text-slabsi);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="vrstva-koren">
+      <canvas id="platno-ramecek"></canvas>
+    </div>
+
+    <!-- horní info vrstva \\{*(°•.)(.•°)*}// -->
+    <div class="vrstva-horni-panel">
+      <div class="znacka-aplikace">VIVERE ATQUE FRUIT • RÁMEČKY 4×</div>
+      <div class="radek-stav">
+        <span class="odznak-zivy">kostra + prostor + štít z písmenek</span>
+      </div>
+    </div>
+
+    <!-- spodní info vrstva -->
+    <div class="vrstva-spodni-panel">
+      <div class="radek-informace-ramecek">
+        Čtyři základní Rámečky vedle sebe: vnější kostra, vnitřní tunel a
+        zadní stěna s lamelami. Přes tunel je jemný štít z písmenek (prach
+        písmen) připravený pro budoucí „Středy“.
+      </div>
+    </div>
+
+    <script>
+      "use strict";
+
+      const platno = document.getElementById("platno-ramecek");
+      const ctx = platno.getContext("2d");
+
+      let sirkaPx = 0;
+      let vyskaPx = 0;
+
+      function zmenitVelikostPlatna() {
+        const dpr = window.devicePixelRatio || 1;
+        sirkaPx = window.innerWidth;
+        vyskaPx = window.innerHeight;
+        platno.width = sirkaPx * dpr;
+        platno.height = vyskaPx * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      window.addEventListener("resize", zmenitVelikostPlatna);
+      zmenitVelikostPlatna();
+
+      function getCss(nazev) {
+        const styl = getComputedStyle(document.documentElement);
+        return styl.getPropertyValue(nazev).trim() || "#ffffff";
+      }
+
+      function vykreslitPozadi() {
+        ctx.save();
+
+        const grd = ctx.createRadialGradient(
+          sirkaPx / 2,
+          0,
+          0,
+          sirkaPx / 2,
+          vyskaPx,
+          vyskaPx * 1.2
+        );
+        grd.addColorStop(0, "#050815");
+        grd.addColorStop(1, "#020308");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, sirkaPx, vyskaPx);
+
+        ctx.strokeStyle = getCss("--barva-mrizka");
+        ctx.lineWidth = 1;
+        const krok = 40;
+        for (let x = 0; x <= sirkaPx; x += krok) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, vyskaPx);
+          ctx.stroke();
+        }
+        for (let y = 0; y <= vyskaPx; y += krok) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(sirkaPx, y);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+      }
+
+      // hlavní funkce pro vykreslení jednoho rámečku
+      function vykreslitRamecekJednotny(stredX, stredY, velikost) {
+        const hloubka = velikost * 0.55;
+        const naklonX = -0.18;
+        const naklonY = 0.2;
+
+        const barvaHrana = getCss("--barva-hrana");
+        const barvaHranaSvet = getCss("--barva-hrana-svetlejsi");
+        const barvaStit = getCss("--barva-stit");
+
+        // přední obdélník
+        const pLevo = stredX - velikost / 2;
+        const pPravo = stredX + velikost / 2;
+        const pNahore = stredY - velikost / 2;
+        const pDole = stredY + velikost / 2;
+
+        const dx = hloubka * naklonY;
+        const dy = -hloubka * (0.45 + naklonX);
+
+        // vnější přední hrana
+        const A = { x: pLevo, y: pNahore };
+        const B = { x: pPravo, y: pNahore };
+        const C = { x: pPravo, y: pDole };
+        const D = { x: pLevo, y: pDole };
+
+        // zadní hrany pro horní a pravý bok
+        const E = { x: B.x + dx, y: B.y + dy };
+        const F = { x: C.x + dx, y: C.y + dy };
+        const G = { x: A.x + dx * 0.4, y: A.y + dy };
+
+        ctx.save();
+
+        // 1) horní plocha
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = barvaHrana;
+        ctx.lineWidth = 1.4;
+
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(B.x, B.y);
+        ctx.lineTo(E.x, E.y);
+        ctx.lineTo(G.x, G.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 2) pravý bok
+        ctx.beginPath();
+        ctx.moveTo(B.x, B.y);
+        ctx.lineTo(C.x, C.y);
+        ctx.lineTo(F.x, F.y);
+        ctx.lineTo(E.x, E.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 3) přední čelo (bílý kvádr)
+        ctx.beginPath();
+        ctx.moveTo(A.x, A.y);
+        ctx.lineTo(B.x, B.y);
+        ctx.lineTo(C.x, C.y);
+        ctx.lineTo(D.x, D.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // vnitřní otvor v přední stěně
+        const vnitOds = velikost * 0.2;
+        const iA = { x: A.x + vnitOds, y: A.y + vnitOds };
+        const iB = { x: B.x - vnitOds, y: B.y + vnitOds };
+        const iC = { x: C.x - vnitOds, y: C.y - vnitOds };
+        const iD = { x: D.x + vnitOds, y: D.y - vnitOds };
+
+        ctx.save();
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.beginPath();
+        ctx.moveTo(iA.x, iA.y);
+        ctx.lineTo(iB.x, iB.y);
+        ctx.lineTo(iC.x, iC.y);
+        ctx.lineTo(iD.x, iD.y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+        ctx.strokeStyle = barvaHrana;
+        ctx.beginPath();
+        ctx.moveTo(iA.x, iA.y);
+        ctx.lineTo(iB.x, iB.y);
+        ctx.lineTo(iC.x, iC.y);
+        ctx.lineTo(iD.x, iD.y);
+        ctx.closePath();
+        ctx.stroke();
+
+        // 4) vnitřní tunel – zadní rám
+        const tunelHloubka = hloubka * 0.9;
+        const tDx = dx * (tunelHloubka / hloubka);
+        const tDy = dy * (tunelHloubka / hloubka);
+
+        const tA = { x: iA.x + tDx, y: iA.y + tDy };
+        const tB = { x: iB.x + tDx, y: iB.y + tDy };
+        const tC = { x: iC.x + tDx, y: iC.y + tDy };
+        const tD = { x: iD.x + tDx, y: iD.y + tDy };
+
+        ctx.strokeStyle = barvaHranaSvet;
+        ctx.lineWidth = 1;
+
+        ctx.beginPath();
+        ctx.moveTo(tA.x, tA.y);
+        ctx.lineTo(tB.x, tB.y);
+        ctx.lineTo(tC.x, tC.y);
+        ctx.lineTo(tD.x, tD.y);
+        ctx.closePath();
+        ctx.stroke();
+
+        // diagonály tunelu (podle nákresu)
+        ctx.beginPath();
+        ctx.moveTo(iA.x, iA.y);
+        ctx.lineTo(tA.x, tA.y);
+        ctx.moveTo(iB.x, iB.y);
+        ctx.lineTo(tB.x, tB.y);
+        ctx.moveTo(iC.x, iC.y);
+        ctx.lineTo(tC.x, tC.y);
+        ctx.moveTo(iD.x, iD.y);
+        ctx.lineTo(tD.x, tD.y);
+        ctx.stroke();
+
+        // 5) lamely na zadní stěně (vertikální pruhy)
+        const lamelPocet = 9;
+        for (let i = 0; i < lamelPocet; i++) {
+          const t = (i + 0.5) / (lamelPocet + 1);
+
+          const p1 = {
+            x: tA.x + (tB.x - tA.x) * t,
+            y: tA.y + (tB.y - tA.y) * t,
+          };
+          const p2 = {
+            x: tD.x + (tC.x - tD.x) * t,
+            y: tD.y + (tC.y - tD.y) * t,
+          };
+
+          ctx.strokeStyle = "rgba(64,64,64,0.9)";
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+
+          // 6) štít z písmenek – jemný prach podél lamely
+          const znaky = ["V", "A", "F", "T"];
+          ctx.font = "8px system-ui";
+          for (let s = 0; s < 4; s++) {
+            const u = (s + 0.5) / 4;
+            const px = p1.x + (p2.x - p1.x) * u;
+            const py = p1.y + (p2.y - p1.y) * u;
+
+            ctx.save();
+            ctx.fillStyle = "rgba(204,204,204,0.28)";
+            const znak = znaky[(i + s) % znaky.length];
+            ctx.fillText(znak, px - 3, py + 3);
+            ctx.restore();
+          }
+        }
+
+        ctx.restore();
+      }
+
+      function vykreslit() {
+        vykreslitPozadi();
+
+        // spočítat velikost a pozice 4 rámečků
+        const maxSize = Math.min(sirkaPx * 0.18, vyskaPx * 0.45);
+        const velikost = maxSize;
+        const mezera = velikost * 0.35;
+        const totalWidth = velikost * 4 + mezera * 3;
+        const startX = (sirkaPx - totalWidth) / 2 + velikost / 2;
+        const stredY = vyskaPx / 2 + 10;
+
+        for (let i = 0; i < 4; i++) {
+          const cx = startX + i * (velikost + mezera);
+          vykreslitRamecekJednotny(cx, stredY, velikost);
+        }
+      }
+
+      function smycka() {
+        requestAnimationFrame(smycka);
+        vykreslit();
+      }
+
+      smycka();
+    </script>
+  
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

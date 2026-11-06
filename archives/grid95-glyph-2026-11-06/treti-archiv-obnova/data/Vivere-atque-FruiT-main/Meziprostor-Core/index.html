@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="cs">
+<head>
+    <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8">
+  <title>Meziprostor • Core</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{background:#0f172a;color:#e2e8f0;font-family:system-ui,sans-serif;padding:1rem;max-width:640px;margin:0 auto;}
+    textarea{width:100%;min-height:120px;background:#020617;border:1px solid #1e293b;border-radius:.5rem;color:#e2e8f0;padding:.5rem;font-size:.8rem;}
+    button{margin-top:.6rem;background:#22c55e;border:none;padding:.45rem .9rem;border-radius:.4rem;font-weight:600;color:#022c16;}
+    h1{font-size:1rem;margin-bottom:.4rem;}
+    small{opacity:.6;font-size:.65rem;}
+    #list div{background:#020617;margin-top:.4rem;padding:.3rem .45rem;border-radius:.3rem;font-size:.7rem;}
+  </style>
+</head>
+<body>
+  <h1>Meziprostor • Core</h1>
+  <small>tohle se uloží do <code>meziprostor_feed_v1</code> a hlava to uvidí</small>
+  <textarea id="input" placeholder="sem můžeš vložit text z cizí AI appky…"></textarea>
+  <button onclick="save()">Uložit</button>
+  <p id="msg"></p>
+  <h2 style="font-size:.8rem;margin-top:1rem;">Poslední kusy</h2>
+  <div id="list"></div>
+
+  <script>
+    const WORLD_KEY = "meziprostor_feed_v1";
+
+    function load(){
+      try{return JSON.parse(localStorage.getItem(WORLD_KEY)||"[]");}
+      catch(e){return[];}
+    }
+    function render(){
+      const list = document.getElementById('list');
+      const arr = load();
+      list.innerHTML = arr.slice(0,50).map(i=>`<div>${new Date(i.ts).toLocaleTimeString()} • ${i.text||i.txt}</div>`).join("");
+    }
+    function save(){
+      const txt = document.getElementById('input').value.trim();
+      if(!txt) return;
+      const arr = load();
+      arr.unshift({text:txt,from:"core",ts:Date.now()});
+      localStorage.setItem(WORLD_KEY, JSON.stringify(arr.slice(0,200)));
+      document.getElementById('input').value = "";
+      document.getElementById('msg').textContent = "✔ uložené do meziprostoru";
+      render();
+    }
+    render();
+  </script>
+  <script src="../vaft.loader.js"></script>
+  <script src="../vaft-core.js"></script>
+  <script src="../vaft.heartbeat.js"></script>
+
+  <script>
+    VAFT.boot && VAFT.boot();
+  </script>
+
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

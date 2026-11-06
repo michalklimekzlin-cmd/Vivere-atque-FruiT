@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+      <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Vivere atque Frui¡'T • LetterLab</title>
+    <link rel="stylesheet" href="./style.css?v=1">
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="title">Vivere atque Frui¡'T • LetterLab</div>
+        <div id="letter-bar" class="letter-bar">…načítám písmenka…</div>
+      </header>
+
+      <main class="layout">
+        <section class="nodes">
+          <h2>Mapa / Uzly</h2>
+          <p class="hint">Klepni na uzel → dostaneš písmenka.</p>
+          <div id="node-list" class="node-list"></div>
+        </section>
+
+        <section class="lab">
+          <h2>Laboratoř / Obchod</h2>
+          <p class="hint">Slož slovo z písmen a zaplať za upgrade.</p>
+          <div id="recipe-list" class="recipe-list"></div>
+          <div id="lab-log" class="lab-log"></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- 🔗 napojení na KOŘEN repa -->
+<script src="../vaft.loader.js"></script>
+<script src="../vaft.kernel.js"></script>
+<script src="../vaft-core.js"></script>
+<script src="../vaft.heartbeat.js"></script>
+
+<!-- 💡 nový palivový modul -->
+<script src="../vaft.fuel.js"></script>
+
+<script src="../teams.js"></script>
+<script src="../engine.js"></script>
+
+<!-- náš modul s písmeny -->
+<script src="./vaft.letters.js?v=1"></script>
+
+<script>
+  // 🩵 Spuštění jádra světa
+  if (window.VAFT && typeof VAFT.boot === "function") {
+    VAFT.boot();
+  }
+
+  // 🔥 Aktivace paliva (písmena jako energie)
+  if (window.VAFT && VAFT.fuel && typeof VAFT.fuel.init === "function") {
+    VAFT.fuel.init();
+  }
+
+  // 💬 Aktivace LetterLabu (napojeného na palivo)
+  if (window.VAFT && VAFT.letters && typeof VAFT.letters.init === "function") {
+    VAFT.letters.init();
+  }
+</script>
+  
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

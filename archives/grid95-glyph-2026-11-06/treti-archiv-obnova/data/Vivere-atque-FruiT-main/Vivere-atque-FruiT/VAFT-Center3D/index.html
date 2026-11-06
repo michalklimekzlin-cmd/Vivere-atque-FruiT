@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+      <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vivere atque Frui¡'T</title>
+    <meta name="theme-color" content="#000000" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./style.css" />
+    <style>
+      :root {
+        --bg: #05070a;
+        --panel: rgba(5, 8, 12, 0.35);
+        --stroke: rgba(255, 255, 255, 0.04);
+        --accent: #19d6ff;
+      }
+      body {
+        background: var(--bg);
+        color: #eef6ff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        margin: 0;
+        min-height: 100vh;
+      }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        background: rgba(5, 7, 10, 0.9);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255,255,255,.04);
+      }
+      .brand-block { display: flex; flex-direction: column; gap: 2px; }
+      .brand-mini { font-size: .7rem; opacity: .65; }
+      .brand-title { font-weight: 600; font-size: 1.12rem; }
+      .role-badge {
+        font-size: .68rem;
+        color: #ffb6e1;
+      }
+      .coins { text-align: right; font-size: .72rem; }
+      .coin-ver { opacity: .5; }
+      .revia-panel {
+        padding: 18px 16px 10px;
+      }
+      .revia-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .revia-title { font-weight: 600; }
+      .revia-link { color: #7dd7ff; font-size: .7rem; text-decoration: none; }
+      .rules { font-size: .7rem; opacity: .7; display: flex; gap: 12px; margin-bottom: 6px; }
+      .pulse-line { font-size: .72rem; display: flex; gap: 6px; align-items: center; }
+      .pulse-dot {
+        width: 9px; height: 9px; border-radius: 999px;
+        background: #e93454;
+        box-shadow: 0 0 12px rgba(233, 52, 84, 0.7);
+      }
+      .center-orbit {
+        position: relative;
+        width: min(340px, 90vw);
+        height: min(340px, 90vw);
+        margin: 14px auto 6px;
+      }
+      .vaft-core {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%) rotate(-12deg);
+        width: 180px; height: 180px;
+        border: 1px solid rgba(170,206,255,.08);
+        border-radius: 999px;
+        display: flex; align-items: center; justify-content: center;
+        text-align: center;
+        font-weight: 500;
+        background: radial-gradient(circle at 50% 35%, rgba(51, 72, 103, 0.18), rgba(5,7,10,0.1));
+      }
+      .orbit-node {
+        position: absolute;
+        width: 86px; height: 86px;
+        border-radius: 999px;
+        border: 1px solid rgba(196,253,205,.28);
+        display: flex; align-items: center; justify-content: center;
+        font-size: .7rem;
+        background: rgba(5,8,12,.3);
+      }
+      .node-glyph { bottom: 12%; left: 5%; }
+      .node-ai { top: 9%; right: 4%; }
+      .node-world { bottom: 9%; right: 8%; }
+      .tabs {
+        display: flex;
+        gap: 6px;
+        padding: 10px 10px 0;
+      }
+      .tab-btn {
+        flex: 1;
+        background: rgba(8,11,13,.5);
+        border: none;
+        border-radius: 999px 999px 0 0;
+        padding: 8px 0 9px;
+        color: rgba(231,244,255,.55);
+        font-size: .78rem;
+      }
+      .tab-btn.active {
+        background: linear-gradient(120deg, #17d0ff, #17ffb9);
+        color: #02070a;
+        font-weight: 600;
+      }
+      .panel {
+        display: none;
+        padding: 14px 14px 88px;
+      }
+      .panel.active { display: block; }
+      .panel-title { font-weight: 600; margin-bottom: 10px; }
+      .label-sm { font-size: .68rem; opacity: .7; display:block; margin-bottom:3px; }
+      .hero-input, .hero-select {
+        width: 100%;
+        background: rgba(1,1,1,.06);
+        border: 1px solid rgba(255,255,255,.015);
+        border-radius: 11px;
+        padding: 9px 10px;
+        color: #fff;
+        font-size: .82rem;
+        margin-bottom: 8px;
+      }
+      .btn-primary {
+        background: #0fb2ff;
+        color: #02070a;
+        font-weight: 600;
+        border: none;
+        border-radius: 999px;
+        padding: 9px 14px;
+        font-size: .8rem;
+      }
+      #heroesList {
+        margin-top: 10px;
+        font-size: .78rem;
+        opacity: .8;
+      }
+      /* meziprostor */
+      #hlavoun-chat {
+        background: rgba(5,8,12,.35);
+        border: 1px solid rgba(255,255,255,.015);
+        border-radius: 16px;
+        padding: 6px 8px;
+        max-height: 240px;
+        overflow-y: auto;
+        margin-bottom: 8px;
+      }
+      #hlavoun-input {
+        width: calc(100% - 80px);
+        background: rgba(1,1,1,.12);
+        border: 1px solid rgba(255,255,255,.01);
+        border-radius: 999px;
+        padding: 8px 9px;
+        color: #fff;
+      }
+      .chat-row {
+        display: flex; gap: 6px; align-items: center;
+        margin-bottom: 6px;
+      }
+      .quick-row { display: flex; gap: 6px; flex-wrap: wrap; }
+      .quick-row button {
+        background: rgba(5,11,13,.25);
+        border: 1px solid rgba(255,255,255,.02);
+        border-radius: 999px;
+        padding: 6px 11px;
+        font-size: .72rem;
+        color: #fff;
+      }
+      /* system menu */
+      #systemMenu {
+        position: fixed;
+        bottom: 88px;
+        right: 12px;
+        background: rgba(5,8,12,.9);
+        border: 1px solid rgba(130,155,180,0.25);
+        border-radius: 16px;
+        padding: 14px 12px 10px;
+        color: #e8f5ff;
+        backdrop-filter: blur(14px);
+        min-width: 240px;
+        max-height: 60vh;
+        overflow-y: auto;
+        box-shadow: 0 8px 25px rgba(0,0,0,.35);
+        z-index: 200;
+      }
+      #systemMenu.hidden { display: none; }
+      #systemMenu h3 {
+        margin: 0 0 8px;
+        font-size: .78rem;
+        opacity: .8;
+        letter-spacing: .04em;
+      }
+      .sys-app {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+      }
+      .sys-app-name { font-size: .72rem; }
+      .sys-app-btn {
+        background: rgba(112,194,227,.12);
+        border: 1px solid rgba(112,194,227,.35);
+        color: #e8f5ff;
+        border-radius: 9px;
+        font-size: .6rem;
+        padding: 3px 8px 4px;
+      }
+      .system-open-btn {
+        margin-top: 12px;
+      }
+      /* síť */
+      #vaft-nodes, #vaft-nodes-outer, #vaft-nodes-mirror, #vaft-nodes-origin {
+        display:flex; flex-wrap:wrap; gap:6px; margin-bottom:4px;
+      }
+      .node-pill {
+        background: rgba(4,9,11,.35);
+        border:1px solid rgba(255,255,255,.01);
+        border-radius: 9px;
+        padding: 4px 7px;
+        font-size:.6rem;
+      }
+      @media (max-width: 820px) {
+        .panel { margin-bottom: 95px; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TOP -->
+    <div class="topbar">
+      <div class="brand-block">
+        <div class="brand-mini">Ĭ’♡ ↓</div>
+        <div class="brand-title">Vivere atque Frui¡'T</div>
+        <div class="role-badge" id="core-status">🧠 Hlavoun systém • aktivní</div>
+      </div>
+      <div class="coins">
+        <div>0</div>
+        <div class="coin-ver">v0.31 • živý základ</div>
+      </div>
+    </div>
+
+    <!-- REVIA / STŘED -->
+    <div class="revia-panel">
+      <div class="revia-head">
+        <div class="revia-title">Revia</div>
+        <a class="revia-link" href="javascript:void(0)" onclick="openApp('./Revia/')">Otevřít Revii →</a>
+      </div>
+      <div class="rules">
+        <div>Pravidlo 1 : Přátelství</div>
+        <div>Pravidlo 2 : Vivere atque frui</div>
+      </div>
+      <div class="pulse-line">
+        <span class="pulse-dot"></span>
+        <span>❤️ svět: puls <span id="pulseTime">00:00:00</span></span>
+      </div>
+      <div class="center-orbit">
+        <div class="vaft-core">Vivere<br>atque FruiT</div>
+        <div class="orbit-node node-glyph">Glyph</div>
+        <div class="orbit-node node-ai">AI (Orbit)</div>
+        <div class="orbit-node node-world">World (Core)</div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="heroes">Hrdinové</button>
+      <button class="tab-btn" data-tab="space">Meziprostor</button>
+      <button class="tab-btn" data-tab="system">Systém</button>
+      <button class="tab-btn" data-tab="nodes">Síť</button>
+      <button class="tab-btn" data-tab="worlds">Světy</button>
+    </div>
+
+    <!-- PANEL: HRDINOVÉ -->
+    <div class="panel active" id="panel-heroes">
+      <div class="panel-title">Hrdinové</div>
+      <label class="label-sm">Jméno hrdiny</label>
+      <input id="hero-name" class="hero-input" placeholder="např. Piko, Orbit, Míza…" />
+      <label class="label-sm">Tým</label>
+      <select id="hero-team" class="hero-select">
+        <option>Human (Piko)</option>
+        <option>AI (Orbit)</option>
+        <option>Glyph</option>
+        <option>World (Core)</option>
+      </select>
+      <button class="btn-primary" onclick="saveHero()">+ Přidat hrdinu</button>
+      <div id="selectedVafit"></div>
+      <div id="heroesList" class="list-sm">Zatím nemáš uložené hrdiny.</div>
+    </div>
+
+    <!-- PANEL: MEZIPROSTOR -->
+    <div class="panel" id="panel-space">
+      <div class="panel-title">Meziprostor (Hlavoun)</div>
+      <div id="hlavoun-chat"></div>
+      <div class="chat-row">
+        <input id="hlavoun-input" placeholder="napiš Hlavounovi...">
+        <button class="btn-primary" onclick="sendToHlavoun()">Poslat</button>
+      </div>
+      <div class="quick-row">
+        <button onclick="sendQuickToHlavoun('příběh pro vybraného vafita')">💡 Příběh</button>
+        <button onclick="sendQuickToHlavoun('gps uložit')">📍 GPS</button>
+        <button onclick="sendQuickToHlavoun('zkontroluj repo')">🔎 Repo</button>
+        <button onclick="sendQuickToHlavoun('batole svět')">🍼 Batole svět</button>
+      </div>
+    </div>
+
+    <!-- PANEL: SYSTÉM -->
+    <div class="panel" id="panel-system">
+      <div class="panel-title">Systém / appky</div>
+      <p style="opacity:.65;font-size:.7rem;">
+        Všechno jsme schovali do jednoho okna, ať je pořádek. 👇
+      </p>
+      <button class="btn-primary system-open-btn" onclick="toggleSystemMenu()">Otevřít systémové appky</button>
+    </div>
+
+    <!-- PANEL: SÍŤ -->
+    <div class="panel" id="panel-nodes">
+      <div class="panel-title">Síť uzlů</div>
+      <p style="opacity:.6;font-size:.7rem;">
+        Tady se zobrazují všechny živé čtverečky napojené na Vivere atque Frui¡'T.
+      </p>
+      <div id="vaft-nodes"></div>
+      <div id="vaft-nodes-outer"></div>
+      <div id="vaft-nodes-mirror"></div>
+      <div id="vaft-nodes-origin"></div>
+      <p style="opacity:.4;font-size:.65rem;margin-top:4px;">
+        (síť se načte až když ji otevřeš – kvůli výkonu iPhonu)
+      </p>
+    </div>
+
+    <!-- PANEL: SVĚTY -->
+    <div class="panel" id="panel-worlds">
+      <div class="panel-title">Světy Vivere atque Frui¡'T</div>
+      <p style="opacity:.6;font-size:.72rem;margin-bottom:10px;">
+        Každé písmeno tvoří svět. Klikni na svět a já to pošlu Hlavounovi / Viri / Pikošovi.
+      </p>
+
+      <div id="vaft-worlds-grid"
+           style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;">
+      </div>
+
+      <div id="vaft-world-detail"
+           style="margin-top:14px;padding:10px;border:1px solid rgba(255,255,255,.03);
+           border-radius:12px;background:rgba(4,6,9,.35);min-height:80px;">
+        <strong>Vyber svět…</strong>
+      </div>
+    </div>
+
+    <!-- SKRYTÉ SYSTÉMOVÉ MENU -->
+    <div id="systemMenu" class="hidden">
+      <h3>VAFT – tvoje appky</h3>
+      <div class="sys-app">
+        <div class="sys-app-name">Vivere (hlavní)</div>
+        <button class="sys-app-btn" onclick="openApp('./')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">Braska-Hlava</div>
+        <button class="sys-app-btn" onclick="openApp('./Braska-Hlava/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">Hlavoun</div>
+        <button class="sys-app-btn" onclick="openApp('./Hlavoun/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">Meziprostor-Core</div>
+        <button class="sys-app-btn" onclick="openApp('./Meziprostor-Core/')">Otevřít</button>
+      </div>
+      <div class="sys-app">
+        <div class="sys-app-name">VAFT-Network</div>
+        <button class="sys-app-btn" onclick="openApp('./VAFT-Network/')">Otevřít</button>
+      </div>
+    </div>
+
+    <!-- SCRIPTS MAIN -->
+    <script>
+      function openApp(url){ window.location.href = url; }
+
+      function tick(){
+        const el = document.getElementById('pulseTime');
+        if(!el) return;
+        el.textContent = new Date().toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      }
+
+      const _origShowTab = function(which){
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        const btn = document.querySelector('[data-tab="'+which+'"]');
+        const pan = document.getElementById('panel-'+which);
+        if (btn) btn.classList.add('active');
+        if (pan) pan.classList.add('active');
+
+        if (which !== 'system') {
+          const m = document.getElementById('systemMenu');
+          if (m) m.classList.add('hidden');
+        }
+      };
+
+      function showTab(which){
+        _origShowTab(which);
+        if (which === 'nodes' || which === 'space') {
+          lazyLoadNetwork();
+        }
+      }
+
+      function toggleSystemMenu() {
+        const m = document.getElementById('systemMenu');
+        if (!m) return;
+        m.classList.toggle('hidden');
+      }
+
+      function saveHero(){
+        const name = document.getElementById('hero-name').value.trim();
+        const team = document.getElementById('hero-team').value;
+        if (!name) return;
+        const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
+        const heroObj = { name, team, ts: Date.now() };
+        heroes.push(heroObj);
+        localStorage.setItem('VAFT_HEROES', JSON.stringify(heroes));
+        document.getElementById('hero-name').value = '';
+        renderHeroes();
+        appendHlavounMsg('ai', 'Uložil jsem hrdinu „'+name+'“. Můžeš ho propojit s VafiTem.');
+      }
+
+      function renderHeroes(){
+        const heroes = JSON.parse(localStorage.getItem('VAFT_HEROES') || '[]');
+        const box = document.getElementById('heroesList');
+        if (!heroes.length) { box.textContent = 'Zatím nemáš uložené hrdiny.'; return; }
+        box.innerHTML = heroes.map(h => '• '+h.name+' ('+h.team+')').join('<br>');
+      }
+
+      function appendHlavounMsg(role, text) {
+        const box = document.getElementById('hlavoun-chat');
+        if (!box) return;
+        const row = document.createElement('div');
+        const name = role === 'user' ? 'Ty' : 'Hlavoun';
+        row.innerHTML = `<strong style="font-size:.6rem;opacity:.6;">${name}:</strong> <span>${text}</span>`;
+        box.appendChild(row);
+        box.scrollTop = box.scrollHeight;
+        const log = JSON.parse(localStorage.getItem('VAFT_HLAVOUN_LOG') || '[]');
+        log.push({ role, text, ts: Date.now() });
+        localStorage.setItem('VAFT_HLAVOUN_LOG', JSON.stringify(log));
+      }
+
+      async function sendToHlavoun() {
+        const inp = document.getElementById('hlavoun-input');
+        if (!inp || !inp.value.trim()) return;
+
+        const text = inp.value.trim();
+
+        // zobraz hned
+        if (typeof appendHlavounMsg === 'function') {
+          appendHlavounMsg('user', text);
+        }
+        inp.value = '';
+
+        // stráž / PoW
+        if (window.Guardian && typeof window.Guardian.checkMessage === 'function') {
+          try {
+            await window.Guardian.checkMessage(text);
+          } catch (e) {
+            console.warn('[guardian] PoW neprošlo, ale pustím dál', e);
+          }
+        }
+
+        // Hlavoun
+        if (window.HlavounSystem && typeof window.HlavounSystem.think === 'function') {
+          window.HlavounSystem.think(text);
+        }
+        // Pikoš
+        if (window.Pikos && typeof window.Pikos.talk === 'function') {
+          window.Pikos.talk(text);
+        }
+        // Viri
+        if (window.VAFT && window.VAFT.agents && window.VAFT.agents.Viri && typeof window.VAFT.agents.Viri.listen === 'function') {
+          window.VAFT.agents.Viri.listen(text);
+        }
+        // staré dráty
+        if (window.VAFTBus) {
+          window.VAFTBus.handleUserMessage(text);
+        }
+        if (window.AgentBus) {
+          window.AgentBus.handleUserMessage(text);
+        }
+      }
+
+      function sendQuickToHlavoun(text){
+        const inp = document.getElementById('hlavoun-input');
+        inp.value = text;
+        sendToHlavoun();
+      }
+
+      // lazy síť
+      let networkLoaded = false;
+      function lazyLoadNetwork() {
+        if (networkLoaded) return;
+        const s = document.createElement('script');
+        s.src = './vaft.network.js';
+        s.onload = () => {
+          console.log('VAFT network připojena');
+          networkLoaded = true;
+          if (window.VAFT && window.VAFT.network && window.VAFT.network.render) {
+            window.VAFT.network.render('#vaft-nodes', '#vaft-nodes-outer', '#vaft-nodes-mirror', '#vaft-nodes-origin');
+          }
+        };
+        s.onerror = () => console.warn('VAFT network.js se nenačetl – jedu bez sítě');
+        document.body.appendChild(s);
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        tick();
+        setInterval(tick, 1000);
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.addEventListener('click', () => showTab(btn.dataset.tab));
+        });
+        showTab('heroes');
+
+        renderHeroes();
+
+        const selectedVafit = JSON.parse(localStorage.getItem('VAFT_SELECTED_VAFIT') || 'null');
+        if (selectedVafit) {
+          const place = document.getElementById('selectedVafit');
+          if (place) place.textContent = "Vybraný VafiT: " + selectedVafit.name + " " + (selectedVafit.glyph || "");
+        }
+      });
+    </script>
+
+    <!-- SVĚTY SCRIPT -->
+    <script>
+      // 16 VAFT světů
+      const VAFT_WORLDS = [
+        { id: 'viventia',  label: 'Viventia',  desc: 'první živý svět – V z názvu' },
+        { id: 'ignis',     label: 'Ignis',     desc: 'oheň / energie, může živit síť' },
+        { id: 'virtus',    label: 'Virtus',    desc: 'síla, odvaha, hrdinové' },
+        { id: 'essentia',  label: 'Essentia',  desc: 'podstata, základ VAFT' },
+
+        { id: 'radius',    label: 'Radius',    desc: 'rozptyl, rozesílání signálů' },
+        { id: 'emovere',   label: 'Emovere',   desc: 'pohyb, přesuny mezi appkama' },
+        { id: 'aetheris',  label: 'Aetheris',  desc: 'vzdušný / orbit / AI' },
+        { id: 'tempora',   label: 'Tempora',   desc: 'čas, pulsy, log' },
+
+        { id: 'quaerentia',label: 'Quaerentia',desc: 'hledání, dotazy Hlavounovi' },
+        { id: 'unum',      label: 'Unum',      desc: 'sjednocení, rodina, tvůj core' },
+        { id: 'exsolum',   label: 'Exsolum',   desc: 'oddělený svět – zkušebna' },
+        { id: 'flamma',    label: 'Flamma',    desc: 'inspirace, příběhy' },
+
+        { id: 'reverentia',label: 'Reverentia',desc: 'úcta, pravidla 1 a 2' },
+        { id: 'umbra',     label: 'Umbra',     desc: 'stín, archiv, schované věci' },
+        { id: 'imaginis',  label: 'Imaginis',  desc: 'glyphy, vafiTy, obrázky' },
+        { id: 'fructum',   label: 'Fructum',   desc: 'plody, výstupy – to co sieješ' }
+      ];
+
+      function renderWorldsPanel() {
+        const box = document.getElementById('vaft-worlds-grid');
+        if (!box) return;
+        box.innerHTML = '';
+        VAFT_WORLDS.forEach(w => {
+          const div = document.createElement('div');
+          div.style.background = 'rgba(25,214,255,.03)';
+          div.style.border = '1px solid rgba(25,214,255,.18)';
+          div.style.borderRadius = '14px';
+          div.style.padding = '10px 8px 9px';
+          div.style.cursor = 'pointer';
+          div.style.display = 'flex';
+          div.style.flexDirection = 'column';
+          div.style.gap = '4px';
+          div.onclick = () => selectWorld(w.id);
+          div.innerHTML = `
+            <div style="font-weight:600;">${w.label}</div>
+            <div style="font-size:.62rem;opacity:.5;">${w.desc}</div>
+          `;
+          box.appendChild(div);
+        });
+      }
+
+      function selectWorld(id) {
+        const world = VAFT_WORLDS.find(w => w.id === id);
+        const det = document.getElementById('vaft-world-detail');
+        if (!world || !det) return;
+        det.innerHTML = `
+          <div style="font-size:.75rem;opacity:.65;">Vybraný svět</div>
+          <div style="font-size:1.05rem;font-weight:600;margin-bottom:4px;">${world.label}</div>
+          <div style="font-size:.7rem;opacity:.7;margin-bottom:6px;">${world.desc}</div>
+          <div style="font-size:.65rem;opacity:.5;">id: ${world.id}</div>
+        `;
+
+        // napojení na agenty
+        if (window.VAFT && window.VAFT.bus && typeof window.VAFT.bus.emit === 'function') {
+          window.VAFT.bus.emit('world.selected', { id: world.id, ts: Date.now() });
+        }
+        if (window.HlavounSystem && typeof window.HlavounSystem.think === 'function') {
+          window.HlavounSystem.think('uživatel otevřel svět: ' + world.label);
+        }
+        if (window.VAFT && window.VAFT.agents && window.VAFT.agents.Viri && typeof window.VAFT.agents.Viri.save === 'function') {
+          window.VAFT.agents.Viri.save('last_world', world);
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        renderWorldsPanel();
+      });
+    </script>
+
+    <!-- ochranný obal / guardian musí být před mozkem -->
+    <script src="./vaft.guardian.client.js"></script>
+
+    <!-- původní skripty -->
+    <script src="./app.js"></script>
+    <script src="./hlavoun.js"></script>
+    <script src="./viri.js"></script>
+    <script src="./pikos.js"></script>
+    <script src="./agents.js"></script>
+    <script src="./agents_v3.js"></script>
+    <script src="./vaft.bus.js"></script>
+    <script src="./vaft.agents.js"></script>
+    <script src="./vaft.engine.js"></script>
+    <script src="./vaft.ascend.js"></script>
+    <script src="./vaft.diagnostics.js"></script>
+ <script>
+(function () {
+  // při načtení doplníme stav
+  const box = document.querySelector('.coins div:first-child');
+  const saved = localStorage.getItem('VAFT_LETTERS') || '';
+  if (box) {
+    if (saved.length) {
+      box.textContent = saved.length + ' ' + saved.slice(-1);
+    } else {
+      box.textContent = '0';
+    }
+  }
+
+  // rotace písmen
+  function nextLetter() {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    let idx = parseInt(localStorage.getItem('VAFT_LETTER_INDEX') || '0', 10);
+    const letter = alphabet[idx % alphabet.length];
+    idx++;
+    localStorage.setItem('VAFT_LETTER_INDEX', idx);
+    return letter;
+  }
+
+  // když guardian řekne "odvedeno", přidáme písmeno
+  window.addEventListener('guardian:reward', function () {
+    const letter = nextLetter();
+    const current = localStorage.getItem('VAFT_LETTERS') || '';
+    const updated = current + letter;
+    localStorage.setItem('VAFT_LETTERS', updated);
+
+    const box2 = document.querySelector('.coins div:first-child');
+    if (box2) {
+      box2.textContent = updated.length + ' ' + letter;
+    }
+  });
+})();
+</script>
+  
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

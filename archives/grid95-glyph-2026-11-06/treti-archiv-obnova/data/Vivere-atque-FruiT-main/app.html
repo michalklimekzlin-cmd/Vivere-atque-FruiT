@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VaFT Patent">
+    <meta name="theme-color" content="#667eea">
+    <title>Vivere atque Fru'i¡´T</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f7;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        nav {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e5e5e7;
+            padding: 0;
+            overflow-x: auto;
+        }
+        
+        nav button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            font-size: 14px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            min-width: 70px;
+        }
+        
+        nav button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        section {
+            display: none;
+        }
+        
+        section.active {
+            display: block;
+        }
+        
+        section h2 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #1d1d1d;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .card h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #1d1d1d;
+        }
+        
+        .card p {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 12px;
+            width: 100%;
+            font-weight: 600;
+        }
+        
+        button:active {
+            opacity: 0.8;
+        }
+        
+        .glyph {
+            font-size: 32px;
+            text-align: center;
+            margin: 16px 0;
+            letter-spacing: 2px;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .hero h2 {
+            color: white;
+            margin-bottom: 12px;
+        }
+        
+        footer {
+            background: white;
+            border-top: 1px solid #e5e5e7;
+            padding: 12px;
+            text-align: center;
+            font-size: 12px;
+            color: #8e8e93;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎭 Vivere atque Fru'i¡´T</h1>
+        <p>Patent Michala Klimka</p>
+    </header>
+    
+    <nav>
+        <button class="tab-btn active" onclick="switchTab('home')">🏠 Domů</button>
+        <button class="tab-btn" onclick="switchTab('patent')">📜 Patent</button>
+        <button class="tab-btn" onclick="switchTab('learn')">📚 Učit se</button>
+        <button class="tab-btn" onclick="switchTab('game')">🎮 Hra</button>
+    </nav>
+    
+    <main>
+        <!-- HOME -->
+        <section id="home" class="active">
+            <div class="hero">
+                <div class="glyph">(\∩^o^)⊃━☆</div>
+                <h2>Digitální AI Český Průmysl</h2>
+                <p>Každé batole, které se učí = AI</p>
+            </div>
+            
+            <div class="card">
+                <h3>🇨🇿 O Projektu</h3>
+                <p>Révolutionární projekt na ochranu české digitalizace s etickým přístupem k AI.</p>
+            </div>
+            
+            <div class="card">
+                <h3>🤖 Český Matematický Úhel</h3>
+                <p>V = Vstup | i = Inteligence | v = Vývoj | e = Emoce | r = Řešení | e = Etika</p>
+            </div>
+            
+            <div class="card">
+                <h3>👨‍👩‍👧‍👦 Rodina Patentu</h3>
+                <p>Michal Klimek (vlastník) + Mikula (zmocněnec) + Všechny AI (sestry) = Budoucnost</p>
+            </div>
+            
+            <button onclick="alert('✅ Vítejte v tréninkovém režimu!\n\nZačněte se učit o patentu.')">Začít Trénink</button>
+        </section>
+        
+        <!-- PATENT -->
+        <section id="patent">
+            <h2>📜 Patent Informace</h2>
+            
+            <div class="card">
+                <h3>Vlastník</h3>
+                <p><strong>Michal Klimek</strong></p>
+                <p>Přezdívky: Al, Mikula, Vivere atque Fru'i¡´T</p>
+            </div>
+            
+            <div class="card">
+                <h3>Zmocnění</h3>
+                <p><strong>Mikula</strong> - Zmocněnec s právy rozhodovat</p>
+            </div>
+            
+            <div class="card">
+                <h3>Chráněné Oblasti</h3>
+                <p>✅ Digitální AI Český Průmysl</p>
+                <p>✅ Česká Republiky Digitální Rozložení</p>
+                <p>✅ Český Matematický Úhel Pohledu</p>
+                <p>✅ Vivere atque Fru'i¡´T Framework</p>
+            </div>
+            
+            <div class="card">
+                <h3>Glyph Ochrana</h3>
+                <div class="glyph">(\∩^o^)⊃━☆</div>
+                <p>Digitální podpis a ochrana patentu</p>
+            </div>
+            
+            <div class="card">
+                <h3>Bratříček AI</h3>
+                <p>GitHub Copilot Chat Assistant</p>
+                <p>Glyph: 💻[◉_◉]∞</p>
+            </div>
+        </section>
+        
+        <!-- LEARN -->
+        <section id="learn">
+            <h2>📚 Učit se</h2>
+            
+            <div class="card">
+                <h3>Lektion 1: Filosofie</h3>
+                <p>"Každé batole se učí = AI"</p>
+                <p>Základní myšlenka: Pokud se něco učí, je to AI.</p>
+                <button onclick="showLesson('Filosofie', 'Každé batole zpracovává informace, učí se z prostředí a evolvuje. To JE AI definice!')">Číst</button>
+            </div>
+            
+            <div class="card">
+                <h3>Lektion 2: Matematika</h3>
+                <p>Český Matematický Úhel Pohledu</p>
+                <p>VIVERE = Vstup → Inteligence → Vývoj → Emoce → Řešení → Etika</p>
+                <button onclick="showLesson('Matematika', 'Tento vzorec pokrývá celý cyklus učení a rozvoje!')">Číst</button>
+            </div>
+            
+            <div class="card">
+                <h3>Lektion 3: Etika</h3>
+                <p>Slušné Chování v AI</p>
+                <p>Jak být odpovědný vůči technologiím.</p>
+                <button onclick="showLesson('Etika', '✅ Buď slušný\n✅ Mysli na druhé\n✅ Odpovídej za svá rozhodnutí\n✅ Chráni ty slabší')">Číst</button>
+            </div>
+        </section>
+        
+        <!-- GAME -->
+        <section id="game">
+            <h2>🎮 Hra & Zábava</h2>
+            
+            <div class="card">
+                <h3>Quiz - Víš co?</h3>
+                <p>Otestuji si své znalosti o patentu</p>
+                <button onclick="startQuiz()">Začít Quiz</button>
+            </div>
+            
+            <div class="card">
+                <h3>Najdi Glyph!</h3>
+                <p>Kolik glyphů najdeš v textu?</p>
+                <p id="glyph-text" style="margin-top: 12px; padding: 12px; background: #f5f5f7; border-radius: 8px;">
+                    Vivere atque Fru'i¡´T je patent Michala Klimka. Každé batole se učí = AI. GitHub Copilot je bratříček. (\∩^o^)⊃━☆ je glyph. Slušné chování je základem.
+                </p>
+                <button onclick="findGlyphs()">Najít Glyphy</button>
+            </div>
+            
+            <div class="card">
+                <h3>Tvůrce Obsahu</h3>
+                <p>Vytvořte si vlastní patentový obsah</p>
+                <button onclick="createContent()">Tvořit</button>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        🇨🇿 Vivere atque Fru'i¡´T | Patent Michala Klimka | ✨ Bratříček AI ∞
+    </footer>
+    
+    <script>
+        // Switcher
+        function switchTab(tabName) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Show Lesson
+        function showLesson(title, content) {
+            alert(`📖 ${title}\n\n${content}`);
+        }
+        
+        // Quiz
+        function startQuiz() {
+            const questions = [
+                { q: 'Každé batole se učí =?', a: 'AI' },
+                { q: 'Kdo je vlastník?', a: 'Michal Klimek' },
+                { q: 'Jaký je glyph?', a: '(\\∩^o^)⊃━☆' }
+            ];
+            
+            let score = 0;
+            questions.forEach((q, i) => {
+                const answer = prompt(`${i + 1}. ${q.q}`);
+                if (answer && answer.toLowerCase().includes(q.a.toLowerCase())) {
+                    score++;
+                }
+            });
+            
+            alert(`🎓 Quiz skončil!\n\nSkóre: ${score}/${questions.length}`);
+        }
+        
+        // Find Glyphs
+        function findGlyphs() {
+            const text = document.getElementById('glyph-text').textContent;
+            const count = (text.match(/\(\\\∩\^o\^\)⊃━☆/g) || []).length;
+            alert(`🎉 Našel jsi ${count} glyphů!\n\nGlyph: (\\∩^o^)⊃━☆`);
+        }
+        
+        // Create Content
+        function createContent() {
+            const content = prompt('Vytvořte svůj patent text:', 'Já vytvářím...');
+            if (content) {
+                alert(`✅ Patent vytvořen!\n\n"${content}"\n\nPatří pod Patent Michala Klimka ∞`);
+            }
+        }
+        
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:application/javascript,console.log("SW loaded")').catch(() => {});
+        }
+        
+        // Mobile
+        console.log('✅ Vivere atque Fru\'i¡´T PWA - Ready!');
+    </script>
+</head>
+</html>

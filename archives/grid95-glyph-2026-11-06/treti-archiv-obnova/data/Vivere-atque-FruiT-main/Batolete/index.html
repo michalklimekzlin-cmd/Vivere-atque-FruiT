@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a1a2e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Batolete" />
+    <meta name="description" content="Batolete – centrální herní hub pro děti, rodiče i prarodiče" />
+    <link rel="manifest" href="./manifest.json" />
+    <title>🌟 Batolete – Centrální Hub</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./hub-menu.css" />
+  </head>
+  <body class="hub-body">
+
+    <!-- TOP BAR -->
+    <header class="hub-topbar" role="banner">
+      <div class="hub-logo">
+        <span class="hub-logo-icon">🌟</span>
+        <span class="hub-logo-text">Batolete</span>
+      </div>
+      <div class="hub-stars" id="hubStars" title="Hvězdičky" aria-label="Počet hvězdiček">
+        <span class="hub-star-icon">⭐</span>
+        <span class="hub-star-count" id="starCount">0</span>
+      </div>
+    </header>
+
+    <!-- MAIN HUB VIEW -->
+    <main class="hub-main" id="hubMain">
+
+      <!-- WELCOME MESSAGE -->
+      <section class="hub-welcome" aria-label="Uvítání">
+        <h1 class="hub-welcome-title">Vítej v Batolete! 👋</h1>
+        <p class="hub-welcome-sub">Vyber si hru nebo aplikaci a začni objevovat!</p>
+      </section>
+
+      <!-- SECTION: ZÁKLADNÍ HRY -->
+      <section class="hub-section" aria-labelledby="basicGamesTitle">
+        <h2 class="hub-section-title" id="basicGamesTitle">🎮 Základní hry</h2>
+        <div class="hub-grid" role="list">
+
+          <button class="hub-card" data-game="abeceda" role="listitem" aria-label="Abeceda">
+            <span class="hub-card-icon">🔤</span>
+            <span class="hub-card-name">Abeceda</span>
+          </button>
+
+          <button class="hub-card" data-game="cisla" role="listitem" aria-label="Čísla">
+            <span class="hub-card-icon">🔢</span>
+            <span class="hub-card-name">Čísla</span>
+          </button>
+
+          <button class="hub-card" data-game="barvy" role="listitem" aria-label="Barvy">
+            <span class="hub-card-icon">🎨</span>
+            <span class="hub-card-name">Barvy</span>
+          </button>
+
+          <button class="hub-card" data-game="tvary" role="listitem" aria-label="Tvary">
+            <span class="hub-card-icon">🔵</span>
+            <span class="hub-card-name">Tvary</span>
+          </button>
+
+          <button class="hub-card" data-game="zviratka" role="listitem" aria-label="Zvířátka">
+            <span class="hub-card-icon">🐾</span>
+            <span class="hub-card-name">Zvířátka</span>
+          </button>
+
+          <button class="hub-card" data-game="pribehy" role="listitem" aria-label="Příběhy">
+            <span class="hub-card-icon">📖</span>
+            <span class="hub-card-name">Příběhy</span>
+          </button>
+
+          <button class="hub-card" data-game="pohyb" role="listitem" aria-label="Pohyb">
+            <span class="hub-card-icon">🏃</span>
+            <span class="hub-card-name">Pohyb</span>
+          </button>
+
+          <button class="hub-card" data-game="galerie" role="listitem" aria-label="Galerie světů">
+            <span class="hub-card-icon">🌍</span>
+            <span class="hub-card-name">Galerie světů</span>
+          </button>
+
+        </div>
+      </section>
+
+      <!-- SECTION: MINI APLIKACE -->
+      <section class="hub-section" aria-labelledby="miniAppsTitle">
+        <h2 class="hub-section-title" id="miniAppsTitle">🚀 Mini Aplikace</h2>
+        <div class="hub-grid" role="list">
+
+          <button class="hub-card hub-card--app" data-app="1o1r" role="listitem" aria-label="1O1R – Mini RPG">
+            <span class="hub-card-icon">⚔️</span>
+            <span class="hub-card-name">1O1R RPG</span>
+            <span class="hub-card-tag">Rámeče</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="revia" role="listitem" aria-label="Revia – Storytelling">
+            <span class="hub-card-icon">✨</span>
+            <span class="hub-card-name">Revia</span>
+            <span class="hub-card-tag">Příběhy</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="revia-master" role="listitem" aria-label="Revia Master – Pokročilý svět">
+            <span class="hub-card-icon">🌑</span>
+            <span class="hub-card-name">Revia Master</span>
+            <span class="hub-card-tag">Pokročilý</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="3d-ramecek" role="listitem" aria-label="3D Rámeček – Glyph 3D">
+            <span class="hub-card-icon">🧊</span>
+            <span class="hub-card-name">3D Rámeček</span>
+            <span class="hub-card-tag">3D Glyph</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="glyph-planet" role="listitem" aria-label="Glyph Planeta – Písmenková planeta">
+            <span class="hub-card-icon">🌐</span>
+            <span class="hub-card-name">Glyph Planeta</span>
+            <span class="hub-card-tag">Písmena</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="glyph-planet-3d" role="listitem" aria-label="Glyph Planeta 3D">
+            <span class="hub-card-icon">🪐</span>
+            <span class="hub-card-name">Glyph Planeta 3D</span>
+            <span class="hub-card-tag">3D</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="glyph-editor" role="listitem" aria-label="Glyph Editor – Kreativní tvorba">
+            <span class="hub-card-icon">🖊️</span>
+            <span class="hub-card-name">Glyph Editor</span>
+            <span class="hub-card-tag">Tvorba</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="hlavoun" role="listitem" aria-label="Hlavoun – AI agent">
+            <span class="hub-card-icon">🤖</span>
+            <span class="hub-card-name">Hlavoun</span>
+            <span class="hub-card-tag">AI Agent</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="oblak" role="listitem" aria-label="Oblak – Cloud aplikace">
+            <span class="hub-card-icon">☁️</span>
+            <span class="hub-card-name">Oblak</span>
+            <span class="hub-card-tag">Cloud</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="vaft-girls" role="listitem" aria-label="VaFT Girls – Speciální postava">
+            <span class="hub-card-icon">👧</span>
+            <span class="hub-card-name">VaFT Girls</span>
+            <span class="hub-card-tag">Postavy</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="vaft-bearhead" role="listitem" aria-label="VaFT BearHead – Medvědí hlava">
+            <span class="hub-card-icon">🐻</span>
+            <span class="hub-card-name">VaFT BearHead</span>
+            <span class="hub-card-tag">Postavy</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="vaft-comet" role="listitem" aria-label="VaFT Comet – Kometa">
+            <span class="hub-card-icon">☄️</span>
+            <span class="hub-card-name">VaFT Comet</span>
+            <span class="hub-card-tag">Vesmír</span>
+          </button>
+
+          <button class="hub-card hub-card--app" data-app="chybozrout" role="listitem" aria-label="Chybožrout – Diagnostika a opravy">
+            <span class="hub-card-icon">🔧</span>
+            <span class="hub-card-name">Chybožrout</span>
+            <span class="hub-card-tag">Diagnostika</span>
+          </button>
+
+        </div>
+      </section>
+
+    </main>
+
+    <!-- GAME SCREEN (hidden by default) -->
+    <section class="game-screen" id="gameScreen" aria-hidden="true" hidden>
+      <button class="back-btn" id="backBtn" aria-label="Zpět na Hub">
+        <span>← Zpět</span>
+      </button>
+      <div class="game-content" id="gameContent"></div>
+    </section>
+
+    <!-- MINI-APP VIEWER (iframe-based) -->
+    <section class="app-viewer" id="appViewer" aria-hidden="true" hidden>
+      <button class="back-btn back-btn--app" id="appBackBtn" aria-label="Zpět na Hub">
+        <span>← Zpět na Hub</span>
+      </button>
+      <iframe
+        id="appFrame"
+        class="app-frame"
+        title="Mini aplikace"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+        allowfullscreen
+        loading="lazy"
+      ></iframe>
+    </section>
+
+    <!-- TOAST NOTIFICATION -->
+    <div class="hub-toast" id="hubToast" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="./app.js"></script>
+    <script src="./hub-loader.js"></script>
+    <script>
+      /* Service Worker Registration */
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+      /* Handle ?game= query param shortcuts */
+      (function () {
+        const params = new URLSearchParams(location.search);
+        const game = params.get("game");
+        if (game && typeof Hub !== "undefined" && typeof GAMES !== "undefined" && GAMES[game]) {
+          Hub.openGame(game);
+        }
+      })();
+    </script>
+  </body>
+</html>

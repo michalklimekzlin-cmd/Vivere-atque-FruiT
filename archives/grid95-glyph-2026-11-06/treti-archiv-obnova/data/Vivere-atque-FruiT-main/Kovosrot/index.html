@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+      <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Vivere atque Frui¡'T • Digitální kovošrot</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        background: radial-gradient(circle at top, #10131c, #050509);
+        color: #f5f5f5;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      .card {
+        max-width: 480px;
+        margin: 0 auto;
+        background: rgba(7, 7, 11, 0.96);
+        border-radius: 18px;
+        padding: 16px 16px 20px;
+        box-shadow: 0 0 24px rgba(0, 0, 0, 0.7);
+        border: 1px solid #202335;
+      }
+
+      .title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .subtitle {
+        font-size: 11px;
+        opacity: 0.7;
+        margin-bottom: 12px;
+      }
+
+      .scrap-box {
+        font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+        font-size: 12px;
+        background: #05060b;
+        border-radius: 10px;
+        border: 1px solid #272a3d;
+        padding: 8px;
+        min-height: 50px;
+        max-height: 110px;
+        overflow-y: auto;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+        margin-bottom: 10px;
+      }
+
+      .btn-row {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      button {
+        flex: 1;
+        border: none;
+        border-radius: 10px;
+        padding: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(90deg, #ffb156, #ff7a3c);
+        color: #150a05;
+      }
+
+      .cols {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .col {
+        background: #05060b;
+        border-radius: 10px;
+        border: 1px solid #1b1e2f;
+        padding: 6px;
+        font-size: 11px;
+      }
+
+      .col-title {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.8;
+        margin-bottom: 4px;
+      }
+
+      .col-content {
+        font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, monospace;
+        font-size: 11px;
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+
+      .small {
+        font-size: 10px;
+        opacity: 0.6;
+        margin-top: 10px;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="card">
+      <div class="title">Digitální kovošrot písmenek</div>
+      <div class="subtitle">
+        VaF'i'T svět třídí digitální bordel: písmena, čísla a znaky. Z toho
+        později postavíme celý Vivere atque Frui¡'T.
+      </div>
+
+      <!-- KOVOŠROT START -->
+      <div id="scrap-box" class="scrap-box">
+        (Zatím žádný šrot. Klikni na „Vygenerovat šrot“.)
+      </div>
+
+      <div class="btn-row">
+        <button id="btn-generate">Vygenerovat šrot</button>
+        <button id="btn-sort">Roztřídit šrot</button>
+      </div>
+
+      <div class="cols">
+        <div class="col">
+          <div class="col-title">PÍSMENKA</div>
+          <div id="letters-box" class="col-content"></div>
+        </div>
+        <div class="col">
+          <div class="col-title">ČÍSLA</div>
+          <div id="digits-box" class="col-content"></div>
+        </div>
+        <div class="col">
+          <div class="col-title">ZNAKY / BORDel</div>
+          <div id="symbols-box" class="col-content"></div>
+        </div>
+      </div>
+      <!-- KOVOŠROT END -->
+
+      <div class="small">
+        Později: VaF'i'T, Glyph a VaFitci budou z těchto hromádek žít (tvořit
+        světy, příběhy, schopnosti).
+      </div>
+    </div>
+
+    <script>
+      // Jednoduchý generátor „digitálního šrotu“
+      const SCRAP_CHARS =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,;:!?_^-~@#$%&*()[]{}<>/\\\\|+=–„“\"'` ";
+
+      const scrapBox = document.getElementById("scrap-box");
+      const lettersBox = document.getElementById("letters-box");
+      const digitsBox = document.getElementById("digits-box");
+      const symbolsBox = document.getElementById("symbols-box");
+      const btnGenerate = document.getElementById("btn-generate");
+      const btnSort = document.getElementById("btn-sort");
+
+      let currentScrap = "";
+
+      function generateScrap(count = 120) {
+        let out = "";
+        for (let i = 0; i < count; i++) {
+          const idx = Math.floor(Math.random() * SCRAP_CHARS.length);
+          out += SCRAP_CHARS[idx];
+        }
+        return out;
+      }
+
+      function showScrap(text) {
+        scrapBox.textContent = text || "(žádný šrot)";
+      }
+
+      function clearSorted() {
+        lettersBox.textContent = "";
+        digitsBox.textContent = "";
+        symbolsBox.textContent = "";
+      }
+
+      function sortScrap(text) {
+        const letters = [];
+        const digits = [];
+        const symbols = [];
+
+        for (const ch of text) {
+          if (/[a-zA-Zá-žÁ-Ž]/.test(ch)) {
+            letters.push(ch);
+          } else if (/[0-9]/.test(ch)) {
+            digits.push(ch);
+          } else if (ch.trim() !== "") {
+            symbols.push(ch);
+          }
+        }
+
+        lettersBox.textContent = letters.join(" ");
+        digitsBox.textContent = digits.join(" ");
+        symbolsBox.textContent = symbols.join(" ");
+
+        // Tady později napojíme:
+        // - VaF'i'T: dostane souhrn (kolik čeho)
+        // - Glyph: dostane symboly a udělá z nich ASCII bytosti
+        // - VaFitci: sežerou kus hromádky a změní schopnosti hráče
+      }
+
+      btnGenerate.addEventListener("click", () => {
+        currentScrap = generateScrap();
+        showScrap(currentScrap);
+        clearSorted();
+      });
+
+      btnSort.addEventListener("click", () => {
+        if (!currentScrap) return;
+        sortScrap(currentScrap);
+      });
+
+      // inicializace
+      showScrap(currentScrap);
+    </script>
+  
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

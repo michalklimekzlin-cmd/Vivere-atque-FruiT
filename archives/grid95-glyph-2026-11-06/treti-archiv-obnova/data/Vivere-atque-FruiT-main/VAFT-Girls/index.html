@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="cs">
+<head>
+    <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8">
+  <title>VAFT – Hodné holky</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{background:#0b0b14;color:#e2e8f0;font-family:system-ui,sans-serif;padding:1rem;}
+    textarea{width:100%;min-height:80px;background:#111827;border:1px solid #1e293b;border-radius:.4rem;color:#e2e8f0;padding:.5rem;}
+    h1{font-size:1rem;margin-bottom:.25rem;}
+    small{opacity:.6;font-size:.65rem;}
+    #mem div{background:#111827;margin-top:.4rem;padding:.35rem .5rem;border-radius:.3rem;font-size:.7rem;}
+  </style>
+</head>
+<body>
+  <h1>VAFT – Hodné holky 💛</h1>
+  <small>píšou hezky, a posílají to do světa</small>
+  <textarea id="input" placeholder="napiš a smaž…"></textarea>
+  <div id="mem"></div>
+
+  <script>
+    const ENTITY_KEY = "vaft_girls_feed";
+    const WORLD_KEY  = "meziprostor_feed_v1";
+    const HUB_KEY    = "vaft_shared_ai";
+    let prev = "";
+
+    function load(k){try{return JSON.parse(localStorage.getItem(k)||"[]");}catch(e){return[];}}
+    function save(k,a){localStorage.setItem(k,JSON.stringify(a));}
+    function render(){
+      const arr = load(ENTITY_KEY);
+      mem.innerHTML = arr.map(x=>`<div>${new Date(x.ts).toLocaleTimeString()} • ${x.txt}</div>`).join("");
+    }
+    const input = document.getElementById('input');
+    const mem   = document.getElementById('mem');
+
+    function pushWorld(label,text){
+      const w = load(WORLD_KEY);
+      w.unshift({from:"girls",label,text,ts:Date.now()});
+      save(WORLD_KEY, w.slice(0,200));
+    }
+
+    input.addEventListener('input', ()=>{
+      const cur = input.value;
+      if (prev.length > cur.length && prev.trim().length){
+        const arr = load(ENTITY_KEY);
+        arr.unshift({txt:prev.trim(), ts:Date.now()});
+        save(ENTITY_KEY, arr.slice(0,80));
+        pushWorld("girls-say", prev.trim());
+        render();
+      }
+      prev = cur;
+    });
+
+    // berou si z hubu
+    function checkHub(){
+      const hub = load(HUB_KEY);
+      if(!hub.length) return;
+      const latest = hub[0];
+      const arr = load(ENTITY_KEY);
+      if(!arr.find(x=>x.txt===latest.txt)){
+        arr.unshift({txt:latest.txt,ts:Date.now(),fromHub:true});
+        save(ENTITY_KEY, arr.slice(0,80));
+        pushWorld("girls-from-hub", latest.txt);
+        render();
+      }
+    }
+    setInterval(checkHub, 9000);
+    render();
+  <script src="../vaft.loader.js"></script>
+<script src="../vaft-core.js"></script>
+<script src="../vaft.heartbeat.js"></script>
+
+<script>
+  VAFT.boot && VAFT.boot();
+</script>
+
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

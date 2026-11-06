@@ -1,0 +1,4 @@
+POZOR: JEN ČÁSTEČNÁ ZÁCHRANA — NENÍ KOMPLETNÍ PROJEKT.
+Původní ZIP byl přerušen u assets/images/BCEF2EFE-14E7-4843-8612-E5FE2EEF58E4.png.
+Obnoveno 492 souborů s platným CRC. Všechny pozdější položky chybí.
+Originální neporušený kompletní ZIP je pro bezpečnou integraci stále potřeba.

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="cs">
+<head>
+    <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Kovošrot • Vivere atque Frui¡'T</title>
+  <link rel="stylesheet" href="./style.css?v=1" />
+</head>
+<body>
+  <main class="wrap">
+    <h1>Kovošrot • Recycle</h1>
+    <div class="subtitle">
+      Vlož digitální šrot (text, logy, nesmysly) a my ho rozložíme na písmenka,
+      čísla a znaky. Pak se zeptáš VaF'i'Ta, jak z toho postavit svět. ♻️
+    </div>
+
+    <!-- VSTUP ŠROTU -->
+    <textarea
+      id="scrap-input"
+      placeholder="Vlož sem cokoliv, co chceš rozebrat..."
+    ></textarea>
+    <button id="btn-generate">Roztřídit šrot</button>
+
+    <!-- ROZDĚLENÝ ŠROT -->
+    <div class="grid">
+      <div class="col">
+        <div class="label">🔡 Písmenka</div>
+        <div id="letters-box" class="scrap-box"></div>
+      </div>
+      <div class="col">
+        <div class="label">🔢 Čísla</div>
+        <div id="digits-box" class="scrap-box"></div>
+      </div>
+      <div class="col">
+        <div class="label">🔣 Znaky</div>
+        <div id="symbols-box" class="scrap-box"></div>
+      </div>
+    </div>
+
+    <!-- VaF'i'T MOZEK -->
+    <div class="section-title">VaF'i'T – mozek kovošrotu</div>
+    <button id="btn-ask-vafit">Zeptat se VaF'i'Ta na tenhle šrot</button>
+    <div id="vafit-answer" class="scrap-box scrap-answer">
+      (VaF'i'T zatím nic neřekl.)
+    </div>
+    <div class="note">
+      VaF'i'T vidí jen souhrn (kolik je písmenek, čísel a znaků) a navrhuje, jak
+      z toho postavit něco ve světě Vivere atque Frui¡'T.
+    </div>
+  </main>
+
+  <script src="./app.js?v=1"></script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

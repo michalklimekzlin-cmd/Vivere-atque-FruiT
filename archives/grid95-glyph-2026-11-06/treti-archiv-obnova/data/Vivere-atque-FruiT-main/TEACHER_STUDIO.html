@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111827" />
+    <link rel="manifest" href="./manifest.json" />
+    <title>VIVERE Teacher Studio • Fru'i¡'T</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #111827; color: #f8fafc; }
+      main { max-width: 960px; margin: 0 auto; padding: 20px; }
+      .card { background: #1f2937; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+      label { display: block; margin: 10px 0 6px; }
+      input, textarea, select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #374151; background: #0f172a; color: #f8fafc; }
+      textarea { min-height: 120px; }
+      button { margin-top: 12px; padding: 10px 14px; border: 0; border-radius: 8px; background: #10b981; color: #052e16; font-weight: 700; cursor: pointer; }
+      pre { white-space: pre-wrap; word-break: break-word; background: #020617; border-radius: 8px; padding: 12px; }
+      .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>VIVERE Teacher Studio</h1>
+      <p>Uč Fru'i¡'T česky: znalosti, pravidla, vztahy i charakter.</p>
+
+      <section class="card">
+        <h2>Nová lekce</h2>
+        <label for="teacher">Učitel</label>
+        <input id="teacher" value="Mikula" />
+
+        <div class="grid">
+          <div>
+            <label for="title">Téma</label>
+            <input id="title" placeholder="Např. Smysl důvěry" />
+          </div>
+          <div>
+            <label for="category">Kategorie</label>
+            <select id="category">
+              <option value="knowledge">knowledge</option>
+              <option value="rules">rules</option>
+              <option value="language">language</option>
+              <option value="mathematics">mathematics</option>
+              <option value="character">character</option>
+              <option value="relationships">relationships</option>
+              <option value="questions">questions</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="lesson">Lekce (čeština)</label>
+        <textarea id="lesson" placeholder="Vysvětli význam, příběh, pravidlo..."></textarea>
+
+        <label for="meaning">Význam</label>
+        <textarea id="meaning" placeholder="Jak to má Fru'i¡'T chápat do hloubky?"></textarea>
+
+        <label for="relations">Vztahy (oddělené čárkou)</label>
+        <input id="relations" placeholder="důvěra:podporuje, vztah:rozvíjí" />
+
+        <button id="teachButton" type="button">Učit Fru'i¡'T</button>
+      </section>
+
+      <section class="card">
+        <h2>Hlas učitele</h2>
+        <label for="voiceStyle">Styl výuky</label>
+        <input id="voiceStyle" placeholder="klidný, důsledný, poetický" />
+        <label for="voiceValues">Hodnoty (oddělené čárkou)</label>
+        <input id="voiceValues" placeholder="pravdivost, odvaha, laskavost" />
+        <button id="voiceButton" type="button">Uložit hlas učitele</button>
+      </section>
+
+      <section class="card">
+        <h2>Výstup porozumění</h2>
+        <pre id="output">Čekám na první lekci…</pre>
+      </section>
+
+      <section class="card">
+        <h2>Sémantická mapa (výběr)</h2>
+        <pre id="semanticMap">{}</pre>
+      </section>
+    </main>
+
+    <script src="./fruiT_memory_system.js"></script>
+    <script src="./fruiT_learning_engine.js"></script>
+    <script src="./VIVERE_atque_FruiT_CORE.js"></script>
+    <script>
+      const outputEl = document.getElementById('output');
+      const mapEl = document.getElementById('semanticMap');
+
+      function parseRelations(value) {
+        if (!value.trim()) return [];
+        return value.split(',').map((item) => {
+          const [target, type] = item.split(':').map((part) => (part || '').trim());
+          return { target, type: type || 'souvisí s' };
+        }).filter((r) => r.target);
+      }
+
+      function refreshSemanticMap() {
+        mapEl.textContent = JSON.stringify(window.fruiTMemorySystem?.state?.semantic || {}, null, 2);
+      }
+
+      document.getElementById('teachButton').addEventListener('click', () => {
+        const payload = {
+          teacher: document.getElementById('teacher').value,
+          category: document.getElementById('category').value,
+          title: document.getElementById('title').value,
+          lesson: document.getElementById('lesson').value,
+          meaning: document.getElementById('meaning').value,
+          relations: parseRelations(document.getElementById('relations').value)
+        };
+
+        const result = window.VivereAtqueFruiT.teach(payload);
+        outputEl.textContent = JSON.stringify(result, null, 2);
+        refreshSemanticMap();
+      });
+
+      document.getElementById('voiceButton').addEventListener('click', () => {
+        const style = document.getElementById('voiceStyle').value;
+        const values = document.getElementById('voiceValues').value
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean);
+        const voice = window.fruiTMemorySystem.setTeacherVoice({ style, values });
+        outputEl.textContent = JSON.stringify({ teacherVoice: voice }, null, 2);
+      });
+
+      refreshSemanticMap();
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

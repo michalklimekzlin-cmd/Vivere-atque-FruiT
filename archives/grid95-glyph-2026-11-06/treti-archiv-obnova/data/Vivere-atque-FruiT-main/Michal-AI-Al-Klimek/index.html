@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta name="theme-color" content="#111111" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Michal AI Al Klimek • Vivere atque Frui¡'T</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./style.css?v=1.2" />
+  </head>
+  <body>
+    <div class="screen">
+      <div class="glyph-background" id="glyphBackground" aria-label="Glyph links"></div>
+
+      <div class="head-label">
+        -0]:.•°˚‰•..•°˚´ˇ':;•.
+        ……....……{"(°.•)(.•°)"}
+      </div>
+
+      <div class="glyph-slot slot-left-1" data-slot="left-1" id="slot-left-1">
+        <div class="glyph-text" id="moodGlyph" contenteditable="true" spellcheck="false"></div>
+      </div>
+
+      <div class="glyph-slot slot-left-2" data-slot="left-2" id="slot-left-2">
+        <div class="glyph-text" contenteditable="true" spellcheck="false"></div>
+      </div>
+      <div class="glyph-slot slot-left-3" data-slot="left-3" id="slot-left-3">
+        <div class="glyph-text" contenteditable="true" spellcheck="false"></div>
+      </div>
+      <div class="glyph-slot slot-left-4" data-slot="left-4" id="slot-left-4">
+        <div class="glyph-text" contenteditable="true" spellcheck="false"></div>
+      </div>
+
+      <div class="glyph-slot slot-bottom-right-1" data-slot="br-1" id="slot-br-1">
+        <div class="glyph-text" contenteditable="true" spellcheck="false"></div>
+      </div>
+
+      <button class="transform-btn" id="transformBtn" type="button">I ❤️</button>
+    </div>
+
+    <script src="./app.js?v=1.2"></script>
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

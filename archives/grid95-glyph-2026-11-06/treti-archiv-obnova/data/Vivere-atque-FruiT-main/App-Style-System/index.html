@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="cs">
+<head>
+    <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VAFT • App Style System (Concept)</title>
+  <style>
+    body {
+      background: #0b0b12;
+      color: #fff;
+      font-family: system-ui, sans-serif;
+      padding: 20px;
+    }
+    h1 { margin-top: 0; }
+    .box {
+      border: 1px solid #333;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.05);
+    }
+    .lvl {
+      font-size: 14px;
+      opacity: .8;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>VAFT • App Style System</h1>
+
+<div class="box">
+  <h2>🔒 Systém odemykání stylů</h2>
+  <p>
+    Tahle část VAFT je koncept, kde si hráč může upravit vzhled aplikace,
+    ale až po dosažení určité úrovně nebo zkušeností.
+  </p>
+</div>
+
+<div class="box">
+  <h2>🎚 Úrovně a odemykání</h2>
+
+  <div class="lvl"><strong>Level 1 – Začátečník</strong><br>
+  • základní vzhled<br>
+  • nic se nedá měnit</div>
+
+  <div class="lvl"><strong>Level 3 – Poutník</strong><br>
+  • může změnit barvy pozadí</div>
+
+  <div class="lvl"><strong>Level 5 – Tvůrce</strong><br>
+  • může měnit tvary panelů</div>
+
+  <div class="lvl"><strong>Level 7 – Designer</strong><br>
+  • může měnit ikonky, rozložení</div>
+
+  <div class="lvl"><strong>Level 10 – Master VAFT</strong><br>
+  • kompletní možnost vytvořit vlastní styl aplikace!</div>
+
+</div>
+
+<div class="box">
+  <h2>🧠 Poznámka</h2>
+  <p>
+    To, co tu vidíš, je zatím jen návrh. Později se sem napojí:
+  </p>
+  <ul>
+    <li>hráčovy zkušenosti (XP)</li>
+    <li>úroveň (Level)</li>
+    <li>odemykání funkcí podle pokroku</li>
+    <li>návrhové plátno (VAFT-Canvas)</li>
+  </ul>
+</div>
+
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

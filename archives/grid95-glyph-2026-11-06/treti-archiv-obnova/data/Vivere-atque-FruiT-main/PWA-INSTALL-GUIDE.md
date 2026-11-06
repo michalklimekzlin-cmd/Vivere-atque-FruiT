@@ -1,0 +1,287 @@
+# PWA-INSTALL-GUIDE
+
+Comprehensive installation guide for all PWA-enabled apps in this repository.
+
+## App links (GitHub + direct index + QR)
+
+- **1O1R**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/1O1R
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/1O1R/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2F1O1R%2Findex.html
+- **3D ramecek**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/3D%20ramecek
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/3D%20ramecek/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2F3D%2520ramecek%2Findex.html
+- **3I-ATLAS**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/3I-ATLAS
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/3I-ATLAS/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2F3I-ATLAS%2Findex.html
+- **AI-Hero-Playground**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/AI-Hero-Playground
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/AI-Hero-Playground/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FAI-Hero-Playground%2Findex.html
+- **App-Style-System**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/App-Style-System
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/App-Style-System/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FApp-Style-System%2Findex.html
+- **Bicak-Supreme-Edition**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Bicak-Supreme-Edition
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Bicak-Supreme-Edition/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FBicak-Supreme-Edition%2Findex.html
+- **Braska-Hlava**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Braska-Hlava
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Braska-Hlava/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FBraska-Hlava%2Findex.html
+- **chybozrout-opravar**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/chybozrout-opravar
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/chybozrout-opravar/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fchybozrout-opravar%2Findex.html
+- **components/Bicak**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/components/Bicak
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/components/Bicak/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fcomponents%2FBicak%2Findex.html
+- **components/Hlavoun**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/components/Hlavoun
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/components/Hlavoun/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fcomponents%2FHlavoun%2Findex.html
+- **CroissantSlots**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/CroissantSlots
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/CroissantSlots/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FCroissantSlots%2Findex.html
+- **Ctverecek-0001-Core**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Ctverecek-0001-Core
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Ctverecek-0001-Core/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FCtverecek-0001-Core%2Findex.html
+- **Demo3D**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Demo3D
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Demo3D/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FDemo3D%2Findex.html
+- **engine.pismenka**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/engine.pismenka
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/engine.pismenka/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fengine.pismenka%2Findex.html
+- **Gentleman**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Gentleman
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Gentleman/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FGentleman%2Findex.html
+- **Glyph-Planet**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Glyph-Planet
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Glyph-Planet/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FGlyph-Planet%2Findex.html
+- **Glyph-Planet-3D**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Glyph-Planet-3D
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Glyph-Planet-3D/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FGlyph-Planet-3D%2Findex.html
+- **Hlavoun**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Hlavoun
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Hlavoun/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FHlavoun%2Findex.html
+- **Kovosrot**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Kovosrot
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Kovosrot/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FKovosrot%2Findex.html
+- **lite**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/lite
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/lite/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Flite%2Findex.html
+- **mapa**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/mapa
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/mapa/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fmapa%2Findex.html
+- **mapa-3d**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/mapa-3d
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/mapa-3d/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fmapa-3d%2Findex.html
+- **Meziprostor-Core**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Meziprostor-Core
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Meziprostor-Core/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FMeziprostor-Core%2Findex.html
+- **Michal-AI-Al-Klimek**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Michal-AI-Al-Klimek
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Michal-AI-Al-Klimek/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FMichal-AI-Al-Klimek%2Findex.html
+- **MichalKlimek**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/MichalKlimek
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/MichalKlimek/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FMichalKlimek%2Findex.html
+- **Miss Ary**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Miss%20Ary
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Miss%20Ary/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FMiss%2520Ary%2Findex.html
+- **Oblak**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Oblak
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Oblak/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FOblak%2Findex.html
+- **oblak+motor**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/oblak%2Bmotor
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/oblak%2Bmotor/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Foblak%252Bmotor%2Findex.html
+- **oblak-side**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/oblak-side
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/oblak-side/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Foblak-side%2Findex.html
+- **Recycle**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Recycle
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Recycle/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FRecycle%2Findex.html
+- **Revia**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Revia
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Revia/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FRevia%2Findex.html
+- **RingPlanetGrid**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/RingPlanetGrid
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/RingPlanetGrid/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FRingPlanetGrid%2Findex.html
+- **Rámečky**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/R%C3%A1me%C4%8Dky
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/R%C3%A1me%C4%8Dky/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FR%25C3%25A1me%25C4%258Dky%2Findex.html
+- **src**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/src
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/src/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fsrc%2Findex.html
+- **uloziste**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/uloziste
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/uloziste/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fuloziste%2Findex.html
+- **VaFiT**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VaFiT
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VaFiT/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVaFiT%2Findex.html
+- **VafiT-gallery**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VafiT-gallery
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VafiT-gallery/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVafiT-gallery%2Findex.html
+- **VAFT-BearHead**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-BearHead
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-BearHead/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-BearHead%2Findex.html
+- **VaFT-Canvas**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VaFT-Canvas
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VaFT-Canvas/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVaFT-Canvas%2Findex.html
+- **VAFT-Comet**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-Comet
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-Comet/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-Comet%2Findex.html
+- **VAFT-Doll**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-Doll
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-Doll/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-Doll%2Findex.html
+- **VAFT-Game**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-Game
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-Game/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-Game%2Findex.html
+- **VAFT-Game-Demo**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-Game-Demo
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-Game-Demo/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-Game-Demo%2Findex.html
+- **VAFT-GhostGirl**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-GhostGirl
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-GhostGirl/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-GhostGirl%2Findex.html
+- **VAFT-Girls**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-Girls
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-Girls/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-Girls%2Findex.html
+- **VaFT-Hub**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VaFT-Hub
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VaFT-Hub/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVaFT-Hub%2Findex.html
+- **VAFT-Jizva**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-Jizva
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-Jizva/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-Jizva%2Findex.html
+- **VAFT-Lady**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-Lady
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-Lady/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-Lady%2Findex.html
+- **VAFT-LetterLab**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-LetterLab
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-LetterLab/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-LetterLab%2Findex.html
+- **VAFT-Lilies**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-Lilies
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-Lilies/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-Lilies%2Findex.html
+- **VAFT-MapWorld**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-MapWorld
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-MapWorld/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-MapWorld%2Findex.html
+- **VAFT-Network**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-Network
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-Network/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-Network%2Findex.html
+- **VaFT-Planet-SignalSphere**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VaFT-Planet-SignalSphere
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VaFT-Planet-SignalSphere/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVaFT-Planet-SignalSphere%2Findex.html
+- **VaFT-Planets-SignalCore**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VaFT-Planets-SignalCore
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VaFT-Planets-SignalCore/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVaFT-Planets-SignalCore%2Findex.html
+- **VaFT-Planets-SignalTower**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VaFT-Planets-SignalTower
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VaFT-Planets-SignalTower/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVaFT-Planets-SignalTower%2Findex.html
+- **VaFT-RPG-Box**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VaFT-RPG-Box
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VaFT-RPG-Box/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVaFT-RPG-Box%2Findex.html
+- **VaFT-SignalCore**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VaFT-SignalCore
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VaFT-SignalCore/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVaFT-SignalCore%2Findex.html
+- **VAFT-StarSkull**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VAFT-StarSkull
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VAFT-StarSkull/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVAFT-StarSkull%2Findex.html
+- **VaF’i’T • 2D Rámeček s rotací**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/VaF%E2%80%99i%E2%80%99T%20%E2%80%A2%202D%20R%C3%A1me%C4%8Dek%20s%20rotac%C3%AD
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/VaF%E2%80%99i%E2%80%99T%20%E2%80%A2%202D%20R%C3%A1me%C4%8Dek%20s%20rotac%C3%AD/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVaF%25E2%2580%2599i%25E2%2580%2599T%2520%25E2%2580%25A2%25202D%2520R%25C3%25A1me%25C4%258Dek%2520s%2520rotac%25C3%25AD%2Findex.html
+- **Vivere**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Vivere
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Vivere/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVivere%2Findex.html
+- **Vivere-atque-FruiT/VAFT-Center3D**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Vivere-atque-FruiT/VAFT-Center3D
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Vivere-atque-FruiT/VAFT-Center3D/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVivere-atque-FruiT%2FVAFT-Center3D%2Findex.html
+- **Vivere-atque-FruiT/VaFT-Vere-Level1**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Vivere-atque-FruiT/VaFT-Vere-Level1
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Vivere-atque-FruiT/VaFT-Vere-Level1/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVivere-atque-FruiT%2FVaFT-Vere-Level1%2Findex.html
+- **Vivere/ /VAFT-Girls**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/Vivere/%20/VAFT-Girls
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/Vivere/%20/VAFT-Girls/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2FVivere%2F%2520%2FVAFT-Girls%2Findex.html
+- **worlds/legacy-glyph-core**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/worlds/legacy-glyph-core
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/worlds/legacy-glyph-core/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fworlds%2Flegacy-glyph-core%2Findex.html
+- **worlds/Revia**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/worlds/Revia
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/worlds/Revia/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fworlds%2FRevia%2Findex.html
+- **worlds/VAFT-Center3D**
+  - GitHub folder: https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/worlds/VAFT-Center3D
+  - Direct index.html: https://raw.githubusercontent.com/michalklimekzlin-cmd/Vivere-atque-FruiT/main/worlds/VAFT-Center3D/index.html
+  - QR code: https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fraw.githubusercontent.com%2Fmichalklimekzlin-cmd%2FVivere-atque-FruiT%2Fmain%2Fworlds%2FVAFT-Center3D%2Findex.html
+
+## Android installation (Chrome)
+1. Open the app `index.html` URL in Chrome.
+2. Wait until the page fully loads once (service worker installs).
+3. Tap the browser menu and choose **Install app** / **Add to Home screen**.
+4. Confirm install. The app opens in standalone mode.
+
+## iOS installation (Safari)
+1. Open the app `index.html` URL in Safari.
+2. Tap the **Share** button.
+3. Choose **Add to Home Screen**.
+4. Confirm the app name and tap **Add**.
+
+## Offline usage
+- Open each app at least once online so manifest and service-worker caches are initialized.
+- After first successful load, static assets are served from cache (Cache First).
+- HTML documents use Network First with cached fallback, so recently loaded pages remain usable offline.

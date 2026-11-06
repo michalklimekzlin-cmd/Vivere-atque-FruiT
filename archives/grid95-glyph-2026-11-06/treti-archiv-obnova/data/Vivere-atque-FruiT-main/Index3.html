@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Vivere atque Fru`ii´T</title>
+
+<style>
+:root{
+ --bg:#04060d;
+ --panel:#0b1020;
+ --accent:#37f4ff;
+ --text:#f5f7ff;
+}
+
+*{
+ margin:0;
+ padding:0;
+ box-sizing:border-box;
+}
+
+body{
+ background:radial-gradient(circle at top,#081020,#020207);
+ color:var(--text);
+ font-family:system-ui,sans-serif;
+ height:100vh;
+ overflow:hidden;
+}
+
+.app{
+ display:flex;
+ flex-direction:column;
+ height:100%;
+}
+
+header{
+ height:70px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:0 20px;
+ border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.logo{
+ font-size:20px;
+ font-weight:700;
+}
+
+.mode-buttons{
+ display:flex;
+ gap:10px;
+}
+
+.mode-btn{
+ border:none;
+ cursor:pointer;
+ padding:10px 16px;
+ border-radius:999px;
+ background:#111827;
+ color:white;
+}
+
+.mode-btn.active{
+ background:var(--accent);
+ color:black;
+ font-weight:700;
+}
+
+main{
+ flex:1;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ position:relative;
+}
+
+.view{
+ display:none;
+ width:100%;
+ height:100%;
+ padding:30px;
+}
+
+.view.active{
+ display:block;
+}
+
+.center{
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ text-align:center;
+ height:100%;
+}
+
+.symbol{
+ font-size:48px;
+ margin-bottom:20px;
+ cursor:pointer;
+}
+
+.card{
+ background:var(--panel);
+ border:1px solid rgba(255,255,255,.08);
+ border-radius:20px;
+ padding:20px;
+ max-width:800px;
+ margin:auto;
+}
+
+.grid{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+ gap:16px;
+ margin-top:20px;
+}
+
+.tile{
+ background:#12192d;
+ border-radius:14px;
+ padding:15px;
+}
+
+.vaft{
+ position:fixed;
+ right:20px;
+ bottom:20px;
+ width:300px;
+ background:#0d1325;
+ border-radius:20px;
+ padding:16px;
+ display:none;
+}
+
+.vaft.open{
+ display:block;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+
+<div class="logo">
+Vivere atque Fru`ii´T
+</div>
+
+<div class="mode-buttons">
+<button class="mode-btn active" onclick="setMode('world')">🌍 Svět</button>
+<button class="mode-btn" onclick="setMode('revia')">🌀 Revia</button>
+<button class="mode-btn" onclick="setMode('system')">⚙️ Systém</button>
+</div>
+
+</header>
+
+<main>
+
+<!-- SVĚT -->
+
+<section id="world" class="view active">
+
+<div class="center">
+
+<div class="symbol" onclick="toggleVaft()">
+ً&’」
+</div>
+
+<div class="card">
+<h2>Svět Vivere</h2>
+
+<div class="grid">
+<div class="tile">🪐 Planety</div>
+<div class="tile">🗺️ Mapy</div>
+<div class="tile">🐻 Hrdinové</div>
+<div class="tile">📜 Příběhy</div>
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- REVIA -->
+
+<section id="revia" class="view">
+
+<div class="card">
+
+<h2>🌀 Revia</h2>
+
+<div class="grid">
+<div class="tile">Human</div>
+<div class="tile">AI</div>
+<div class="tile">Glyph</div>
+<div class="tile">World</div>
+</div>
+
+</div>
+
+</section>
+
+<!-- SYSTEM -->
+
+<section id="system" class="view">
+
+<div class="card">
+
+<h2>⚙️ Systém</h2>
+
+<div class="grid">
+<div class="tile">Guardian</div>
+<div class="tile">Recycle</div>
+<div class="tile">LetterLab</div>
+<div class="tile">MapWorld</div>
+<div class="tile">Signal Core</div>
+<div class="tile">Apps Lite</div>
+</div>
+
+</div>
+
+</section>
+
+</main>
+
+</div>
+
+<div id="vaft" class="vaft">
+<h3>VaF'i'T</h3>
+
+<p>
+Ahoj brácho.
+Kam dnes chceš jít?
+</p>
+
+<br>
+
+<div>🌍 Svět</div>
+<div>🌀 Revia</div>
+<div>⚙️ Systém</div>
+</div>
+
+<script>
+
+const views=document.querySelectorAll(".view");
+const buttons=document.querySelectorAll(".mode-btn");
+
+function setMode(mode){
+
+views.forEach(v=>{
+v.classList.remove("active");
+});
+
+document.getElementById(mode)
+.classList.add("active");
+
+buttons.forEach(b=>{
+b.classList.remove("active");
+});
+
+event.target.classList.add("active");
+}
+
+function toggleVaft(){
+document
+.getElementById("vaft")
+.classList.toggle("open");
+}
+
+</script>
+
+</body>
+</html>

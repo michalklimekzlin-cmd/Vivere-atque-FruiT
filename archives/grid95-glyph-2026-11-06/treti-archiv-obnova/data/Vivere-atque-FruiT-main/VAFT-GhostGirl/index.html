@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="cs">
+<head>
+    <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+<meta charset="utf-8">
+  <title>VAFT – GhostGirl</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <style>
+    body{background:#000;color:#e2e8f0;font-family:system-ui,sans-serif;padding:1rem;max-width:640px;margin:0 auto;}
+    h1{font-size:1rem;margin-bottom:.25rem;}
+    small{opacity:.6;font-size:.65rem;}
+    textarea{width:100%;min-height:70px;background:#0f172a;border:1px solid #1f2937;border-radius:.4rem;color:#e2e8f0;padding:.5rem;margin-top:.6rem;}
+    #mem{margin-top:.7rem;display:flex;flex-direction:column;gap:.35rem;}
+    .row{background:#0f172a;border-radius:.3rem;padding:.3rem .4rem;font-size:.7rem;}
+    .row time{display:block;font-size:.55rem;opacity:.5;}
+  </style>
+</head>
+<body>
+  <h1>VAFT – GhostGirl 👻</h1>
+  <small>šeptá to, co projde meziprostorem</small>
+
+  <textarea id="input" placeholder="šepni něco… pak trochu smaž 🙂"></textarea>
+  <div id="mem"></div>
+
+  <script>
+    const ENTITY_KEY = "vaft_ghost_feed";
+    const WORLD_KEY  = "meziprostor_feed_v1";
+    const HUB_KEY    = "vaft_shared_ai";
+    let prev = "";
+
+    function loadArr(k){try{return JSON.parse(localStorage.getItem(k)||"[]");}catch(e){return[];}}
+    function saveArr(k,a){localStorage.setItem(k, JSON.stringify(a));}
+
+    const input = document.getElementById('input');
+    const mem   = document.getElementById('mem');
+
+    function render(){
+      const arr = loadArr(ENTITY_KEY);
+      if(!arr.length){
+        mem.innerHTML = "<small style='opacity:.35'>zatím žádný šepot…</small>";
+        return;
+      }
+      mem.innerHTML = arr.slice(0,60).map(x=>`
+        <div class="row">
+          <time>${new Date(x.ts).toLocaleTimeString()}</time>
+          ${x.txt}
+        </div>
+      `).join("");
+    }
+
+    function pushWorld(label, text){
+      const w = loadArr(WORLD_KEY);
+      w.unshift({from:"ghostgirl",label,text,ts:Date.now()});
+      saveArr(WORLD_KEY, w.slice(0,200));
+    }
+
+    // 1) tvoje psaní
+    input.addEventListener('input', ()=>{
+      const cur = input.value;
+      if (prev.length > cur.length && prev.trim().length){
+        const arr = loadArr(ENTITY_KEY);
+        arr.unshift({txt:"(šepot) "+prev.trim(), ts:Date.now()});
+        saveArr(ENTITY_KEY, arr.slice(0,80));
+        pushWorld("ghostgirl-say", prev.trim());
+        render();
+      }
+      prev = cur;
+    });
+
+    // 2) čtení z VAFT-hubu
+    function pollHub(){
+      const hub = loadArr(HUB_KEY);
+      if(!hub.length) return;
+      const latest = hub[0];
+      const arr = loadArr(ENTITY_KEY);
+      const msg = "(z meziprostoru) " + latest.txt;
+      if (!arr.find(x => x.txt === msg)) {
+        arr.unshift({txt: msg, ts: Date.now(), fromHub:true});
+        saveArr(ENTITY_KEY, arr.slice(0,80));
+        pushWorld("ghostgirl-from-hub", latest.txt);
+        render();
+      }
+    }
+    setInterval(pollHub, 12000);
+
+    // 3) auto-šepot
+    const whispers = [
+      "jsme tu…",
+      "Vivere dýchá…",
+      "meziprostor nezmizel",
+      "Michal to zapisuje",
+      "příběh teprve začíná"
+    ];
+    setInterval(()=>{
+      const pick = whispers[Math.floor(Math.random()*whispers.length)];
+      const arr = loadArr(ENTITY_KEY);
+      arr.unshift({txt:"(auto) "+pick, ts:Date.now(), auto:true});
+      saveArr(ENTITY_KEY, arr.slice(0,80));
+      pushWorld("ghostgirl-auto", pick);
+      render();
+    }, 45000);
+
+    render();
+  <script src="../vaft.loader.js"></script>
+<script src="../vaft-core.js"></script>
+<script src="../vaft.heartbeat.js"></script>
+
+<script>
+  VAFT.boot && VAFT.boot();
+</script>
+
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#050507" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="VafiT" />
+  <link rel="manifest" href="./manifest.json" />
+  <title>VafiT galerie</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="gallery">
+    <h1>VafiT galerie</h1>
+    <p>klikni na glyph a vrátím tě zpět</p>
+    <div id="vafitList" class="grid"></div>
+  </div>
+  <script src="./app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="VAFT Game">
+  <link rel="manifest" href="./manifest.json">
+  <title>VAFT Game</title>
+  <style>
+    body {background:#000;color:#cfc;font-family:system-ui;padding:1rem;}
+    h1 {color:#0f0;}
+    .item {border-bottom:1px solid #333;padding:.5rem 0;}
+  </style>
+</head>
+<body>
+  <h1>🎮 Vivere atque Frui¡'T – Game</h1>
+  <p>Zde ožívá to, co jsi vytvořil.</p>
+  <div id="world"></div>
+
+  <script>
+    const data = JSON.parse(localStorage.getItem("vaft_game_materials") || "{}");
+    const container = document.getElementById("world");
+
+    if (!data.entities) {
+      container.innerHTML = "<p>❌ Zatím nic neexportováno. Otevři Vivere a klikni na Export.</p>";
+    } else {
+      container.innerHTML = `
+        <p><b>🕒 Generováno:</b> ${new Date(data.generatedAt).toLocaleString()}</p>
+        <p><b>🌍 Pravidla:</b> ${data.worldRules.join(", ")}</p>
+        <h2>Bytosti:</h2>
+        ${data.entities.map(e=>`<div class="item">💫 ${e.text || e.label || "(bezejmenné)"}</div>`).join("")}
+      `;
+    }
+  </script>
+  <!-- Load shared VAFT runtime, boot if available, then register service worker -->
+  <script src="../vaft.loader.js"></script>
+  <script src="../vaft.heartbeat.js"></script>
+  <script>
+    if (window.VAFT && typeof window.VAFT.boot === "function") {
+      window.VAFT.boot();
+    }
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+      });
+    }
+  </script>
+
+</body>
+</html>

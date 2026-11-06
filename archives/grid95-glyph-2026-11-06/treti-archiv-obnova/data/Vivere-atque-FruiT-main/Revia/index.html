@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#0a0e1f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Revia" />
+    <link rel="manifest" href="./manifest.json" />
+    <title>Revia • Vivere atque Frui¡'T</title>
+
+    <!-- Styl Revie -->
+    <link rel="stylesheet" href="./revia.css?v=0.79" />
+
+    <!-- Jemné nastavení pozadí (můžeš klidně nechat) -->
+    <style>
+      body {
+        background-size: auto 70vh;
+        background-position: center 18vh;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-color: #000;
+      }
+      @media (max-height: 820px) {
+        body {
+          background-size: auto 68vh;
+          background-position: center 20vh;
+        }
+      }
+      @media (min-height: 900px) {
+        body {
+          background-size: auto 78vh;
+          background-position: center 15vh;
+        }
+      }
+      @media (max-width: 480px) {
+        body {
+          background-size: auto 88vh;
+          background-position: center 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Hlavní wrapper Revie -->
+    <div
+      class="revia-main"
+      id="reviaMain"
+      data-mode="angel"
+      data-control="ai"
+    >
+      <!-- horní lišta -->
+      <div class="revia-topbar">
+        <!-- křídlo = PROGRAMMOVACÍ PANEL -->
+        <button
+          class="revia-wing"
+          id="revWing"
+          type="button"
+          aria-label="otevřít programovací panel"
+          title="Programuj Revii - definuj její chování"
+        ></button>
+
+        <div class="revia-title">Revia</div>
+        <div class="revia-state" id="revState">AI: hlídám svět</div>
+      </div>
+
+      <!-- PROGRAMMOVACÍ PANEL (křídlo) -->
+      <div class="revia-notes" id="revNotes">
+        <div class="notes-head">
+          <span>⚙️ Programování Revie</span>
+          <button id="notesClose" type="button">×</button>
+        </div>
+        
+        <div class="notes-section">
+          <label for="notesText" class="notes-label">📝 Definuj Reviin charakter:</label>
+          <textarea
+            id="notesText"
+            placeholder="Napiš jak se má Revia chovat...&#10;Příklady:&#10;• Bud vtipnější a používej emojis&#10;• V andělském režimu bud inspirující&#10;• V demon režimu bud analytická a skeptická&#10;• Odpovídej jako 90s chatbot&#10;&#10;Revia si to přečte a bude se tím řídit!"
+          ></textarea>
+        </div>
+
+        <div class="notes-controls">
+          <button id="notesApply" type="button" class="btn-apply">✓ Aplikovat</button>
+          <button id="notesClear" type="button" class="btn-clear">🔄 Reset</button>
+        </div>
+
+        <div class="notes-info">
+          <strong>Jak to funguje:</strong><br/>
+          1. Napiš instrukce jak se má Revia chovat<br/>
+          2. Klikni "Aplikovat"<br/>
+          3. Zkus chat - Revia bude následovat tvoje pokyny!<br/>
+          <br/>
+          💾 Uloží se jen v tomto zařízení • Bez historie na serveru
+        </div>
+      </div>
+
+      <!-- mřížka slotů (dovednosti) -->
+      <div class="revia-card">
+        <!-- SLOT 1: portál do Centra (hlavní index) -->
+        <button
+          class="revia-slot active"
+          id="slotPortal"
+          type="button"
+          aria-label="Otevřít Vivere atque Frui¡'T • Revia &amp; Centrum"
+        >
+          <span class="revia-glyph" id="slotPortalGlyph">ً&'」</span>
+        </button>
+
+        <!-- SLOT 2: Vstoupit / CHAT REVIA -->
+        <button
+          class="revia-slot"
+          id="slotEnter"
+          type="button"
+          aria-label="Otevřít chat s Revií"
+        ></button>
+
+        <!-- SLOT 3: Přepnout AI / Human (bez textu) -->
+        <button
+          class="revia-slot"
+          id="slotControl"
+          type="button"
+          aria-label="Přepnout řízení mezi AI a Human"
+        ></button>
+
+        <!-- SLOT 4: Anděl ❤️ / Ďábel ☆ – přepíná mód světa -->
+        <button
+          class="revia-slot"
+          id="slotMode"
+          type="button"
+          aria-label="Přepnout Revia mód anděl / ďábel"
+        >
+          <span class="revia-glyph" id="slotModeGlyph">「Ī'♡</span>
+        </button>
+
+        <!-- SLOT 5: Rezerva (zatím info) -->
+        <button
+          class="revia-slot"
+          id="slotWorld"
+          type="button"
+          aria-label="Budoucí světový modul"
+        ></button>
+
+        <!-- SLOT 6: Rezerva (zatím info) -->
+        <button
+          class="revia-slot"
+          id="slotExtra"
+          type="button"
+          aria-label="Budoucí speciální dovednost"
+        ></button>
+      </div>
+
+      <!-- CHAT PANEL REVIE -->
+      <div class="revia-chat" id="revChat">
+        <div class="revia-chat-panel">
+          <div class="revchat-head">
+            <span id="revChatTitle">Revia • andělský režim</span>
+            <button id="revChatClose" type="button">×</button>
+          </div>
+
+          <div id="revChatLog" class="revchat-log"></div>
+
+          <div class="revchat-input-row">
+            <textarea
+              id="revChatInput"
+              placeholder="Zeptej se Revie na cokoliv…"
+            ></textarea>
+            <button id="revChatSend" type="button">Poslat</button>
+          </div>
+
+          <p class="revchat-note">
+            Revia používá OpenAI přes backend. Její chování se řídí tím, co napíšeš v Programování (Křídlo).
+          </p>
+        </div>
+      </div>
+
+      <!-- spodní toast (malé hlášky) -->
+      <div class="revia-toast" id="revToast" aria-live="polite"></div>
+    </div>
+
+    <script>
+      // ============================================
+      // KONFIGURACE BACKENDU – DYNAMICKÉ ROUTOVÁNÍ
+      // ============================================
+      const BACKEND_URL = (() => {
+        if (window.location.hostname === 'localhost') {
+          return 'http://localhost:3000'; // Lokální vývoj
+        }
+        if (window.location.hostname.includes('github.io')) {
+          return 'https://vivere-atque-frui-t.vercel.app'; // GitHub Pages (iPad) → Vercel backend
+        }
+        return window.location.origin; // Přímý přístup na Vercel
+      })();
+
+      console.log('[REVIA] Backend URL:', BACKEND_URL);
+      console.log('[REVIA] Hostname:', window.location.hostname);
+
+      // Pomocná funkce pro toast
+      function showToast(message) {
+        const toast = document.getElementById("revToast");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toast._hideTimer);
+        toast._hideTimer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2200);
+      }
+
+      // Debug
+      function debugLog(title, data) {
+        console.log(`[REVIA] ${title}:`, data);
+      }
+
+      // ========== PROGRAMMOVACÍ PANEL (křídlo) ==========
+      (function () {
+        const wing = document.getElementById("revWing");
+        const notes = document.getElementById("revNotes");
+        const closeBtn = document.getElementById("notesClose");
+        const textarea = document.getElementById("notesText");
+        const applyBtn = document.getElementById("notesApply");
+        const clearBtn = document.getElementById("notesClear");
+        const STORAGE_KEY = "revia-character-v1";
+
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) textarea.value = saved;
+        } catch (e) {
+          debugLog("localStorage čtení - charakter", e.message);
+        }
+
+        function openPanel() {
+          notes.classList.add("open");
+        }
+
+        function closePanel() {
+          notes.classList.remove("open");
+        }
+
+        function applyCharacter() {
+          const character = textarea.value.trim();
+          if (!character) {
+            showToast("Revia: Napiš mi instrukce, ať vím jak se mám chovat!");
+            return;
+          }
+          try {
+            localStorage.setItem(STORAGE_KEY, character);
+            showToast("Revia: Rozumím! Pamatuju si to. 💙");
+            debugLog("Charakter uložen", character.substring(0, 100) + "...");
+          } catch (e) {
+            debugLog("localStorage zápis - charakter", e.message);
+          }
+        }
+
+        function resetCharacter() {
+          if (confirm("Smazat všechny instrukce pro Reviu?")) {
+            textarea.value = "";
+            try {
+              localStorage.removeItem(STORAGE_KEY);
+              showToast("Revia: Reset! Jsem opět sama sebou.");
+            } catch (e) {
+              debugLog("localStorage smazání", e.message);
+            }
+          }
+        }
+
+        if (wing) wing.addEventListener("click", openPanel);
+        if (closeBtn) closeBtn.addEventListener("click", closePanel);
+        if (applyBtn) applyBtn.addEventListener("click", applyCharacter);
+        if (clearBtn) clearBtn.addEventListener("click", resetCharacter);
+
+        if (textarea) {
+          textarea.addEventListener("keydown", (e) => {
+            // Ctrl+Enter = Aplikovat
+            if (e.ctrlKey && e.key === "Enter") {
+              e.preventDefault();
+              applyCharacter();
+            }
+          });
+        }
+
+        // Exportuj funkcí pro chat
+        window.getReviaCharacter = function() {
+          return localStorage.getItem(STORAGE_KEY) || "";
+        };
+      })();
+
+      // ========== SLOT 1 – portál do Centra ==========
+      (function () {
+        const slotPortal = document.getElementById("slotPortal");
+        if (!slotPortal) return;
+        slotPortal.addEventListener("click", () => {
+          showToast("Otevírám Vivere atque Frui¡'T • Revia & Centrum…");
+          window.location.href = "../index.html";
+        });
+      })();
+
+      // ========== SLOT 3 – Přepnout AI / Human ==========
+      (function () {
+        const main = document.getElementById("reviaMain");
+        const state = document.getElementById("revState");
+        const slotControl = document.getElementById("slotControl");
+
+        if (!main || !state || !slotControl) return;
+
+        function updateState() {
+          const mode = main.getAttribute("data-control") || "ai";
+          if (mode === "ai") {
+            state.textContent = "AI: hlídám svět";
+          } else {
+            state.textContent = "Human: přebírám řízení";
+          }
+        }
+
+        updateState();
+
+        slotControl.addEventListener("click", () => {
+          const current = main.getAttribute("data-control") || "ai";
+          const next = current === "ai" ? "human" : "ai";
+          main.setAttribute("data-control", next);
+          updateState();
+
+          if (next === "ai") {
+            showToast("Revia řízení vrací AI, ty jen hlídej, jak se svět chová.");
+          } else {
+            showToast("Revia dává řízení tobě. Svět se přizpůsobí tobě.");
+          }
+        });
+      })();
+
+      // ========== SLOT 4 – Anděl / Ďábel ==========
+      (function () {
+        const main = document.getElementById("reviaMain");
+        const glyph = document.getElementById("slotModeGlyph");
+        const slotMode = document.getElementById("slotMode");
+        const chatTitle = document.getElementById("revChatTitle");
+
+        if (!main || !glyph || !slotMode) return;
+
+        function setAngel() {
+          main.setAttribute("data-mode", "angel");
+          glyph.textContent = "「Ī'♡";
+          if (chatTitle) chatTitle.textContent = "Revia • andělský režim";
+          showToast("Revia přepnuta do andělského režimu ✨");
+        }
+
+        function setDaemon() {
+          main.setAttribute("data-mode", "daemon");
+          glyph.textContent = "「Ī'☆";
+          if (chatTitle) chatTitle.textContent = "Revia • ďábelský režim";
+          showToast("Revia přepnuta do ďábelského režimu ⚡");
+        }
+
+        setAngel();
+
+        slotMode.addEventListener("click", () => {
+          const mode = main.getAttribute("data-mode") || "angel";
+          if (mode === "angel") {
+            setDaemon();
+          } else {
+            setAngel();
+          }
+        });
+      })();
+
+      // ========== SLOT 5 + 6 – placeholdery ==========
+      (function () {
+        const world = document.getElementById("slotWorld");
+        const extra = document.getElementById("slotExtra");
+
+        if (world) {
+          world.addEventListener("click", () => {
+            showToast("Tady bude později přímý vstup na některý z VaFT světů.");
+          });
+        }
+
+        if (extra) {
+          extra.addEventListener("click", () => {
+            showToast("Rezervovaný slot pro budoucí speciální dovednost Revie.");
+          });
+        }
+      })();
+
+      // ========== CHAT REVIE – SLOT 2 + TOKENY + CHARACTER ==========
+      (function () {
+        const main = document.getElementById("reviaMain");
+        const slotEnter = document.getElementById("slotEnter");
+        const chat = document.getElementById("revChat");
+        const closeBtn = document.getElementById("revChatClose");
+        const sendBtn = document.getElementById("revChatSend");
+        const input = document.getElementById("revChatInput");
+        const log = document.getElementById("revChatLog");
+        const STORAGE_KEY = "revia.chat.history.v1";
+
+        // ✦ tokenová peněženka
+        const TOKEN_DAILY_LIMIT = 100000;
+        const TOKEN_MONTHLY_LIMIT = 1000000;
+        const USAGE_KEY = "revia.tokens.usage.v1";
+
+        function loadUsage() {
+          const now = new Date();
+          const today = now.toISOString().slice(0, 10);
+          const monthKey =
+            now.getFullYear() +
+            "-" +
+            String(now.getMonth() + 1).padStart(2, "0");
+
+          try {
+            const raw = localStorage.getItem(USAGE_KEY);
+            if (!raw) {
+              return { day: today, month: monthKey, usedToday: 0, usedMonth: 0 };
+            }
+            const parsed = JSON.parse(raw);
+
+            if (parsed.day !== today) {
+              parsed.day = today;
+              parsed.usedToday = 0;
+            }
+
+            if (parsed.month !== monthKey) {
+              parsed.month = monthKey;
+              parsed.usedMonth = 0;
+            }
+
+            return parsed;
+          } catch (e) {
+            debugLog("loadUsage chyba", e.message);
+            return { day: today, month: monthKey, usedToday: 0, usedMonth: 0 };
+          }
+        }
+
+        function saveUsage(usage) {
+          try {
+            localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
+          } catch (e) {
+            debugLog("saveUsage chyba", e.message);
+          }
+        }
+
+        function estimateTokensPerCall() {
+          return 1200;
+        }
+
+        if (!slotEnter || !chat || !sendBtn || !input || !log) return;
+
+        let history = [];
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) history = JSON.parse(raw);
+        } catch (e) {
+          debugLog("chat history čtení", e.message);
+          history = [];
+        }
+
+        function saveHistory() {
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+          } catch (e) {
+            debugLog("chat history zápis", e.message);
+          }
+        }
+
+        function addMessage(role, content) {
+          history.push({
+            role,
+            content,
+            time: new Date().toLocaleTimeString("cs-CZ", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          });
+
+          if (history.length > 500) {
+            history = history.slice(history.length - 500);
+          }
+
+          saveHistory();
+          renderLog();
+        }
+
+        function renderLog() {
+          log.innerHTML = "";
+          history.forEach((m) => {
+            const row = document.createElement("div");
+            row.className =
+              "revchat-msg " +
+              (m.role === "user" ? "revchat-user" : "revchat-bot");
+            const name = m.role === "user" ? "Ty" : "Revia";
+            const meta = document.createElement("small");
+            meta.textContent = name + " • " + (m.time || "");
+            row.appendChild(meta);
+            row.appendChild(document.createElement("br"));
+            row.appendChild(document.createTextNode(m.content || ""));
+            log.appendChild(row);
+          });
+          log.scrollTop = log.scrollHeight;
+        }
+
+        function openChat() {
+          chat.classList.add("is-open");
+          renderLog();
+          input.focus();
+        }
+
+        function closeChat() {
+          chat.classList.remove("is-open");
+        }
+
+        slotEnter.addEventListener("click", openChat);
+        if (closeBtn) closeBtn.addEventListener("click", closeChat);
+
+        async function handleSend() {
+          const text = (input.value || "").trim();
+          if (!text) return;
+          input.value = "";
+          addMessage("user", text);
+
+          let usageState = loadUsage();
+          const estimatedCost = estimateTokensPerCall();
+          const softDaily = TOKEN_DAILY_LIMIT * 0.8;
+          const softMonth = TOKEN_MONTHLY_LIMIT * 0.8;
+
+          if (
+            usageState.usedToday + estimatedCost > TOKEN_DAILY_LIMIT ||
+            usageState.usedMonth + estimatedCost > TOKEN_MONTHLY_LIMIT
+          ) {
+            addMessage(
+              "assistant",
+              "Brácho… dneska jsem už vyčerpala svůj tokenový rozpočet. " +
+                "Abych nevycucla účet, počkej prosím do dalšího resetu."
+            );
+            showToast(
+              "Revia: Denní nebo měsíční limit tokenů je vyčerpaný."
+            );
+            return;
+          }
+
+          if (
+            usageState.usedToday + estimatedCost > softDaily ||
+            usageState.usedMonth + estimatedCost > softMonth
+          ) {
+            showToast(
+              "Revia: Blížíme se tokenovému limitu, zkusme kratší zprávy."
+            );
+          }
+
+          const mode =
+            (main && main.getAttribute("data-mode")) || "angel";
+
+          // 🆕 获取 PROGRAMMOVACÍ INSTRUKCE
+          const character = window.getReviaCharacter() || "";
+
+          const backendMessages = history.slice(-50).map((m) => ({
+            role: m.role === "user" ? "user" : "assistant",
+            content: m.content,
+          }));
+
+          try {
+            showToast("Revia přemýšlí…");
+            
+            debugLog("Posílám na backend", {
+              url: `${BACKEND_URL}/api/revia-chat`,
+              mode,
+              hasCharacter: !!character,
+              messageCount: backendMessages.length
+            });
+
+            const resp = await fetch(`${BACKEND_URL}/api/revia-chat`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                messages: backendMessages,
+                mode,
+                character: character,  // 🆕 Pošli i instrukce!
+              }),
+            });
+
+            debugLog("Backend odpověď - status", resp.status);
+
+            if (!resp.ok) {
+              debugLog("Backend chyba", {
+                status: resp.status,
+                statusText: resp.statusText,
+              });
+              addMessage(
+                "assistant",
+                `❌ Chyba ${resp.status}: Revia backend není dostupný. Zkontroluj jestli běží server na ${BACKEND_URL}`
+              );
+              showToast("Chyba: Backend není dostupný");
+              return;
+            }
+
+            let data;
+            try {
+              data = await resp.json();
+              debugLog("Parsovaná data z backendu", data);
+            } catch (parseErr) {
+              debugLog("JSON parse chyba", parseErr.message);
+              data = null;
+            }
+
+            if (!data || !data.reply) {
+              debugLog("Backend vrátil prázdná data", data);
+              addMessage(
+                "assistant",
+                "Backend vrátil prázdnou odpověď. Zkus to prosím znova."
+              );
+              return;
+            }
+
+            const reply = data.reply;
+            addMessage("assistant", reply);
+            debugLog("Zpráva přidána", reply);
+
+            // Zpracování tokenů
+            try {
+              if (
+                data &&
+                data.usage &&
+                typeof data.usage.total_tokens === "number"
+              ) {
+                usageState = loadUsage();
+                usageState.usedToday += data.usage.total_tokens;
+                usageState.usedMonth += data.usage.total_tokens;
+                saveUsage(usageState);
+                debugLog("Tokeny aktualizovány", usageState);
+
+                if (usageState.usedToday > softDaily) {
+                  showToast(
+                    "Revia: Za dnešek jsem už použila ~" +
+                      usageState.usedToday +
+                      " tokenů. Ještě chvíli a dám si pauzu."
+                  );
+                }
+              }
+            } catch (tokenErr) {
+              debugLog("Token tracking chyba", tokenErr.message);
+            }
+          } catch (e) {
+            debugLog("Fetch/Network chyba", e.message);
+            addMessage(
+              "assistant",
+              `🔴 Síťová chyba: ${e.message}. Zkontroluj jestli je backend dostupný na ${BACKEND_URL}`
+            );
+            showToast("Síťová chyba - zkus to později");
+          }
+        }
+
+        sendBtn.addEventListener("click", handleSend);
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+          }
+        });
+
+        if (history.length === 0) {
+          addMessage(
+            "assistant",
+            "Jsem Revia. Hlídám tvůj svět Vivere atque Frui¡'T. Zeptej se mě na cokoliv, co máš teď v hlavě."
+          );
+        } else {
+          renderLog();
+        }
+      })();
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

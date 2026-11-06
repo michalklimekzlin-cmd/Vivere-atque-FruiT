@@ -1,0 +1,33 @@
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:#02050a;
+  color:#e8f5ff;
+  font-family:-apple-system,system-ui,sans-serif;
+}
+.topbar {
+  padding:10px 14px;
+  background:rgba(2,4,7,.5);
+  border-bottom:1px solid rgba(150,200,255,.1);
+}
+.title { font-weight:600; }
+.sub { font-size:.65rem; opacity:.6; }
+.main { padding:12px 10px 80px; }
+.panel {
+  background:rgba(3,6,10,.35);
+  border:1px solid rgba(150,200,255,.1);
+  border-radius:16px;
+  padding:12px 10px 16px;
+}
+.panel-title { font-weight:600; margin-bottom:4px; }
+.muted { opacity:.6; font-size:.7rem; }
+
+#vaft-nodes,
+#vaft-nodes-outer,
+#vaft-nodes-mirror,
+#vaft-nodes-origin {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}

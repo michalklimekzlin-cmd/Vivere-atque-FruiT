@@ -1,0 +1,2477 @@
+{
+  "title": "CHT360-GLYPH částečná záchrana 6.11.2026",
+  "origin": "CHT360-GLYPH-492-zachranenych-souboru-2026-11-06.zip",
+  "note": "Tato sada obsahuje 492 zachráněných původních souborů a 2 zprávy. Jde o částečnou záchranu, nikoli kompletní původní ZIP.",
+  "entries": [
+    {
+      "path": "Vivere-atque-FruiT-main/.editorconfig",
+      "size": 188,
+      "blob_sha": "1014ba78880c899e842b397cb89a878be4671f7d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/$7/#U00af&7#U20b9-|",
+      "size": 463,
+      "blob_sha": "1e3fa2393f5a4855c7581e1cb1f681e7aceb9c92"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/$7/`#U00a1#U00b4T",
+      "size": 238,
+      "blob_sha": "7a02beece72fd0fdef995b6c37342ed24416e6d9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/anchore-syft.yml",
+      "size": 1281,
+      "blob_sha": "85249e2c7d4048adfbe293ab11f3e22bd2ab8b6c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/anchore.yml",
+      "size": 1822,
+      "blob_sha": "c524c7a65bed2d41a97e5e2a1c9f5eb86d4676e2"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/apisec-scan.yml",
+      "size": 3010,
+      "blob_sha": "dfb97d652a7b1700dc8ec79f719c39f3d9612545"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/appknox.yml",
+      "size": 2235,
+      "blob_sha": "ab4e3d7a3a90a38ecb25537eb5aee35c72ea65cd"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/bandit.yml",
+      "size": 2542,
+      "blob_sha": "dd47ab739cf780cf673d1ccf89dad4bf40740c53"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/bearer.yml",
+      "size": 1423,
+      "blob_sha": "dc77f12ceb0b3c19113af731fe16b60463bbbd59"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/black-duck-security-scan-ci.yml",
+      "size": 1972,
+      "blob_sha": "30d9405c94b42e22fedc18c3adf6fb46d431a055"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/brakeman.yml",
+      "size": 1734,
+      "blob_sha": "03a1fee2f9fc348708c8adff06656415fd3deeef"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/checkmarx-one.yml",
+      "size": 3012,
+      "blob_sha": "16b78a35257b37661565a8ee8de7a855167e6353"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/checkmarx.yml",
+      "size": 2654,
+      "blob_sha": "bf55ce025ac8bfc4f8ae1b4b16dd26f278a313cd"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/clj-holmes.yml",
+      "size": 1309,
+      "blob_sha": "969e811ad1ebebc80c885d3c0d961e6944d55ce6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/clj-watson.yml",
+      "size": 1739,
+      "blob_sha": "c70361118239ca39d4b5cd4e40f471ba9ddc0d2b"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/cloudrail.yml",
+      "size": 1921,
+      "blob_sha": "d2a7c38af68194d590f5344c4cbf1b94b9c36191"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/codacy.yml",
+      "size": 2460,
+      "blob_sha": "98bc192f4c86cc54c86d8c614c5a4551d2a9266f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/codeql.yml",
+      "size": 649,
+      "blob_sha": "2ed92cfa8111fba1c4329238bde0f0e33134a550"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/codescan.yml",
+      "size": 1734,
+      "blob_sha": "b94ebf1c3d8a6ee0da247c3d8c22794704c9f632"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/contrast-scan.yml",
+      "size": 2379,
+      "blob_sha": "ead52fa00724106ffbba3afee41eaf0356a31ca2"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/crda.yml",
+      "size": 5576,
+      "blob_sha": "c96e9b39047ae3a0cf6f3ec82fdfbc9c18a58753"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/credo.yml",
+      "size": 2123,
+      "blob_sha": "bb8598e9efc3c0040e7d24b6fadf6a9fa04f25af"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/crunch42.yml",
+      "size": 2544,
+      "blob_sha": "6b7080fc77584770127a1c148d68e21ef974d79a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/debricked.yml",
+      "size": 3702,
+      "blob_sha": "dd20163fbc1bfe3c8a5a90b4adfdd041ace2ea29"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/defender-for-devops.yml",
+      "size": 1755,
+      "blob_sha": "d5a77aa51e0dedc781e72e3c280a65e681a3a4ae"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/detekt.yml",
+      "size": 4450,
+      "blob_sha": "efade7233cd0eba76d9f7a50d83e0d6ef131389c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/devskim.yml",
+      "size": 707,
+      "blob_sha": "dfb4bb3ca8cb247c32cfc6e769fc7025403da6d4"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/endorlabs.yml",
+      "size": 1986,
+      "blob_sha": "589ee241e2c06730d909bf26b1931b63dcca806c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/eslint.yml",
+      "size": 1551,
+      "blob_sha": "29a5a6b04121f223c6c2b0f63503205413d646e3"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/ethicalcheck.yml",
+      "size": 3202,
+      "blob_sha": "74aa238f32ae81f5413680c6aa2f26c2419d8fdd"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/flawfinder.yml",
+      "size": 1024,
+      "blob_sha": "d5c6f8678c63ef7a7513bcb0d530602c7388b004"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/fortify.yml",
+      "size": 10471,
+      "blob_sha": "f1f030602d937e7e7912dde9c545a742765e2bb3"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/frogbot-scan-and-fix.yml",
+      "size": 2912,
+      "blob_sha": "e5bcd079646e95f4dd94af309c95bb14a96a1195"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/frogbot-scan-pr.yml",
+      "size": 3362,
+      "blob_sha": "41a83f5c1b2c74bc9021008d49634bd89432b291"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/hadolint.yml",
+      "size": 1472,
+      "blob_sha": "7c4a01ad258d1d2e3c9f38a39b96d386e9034ee0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/jfrog-sast.yml",
+      "size": 1437,
+      "blob_sha": "d66f4a124c22a56d0496f5ce79ee46832961a292"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/jscrambler-code-integrity.yml",
+      "size": 1973,
+      "blob_sha": "893d5bfb1d8c150b5afcfd89998604d2e2a53e0f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/kubesec.yml",
+      "size": 964,
+      "blob_sha": "469354bd1c497795a21b6e7a078d33a4a5ef28a1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/lint.yml",
+      "size": 979,
+      "blob_sha": "d52b112c8ac73fc0bfd002ff33cabad21666edbf"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/lintr.yml",
+      "size": 1709,
+      "blob_sha": "3b891c1cedf31eeebcefded90f960eea75df6921"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/mayhem-for-api.yml",
+      "size": 2090,
+      "blob_sha": "bd4405aab492fb979916ed094f8d7e5cdec01743"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/msvc.yml",
+      "size": 2082,
+      "blob_sha": "c90f33b22da88e5d9dabd3497437ed95577a70c6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/neuralegion.yml",
+      "size": 6165,
+      "blob_sha": "da1d15e75e3571e72bebf90ca1d863c6ddfec53e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/njsscan.yml",
+      "size": 1223,
+      "blob_sha": "54b3b6e37a25e6f55b9aae266b6d3bf854c691b4"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/nowsecure-mobile-sbom.yml",
+      "size": 2055,
+      "blob_sha": "cbd47111535bf68690d2bf99031825e724ef40b5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/nowsecure.yml",
+      "size": 1966,
+      "blob_sha": "312ac2f048f0d94b3e597f73b343e18c55f7104f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/ossar.yml",
+      "size": 2060,
+      "blob_sha": "579ee9ee7f81ad8d50e7b877918eb9f27e811c51"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/osv-scanner.yml",
+      "size": 1405,
+      "blob_sha": "132c118ecc730c602340b11e6241a3a2a6cbe5f6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/phpmd.yml",
+      "size": 1755,
+      "blob_sha": "9a58f82ee705a9c610188871be5ed377c9b9b805"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/pmd.yml",
+      "size": 1281,
+      "blob_sha": "d644e64c89a2e52d5b89dc06cdc7070d8e8e6529"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/policy-validator-cfn.yml",
+      "size": 7596,
+      "blob_sha": "1dc8c74be5bff14addc0ca5d20b8a001b0ca7a88"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/powershell.yml",
+      "size": 1767,
+      "blob_sha": "73ec3b4b92a79ec0df6243585c23fb0b085b6111"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/prisma.yml",
+      "size": 2567,
+      "blob_sha": "0e9aaff17b6b1329a5be447e2e853959faad783d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/psalm.yml",
+      "size": 1133,
+      "blob_sha": "634636bb9f579467dc01a8096e5ef4e8c0c389e4"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/puppet-lint.yml",
+      "size": 1777,
+      "blob_sha": "aa134f3f773ace5e3b2b17eb22fb1806bc04c331"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/pwa-validate.yml",
+      "size": 259,
+      "blob_sha": "eabd7eb22c40711f97a807423f1add4ca2b28ae2"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/pyre.yml",
+      "size": 1174,
+      "blob_sha": "053f88a6f05221fea47e51876a0078fc97668e05"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/pysa.yml",
+      "size": 1289,
+      "blob_sha": "92dbb0ca395173140e101fef1c94d6b77c2f3203"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/rubocop.yml",
+      "size": 1440,
+      "blob_sha": "e7b2b3a43a2d3997f21a19c2204e293aec76b7d4"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/rust-clippy.yml",
+      "size": 1740,
+      "blob_sha": "e73e7f1dd0446fbd44f76931fffb7dfce903a7f8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/scorecard.yml",
+      "size": 3428,
+      "blob_sha": "bf3ffa56255026e17b54170fbe69b4ae9f03c33d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/securitycodescan.yml",
+      "size": 1271,
+      "blob_sha": "97a6c04aa55d5388ca2cf622306c9f4b72433758"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/semgrep.yml",
+      "size": 1541,
+      "blob_sha": "1ffbd2a67ccefd9514296a76733b3ec8aca193a1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/snyk-container.yml",
+      "size": 2141,
+      "blob_sha": "7aabcbe78e4af660a220f7cfc9b38d8536c343c9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/snyk-infrastructure.yml",
+      "size": 2240,
+      "blob_sha": "196c9e27b373d116eb8a1ebc7d43fc1d41af4ba7"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/snyk-security.yml",
+      "size": 3244,
+      "blob_sha": "578dcae6625fb37aa7e06b03d562f318dbd40dae"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/sobelow.yml",
+      "size": 1371,
+      "blob_sha": "7164ee242e37d397b3a4e5c6c7889cb76b338a2e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/sonarcloud.yml",
+      "size": 3344,
+      "blob_sha": "f2ca65ac06a4f9f090b1f2a125c2f2d7da8c2b96"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/soos-dast-scan.yml",
+      "size": 2349,
+      "blob_sha": "e7727c55334626e4bc1ddd17e8e82dd376299827"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/stackhawk.yml",
+      "size": 2501,
+      "blob_sha": "5e50fdca31b892460137adda47b5c4d65cd0dc5f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/synopsys-action.yml",
+      "size": 1485,
+      "blob_sha": "4700ca6e67ce8e22df4079c3380e3b859672f5c5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/synopsys-io.yml",
+      "size": 3415,
+      "blob_sha": "3cd924295682e3b9972c5cb90a46efcb23283bc3"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/sysdig-scan.yml",
+      "size": 2178,
+      "blob_sha": "89c14063fa058f3c9b3117e9434e1f6f5cf3ffa0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/tfsec.yml",
+      "size": 920,
+      "blob_sha": "a7536abf7a9c1a7c1bcf7bed6d200cd631b74e21"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/trivy.yml",
+      "size": 1367,
+      "blob_sha": "ee0cb0c3762189ee1a961e1159e5238eb9c8497e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/veracode.yml",
+      "size": 2626,
+      "blob_sha": "e5182ca64d27b7d0ab349877addc9948f2a4aa37"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/xanitizer.yml",
+      "size": 4363,
+      "blob_sha": "7c6df4e8408a902d0a0a05848637984c35fc471c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/zscaler-iac-scan.yml",
+      "size": 2563,
+      "blob_sha": "dffdb293c0bac102c6a4db45a93941f2d097b33d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.github/workflows/zscan.yml",
+      "size": 2187,
+      "blob_sha": "0c35e1714f9959babf11162397f0bf18dbc7beef"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.gitignore",
+      "size": 314,
+      "blob_sha": "020f69b4b802f33aa48fa8f6b856d7fba3d564b1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.htmlhintrc",
+      "size": 272,
+      "blob_sha": "eb7454c4aa6f797bb01ab72ff08f7d0dd4d319ec"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/.vercelignore",
+      "size": 34,
+      "blob_sha": "1cf0eaf75e3595432f40d9a20a5523d0c5204b3b"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/1O1R/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/1O1R/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/1O1R/index.html",
+      "size": 24298,
+      "blob_sha": "19cac4c7a6a9be7a1401320da3679d71c4fcbb28"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/1O1R/manifest.json",
+      "size": 377,
+      "blob_sha": "aa384fb10be0e620f826da78180785c6fb1eac0e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/1O1R/service-worker.js",
+      "size": 1265,
+      "blob_sha": "8dca55ebd444f6573838e668a5a4b9071053766e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3D ramecek/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3D ramecek/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3D ramecek/index.html",
+      "size": 10421,
+      "blob_sha": "109be9d0c4e899e8b29bee62d1324ddfd66a35d6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3D ramecek/manifest.json",
+      "size": 491,
+      "blob_sha": "c06f82aa6370ba6c668a1da0e08f57912018cf84"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3D ramecek/service-worker.js",
+      "size": 1781,
+      "blob_sha": "c66caef8585c4c3de14093a2ec95b5158acf730e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3I-ATLAS/atlas.css",
+      "size": 3041,
+      "blob_sha": "0f74aff3cecc2c6085c9983852cce99a9a7c978c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3I-ATLAS/atlas.js",
+      "size": 751,
+      "blob_sha": "069efc5b284f7a8fccc52ba187ead2ed4d879b52"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3I-ATLAS/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3I-ATLAS/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3I-ATLAS/index.html",
+      "size": 2334,
+      "blob_sha": "6514e5974a7475717b02368a2486aee0efbffe71"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3I-ATLAS/manifest.json",
+      "size": 389,
+      "blob_sha": "c7180ee4ad020a3b206bd0c68896c90c16d604fa"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/3I-ATLAS/service-worker.js",
+      "size": 1269,
+      "blob_sha": "49ecb2d96d1b5be404324fad6143809302f13ac1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/50F62985-1E64-4F1B-934A-64A8C4DC98CB.png",
+      "size": 2128276,
+      "blob_sha": "1bcd6b8e2c98b443f168e90f722f97d7cdf4d765"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/7B8F707C-4A0B-4F7A-B3EC-621BCFE498CE.png",
+      "size": 3418374,
+      "blob_sha": "b8b3380dabdb782a9bdfb59f632c98edaeb4cb3f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/7i_.html",
+      "size": 290,
+      "blob_sha": "8475b811acc36dced779c1bcbcc7319c4e5de7e7"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AFA0870E-F586-4406-8BAA-0A7944120AA3.png",
+      "size": 1321693,
+      "blob_sha": "ba7a2fbbb7e1349876518b216328c0c654629153"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Hero-Playground/ai-hero.js",
+      "size": 3936,
+      "blob_sha": "5def7415ca91dc8180d879fc9848d95ec2e6ade8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Hero-Playground/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Hero-Playground/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Hero-Playground/index.html",
+      "size": 1058,
+      "blob_sha": "5b23eea8cf837b7112c231c1ff1bfbc35351d6f9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Hero-Playground/main.js",
+      "size": 2236,
+      "blob_sha": "31deb35c5f66e6ded8a46e0e82529b2b977a536d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Hero-Playground/manifest.json",
+      "size": 408,
+      "blob_sha": "8cbeb663e505000c25e437b6d01374a870d54239"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Hero-Playground/service-worker.js",
+      "size": 1283,
+      "blob_sha": "79ab911321b9d21d8fab84b7529d8521cb0f1307"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Hero-Playground/style.css",
+      "size": 1015,
+      "blob_sha": "1760b8b009f254944256e11e17e203f207fd618d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Hero-Playground/world.js",
+      "size": 1580,
+      "blob_sha": "9ba45b9a32dff1f89f39e586fb452d68436def99"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Vivere-Core/.gitkeep",
+      "size": 1153,
+      "blob_sha": "292ab0897d7c8c4eb057de32070a71cd6efae379"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Vivere-Core/README.md",
+      "size": 1314,
+      "blob_sha": "bddeef642cc94d06d7ceabd5bb3346d411947e48"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Vivere-Core/ai-agents.js",
+      "size": 3458,
+      "blob_sha": "eef06f2c7ba32cd82e3ae48dedf39cfc06c59c56"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Vivere-Core/ai-core.js",
+      "size": 2042,
+      "blob_sha": "409e402228ccf62e885dc2dd166945fe505caa2f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Vivere-Core/ai-memory.js",
+      "size": 5999,
+      "blob_sha": "a239890e6f6cec6af2c35c16fa01a534b55294f0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Vivere-Core/manifest.json",
+      "size": 5993,
+      "blob_sha": "f515cd2d0792c2e76f13022abdca05f67989a86e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/AI-Vivere-Core/sw.js",
+      "size": 2168,
+      "blob_sha": "cff1790d1f050cf16677d6ecdea98194f2f85799"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/ARCHITECTURE.md",
+      "size": 1461,
+      "blob_sha": "57c234b43e5420bc0483af3a86e8c51a5f88c2d5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/App-Style-System/README.md",
+      "size": 481,
+      "blob_sha": "038af76c15eeb865f2b3a57ab9f765ce5032c088"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/App-Style-System/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/App-Style-System/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/App-Style-System/index.html",
+      "size": 2228,
+      "blob_sha": "c35c916dae7451cbe1d7c326a065c69c815d0127"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/App-Style-System/manifest.json",
+      "size": 405,
+      "blob_sha": "f9565eb4315cfb0bf0786232e5a087a57a4e3dc5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/App-Style-System/service-worker.js",
+      "size": 1270,
+      "blob_sha": "a3910fb0131bdfff851fd347f0b5ff661c6e8085"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/BCEF2EFE-14E7-4843-8612-E5FE2EEF58E4.png",
+      "size": 3971187,
+      "blob_sha": "191d95adf1cff49e225b0cd9356e5e9b76841b69"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/README.md",
+      "size": 4727,
+      "blob_sha": "f0bf5e074c1a6d350578ea817780513e3867c9f5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/app.js",
+      "size": 22574,
+      "blob_sha": "050248741b1a4b95aa1dadf57b7ff4a5ff3ed175"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/hub-loader.js",
+      "size": 3239,
+      "blob_sha": "513ec3f78b657e42664e835381a9cb986086947c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/hub-menu.css",
+      "size": 6859,
+      "blob_sha": "9b272792822b006f6321dddc0c4b47ac548798d1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/index.html",
+      "size": 9523,
+      "blob_sha": "a5130f5df1dd2090790758cc2927f1c3a3f8d94d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/manifest.json",
+      "size": 931,
+      "blob_sha": "02710fda5e57d09f6741b7950107d75610fcaa66"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/1o1r.html",
+      "size": 1811,
+      "blob_sha": "0ab62564846f0e3cea5cde9d03d986902f6ddac0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/3d-ramecek.html",
+      "size": 1825,
+      "blob_sha": "512de55f22b35c9e6703c6aee1be6c48c98ac5e5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/chybozrout.html",
+      "size": 1860,
+      "blob_sha": "3040a545f7b6510d290abb4a2cc3969374ed6e8f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/glyph-editor.html",
+      "size": 1840,
+      "blob_sha": "52aeaf1f6f1e497dd7106690f254cbd1260afa44"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/glyph-planet-3d.html",
+      "size": 1842,
+      "blob_sha": "d200691c8b98b65c4bc2e32c6b451da91046a695"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/glyph-planet.html",
+      "size": 1830,
+      "blob_sha": "cb29283045dd0605be68307aae805dde61c4b412"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/hlavoun.html",
+      "size": 1807,
+      "blob_sha": "1917b7b32d7a89a44f04f710207b5597d3a2bf3d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/oblak.html",
+      "size": 1803,
+      "blob_sha": "b76c74495cb62c1c20fd329e69fad27344a051ee"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/revia-master.html",
+      "size": 1827,
+      "blob_sha": "f8ba863ba3fee24b278599072e086d3448453b34"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/revia.html",
+      "size": 1797,
+      "blob_sha": "c57ff429e986f4d7f14fb33e717af13fa2fced36"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/vaft-bearhead.html",
+      "size": 1831,
+      "blob_sha": "d7df3592cb3eccd57b8aba4e05a95366324abe81"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/vaft-comet.html",
+      "size": 1823,
+      "blob_sha": "e7fab886683c41086af402d13267b0b6a386642e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/mini-apps/vaft-girls.html",
+      "size": 1819,
+      "blob_sha": "b133eb48695c142ed735eb7fb8a28eccf8620449"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/service-worker.js",
+      "size": 1648,
+      "blob_sha": "6f9af9120355479d60f8a45e3eef5cf5a344620c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/style.css",
+      "size": 2036,
+      "blob_sha": "d48719a2411a01aaa2f522e6fe66b8d34e851fc9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/worlds/index.html",
+      "size": 2598,
+      "blob_sha": "d9b4aa0cf8f3f8e53f4c74437b1cbd475626cdb7"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Batolete/worlds/worlds.js",
+      "size": 1733,
+      "blob_sha": "f95ba478fd4f06fb2dce1ff4d6e21ec942e43f45"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Bicak-Supreme-Edition/README.md",
+      "size": 449,
+      "blob_sha": "3f8569102ba6c357e47d656a1fc4caf1b75afbbe"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Bicak-Supreme-Edition/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Bicak-Supreme-Edition/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Bicak-Supreme-Edition/index.html",
+      "size": 2104,
+      "blob_sha": "504d7a32485a54c6d442803c58a5c307d903d0dc"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Bicak-Supreme-Edition/manifest.json",
+      "size": 412,
+      "blob_sha": "603e923b2edef9deaa8042fcf71ddac9e2d9c231"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Bicak-Supreme-Edition/service-worker.js",
+      "size": 1266,
+      "blob_sha": "29b453cdb07e6354415ae7ed4b31bb157d517761"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Braska-Hlava/glyph.css",
+      "size": 609,
+      "blob_sha": "c7b1bc612532fc30ccfe7e84192d13e998118501"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Braska-Hlava/glyph.js",
+      "size": 182,
+      "blob_sha": "873d822ed1dec91a4a9bf84dc9044368b336ef42"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Braska-Hlava/glyph.json",
+      "size": 193,
+      "blob_sha": "4cb7463f50a19482bdd44ad6ddf33ad4879dbfa0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Braska-Hlava/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Braska-Hlava/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Braska-Hlava/index.html",
+      "size": 13743,
+      "blob_sha": "8172c8b61b454fc4f2c058b5d58245934000477d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Braska-Hlava/manifest.json",
+      "size": 407,
+      "blob_sha": "122b4cf45fa1f1544ce974e362f7dbc7dd5d55d6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Braska-Hlava/service-worker.js",
+      "size": 1595,
+      "blob_sha": "5bcf7da50a75ff519bc5aa65500e06c13eb428f2"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Braska-Hlava/style.css",
+      "size": 4706,
+      "blob_sha": "f9219ff6fd00a1dde4936328b37c77101637f84e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/C4978651-73C8-434A-B25D-AF784A443975.png",
+      "size": 2949594,
+      "blob_sha": "8b7e86f0f5d36a07abb1e280e1d5b26b3867aeaf"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/CHANGELOG.md",
+      "size": 271,
+      "blob_sha": "859d043605f0bc40cc3dec9194251f4b871d1aeb"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/CODE_OF_CONDUCT.md",
+      "size": 331,
+      "blob_sha": "1bea4410026859610689000592159e585e4f3384"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/CONTRIBUTING.md",
+      "size": 1170,
+      "blob_sha": "275efe67cf17ce261932277094b170d5dfadbff2"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/COPYRIGHT.md",
+      "size": 170,
+      "blob_sha": "3401b28bd35864246dfd83b3fe4740529f1216b3"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/CroissantSlots/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/CroissantSlots/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/CroissantSlots/index.html",
+      "size": 10262,
+      "blob_sha": "51636af0c7d5a92502dd0d682b8eb0659b002f7f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/CroissantSlots/manifest.json",
+      "size": 402,
+      "blob_sha": "86fa880793b3d3ec6e6ff80f9883019d807a6559"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/CroissantSlots/service-worker.js",
+      "size": 1270,
+      "blob_sha": "493a39b1fd6f84b5d43f07efc71c614278fcf687"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Ctverecek-0001-Core/ctverecek-0001.js",
+      "size": 1018,
+      "blob_sha": "9317cef52c19e49da2e4afe0a36784f3f80e8662"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Ctverecek-0001-Core/ctverecek-0001.json",
+      "size": 11684,
+      "blob_sha": "4af52f93df05b3bfe18c451a63a8b45f7693592a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Ctverecek-0001-Core/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Ctverecek-0001-Core/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Ctverecek-0001-Core/index.html",
+      "size": 3436,
+      "blob_sha": "daf1d98d0ef8a223a71bfc45c1c78e41f77ae9af"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Ctverecek-0001-Core/manifest.json",
+      "size": 412,
+      "blob_sha": "46f94d79e9eae278d784386af20de25a5230ed9b"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Ctverecek-0001-Core/service-worker.js",
+      "size": 1270,
+      "blob_sha": "0b958783743eddbcca64caa8b775e8820271c2b1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/DE692167-8603-4E16-B3C7-72A770A63D4A.png",
+      "size": 1717717,
+      "blob_sha": "d1a74c45ab202c36e4ff576339834657a77cff84"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/DOPIS-GITHUB-COPILOT-K-PATENTU.md",
+      "size": 6132,
+      "blob_sha": "10b7a920ad576e6e2c429c7aef5e44922fec09d4"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Demo3D/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Demo3D/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Demo3D/index.html",
+      "size": 18387,
+      "blob_sha": "9a0d7e7b5bb472f3594e2461ed3256926d2e9aed"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Demo3D/manifest.json",
+      "size": 383,
+      "blob_sha": "17f121dacf148df4fe8ca4226ddfcbf30b3d1847"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Demo3D/service-worker.js",
+      "size": 1267,
+      "blob_sha": "55d28c0d2960a2d57c8d68b03bbb00a43d393298"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/ECOSYSTEM.md",
+      "size": 881,
+      "blob_sha": "f608d65c91afacf0f88203ed4e1f78cfc13e6314"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/FIXES_SUMMARY.md",
+      "size": 903,
+      "blob_sha": "eaee758d09115f5250f9f7f3ec699e2c87aea147"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/GLYPH-CTI-ME.md",
+      "size": 7093,
+      "blob_sha": "0c7c3f4fffaedb9852eba6041bf5c9bbe0268ee1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/GLYPH-OVERENI.json",
+      "size": 564,
+      "blob_sha": "9cd305b9dad3401baf2feca130dc932d150821c7"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/GLYPH-SOUBORY.sha256",
+      "size": 1535,
+      "blob_sha": "5d61651f27e593be6802b244e242b80ff363c6cc"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/GLYPH-zaloha-pred-zmenou-2026-11-06/docs/index.html",
+      "size": 30295,
+      "blob_sha": "3a94dfb7cdd5747cfd0df09cdc917315dae49abb"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/GLYPH-zaloha-pred-zmenou-2026-11-06/docs/js/cht-360-aplikace-2.js",
+      "size": 100265,
+      "blob_sha": "d7ebfc2d111d2352bfe5e04b0817855d8456e015"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/GLYPH-zaloha-pred-zmenou-2026-11-06/docs/offline-cashe-assets.json",
+      "size": 4296,
+      "blob_sha": "5491149d7e0e2f3d2acc762291186903acc90c55"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/GLYPH-zaloha-pred-zmenou-2026-11-06/docs/service-worker.js",
+      "size": 17271,
+      "blob_sha": "3892465541aaf237feae67bd65af811591440f26"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/GOVERNANCE.md",
+      "size": 2475,
+      "blob_sha": "67e5e5367cb16803984d0a4e251534ef4a074d6a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/GUIDE.md",
+      "size": 414,
+      "blob_sha": "13a1190f13c4240e1c3a2aba189a6f88772a3ede"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Gentleman/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Gentleman/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Gentleman/index.html",
+      "size": 11349,
+      "blob_sha": "71250b4ea03f89a7fbc9b778acbc4af13e47d5e5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Gentleman/manifest.json",
+      "size": 392,
+      "blob_sha": "de901d8c6dd2c56557b5f053f8aa6802eb1f3981"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Gentleman/service-worker.js",
+      "size": 1270,
+      "blob_sha": "0477301cbe1af1e0cc274d8417d1e9b3cfa377bb"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Glyph-Planet/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Glyph-Planet/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Glyph-Planet/index.html",
+      "size": 17949,
+      "blob_sha": "37c83a7c464732bf45c75b6eeed191159eab8ae5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Glyph-Planet/manifest.json",
+      "size": 406,
+      "blob_sha": "2fa2d716be076324d84c800e2c5e3aeb201b274f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Glyph-Planet/service-worker.js",
+      "size": 1580,
+      "blob_sha": "dd2347fbec4b942bc752fefed5e59eff095cac62"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Glyph-Planet-3D/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Glyph-Planet-3D/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Glyph-Planet-3D/index.html",
+      "size": 11468,
+      "blob_sha": "88b56dc07fc175fd6407374c8cddd041e0c2cca0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Glyph-Planet-3D/manifest.json",
+      "size": 403,
+      "blob_sha": "f93e1a632334e27498eea0bd34aa51e1e4e6a8a0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Glyph-Planet-3D/service-worker.js",
+      "size": 1276,
+      "blob_sha": "72e11a86a7c9861653ecf7a8eda9377111009dd9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Hlavoun/hlavoun.brain.js",
+      "size": 3163,
+      "blob_sha": "17e478290690e0d18e66fc923d21f121cf2c9da6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Hlavoun/hlavoun.css",
+      "size": 5215,
+      "blob_sha": "f532ffaf1184c64c66e846c255faa127383d5565"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Hlavoun/hlavoun.js",
+      "size": 1440,
+      "blob_sha": "97d57b8ffb239b48898eeebd8ddd5620fbc73547"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Hlavoun/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Hlavoun/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Hlavoun/index.html",
+      "size": 2219,
+      "blob_sha": "032e152f1e21774d31499f315e2a2f6067c78269"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Hlavoun/manifest.json",
+      "size": 398,
+      "blob_sha": "4b6db6dbd2479aab1b0c28f97412ad773b745e49"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Hlavoun/service-worker.js",
+      "size": 1575,
+      "blob_sha": "48a3f3836708d862af1872f72efb0d992364b026"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/IMG_1092.jpeg",
+      "size": 2420096,
+      "blob_sha": "95c0002cf3b0fcc1b53f68faf3924c466c658e7f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Index3.html",
+      "size": 3906,
+      "blob_sha": "9ebc9e3a5ca133e551d41aeb8471e99f6b70a34e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/KNOWLEDGE_MAP.md",
+      "size": 1829,
+      "blob_sha": "ffe57a4d1a3df013cb53c403820b7b8598de038d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Kovosrot/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Kovosrot/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Kovosrot/index.html",
+      "size": 6461,
+      "blob_sha": "3d27629281a2b2095071f5a0a4db724a6dd89fb8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Kovosrot/manifest.json",
+      "size": 389,
+      "blob_sha": "9156a7026dd94d373e09030ed85a5081ee2ca783"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Kovosrot/service-worker.js",
+      "size": 1269,
+      "blob_sha": "7493940372ef77162c01791b48718b9e833bbe3d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/LICENSE",
+      "size": 11360,
+      "blob_sha": "bf53de03d272148079fce7b62e505f96b72244d6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Meziprostor-Core/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Meziprostor-Core/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Meziprostor-Core/impulse.js",
+      "size": 790,
+      "blob_sha": "81514c6df1a8a3ec9fc9656e1c4cbde452371c6e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Meziprostor-Core/index.html",
+      "size": 2615,
+      "blob_sha": "77cee354d159472a81eb981bfc89ecd63c944ce7"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Meziprostor-Core/manifest.json",
+      "size": 408,
+      "blob_sha": "db6e1f72f439ff2180ebf87dd67478ca384aae58"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Meziprostor-Core/service-worker.js",
+      "size": 1272,
+      "blob_sha": "91ab086da5d9f6e0f81b8176f7f6ef80a7d37c6a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Michal-AI-Al-Klimek/app.js",
+      "size": 4390,
+      "blob_sha": "58d13f86362f6c902e24f3d2ba1e8fc45e900640"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Michal-AI-Al-Klimek/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Michal-AI-Al-Klimek/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Michal-AI-Al-Klimek/index.html",
+      "size": 2000,
+      "blob_sha": "6aaf84d44193cdbe486254277ad0eee6ff3ff04d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Michal-AI-Al-Klimek/manifest.json",
+      "size": 412,
+      "blob_sha": "dec223da38bdeb5b26f7c6c84d7b7efb099fea41"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Michal-AI-Al-Klimek/service-worker.js",
+      "size": 1285,
+      "blob_sha": "4bb21d95a42963d5e3e4451bf66e4283f6f08ee6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Michal-AI-Al-Klimek/style.css",
+      "size": 2690,
+      "blob_sha": "9ba7e926069524628b67f3ff8eed90deb752cc1e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/MichalKlimek/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/MichalKlimek/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/MichalKlimek/index.html",
+      "size": 9758,
+      "blob_sha": "5909c4a001970d7a6c5992687de3bd66848f6ced"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/MichalKlimek/manifest.json",
+      "size": 396,
+      "blob_sha": "de7217e5b397bbbf32526d0be3903a4c75c69ca8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/MichalKlimek/service-worker.js",
+      "size": 1274,
+      "blob_sha": "c8ab19e5c2b8b6234d72e1bd2991b8b7aa82cbd4"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Miss Ary/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Miss Ary/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Miss Ary/index.html",
+      "size": 4404,
+      "blob_sha": "54c203d231b9574930eb1471b9e2c6bd13f40ba6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Miss Ary/manifest.json",
+      "size": 485,
+      "blob_sha": "559f16794db3c14aea66e345f8321022046cf04d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Miss Ary/service-worker.js",
+      "size": 1779,
+      "blob_sha": "efd28eed71e8f552f114b8126f81b242ff8d6a21"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/NOTICE",
+      "size": 204,
+      "blob_sha": "befb0723808a252ddf872eb8bab5ee052875b994"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Oblak/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Oblak/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Oblak/index.html",
+      "size": 9678,
+      "blob_sha": "1377b57c8dae7242db28849e4027f100867e7c8c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Oblak/manifest.json",
+      "size": 392,
+      "blob_sha": "73899147c36f889f9f93533e017c5252338a9c1e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Oblak/service-worker.js",
+      "size": 1573,
+      "blob_sha": "cf481507ce4aa5fe610014cca325d7f3103bee99"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/PATENT-DECLARATION-MICHAL-KLIMEK.md",
+      "size": 8814,
+      "blob_sha": "1233cd0495bb228c97ebddd142ef83daa807711c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/PATENTS",
+      "size": 303,
+      "blob_sha": "fafe5539e14ebf39058a16b2041df07fac96df13"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/PWA-INSTALL-GUIDE.md",
+      "size": 30492,
+      "blob_sha": "41905f951137c9b628589ea7e61eeaa12935b5bf"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/PWA-INSTALLATION-GUIDE.md",
+      "size": 5791,
+      "blob_sha": "87378596b083f663cfcf93e73e2455ae6defe7b3"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/R#U00e1me#U010dky/icon-192.png",
+      "size": 409,
+      "blob_sha": "7c67d610af3489d00ed18ce622696d75cf881873"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/R#U00e1me#U010dky/icon-512.png",
+      "size": 1488,
+      "blob_sha": "fc4af14379fbd3dd55d3bd1fb5ef9313766532a5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/R#U00e1me#U010dky/index.html",
+      "size": 11039,
+      "blob_sha": "b7b831c07d539bf63325dd91a620a4dbc8775aba"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/R#U00e1me#U010dky/manifest.json",
+      "size": 488,
+      "blob_sha": "acf2f7f2a179e9fc5b6471ef2d3425966555f126"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/R#U00e1me#U010dky/service-worker.js",
+      "size": 1778,
+      "blob_sha": "c821a987442c284a853294e49a94c9a1f741c7c9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/README.md",
+      "size": 692,
+      "blob_sha": "fbc0a21c3c90c10c0fa357d8ce8e22ebacba53de"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/README.md (sekce Licence)",
+      "size": 175,
+      "blob_sha": "293b15f7570623ccd8c30dc940fe2037549c3041"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/REVIA_V2_SETUP.md",
+      "size": 339,
+      "blob_sha": "faec98b3444c66fdfc381aa7f99c0e1c26efe690"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/ROADMAP.md",
+      "size": 321,
+      "blob_sha": "2423e06cac3ab13bc9becd79e643a2dd4a4d42a1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Readme2.md",
+      "size": 347,
+      "blob_sha": "cadfffec67fdbd06418fdbda04e8bf29fabf0c26"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Recycle/app.js",
+      "size": 2620,
+      "blob_sha": "af83f1958433f624e202feca2590168e69e38df5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Recycle/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Recycle/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Recycle/index.html",
+      "size": 2097,
+      "blob_sha": "963debb4bfd421f9c5179b5a36cde94151d7574d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Recycle/manifest.json",
+      "size": 386,
+      "blob_sha": "1f44223c139f1f622aa4df3023b669e9056c717d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Recycle/service-worker.js",
+      "size": 1283,
+      "blob_sha": "e8e0627d53cb2d062caa60999f0abbd91100a312"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Recycle/style.css",
+      "size": 1728,
+      "blob_sha": "bb3725f184217e4bf996d62bc10ebf6e2ac7a908"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia/README-INTEGRATION.md",
+      "size": 6901,
+      "blob_sha": "a70daa95a30390f68a99faf9b3bc9180435c78f0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia/index.html",
+      "size": 22618,
+      "blob_sha": "fe0cdb88512de9ea9a2c122d56035c7bfc04e18d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia/manifest.json",
+      "size": 491,
+      "blob_sha": "5437b394e7932f3ffd056715270dc9f716bea254"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia/revia-bg-angel.jpg",
+      "size": 375064,
+      "blob_sha": "cb36534efdb0196c65eaf62b587f22d1c6d3aba5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia/revia-bg-daemon.jpg",
+      "size": 286204,
+      "blob_sha": "ab2a81ef9d26d992f3fe43c54a0b9b6f2c029e2d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia/revia-letter-chat.html",
+      "size": 8386,
+      "blob_sha": "0a766c0070988169c4060bdf67c5707caa656dff"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia/revia-personality.md",
+      "size": 4912,
+      "blob_sha": "93ea167edd9225cb5839cf7d5b6a3913fc57f66c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia/revia.css",
+      "size": 10878,
+      "blob_sha": "7e341ccc0c0692dcaa41075c4297014b7a0ceb01"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia/revia.js",
+      "size": 4404,
+      "blob_sha": "1d3b5f5bbb2732171b453412389713838392759e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia/service-worker.js",
+      "size": 1892,
+      "blob_sha": "de9200bce31fc81a4f4a98894cf6783e9fce5ce7"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Revia-Master/index.html",
+      "size": 3522,
+      "blob_sha": "8fe7368bdbf03671bb179107358c5344f229ee32"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/RingPlanetGrid/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/RingPlanetGrid/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/RingPlanetGrid/index.html",
+      "size": 10785,
+      "blob_sha": "ff5c9119ee36fb9aa631aca89c6421eedb00c634"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/RingPlanetGrid/manifest.json",
+      "size": 401,
+      "blob_sha": "f8c6ef18261e7b83e71e4cda00034b6e6920cc46"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/RingPlanetGrid/service-worker.js",
+      "size": 1275,
+      "blob_sha": "2bcfe0af456520d54fc06fc12c8209a5f1694ac6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/SECURITY.md",
+      "size": 240,
+      "blob_sha": "a01054145ff38946c21854e5283289ee6a1fe83a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/SETUP.md",
+      "size": 932,
+      "blob_sha": "afb48ca69938c09f159531fe226d04f85890203c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/TEACHER_STUDIO.html",
+      "size": 5651,
+      "blob_sha": "62d1e46937879d63e37ef3328c75f9d1896d744f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-BearHead/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-BearHead/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-BearHead/index.html",
+      "size": 3315,
+      "blob_sha": "d73a5014544cfa90b7fbc7afc69222ac25c7c17e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-BearHead/manifest.json",
+      "size": 411,
+      "blob_sha": "bafa9846439e869e3b2eac44c69745549f02882e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-BearHead/service-worker.js",
+      "size": 1581,
+      "blob_sha": "2b9da5e2d1191c335e1266ee76b999692c4eb28a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Comet/comet.css",
+      "size": 1918,
+      "blob_sha": "4692f1b0c0a6671593cc5a786247638c5cb79561"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Comet/comet.js",
+      "size": 1940,
+      "blob_sha": "46f746a8fd8dec4e24cf6a96f6ef6c6f232371af"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Comet/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Comet/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Comet/index.html",
+      "size": 2493,
+      "blob_sha": "3e681f6dbb2dd72b1dffb53fd8a682e3fd23c987"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Comet/manifest.json",
+      "size": 402,
+      "blob_sha": "256435ce816adee1a9edf3c14ddc65c8314d923c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Comet/service-worker.js",
+      "size": 1578,
+      "blob_sha": "c4ad6d15e75c1966f0b07a70ee6eec222a731b73"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Doll/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Doll/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Doll/index.html",
+      "size": 2835,
+      "blob_sha": "951ba4c15668cb3d2d868f735017f005ad3e729d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Doll/manifest.json",
+      "size": 399,
+      "blob_sha": "3919d401fbc828e8f18bb78a841d61251d08c7e9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Doll/service-worker.js",
+      "size": 1577,
+      "blob_sha": "e9e8bdb8cd4c40989a62e9af3351998dad43e1e9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Game/icon-192.png",
+      "size": 187,
+      "blob_sha": "dd1592dd942690164c2ecabad7ccfc162ae2332a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Game/icon-512.png",
+      "size": 842,
+      "blob_sha": "ac415ef18469d64c291049bf90d4a355dadd77df"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Game/index.html",
+      "size": 1823,
+      "blob_sha": "ee29581485a6bbdfe57e60ff353f0cc66a0f980e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Game/manifest.json",
+      "size": 488,
+      "blob_sha": "693200e8a3202d68479438b69abe8847fe827e1a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Game/service-worker.js",
+      "size": 1780,
+      "blob_sha": "d3b77f3d15802ffd1db104d64a9b3f57ebe75497"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Game-Demo/icon-192.png",
+      "size": 409,
+      "blob_sha": "7c67d610af3489d00ed18ce622696d75cf881873"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Game-Demo/icon-512.png",
+      "size": 1488,
+      "blob_sha": "fc4af14379fbd3dd55d3bd1fb5ef9313766532a5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Game-Demo/index.html",
+      "size": 11767,
+      "blob_sha": "8fe31d708a784a843fc60ae21f5b28c085b9fede"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Game-Demo/manifest.json",
+      "size": 503,
+      "blob_sha": "757cf281bd6ea6ad29d97de80ac30d9a3a288e06"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Game-Demo/service-worker.js",
+      "size": 1785,
+      "blob_sha": "5f0e241969d561fc1f1016343b3b42895ae1cddc"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-GhostGirl/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-GhostGirl/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-GhostGirl/index.html",
+      "size": 4070,
+      "blob_sha": "5668b617c6d7468776fe466c15ac2867d5a825d9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-GhostGirl/manifest.json",
+      "size": 414,
+      "blob_sha": "3218843b8b00e44ae2f15341081e500fdb11a92a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-GhostGirl/service-worker.js",
+      "size": 1582,
+      "blob_sha": "08a156e4dddcb7bfc26fe649fe7fc0caeb917337"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Girls/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Girls/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Girls/index.html",
+      "size": 2977,
+      "blob_sha": "15af57107e44ecc2d2d4f48536087d4cea03241b"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Girls/manifest.json",
+      "size": 407,
+      "blob_sha": "1cfa27c7d630f453ee3849531661ee763189aefe"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Girls/service-worker.js",
+      "size": 1578,
+      "blob_sha": "1bdffe8adde8052de105066b0fd5645d586dc54b"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Jizva/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Jizva/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Jizva/index.html",
+      "size": 2351,
+      "blob_sha": "a59bf298bff4a368ab28a6b8bac3040f3ad29da3"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Jizva/jizva.css",
+      "size": 2492,
+      "blob_sha": "ae9d6226ae9c1e5456e017edc23eb466039c489d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Jizva/jizva.js",
+      "size": 3603,
+      "blob_sha": "f7116c5f466c81abdb414322233e4eb83f1f0b19"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Jizva/manifest.json",
+      "size": 402,
+      "blob_sha": "be2ae76f51bb98cfeebae274f5b69b5db2ae4ed1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Jizva/service-worker.js",
+      "size": 1578,
+      "blob_sha": "977fc53383d7427408d8ebfca8b23dba41dd9aed"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Lady/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Lady/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Lady/index.html",
+      "size": 2874,
+      "blob_sha": "8721a35a9dcc14b82d88c73353923a4291e52e65"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Lady/manifest.json",
+      "size": 399,
+      "blob_sha": "a6e511fab0f0d827c50423457f3b0a3915a830db"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Lady/service-worker.js",
+      "size": 1577,
+      "blob_sha": "4ad7def66278104edf011e873ed4c9e9bc53a29c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-LetterLab/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-LetterLab/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-LetterLab/index.html",
+      "size": 2301,
+      "blob_sha": "0ffe4913b15610469b26dc6b0b73842dbafb7446"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-LetterLab/manifest.json",
+      "size": 414,
+      "blob_sha": "e37cdf1b021c65ca49df443fcb993d90c065ff5a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-LetterLab/service-worker.js",
+      "size": 1597,
+      "blob_sha": "57ad8b2722a366ce50daab0ade8c332508a9de6f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-LetterLab/style.css",
+      "size": 2335,
+      "blob_sha": "3041a6e120956198898edb7b0e5f2480850fd894"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-LetterLab/vaft.letters.js",
+      "size": 6975,
+      "blob_sha": "8a6984ceef941626901a20cffa0ac1ec3b9325f8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Lilies/icon-192.png",
+      "size": 412,
+      "blob_sha": "107675e5461c5aa249ae0b43335533d4fdc40457"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Lilies/icon-512.png",
+      "size": 1495,
+      "blob_sha": "f40b31a4edec5a08a9705da27a4bd44d921f9984"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Lilies/index.html",
+      "size": 6733,
+      "blob_sha": "93eee13afdaa5fd9e76ca09dd4ddd50301274d99"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Lilies/manifest.json",
+      "size": 494,
+      "blob_sha": "5d599c6b097c6c86080301ff347a99e41a8fce97"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Lilies/service-worker.js",
+      "size": 1782,
+      "blob_sha": "e4e0d36d85a3f8b4e2207b13db623095c6015b54"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-MapWorld/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-MapWorld/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-MapWorld/index.html",
+      "size": 3002,
+      "blob_sha": "fe92ffa1054f92de89d9660340661ea9d8a15d56"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-MapWorld/manifest.json",
+      "size": 399,
+      "blob_sha": "3f5dd089ff84f6c7b619f80bf050812636ede069"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-MapWorld/service-worker.js",
+      "size": 1289,
+      "blob_sha": "133b1ee9d6ee0f16e69bbdd807a207bbe150f017"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-MapWorld/style.css",
+      "size": 1075,
+      "blob_sha": "54d4ee943a13a22c9bf7387003cfd6ac383d5aff"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-MapWorld/vaft.world.map.js",
+      "size": 2558,
+      "blob_sha": "5737df1bf6609f830326a5b0f3f7a8870317542b"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Network/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Network/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Network/index.html",
+      "size": 1356,
+      "blob_sha": "4eead9b53b1e6fef10892137f19cd1c212d62e5b"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Network/manifest.json",
+      "size": 409,
+      "blob_sha": "005eebe8b1010e9192db19eab9e05257f99b9183"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Network/service-worker.js",
+      "size": 1595,
+      "blob_sha": "6a8c08186da96d11669fa27238938391b88da2db"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-Network/style.css",
+      "size": 714,
+      "blob_sha": "41144b0d03d491a002f7b73a14728bb42bd76ade"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-StarSkull/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-StarSkull/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-StarSkull/index.html",
+      "size": 2844,
+      "blob_sha": "8f0f00ed7ac1aa856143bc6803b8bbcea028982b"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-StarSkull/manifest.json",
+      "size": 414,
+      "blob_sha": "f4c86ba56f72ca8090fc4533a5524191b6dcb5c9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VAFT-StarSkull/service-worker.js",
+      "size": 1582,
+      "blob_sha": "268943a472005fe2f6778367d31ed1bcbdcca539"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VIVERE_NEXT_STEPS.md",
+      "size": 2726,
+      "blob_sha": "121b42b48c3f264e5c8c4ca2beae9099c7987dba"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VIVERE_atque_FruiT_CORE.js",
+      "size": 3399,
+      "blob_sha": "22ccf2180d89f235577993028e9b0cf53a890c6c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaF#U2019i#U2019T #U2022 2D R#U00e1me#U010dek s rotac#U00ed/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaF#U2019i#U2019T #U2022 2D R#U00e1me#U010dek s rotac#U00ed/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaF#U2019i#U2019T #U2022 2D R#U00e1me#U010dek s rotac#U00ed/index.html",
+      "size": 5553,
+      "blob_sha": "094846b4065a82b67b46a7700a826a5332b1a771"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaF#U2019i#U2019T #U2022 2D R#U00e1me#U010dek s rotac#U00ed/manifest.json",
+      "size": 569,
+      "blob_sha": "f7a67a011a5c2a5578444da04b0dc9ac3a09607e"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaF#U2019i#U2019T #U2022 2D R#U00e1me#U010dek s rotac#U00ed/service-worker.js",
+      "size": 1797,
+      "blob_sha": "02c9ec09738d3d50bf38319f13b3889c923aae45"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Canvas/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Canvas/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Canvas/index.html",
+      "size": 6762,
+      "blob_sha": "9eaef3b7eb4ab5b0a6db34915093e82060e46e89"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Canvas/manifest.json",
+      "size": 405,
+      "blob_sha": "748d6fc2a2aa4d9a9d732dbf1bad95ff101c1f62"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Canvas/service-worker.js",
+      "size": 1579,
+      "blob_sha": "c8ad4a4fd4d1aa5e75d9fda40b415d4b7d6e040d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-HoloCore.js",
+      "size": 2818,
+      "blob_sha": "fcfba3479dc5d346325c03be4acb32a61b5e8c39"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Hub/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Hub/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Hub/index.html",
+      "size": 31626,
+      "blob_sha": "eba2c7b8ba03106d7bf1502ee88a2e3ab1b2931d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Hub/manifest.json",
+      "size": 401,
+      "blob_sha": "d87dfc1017b10a2e448af4e2206a90908755aff0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Hub/service-worker.js",
+      "size": 1576,
+      "blob_sha": "d26d3a7f6f3f816ee6f5a825b083f904325e6df5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Hub-All.html",
+      "size": 31528,
+      "blob_sha": "1c77e93bbc9adcd20b28163b20a4eee225fecad8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planet-SignalSphere/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planet-SignalSphere/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planet-SignalSphere/index.html",
+      "size": 13942,
+      "blob_sha": "e4157e2815d61363dbf962c912a4318c433c4275"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planet-SignalSphere/manifest.json",
+      "size": 425,
+      "blob_sha": "764ca1fff009209844697da5d7f6723ab99282e2"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planet-SignalSphere/service-worker.js",
+      "size": 1274,
+      "blob_sha": "2ed3617078e75dc18bbfd4f728be40e490d17a54"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planets-SignalCore/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planets-SignalCore/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planets-SignalCore/index.html",
+      "size": 38875,
+      "blob_sha": "81f216c714d4e80525f6fa3ed4bcf0567ff765d7"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planets-SignalCore/manifest.json",
+      "size": 424,
+      "blob_sha": "1348cbf7be9601f22bfa41cbc3585fbeb8bac2c8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planets-SignalCore/service-worker.js",
+      "size": 1275,
+      "blob_sha": "208292f4c1d6185fcb64881982ed323373df9ba8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planets-SignalTower/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planets-SignalTower/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planets-SignalTower/index.html",
+      "size": 38231,
+      "blob_sha": "64665f662deaafafd43043ab9edd64748d655f40"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planets-SignalTower/manifest.json",
+      "size": 424,
+      "blob_sha": "6714c4eac100f578047ec8a6cb3455020dbb19e0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-Planets-SignalTower/service-worker.js",
+      "size": 1273,
+      "blob_sha": "4177151529918ef978551fd68e0761f202493f88"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-RPG-Box/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-RPG-Box/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-RPG-Box/index.html",
+      "size": 30719,
+      "blob_sha": "3c07a47326f6d96f8bae9b0cf9d4b0528e6cf580"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-RPG-Box/manifest.json",
+      "size": 408,
+      "blob_sha": "7c334887f143c4ff36763dc9b40cee26259a8cd4"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-RPG-Box/service-worker.js",
+      "size": 1579,
+      "blob_sha": "8e3005c8a864607d00e90b905a0ff376baf8481d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-SignalCore/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-SignalCore/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-SignalCore/index.html",
+      "size": 14351,
+      "blob_sha": "ac652c86f9e49c84d828ee784147c775dcf4af1d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-SignalCore/manifest.json",
+      "size": 405,
+      "blob_sha": "c563b66705fcab3e6541ee146b5be1092b4fc656"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT-SignalCore/service-worker.js",
+      "size": 1276,
+      "blob_sha": "e5e3c39042755bad471ca35402573878b13670e1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT_GlyphCore_0.1.zip",
+      "size": 4170,
+      "blob_sha": "d4a8e666024b98d57dcc3648fa41c423baaa866d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFT_Glyph_Globe_0.1.zip",
+      "size": 4362,
+      "blob_sha": "626a818a6402f2975263848f6a4735628995ef79"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFiT/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFiT/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFiT/index.html",
+      "size": 43192,
+      "blob_sha": "f9261a680f1071b6f8012c559730bc04bb6f3f47"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFiT/manifest.json",
+      "size": 380,
+      "blob_sha": "2400712629d87a18a31d2eb17af14a65892bbe3a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFiT/service-worker.js",
+      "size": 1266,
+      "blob_sha": "90939bd75698a4944887a765a680b8f9c274f0f9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VaFiT/vafit-lab.js",
+      "size": 2960,
+      "blob_sha": "c0de94dfa2f181a72038070e76898fbd7101837a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VafiT-gallery/app.js",
+      "size": 553,
+      "blob_sha": "c6ae4b071c923f876c352c1847821c9fd1b4259c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VafiT-gallery/icon-192.png",
+      "size": 411,
+      "blob_sha": "a4705bdde14ab8bc1dffb2ff6e54d54dbcd7f4f0"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VafiT-gallery/icon-512.png",
+      "size": 1494,
+      "blob_sha": "c0894b9ea9f82dc6dd2e6952bd7dd615c9d8394a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VafiT-gallery/index.html",
+      "size": 858,
+      "blob_sha": "b51d1d121ffaa0fcf2f789913256f6eb7013d005"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VafiT-gallery/manifest.json",
+      "size": 500,
+      "blob_sha": "06b71efaef5b965d7473e0d2899a9b21ef134f81"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VafiT-gallery/service-worker.js",
+      "size": 1815,
+      "blob_sha": "45e6c34bf4dbb56dc2fcd34c89607997bf0f536a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/VafiT-gallery/style.css",
+      "size": 427,
+      "blob_sha": "27b1a014b69f8c4b27f0a9b0b23a892ec1eeea02"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere/ /VAFT-Girls/icon-192.png",
+      "size": 412,
+      "blob_sha": "83b928000f3a49e0a3f9adfc9e0fc5aa15a62cd1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere/ /VAFT-Girls/icon-512.png",
+      "size": 1496,
+      "blob_sha": "65572b29e557b2fde41948502d092477466c0493"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere/ /VAFT-Girls/index.html",
+      "size": 2035,
+      "blob_sha": "b4762acefb9749c17082a59a07dbe9161b378e47"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere/ /VAFT-Girls/manifest.json",
+      "size": 491,
+      "blob_sha": "111150eb1eac39753e4442ea383eeefeb27b9de8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere/ /VAFT-Girls/service-worker.js",
+      "size": 1788,
+      "blob_sha": "6bb155791ad3280c7efa7d85025a845ec3287bdf"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere/icon-192.png",
+      "size": 409,
+      "blob_sha": "7c67d610af3489d00ed18ce622696d75cf881873"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere/icon-512.png",
+      "size": 1488,
+      "blob_sha": "fc4af14379fbd3dd55d3bd1fb5ef9313766532a5"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere/index.html",
+      "size": 2738,
+      "blob_sha": "67b9592a64b7f676f5b9cf151cf111691b4fdfc9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere/manifest.json",
+      "size": 479,
+      "blob_sha": "bd98a4c0a442d8e2f4f34a33d94345f3e62cc10f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere/service-worker.js",
+      "size": 1808,
+      "blob_sha": "4385d7b08b4268eb72ba1f0a5249e9a9515433d7"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VAFT-Center3D/center.js",
+      "size": 1950,
+      "blob_sha": "2e5f70df496b7ad4da56963cd735e6521220a986"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VAFT-Center3D/icon-192.png",
+      "size": 187,
+      "blob_sha": "dd1592dd942690164c2ecabad7ccfc162ae2332a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VAFT-Center3D/icon-512.png",
+      "size": 842,
+      "blob_sha": "ac415ef18469d64c291049bf90d4a355dadd77df"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VAFT-Center3D/index.html",
+      "size": 24349,
+      "blob_sha": "27d7945ede2a9d63b46fdfc8c336392f660b85a6"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VAFT-Center3D/manifest.json",
+      "size": 500,
+      "blob_sha": "1362f131f2d23796ebf053908679d90ac122779d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VAFT-Center3D/service-worker.js",
+      "size": 1837,
+      "blob_sha": "ba9faea2c7a8d8672b8552bd25764e4396283b2c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VAFT-Center3D/style.css",
+      "size": 144,
+      "blob_sha": "6052a2db9582f8c56bce8d64d1fe99affe22044d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VaFT-Vere-Level1/actors.js",
+      "size": 6444,
+      "blob_sha": "be0325bd2859d965197827e3d088459403334537"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VaFT-Vere-Level1/config.js",
+      "size": 669,
+      "blob_sha": "3ac7d16b7855ab5e80cbaa860158a0c0bc87c23c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VaFT-Vere-Level1/icon-192.png",
+      "size": 187,
+      "blob_sha": "dd1592dd942690164c2ecabad7ccfc162ae2332a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VaFT-Vere-Level1/icon-512.png",
+      "size": 842,
+      "blob_sha": "ac415ef18469d64c291049bf90d4a355dadd77df"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VaFT-Vere-Level1/index.html",
+      "size": 2720,
+      "blob_sha": "5397d205028fd7e9762f721e15dd38d7023916b3"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VaFT-Vere-Level1/main.js",
+      "size": 5092,
+      "blob_sha": "8435d72a4c1c4e8c9fcba132c41897abbf79bb50"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VaFT-Vere-Level1/manifest.json",
+      "size": 509,
+      "blob_sha": "5575d50e6fabe8786a4cdc67a8cb66693235489c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VaFT-Vere-Level1/service-worker.js",
+      "size": 1888,
+      "blob_sha": "7eb27fe3449bb38075b89f514efe6e22860f04e3"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VaFT-Vere-Level1/style.css",
+      "size": 3478,
+      "blob_sha": "305ac861d11057208f2bc68e19fc638178591a63"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere-atque-FruiT/VaFT-Vere-Level1/world.js",
+      "size": 3146,
+      "blob_sha": "0e0efad0134cbbd87ea3086563732eced1d53574"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/Vivere_atque_FruiiT_0_1_Rekonstrukce.zip",
+      "size": 19450069,
+      "blob_sha": "d88f9e45ac2b02ec6f43bb5f447f0f0b0d32daed"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/agents.js",
+      "size": 8889,
+      "blob_sha": "8dec07158650180585dfc7ba8a37b61e846fbc03"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/ai.html",
+      "size": 301,
+      "blob_sha": "96d3a305ee7dfed34e4e3e156ba8a432fd1d5292"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/api/cht360-sync.js",
+      "size": 2853,
+      "blob_sha": "04cb78661b23446db16d783356ee6b8135dd92e8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/api/revia-chat.js",
+      "size": 9392,
+      "blob_sha": "2ac80d7999324efca8c3b416087980e76023544d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/api/vafit-chat.js",
+      "size": 9909,
+      "blob_sha": "faaa8554e21ba0f120385bc4b28717b48946e7f7"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/app.html",
+      "size": 11723,
+      "blob_sha": "885459060769b28bffbbf3e6a32d4f6c8fec268c"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/app.js",
+      "size": 782,
+      "blob_sha": "ec133a6edb7e5658877b0234749ff6141b369908"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/ai-port.js",
+      "size": 168,
+      "blob_sha": "9e72e753bca9773b0cfa2d838444d4d6f6674692"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/chybozrout.js",
+      "size": 165,
+      "blob_sha": "0cb4063cdfb06ae2d17b10090c2186ba43f977f8"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/editor.js",
+      "size": 168,
+      "blob_sha": "edb70662b22f92841dc771dbc3c470b18c032739"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/glyph.js",
+      "size": 139,
+      "blob_sha": "903050c95370e2b0df0896a12c9c8c2f52e46bae"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/hlavoun.js",
+      "size": 151,
+      "blob_sha": "c00c831211857a9b4af480da1970b68b0907878a"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/mapview.js",
+      "size": 135,
+      "blob_sha": "303cb1b81cfb19b6af59e81c987ffe9ed1860ee9"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/pikos.js",
+      "size": 135,
+      "blob_sha": "411f3e13a282f5f1a401029390820dcb93b084bb"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/vafiti.js",
+      "size": 160,
+      "blob_sha": "cba388cabd7316f2652d9f769f498e237b677538"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/vaft-core.js",
+      "size": 150,
+      "blob_sha": "3bbe4356b801258e33ce9e1122cc4f318dd8a7c4"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/viri.js",
+      "size": 112,
+      "blob_sha": "27265163c4601f9b7f80d689210ec47e033c48ba"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/world-name.js",
+      "size": 175,
+      "blob_sha": "ffda1779a082123f38a0140ae01f0e6cb68688c1"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/apps/worlds-select.js",
+      "size": 204,
+      "blob_sha": "a8fd1191a9d699c0879aea2f3157af2faecd6b51"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/assets/archives/VaFT_GlyphCore_0.1.zip",
+      "size": 4170,
+      "blob_sha": "d4a8e666024b98d57dcc3648fa41c423baaa866d"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/assets/archives/VaFT_Glyph_Globe_0.1.zip",
+      "size": 4362,
+      "blob_sha": "626a818a6402f2975263848f6a4735628995ef79"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/assets/archives/Vivere_atque_FruiiT_0_1_Rekonstrukce.zip",
+      "size": 19450069,
+      "blob_sha": "d88f9e45ac2b02ec6f43bb5f447f0f0b0d32daed"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/assets/images/50F62985-1E64-4F1B-934A-64A8C4DC98CB.png",
+      "size": 2128276,
+      "blob_sha": "1bcd6b8e2c98b443f168e90f722f97d7cdf4d765"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/assets/images/7B8F707C-4A0B-4F7A-B3EC-621BCFE498CE.png",
+      "size": 3418374,
+      "blob_sha": "b8b3380dabdb782a9bdfb59f632c98edaeb4cb3f"
+    },
+    {
+      "path": "Vivere-atque-FruiT-main/assets/images/AFA0870E-F586-4406-8BAA-0A7944120AA3.png",
+      "size": 1321693,
+      "blob_sha": "ba7a2fbbb7e1349876518b216328c0c654629153"
+    },
+    {
+      "path": "VAROVANI-CASTECNA-ZACHRANA.txt",
+      "size": 313,
+      "blob_sha": "d78cc647e8ae21e9573c975ebbbcc9f96dd2989e"
+    },
+    {
+      "path": "AUDIT-SHRNUTI.md",
+      "size": 3989,
+      "blob_sha": "2aff0bcc0b4a35ff3f557f1b2fae0b2ab583a8f0"
+    }
+  ]
+}

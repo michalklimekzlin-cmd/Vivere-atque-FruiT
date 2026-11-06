@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+      <link rel="manifest" href="./manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Vivere atque Frui¡'T • VaFT &amp; Vere Level 1</title>
+    <meta name="theme-color" content="#000000" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="ui-root">
+      <!-- TOP PANEL -->
+      <header class="ui-top">
+        <div class="ui-top-left">
+          <div class="ui-game-title">Vivere atque Frui¡'T</div>
+          <div class="ui-game-subtitle">VaFT (AI) &amp; Vere (mlha)</div>
+        </div>
+        <div class="ui-top-right">
+          <div class="ui-resource">
+            <span class="ui-icon">★</span>
+            <span id="ui-coins">5</span>
+          </div>
+          <div class="ui-resource">
+            <span class="ui-icon">✦</span>
+            <span id="ui-keys">1</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- HLAVNÍ HRACÍ OBLAST -->
+      <main class="ui-main">
+        <!-- "Matchmaking" pruh -->
+        <div class="ui-match-panel">
+          <div class="ui-match-title">Mission: Level 1 • Co-op</div>
+          <div class="ui-match-status">Connecting VaFT &amp; Vere...</div>
+        </div>
+
+        <!-- Canvas s herním světem -->
+        <div class="ui-world-wrapper">
+          <canvas id="world"></canvas>
+
+          <!-- Label nad hrdinou (UI overlay) -->
+          <div class="ui-hero-label">
+            <div class="ui-hero-name">VaFT</div>
+            <div class="ui-hero-tag">AI partner</div>
+          </div>
+        </div>
+      </main>
+
+      <!-- SPODNÍ HUD -->
+      <footer class="ui-bottom">
+        <button class="ui-bottom-btn">
+          <span class="ui-bottom-icon">⚔</span>
+          <span>Weapons</span>
+        </button>
+        <button class="ui-bottom-btn">
+          <span class="ui-bottom-icon">🗒</span>
+          <span>Tasks</span>
+        </button>
+        <button class="ui-bottom-btn">
+          <span class="ui-bottom-icon">⚙</span>
+          <span>Settings</span>
+        </button>
+      </footer>
+
+      <!-- LOG / CHAT -->
+      <div class="log" id="log"></div>
+
+      <script src="./config.js"></script>
+      <script src="./world.js"></script>
+      <script src="./actors.js"></script>
+      <script src="./main.js"></script>
+    </div>
+  
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>

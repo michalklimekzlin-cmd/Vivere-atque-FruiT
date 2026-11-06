@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "date": "2026-11-06",
+  "automated_logic_and_offline_tests": 24,
+  "isolated_browser_tests": 8,
+  "installer": "passed and idempotent",
+  "original_files_removed": 0,
+  "modified_original_files": [
+    "docs/offline-cashe-assets.json",
+    "docs/index.html",
+    "docs/js/cht-360-aplikace-2.js",
+    "docs/CHT-360-STORAGE-SCHEMA.md",
+    "docs/service-worker.js"
+  ],
+  "physical_iphone": "not verified",
+  "https_service_worker_install": "not verified in HTTP preview",
+  "offline_worker_simulation": "passed",
+  "publication": "none"
+}

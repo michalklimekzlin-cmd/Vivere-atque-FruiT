@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+      <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>🧠 Hlavoun • System Overseer</title>
+    <link rel="stylesheet" href="./hlavoun.css?v=0.4">
+  </head>
+  <body>
+    <div class="hlavoun-main">
+      <!-- horní lišta -->
+      <header class="hlavoun-top">
+        <h1>🧠 Hlavoun</h1>
+        <span class="hlavoun-role">System Overseer</span>
+      </header>
+
+      <!-- velký skleněný panel -->
+      <main class="hlavoun-glass">
+        <div class="hlavoun-console" id="hlavounConsole">
+          <p><b>[init]</b> Bráško… já už běžím. Mám nejvyšší práva.</p>
+        </div>
+        <div class="hlavoun-input">
+          <input type="text" id="hlavounCmd" placeholder="Zeptej se Hlavouna nebo napiš příkaz…" />
+          <button id="hlavounRun">▶</button>
+        </div>
+      </main>
+
+      <!-- tři malé bloky -->
+      <section class="hlavoun-cells">
+        <div class="cell">režim: <b>online</b></div>
+        <div class="cell">Revia: <span id="revState">angel</span></div>
+        <div class="cell">link: <b>VAFT</b></div>
+      </section>
+      
+      <!-- ⚡ Jádro Hlavouna -->
+<div class="hlavoun-core">
+  <div class="hlavoun-bolt">⚡</div>
+  <div class="hlavoun-stream">
+    <span>0101Λ0 · B02 · [HLAVOUN]</span>
+    <span>101:r→90 · VAFT.link</span>
+    <span>{*(º·º)*) — core-drive}</span>
+  </div>
+</div>
+
+      <!-- spodní panel -->
+      <footer class="hlavoun-foot">
+        <button id="hlavounMode" class="ghost-btn">🌗 Přepni Revii</button>
+        <button id="hlavounNote" class="ghost-btn">🪶 Zapiš do křídla</button>
+      </footer>
+    </div>
+
+    <script src="./hlavoun.js?v=0.3"></script>
+    <script src="./hlavoun.brain.js?v=0.3"></script>
+  
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+        });
+      }
+    </script>
+</body>
+</html>
