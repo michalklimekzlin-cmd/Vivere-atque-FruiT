@@ -286,7 +286,9 @@ function render() {
 }
 
 function push(role, text) {
-  state.messages.push({ role, text });
+  const entry = { id: "revia-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9), role, text, at: new Date().toISOString() };
+  state.messages.push(entry);
+  window.dispatchEvent(new CustomEvent("cht360:message-created", { detail: { channel: "revia", message: entry } }));
   state.messages = state.messages.slice(-MAX_HISTORY);
   saveState();
   render();
