@@ -212,6 +212,10 @@
     await migrate(); await render();
   }
   window.CHT360MessageArchive = Object.freeze({ add, all, openPanel, exportJSON, migrate });
+  for (const id of ["openCHTMessageArchive", "openReviaArchive"]) {
+    document.getElementById(id)?.addEventListener("click", () =>
+      openPanel().catch(error => console.warn("[CHT Archiv] Zobrazení selhalo", error)));
+  }
   window.addEventListener("cht360:message-created", (e) => {
     const { channel, message } = e.detail || {};
     add(channel, message).catch(error => console.warn("[CHT Archiv] Zápis zprávy selhal", error));
