@@ -4,13 +4,12 @@
 "use strict";
 function install(){
   if(document.getElementById("cht360VaF7Layer"))return;
-  const toolbar=document.getElementById("cht360-stena-toolbar");
-  if(!toolbar)return;
+  const host=document.querySelector(".slotsToolbar") || document.body;
   const open=document.createElement("button");
   open.id="cht360VaF7Open";open.type="button";
   open.textContent="VaF7";open.setAttribute("aria-label","Otevřít VaF7 hru s písmeny");
   open.title="VaF7 • grid95 / grid96 / Glyph";
-  toolbar.appendChild(open);
+  host.appendChild(open);
   const layer=document.createElement("div");
   layer.id="cht360VaF7Layer";layer.hidden=true;
   const pane=document.createElement("section");
