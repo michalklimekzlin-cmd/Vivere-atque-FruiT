@@ -1,5 +1,5 @@
 "use strict";
-const CACHE = "vafit-sklad-pwa-v2";
+const CACHE = "vafit-sklad-pwa-v3";
 const ASSETS = ["./", "./index.html", "./manifest.json", "../docs/icon.svg"];
 self.addEventListener("install",event => {event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)));self.skipWaiting();});
 self.addEventListener("activate",event=>{event.waitUntil((async()=>{for(const key of await caches.keys()){if(key.startsWith("vafit-sklad-pwa-")&&key!==CACHE)await caches.delete(key);}await self.clients.claim();})());});
