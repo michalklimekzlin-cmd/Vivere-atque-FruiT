@@ -27,45 +27,198 @@ body{color:var(--gold);font-family:ui-rounded,-apple-system,BlinkMacSystemFont,"
 @media(prefers-reduced-motion:reduce){.bead{transition:none}}
 /* Samostatny odkaz CHT: bez editoru, stejny vzhled jako ostatni koralky. */
 .bead-link{text-decoration:none;cursor:pointer;font-size:clamp(8px,1.95vw,10px)}
+
+/* Dve klikatelne poloviny jednoho koralku, svisla stredova hranice. */
+.bead.bead-split{display:flex;align-items:stretch;justify-content:stretch;place-items:unset;overflow:hidden;padding:0;width:clamp(85px,10.5vw,122px);height:clamp(38px,5vw,48px)}
+.bead-half{width:50%;min-width:0;min-height:100%;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:2px 3px;background:none;border:0;border-radius:0;color:#efd49a;text-decoration:none;text-align:center;font:650 clamp(7px,.85vw,9px)/1.1 ui-rounded,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.bead-half+.bead-half{border-left:1px solid rgba(255,226,173,.76)}
+.bead-half:focus-visible,.bead-half:hover{outline:none;background:rgba(255,226,173,.14);color:#fff0c5}
+.bead-half-label{display:block;max-width:100%;overflow:hidden;overflow-wrap:anywhere;word-break:break-word;white-space:pre-line;max-height:3.3em}
+.bead-half.is-custom .bead-half-label{color:#fff0c5}
+.bead-half input{display:block;box-sizing:border-box;width:100%;min-width:0;max-height:90%;border:0;background:rgba(255,239,205,.14);border-radius:3px;color:#fff0c5;text-align:center;font:inherit;outline:1px solid rgba(255,226,173,.64)}
+@media(max-width:699px){
+ #sklad{overflow:hidden}
+ .beads{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:52px;align-content:start;gap:9px 7px;padding:235px 8px max(75px,env(safe-area-inset-bottom));overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+ .bead.bead-split{position:relative;left:auto;top:auto;transform:none;width:100%;height:49px;min-width:0;margin:0}
+ .bead-half{font-size:clamp(8px,2.1vw,10px);padding:2px 3px}
+ .brand{top:11%;pointer-events:none}
+}
 </style>
 </head>
 <body>
 <main id="sklad" aria-label="Vivere atque Fru'¡¡'T">
 <h1 class="brand"><span>Vivere</span><span>atque</span><span>Fru'¡¡'T</span></h1>
-<section class="beads" id="beads" aria-label="Sklad projektových míst">
-<button class="bead" style="--x:12%;--y:85%" data-slot="0-0" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:28%;--y:85%" data-slot="0-1" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:44%;--y:85%" data-slot="0-2" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:60%;--y:85%" data-slot="0-3" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:76%;--y:85%" data-slot="0-4" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:92%;--y:85%" data-slot="0-5" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:10%;--y:74%" data-slot="1-0" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:26%;--y:74%" data-slot="1-1" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:42%;--y:74%" data-slot="1-2" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:58%;--y:74%" data-slot="1-3" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:74%;--y:74%" data-slot="1-4" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:90%;--y:74%" data-slot="1-5" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:16%;--y:63%" data-slot="2-0" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:32%;--y:63%" data-slot="2-1" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:48%;--y:63%" data-slot="2-2" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:64%;--y:63%" data-slot="2-3" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:80%;--y:63%" data-slot="2-4" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:25%;--y:52%" data-slot="3-0" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:41%;--y:52%" data-slot="3-1" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:57%;--y:52%" data-slot="3-2" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:73%;--y:52%" data-slot="3-3" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:38%;--y:41%" data-slot="4-0" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:54%;--y:41%" data-slot="4-1" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:70%;--y:41%" data-slot="4-2" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:53%;--y:30%" data-slot="5-0" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:69%;--y:30%" data-slot="5-1" type="button"><span>VaF'¡¡'T</span></button>
-<button class="bead" style="--x:85%;--y:30%" data-slot="5-2" type="button"><span>VaF'¡¡'T</span></button>
-<a class="bead bead-link" style="--x:72%;--y:19%" href="./index.html" aria-label="Otevřít CHT 360°‰." title="Otevřít CHT 360°‰."><span>CHT 360°‰.</span></a>
-<button class="bead" style="--x:88%;--y:19%" data-slot="6-1" type="button"><span>VaF'¡¡'T</span></button>
+<section class="beads" id="beads" aria-label="VaFiT — dvojita projektova mista">
+<div class="bead bead-split" style="--x:72%;--y:19%" data-slot="6-0" aria-label="Dve projektova mista">
+<a class="bead-half" href="./index.html" data-half-id="6-0-l" data-slot="6-0" data-side="l" data-short="CHT
+360°‰." data-full="CHT 360°‰." data-fixed="1" aria-label="CHT 360°‰." title="CHT 360°‰."><span class="bead-half-label">CHT
+360°‰.</span></a>
+<a class="bead-half" href="../1O1R/index.html" data-half-id="6-0-r" data-slot="6-0" data-side="r" data-short="101R" data-full="1O1R" aria-label="1O1R" title="1O1R"><span class="bead-half-label">101R</span></a>
+</div>
+<div class="bead bead-split" style="--x:88%;--y:19%" data-slot="6-1" aria-label="Dve projektova mista">
+<a class="bead-half" href="../3D%20ramecek/index.html" data-half-id="6-1-l" data-slot="6-1" data-side="l" data-short="3D rám." data-full="3D ramecek" aria-label="3D ramecek" title="3D ramecek"><span class="bead-half-label">3D rám.</span></a>
+<a class="bead-half" href="../3I-ATLAS/index.html" data-half-id="6-1-r" data-slot="6-1" data-side="r" data-short="ATLAS" data-full="3I-ATLAS" aria-label="3I-ATLAS" title="3I-ATLAS"><span class="bead-half-label">ATLAS</span></a>
+</div>
+<div class="bead bead-split" style="--x:53%;--y:30%" data-slot="5-0" aria-label="Dve projektova mista">
+<a class="bead-half" href="../AI-Hero-Playground/index.html" data-half-id="5-0-l" data-slot="5-0" data-side="l" data-short="AI Hero" data-full="AI-Hero-Playground" aria-label="AI-Hero-Playground" title="AI-Hero-Playground"><span class="bead-half-label">AI Hero</span></a>
+<a class="bead-half" href="https://github.com/michalklimekzlin-cmd/Vivere-atque-FruiT/tree/main/AI-Vivere-Core" data-half-id="5-0-r" data-slot="5-0" data-side="r" data-short="AI Core" data-full="AI-Vivere-Core" aria-label="AI-Vivere-Core (slozka bez index.html)" title="AI-Vivere-Core (slozka bez index.html)"><span class="bead-half-label">AI Core</span></a>
+</div>
+<div class="bead bead-split" style="--x:69%;--y:30%" data-slot="5-1" aria-label="Dve projektova mista">
+<a class="bead-half" href="../App-Style-System/index.html" data-half-id="5-1-l" data-slot="5-1" data-side="l" data-short="Styly" data-full="App-Style-System" aria-label="App-Style-System" title="App-Style-System"><span class="bead-half-label">Styly</span></a>
+<a class="bead-half" href="../Batolete/index.html" data-half-id="5-1-r" data-slot="5-1" data-side="r" data-short="Batolete" data-full="Batolete" aria-label="Batolete" title="Batolete"><span class="bead-half-label">Batolete</span></a>
+</div>
+<div class="bead bead-split" style="--x:85%;--y:30%" data-slot="5-2" aria-label="Dve projektova mista">
+<a class="bead-half" href="../Bicak-Supreme-Edition/index.html" data-half-id="5-2-l" data-slot="5-2" data-side="l" data-short="Bicak" data-full="Bicak-Supreme-Edition" aria-label="Bicak-Supreme-Edition" title="Bicak-Supreme-Edition"><span class="bead-half-label">Bicak</span></a>
+<a class="bead-half" href="../Braska-Hlava/index.html" data-half-id="5-2-r" data-slot="5-2" data-side="r" data-short="Bráška" data-full="Braska-Hlava" aria-label="Braska-Hlava" title="Braska-Hlava"><span class="bead-half-label">Bráška</span></a>
+</div>
+<div class="bead bead-split" style="--x:38%;--y:41%" data-slot="4-0" aria-label="Dve projektova mista">
+<a class="bead-half" href="../CroissantSlots/index.html" data-half-id="4-0-l" data-slot="4-0" data-side="l" data-short="Croiss." data-full="CroissantSlots" aria-label="CroissantSlots" title="CroissantSlots"><span class="bead-half-label">Croiss.</span></a>
+<a class="bead-half" href="../Ctverecek-0001-Core/index.html" data-half-id="4-0-r" data-slot="4-0" data-side="r" data-short="Čtver." data-full="Ctverecek-0001-Core" aria-label="Ctverecek-0001-Core" title="Ctverecek-0001-Core"><span class="bead-half-label">Čtver.</span></a>
+</div>
+<div class="bead bead-split" style="--x:54%;--y:41%" data-slot="4-1" aria-label="Dve projektova mista">
+<a class="bead-half" href="../Demo3D/index.html" data-half-id="4-1-l" data-slot="4-1" data-side="l" data-short="Demo3D" data-full="Demo3D" aria-label="Demo3D" title="Demo3D"><span class="bead-half-label">Demo3D</span></a>
+<a class="bead-half" href="../Gentleman/index.html" data-half-id="4-1-r" data-slot="4-1" data-side="r" data-short="Gentleman" data-full="Gentleman" aria-label="Gentleman" title="Gentleman"><span class="bead-half-label">Gentleman</span></a>
+</div>
+<div class="bead bead-split" style="--x:70%;--y:41%" data-slot="4-2" aria-label="Dve projektova mista">
+<a class="bead-half" href="../Glyph-Planet-3D/index.html" data-half-id="4-2-l" data-slot="4-2" data-side="l" data-short="Glyph 3D" data-full="Glyph-Planet-3D" aria-label="Glyph-Planet-3D" title="Glyph-Planet-3D"><span class="bead-half-label">Glyph 3D</span></a>
+<a class="bead-half" href="../Glyph-Planet/index.html" data-half-id="4-2-r" data-slot="4-2" data-side="r" data-short="Glyph" data-full="Glyph-Planet" aria-label="Glyph-Planet" title="Glyph-Planet"><span class="bead-half-label">Glyph</span></a>
+</div>
+<div class="bead bead-split" style="--x:25%;--y:52%" data-slot="3-0" aria-label="Dve projektova mista">
+<a class="bead-half" href="../Hlavoun/index.html" data-half-id="3-0-l" data-slot="3-0" data-side="l" data-short="Hlavoun" data-full="Hlavoun" aria-label="Hlavoun" title="Hlavoun"><span class="bead-half-label">Hlavoun</span></a>
+<a class="bead-half" href="../Kovosrot/index.html" data-half-id="3-0-r" data-slot="3-0" data-side="r" data-short="Kovosrot" data-full="Kovosrot" aria-label="Kovosrot" title="Kovosrot"><span class="bead-half-label">Kovosrot</span></a>
+</div>
+<div class="bead bead-split" style="--x:41%;--y:52%" data-slot="3-1" aria-label="Dve projektova mista">
+<a class="bead-half" href="../Meziprostor-Core/index.html" data-half-id="3-1-l" data-slot="3-1" data-side="l" data-short="Mezipr." data-full="Meziprostor-Core" aria-label="Meziprostor-Core" title="Meziprostor-Core"><span class="bead-half-label">Mezipr.</span></a>
+<a class="bead-half" href="../Michal-AI-Al-Klimek/index.html" data-half-id="3-1-r" data-slot="3-1" data-side="r" data-short="AI-Al" data-full="Michal-AI-Al-Klimek" aria-label="Michal-AI-Al-Klimek" title="Michal-AI-Al-Klimek"><span class="bead-half-label">AI-Al</span></a>
+</div>
+<div class="bead bead-split" style="--x:57%;--y:52%" data-slot="3-2" aria-label="Dve projektova mista">
+<a class="bead-half" href="../MichalKlimek/index.html" data-half-id="3-2-l" data-slot="3-2" data-side="l" data-short="Michal" data-full="MichalKlimek" aria-label="MichalKlimek" title="MichalKlimek"><span class="bead-half-label">Michal</span></a>
+<a class="bead-half" href="../Miss%20Ary/index.html" data-half-id="3-2-r" data-slot="3-2" data-side="r" data-short="Ary" data-full="Miss Ary" aria-label="Miss Ary" title="Miss Ary"><span class="bead-half-label">Ary</span></a>
+</div>
+<div class="bead bead-split" style="--x:73%;--y:52%" data-slot="3-3" aria-label="Dve projektova mista">
+<a class="bead-half" href="../Oblak/index.html" data-half-id="3-3-l" data-slot="3-3" data-side="l" data-short="Oblak" data-full="Oblak" aria-label="Oblak" title="Oblak"><span class="bead-half-label">Oblak</span></a>
+<a class="bead-half" href="../Recycle/index.html" data-half-id="3-3-r" data-slot="3-3" data-side="r" data-short="Recycle" data-full="Recycle" aria-label="Recycle" title="Recycle"><span class="bead-half-label">Recycle</span></a>
+</div>
+<div class="bead bead-split" style="--x:16%;--y:63%" data-slot="2-0" aria-label="Dve projektova mista">
+<a class="bead-half" href="../Revia-Master/index.html" data-half-id="2-0-l" data-slot="2-0" data-side="l" data-short="Revia M" data-full="Revia-Master" aria-label="Revia-Master" title="Revia-Master"><span class="bead-half-label">Revia M</span></a>
+<a class="bead-half" href="../Revia/index.html" data-half-id="2-0-r" data-slot="2-0" data-side="r" data-short="Revia" data-full="Revia" aria-label="Revia" title="Revia"><span class="bead-half-label">Revia</span></a>
+</div>
+<div class="bead bead-split" style="--x:32%;--y:63%" data-slot="2-1" aria-label="Dve projektova mista">
+<a class="bead-half" href="../RingPlanetGrid/index.html" data-half-id="2-1-l" data-slot="2-1" data-side="l" data-short="RingGrid" data-full="RingPlanetGrid" aria-label="RingPlanetGrid" title="RingPlanetGrid"><span class="bead-half-label">RingGrid</span></a>
+<a class="bead-half" href="../R%C3%A1me%C4%8Dky/index.html" data-half-id="2-1-r" data-slot="2-1" data-side="r" data-short="Rámečky" data-full="Rámečky" aria-label="Rámečky" title="Rámečky"><span class="bead-half-label">Rámečky</span></a>
+</div>
+<div class="bead bead-split" style="--x:48%;--y:63%" data-slot="2-2" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VAFT-BearHead/index.html" data-half-id="2-2-l" data-slot="2-2" data-side="l" data-short="BearHead" data-full="VAFT-BearHead" aria-label="VAFT-BearHead" title="VAFT-BearHead"><span class="bead-half-label">BearHead</span></a>
+<a class="bead-half" href="../VAFT-Comet/index.html" data-half-id="2-2-r" data-slot="2-2" data-side="r" data-short="Comet" data-full="VAFT-Comet" aria-label="VAFT-Comet" title="VAFT-Comet"><span class="bead-half-label">Comet</span></a>
+</div>
+<div class="bead bead-split" style="--x:64%;--y:63%" data-slot="2-3" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VAFT-Doll/index.html" data-half-id="2-3-l" data-slot="2-3" data-side="l" data-short="Doll" data-full="VAFT-Doll" aria-label="VAFT-Doll" title="VAFT-Doll"><span class="bead-half-label">Doll</span></a>
+<a class="bead-half" href="../VAFT-Game-Demo/index.html" data-half-id="2-3-r" data-slot="2-3" data-side="r" data-short="Hra demo" data-full="VAFT-Game-Demo" aria-label="VAFT-Game-Demo" title="VAFT-Game-Demo"><span class="bead-half-label">Hra demo</span></a>
+</div>
+<div class="bead bead-split" style="--x:80%;--y:63%" data-slot="2-4" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VAFT-Game/index.html" data-half-id="2-4-l" data-slot="2-4" data-side="l" data-short="Game" data-full="VAFT-Game" aria-label="VAFT-Game" title="VAFT-Game"><span class="bead-half-label">Game</span></a>
+<a class="bead-half" href="../VAFT-GhostGirl/index.html" data-half-id="2-4-r" data-slot="2-4" data-side="r" data-short="Ghost" data-full="VAFT-GhostGirl" aria-label="VAFT-GhostGirl" title="VAFT-GhostGirl"><span class="bead-half-label">Ghost</span></a>
+</div>
+<div class="bead bead-split" style="--x:10%;--y:74%" data-slot="1-0" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VAFT-Girls/index.html" data-half-id="1-0-l" data-slot="1-0" data-side="l" data-short="Girls" data-full="VAFT-Girls" aria-label="VAFT-Girls" title="VAFT-Girls"><span class="bead-half-label">Girls</span></a>
+<a class="bead-half" href="../VAFT-Jizva/index.html" data-half-id="1-0-r" data-slot="1-0" data-side="r" data-short="Jizva" data-full="VAFT-Jizva" aria-label="VAFT-Jizva" title="VAFT-Jizva"><span class="bead-half-label">Jizva</span></a>
+</div>
+<div class="bead bead-split" style="--x:26%;--y:74%" data-slot="1-1" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VAFT-Lady/index.html" data-half-id="1-1-l" data-slot="1-1" data-side="l" data-short="Lady" data-full="VAFT-Lady" aria-label="VAFT-Lady" title="VAFT-Lady"><span class="bead-half-label">Lady</span></a>
+<a class="bead-half" href="../VAFT-LetterLab/index.html" data-half-id="1-1-r" data-slot="1-1" data-side="r" data-short="Písmena" data-full="VAFT-LetterLab" aria-label="VAFT-LetterLab" title="VAFT-LetterLab"><span class="bead-half-label">Písmena</span></a>
+</div>
+<div class="bead bead-split" style="--x:42%;--y:74%" data-slot="1-2" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VAFT-Lilies/index.html" data-half-id="1-2-l" data-slot="1-2" data-side="l" data-short="Lilies" data-full="VAFT-Lilies" aria-label="VAFT-Lilies" title="VAFT-Lilies"><span class="bead-half-label">Lilies</span></a>
+<a class="bead-half" href="../VAFT-MapWorld/index.html" data-half-id="1-2-r" data-slot="1-2" data-side="r" data-short="Mapa" data-full="VAFT-MapWorld" aria-label="VAFT-MapWorld" title="VAFT-MapWorld"><span class="bead-half-label">Mapa</span></a>
+</div>
+<div class="bead bead-split" style="--x:58%;--y:74%" data-slot="1-3" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VAFT-Network/index.html" data-half-id="1-3-l" data-slot="1-3" data-side="l" data-short="Síť" data-full="VAFT-Network" aria-label="VAFT-Network" title="VAFT-Network"><span class="bead-half-label">Síť</span></a>
+<a class="bead-half" href="../VAFT-StarSkull/index.html" data-half-id="1-3-r" data-slot="1-3" data-side="r" data-short="StarSkull" data-full="VAFT-StarSkull" aria-label="VAFT-StarSkull" title="VAFT-StarSkull"><span class="bead-half-label">StarSkull</span></a>
+</div>
+<div class="bead bead-split" style="--x:74%;--y:74%" data-slot="1-4" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VaFT-Canvas/index.html" data-half-id="1-4-l" data-slot="1-4" data-side="l" data-short="Canvas" data-full="VaFT-Canvas" aria-label="VaFT-Canvas" title="VaFT-Canvas"><span class="bead-half-label">Canvas</span></a>
+<a class="bead-half" href="../VaFT-Hub/index.html" data-half-id="1-4-r" data-slot="1-4" data-side="r" data-short="Hub" data-full="VaFT-Hub" aria-label="VaFT-Hub" title="VaFT-Hub"><span class="bead-half-label">Hub</span></a>
+</div>
+<div class="bead bead-split" style="--x:90%;--y:74%" data-slot="1-5" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VaFT-Planet-SignalSphere/index.html" data-half-id="1-5-l" data-slot="1-5" data-side="l" data-short="SigSphere" data-full="VaFT-Planet-SignalSphere" aria-label="VaFT-Planet-SignalSphere" title="VaFT-Planet-SignalSphere"><span class="bead-half-label">SigSphere</span></a>
+<a class="bead-half" href="../VaFT-Planets-SignalCore/index.html" data-half-id="1-5-r" data-slot="1-5" data-side="r" data-short="SigCore" data-full="VaFT-Planets-SignalCore" aria-label="VaFT-Planets-SignalCore" title="VaFT-Planets-SignalCore"><span class="bead-half-label">SigCore</span></a>
+</div>
+<div class="bead bead-split" style="--x:12%;--y:85%" data-slot="0-0" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VaFT-Planets-SignalTower/index.html" data-half-id="0-0-l" data-slot="0-0" data-side="l" data-short="SigTower" data-full="VaFT-Planets-SignalTower" aria-label="VaFT-Planets-SignalTower" title="VaFT-Planets-SignalTower"><span class="bead-half-label">SigTower</span></a>
+<a class="bead-half" href="../VaFT-RPG-Box/index.html" data-half-id="0-0-r" data-slot="0-0" data-side="r" data-short="RPG Box" data-full="VaFT-RPG-Box" aria-label="VaFT-RPG-Box" title="VaFT-RPG-Box"><span class="bead-half-label">RPG Box</span></a>
+</div>
+<div class="bead bead-split" style="--x:28%;--y:85%" data-slot="0-1" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VaFT-SignalCore/index.html" data-half-id="0-1-l" data-slot="0-1" data-side="l" data-short="Signál" data-full="VaFT-SignalCore" aria-label="VaFT-SignalCore" title="VaFT-SignalCore"><span class="bead-half-label">Signál</span></a>
+<a class="bead-half" href="../VaFiT/index.html" data-half-id="0-1-r" data-slot="0-1" data-side="r" data-short="VaFiT" data-full="VaFiT" aria-label="VaFiT" title="VaFiT"><span class="bead-half-label">VaFiT</span></a>
+</div>
+<div class="bead bead-split" style="--x:44%;--y:85%" data-slot="0-2" aria-label="Dve projektova mista">
+<a class="bead-half" href="../VaF%E2%80%99i%E2%80%99T%20%E2%80%A2%202D%20R%C3%A1me%C4%8Dek%20s%20rotac%C3%AD/index.html" data-half-id="0-2-l" data-slot="0-2" data-side="l" data-short="2D rám." data-full="VaF’i’T • 2D Rámeček s rotací" aria-label="VaF’i’T • 2D Rámeček s rotací" title="VaF’i’T • 2D Rámeček s rotací"><span class="bead-half-label">2D rám.</span></a>
+<a class="bead-half" href="../VafiT-gallery/index.html" data-half-id="0-2-r" data-slot="0-2" data-side="r" data-short="Galerie" data-full="VafiT-gallery" aria-label="VafiT-gallery" title="VafiT-gallery"><span class="bead-half-label">Galerie</span></a>
+</div>
+<div class="bead bead-split" style="--x:60%;--y:85%" data-slot="0-3" aria-label="Dve projektova mista">
+<button class="bead-half" type="button" data-half-id="0-3-l" data-slot="0-3" data-side="l" data-short="+" data-full="Volne misto" aria-label="Volne misto, napsat glyph"><span class="bead-half-label">+</span></button>
+<button class="bead-half" type="button" data-half-id="0-3-r" data-slot="0-3" data-side="r" data-short="+" data-full="Volne misto" aria-label="Volne misto, napsat glyph"><span class="bead-half-label">+</span></button>
+</div>
+<div class="bead bead-split" style="--x:76%;--y:85%" data-slot="0-4" aria-label="Dve projektova mista">
+<button class="bead-half" type="button" data-half-id="0-4-l" data-slot="0-4" data-side="l" data-short="+" data-full="Volne misto" aria-label="Volne misto, napsat glyph"><span class="bead-half-label">+</span></button>
+<button class="bead-half" type="button" data-half-id="0-4-r" data-slot="0-4" data-side="r" data-short="+" data-full="Volne misto" aria-label="Volne misto, napsat glyph"><span class="bead-half-label">+</span></button>
+</div>
+<div class="bead bead-split" style="--x:92%;--y:85%" data-slot="0-5" aria-label="Dve projektova mista">
+<button class="bead-half" type="button" data-half-id="0-5-l" data-slot="0-5" data-side="l" data-short="+" data-full="Volne misto" aria-label="Volne misto, napsat glyph"><span class="bead-half-label">+</span></button>
+<button class="bead-half" type="button" data-half-id="0-5-r" data-slot="0-5" data-side="r" data-short="+" data-full="Volne misto" aria-label="Volne misto, napsat glyph"><span class="bead-half-label">+</span></button>
+</div>
 </section>
 </main>
 <script>
-(()=>{'use strict';const KEY='vafit-sklad-mista-v1',root=document.getElementById('beads');let saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(_){saved={}}const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(_){}};root.querySelectorAll('button.bead[data-slot]').forEach(button=>{const id=button.dataset.slot,label=button.querySelector('span');if(saved[id]){label.textContent=saved[id];button.classList.add('filled')}button.addEventListener('click',()=>{if(button.querySelector('input'))return;const input=document.createElement('input');input.type='text';input.maxLength=32;input.autocomplete='off';input.spellcheck=false;input.setAttribute('aria-label','Název místa');input.value=saved[id]||'';input.placeholder="VaF'¡¡'T";button.replaceChildren(input);input.focus();input.select();const finish=()=>{const value=input.value.trim();if(value)saved[id]=value;else delete saved[id];persist();button.replaceChildren();const span=document.createElement('span');span.textContent=value||"VaF'¡¡'T";button.append(span);button.classList.toggle('filled',!!value)};input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();input.blur()}if(e.key==='Escape'){input.value=saved[id]||'';input.blur()}});input.addEventListener('blur',finish,{once:true})})});if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}))})();
+(() => {
+ "use strict";
+ const root=document.getElementById("beads");
+ const OLD_KEY="vafit-sklad-mista-v1", NEW_KEY="vafit-sklad-poloviny-v1";
+ function read(key){try{const x=JSON.parse(localStorage.getItem(key)||"{}");return x&&typeof x==="object"&&!Array.isArray(x)?x:{}}catch(_){return {}}}
+ const legacy=read(OLD_KEY),custom=read(NEW_KEY);
+ const save=()=>{try{localStorage.setItem(NEW_KEY,JSON.stringify(custom))}catch(_){}};
+ function value(el){const id=el.dataset.halfId,old=el.dataset.side==="l"&&el.dataset.slot!=="6-0"?legacy[el.dataset.slot]:"";return custom[id]||old||el.dataset.short||"+"}
+ function render(el){
+  el.classList.toggle("is-custom",Boolean(custom[el.dataset.halfId]||(el.dataset.side==="l"&&el.dataset.slot!=="6-0"&&legacy[el.dataset.slot])));
+  const span=document.createElement("span");span.className="bead-half-label";span.textContent=value(el);el.replaceChildren(span);
+ }
+ function edit(el){
+  if(el.dataset.fixed==="1"||el.dataset.editing==="1")return;
+  el.dataset.editing="1";
+  const input=document.createElement("input");input.type="text";input.maxLength=32;input.autocomplete="off";input.spellcheck=false;
+  input.setAttribute("aria-label","Upravit napis: "+(el.dataset.full||"Volne misto"));
+  const previous=custom[el.dataset.halfId]||(el.dataset.side==="l"?legacy[el.dataset.slot]:"")||"";
+  input.value=previous;el.replaceChildren(input);
+  input.addEventListener("click",ev=>ev.stopPropagation());
+  input.addEventListener("pointerdown",ev=>ev.stopPropagation());
+  input.addEventListener("keydown",ev=>{
+   if(ev.key==="Enter"){ev.preventDefault();input.blur()}
+   if(ev.key==="Escape"){ev.preventDefault();input.value=previous;input.blur()}
+  });
+  input.addEventListener("blur",()=>{
+   const text=input.value.trim();if(text)custom[el.dataset.halfId]=text;else delete custom[el.dataset.halfId];
+   save();delete el.dataset.editing;render(el);
+  },{once:true});
+  input.focus();input.select();
+ }
+ root.querySelectorAll(".bead-half").forEach(el=>{
+  render(el);if(el.dataset.fixed==="1")return;
+  if(el.tagName==="A"){
+   let timer=null,held=false,point=null;
+   const cancel=()=>{if(timer!==null)clearTimeout(timer);timer=null};
+   el.addEventListener("pointerdown",ev=>{
+    if(ev.button!==0||el.dataset.editing==="1")return;
+    held=false;point={x:ev.clientX,y:ev.clientY};cancel();
+    timer=setTimeout(()=>{timer=null;held=true;edit(el)},600);
+   });
+   el.addEventListener("pointermove",ev=>{if(point&&Math.hypot(ev.clientX-point.x,ev.clientY-point.y)>10)cancel()});
+   for(const evt of ["pointerup","pointercancel","pointerleave"])el.addEventListener(evt,cancel);
+   el.addEventListener("click",ev=>{if(held||el.dataset.editing==="1"){ev.preventDefault();held=false}});
+   el.addEventListener("contextmenu",ev=>{ev.preventDefault();cancel();held=true;edit(el)});
+   el.addEventListener("dblclick",ev=>{ev.preventDefault();held=true;edit(el)});
+  }else el.addEventListener("click",()=>{if(el.dataset.editing!=="1")edit(el)});
+ });
+})();
 </script>
 
 <!-- VaF backup bridge: no changes to beads or existing storage keys -->
