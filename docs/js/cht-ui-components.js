@@ -60,7 +60,7 @@
 
   function createShell() {
     if (document.getElementById("cht360-arc")) return;
-    var current = navigation.getCurrentModule() || { id: "", title: "Paměť", longTitle: "CHT 360°‰." };
+    var current = navigation.getCurrentModule() || { id: "", title: "Paměť", longTitle: "m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m" };
     var dock = document.createElement("div");
     dock.className = "cht360-arc";
     dock.id = "cht360-arc";
@@ -68,7 +68,7 @@
     var panel = document.createElement("section");
     panel.className = "cht360-arc__panel";
     panel.id = "cht360-arc-panel";
-    panel.setAttribute("aria-label", "Oblouk přepínacích karet CHT 360°‰.");
+    panel.setAttribute("aria-label", "Oblouk přepínacích karet m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m");
 
     var inner = document.createElement("div");
     inner.className = "cht360-arc__inner";
@@ -94,7 +94,7 @@
 
     var modules = document.createElement("nav");
     modules.className = "cht360-arc__modules";
-    modules.setAttribute("aria-label", "Moduly CHT 360°‰.");
+    modules.setAttribute("aria-label", "Moduly m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m");
     var lifts = [10, 5, 1, 0, 1, 5, 10, 5, 1, 0];
     navigation.getModuleLinks().forEach(function (module, index) {
       var link = document.createElement("a");
@@ -165,7 +165,7 @@
     var current = navigation.getCurrentModule() || { title: "CHT", description: "" };
     body.innerHTML = "";
     var intro = document.createElement("p");
-    intro.textContent = current.description || "Tento modul je součástí propojeného oběhu CHT 360°‰.";
+    intro.textContent = current.description || "Tento modul je součástí propojeného oběhu m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m";
     var list = document.createElement("ul");
     [
       "Šipka Karty u spodního okraje vysune nebo zasune oblouk ovládání.",

@@ -211,7 +211,7 @@ function bindEvents() {
 }
 
 function createDefaultData() {
-  const title = createBlock("Glyph CHT 360°‰", "single", "ring", 7, 8, "Název Glyph CHT");
+  const title = createBlock("Glyph m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m", "single", "ring", 7, 8, "Název Glyph CHT");
   const earth = createBlock("Země Paměť", "double", "bracket", 11, 43, "Země Paměť");
   const slot = createBlock("Slot 1", "single", "rail", 59, 27, "Slot 1");
   const language = createBlock("Jazyk 4/70", "double", "capsule", 41, 68, "Jazyk 4/70");
@@ -654,7 +654,7 @@ function renderTitle() {
   const titleBlock = getBlockById(data.titleBlockId);
   const titleUnits = titleBlock
     ? titleBlock.units
-    : unitsFromText(APP_NAME, "single");
+    : unitsFromText("Glyph m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m", "single");
 
   titleUnits.forEach((unit) => {
     if (unit.gap) {
@@ -1801,7 +1801,7 @@ function sendSelectedBlockToCht() {
   const block = getSelectedBlock();
 
   if (!target) {
-    ui.message = "Nejdřív otevři dílnu přímo z vybraného slotu CHT 360°‰.";
+    ui.message = "Nejdřív otevři dílnu přímo z vybraného slotu m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m.";
     renderMessage();
     return;
   }

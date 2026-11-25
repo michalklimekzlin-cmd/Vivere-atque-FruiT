@@ -17,7 +17,7 @@ function install(){
   pane.setAttribute("aria-label","VaF7 – hra s písmeny a výklady");
   pane.setAttribute("aria-modal","true");
   const head=document.createElement("header");head.className="vf-top";
-  const title=document.createElement("strong");title.textContent="VaF7 • CHT 360°‰.";
+  const title=document.createElement("strong");title.textContent="VaF7 • m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m";
   const close=document.createElement("button");close.type="button";
   close.id="cht360VaF7Close";close.textContent="Zavřít";
   head.append(title,close);

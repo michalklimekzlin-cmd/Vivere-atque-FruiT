@@ -528,7 +528,7 @@ async function handleNavigation(event) {
   if (fallback) return fallback;
 
   return new Response(
-    "<!doctype html><html lang=\"cs\"><meta charset=\"utf-8\"><title>CHT 360°‰.</title><body style=\"background:#090705;color:#ffe2ad;font-family:system-ui\"><h1>CHT 360°‰.</h1><p>Offline stránka není dostupná.</p></body></html>",
+    "<!doctype html><html lang=\"cs\"><meta charset=\"utf-8\"><title>m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m</title><body style=\"background:#090705;color:#ffe2ad;font-family:system-ui\"><h1>m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m</h1><p>Offline stránka není dostupná.</p></body></html>",
     { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } }
   );
 }

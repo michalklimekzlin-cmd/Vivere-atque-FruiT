@@ -1693,11 +1693,11 @@ function ensureIPhoneSettingsPanel() {
   phonePanel.id = "iphoneSettingsPanel";
   phonePanel.setAttribute("role", "dialog");
   phonePanel.setAttribute("aria-modal", "true");
-  phonePanel.setAttribute("aria-label", "Nastavení iPhone 14 v CHT 360°‰.");
+  phonePanel.setAttribute("aria-label", "Nastavení iPhone 14 v m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m");
   phonePanel.innerHTML = [
     "<div class=\"iphoneSettingsCard\">",
     "  <div class=\"iphoneSettingsHead\">",
-    "    <div><strong>iPhone 14 · CHT 360°‰.</strong><span>Červený uzel v oběhu Paměti.</span></div>",
+    "    <div><strong>iPhone 14 · m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m</strong><span>Červený uzel v oběhu Paměti.</span></div>",
     "    <button class=\"iphoneSettingsClose\" type=\"button\" aria-label=\"Zavřít nastavení\">×</button>",
     "  </div>",
     "  <div class=\"iphoneSettingsBody\">",

@@ -31,7 +31,7 @@
   function getBreadcrumbs() {
     var current = matchCurrentModule();
     return [
-      { label: "CHT 360°‰.", url: config.resolveModuleUrl("index.html") },
+      { label: "m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m", url: config.resolveModuleUrl("index.html") },
       current ? { label: current.longTitle || current.title, url: current.url } : { label: "Modul", url: window.location.href }
     ];
   }

@@ -24,7 +24,7 @@
     {
       id: "cht-360-core",
       title: "Paměť",
-      longTitle: "CHT 360°‰. Paměť",
+      longTitle: "m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m Paměť",
       path: "index.html",
       badge: "Paměť",
       description: "Hlavní rozcestník paměti, jádra, pokojíčků a kontroly.",
@@ -33,7 +33,7 @@
     {
       id: "cht-mluva",
       title: "Mluva",
-      longTitle: "Mluva CHT 360°‰.",
+      longTitle: "Mluva m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m",
       path: "mluva-cht-360/",
       badge: "Mluva",
       description: "Offline rozhovor nad lokální pamětí a glyphy.",
@@ -42,7 +42,7 @@
     {
       id: "glyph-cht-360",
       title: "Glyphy",
-      longTitle: "Glyph CHT 360°‰.",
+      longTitle: "Glyph m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m",
       path: "glyph-cht-360/",
       badge: "Glyphy",
       description: "Dílna glyphů, bubínků a exportu vlastních znaků.",
@@ -51,7 +51,7 @@
     {
       id: "glyph-pokojicku-cht-360",
       title: "Pokojíčky",
-      longTitle: "Glyph pokojíčky CHT 360°‰.",
+      longTitle: "Glyph pokojíčky m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m",
       path: "glyph-pokojicku-cht-360/",
       badge: "Pokojíčky",
       description: "Pokojíčky a vazby glyphů na místa a moduly.",
@@ -60,7 +60,7 @@
     {
       id: "cht-360-bubinky",
       title: "Bubínky",
-      longTitle: "Bubínky CHT 360°‰.",
+      longTitle: "Bubínky m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m",
       path: "bubinky/",
       badge: "Bubínky",
       description: "Zámky slotů, odemykání a přehled bubínků.",
@@ -78,7 +78,7 @@
     {
       id: "cht-puls-360",
       title: "Puls",
-      longTitle: "CHT Puls 360°‰.",
+      longTitle: "Puls m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m",
       path: "cht-puls-360/",
       badge: "Puls",
       description: "Puls, koš, kompost a přenosové cesty CHT.",
@@ -114,7 +114,7 @@
     {
       id: "cht360-batole",
       title: "Batole",
-      longTitle: "Batole •ア | CHT 360°‰",
+      longTitle: "Batole •ア | m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m",
       path: "../cht360-batole/",
       badge: "Batole",
       description: "První uzel zkušenosti. Pozoruje, přijímá vědomé kroky a roste skládáním odrazů — nikdy nepřepisuje Paměť.",

@@ -49,12 +49,12 @@ export {
 */
 
 export const CHT_PROJECT_CONTEXT = Object.freeze({
-  title: "CHT 360°‰.",
+  title: "m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m",
   kind: "místní PWA jádro v repozitáři Vivere-atque-FruiT",
   principle: "Paměť, Glyphy, pokojíčky a iPhone 14 mají společný klidný oběh; uživatel rozhoduje, co se uloží a kam vede odkaz.",
   storage: "Aktivní CHT ukládá data do místního úložiště tohoto prohlížeče. Paměť lze vyexportovat a importovat; jiné domény ani jiné instalace PWA data automaticky nesdílejí.",
   activeModules: Object.freeze([
-    { name: "Hlavní CHT 360°‰.", path: "./", role: "3D oběh, čtyři jádra Paměti, iPhone 14 a centrální ovládání." },
+    { name: "Hlavní m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m", path: "./", role: "3D oběh, čtyři jádra Paměti, iPhone 14 a centrální ovládání." },
     { name: "Paměť", path: "./js/aplikace.js", role: "Čtyři jádra: Země, Jazyk, Hra a Řízení/iPhone; aktuální schéma má 70 slotů na jádro." },
     { name: "Glyph dílna", path: "./glyph-cht-360/", role: "Živé Glyphy a bubínky, vlastní znaky, export a import." },
     { name: "Glyph pokojíčky", path: "./glyph-pokojicku-cht-360/", role: "Chodba a pokojíčky pro navázání Glyphů; Glyph nezůstává bez místa." },
@@ -107,7 +107,7 @@ export function findProjectContext(query) {
 
 export function formatProjectHistory() {
   return [
-    "Projektová paměť CHT 360°‰.",
+    "Projektová paměť m(.ٓ•ア)=m'i''ī'm={˚(°•)•)m",
     "• Paměť: čtyři jádra, místní uložení, export/import.",
     "• Glyph: dílna bubínků; pokojíčky drží Glyphy dohledatelné.",
     "• Vive: připravený herní návrh pro stavění z hráčem potvrzených Glyphů, slov a signálů.",
